@@ -25,13 +25,11 @@ public class DefaultAlertEventManager implements InternalAlertTriggeredEventMana
     }
 
     public void add(final AlertTriggeredEventListener eventListener, boolean includeExisting) {
-        System.out.println("DefaultAlertEventManager:28 ---> eventListener= "+eventListener);
         if (includeExisting) {
             admin.raiseEvent(eventListener, new Runnable() {
                 public void run() {
                     for (Alert alert : alerts.getAlertRepository().iterateFifo()) {
                         eventListener.alertTriggered(alert);
-                        System.out.println("DefaultAlertEventManager:34 ---> alert= "+alert);
                     }
                 }
             });
