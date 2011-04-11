@@ -4,7 +4,6 @@ import org.openspaces.admin.alert.Alert;
 import org.openspaces.admin.alert.AlertFactory;
 import org.openspaces.admin.alert.AlertSeverity;
 import org.openspaces.admin.alert.AlertStatus;
-import org.openspaces.admin.internal.alert.AlertHistory;
 import org.openspaces.admin.internal.alert.DefaultAlertRepository;
 
 import junit.framework.TestCase;
@@ -19,7 +18,7 @@ public class DefaultAlertRepositoryTest extends TestCase {
 
     final DefaultAlertRepository repository = new DefaultAlertRepository();
 
-    /** adding an {@link AlertStatus#RESOLVED} alert with a non-existing group UID should not open an entry in the repository */
+    /** adding an {@link AlertStatus#RESOLVED} alert with a non-existing group UID should open an entry in the repository */
     public void test1() {
         Alert alert = new AlertFactory()
         .severity(AlertSeverity.WARNING)
@@ -27,16 +26,15 @@ public class DefaultAlertRepositoryTest extends TestCase {
         .groupUid("group1")
         .toAlert();
 
-        assertFalse(repository.addAlert(alert));
-        assertNull(repository.getAlertByUid(alert.getAlertUid()));
-        AlertHistory alertHistoryByGroupUid = repository.getAlertHistoryByGroupUid(alert.getGroupUid());
-        assertNotNull(alertHistoryByGroupUid);
-        assertNull(alertHistoryByGroupUid.getDetails());
-        assertNotNull(alertHistoryByGroupUid.getAlerts());
-        assertEquals(0, alertHistoryByGroupUid.getAlerts().length);
+        repository.addAlert(alert);
+        assertNotNull(repository.getAlertByAlertUid(alert.getAlertUid()));
+        Alert[] alertsByGroupUid = repository.getAlertsByGroupUid(alert.getGroupUid());
+        assertNotNull(alertsByGroupUid);
+        assertEquals(1, alertsByGroupUid.length);
+        assertEquals(alert, alertsByGroupUid[0]);
     }
     
-    /** adding an {@link AlertStatus#NA} alert with a non-existing group UID should not open an entry in the repository */
+    /** adding an {@link AlertStatus#NA} alert with a non-existing group UID should open an entry in the repository */
     public void test2() {
         Alert alert = new AlertFactory()
         .severity(AlertSeverity.WARNING)
@@ -44,13 +42,12 @@ public class DefaultAlertRepositoryTest extends TestCase {
         .groupUid("group2")
         .toAlert();
 
-        assertFalse(repository.addAlert(alert));
-        assertNull(repository.getAlertByUid(alert.getAlertUid()));
-        AlertHistory alertHistoryByGroupUid = repository.getAlertHistoryByGroupUid(alert.getGroupUid());
-        assertNotNull(alertHistoryByGroupUid);
-        assertNull(alertHistoryByGroupUid.getDetails());
-        assertNotNull(alertHistoryByGroupUid.getAlerts());
-        assertEquals(0, alertHistoryByGroupUid.getAlerts().length);
+        repository.addAlert(alert);
+        assertNotNull(repository.getAlertByAlertUid(alert.getAlertUid()));
+        Alert[] alertsByGroupUid = repository.getAlertsByGroupUid(alert.getGroupUid());
+        assertNotNull(alertsByGroupUid);
+        assertEquals(1, alertsByGroupUid.length);
+        assertEquals(alert, alertsByGroupUid[0]);
     }
     
     /** 
@@ -67,14 +64,13 @@ public class DefaultAlertRepositoryTest extends TestCase {
             .description("alert#"+i)
             .toAlert();
 
-            assertTrue(repository.addAlert(alert));
-            assertNotNull(repository.getAlertByUid(alert.getAlertUid()));
-            AlertHistory alertHistoryByGroupUid = repository.getAlertHistoryByGroupUid(alert.getGroupUid());
-            assertNotNull(alertHistoryByGroupUid);
-            assertNotNull(alertHistoryByGroupUid.getDetails());
-            assertFalse(alertHistoryByGroupUid.getDetails().getLastAlertStatus().isResolved());
-            assertNotNull(alertHistoryByGroupUid.getAlerts());
-            assertEquals(i+1, alertHistoryByGroupUid.getAlerts().length);
+            repository.addAlert(alert);
+            assertNotNull(repository.getAlertByAlertUid(alert.getAlertUid()));
+            Alert[] alertsByGroupUid = repository.getAlertsByGroupUid(alert.getGroupUid());
+            assertNotNull(alertsByGroupUid);
+            assertFalse(alertsByGroupUid[0].getStatus().isResolved());
+            assertEquals(i+1, alertsByGroupUid.length);
+            assertEquals(alert, alertsByGroupUid[0]);
         }
 
         Alert alert = new AlertFactory()
@@ -84,55 +80,58 @@ public class DefaultAlertRepositoryTest extends TestCase {
         .description("alert#4")
         .toAlert();
 
-        assertTrue(repository.addAlert(alert));
-        assertNotNull(repository.getAlertByUid(alert.getAlertUid()));
-        AlertHistory alertHistoryByGroupUid = repository.getAlertHistoryByGroupUid(alert.getGroupUid());
-        assertNotNull(alertHistoryByGroupUid);
-        assertNotNull(alertHistoryByGroupUid.getDetails());
-        assertTrue(alertHistoryByGroupUid.getDetails().getLastAlertStatus().isResolved());
-        assertNotNull(alertHistoryByGroupUid.getAlerts());
-        assertEquals(4, alertHistoryByGroupUid.getAlerts().length);
+        repository.addAlert(alert);
+        assertNotNull(repository.getAlertByAlertUid(alert.getAlertUid()));
+        Alert[] alertsByGroupUid = repository.getAlertsByGroupUid(alert.getGroupUid());
+        assertNotNull(alertsByGroupUid);
+        assertTrue(alertsByGroupUid[0].getStatus().isResolved());
+        assertEquals(4, alertsByGroupUid.length);
+        assertEquals(alert, alertsByGroupUid[0]);
+        
+        assertEquals(4, repository.size());
     }
     
     /** 
      * adding an {@link AlertStatus#RAISED} alert should open an entry in the repository.
-     * adding an {@link AlertStatus#NA} alert should 'close' the alert group.
+     * adding an {@link AlertStatus#NA} alert should behave as any raised alert in the group.
+     * adding another {@link AlertStatus#RAISED} alert should keep adding to the same group.
      */
     public void test4() {
         
-        for (int i=0; i<3; ++i) {
+        for (int i=0; i<7; ++i) {
             Alert alert = new AlertFactory()
             .severity(AlertSeverity.WARNING)
-            .status(AlertStatus.RAISED)
+            .status( (i!=4 ? AlertStatus.RAISED : AlertStatus.NA) )
             .groupUid("group4")
             .description("alert#"+i)
             .toAlert();
+            
 
-            assertTrue(repository.addAlert(alert));
-            assertNotNull(repository.getAlertByUid(alert.getAlertUid()));
-            AlertHistory alertHistoryByGroupUid = repository.getAlertHistoryByGroupUid(alert.getGroupUid());
-            assertNotNull(alertHistoryByGroupUid);
-            assertNotNull(alertHistoryByGroupUid.getDetails());
-            assertFalse(alertHistoryByGroupUid.getDetails().getLastAlertStatus().isResolved());
-            assertNotNull(alertHistoryByGroupUid.getAlerts());
-            assertEquals(i+1, alertHistoryByGroupUid.getAlerts().length);
+            repository.addAlert(alert);
+            assertNotNull(repository.getAlertByAlertUid(alert.getAlertUid()));
+            Alert[] alertsByGroupUid = repository.getAlertsByGroupUid(alert.getGroupUid());
+            assertNotNull(alertsByGroupUid);
+            assertFalse(alertsByGroupUid[0].getStatus().isResolved());
+            assertEquals(i+1, alertsByGroupUid.length);
+            assertEquals(alert, alertsByGroupUid[0]);
         }
 
         Alert alert = new AlertFactory()
         .severity(AlertSeverity.WARNING)
-        .status(AlertStatus.NA)
+        .status(AlertStatus.RESOLVED)
         .groupUid("group4")
-        .description("alert#4")
+        .description("alert#7")
         .toAlert();
 
-        assertTrue(repository.addAlert(alert));
-        assertNotNull(repository.getAlertByUid(alert.getAlertUid()));
-        AlertHistory alertHistoryByGroupUid = repository.getAlertHistoryByGroupUid(alert.getGroupUid());
-        assertNotNull(alertHistoryByGroupUid);
-        assertNotNull(alertHistoryByGroupUid.getDetails());
-        assertFalse(alertHistoryByGroupUid.getDetails().getLastAlertStatus().isResolved());
-        assertNotNull(alertHistoryByGroupUid.getAlerts());
-        assertEquals(4, alertHistoryByGroupUid.getAlerts().length);
+        repository.addAlert(alert);
+        assertNotNull(repository.getAlertByAlertUid(alert.getAlertUid()));
+        Alert[] alertsByGroupUid = repository.getAlertsByGroupUid(alert.getGroupUid());
+        assertNotNull(alertsByGroupUid);
+        assertTrue(alertsByGroupUid[0].getStatus().isResolved());
+        assertEquals(8, alertsByGroupUid.length);
+        assertEquals(alert, alertsByGroupUid[0]);
+        
+        assertEquals(8, repository.size());
     }
     
     /** 
@@ -150,7 +149,7 @@ public class DefaultAlertRepositoryTest extends TestCase {
             .description("alert#"+i)
             .toAlert();
 
-            assertTrue(repository.addAlert(alert));
+            repository.addAlert(alert);
         }
 
         for (int i=0; i<3; ++i) {
@@ -158,30 +157,30 @@ public class DefaultAlertRepositoryTest extends TestCase {
             .severity(AlertSeverity.WARNING)
             .status(AlertStatus.RESOLVED)
             .groupUid("group5")
-            .description("alert#4")
+            .description("alert#"+(i+4))
             .toAlert();
 
             if (i==0) {
-                assertTrue(repository.addAlert(alert));
-                assertNotNull(repository.getAlertByUid(alert.getAlertUid()));
-                AlertHistory alertHistoryByGroupUid = repository.getAlertHistoryByGroupUid(alert.getGroupUid());
-                assertNotNull(alertHistoryByGroupUid);
-                assertNotNull(alertHistoryByGroupUid.getDetails());
-                assertTrue(alertHistoryByGroupUid.getDetails().getLastAlertStatus().isResolved());
-                assertNotNull(alertHistoryByGroupUid.getAlerts());
-                assertEquals(4, alertHistoryByGroupUid.getAlerts().length);
+                repository.addAlert(alert);
+                assertNotNull(repository.getAlertByAlertUid(alert.getAlertUid()));
+                Alert[] alertsByGroupUid = repository.getAlertsByGroupUid(alert.getGroupUid());
+                assertNotNull(alertsByGroupUid);
+                assertTrue(alertsByGroupUid[0].getStatus().isResolved());
+                assertEquals(4, alertsByGroupUid.length);
+                assertEquals(alert, alertsByGroupUid[0]);
             }
             else {
-                assertFalse(repository.addAlert(alert));
-                assertNull(repository.getAlertByUid(alert.getAlertUid()));
-                AlertHistory alertHistoryByGroupUid = repository.getAlertHistoryByGroupUid(alert.getGroupUid());
-                assertNotNull(alertHistoryByGroupUid);
-                assertNotNull(alertHistoryByGroupUid.getDetails());
-                assertTrue(alertHistoryByGroupUid.getDetails().getLastAlertStatus().isResolved());
-                assertNotNull(alertHistoryByGroupUid.getAlerts());
-                assertEquals(4, alertHistoryByGroupUid.getAlerts().length);
+                repository.addAlert(alert);
+                assertNotNull(repository.getAlertByAlertUid(alert.getAlertUid()));
+                Alert[] alertsByGroupUid = repository.getAlertsByGroupUid(alert.getGroupUid());
+                assertNotNull(alertsByGroupUid);
+                assertTrue(alertsByGroupUid[0].getStatus().isResolved());
+                assertEquals(1, alertsByGroupUid.length);
+                assertEquals(alert, alertsByGroupUid[0]);
             }
         }
+        
+        assertEquals(6, repository.size());
     }
     
     /** 
@@ -189,43 +188,70 @@ public class DefaultAlertRepositoryTest extends TestCase {
      * adding an {@link AlertStatus#RESOLVED} alert should resolve the alert group.
      * repeat, should always add the new raised alert belonging to the same group.
      */
-    public void test55() {
+    public void test6() {
         
         for (int repeat=0; repeat<2; ++repeat) {
             for (int i=0; i<3; ++i) {
                 Alert alert = new AlertFactory()
                 .severity(AlertSeverity.WARNING)
                 .status(AlertStatus.RAISED)
-                .groupUid("group55")
+                .groupUid("group6")
                 .description("alert#"+i)
                 .toAlert();
 
-                assertTrue(repository.addAlert(alert));
+                repository.addAlert(alert);
             }
 
             Alert alert = new AlertFactory()
             .severity(AlertSeverity.WARNING)
             .status(AlertStatus.RESOLVED)
-            .groupUid("group55")
+            .groupUid("group6")
             .description("alert#4")
             .toAlert();
 
-            assertTrue(repository.addAlert(alert));
-            assertNotNull(repository.getAlertByUid(alert.getAlertUid()));
-            AlertHistory alertHistoryByGroupUid = repository.getAlertHistoryByGroupUid(alert.getGroupUid());
-            assertNotNull(alertHistoryByGroupUid);
-            assertNotNull(alertHistoryByGroupUid.getDetails());
-            assertTrue(alertHistoryByGroupUid.getDetails().getLastAlertStatus().isResolved());
-            assertNotNull(alertHistoryByGroupUid.getAlerts());
-            assertEquals(4, alertHistoryByGroupUid.getAlerts().length);
+            repository.addAlert(alert);
+            assertNotNull(repository.getAlertByAlertUid(alert.getAlertUid()));
+            Alert[] alertsByGroupUid = repository.getAlertsByGroupUid(alert.getGroupUid());
+            assertNotNull(alertsByGroupUid);
+            assertTrue(alertsByGroupUid[0].getStatus().isResolved());
+            assertEquals(4, alertsByGroupUid.length);
+            assertEquals(alert, alertsByGroupUid[0]);
         }
         
+        assertEquals(2*4, repository.size());
     }
     
-    /** resolved history size */
-    public void test6() {
+    
+    
+    /** limit repository size */
+    public void test7() {
 
-        repository.setResolvedAlertHistorySize(5);
+        final int LIMIT = DefaultAlertRepository.STORE_LIMIT;
+        
+        for (int i=0; i<LIMIT+10; ++i) {
+            for (int j=0; j<7; ++j) {
+                Alert alert = new AlertFactory()
+                .severity(AlertSeverity.WARNING)
+                .status(AlertStatus.RAISED)
+                .groupUid("group"+i)
+                .description("alert#"+i+"#"+j)
+                .toAlert();
+
+                repository.addAlert(alert);
+                Alert[] alertsByGroupUid = repository.getAlertsByGroupUid(alert.getGroupUid());
+                assertNotNull(alertsByGroupUid);
+                assertEquals(alert, alertsByGroupUid[0]);
+            }
+            
+            //assert that the first and last alert are always kept
+            Alert[] alertsByGroupUid = repository.getAlertsByGroupUid("group"+i);
+            assertNotNull(alertsByGroupUid);
+            assertTrue(alertsByGroupUid[0].getDescription().equals("alert#"+i+"#6"));
+            assertTrue(alertsByGroupUid[alertsByGroupUid.length -1].getDescription().equals("alert#"+i+"#0"));
+        }
+        
+        //limit is always kept - even at the risk of loosing unresolved alerts.
+        assertEquals(LIMIT, repository.size());
         
         for (int i=0; i<10; ++i) {
             Alert alert = new AlertFactory()
@@ -233,77 +259,49 @@ public class DefaultAlertRepositoryTest extends TestCase {
             .status(AlertStatus.RAISED)
             .groupUid("group"+i)
             .description("alert#"+i)
+            .timestamp(i)
             .toAlert();
 
-            assertTrue(repository.addAlert(alert));
+            repository.addAlert(alert);
         }
         
-        assertEquals(10, repository.getAlertHistory().length);
+        //there should only be as much as declared history size
+        assertEquals(LIMIT, repository.size());
         
+        //check that last alerts are kept;
         for (int i=0; i<10; ++i) {
+            Alert[] alertsByGroupUid = repository.getAlertsByGroupUid("group"+i);
+            assertNotNull(alertsByGroupUid);
+            assertEquals(i, alertsByGroupUid[0].getTimestamp());
+            assertEquals(1, alertsByGroupUid.length);
+        }
+        
+        //add some resolved alerts in between
+        for (int i=5; i<15; ++i) {
             Alert alert = new AlertFactory()
             .severity(AlertSeverity.WARNING)
             .status(AlertStatus.RESOLVED)
             .groupUid("group"+i)
             .description("alert#"+i)
-            .timestamp(i) //timestamp of last resolved should be kept in repository if exceeds history size
+            .timestamp(i)
             .toAlert();
 
-            assertTrue(repository.addAlert(alert));
+            repository.addAlert(alert);
         }
         
         //there should only be as much as declared history size
-        assertEquals(5, repository.getAlertHistory().length);
+        assertEquals(LIMIT, repository.size());
         
-        //check that last resolved alerts are kept; FIFO order - first alert to be resolved is removed.
-        for (int i=5; i<10; ++i) {
-            AlertHistory alertHistoryByGroupUid = repository.getAlertHistoryByGroupUid("group"+i);
-            assertNotNull(alertHistoryByGroupUid);
-            assertNotNull(alertHistoryByGroupUid.getDetails());
-            assertTrue(alertHistoryByGroupUid.getDetails().getLastAlertStatus().isResolved());
-            assertNotNull(alertHistoryByGroupUid.getAlerts());
-            assertEquals(2, alertHistoryByGroupUid.getAlerts().length);
+        //check that last alerts are kept;
+        for (int i=5; i<15; ++i) {
+            Alert[] alertsByGroupUid = repository.getAlertsByGroupUid("group"+i);
+            assertNotNull(alertsByGroupUid);
+            assertTrue(alertsByGroupUid[0].getStatus().isResolved());
+            assertEquals(i, alertsByGroupUid[0].getTimestamp());
+            assertEquals((i<10?2:1), alertsByGroupUid.length);
         }
     }
     
-    /** group history size */
-    public void test7() {
-        repository.setGroupAlertHistorySize(5);
-        
-        for (int i=0; i<10; ++i) {
-            Alert alert = new AlertFactory()
-            .severity(AlertSeverity.WARNING)
-            .status(AlertStatus.RAISED)
-            .groupUid("group7")
-            .description("alert#"+i)
-            .toAlert();
-
-            assertTrue(repository.addAlert(alert));
-        }
-        
-        AlertHistory alertHistoryByGroupUid = repository.getAlertHistoryByGroupUid("group7");
-        assertNotNull(alertHistoryByGroupUid);
-        assertNotNull(alertHistoryByGroupUid.getDetails());
-        assertFalse(alertHistoryByGroupUid.getDetails().getLastAlertStatus().isResolved());
-        assertNotNull(alertHistoryByGroupUid.getAlerts());
-        assertEquals(5+1, alertHistoryByGroupUid.getAlerts().length); //1 - is the first alert triggered, 5 - the rest of the history
-        
-        
-        Alert alert = new AlertFactory()
-        .severity(AlertSeverity.WARNING)
-        .status(AlertStatus.RESOLVED)
-        .groupUid("group7")
-        .description("alert#11")
-        .toAlert();
-
-        assertTrue(repository.addAlert(alert));
-        AlertHistory alertHistoryByGroupUid7 = repository.getAlertHistoryByGroupUid("group7");
-        assertNotNull(alertHistoryByGroupUid7);
-        assertNotNull(alertHistoryByGroupUid7.getDetails());
-        assertTrue(alertHistoryByGroupUid7.getDetails().getLastAlertStatus().isResolved());
-        assertNotNull(alertHistoryByGroupUid7.getAlerts());
-        assertEquals(5+2, alertHistoryByGroupUid7.getAlerts().length); //2 - is the first&last alert triggered, 5 - the rest of the history
-    }
     
     /** history is ordered by timestamp of last alert */
     public void test8() {
@@ -326,69 +324,29 @@ public class DefaultAlertRepositoryTest extends TestCase {
                 .timestamp(timestamp++)
                 .toAlert();
 
-                assertTrue(repository.addAlert(alert));
+                repository.addAlert(alert);
             }
         }
-        
-        AlertHistory[] alertHistory = repository.getAlertHistory();
         
         /*
          * Assert the following order:
-         * group 2: [3, 6, 9] (latest alert#9 in group)
-         * group 1: [2, 5, 8]
-         * group 0: [1, 4, 7] (earliest alert#7 in group)
+         * group 2: [9, 6, 3] (latest alert#9 in group)
+         * group 1: [8, 5, 2]
+         * group 0: [7, 4, 1] (earliest alert#7 in group)
          */
-        long expectedTimestamp;
-        for (int j=0; j<3; ++j) {
-            expectedTimestamp = 3 - j;
-            for (int i=0; i<3; ++i) {
-                assertEquals(expectedTimestamp, alertHistory[j].getAlerts()[i].getTimestamp());
-                expectedTimestamp+=3;
+        int[][] expected = new int[3][3];
+        expected[0] = new int[]{9,6,3};
+        expected[1] = new int[]{8,5,2};
+        expected[2] = new int[]{7,4,1};
+        
+        int i=0;
+        for (Iterable<Alert> iter : repository.list()) {
+            int j=0;
+            for (Alert alert : iter) {
+                assertEquals(expected[i][j], alert.getTimestamp());
+                j++;
             }
+            i++;
         }
-        
-        /* 
-         * resolve group 0
-         * assert the following order:
-         * group 0: [1, 4, 7, 10]
-         * group 2: [3, 6, 9]
-         * group 1: [2, 5, 8]
-         */
-        Alert alert = new AlertFactory()
-        .severity(AlertSeverity.WARNING)
-        .status(AlertStatus.RESOLVED)
-        .groupUid("group"+0)
-        .description("alert#"+timestamp)
-        .timestamp(timestamp++)
-        .toAlert();
-
-        assertTrue(repository.addAlert(alert));
-        alertHistory = repository.getAlertHistory();
-        assertEquals(10, alertHistory[0].getAlerts()[3].getTimestamp());
-        assertEquals(1, alertHistory[0].getAlerts()[0].getTimestamp());
-        assertEquals(3, alertHistory[1].getAlerts()[0].getTimestamp());
-        assertEquals(2, alertHistory[2].getAlerts()[0].getTimestamp());
-        
-        /* 
-         * resolve group 1
-         * assert the following order:
-         * group 1: [2, 5, 8, 11]
-         * group 0: [1, 4, 7, 10]
-         * group 2: [3, 6, 9]
-         */
-        alert = new AlertFactory()
-        .severity(AlertSeverity.WARNING)
-        .status(AlertStatus.RESOLVED)
-        .groupUid("group"+1)
-        .description("alert#"+timestamp)
-        .timestamp(timestamp++)
-        .toAlert();
-
-        assertTrue(repository.addAlert(alert));
-        alertHistory = repository.getAlertHistory();
-        assertEquals(11, alertHistory[0].getAlerts()[3].getTimestamp());
-        assertEquals(2, alertHistory[0].getAlerts()[0].getTimestamp());
-        assertEquals(1, alertHistory[1].getAlerts()[0].getTimestamp());
-        assertEquals(3, alertHistory[2].getAlerts()[0].getTimestamp());
     }
 }

@@ -12,8 +12,6 @@ import org.openspaces.admin.alert.AlertStatus;
 import org.openspaces.admin.alert.alerts.GarbageCollectionAlert;
 import org.openspaces.admin.alert.config.GarbageCollectionAlertConfiguration;
 import org.openspaces.admin.bean.BeanConfigurationException;
-import org.openspaces.admin.internal.alert.AlertHistory;
-import org.openspaces.admin.internal.alert.AlertHistoryDetails;
 import org.openspaces.admin.internal.alert.InternalAlertManager;
 import org.openspaces.admin.internal.alert.bean.util.AlertBeanUtils;
 import org.openspaces.admin.vm.VirtualMachine;
@@ -88,19 +86,22 @@ public class GarbageCollectionAlertBean implements AlertBean, VirtualMachineStat
     public void virtualMachineRemoved(VirtualMachine virtualMachine) {
 
         final String groupUid = generateGroupUid(virtualMachine.getUid());
-        AlertFactory factory = new AlertFactory();
-        factory.name(ALERT_NAME);
-        factory.groupUid(groupUid);
-        factory.description(AlertBeanUtils.getGridComponentShortName(virtualMachine)
-                + " GC reading is unavailable; JVM has been removed");
-        factory.severity(AlertSeverity.WARNING);
-        factory.status(AlertStatus.NA);
-        factory.componentUid(virtualMachine.getUid());
-        factory.componentDescription(AlertBeanUtils.getGridComponentDescription(virtualMachine));
-        factory.config(config.getProperties());
+        Alert[] alertsByGroupUid = ((InternalAlertManager)admin.getAlertManager()).getAlertRepository().getAlertsByGroupUid(groupUid);
+        if (alertsByGroupUid.length != 0 && !alertsByGroupUid[0].getStatus().isResolved()) {
+            AlertFactory factory = new AlertFactory();
+            factory.name(ALERT_NAME);
+            factory.groupUid(groupUid);
+            factory.description(AlertBeanUtils.getGridComponentShortName(virtualMachine)
+                    + " GC reading is unavailable; JVM has been removed");
+            factory.severity(AlertSeverity.WARNING);
+            factory.status(AlertStatus.NA);
+            factory.componentUid(virtualMachine.getUid());
+            factory.componentDescription(AlertBeanUtils.getGridComponentDescription(virtualMachine));
+            factory.config(config.getProperties());
 
-        Alert alert = factory.toAlert();
-        admin.getAlertManager().triggerAlert( new GarbageCollectionAlert(alert));
+            Alert alert = factory.toAlert();
+            admin.getAlertManager().triggerAlert( new GarbageCollectionAlert(alert));
+        }
     }
 
     public void virtualMachineStatisticsChanged(VirtualMachineStatisticsChangedEvent event) {
@@ -150,9 +151,8 @@ public class GarbageCollectionAlertBean implements AlertBean, VirtualMachineStat
             
         } else if (gcPauseTime < shortGcPausePeriod) {
             final String groupUid = generateGroupUid(event.getVirtualMachine().getUid());
-            AlertHistory alertHistory = ((InternalAlertManager)admin.getAlertManager()).getAlertRepository().getAlertHistoryByGroupUid(groupUid);
-            AlertHistoryDetails alertHistoryDetails = alertHistory.getDetails();
-            if (alertHistoryDetails != null && !alertHistoryDetails.getLastAlertStatus().isResolved()) {
+            Alert[] alertsByGroupUid = ((InternalAlertManager)admin.getAlertManager()).getAlertRepository().getAlertsByGroupUid(groupUid);
+            if (alertsByGroupUid.length != 0 && !alertsByGroupUid[0].getStatus().isResolved()) {
                 AlertFactory factory = new AlertFactory();
                 factory.name(ALERT_NAME);
                 factory.groupUid(groupUid);

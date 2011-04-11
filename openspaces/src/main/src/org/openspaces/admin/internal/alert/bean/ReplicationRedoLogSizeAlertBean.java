@@ -10,8 +10,6 @@ import org.openspaces.admin.alert.AlertStatus;
 import org.openspaces.admin.alert.alerts.ReplicationRedoLogSizeAlert;
 import org.openspaces.admin.alert.config.ReplicationRedoLogSizeAlertConfiguration;
 import org.openspaces.admin.bean.BeanConfigurationException;
-import org.openspaces.admin.internal.alert.AlertHistory;
-import org.openspaces.admin.internal.alert.AlertHistoryDetails;
 import org.openspaces.admin.internal.alert.InternalAlertManager;
 import org.openspaces.admin.internal.alert.bean.util.AlertBeanUtils;
 import org.openspaces.admin.space.ReplicationStatus;
@@ -89,18 +87,21 @@ public class ReplicationRedoLogSizeAlertBean implements AlertBean, SpaceInstance
     
     public void spaceInstanceRemoved(SpaceInstance spaceInstance) {
         final String groupUid = generateGroupUid(spaceInstance.getUid());
-        AlertFactory factory = new AlertFactory();
-        factory.name(ALERT_NAME);
-        factory.groupUid(groupUid);
-        factory.description("Replication redo log is unvailable; " + getSpaceName(spaceInstance) + " has been removed.");
-        factory.severity(AlertSeverity.WARNING);
-        factory.status(AlertStatus.NA);
-        factory.componentUid(spaceInstance.getUid());
-        factory.componentDescription(AlertBeanUtils.getSpaceInstanceDescription(spaceInstance));
-        factory.config(config.getProperties());
+        Alert[] alertsByGroupUid = ((InternalAlertManager)admin.getAlertManager()).getAlertRepository().getAlertsByGroupUid(groupUid);
+        if (alertsByGroupUid.length != 0 && !alertsByGroupUid[0].getStatus().isResolved()) {
+            AlertFactory factory = new AlertFactory();
+            factory.name(ALERT_NAME);
+            factory.groupUid(groupUid);
+            factory.description("Replication redo log is unvailable; " + getSpaceName(spaceInstance) + " has been removed.");
+            factory.severity(AlertSeverity.WARNING);
+            factory.status(AlertStatus.NA);
+            factory.componentUid(spaceInstance.getUid());
+            factory.componentDescription(AlertBeanUtils.getSpaceInstanceDescription(spaceInstance));
+            factory.config(config.getProperties());
 
-        Alert alert = factory.toAlert();
-        admin.getAlertManager().triggerAlert( new ReplicationRedoLogSizeAlert(alert));
+            Alert alert = factory.toAlert();
+            admin.getAlertManager().triggerAlert( new ReplicationRedoLogSizeAlert(alert));
+        }
     }
     
     
@@ -142,9 +143,8 @@ public class ReplicationRedoLogSizeAlertBean implements AlertBean, SpaceInstance
             
         } else if (redoLogSize <= lowThreshold) {
             final String groupUid = generateGroupUid(source.getUid());
-            AlertHistory alertHistory = ((InternalAlertManager)admin.getAlertManager()).getAlertRepository().getAlertHistoryByGroupUid(groupUid);
-            AlertHistoryDetails alertHistoryDetails = alertHistory.getDetails();
-            if (alertHistoryDetails != null && !alertHistoryDetails.getLastAlertStatus().isResolved()) {
+            Alert[] alertsByGroupUid = ((InternalAlertManager)admin.getAlertManager()).getAlertRepository().getAlertsByGroupUid(groupUid);
+            if (alertsByGroupUid.length != 0 && !alertsByGroupUid[0].getStatus().isResolved()) {
                 AlertFactory factory = new AlertFactory();
                 factory.name(ALERT_NAME);
                 factory.groupUid(groupUid);

@@ -1,54 +1,67 @@
 package org.openspaces.admin.internal.alert;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.LinkedList;
 
 import org.openspaces.admin.alert.Alert;
+import org.openspaces.admin.alert.AlertStatus;
 import org.openspaces.admin.alert.alerts.AbstractAlert;
 
-public class DefaultAlertRepository implements InternalAlertRepository {
 
-    public volatile int groupHistorySize = 200;
-    private volatile int resolvedHistorySize = 100;
-    
-    private final AtomicInteger incrementalId = new AtomicInteger();
-    private final ConcurrentHashMap<String, AlertChain> alertsByGroupUid = new ConcurrentHashMap<String, AlertChain>();
+public class DefaultAlertRepository implements AlertRepository {
 
-    public void setGroupAlertHistorySize(int groupHistorySize) {
-        this.groupHistorySize = groupHistorySize;
-    }
-    
-    public void setResolvedAlertHistorySize(int resolvedHistorySize) {
-        this.resolvedHistorySize = resolvedHistorySize;
-    }
-
-    public boolean addAlert(Alert alert) {
-
-        AlertChain chain = alertsByGroupUid.get(alert.getGroupUid());
-        if (chain == null) {
-            if (alert.getStatus().isResolved() || alert.getStatus().isNotAvailable()) {
-                return false;
-            }
-            
-            AlertChain newChain = new AlertChain(groupHistorySize);
-            chain = alertsByGroupUid.putIfAbsent(alert.getGroupUid(), newChain);
-            if (chain == null) {
-                chain = newChain;
-            }
+    public class AlertGroup {
+        private final ArrayList<Alert> alertsInGroupList = new ArrayList<Alert>();
+        public void addAlert(Alert alert) {
+            alertsInGroupList.add(0,alert);
         }
-        ensureResolvedHistoryCapacity();
-        setAlertUid(alert);
-
-        return chain.addAlert(alert);
+        
+        public boolean isResolved() {
+            return alertsInGroupList.get(0).getStatus().isResolved();
+        }
+        
+        public boolean isUnResolved() {
+            return alertsInGroupList.get(0).getStatus().getValue() > AlertStatus.RESOLVED.getValue();
+        }
+        
+        public String getGroupUid() {
+            return alertsInGroupList.get(0).getGroupUid();
+        }
+        public Alert[] toArray() {
+            return alertsInGroupList.toArray(new Alert[alertsInGroupList.size()]);
+        }
     }
 
+    public final static int STORE_LIMIT = 2000;
+    
+    private int incrementalAlertUid = 0;
+
+    /**
+     * Maps an {@link Alert#getGroupUid()} to an {@link AlertGroup}. Holds only mapping of new groups.
+     * Old groups, with same group Uid, are located in {@link #alertGroupList}.
+     */
+    private final HashMap<String, AlertGroup> alertGroupByGroupUidMapping = new HashMap<String, AlertGroup>();
+    
+    /**
+     * Groups together alerts belonging to the same group Uid. Note that a new group may be created,
+     * if the former group was already resolved.  Any updated group gets bumped-up to the head. If the
+     * list reaches the limit, we use the tail to remove old alert groups.
+     */
+    private final LinkedList<AlertGroup> alertGroupList = new LinkedList<AlertGroup>();
+
+    //called under "this" lock
+    public synchronized void addAlert(Alert alert) {
+        
+        setAlertUid(alert);
+        mapAlertByGroupUid(alert);
+        ensureStoreLimit();
+    }
+
+    /**
+     * Sets an incremental id as the alert UID.
+     */
+    //called under "this" lock
     private void setAlertUid(Alert alert) {
         InternalAlert internalAlert = null;
         
@@ -64,185 +77,146 @@ public class DefaultAlertRepository implements InternalAlertRepository {
             throw new IllegalStateException("Can't set alert Uid, Alert must implement InternalAlert interface.");
         }
         
-        internalAlert.setAlertUid((incrementalId.incrementAndGet() + "@" + Integer.toHexString(System.identityHashCode(alert))));
+        ++incrementalAlertUid;
+        internalAlert.setAlertUid((incrementalAlertUid + "@" + Integer.toHexString(System.identityHashCode(alert))));
     }
 
-    private void ensureResolvedHistoryCapacity() {
-        //fast exit check
-        if (alertsByGroupUid.size() < resolvedHistorySize) {
+    /**
+     * Map alerts to their respective group. A new group is needed when the old group is already resolved,
+     * or if a group never existed.
+     * @param alert the new alert.
+     */
+    //called under "this" lock
+    private void mapAlertByGroupUid(Alert alert) {
+        AlertGroup alertGroup = alertGroupByGroupUidMapping.get(alert.getGroupUid());
+        boolean needsNewAlertGroup = (alertGroup != null && alertGroup.isResolved());
+        if (alertGroup == null || needsNewAlertGroup) {
+            alertGroup = new AlertGroup();
+            alertGroup.addAlert(alert);
+            alertGroupByGroupUidMapping.put(alert.getGroupUid(), alertGroup);
+            alertGroupList.addFirst(alertGroup);
+        } else {
+            alertGroup.addAlert(alert);
+            alertGroupList.remove(alertGroup);
+            alertGroupList.addFirst(alertGroup);
+        }
+    }
+
+    /**
+     * If store reaches limit, start removing from the tail -
+     * alert that were resolved/NA we can remove completely.
+     * alerts that are still unresolved, we can remove only alerts inside the group.
+     */
+    //called under "this" lock
+    private void ensureStoreLimit() {
+        if (size() <= STORE_LIMIT) {
             return;
         }
         
-        int countResolved = 0;
-        AlertChain olderTimestampAlertChain = null;
-        for (AlertChain chain : alertsByGroupUid.values()) {
-            if (chain.isResolved()) {
-                countResolved++;
-                //replace with older timestamp
-                if (olderTimestampAlertChain == null || olderTimestampAlertChain.resolvedAlert.getTimestamp() > chain.resolvedAlert.getTimestamp()) {
-                    olderTimestampAlertChain = chain;
+        /*
+         * Look for candidate - an alert still unresolved - we can remove only alerts inside the group.
+         */
+        boolean removed = false;
+        for (int i=(alertGroupList.size() -1); i>=0; --i) {
+            AlertGroup alertGroup = alertGroupList.get(i);
+            if (alertGroup.isUnResolved()) {
+
+                /*
+                 * don't remove first and last alert!
+                 * First alert (index 0) indicates the last alert from the group.
+                 * Last alert (index size -1) indicates the first alert to open the group. 
+                 */
+                for (int j=(alertGroup.alertsInGroupList.size() -2); j>0; j-=2) {
+                    alertGroup.alertsInGroupList.remove(j);
+                    removed = true;
+                }
+
+                if (removed) {
+                    break;
                 }
             }
         }
         
-        if (countResolved >= resolvedHistorySize && olderTimestampAlertChain != null) {
-            removeAlertHistoryByGroupUid(olderTimestampAlertChain.resolvedAlert.getGroupUid());
+        if (!removed) {
+            //remove whatever is in last position.
+            AlertGroup lastAlertGroup = alertGroupList.removeLast();
+
+            /*
+             * last alert group may differ from the mapped one since a new group may have been created
+             * since then. Only remove if they equal!
+             */
+            AlertGroup mappedAlertGroup = alertGroupByGroupUidMapping.get(lastAlertGroup.getGroupUid());
+            if (mappedAlertGroup == lastAlertGroup) {
+                alertGroupByGroupUidMapping.remove(lastAlertGroup.getGroupUid());
+            }
         }
     }
 
-    public Alert getAlertByUid(String uid) {
-        for (AlertChain alertChain : alertsByGroupUid.values()) {
-            Alert alert = alertChain.getAlertByUid(uid);
-            if (alert != null) {
-                return alert;
+    //called under "this" lock
+    public synchronized Alert getAlertByAlertUid(String alertUid) {
+        for (AlertGroup alertGroup : alertGroupList) {
+            for (Alert alert : alertGroup.alertsInGroupList) {
+                if (alert.getAlertUid().equals(alertUid)) {
+                    return alert;
+                }
             }
         }
         return null;
     }
-    
-    public AlertHistory getAlertHistoryByGroupUid(String groupUid) {
-        AlertChain alertChain = alertsByGroupUid.get(groupUid);
-        if (alertChain == null) {
-            return new DefaultAlertHistory(new Alert[0]);
-        } else {
-            DefaultAlertHistory alerts = new DefaultAlertHistory(alertChain.toArray());
-            return alerts;
+
+    //called under "this" lock
+    public synchronized Alert[] getAlertsByGroupUid(String groupUid) {
+        for (AlertGroup alertGroup : alertGroupList) {
+            if (alertGroup.getGroupUid().equals(groupUid)) {
+                return alertGroup.toArray();
+            }
         }
+        return new Alert[0];
     }
 
-    public AlertHistory[] getAlertHistory() {
-        TreeMap<Alert, AlertHistory> treeMap = new TreeMap<Alert, AlertHistory>(new Comparator<Alert>() {
-            public int compare(Alert a1, Alert a2) {
-                if (a1.getTimestamp() <= a2.getTimestamp()) {
-                    return 1;
-                } else {
-                    return -1;
-                }
+    //called under "this" lock
+    public synchronized Iterable<Alert> iterateFifo() {
+        ArrayList<Alert> list = new ArrayList<Alert>(Math.max(10, alertGroupList.size()));
+        for (int i=(alertGroupList.size() -1); i>=0; --i) {
+            AlertGroup alertGroup = alertGroupList.get(i);
+            for (int j=(alertGroup.alertsInGroupList.size() -1); j>=0; --j) {
+                Alert alert = alertGroup.alertsInGroupList.get(j);
+                list.add(alert);
             }
-        });
-        
-        for (AlertChain chain : alertsByGroupUid.values()) {
-            Alert[] alerts = chain.toArray();
-            DefaultAlertHistory alertHistory = new DefaultAlertHistory(alerts);
-            treeMap.put(alerts[alerts.length-1], alertHistory);
         }
-
-        AlertHistory[] result = treeMap.values().toArray(new AlertHistory[treeMap.size()]);
-        return result;
+        return list;
     }
     
-    public boolean isAlertResolvedByGroupUid(String groupUid) {
-        AlertChain alertChain = alertsByGroupUid.get(groupUid);
-        if (alertChain == null) return true;
-        return (alertChain.isResolved());
+    //called under "this" lock
+    public synchronized Iterable<Alert> iterateLifo() {
+        ArrayList<Alert> list = new ArrayList<Alert>(Math.max(10, alertGroupList.size()));
+        for (int i=0; i<alertGroupList.size(); ++i) {
+            AlertGroup alertGroup = alertGroupList.get(i);
+            for (int j=0; j<alertGroup.alertsInGroupList.size(); ++j) {
+                Alert alert = alertGroup.alertsInGroupList.get(j);
+                list.add(alert);
+            }
+        }
+        return list;
+    }
+    
+    //called under "this" lock
+    public synchronized Iterable<Iterable<Alert>> list() {
+        ArrayList<Iterable<Alert>> list = new ArrayList<Iterable<Alert>>(Math.max(10, alertGroupList.size()));
+        for (int i=0; i<alertGroupList.size(); ++i) {
+            AlertGroup alertGroup = alertGroupList.get(i);
+            ArrayList<Alert> alertsInGroup = new ArrayList<Alert>(alertGroup.alertsInGroupList);
+            list.add(alertsInGroup);
+        }
+        return list;
     }
 
-    public Iterator<Alert> iterator() {
-        List<Alert> alerts = new ArrayList<Alert>();
-        for (AlertChain chain : alertsByGroupUid.values()) {
-            alerts.addAll(chain.asList());
+    //called under "this" lock
+    public synchronized int size() {
+        int size = 0;
+        for (AlertGroup alertGroup : alertGroupList) {
+            size += alertGroup.alertsInGroupList.size();
         }
-        return alerts.iterator();
-    }
- 
-    public boolean removeAlertHistoryByGroupUid(String groupUid) {
-        AlertChain alertChain = alertsByGroupUid.remove(groupUid);
-        return alertChain != null;
-    }
-
-    /*
-     * Holds unresolved alerts, a history chain of negative alerts after the first unresolved alert
-     * was fired, and a resolution alert.
-     */
-    private static final class AlertChain {
-        private Alert unresolvedAlert;
-        private Alert resolvedAlert;
-        private List<Alert> unresolvedAlertsChain;
-        private int historyIndex = 0;
-        private final Map<String, Alert> alertByUid = new HashMap<String, Alert>();
-        private final int groupHistorySize;
-
-        public AlertChain(int groupHistorySize) {
-            this.groupHistorySize = groupHistorySize;
-        }
-
-        private void initialize() {
-            resolvedAlert = null;
-            unresolvedAlert = null;
-            alertByUid.clear();
-            if (unresolvedAlertsChain != null) {
-                unresolvedAlertsChain.clear();
-                historyIndex = 0;
-            }
-        }
-        
-        public synchronized boolean isResolved() {
-            return (resolvedAlert != null); 
-        }
-
-        public synchronized boolean addAlert(Alert alert) {
-            if (alert.getStatus().isResolved() || alert.getStatus().isNotAvailable()) {
-                if (resolvedAlert != null)
-                    return false;
-                resolvedAlert = alert;
-            } else {
-                if (resolvedAlert != null) {
-                    initialize();
-                }
-
-                if (unresolvedAlert == null) {
-                    unresolvedAlert = alert;
-                } else {
-                    if (unresolvedAlertsChain == null) {
-                        unresolvedAlertsChain = new ArrayList<Alert>();
-                    }
-                    if (unresolvedAlertsChain.size() < groupHistorySize) {
-                        unresolvedAlertsChain.add(alert);
-                    } else {
-                        /*
-                         * Try to keep history uniformed in cases of overflow, by removing using a
-                         * cyclic moving index. - remove alert at index 0, adding new alert to the
-                         * end - remove alert at index 1, keeping alert at index 0, and adding new
-                         * alert to the end - remove alert at index 2, keeping alerts at index 0 and
-                         * 1, and adding new alert to the end ... - and if index reaches the end,
-                         * will cycle again starting at index 0.
-                         */
-                        Alert removed = unresolvedAlertsChain.remove(historyIndex);
-                        unresolvedAlertsChain.add(alert);
-                        historyIndex = (++historyIndex % unresolvedAlertsChain.size());
-                        alertByUid.remove(removed.getAlertUid());
-                    }
-                }
-            }
-            alertByUid.put(alert.getAlertUid(), alert);
-            return true;
-        }
-
-        public Alert getAlertByUid(String uid) {
-            return alertByUid.get(uid);
-        }
-
-        /**
-         * @return an array which it's first element is the first unresolved alert, followed by all
-         *         consecutive unresolved alerts, ending in a resolved alert (if resolved).
-         */
-        public Alert[] toArray() {
-            List<Alert> list = asList();
-            return list.toArray(new Alert[list.size()]);
-        }
-
-        private List<Alert> asList() {
-            List<Alert> list = new ArrayList<Alert>();
-            if (unresolvedAlert != null) {
-                list.add(unresolvedAlert);
-            }
-            if (unresolvedAlertsChain != null) {
-                list.addAll(unresolvedAlertsChain);
-            }
-            if (resolvedAlert != null) {
-                list.add(resolvedAlert);
-            }
-            return list;
-        }
+        return size;
     }
 }

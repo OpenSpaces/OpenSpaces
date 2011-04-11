@@ -19,7 +19,7 @@ public class DefaultAlertManager implements InternalAlertManager {
 
     private final Admin admin;
     private final InternalAlertTriggeredEventManager alertEventManager;
-    private final InternalAlertRepository alertRepository;
+    private final AlertRepository alertRepository;
     private final BeanConfigPropertiesManager beanConfigPropertiesManager;
 
     public DefaultAlertManager(Admin admin) {
@@ -38,10 +38,8 @@ public class DefaultAlertManager implements InternalAlertManager {
     }
 
     public void triggerAlert(Alert alert) {
-        boolean added = alertRepository.addAlert(alert);
-        if (added) {
-            alertEventManager.alertTriggered(alert);
-        }
+        alertRepository.addAlert(alert);
+        alertEventManager.alertTriggered(alert);
     }
 
     public Admin getAdmin() {

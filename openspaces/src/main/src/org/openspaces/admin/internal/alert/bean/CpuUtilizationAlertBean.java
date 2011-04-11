@@ -15,8 +15,6 @@ import org.openspaces.admin.alert.AlertStatus;
 import org.openspaces.admin.alert.alerts.CpuUtilizationAlert;
 import org.openspaces.admin.alert.config.CpuUtilizationAlertConfiguration;
 import org.openspaces.admin.bean.BeanConfigurationException;
-import org.openspaces.admin.internal.alert.AlertHistory;
-import org.openspaces.admin.internal.alert.AlertHistoryDetails;
 import org.openspaces.admin.internal.alert.InternalAlertManager;
 import org.openspaces.admin.internal.alert.bean.util.AlertBeanUtils;
 import org.openspaces.admin.machine.Machine;
@@ -105,18 +103,21 @@ public class CpuUtilizationAlertBean implements AlertBean,
     //unreachable machine
     public void machineRemoved(final Machine machine) {
         final String groupUid = generateGroupUid(machine.getOperatingSystem().getUid());
-        AlertFactory factory = new AlertFactory();
-        factory.name(ALERT_NAME);
-        factory.groupUid(groupUid);
-        factory.description("CPU measurment is unavailable; machine has been removed");
-        factory.severity(AlertSeverity.WARNING);
-        factory.status(AlertStatus.NA);
-        factory.componentUid(machine.getOperatingSystem().getUid());
-        factory.componentDescription(AlertBeanUtils.getMachineDescription(machine));
-        factory.config(config.getProperties());
+        Alert[] alertsByGroupUid = ((InternalAlertManager)admin.getAlertManager()).getAlertRepository().getAlertsByGroupUid(groupUid);
+        if (alertsByGroupUid.length != 0 && !alertsByGroupUid[0].getStatus().isResolved()) {
+            AlertFactory factory = new AlertFactory();
+            factory.name(ALERT_NAME);
+            factory.groupUid(groupUid);
+            factory.description("CPU measurment is unavailable; machine has been removed");
+            factory.severity(AlertSeverity.WARNING);
+            factory.status(AlertStatus.NA);
+            factory.componentUid(machine.getOperatingSystem().getUid());
+            factory.componentDescription(AlertBeanUtils.getMachineDescription(machine));
+            factory.config(config.getProperties());
 
-        Alert alert = factory.toAlert();
-        admin.getAlertManager().triggerAlert( new CpuUtilizationAlert(alert));
+            Alert alert = factory.toAlert();
+            admin.getAlertManager().triggerAlert( new CpuUtilizationAlert(alert));
+        }
     }
 
     public void operatingSystemStatisticsChanged(OperatingSystemStatisticsChangedEvent event) {
@@ -148,9 +149,8 @@ public class CpuUtilizationAlertBean implements AlertBean,
                 
         } else if (cpuAvg < lowThreshold) {
             final String groupUid = generateGroupUid(event.getOperatingSystem().getUid());
-            AlertHistory alertHistory = ((InternalAlertManager)admin.getAlertManager()).getAlertRepository().getAlertHistoryByGroupUid(groupUid);
-            AlertHistoryDetails alertHistoryDetails = alertHistory.getDetails();
-            if (alertHistoryDetails != null && !alertHistoryDetails.getLastAlertStatus().isResolved()) {
+            Alert[] alertsByGroupUid = ((InternalAlertManager)admin.getAlertManager()).getAlertRepository().getAlertsByGroupUid(groupUid);
+            if (alertsByGroupUid.length != 0 && !alertsByGroupUid[0].getStatus().isResolved()) {
                 AlertFactory factory = new AlertFactory();
                 factory.name(ALERT_NAME);
                 factory.groupUid(groupUid);

@@ -10,8 +10,6 @@ import org.openspaces.admin.alert.AlertSeverity;
 import org.openspaces.admin.alert.AlertStatus;
 import org.openspaces.admin.alert.alerts.MirrorPersistenceFailureAlert;
 import org.openspaces.admin.alert.config.MirrorPersistenceFailureAlertConfiguration;
-import org.openspaces.admin.internal.alert.AlertHistory;
-import org.openspaces.admin.internal.alert.AlertHistoryDetails;
 import org.openspaces.admin.internal.alert.InternalAlertManager;
 import org.openspaces.admin.internal.alert.bean.util.AlertBeanUtils;
 import org.openspaces.admin.space.ReplicationStatus;
@@ -72,18 +70,21 @@ public class MirrorPersistenceFailureAlertBean implements AlertBean, SpaceInstan
             return; //not a mirror
         }
         final String groupUid = generateGroupUid(spaceInstance.getUid());
-        AlertFactory factory = new AlertFactory();
-        factory.name(ALERT_NAME);
-        factory.groupUid(groupUid);
-        factory.description("Mirror space " + getSpaceName(spaceInstance) + " is unavailable.");
-        factory.severity(AlertSeverity.SEVERE);
-        factory.status(AlertStatus.NA);
-        factory.componentUid(spaceInstance.getUid());
-        factory.componentDescription(AlertBeanUtils.getSpaceInstanceDescription(spaceInstance));
-        factory.config(config.getProperties());
+        Alert[] alertsByGroupUid = ((InternalAlertManager)admin.getAlertManager()).getAlertRepository().getAlertsByGroupUid(groupUid);
+        if (alertsByGroupUid.length != 0 && !alertsByGroupUid[0].getStatus().isResolved()) {
+            AlertFactory factory = new AlertFactory();
+            factory.name(ALERT_NAME);
+            factory.groupUid(groupUid);
+            factory.description("Mirror space " + getSpaceName(spaceInstance) + " is unavailable.");
+            factory.severity(AlertSeverity.SEVERE);
+            factory.status(AlertStatus.NA);
+            factory.componentUid(spaceInstance.getUid());
+            factory.componentDescription(AlertBeanUtils.getSpaceInstanceDescription(spaceInstance));
+            factory.config(config.getProperties());
 
-        Alert alert = factory.toAlert();
-        admin.getAlertManager().triggerAlert( new MirrorPersistenceFailureAlert(alert));
+            Alert alert = factory.toAlert();
+            admin.getAlertManager().triggerAlert( new MirrorPersistenceFailureAlert(alert));
+        }
     }
     
     
@@ -151,9 +152,8 @@ public class MirrorPersistenceFailureAlertBean implements AlertBean, SpaceInstan
             
         } else if (!mirrorChannelIsInconsistent) {
             final String groupUid = generateGroupUid(mirrorInstance.getUid());
-            AlertHistory alertHistory = ((InternalAlertManager)admin.getAlertManager()).getAlertRepository().getAlertHistoryByGroupUid(groupUid);
-            AlertHistoryDetails alertHistoryDetails = alertHistory.getDetails();
-            if (alertHistoryDetails != null && !alertHistoryDetails.getLastAlertStatus().isResolved()) {
+            Alert[] alertsByGroupUid = ((InternalAlertManager)admin.getAlertManager()).getAlertRepository().getAlertsByGroupUid(groupUid);
+            if (alertsByGroupUid.length != 0 && !alertsByGroupUid[0].getStatus().isResolved()) {
                 AlertFactory factory = new AlertFactory();
                 factory.name(ALERT_NAME);
                 factory.groupUid(groupUid);
