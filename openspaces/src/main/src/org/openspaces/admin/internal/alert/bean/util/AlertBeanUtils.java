@@ -8,6 +8,7 @@ import org.openspaces.admin.internal.alert.bean.AlertBean;
 import org.openspaces.admin.internal.support.AbstractAgentGridComponent;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.os.OperatingSystemDetails;
+import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.vm.VirtualMachine;
 
@@ -158,5 +159,12 @@ public class AlertBeanUtils {
         }
         
         return sb.toString();
+    }
+    
+    /**
+     * @return "[name]"
+     */
+    public static String getProcessingUnitDescription(ProcessingUnit processingUnit) {
+        return processingUnit.getName();
     }
 }
