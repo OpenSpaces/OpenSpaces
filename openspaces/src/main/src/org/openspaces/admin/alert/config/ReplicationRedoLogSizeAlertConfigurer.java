@@ -40,6 +40,15 @@ public class ReplicationRedoLogSizeAlertConfigurer implements AlertConfigurer {
 	public ReplicationRedoLogSizeAlertConfigurer() {
 	}
 	
+    /*
+     * (non-Javadoc)
+     * @see org.openspaces.admin.alert.config.AlertConfigurer#enable(boolean)
+     */
+    public ReplicationRedoLogSizeAlertConfigurer enable(boolean enabled) {
+        config.setEnabled(enabled);
+        return this;
+    }
+	
 	/**
 	 * Raise an alert if the number of packets in the redo log is above the specified threshold.
 	 * @see ReplicationRedoLogSizeAlertConfiguration#setHighThresholdRedoLogSize(int)

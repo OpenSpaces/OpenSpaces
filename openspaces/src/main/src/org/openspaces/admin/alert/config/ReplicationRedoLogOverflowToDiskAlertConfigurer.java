@@ -45,6 +45,15 @@ public class ReplicationRedoLogOverflowToDiskAlertConfigurer implements AlertCon
 	 */
 	public ReplicationRedoLogOverflowToDiskAlertConfigurer() {
 	}
+	
+    /*
+     * (non-Javadoc)
+     * @see org.openspaces.admin.alert.config.AlertConfigurer#enable(boolean)
+     */
+    public ReplicationRedoLogOverflowToDiskAlertConfigurer enable(boolean enabled) {
+        config.setEnabled(enabled);
+        return this;
+    }
 
 	/**
 	 * Get a fully configured configuration (after all properties have been set).

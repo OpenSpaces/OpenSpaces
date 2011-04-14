@@ -41,6 +41,15 @@ public class GarbageCollectionAlertConfigurer implements AlertConfigurer {
      */
     public GarbageCollectionAlertConfigurer() {
     }
+    
+    /*
+     * (non-Javadoc)
+     * @see org.openspaces.admin.alert.config.AlertConfigurer#enable(boolean)
+     */
+    public GarbageCollectionAlertConfigurer enable(boolean enabled) {
+        config.setEnabled(enabled);
+        return this;
+    }
 
     /**
      * Raise an alert if gc took longer than the specified period of time.

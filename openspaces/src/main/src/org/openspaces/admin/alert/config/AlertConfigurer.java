@@ -29,4 +29,13 @@ import org.openspaces.admin.bean.BeanConfigurer;
  * @since 8.0
  */
 public interface AlertConfigurer extends BeanConfigurer<AlertConfiguration> {
+    
+    /**
+     * Enable an alert using this configuration. By default an alert is disabled.
+     * @param enabled <code>true</code> to enable the alert using this configuration; <code>false</code> to disable the alert.
+     * @return this.
+     * @see AlertConfiguration#setEnabled(boolean)
+     * @since 8.0.2
+     */
+    AlertConfigurer enable(boolean enabled);
 }

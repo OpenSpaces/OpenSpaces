@@ -42,6 +42,15 @@ public class HeapMemoryUtilizationAlertConfigurer implements AlertConfigurer {
      */
     public HeapMemoryUtilizationAlertConfigurer() {
     }
+    
+    /*
+     * (non-Javadoc)
+     * @see org.openspaces.admin.alert.config.AlertConfigurer#enable(boolean)
+     */
+    public HeapMemoryUtilizationAlertConfigurer enable(boolean enabled) {
+        config.setEnabled(enabled);
+        return this;
+    }
 
     /**
      * Raise an alert if heap utilization if above the specified threshold for a period of time. The

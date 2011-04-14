@@ -42,6 +42,15 @@ public class CpuUtilizationAlertConfigurer implements AlertConfigurer {
 	 */
 	public CpuUtilizationAlertConfigurer() {
 	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.openspaces.admin.alert.config.AlertConfigurer#enable(boolean)
+	 */
+	public CpuUtilizationAlertConfigurer enable(boolean enabled) {
+	    config.setEnabled(enabled);
+	    return this;
+	}
 
     /**
      * Raise an alert if the CPU reading is above the specified threshold for a period of time. The

@@ -43,6 +43,15 @@ public class PhysicalMemoryUtilizationAlertConfigurer implements AlertConfigurer
 	 */
 	public PhysicalMemoryUtilizationAlertConfigurer() {
 	}
+	
+    /*
+     * (non-Javadoc)
+     * @see org.openspaces.admin.alert.config.AlertConfigurer#enable(boolean)
+     */
+    public PhysicalMemoryUtilizationAlertConfigurer enable(boolean enabled) {
+        config.setEnabled(enabled);
+        return this;
+    }
 
     /**
      * Raise an alert if physical memory is above the specified threshold for a period of time. The
