@@ -307,11 +307,12 @@ public class GigaSessionManager extends AbstractSessionManager {
     }
 
     @Override
-    protected void removeSession(String idInCluster) {
+    protected boolean removeSession(String idInCluster) {
         try {
-            delete(idInCluster);
+            return delete(idInCluster);
         } catch (Exception e) {
             Log.warn("Failed to remove session with id [" + idInCluster + "]", e);
+            return false;
         }
     }
 
@@ -437,7 +438,7 @@ public class GigaSessionManager extends AbstractSessionManager {
     }
 
     protected Object[] findExpiredSessions(long timestamp) throws Exception {
-        SQLQuery query = new SQLQuery<SessionData>(SessionData.class, "expiryTime < ?");
+        SQLQuery<SessionData> query = new SQLQuery<SessionData>(SessionData.class, "expiryTime < ?");
         query.setParameter(1, timestamp);
         return space.readMultiple(query, null, 100);
     }
@@ -461,32 +462,25 @@ public class GigaSessionManager extends AbstractSessionManager {
             _data.setMaxIdleMs(_dftMaxIdleSecs * 1000L);
             _data.setExpiryTime(_maxIdleMs < 0 ? Long.MAX_VALUE : (System.currentTimeMillis() + _maxIdleMs));
             _data.setCookieSet(0);
-            if (_data.getAttributeMap() == null)
-                newAttributeMap();
-            _values = _data.getAttributeMap();
+            _data.setAttributeMap(_attributes);
             if (Log.isDebugEnabled()) Log.debug("New Session from request, " + _data.toStringExtended());
         }
 
         protected Session(SessionData data) {
-            super(data.getCreated(), data.getId());
-            _accessed = data.getAccessed();
+            super(data.getCreated(), data.getAccessed() ,data.getId());
             _lastAccessed = data.getLastAccessed();
             _data = data;
-            _values = data.getAttributeMap();
+            
+            //Merges the two tables and make sure both SessionData and AbstractSessionManager.Session holds the same map 
+            _attributes.putAll(data.getAttributeMap());
+            _data.setAttributeMap(_attributes);
+            
             if (Log.isDebugEnabled()) Log.debug("New Session from existing session data " + _data.toStringExtended());
         }
 
         @Override
         protected void cookieSet() {
             _data.setCookieSet(_data.getAccessed());
-        }
-
-        @Override
-        protected Map newAttributeMap() {
-            if (_data.getAttributeMap() == null) {
-                _data.setAttributeMap(new ConcurrentHashMap());
-            }
-            return _data.getAttributeMap();
         }
 
         @Override

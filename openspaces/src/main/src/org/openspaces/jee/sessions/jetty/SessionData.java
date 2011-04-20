@@ -43,7 +43,7 @@ public class SessionData implements Externalizable {
     private volatile long _cookieSet = -1;
     private long _created = -1;
     private volatile long _expiryTime = -1;
-    private volatile ConcurrentHashMap _attributes = null;
+    private volatile Map<String,Object> _attributes = null;
 
 
     public SessionData() {
@@ -75,8 +75,8 @@ public class SessionData implements Externalizable {
             out.writeInt(-1);
         } else {
             out.writeInt(_attributes.size());
-            for (Iterator it = _attributes.entrySet().iterator(); it.hasNext();) {
-                Map.Entry entry = (Map.Entry) it.next();
+            for (Iterator<Map.Entry<String,Object>> it = _attributes.entrySet().iterator(); it.hasNext();) {
+                Map.Entry<String,Object> entry = it.next();
                 out.writeObject(entry.getKey());
                 out.writeObject(entry.getValue());
             }
@@ -96,9 +96,9 @@ public class SessionData implements Externalizable {
         _expiryTime = in.readLong();
         int size = in.readInt();
         if (size > -1) {
-            _attributes = new ConcurrentHashMap();
+            _attributes = new ConcurrentHashMap<String,Object>();
             for (int i = 0; i < size; i++) {
-                _attributes.put(in.readObject(), in.readObject());
+                _attributes.put((String)in.readObject(), in.readObject());
             }
         }
     }
@@ -168,11 +168,11 @@ public class SessionData implements Externalizable {
     }
 
     @SpaceProperty
-    protected ConcurrentHashMap getAttributeMap() {
+    protected Map<String,Object> getAttributeMap() {
         return _attributes;
     }
 
-    protected void setAttributeMap(ConcurrentHashMap map) {
+    protected void setAttributeMap(Map<String,Object> map) {
         _attributes = map;
     }
 
