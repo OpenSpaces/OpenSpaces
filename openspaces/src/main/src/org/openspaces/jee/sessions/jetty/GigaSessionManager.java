@@ -16,28 +16,30 @@
 
 package org.openspaces.jee.sessions.jetty;
 
-import com.gigaspaces.internal.client.QueryResultTypeInternal;
-import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
-import com.j_spaces.core.IJSpace;
-import com.j_spaces.core.client.SQLQuery;
-import net.jini.core.lease.Lease;
-import org.eclipse.jetty.server.session.AbstractSessionManager;
-import org.eclipse.jetty.util.LazyList;
-import org.eclipse.jetty.util.log.Log;
-import org.openspaces.core.properties.BeanLevelProperties;
-import org.openspaces.core.cluster.ClusterInfo;
-import org.openspaces.core.space.UrlSpaceConfigurer;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSessionEvent;
-import javax.servlet.http.HttpSessionListener;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSessionEvent;
+import javax.servlet.http.HttpSessionListener;
+
+import net.jini.core.lease.Lease;
+
+import org.eclipse.jetty.server.session.AbstractSessionManager;
+import org.eclipse.jetty.util.LazyList;
+import org.eclipse.jetty.util.log.Log;
+import org.openspaces.core.cluster.ClusterInfo;
+import org.openspaces.core.properties.BeanLevelProperties;
+import org.openspaces.core.space.UrlSpaceConfigurer;
+
+import com.gigaspaces.internal.client.QueryResultTypeInternal;
+import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
+import com.j_spaces.core.IJSpace;
+import com.j_spaces.core.client.SQLQuery;
 
 
 /**
