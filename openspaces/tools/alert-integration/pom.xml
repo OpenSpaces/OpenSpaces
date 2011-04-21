@@ -16,20 +16,21 @@
 			<id>snmp4j</id>
 			<url>https://server.oosnmp.net</url>
 		</repository>
+		<repository>
+			<id>com.gigaspaces</id>
+			<url>http://openspaces-maven-repository.googlecode.com/svn/maven-repository</url>
+		</repository>
 	</repositories>
 	<dependencies>
 		<dependency>
 			<groupId>com.gigaspaces</groupId>
 			<artifactId>gs-openspaces</artifactId>
 			<version>${gsVersion}</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>snmpTrapAppender</groupId>
-			<artifactId>snmpTrapAppender</artifactId>
+			<groupId>org.apache.log4j.ext</groupId>
+			<artifactId>snmptrapappender</artifactId>
 			<version>1.2.9</version>
-			<scope>system</scope>
-			<systemPath>${basedir}/lib/snmpTrapAppender_1_2_9.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>javax.annotation</groupId>
