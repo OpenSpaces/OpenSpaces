@@ -123,9 +123,11 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
         }
         
         /*
-         * Shared machine provisioning is only allowed for licensed customers
+         * Shared/public machine provisioning is only allowed for licensed customers
          */
-        ElasticMultiTenancyLicenseVerifier.verify();
+        if (isolationConfig.isSharedIsolation()) {
+            ElasticMultiTenancyLicenseVerifier.verify();
+        }
         
         return instance;
     }
