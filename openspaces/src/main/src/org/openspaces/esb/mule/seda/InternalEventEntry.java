@@ -16,6 +16,7 @@
 
 package org.openspaces.esb.mule.seda;
 
+import com.j_spaces.core.client.IReplicatable;
 import com.j_spaces.core.client.MetaDataEntry;
 import org.mule.api.MuleEvent;
 import org.openspaces.core.util.ThreadLocalMarshaller;
@@ -31,7 +32,7 @@ import java.io.ObjectOutput;
  *
  * @author kimchy
  */
-public class InternalEventEntry extends MetaDataEntry implements Externalizable {
+public class InternalEventEntry extends MetaDataEntry implements Externalizable, IReplicatable {
 
     public String name;
 

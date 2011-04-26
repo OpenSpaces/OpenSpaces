@@ -16,6 +16,7 @@
 
 package org.openspaces.esb.mule.queue;
 
+import com.j_spaces.core.client.IReplicatable;
 import com.j_spaces.core.client.MetaDataEntry;
 import org.mule.api.MuleMessage;
 import org.openspaces.core.util.ThreadLocalMarshaller;
@@ -30,7 +31,7 @@ import java.io.ObjectOutput;
  *
  * @author kimchy
  */
-public class InternalQueueEntry extends MetaDataEntry implements Externalizable {
+public class InternalQueueEntry extends MetaDataEntry implements Externalizable, IReplicatable {
 
     public String endpointURI;
 

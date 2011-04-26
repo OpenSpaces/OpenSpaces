@@ -16,6 +16,7 @@
 
 package org.openspaces.remoting;
 
+import com.j_spaces.core.client.IReplicatable;
 import com.j_spaces.core.client.MetaDataEntry;
 
 import java.io.Externalizable;
@@ -32,7 +33,7 @@ import java.util.Arrays;
  * @deprecated
  */
 @Deprecated
-public class EventDrivenSpaceRemotingEntry extends MetaDataEntry implements SpaceRemotingEntry, Externalizable {
+public class EventDrivenSpaceRemotingEntry extends MetaDataEntry implements SpaceRemotingEntry, Externalizable, IReplicatable {
     
     static final long serialVersionUID = 7009426586658014410L;
     static int bitIndexCounter = 0;
