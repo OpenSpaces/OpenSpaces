@@ -194,6 +194,7 @@ public class EventDrivenSpaceRemotingEntry extends MetaDataEntry implements Spac
         setLookupName(null);
         setMethodName(null);
         setArguments(null);
+        setMetaArguments(null);
         setOneWay(null);
     }
 
