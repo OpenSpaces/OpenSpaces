@@ -52,7 +52,7 @@
                 <value>org.eclipse.jetty.webapp.MetaInfConfiguration</value>
                 <value>org.eclipse.jetty.webapp.FragmentConfiguration</value>
                 <value>org.eclipse.jetty.plus.webapp.EnvConfiguration</value>
-                <value>org.eclipse.jetty.plus.webapp.Configuration</value>
+                <value>org.eclipse.jetty.plus.webapp.PlusConfiguration</value>
                 <value>org.eclipse.jetty.webapp.JettyWebXmlConfiguration</value>
                 <value>org.eclipse.jetty.webapp.TagLibConfiguration</value>
             </list>
