@@ -316,6 +316,7 @@ public class EventDrivenSpaceRemotingEntry extends MetaDataEntry implements Spac
             sb.append("lookupName [").append(lookupName).append("]");
             sb.append(" methodName[").append(methodName).append("]");
             sb.append(" arguments[").append(Arrays.toString(arguments)).append("]");
+            sb.append(" metaArguments[").append(Arrays.toString(metaArguments)).append("]");
             sb.append(" routing[").append(routing).append("]");
             sb.append(" oneWay[").append(oneWay).append("]");
         } else {
