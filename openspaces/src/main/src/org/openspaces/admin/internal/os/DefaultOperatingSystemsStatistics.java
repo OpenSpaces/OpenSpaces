@@ -1,5 +1,6 @@
 package org.openspaces.admin.internal.os;
 
+import org.openspaces.admin.os.OperatingSystemDetails;
 import org.openspaces.admin.os.OperatingSystemStatistics;
 import org.openspaces.admin.os.OperatingSystemsDetails;
 import org.openspaces.admin.os.OperatingSystemsStatistics;
@@ -184,8 +185,11 @@ public class DefaultOperatingSystemsStatistics implements OperatingSystemsStatis
         int count = 0;
         double total = 0;
         for (OperatingSystemStatistics stat : stats) {
-            count++;
-            total += calculateOSUsedMemoryPerc( stat );
+            double usedMemoryPerc = calculateOSUsedMemoryPerc( stat );
+            if( usedMemoryPerc >= 0 ){
+                count++;
+                total += usedMemoryPerc;
+            }
         }
         if (count == 0) {
             return -1;
@@ -198,8 +202,10 @@ public class DefaultOperatingSystemsStatistics implements OperatingSystemsStatis
         //minimum should have 1 ( maximal possible ) value if there are elements in statistics
         double min = stats.length == 0 ? 0 : 1;
         for (OperatingSystemStatistics stat : stats) {
-            double usedMemoryPerc = calculateOSUsedMemoryPerc( stat );            
-            min = Math.min( min, usedMemoryPerc );
+            double usedMemoryPerc = calculateOSUsedMemoryPerc( stat );
+            if( usedMemoryPerc >= 0 ){
+                min = Math.min( min, usedMemoryPerc );
+            }
         }
         
         return min;
@@ -209,7 +215,9 @@ public class DefaultOperatingSystemsStatistics implements OperatingSystemsStatis
         double max = 0;
         for (OperatingSystemStatistics stat : stats) {
             double usedMemoryPerc = calculateOSUsedMemoryPerc( stat );
-            max = Math.max( max, usedMemoryPerc );
+            if( usedMemoryPerc >= 0 ){
+                max = Math.max( max, usedMemoryPerc );
+            }
         }
         
         return max;
@@ -233,11 +241,15 @@ public class DefaultOperatingSystemsStatistics implements OperatingSystemsStatis
     
     
     private double calculateOSUsedMemoryPerc( OperatingSystemStatistics stat ) {
-        long totalPhysicalMemorySize = 
-            stat.getDetails().getTotalPhysicalMemorySizeInBytes();
-        double usedMemory = totalPhysicalMemorySize - 
+        OperatingSystemDetails osDetails = stat.getDetails();
+        //os details can be null if OperatingSystemStatistics is NA
+        if( osDetails != null ){
+            long totalPhysicalMemorySize = osDetails.getTotalPhysicalMemorySizeInBytes();
+            double usedMemory = totalPhysicalMemorySize - 
             stat.getFreePhysicalMemorySizeInBytes();
-        return usedMemory/totalPhysicalMemorySize;            
+            return usedMemory/totalPhysicalMemorySize;
+        }
+        
+        return -1;
     }
-
 }
