@@ -89,7 +89,7 @@ import java.util.*;
 public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUnitContainerProvider {
 
     static {
-        System.setProperty("org.eclipse.log.class", JavaUtilLog.class.getName());
+        System.setProperty("org.eclipse.jetty.util.log.class", JavaUtilLog.class.getName());
         // disable jetty server shutdown hook
         System.setProperty("JETTY_NO_SHUTDOWN_HOOK", "true");
     }
