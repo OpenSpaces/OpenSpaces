@@ -13,7 +13,7 @@ import com.gigaspaces.internal.jvm.JVMDetails;
 public class DefaultVirtualMachineDetails implements VirtualMachineDetails {
 
     private final JVMDetails details;
-    private String jmxUrl;
+    private final String jmxUrl;
 
     public DefaultVirtualMachineDetails() {
         this( new JVMDetails(), "" );
