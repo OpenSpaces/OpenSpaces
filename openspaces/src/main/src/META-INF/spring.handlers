@@ -4,5 +4,6 @@ http\://www.openspaces.org/schema/remoting=org.openspaces.remoting.config.Remoti
 http\://www.openspaces.org/schema/jdbc=org.openspaces.jdbc.config.JdbcNamespaceHandler
 http\://www.openspaces.org/schema/jms=org.openspaces.jms.config.JmsNamespaceHandler
 http\://www.openspaces.org/schema/sla=org.openspaces.pu.sla.config.SLANamespaceHandler
+http\://www.openspaces.org/schema/core/gateway=org.openspaces.core.gateway.config.GatewayNamespaceHandler
 
 
