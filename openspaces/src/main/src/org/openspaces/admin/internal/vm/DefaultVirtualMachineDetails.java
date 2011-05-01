@@ -13,11 +13,10 @@ import com.gigaspaces.internal.jvm.JVMDetails;
 public class DefaultVirtualMachineDetails implements VirtualMachineDetails {
 
     private final JVMDetails details;
-    private final String jmxUrl;
+    private String jmxUrl;
 
     public DefaultVirtualMachineDetails() {
-        this.details = new JVMDetails();
-        jmxUrl = "";
+        this( new JVMDetails(), "" );
     }
 
     public DefaultVirtualMachineDetails(JVMDetails details,String jmxUrl) {
@@ -28,7 +27,7 @@ public class DefaultVirtualMachineDetails implements VirtualMachineDetails {
     public String getJmxUrl(){
         return jmxUrl;
     }
-
+    
     public boolean isNA() {
         return details.isNA();
     }

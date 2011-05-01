@@ -107,14 +107,17 @@ import com.gigaspaces.internal.os.OSStatistics;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOInfoHelper;
 import com.gigaspaces.lrmi.nio.info.NIOStatistics;
+import com.gigaspaces.management.entry.JMXConnection;
 import com.gigaspaces.security.service.SecurityResolver;
 import com.gigaspaces.start.Locator;
+import com.gigaspaces.start.SystemBoot;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
 import com.j_spaces.core.admin.RuntimeHolder;
 import com.j_spaces.core.admin.StatisticsAdmin;
 import com.j_spaces.core.client.SpaceURL;
 import com.j_spaces.core.filters.StatisticsHolder;
+import com.j_spaces.jmx.util.JMXUtilities;
 import com.j_spaces.kernel.ClassLoaderHelper;
 import com.j_spaces.kernel.Environment;
 
@@ -224,6 +227,26 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             return super.doStart(context);
         } finally {
             Thread.currentThread().setContextClassLoader(origClassLoader);
+        }
+    }
+    
+    /**
+     * Override initialize to perform additional initialization
+     */
+    @Override
+    public void initialize(ServiceBeanContext context) throws Exception {
+
+        /* Initialize super class */
+        super.initialize(context);
+
+        /* Get the JMX Service URL */
+        String jmxServiceURL = SystemBoot.getJMXServiceURL();
+
+        if(jmxServiceURL != null) {
+            String hostName = BootUtil.getHostAddress();
+            JMXConnection jmxConnection = JMXUtilities.createJMXConnectionAttribute(
+                    jmxServiceURL, hostName, context );
+            addAttribute( jmxConnection );
         }
     }
 
