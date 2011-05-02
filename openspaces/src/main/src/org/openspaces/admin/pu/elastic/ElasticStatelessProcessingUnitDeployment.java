@@ -1,7 +1,6 @@
 package org.openspaces.admin.pu.elastic;
 
 import java.io.File;
-import java.util.Map;
 
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.internal.pu.elastic.AbstractElasticProcessingUnitDeployment;
@@ -20,8 +19,6 @@ import com.gigaspaces.security.directory.UserDetails;
  */
 public class ElasticStatelessProcessingUnitDeployment extends AbstractElasticProcessingUnitDeployment
     implements ElasticStatelessDeploymentTopology {
-
-    Map<String,String> scaleStrategy;
     
     /**
      * Constructs a stateless processing unit deployment based on the specified processing unit name 
