@@ -12,6 +12,7 @@ import org.openspaces.admin.internal.gsm.InternalGridServiceManager;
 import org.openspaces.admin.internal.lus.InternalLookupService;
 import org.openspaces.admin.internal.pu.InternalProcessingUnitInstance;
 import org.openspaces.admin.internal.space.InternalSpaceInstance;
+import org.openspaces.admin.pu.ProcessingUnit;
 
 import com.gigaspaces.internal.jvm.JVMDetails;
 import com.gigaspaces.internal.os.OSDetails;
@@ -121,5 +122,17 @@ public interface InternalAdmin extends Admin {
      */
     void singleThreadedEventListeners();
 
+    /**
+     * @param applicationName
+     * @return the list of processing units associated with the specified application name
+     */
+    @Deprecated
+    public ProcessingUnit[] getProcessingUnitsForApplication(String applicationName);
     
+    @Deprecated 
+    public String[] getApplicationNames();
+    
+    
+    @Deprecated
+    String getApplicationName(ProcessingUnit pu);
 }

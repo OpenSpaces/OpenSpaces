@@ -31,6 +31,7 @@ import org.openspaces.admin.internal.space.InternalSpaceInstance;
 import org.openspaces.admin.lus.LookupServices;
 import org.openspaces.admin.machine.Machines;
 import org.openspaces.admin.os.OperatingSystems;
+import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnits;
 import org.openspaces.admin.space.Spaces;
 import org.openspaces.admin.transport.Transports;
@@ -354,4 +355,18 @@ public class NullMockAdmin implements Admin, InternalAdmin {
         return null;
     }
 
+    public ProcessingUnit[] getProcessingUnitsForApplication(String applicationName) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public String[] getApplicationNames() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public String getApplicationName(ProcessingUnit pu) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

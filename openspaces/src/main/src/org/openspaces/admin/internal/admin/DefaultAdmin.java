@@ -1,11 +1,14 @@
 package org.openspaces.admin.internal.admin;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ConcurrentHashMap;
@@ -203,7 +206,11 @@ public class DefaultAdmin implements InternalAdmin {
     private long executorSingleThreadId;
 
     private final AlertManager alertManager;
-    
+
+    //TODO: Move to ProcessingUnit
+    @Deprecated
+    private static final String APPLICATION_NAME_CONTEXT_PROPERTY = "com.gs.application";
+
     public DefaultAdmin() {
         this.discoveryService = new DiscoveryService(this);
         this.alertManager = new DefaultAlertManager(this);
@@ -1289,5 +1296,35 @@ public class DefaultAdmin implements InternalAdmin {
             }}, 
             
             delay, unit);
+    }
+
+    //TODO: Treat Application as a 1st class citizen in the Admin API (Application object abstraction needed)
+    @Deprecated
+    public ProcessingUnit[] getProcessingUnitsForApplication(String applicationName) {
+        List<ProcessingUnit> applicationProcessingUnits = new ArrayList<ProcessingUnit>();
+        for (ProcessingUnit pu : this.getProcessingUnits()) {
+            String puApplicationName = getApplicationName(pu);
+            if (puApplicationName != null && applicationName.equals(puApplicationName)) {
+                applicationProcessingUnits.add(pu);
+            }
+        }
+        return applicationProcessingUnits.toArray(new ProcessingUnit[applicationProcessingUnits.size()]);
+    }
+    
+    @Deprecated
+    public String[] getApplicationNames() {
+        Set<String> applicationNames= new TreeSet<String>(); //deterministic sorting
+        for (ProcessingUnit pu : this.getProcessingUnits()) {
+            String puApplicationName = getApplicationName(pu);
+            if (puApplicationName != null) {
+                applicationNames.add(puApplicationName);
+            }
+        }
+        return applicationNames.toArray(new String[applicationNames.size()]);
+    }
+
+    @Deprecated
+    public String getApplicationName(ProcessingUnit pu) {
+        return pu.getBeanLevelProperties().getContextProperties().getProperty(APPLICATION_NAME_CONTEXT_PROPERTY);
     }
 }
