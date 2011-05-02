@@ -33,7 +33,7 @@ public class OutputVersion {
     public static String computeVersion() {
         
         if(PlatformVersion.getBuildNumber().contains("patch")) {
-            return PlatformVersion.getVersion() + "+" + PlatformVersion.getBuildNumber();
+            return PlatformVersion.getVersion() + "-" + PlatformVersion.getBuildNumber();
         }
         
         if (PlatformVersion.getMilestone().equalsIgnoreCase("GA")) {
