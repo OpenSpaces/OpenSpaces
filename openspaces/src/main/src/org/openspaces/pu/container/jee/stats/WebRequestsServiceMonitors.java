@@ -35,8 +35,8 @@ public class WebRequestsServiceMonitors extends PlainServiceMonitors {
     
     public void setPrevious(WebRequestsServiceMonitors previous, long timeout) {
         
-        float requestsThroughput = 0;
-        float averageRequetsLatency = 0;
+        float requestsThroughput = -1;
+        float averageRequetsLatency = -1;
         
         if( previous != null ){
             //calculate requests throughput

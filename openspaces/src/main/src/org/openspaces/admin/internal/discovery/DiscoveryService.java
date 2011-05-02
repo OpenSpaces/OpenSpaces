@@ -59,6 +59,7 @@ import com.j_spaces.core.IJSpaceContainer;
 import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
 import com.j_spaces.core.admin.IJSpaceContainerAdmin;
 import com.j_spaces.core.jini.SharedDiscoveryManagement;
+import com.j_spaces.jmx.util.JMXUtilities;
 import com.j_spaces.kernel.PlatformVersion;
 
 /**
@@ -349,7 +350,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 String jmxServiceURL = null;
                 try{
                     String jndiUrl = containerAdmin.getConfig().jndiUrl;
-                    jmxServiceURL = "service:jmx:rmi:///jndi/rmi://" + jndiUrl + "/jmxrmi";
+                    jmxServiceURL = JMXUtilities.createJMXUrl( jndiUrl );
                 }
                 catch( RemoteException re ){
                     logger.warn( "Failed to fetch jndi url from space container", re);   

@@ -245,7 +245,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         if(jmxServiceURL != null) {
             String hostName = BootUtil.getHostAddress();
             JMXConnection jmxConnection = JMXUtilities.createJMXConnectionAttribute(
-                    jmxServiceURL, hostName, context );
+                    jmxServiceURL, context.getServiceElement().getName(), hostName );
             addAttribute( jmxConnection );
         }
     }
