@@ -21,22 +21,31 @@ import com.j_spaces.kernel.PlatformVersion;
 /**
  * Outputs the version to use with Maven. Following the following rules:
  *
- * 1. It this is GA, then just 6.5 will be used.
- * 2. If this is a final milestone, then 6.5-[milestone] will be used.
- * 3. If this is an internal milestone, then 6.5-[milestone]-[build number] will be used.
+ * 1. If this is patch, then concatenate build number to product version 6.5-3500  
+ * 2. If this is GA, then just 6.5 will be used.
+ * 3. If this is a final milestone, then 6.5-[milestone] will be used.
+ * 4. If this is an internal milestone, then 6.5-[milestone]-[build number] will be used.
  *
  * @author kimchy
  */
 public class OutputVersion {
 
     public static String computeVersion() {
+        
+        if(PlatformVersion.getBuildNumber().contains("patch")) {
+            return PlatformVersion.getVersion() + "+" + PlatformVersion.getBuildNumber();
+        }
+        
         if (PlatformVersion.getMilestone().equalsIgnoreCase("GA")) {
             return PlatformVersion.getVersion();
-        } else if (PlatformVersion.getBuildNumber().indexOf("-") == -1) {
-            return PlatformVersion.getVersion() + "-" + PlatformVersion.getMilestone();
-        } else {
-            return PlatformVersion.getVersion() + "-" + PlatformVersion.getMilestone() + "-" + PlatformVersion.getBuildNumber();
         }
+        
+        if (PlatformVersion.getBuildNumber().indexOf("-") == -1) {
+            return PlatformVersion.getVersion() + "-" + PlatformVersion.getMilestone();
+        }
+        
+        return PlatformVersion.getVersion() + "-" + PlatformVersion.getMilestone() + "-" + PlatformVersion.getBuildNumber();
+        
     }
 
     public static void main(String[] args) throws Exception {
