@@ -38,7 +38,7 @@ public interface ServiceDetails extends Serializable {
     String getLongDescription();
 
     /**
-     * Returns extra atrributes the service details wishes to expose.
+     * Returns extra attributes the service details wishes to expose.
      */
     Map<String, Object> getAttributes();
 
