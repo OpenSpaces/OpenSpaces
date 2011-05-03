@@ -32,7 +32,7 @@ public class OutputVersion {
 
     public static String computeVersion() {
         
-        if(PlatformVersion.getBuildNumber().contains("patch")) {
+        if(PlatformVersion.getBuildType().contains("patch")) {
             return PlatformVersion.getVersion() + "-" + PlatformVersion.getBuildNumber();
         }
         
