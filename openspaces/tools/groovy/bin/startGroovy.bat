@@ -6,7 +6,7 @@
 @rem ##########################################################################
 
 @rem
-@rem $Revision: 20053 $ $Date: 2010-05-16 06:57:31 +0200 (So, 16. Mai 2010) $
+@rem $Revision: 20052 $ $Date: 2010-05-16 06:56:35 +0200 (So, 16. Mai 2010) $
 @rem
 
 @rem Set local scope for the variables with windows NT shell
@@ -200,7 +200,7 @@ set CMD_LINE_ARGS=%$
 
 :execute
 @rem Setup the command line
-set STARTER_CLASSPATH=%GS_GROOVY_HOME%\lib\groovy-1.7.8.jar
+set STARTER_CLASSPATH=%GS_GROOVY_HOME%\lib\groovy-1.8.0.jar
 
 if exist "%USERPROFILE%/.groovy/init.bat" call "%USERPROFILE%/.groovy/init.bat"
 
