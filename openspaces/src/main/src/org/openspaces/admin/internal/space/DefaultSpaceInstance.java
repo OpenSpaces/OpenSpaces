@@ -89,6 +89,8 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
     private long lastStatisticsTimestamp = 0;
 
     private SpaceInstanceStatistics lastStatistics;
+    
+    private final SpaceInstanceRuntimeDetails spaceInstanceRuntimeDetails;
 
     private Future scheduledStatisticsMonitor;
 
@@ -107,6 +109,7 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
         this.spaceModeChangedEventManager = new DefaultSpaceModeChangedEventManager(null, admin);
         this.replicationStatusChangedEventManager = new DefaultReplicationStatusChangedEventManager(admin);
         this.statisticsChangedEventManager = new DefaultSpaceInstanceStatisticsChangedEventManager(admin);
+        this.spaceInstanceRuntimeDetails = new DefaultSpaceInstanceRuntimeDetails(this);
 
         this.clusterSchema = spaceURL.getProperty(SpaceURL.CLUSTER_SCHEMA);
 
@@ -148,6 +151,7 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
         this.spaceModeChangedEventManager = new DefaultSpaceModeChangedEventManager(null, admin);
         this.replicationStatusChangedEventManager = new DefaultReplicationStatusChangedEventManager(admin);
         this.statisticsChangedEventManager = new DefaultSpaceInstanceStatisticsChangedEventManager(admin);
+        this.spaceInstanceRuntimeDetails = new DefaultSpaceInstanceRuntimeDetails(this);
 
         this.clusterSchema = spaceURL.getProperty(SpaceURL.CLUSTER_SCHEMA);
 
@@ -371,6 +375,10 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
             lastStatistics = NA_STATISTICS;
         }
         return lastStatistics;
+    }
+    
+    public SpaceInstanceRuntimeDetails getRuntimeDetails() {
+        return spaceInstanceRuntimeDetails;
     }
 
     public ReplicationTarget[] getReplicationTargets() {

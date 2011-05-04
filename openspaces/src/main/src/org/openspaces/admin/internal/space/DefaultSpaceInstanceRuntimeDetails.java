@@ -1,0 +1,98 @@
+package org.openspaces.admin.internal.space;
+
+import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.openspaces.admin.internal.admin.DefaultAdmin;
+import org.openspaces.admin.space.SpaceInstanceRuntimeDetails;
+
+import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
+
+import java.util.Collections;
+
+public class DefaultSpaceInstanceRuntimeDetails implements SpaceInstanceRuntimeDetails {
+
+    private static final Log logger = LogFactory.getLog(DefaultAdmin.class);
+    private final DefaultSpaceInstance defaultSpaceInstance;
+
+    public DefaultSpaceInstanceRuntimeDetails(DefaultSpaceInstance defaultSpaceInstance) {
+        this.defaultSpaceInstance = defaultSpaceInstance;
+    }
+
+    public int getCount() {
+        int count = 0;
+        IInternalRemoteJSpaceAdmin spaceAdmin = defaultSpaceInstance.getSpaceAdmin();
+        if (spaceAdmin != null) {
+            try {
+                for (Integer num : spaceAdmin.getRuntimeInfo().m_NumOFEntries) {
+                    count += num.intValue();
+                }
+            } catch (RemoteException e) {
+                logger.debug("RemoteException caught while trying to get Space count information from "
+                        + defaultSpaceInstance.getSpaceName(), e);
+            }
+        }
+        return count;
+    }
+
+    public String[] getClassNames() {
+        IInternalRemoteJSpaceAdmin spaceAdmin = defaultSpaceInstance.getSpaceAdmin();
+        if (spaceAdmin != null) {
+            try {
+                ArrayList<String> classNames = new ArrayList<String>(spaceAdmin.getRuntimeInfo().m_ClassNames);
+                Collections.sort(classNames);
+                return classNames.toArray(new String[classNames.size()]);
+            } catch (RemoteException e) {
+                logger.debug("RemoteException caught while trying to get Space class names information from "
+                        + defaultSpaceInstance.getSpaceName(), e);
+                return new String[0];
+            }
+        }else {
+            return new String[0];
+        }
+    }
+
+    public Map<String, Integer> getCountPerClassName() {
+        Map<String, Integer> mapping = new HashMap<String, Integer>();
+        IInternalRemoteJSpaceAdmin spaceAdmin = defaultSpaceInstance.getSpaceAdmin();
+        if (spaceAdmin != null) {
+            try {
+                List<String> classNames = spaceAdmin.getRuntimeInfo().m_ClassNames;
+                List<Integer> numOfEntries = spaceAdmin.getRuntimeInfo().m_NumOFEntries;
+                for (int i=0; i<classNames.size(); ++i) {
+                    mapping.put(classNames.get(i), numOfEntries.get(i));
+                }
+            } catch (RemoteException e) {
+                logger.debug("RemoteException caught while trying to get Space count per class name information from "
+                        + defaultSpaceInstance.getSpaceName(), e);
+                return mapping;
+            }
+        }
+        return mapping;
+    }
+
+    public Map<String, Integer> getNotifyTemplateCountPerClassName() {
+        Map<String, Integer> mapping = new HashMap<String, Integer>();
+        IInternalRemoteJSpaceAdmin spaceAdmin = defaultSpaceInstance.getSpaceAdmin();
+        if (spaceAdmin != null) {
+            try {
+                List<String> classNames = spaceAdmin.getRuntimeInfo().m_ClassNames;
+                List<Integer> numOfTemplates = spaceAdmin.getRuntimeInfo().m_NumOFTemplates;
+                for (int i=0; i<classNames.size(); ++i) {
+                    mapping.put(classNames.get(i), numOfTemplates.get(i));
+                }
+            } catch (RemoteException e) {
+                logger.debug("RemoteException caught while trying to get Space template count per class name information from "
+                        + defaultSpaceInstance.getSpaceName(), e);
+                return mapping;
+            }
+        }
+        return mapping;
+    }
+
+}

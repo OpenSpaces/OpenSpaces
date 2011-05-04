@@ -84,6 +84,11 @@ public interface SpaceInstance extends GridComponent, StatisticsMonitor {
      * Returns the space instance statistics.
      */
     SpaceInstanceStatistics getStatistics();
+    
+    /**
+     * Returns the space runtime information.
+     */
+    SpaceInstanceRuntimeDetails getRuntimeDetails();
 
     /**
      * Returns the space this instance is part of.

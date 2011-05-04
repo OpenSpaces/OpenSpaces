@@ -90,6 +90,8 @@ public class DefaultSpace implements InternalSpace {
     private SpaceStatistics lastPrimariesStatistics;
 
     private SpaceStatistics lastBackupStatistics;
+    
+    private final SpaceRuntimeDetails spaceRuntimeDetails;
 
     private Future scheduledStatisticsMonitor;
     
@@ -107,6 +109,7 @@ public class DefaultSpace implements InternalSpace {
         this.replicationStatusChangedEventManager = new DefaultReplicationStatusChangedEventManager(admin);
         this.statisticsChangedEventManager = new DefaultSpaceStatisticsChangedEventManager(admin);
         this.instanceStatisticsChangedEventManager = new DefaultSpaceInstanceStatisticsChangedEventManager(admin);
+        this.spaceRuntimeDetails = new DefaultSpaceRuntimeDetails(this);
     }
 
     public Spaces getSpaces() {
@@ -289,6 +292,10 @@ public class DefaultSpace implements InternalSpace {
         }
         lastBackupStatistics = new DefaultSpaceStatistics(stats.toArray(new SpaceInstanceStatistics[stats.size()]), lastBackupStatistics, statisticsHistorySize);
         return lastBackupStatistics;
+    }
+    
+    public SpaceRuntimeDetails getRuntimeDetails() {
+        return spaceRuntimeDetails;
     }
 
     public void addInstance(SpaceInstance spaceInstance) {

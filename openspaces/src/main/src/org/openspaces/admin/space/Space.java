@@ -164,6 +164,11 @@ public interface Space extends Iterable<SpaceInstance>, StatisticsMonitor {
      * Returns an aggregated view of all the statistics of the backup instances.
      */
     SpaceStatistics getBackupsStatistics();
+    
+    /**
+     * Returns an aggregated view of all the Space runtime details of all primary instances.
+     */
+    SpaceRuntimeDetails getRuntimeDetails();
 
     /**
      * Allows to registered {@link org.openspaces.admin.space.events.SpaceInstanceAddedEventListener} to be notified
