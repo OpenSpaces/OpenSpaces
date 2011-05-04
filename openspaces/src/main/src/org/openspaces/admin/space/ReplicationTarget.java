@@ -59,7 +59,7 @@ public class ReplicationTarget {
 
     /**
      * Returns the space instance that will be replicated to. Can be <code>null</code>
-     * if replication is disabled/disconnected.
+     * if replication is disabled/disconnected or the replication target is not a space (gateway).
      */
     public InternalSpaceInstance getSpaceInstance() {
         return spaceInstance;

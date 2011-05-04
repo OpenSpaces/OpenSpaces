@@ -3,6 +3,7 @@ package org.openspaces.admin.internal.space;
 import com.gigaspaces.cluster.activeelection.InactiveSpaceException;
 import com.gigaspaces.cluster.activeelection.SpaceMode;
 import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
+import com.gigaspaces.internal.cluster.node.impl.gateway.delegator.ReplicationConnectionDelegator;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.admin.IRemoteJSpaceAdmin;
 import com.j_spaces.core.admin.RuntimeHolder;
@@ -537,20 +538,23 @@ public class DefaultSpace implements InternalSpace {
                          * If mirror-service is one of the replication target names, find its SpaceInstance.
                          */
                         boolean isMirrorService = false;
-                        if (targetSpaceInstance == null) {
-                            //we don't know the name of the mirror-service space (since 8.0 it can be any name that is different from the cluster name)
+                        if (targetSpaceInstance == null) {                            
+                            //we don't know the name of the mirror-service space (it can be any name that is different from the cluster name)
                             if (!((String)memberNames[i]).endsWith(":"+name)) {
-                                String mirrorServiceName = ((String)memberNames[i]).split(":")[1];
-                                Space mirrorServiceSpace = spaceInstance.getAdmin().getSpaces().getSpaceByName(mirrorServiceName);
-                                if (mirrorServiceSpace != null) {
-                                    SpaceInstance mirrorInstance = mirrorServiceSpace.getInstances()[0];
-                                    if (mirrorInstance != null && mirrorInstance.getSpaceUrl().getSchema().equals("mirror")) {
-                                        //note: don't cache it in spaceInstanceByMemberName map since we don't get a removal event on this instance
-                                        targetSpaceInstance = mirrorInstance;
-                                        isMirrorService = true;
+                                //Check if target is not a delegator, so we cannot locate a target space instance for it
+                                if (!((String)memberNames[i]).startsWith(ReplicationConnectionDelegator.LOOKUP_NAME_PREFIX)){
+                                    String mirrorServiceName = ((String)memberNames[i]).split(":")[1];
+                                    Space mirrorServiceSpace = spaceInstance.getAdmin().getSpaces().getSpaceByName(mirrorServiceName);
+                                    if (mirrorServiceSpace != null) {
+                                        SpaceInstance mirrorInstance = mirrorServiceSpace.getInstances()[0];
+                                        if (mirrorInstance != null && mirrorInstance.getSpaceUrl().getSchema().equals("mirror")) {
+                                            //note: don't cache it in spaceInstanceByMemberName map since we don't get a removal event on this instance
+                                            targetSpaceInstance = mirrorInstance;
+                                            isMirrorService = true;
+                                        }
+                                    } else {
+                                        isMirrorService = true; //we guess this is a mirror (since 8.0.1)
                                     }
-                                } else {
-                                    isMirrorService = true; //we guess this is a mirror (since 8.0.1)
                                 }
                             }
                         }else {
