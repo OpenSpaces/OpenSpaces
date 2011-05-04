@@ -17,8 +17,8 @@
 			<url>https://server.oosnmp.net</url>
 		</repository>
 		<repository>
-			<id>com.gigaspaces</id>
-			<url>http://openspaces-maven-repository.googlecode.com/svn/maven-repository</url>
+			<id>org.openspaces</id>
+			<url>http://maven-repository.openspaces.org</url>
 		</repository>
 	</repositories>
 	<dependencies>
