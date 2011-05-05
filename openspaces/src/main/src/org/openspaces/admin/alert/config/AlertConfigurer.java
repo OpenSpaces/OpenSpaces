@@ -35,7 +35,7 @@ public interface AlertConfigurer extends BeanConfigurer<AlertConfiguration> {
      * @param enabled <code>true</code> to enable the alert using this configuration; <code>false</code> to disable the alert.
      * @return this.
      * @see AlertConfiguration#setEnabled(boolean)
-     * @since 8.0.2
+     * @since 8.0.3
      */
     AlertConfigurer enable(boolean enabled);
 }

@@ -11,7 +11,7 @@ package org.openspaces.admin.alert.config;
  * @see ProvisionFailureAlertConfiguration
  * 
  * @author Moran Avigdor
- * @since 8.0.2
+ * @since 8.0.3
  */
 public class ProvisionFailureAlertConfigurer implements AlertConfigurer {
 

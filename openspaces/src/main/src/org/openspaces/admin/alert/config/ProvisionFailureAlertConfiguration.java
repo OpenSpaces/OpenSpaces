@@ -12,7 +12,7 @@ import org.openspaces.admin.internal.alert.bean.ProvisionFailureAlertBean;
  * @see ProvisionFailureAlertConfigurer
  * 
  * @author Moran Avigdor
- * @since 8.0.2
+ * @since 8.0.3
  */
 public class ProvisionFailureAlertConfiguration implements AlertConfiguration {
     private static final long serialVersionUID = 1L;
