@@ -1,40 +1,70 @@
 package org.openspaces.admin.internal.space;
 
-import com.gigaspaces.cluster.activeelection.InactiveSpaceException;
-import com.gigaspaces.cluster.activeelection.SpaceMode;
-import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
-import com.gigaspaces.internal.cluster.node.impl.gateway.delegator.ReplicationConnectionDelegator;
-import com.j_spaces.core.IJSpace;
-import com.j_spaces.core.admin.IRemoteJSpaceAdmin;
-import com.j_spaces.core.admin.RuntimeHolder;
-import com.j_spaces.core.exception.SpaceUnavailableException;
-import com.j_spaces.core.exception.internal.InterruptedSpaceException;
-import com.j_spaces.kernel.JSpaceUtilities;
-import com.j_spaces.kernel.SizeConcurrentHashMap;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.internal.admin.InternalAdmin;
-import org.openspaces.admin.internal.space.events.*;
+import org.openspaces.admin.internal.space.events.DefaultReplicationStatusChangedEventManager;
+import org.openspaces.admin.internal.space.events.DefaultSpaceInstanceAddedEventManager;
+import org.openspaces.admin.internal.space.events.DefaultSpaceInstanceRemovedEventManager;
+import org.openspaces.admin.internal.space.events.DefaultSpaceInstanceStatisticsChangedEventManager;
+import org.openspaces.admin.internal.space.events.DefaultSpaceModeChangedEventManager;
+import org.openspaces.admin.internal.space.events.DefaultSpaceStatisticsChangedEventManager;
+import org.openspaces.admin.internal.space.events.InternalReplicationStatusChangedEventManager;
+import org.openspaces.admin.internal.space.events.InternalSpaceInstanceAddedEventManager;
+import org.openspaces.admin.internal.space.events.InternalSpaceInstanceRemovedEventManager;
+import org.openspaces.admin.internal.space.events.InternalSpaceInstanceStatisticsChangedEventManager;
+import org.openspaces.admin.internal.space.events.InternalSpaceModeChangedEventManager;
+import org.openspaces.admin.internal.space.events.InternalSpaceStatisticsChangedEventManager;
 import org.openspaces.admin.internal.support.NetworkExceptionHelper;
 import org.openspaces.admin.pu.DeploymentStatus;
 import org.openspaces.admin.pu.ProcessingUnit;
-import org.openspaces.admin.space.*;
-import org.openspaces.admin.space.events.*;
+import org.openspaces.admin.space.ReplicationStatus;
+import org.openspaces.admin.space.ReplicationTarget;
+import org.openspaces.admin.space.Space;
+import org.openspaces.admin.space.SpaceInstance;
+import org.openspaces.admin.space.SpaceInstanceStatistics;
+import org.openspaces.admin.space.SpacePartition;
+import org.openspaces.admin.space.SpaceRuntimeDetails;
+import org.openspaces.admin.space.SpaceStatistics;
+import org.openspaces.admin.space.Spaces;
+import org.openspaces.admin.space.events.ReplicationStatusChangedEventManager;
+import org.openspaces.admin.space.events.SpaceInstanceAddedEventListener;
+import org.openspaces.admin.space.events.SpaceInstanceAddedEventManager;
+import org.openspaces.admin.space.events.SpaceInstanceLifecycleEventListener;
+import org.openspaces.admin.space.events.SpaceInstanceRemovedEventManager;
+import org.openspaces.admin.space.events.SpaceInstanceStatisticsChangedEventManager;
+import org.openspaces.admin.space.events.SpaceModeChangedEvent;
+import org.openspaces.admin.space.events.SpaceModeChangedEventListener;
+import org.openspaces.admin.space.events.SpaceModeChangedEventManager;
+import org.openspaces.admin.space.events.SpaceStatisticsChangedEvent;
+import org.openspaces.admin.space.events.SpaceStatisticsChangedEventManager;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.GigaSpaceConfigurer;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Collections;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
+import com.gigaspaces.cluster.activeelection.InactiveSpaceException;
+import com.gigaspaces.cluster.activeelection.SpaceMode;
+import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
+import com.j_spaces.core.IJSpace;
+import com.j_spaces.core.admin.IRemoteJSpaceAdmin;
+import com.j_spaces.core.admin.RuntimeHolder;
+import com.j_spaces.core.cluster.gateway.GatewayPolicy;
+import com.j_spaces.core.exception.SpaceUnavailableException;
+import com.j_spaces.core.exception.internal.InterruptedSpaceException;
+import com.j_spaces.kernel.JSpaceUtilities;
+import com.j_spaces.kernel.SizeConcurrentHashMap;
 
 /**
  * @author kimchy
@@ -549,7 +579,7 @@ public class DefaultSpace implements InternalSpace {
                             //we don't know the name of the mirror-service space (it can be any name that is different from the cluster name)
                             if (!((String)memberNames[i]).endsWith(":"+name)) {
                                 //Check if target is not a delegator, so we cannot locate a target space instance for it
-                                if (!((String)memberNames[i]).startsWith(ReplicationConnectionDelegator.LOOKUP_NAME_PREFIX)){
+                                if (!((String)memberNames[i]).startsWith(GatewayPolicy.GATEWAY_NAME_PREFIX)){
                                     String mirrorServiceName = ((String)memberNames[i]).split(":")[1];
                                     Space mirrorServiceSpace = spaceInstance.getAdmin().getSpaces().getSpaceByName(mirrorServiceName);
                                     if (mirrorServiceSpace != null) {
