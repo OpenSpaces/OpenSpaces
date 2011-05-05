@@ -123,16 +123,28 @@ public interface InternalAdmin extends Admin {
     void singleThreadedEventListeners();
 
     /**
-     * @param applicationName
+     * Processing units with the given context property: com.gs.application
+     * @param applicationName matching application name.
      * @return the list of processing units associated with the specified application name
+     * @since 8.0.3
+     * @deprecated temporary API for 8.0.3 until we introduce the "Application" model. 
      */
     @Deprecated
     public ProcessingUnit[] getProcessingUnitsForApplication(String applicationName);
     
+    /**
+     * @return an array of all application names. zero length array if no applications were defined.
+     * @since 8.0.3
+     * @deprecated temporary API for 8.0.3 until we introduce the "Application" model.
+     */
     @Deprecated 
     public String[] getApplicationNames();
     
-    
+    /**
+     * @return an application name of a processing Unit (set by context property: com.gs.application). 
+     * @since 8.0.3
+     * @deprecated temporary API for 8.0.3 until we introduce the "Application" model.
+     */
     @Deprecated
     String getApplicationName(ProcessingUnit pu);
 }
