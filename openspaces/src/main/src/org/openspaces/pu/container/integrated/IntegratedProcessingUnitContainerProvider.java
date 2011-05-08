@@ -163,13 +163,13 @@ public class IntegratedProcessingUnitContainerProvider implements ApplicationCon
 
     /**
      * Creates a new {@link IntegratedProcessingUnitContainer} based on the configured parameters.
-     *
+     * 
      * <p>
      * If {@link #addConfigLocation(org.springframework.core.io.Resource)} or
      * {@link #addConfigLocation(String)} were used, the Spring xml context will be read based on
      * the provided locations. If no config location was provided the default config location will
      * be <code>classpath*:/META-INF/spring/pu.xml</code>.
-     *
+     * 
      * <p>
      * If {@link #setBeanLevelProperties(org.openspaces.core.properties.BeanLevelProperties)} is set
      * will use the configured bean level properties in order to configure the application context
@@ -177,12 +177,15 @@ public class IntegratedProcessingUnitContainerProvider implements ApplicationCon
      * {@link org.openspaces.core.properties.BeanLevelPropertyBeanPostProcessor} and
      * {@link org.openspaces.core.properties.BeanLevelPropertyPlaceholderConfigurer} to the
      * application context.
-     *
-     * <p>If {@link #setClusterInfo(org.openspaces.core.cluster.ClusterInfo)} is set will use it to
+     * 
+     * <p>
+     * If {@link #setClusterInfo(org.openspaces.core.cluster.ClusterInfo)} is set will use it to
      * inject {@link org.openspaces.core.cluster.ClusterInfo} into beans that implement
      * {@link org.openspaces.core.cluster.ClusterInfoAware}.
-     *
-     * @return An {@link IntegratedProcessingUnitContainer} instance
+     * 
+     * @return An {@link IntegratedProcessingUnitContainer} instance or an
+     *         {@link CompoundProcessingUnitContainer} in case of a clustered processing unit
+     *         without a specific instance Id.
      * @throws CannotCreateContainerException
      */
     public ProcessingUnitContainer createContainer() throws CannotCreateContainerException {
