@@ -62,6 +62,10 @@ public class MemcachedDeploy {
     public void setLookupTimeout(int lookupTimeout) {
         deploy.setLookupTimeout(lookupTimeout);
     }
+    
+    public void setDeployTimeout(long deployTimeout) {
+        deploy.setDeployTimeout(deployTimeout);
+    }
 
     public void deployAndWait(String[] args) throws Exception {
         deploy.deployAndWait(prepareArgs(args));
@@ -121,6 +125,7 @@ public class MemcachedDeploy {
             sb.append("Usage: deploy-memcached [-sla ...] [-cluster ...] [-properties ...] [-user xxx -password yyy] [-secured true/false] space_url");
         }
         sb.append("\n    space_url: The url of the space, can be embedded, eg: /./myMemcached, or remote eg: jini://*/*/myMemcached");
+        sb.append("\n    -deploy-timeout [timeout value in ms]    : Timeout for deploy operation, otherwise blocks until all successful/failed deployment events arrive (default)");
         sb.append("\n    -sla [sla-location]                      : Location of an optional xml file holding the SLA element");
         sb.append("\n    -cluster [cluster properties]            : Allows to override the cluster parameters of the SLA elements");
         sb.append("\n             schema=partitioned-sync2backup  : The cluster schema to override");

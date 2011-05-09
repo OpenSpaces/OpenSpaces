@@ -112,6 +112,8 @@ public class Deploy {
     private LookupLocator[] locators;
 
     private int lookupTimeout = 5000;
+    
+    private long deployTimeout = Long.MAX_VALUE;
 
     private static boolean sout = false;
 
@@ -212,6 +214,10 @@ public class Deploy {
     public void setUserDetails(String userName, String password) {
         this.userDetails = new User(userName, password);
     }
+    
+    public void setDeployTimeout(long deployTimeout) {
+        this.deployTimeout = deployTimeout;
+    }
 
     public void deployAndWait(String[] args) throws Exception {
         OperationalString opString = buildOperationalString(args);
@@ -223,11 +229,16 @@ public class Deploy {
         DeployListener listener = new DeployListener();
         Configuration config = ServiceConfigLoader.getConfiguration();
         deployAdmin.deploy(opString, (ServiceProvisionListener) ExporterConfig.getExporter(config, "com.gigaspaces.transport", "defaultExporter").export(listener));
-        info("Waiting for [" + totalPlanned + "] processing unit instances to be deployed...");
-        while (totalPlanned != listener.getTotalStarted()) {
+        info("Waiting "+ (deployTimeout!=Long.MAX_VALUE?deployTimeout+" ms":"indefinitely") +" for [" + totalPlanned + "] processing unit instances to be deployed...");
+        long expireDeployTimeout = (deployTimeout!=Long.MAX_VALUE ? System.currentTimeMillis() + deployTimeout : Long.MAX_VALUE);
+        while (listener.getTotalEvents() < totalPlanned && System.currentTimeMillis() < expireDeployTimeout) {
             Thread.sleep(200);
         }
-        info("Finished deploying [" + totalPlanned + "] processing unit instances");
+        if (System.currentTimeMillis() >= expireDeployTimeout) {
+            info("Timed-out deploying [" + totalPlanned + "] processing unit instances");
+        } else {
+            info("Finished deploying [" + totalPlanned + "] processing unit instances");
+        }
     }
 
     public void deploy(String[] args) throws Exception {
@@ -293,6 +304,9 @@ public class Deploy {
             }
             if (param.getName().equalsIgnoreCase("override-name")) {
                 overridePuName = param.getArguments()[0];
+            }
+            if (param.getName().equalsIgnoreCase("deploy-timeout")) {
+                setDeployTimeout(Long.valueOf(param.getArguments()[0]));
             }
         }
 
@@ -873,6 +887,7 @@ public class Deploy {
             sb.append("Usage: deploy [-sla ...] [-cluster ...] [-properties ...] [-user xxx -password yyy] [-secured true/false] PU_Name");
         }
         sb.append("\n    PU_Name: The name of the processing unit under the deploy directory, or packaged jar file");
+        sb.append("\n    -deploy-timeout [timeout value in ms]    : Timeout for deploy operation, otherwise blocks until all successful/failed deployment events arrive (default)");
         sb.append("\n    -sla [sla-location]                      : Location of an optional xml file holding the SLA element");
         sb.append("\n    -cluster [cluster properties]            : Allows to override the cluster parameters of the SLA elements");
         sb.append("\n             schema=partitioned-sync2backup  : The cluster schema to override");
@@ -922,20 +937,20 @@ public class Deploy {
 
     private static class DeployListener implements ServiceProvisionListener {
 
-        private final AtomicInteger totalStarted = new AtomicInteger();
+        private final AtomicInteger totalEvents = new AtomicInteger();
 
         public void succeeded(ServiceBeanInstance jsbInstance) throws RemoteException {
             info("[" + jsbInstance.getServiceBeanConfig().getName() + "] [" + jsbInstance.getServiceBeanConfig().getInstanceID() + "] deployed successfully on [" + jsbInstance.getHostAddress() + "]");
-            totalStarted.incrementAndGet();
+            totalEvents.incrementAndGet();
         }
 
         public void failed(ServiceElement sElem, boolean resubmitted) throws RemoteException {
             info("[" + sElem.getName() + "] [" + sElem.getServiceBeanConfig().getInstanceID() + "] failed to deploy, resubmitted [" + resubmitted + "]");
-            totalStarted.incrementAndGet();
+            totalEvents.incrementAndGet();
         }
 
-        public int getTotalStarted() {
-            return totalStarted.intValue();
+        public int getTotalEvents() {
+            return totalEvents.intValue();
         }
     }
 
