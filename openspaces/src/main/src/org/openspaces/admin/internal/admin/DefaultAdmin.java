@@ -1271,6 +1271,9 @@ public class DefaultAdmin implements InternalAdmin {
                 runnable.run();
             } catch (Exception e) {
                 logger.warn("Failed to executed event listener", e);
+            } catch (Error e) {
+                logger.error("Failed to executed event listener", e);
+                throw e;
             }
         }
     }
