@@ -537,6 +537,8 @@ public class StoreManager extends AbstractStoreManager {
                 else
                     template = TemplatePacketFactory.createIdPacket(ids[0], routing, 0, typeDescriptor, QueryResultTypeInternal.OBJECT);
                 
+                template.setOperationID(proxy.createNewOperationID());
+                
                 int result = proxy.clear(template, _transaction, 0);
                 if (result != 1)
                     throw new Exception("Unable to clear object from space.");
