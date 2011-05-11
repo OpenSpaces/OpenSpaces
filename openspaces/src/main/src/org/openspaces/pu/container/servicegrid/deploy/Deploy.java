@@ -372,7 +372,7 @@ public class Deploy {
         if (logger.isDebugEnabled()) {
             logger.debug("Using PU xml [" + puString + "]");
         }
-
+        
         boolean slaInPu = true;
         Resource resource;
 
@@ -544,9 +544,45 @@ public class Deploy {
                 }
             }
         }
+        
+        //get pu type
+        if ( containsWEB_INF(puPath, root) ) {
+            beanLevelProperties.getContextProperties().put("pu.type", "WEB"); //Web APP
+        } else if (sla.getClusterSchema() != null) {
+            beanLevelProperties.getContextProperties().put("pu.type", "STATEFUL"); //cluster space
+        } else {
+            String puStringWithoutComments = removeCommentsFromPuString(puString);
+            if (puStringWithoutComments.contains("schema=\"mirror\"")) {
+                beanLevelProperties.getContextProperties().put("pu.type", "MIRROR"); //mirror space
+            } else if (puStringWithoutComments.contains("<os-core:space") && puString.contains("url=\"/./")) {
+                beanLevelProperties.getContextProperties().put("pu.type", "STATEFUL"); //embedded space
+            } else {
+                beanLevelProperties.getContextProperties().put("pu.type", "STATELESS"); //default
+            }
+        }
 
         //deploy to sg
         return loadDeployment(puString, codeserver, sla, puPath, overridePuName, beanLevelProperties, elasticProperties);
+    }
+
+    private boolean containsWEB_INF(String puPath, URL root) {
+        boolean containsWebInf = false;
+        try {
+            URL webInfURL = new URL(root, puPath + "/WEB-INF");
+            InputStream is = webInfURL.openStream();
+            if (is != null) {
+                containsWebInf = true;
+                is.close();
+            }
+        } catch (Exception e) {
+            // ignore, no file
+        }
+        return containsWebInf;
+    }
+    
+    private String removeCommentsFromPuString(String puString) {
+        if (puString.length() == 0) return puString;
+        return puString.replaceAll("<!--(?:[^-]|-(?!->))*-->","");
     }
 
     //copied from opstringloader
@@ -632,6 +668,7 @@ public class Deploy {
         element.getServiceBeanConfig().addInitParameter("pu", puString);
 
         if (beanLevelProperties != null) {
+            element.getServiceBeanConfig().addInitParameter("pu.type", beanLevelProperties.getContextProperties().remove("pu.type"));
             element.getServiceBeanConfig().addInitParameter("beanLevelProperties", new MarshalledObject(beanLevelProperties));
             element.getServiceBeanConfig().addInitParameter("jee.container", beanLevelProperties.getContextProperties().getProperty("jee.container", "jetty"));
         }
@@ -699,7 +736,7 @@ public class Deploy {
         // add pu names, path and code server so it can be used on the service bean side
         element.getServiceBeanConfig().addInitParameter("puName", puName);
         element.getServiceBeanConfig().addInitParameter("puPath", puPath);
-
+        
         //this is the MOST IMPORTANT part
         if (sla.getInstanceSLAs() != null && sla.getInstanceSLAs().size() > 0) {
             element.setPlanned(1);

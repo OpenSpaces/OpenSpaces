@@ -137,6 +137,11 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
      * Return the deploy time properties of the processing unit.
      */
     BeanLevelProperties getBeanLevelProperties();
+    
+    /**
+     * Returns the type of processing unit: stateless, stateful, mirror, web.
+     */
+    ProcessingUnitType getProcessingUnitType();
 
     /**
      * Waits till at least the provided number of Processing Unit Instances are up.

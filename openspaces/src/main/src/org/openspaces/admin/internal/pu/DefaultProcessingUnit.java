@@ -34,6 +34,7 @@ import org.openspaces.admin.pu.DeploymentStatus;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.ProcessingUnitPartition;
+import org.openspaces.admin.pu.ProcessingUnitType;
 import org.openspaces.admin.pu.ProcessingUnits;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
 import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEvent;
@@ -114,6 +115,8 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
 
     private volatile boolean scheduledStatisticsMonitor = false;
 
+    private final ProcessingUnitType processingUnitType;
+
 
     public DefaultProcessingUnit(InternalAdmin admin, InternalProcessingUnits processingUnits, PUDetails details) {
         this.admin = admin;
@@ -121,6 +124,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         this.name = details.getName();
         this.numberOfInstances = details.getNumberOfInstances();
         this.numberOfBackups = details.getNumberOfBackups();
+        this.processingUnitType = ProcessingUnitType.valueOf(details.getType());
         this.elasticProperties = details.getElasticProperties();
         try {
             this.beanLevelProperties = (BeanLevelProperties) details.getBeanLevelProperties().get();
@@ -166,6 +170,10 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
 
     public BeanLevelProperties getBeanLevelProperties() {
         return beanLevelProperties;
+    }
+    
+    public ProcessingUnitType getProcessingUnitType() {
+        return processingUnitType;
     }
 
     public ManagingGridServiceManagerChangedEventManager getManagingGridServiceManagerChanged() {
