@@ -686,10 +686,8 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
         if (container instanceof ApplicationContextProcessingUnitContainer) {
             ConfigurableApplicationContext applicationContext = (ConfigurableApplicationContext) ((ApplicationContextProcessingUnitContainer) container).getApplicationContext();
-            final Map dumpProcessorsMap = applicationContext.getBeansOfType(InternalDumpProcessor.class);
-            for (Iterator it = dumpProcessorsMap.values().iterator(); it.hasNext();) {
-                dumpProcessors.add((InternalDumpProcessor) it.next());
-            }
+            final Map<String, InternalDumpProcessor> dumpProcessorsMap = applicationContext.getBeansOfType(InternalDumpProcessor.class);
+            dumpProcessors.addAll(dumpProcessorsMap.values());
         }
 
         List<Object> sharedDumpProcessors = SharedServiceData.removeDumpProcessors(clusterInfo.getUniqueName());
@@ -716,9 +714,9 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
         if (container instanceof ApplicationContextProcessingUnitContainer) {
             ConfigurableApplicationContext applicationContext = (ConfigurableApplicationContext) ((ApplicationContextProcessingUnitContainer) container).getApplicationContext();
-            Map map = applicationContext.getBeansOfType(ServiceDetailsProvider.class);
-            for (Iterator it = map.values().iterator(); it.hasNext();) {
-                ServiceDetails[] details = ((ServiceDetailsProvider) it.next()).getServicesDetails();
+            Map<String, ServiceDetailsProvider> map = applicationContext.getBeansOfType(ServiceDetailsProvider.class);
+            for (ServiceDetailsProvider serviceDetailsProvider : map.values()) {
+                ServiceDetails[] details = serviceDetailsProvider.getServicesDetails();
                 if (details != null) {
                     for (ServiceDetails detail : details) {
                         serviceDetails.add(detail);
@@ -742,12 +740,11 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     }
 
     private void buildUndeployingEventListeners() {
-        ArrayList<Callable> undeployingListeners = new ArrayList<Callable>();
+        ArrayList<Callable<?>> undeployingListeners = new ArrayList<Callable<?>>();
         if (container instanceof ApplicationContextProcessingUnitContainer) {
             ApplicationContext applicationContext = ((ApplicationContextProcessingUnitContainer) container).getApplicationContext();
-            Map map = applicationContext.getBeansOfType(ProcessingUnitUndeployingListener.class);
-            for (Iterator it = map.values().iterator(); it.hasNext();) {
-                final ProcessingUnitUndeployingListener listener = (ProcessingUnitUndeployingListener) it.next();
+            Map<String, ProcessingUnitUndeployingListener> map = applicationContext.getBeansOfType(ProcessingUnitUndeployingListener.class);
+            for (final ProcessingUnitUndeployingListener listener : map.values()) {
                 undeployingListeners.add(new Callable<Object>() {
                     public Object call() throws Exception {
                         listener.processingUnitUndeploying();
@@ -771,9 +768,8 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         ArrayList<Callable<Boolean>> maIndicators = new ArrayList<Callable<Boolean>>();
         if (container instanceof ApplicationContextProcessingUnitContainer) {
             ApplicationContext applicationContext = ((ApplicationContextProcessingUnitContainer) container).getApplicationContext();
-            Map map = applicationContext.getBeansOfType(MemberAliveIndicator.class);
-            for (Iterator it = map.values().iterator(); it.hasNext();) {
-                final MemberAliveIndicator memberAliveIndicator = (MemberAliveIndicator) it.next();
+            Map<String, MemberAliveIndicator> map = applicationContext.getBeansOfType(MemberAliveIndicator.class);
+            for (final MemberAliveIndicator memberAliveIndicator : map.values()) {
                 if (memberAliveIndicator.isMemberAliveEnabled()) {
                     maIndicators.add(new Callable<Boolean>() {
                         public Boolean call() throws Exception {
