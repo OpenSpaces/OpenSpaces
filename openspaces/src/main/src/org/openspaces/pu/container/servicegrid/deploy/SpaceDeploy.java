@@ -114,7 +114,6 @@ public class SpaceDeploy {
             sb.append("Usage: deploy-space [-sla ...] [-cluster ...] [-properties ...] [-user xxx -password yyy] [-secured true/false] Space_Name");
         }
         sb.append("\n    Space_Name: The name of the space to deploy");
-        sb.append("\n    -deploy-timeout [timeout value in ms]    : Timeout for deploy operation, otherwise blocks until all successful/failed deployment events arrive (default)");
         sb.append("\n    -sla [sla-location]                      : Location of an optional xml file holding the SLA element");
         sb.append("\n    -cluster [cluster properties]            : Allows to override the cluster parameters of the SLA elements");
         sb.append("\n             schema=partitioned-sync2backup  : The cluster schema to override");
@@ -132,6 +131,7 @@ public class SpaceDeploy {
         sb.append("\n    -max-instances-per-machine [number]      : Allows to set the SLA number of instances per machine");
         sb.append("\n    -max-instances-per-zone [zone/number,...]: Allows to set the SLA number of instances per zone");
         sb.append("\n    -zones [zoneName] [zoneName] ...         : Allows to set the SLA zone requirements");
+        sb.append("\n    -deploy-timeout [timeout value in ms]    : Timeout for deploy operation, otherwise blocks until all successful/failed deployment events arrive (default)");
         sb.append("\n");
         sb.append("\n");
         if (!managed) {
