@@ -34,7 +34,7 @@ BUILDING, PACKAGING, RUNNING, DEPLOYING
 
   In order to use Mule with GigaSpaces, mule jar files must be copied to the GigaSpaces
 installation under GSHOME/lib/platform/mule (if the mule directory does not exists, create it).
-In order to obtain the mule jar files, please download mule 2.1.2 from http://mule.mulesource.org.
+In order to obtain the mule jar files, please download mule 3.1 from http://www.mulesoft.org
 
 The following needs to be copied:
   - From MULEHOME/lib/mule and into GSHOME/lib/platform/mule: mule-core, mule-module-client,
@@ -45,29 +45,21 @@ commons-io, commons-lang, commons-pool, jug.osgi-2.0.0, quartz-all, backport-uti
 
 Libraries Required:
 The following libraries should be located at your GigaSpaces Root\lib\platform\mule folder before deploying the example. 
- commons-beanutils.osgi-1.7.0.jar
- commons-collections-3.2.jar
- commons-io-1.3.1.jar
- commons-lang.osgi-2.4.jar
- commons-pool-1.4.jar
- dom4j.osgi-1.6.1.jar
- jaxen.osgi-1.1.1.jar
- jug.osgi-2.0.0.jar
- mule-core-2.2.1.jar
- mule-module-builders-2.2.1.jar
- mule-module-client-2.2.1.jar
- mule-module-management-2.2.1.jar
- mule-module-spring-config-2.2.1.jar
- mule-module-spring-extras-2.2.1.jar
- mule-module-xml-2.2.1.jar
- mule-transport-http-2.2.1.jar
- mule-transport-quartz-2.2.1.jar
- mule-transport-ssl-2.2.1.jar
- mule-transport-stdio-2.2.1.jar
- mule-transport-tcp-2.2.1.jar
- mule-transport-vm-2.2.1.jar
- quartz-all.osgi-1.6.0.jar
- backport-util-concurrent.osgi-3.1.jar
+mule-transport-stdio-3.1.0.jar
+mule-transport-vm-3.1.0.jar
+mule-core-3.1.0.jar
+mule-module-spring-config-3.1.0.jar
+mule-module-spring-extras-3.1.0.jar
+backport-util-concurrent-3.1-osgi.jar
+commons-beanutils-1.8.0.jar
+commons-collections-3.2.1.jar
+commons-io-1.4.jar
+commons-lang-2.4.jar
+commons-pool-1.5.3.jar
+jug-2.0.0-osgi-asl.jar
+mule-transport-quartz-3.1.0.jar
+quartz-all-1.6.0-osgi.jar
+mule-module-annotations-3.1.0.jar
 
 The above creates the ability to deploy a mule processing unit that does not have the mule jars files
 in it. It is also possible to package the mule jar files into the processing unit "lib" directory, without
