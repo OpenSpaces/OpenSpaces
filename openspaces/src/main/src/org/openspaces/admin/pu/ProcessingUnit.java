@@ -140,6 +140,7 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
     
     /**
      * Returns the type of processing unit: stateless, stateful, mirror, web.
+     * @since 8.0.3
      */
     ProcessingUnitType getProcessingUnitType();
 
