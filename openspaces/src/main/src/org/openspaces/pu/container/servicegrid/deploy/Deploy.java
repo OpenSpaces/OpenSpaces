@@ -546,6 +546,7 @@ public class Deploy {
         }
         
         //get pu type
+        beanLevelProperties.getContextProperties().put("pu.type", "STATELESS"); //default
         if ( containsWEB_INF(puPath, root) ) {
             beanLevelProperties.getContextProperties().put("pu.type", "WEB"); //Web APP
         } else if (sla.getClusterSchema() != null) {
@@ -556,8 +557,17 @@ public class Deploy {
                 beanLevelProperties.getContextProperties().put("pu.type", "MIRROR"); //mirror space
             } else if (puStringWithoutComments.contains("<os-core:space") && puString.contains("url=\"/./")) {
                 beanLevelProperties.getContextProperties().put("pu.type", "STATEFUL"); //embedded space
-            } else {
-                beanLevelProperties.getContextProperties().put("pu.type", "STATELESS"); //default
+            } else if (puString.contains("url=\"${")) {
+                int beginIndex = puString.indexOf("url=\"${") + 7; //length
+                if (beginIndex != -1) {
+                    int endIndex = puString.indexOf("}", beginIndex);
+                    if (endIndex != -1) {
+                        String propertyKey = puString.substring(beginIndex, endIndex);
+                        if (beanLevelProperties.getContextProperties().getProperty(propertyKey,"").startsWith("/./")) {
+                            beanLevelProperties.getContextProperties().put("pu.type", "STATEFUL"); //embedded space
+                        }
+                    }
+                }
             }
         }
 
