@@ -11,7 +11,7 @@ import org.openspaces.grid.gsm.capacity.CpuCapacityRequirement;
 import org.openspaces.grid.gsm.capacity.DriveCapacityRequirement;
 import org.openspaces.grid.gsm.capacity.MemoryCapacityRequirement;
 
-public class AggregatedAllocatedCapacityTest extends TestCase {
+public class ClusterCapacityRequirementsTest extends TestCase {
 
     private static final CapacityRequirements DRIVE = new CapacityRequirements(new DriveCapacityRequirement("d:",1L));
     private static final CapacityRequirements CPU = new CapacityRequirements(new CpuCapacityRequirement(Fraction.ONE));

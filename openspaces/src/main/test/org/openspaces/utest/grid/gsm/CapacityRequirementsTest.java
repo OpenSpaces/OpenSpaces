@@ -9,7 +9,7 @@ import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.CpuCapacityRequirement;
 import org.openspaces.grid.gsm.capacity.MemoryCapacityRequirement;
 
-public class AllocatedCapacityTest extends TestCase {
+public class CapacityRequirementsTest extends TestCase {
 
     private static final CapacityRequirements EMPTY = new CapacityRequirements();
     private static final CapacityRequirements CPU = new CapacityRequirements(new CpuCapacityRequirement(Fraction.ONE));

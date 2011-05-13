@@ -499,53 +499,37 @@ public class BinPackingSolver {
         }
         return clusterCapacityRequirements;
     }
-    
+
+    /**
+     * Allocate memory until the specified goal is reached
+     */
     private void allocateNewMemoryCapacityForPu(long goalMemoryCapacityInMB) {
-        boolean startOverAgain;
-        do {
-            startOverAgain = false;
+        long memoryToAllocateOnMachine;
         
+        do {
+            memoryToAllocateOnMachine = 0;
+            
+            //filter agents that have unallocated capacity but not unallocated memory.
             ClusterCapacityRequirements unallocatedMemory = unallocatedCapacity;
             for (String agentUid: unallocatedMemory.getAgentUids()) {
                 if (getMemoryInMB(unallocatedMemory.getAgentCapacity(agentUid)) == 0) {
                     unallocatedMemory = unallocatedMemory.subtractAgent(agentUid);
                 }
             }
+
             
-         // calculate memory to allocate on machine based on constraints (such as available free memory, max memory per machine, container Xmx)
-            long memoryShortage =  goalMemoryCapacityInMB - getMemoryInMB(allocatedCapacityForPu);
+           // calculate memory to allocate on machine based on constraints (such as available free memory, max memory per machine, container Xmx)
+           long memoryShortage =  goalMemoryCapacityInMB - getMemoryInMB(allocatedCapacityForPu);
             if (memoryShortage < 0) {
                 throw new IllegalStateException ("memoryShortage cannot be negative");
             }
-            if (memoryShortage == 0 || unallocatedMemory.getAgentUids().size() == 0) {
+            if (memoryShortage == 0 || unallocatedMemory.equalsZero()) {
                 // nothing to do
                 break;
             }
-            else if (unallocatedMemory.getAgentUids().size() == 1 ||
-                     memoryShortage == containerMemoryCapacityInMB) {
-                // we need to allocate memory on a single machine
-                for (String agentUid1 : unallocatedMemory.getAgentUids()) {
-                    long memoryToAllocateOnMachine = 
-                        calculateMemoryToAllocateOnMachine(agentUid1, memoryShortage);
-                    long allocatedMemoryForPuOnMachine1 = getMemoryInMB(allocatedCapacityForPu.getAgentCapacityOrZero(agentUid1));
-                    
-                    for(; memoryToAllocateOnMachine > 0; memoryToAllocateOnMachine -= this.containerMemoryCapacityInMB) {
-                        long maxMemoryPerMachine = getMaxMemoryPerMachine(memoryToAllocateOnMachine);
-                        if (memoryToAllocateOnMachine + allocatedMemoryForPuOnMachine1 <= maxMemoryPerMachine) { 
-                            break;
-                        }
-                    }
-                    
-                    if (memoryToAllocateOnMachine > 0) {
-                            startOverAgain = true;
-                            allocateCapacityOnMachine(
-                                    agentUid1, 
-                                    new MemoryCapacityRequirement(memoryToAllocateOnMachine));
-                            break;
-                    }
-                }
-            }
-            else {
+            if (unallocatedMemory.getAgentUids().size() > 1 &&
+                memoryShortage > containerMemoryCapacityInMB) {
+            
                 // we need to allocate memory on two different machines at the same time
                 // otherwise we might violate the limitation of one machine having more than 50% of the total memory
                 for (String agentUid1 : unallocatedMemory.getAgentUids()) {
@@ -554,26 +538,14 @@ public class BinPackingSolver {
                             continue;
                         }
                         
-                        long memoryToAllocateOnMachine1 = 
-                            calculateMemoryToAllocateOnMachine(agentUid1, (int) Math.floor(memoryShortage/2.0));
-                        long memoryToAllocateOnMachine2 = 
-                            calculateMemoryToAllocateOnMachine(agentUid2, memoryToAllocateOnMachine1);
-                        long memoryToAllocateOnMachine = Math.min(memoryToAllocateOnMachine1,memoryToAllocateOnMachine2);
-                        
-                        long allocatedMemoryForPuOnMachine1 = getMemoryInMB(allocatedCapacityForPu.getAgentCapacityOrZero(agentUid1));
-                        long allocatedMemoryForPuOnMachine2 = getMemoryInMB(allocatedCapacityForPu.getAgentCapacityOrZero(agentUid1));
-                        
-                        for(; memoryToAllocateOnMachine > 0; memoryToAllocateOnMachine -= this.containerMemoryCapacityInMB) {
-                            long maxMemoryPerMachine = getMaxMemoryPerMachine(memoryToAllocateOnMachine*2);
-                            if (memoryToAllocateOnMachine + allocatedMemoryForPuOnMachine1 <= maxMemoryPerMachine && 
-                                memoryToAllocateOnMachine + allocatedMemoryForPuOnMachine2 <= maxMemoryPerMachine) {
-                                break;
-                            }
-                        }
+                        memoryToAllocateOnMachine = 
+                            calculateMemoryToAllocateOnTwoMachines(
+                                    agentUid1,
+                                    agentUid2,
+                                    memoryShortage);
                         
                         if (memoryToAllocateOnMachine > 0) {
                             
-                            startOverAgain = true;
                             allocateCapacityOnMachine(
                                     agentUid1, 
                                     new MemoryCapacityRequirement(memoryToAllocateOnMachine));
@@ -581,20 +553,82 @@ public class BinPackingSolver {
                             allocateCapacityOnMachine(
                                     agentUid2, 
                                     new MemoryCapacityRequirement(memoryToAllocateOnMachine));
-                        }
-                                    
+                            break;
+                        }                  
                     }
-                    if (startOverAgain) { break;}
+                    if (memoryToAllocateOnMachine > 0) { 
+                        // break from outer for loop
+                        break;
+                    }
                 }
-                if (startOverAgain) { break;}
-            }        
-        } while (startOverAgain);
+            }
+            
+            if (memoryToAllocateOnMachine == 0) {
+                
+                // try allocate memory on a single machine
+                for (String agentUid : unallocatedMemory.getAgentUids()) {
+                    
+                    memoryToAllocateOnMachine = 
+                        calculateMemoryToAllocateOnSingleMachine(agentUid, memoryShortage);
+                    
+                    if (memoryToAllocateOnMachine > 0) {
+                            allocateCapacityOnMachine(
+                                    agentUid, 
+                                    new MemoryCapacityRequirement(memoryToAllocateOnMachine));
+                            break;
+                    }
+                }
+            }
+            
+        } while (memoryToAllocateOnMachine > 0);
+    }
+
+    /**
+     * @return the memory to allocate on each machine to satisfy the specified memory shortage.
+     * 
+     */
+    private long calculateMemoryToAllocateOnTwoMachines(String agentUid2, String agentUid1, long memoryShortage) {
+        
+        long memoryToAllocateOnMachine1 = 
+            calculateMemoryToAllocateOnMachine(agentUid1, (int) Math.floor(memoryShortage/2.0));
+        long memoryToAllocateOnMachine2 = 
+            calculateMemoryToAllocateOnMachine(agentUid2, memoryToAllocateOnMachine1);
+        long memoryToAllocateOnEachMachine = Math.min(memoryToAllocateOnMachine1,memoryToAllocateOnMachine2);
+        
+        long allocatedMemoryForPuOnMachine1 = getMemoryInMB(allocatedCapacityForPu.getAgentCapacityOrZero(agentUid1));
+        long allocatedMemoryForPuOnMachine2 = getMemoryInMB(allocatedCapacityForPu.getAgentCapacityOrZero(agentUid2));
+        
+        for(; memoryToAllocateOnEachMachine > 0; memoryToAllocateOnEachMachine -= this.containerMemoryCapacityInMB) {
+            long maxMemoryPerMachine = getMaxMemoryPerMachine(memoryToAllocateOnEachMachine*2);
+            if (memoryToAllocateOnEachMachine + allocatedMemoryForPuOnMachine1 <= maxMemoryPerMachine && 
+                memoryToAllocateOnEachMachine + allocatedMemoryForPuOnMachine2 <= maxMemoryPerMachine) {
+                break;
+            }
+        }
+        return memoryToAllocateOnEachMachine;
+    }
+
+    /**
+     * @return the memory to allocate on the specified machine to satisfy the specified memory shortage.
+     */
+    private long calculateMemoryToAllocateOnSingleMachine(String agentUid, long memoryShortage) {
+        
+        long memoryToAllocateOnMachine = 
+            calculateMemoryToAllocateOnMachine(agentUid, memoryShortage);
+        
+        long allocatedMemoryForPuOnMachine1 = getMemoryInMB(allocatedCapacityForPu.getAgentCapacityOrZero(agentUid));
+        for(; memoryToAllocateOnMachine > 0; memoryToAllocateOnMachine -= this.containerMemoryCapacityInMB) {
+            long maxMemoryPerMachine = getMaxMemoryPerMachine(memoryToAllocateOnMachine);
+            if (memoryToAllocateOnMachine + allocatedMemoryForPuOnMachine1 <= maxMemoryPerMachine) { 
+                break;
+            }
+        }
+        return memoryToAllocateOnMachine;
     }
 
     private long calculateMemoryToAllocateOnMachine(String agentUid, long memoryShortage) {
         
         memoryShortage  -= memoryShortage % containerMemoryCapacityInMB;
-            
         final long unallocatedMemoryOnMachine = getMemoryInMB(unallocatedCapacity.getAgentCapacityOrZero(agentUid));
         if (unallocatedMemoryOnMachine % containerMemoryCapacityInMB > 0) {
             throw new IllegalStateException("unallocated memory " + containerMemoryCapacityInMB + "MB must be in multiples of " + containerMemoryCapacityInMB);
