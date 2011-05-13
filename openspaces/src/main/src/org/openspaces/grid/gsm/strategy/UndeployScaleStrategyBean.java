@@ -6,7 +6,8 @@ import org.openspaces.admin.alert.AlertSeverity;
 import org.openspaces.admin.alert.AlertStatus;
 import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
 import org.openspaces.grid.gsm.GridServiceContainerConfigAware;
-import org.openspaces.grid.gsm.capacity.AggregatedAllocatedCapacity;
+import org.openspaces.grid.gsm.capacity.CapacityRequirements;
+import org.openspaces.grid.gsm.capacity.ClusterCapacityRequirements;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpointAware;
 import org.openspaces.grid.gsm.containers.ContainersSlaPolicy;
@@ -113,8 +114,7 @@ public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
         final CapacityMachinesSlaPolicy sla = new CapacityMachinesSlaPolicy();
         NonBlockingElasticMachineProvisioning machineProvisioning = super.getMachineProvisioning();
         sla.setMachineProvisioning(machineProvisioning);
-        sla.setCpuCapacity(0);
-        sla.setMemoryCapacityInMB(0);
+        sla.setCapacityRequirements(new CapacityRequirements());
         sla.setMinimumNumberOfMachines(0);
         sla.setMaximumNumberOfMachines(getMaximumNumberOfInstances());
         sla.setContainerMemoryCapacityInMB(containersConfig.getMaximumJavaHeapSizeInMB());
@@ -147,7 +147,7 @@ public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
         
         final ContainersSlaPolicy sla = new ContainersSlaPolicy();
         sla.setNewContainerConfig(containersConfig);
-        sla.setAllocatedCapacity(new AggregatedAllocatedCapacity());
+        sla.setClusterCapacityRequirements(new ClusterCapacityRequirements());
         
         boolean reachedSla = containersEndpoint.enforceSla(sla);
         

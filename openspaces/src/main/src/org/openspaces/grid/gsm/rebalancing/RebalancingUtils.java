@@ -31,8 +31,9 @@ import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.ProcessingUnitPartition;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.core.internal.commons.math.fraction.Fraction;
-import org.openspaces.grid.gsm.capacity.AggregatedAllocatedCapacity;
-import org.openspaces.grid.gsm.capacity.AllocatedCapacity;
+import org.openspaces.grid.gsm.capacity.CapacityRequirements;
+import org.openspaces.grid.gsm.capacity.ClusterCapacityRequirements;
+import org.openspaces.grid.gsm.capacity.CpuCapacityRequirement;
 
 import com.gigaspaces.cluster.activeelection.SpaceMode;
 
@@ -558,7 +559,7 @@ private static GridServiceContainer[] getContainers(final ProcessingUnit pu) {
         return puInstancesFromSamePartition;
     }
     
-    public static boolean isEvenlyDistributedAcrossMachines(ProcessingUnit pu, AggregatedAllocatedCapacity aggregatedAllocatedCapacity) {
+    public static boolean isEvenlyDistributedAcrossMachines(ProcessingUnit pu, ClusterCapacityRequirements aggregatedAllocatedCapacity) {
 
         boolean isEvenlyDistributedAcrossMachines = true;
         final Machine[] machines = getMachinesFromAgentUids(pu, aggregatedAllocatedCapacity.getAgentUids());
@@ -600,7 +601,7 @@ private static GridServiceContainer[] getContainers(final ProcessingUnit pu) {
         return machines.toArray(new Machine[machines.size()]);
     }
     
-    public static boolean isRestartRecommended(ProcessingUnit pu, Machine source, Machine target, Fraction optimalCpuCoresPerPrimary, AggregatedAllocatedCapacity allocatedCapacity) {       
+    public static boolean isRestartRecommended(ProcessingUnit pu, Machine source, Machine target, Fraction optimalCpuCoresPerPrimary, ClusterCapacityRequirements allocatedCapacity) {       
 
         boolean isRestartRecommended = false;
         final int numberOfPrimaryInstancesOnSource = getNumberOfPrimaryInstancesOnMachine(pu, source);
@@ -824,7 +825,7 @@ private static GridServiceContainer[] getContainers(final ProcessingUnit pu) {
     public static List<Machine> sortMachinesByNumberOfPrimaryInstancesPerCpuCore(
             final ProcessingUnit pu,
             final Machine[] machines,
-            final AggregatedAllocatedCapacity allocatedCapacity) {
+            final ClusterCapacityRequirements allocatedCapacity) {
         
         final List<Machine> sortedMachines = 
                 new ArrayList<Machine>(Arrays.asList(machines));
@@ -848,7 +849,7 @@ private static GridServiceContainer[] getContainers(final ProcessingUnit pu) {
             return sortedMachines;
         }
 
-    public static Fraction getNumberOfPrimaryInstancesPerCpuCore(ProcessingUnit pu, Machine machine, AggregatedAllocatedCapacity allocatedCapacity) {
+    public static Fraction getNumberOfPrimaryInstancesPerCpuCore(ProcessingUnit pu, Machine machine, ClusterCapacityRequirements allocatedCapacity) {
         return new Fraction(getNumberOfPrimaryInstancesOnMachine(pu, machine))
                .divide(getNumberOfCpuCores(machine,allocatedCapacity));
     }
@@ -878,22 +879,26 @@ private static GridServiceContainer[] getContainers(final ProcessingUnit pu) {
 
 
     public static Fraction getAverageCpuCoresPerPrimary(
-            ProcessingUnit pu, AggregatedAllocatedCapacity aggregatedAllocatedCapacity) {
+            ProcessingUnit pu, ClusterCapacityRequirements aggregatedAllocatedCapacity) {
         
-        AllocatedCapacity totalAllocatedCapacity = aggregatedAllocatedCapacity.getTotalAllocatedCapacity();
+        CapacityRequirements totalAllocatedCapacity = aggregatedAllocatedCapacity.getTotalAllocatedCapacity();
         
         if (totalAllocatedCapacity.equalsZero()) {
             throw new IllegalStateException("allocated capacity cannot be empty.");
         }
         
-        return totalAllocatedCapacity.getCpuCores().divide(pu.getNumberOfInstances());
+        return getCpuCores(totalAllocatedCapacity).divide(pu.getNumberOfInstances());
     }
     
-    public static Fraction getNumberOfCpuCores(Machine machine, AggregatedAllocatedCapacity allocatedCapacity) {
+    private static Fraction getCpuCores(CapacityRequirements totalAllocatedCapacity) {
+        return totalAllocatedCapacity.getRequirement(new CpuCapacityRequirement().getType()).getCpu();
+    }
+
+    public static Fraction getNumberOfCpuCores(Machine machine, ClusterCapacityRequirements allocatedCapacity) {
         if (machine.getGridServiceAgents().getSize() != 1) {
             throw new IllegalStateException("Machine must have at least one agent");
         }
-        return allocatedCapacity.getAgentCapacity(machine.getGridServiceAgent().getUid()).getCpuCores();
+        return getCpuCores(allocatedCapacity.getAgentCapacity(machine.getGridServiceAgent().getUid()));
     }
     
     public static String puInstanceToString(ProcessingUnitInstance instance) {

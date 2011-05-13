@@ -1,24 +1,25 @@
 package org.openspaces.grid.gsm.capacity;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.openspaces.core.internal.commons.math.fraction.Fraction;
-
-public class AggregatedAllocatedCapacity {
+public class ClusterCapacityRequirements {
 
     // allocated capacity per grid service agent (UUID)
-    private final Map<String,AllocatedCapacity> capacityPerAgent;
-    private AllocatedCapacity totalCapacity;
+    private final Map<String,CapacityRequirements> capacityPerAgent;
+    private CapacityRequirements totalCapacity;
     
-    public AggregatedAllocatedCapacity() {
+    public ClusterCapacityRequirements() {
         // use consistent ordering of machines so unit tests and bugs will have consistent iterator behavior.
-        this.capacityPerAgent = new TreeMap<String, AllocatedCapacity>();
-        totalCapacity = new AllocatedCapacity(Fraction.ZERO, 0);
+        this.capacityPerAgent = new TreeMap<String, CapacityRequirements>();
+        totalCapacity = new CapacityRequirements();
     }
         
-    public AllocatedCapacity getTotalAllocatedCapacity() {
+    public CapacityRequirements getTotalAllocatedCapacity() {
         return totalCapacity;
     }
     
@@ -29,8 +30,8 @@ public class AggregatedAllocatedCapacity {
     @Override
     public boolean equals(Object other) {
         return 
-            other instanceof AggregatedAllocatedCapacity &&
-            ((AggregatedAllocatedCapacity)other).capacityPerAgent.equals(capacityPerAgent);
+            other instanceof ClusterCapacityRequirements &&
+            ((ClusterCapacityRequirements)other).capacityPerAgent.equals(capacityPerAgent);
     }
 
     public Collection<String> getAgentUids() {
@@ -45,49 +46,58 @@ public class AggregatedAllocatedCapacity {
     public String toDetailedString() {
         StringBuilder builder = new StringBuilder();
         builder.append("totalNumberOfMachines:" + capacityPerAgent.size() + " , totalCapacity:" + getTotalAllocatedCapacity()+", details:{");
-        for (String agentUid : capacityPerAgent.keySet()) {
+        List<String> keySet = new ArrayList<String>(capacityPerAgent.keySet());
+        Collections.sort(keySet);
+        for (String agentUid : keySet) {
             builder.append(agentUid + ":" + capacityPerAgent.get(agentUid)+" , ");
         }
         builder.append("}");
         return builder.toString();
     }
     
-    public AggregatedAllocatedCapacity add(AggregatedAllocatedCapacity other) {
+    public ClusterCapacityRequirements add(ClusterCapacityRequirements other) {
         if (other.equalsZero()) {
             return this;
         }
         
-        AggregatedAllocatedCapacity sum = new AggregatedAllocatedCapacity();
+        ClusterCapacityRequirements sum = new ClusterCapacityRequirements();
         sum.addAllInternal(this);
         sum.addAllInternal(other);
         return sum;
     }
 
-    public AggregatedAllocatedCapacity subtract(
-            AggregatedAllocatedCapacity other) {
+    public ClusterCapacityRequirements subtract(
+            ClusterCapacityRequirements other) {
 
-        AggregatedAllocatedCapacity diff = new AggregatedAllocatedCapacity();
+        ClusterCapacityRequirements diff = new ClusterCapacityRequirements();
         diff.addAllInternal(this);
         diff.subtractAllInternal(other);
         return diff;
     }
     
-    public AggregatedAllocatedCapacity add(
+    public ClusterCapacityRequirements set(String agentUid, CapacityRequirements capacity) {
+        ClusterCapacityRequirements sum = new ClusterCapacityRequirements();
+        sum.addAllInternal(this);
+        sum.setInternal(agentUid,capacity);
+        return sum;
+    }
+    
+    public ClusterCapacityRequirements add(
             String agentUid, 
-            AllocatedCapacity capacity) {
+            CapacityRequirements capacity) {
         
-        AggregatedAllocatedCapacity sum = new AggregatedAllocatedCapacity();
+        ClusterCapacityRequirements sum = new ClusterCapacityRequirements();
         sum.addAllInternal(this);
         sum.addInternal(agentUid,capacity);
         return sum;
         
     }
     
-    public AggregatedAllocatedCapacity subtract(
+    public ClusterCapacityRequirements subtract(
             String agentUid, 
-            AllocatedCapacity capacity) {
+            CapacityRequirements capacity) {
         
-        AggregatedAllocatedCapacity remaining = new AggregatedAllocatedCapacity();
+        ClusterCapacityRequirements remaining = new ClusterCapacityRequirements();
         remaining.addAllInternal(this);
         remaining.subtractInternal(agentUid,capacity);
         return remaining;
@@ -95,56 +105,71 @@ public class AggregatedAllocatedCapacity {
 
 
 
-    public AggregatedAllocatedCapacity subtractAgent(
+    public ClusterCapacityRequirements subtractAgent(
             String agentUid) {
         return subtract(agentUid, this.getAgentCapacity(agentUid));
     }
     
-    public AggregatedAllocatedCapacity subtractOrZero(
-           String agentUid, AllocatedCapacity capacity) {
+    public ClusterCapacityRequirements subtractOrZero(
+           String agentUid, CapacityRequirements capacity) {
         
-        AggregatedAllocatedCapacity remaining = new AggregatedAllocatedCapacity();
+        ClusterCapacityRequirements remaining = new ClusterCapacityRequirements();
         remaining.addAllInternal(this);
         remaining.subtractOrZeroInternal(agentUid,capacity);
         return remaining;
     }
 
 
-    public AllocatedCapacity getAgentCapacity(String agentUid) {
+    public CapacityRequirements getAgentCapacity(String agentUid) {
         if (!capacityPerAgent.containsKey(agentUid)) {
             throw new IllegalArgumentException(agentUid);
         }
         return this.capacityPerAgent.get(agentUid);
     }
     
-    public AllocatedCapacity getAgentCapacityOrZero(String agentUid) {
+    public CapacityRequirements getAgentCapacityOrZero(String agentUid) {
         
         if (capacityPerAgent.containsKey(agentUid)) {
             return this.capacityPerAgent.get(agentUid);
         }
         else {
-            return new AllocatedCapacity(Fraction.ZERO, 0);
+            return new CapacityRequirements();
         }
     }
     
-    private void addAllInternal(AggregatedAllocatedCapacity aggregatedCapacity) {
-        for (String agentUid : aggregatedCapacity.capacityPerAgent.keySet()) {
-            AllocatedCapacity capacity = aggregatedCapacity.capacityPerAgent.get(agentUid);
+    private void addAllInternal(ClusterCapacityRequirements clusterCapacityRequirements) {
+        for (String agentUid : clusterCapacityRequirements.capacityPerAgent.keySet()) {
+            CapacityRequirements capacity = clusterCapacityRequirements.capacityPerAgent.get(agentUid);
             addInternal(agentUid,capacity);
         }
     }
     
-    private void subtractAllInternal(AggregatedAllocatedCapacity aggregatedCapacity) {
+    private void subtractAllInternal(ClusterCapacityRequirements aggregatedCapacity) {
         for (String agentUid : aggregatedCapacity.capacityPerAgent.keySet()) {
-            AllocatedCapacity capacity = aggregatedCapacity.capacityPerAgent.get(agentUid);
+            CapacityRequirements capacity = aggregatedCapacity.capacityPerAgent.get(agentUid);
             subtractInternal(agentUid,capacity);
         }
     }
     
-    private void addInternal(String agentUid, AllocatedCapacity capacityToAdd) {
+    private void setInternal(String agentUid, CapacityRequirements newCapacity) {
+
+        CapacityRequirements oldCapacity = capacityPerAgent.get(agentUid);
+        
+        if (newCapacity.equalsZero()) {
+            capacityPerAgent.remove(agentUid);
+        }
+        else {
+            capacityPerAgent.put(agentUid,newCapacity);
+        }
+        
+        totalCapacity = totalCapacity.subtract(oldCapacity).add(newCapacity);
+    
+    }
+
+    private void addInternal(String agentUid, CapacityRequirements capacityToAdd) {
         
         validateAllocation(capacityToAdd);
-        AllocatedCapacity sumCapacity = capacityToAdd;
+        CapacityRequirements sumCapacity = capacityToAdd;
         if (capacityPerAgent.containsKey(agentUid)) {
             
             sumCapacity = sumCapacity.add(capacityPerAgent.get(agentUid));
@@ -155,7 +180,7 @@ public class AggregatedAllocatedCapacity {
     }
 
   
-    private void subtractInternal(String agentUid, AllocatedCapacity capacity) {
+    private void subtractInternal(String agentUid, CapacityRequirements capacity) {
         
         validateAllocation(capacity);
         
@@ -163,7 +188,7 @@ public class AggregatedAllocatedCapacity {
             throw new IllegalArgumentException("Agent UID " + agentUid + " no found");
         }
         
-        AllocatedCapacity newAllocation = 
+        CapacityRequirements newAllocation = 
             capacityPerAgent.get(agentUid).subtract(capacity);
         
         updateAgentCapacity(agentUid, newAllocation);
@@ -172,14 +197,14 @@ public class AggregatedAllocatedCapacity {
     }
     
 
-    private void subtractOrZeroInternal(String agentUid, AllocatedCapacity capacity) {
+    private void subtractOrZeroInternal(String agentUid, CapacityRequirements capacity) {
    validateAllocation(capacity);
         
         if (!capacityPerAgent.containsKey(agentUid)) {
             throw new IllegalArgumentException("Agent UID " + agentUid + " no found");
         }
         
-        AllocatedCapacity newAllocation = 
+        CapacityRequirements newAllocation = 
             capacityPerAgent.get(agentUid).subtractOrZero(capacity);
         
         updateAgentCapacity(agentUid, newAllocation);
@@ -187,7 +212,7 @@ public class AggregatedAllocatedCapacity {
         
     }
 
-    private void updateAgentCapacity(String agentUid, AllocatedCapacity newAllocation) {
+    private void updateAgentCapacity(String agentUid, CapacityRequirements newAllocation) {
         if (newAllocation.equalsZero()) {
             capacityPerAgent.remove(agentUid);
         }
@@ -196,7 +221,7 @@ public class AggregatedAllocatedCapacity {
         }
     }
     
-    private void validateAllocation(AllocatedCapacity allocation) {
+    private void validateAllocation(CapacityRequirements allocation) {
         if (allocation.equalsZero()) {
             throw new IllegalArgumentException(allocation + " equals zero");
         }

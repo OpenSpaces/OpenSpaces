@@ -1,6 +1,7 @@
 package org.openspaces.admin.pu.elastic;
 
 import org.openspaces.admin.bean.BeanConfig;
+import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 
 /**
  * Defines the required configuration properties of an @{link ElasticMachineProvisioning} bean.
@@ -23,17 +24,16 @@ public interface ElasticMachineProvisioningConfig extends BeanConfig {
     double getMinimumNumberOfCpuCoresPerMachine();
     
     /**
-     * Gets the expected amount of memory per machine that is reserved for processes other than grid containers.
+     * Gets the expected amount of memory,cpu,disk,etc... per machine that is reserved for processes other than grid containers.
      * These include Grid Service Manager, Lookup Service or any other daemon running on the system.
      * 
-     * For example, by default, a 16GB server  
-     * can run 3 containers 5GB each, since it approximately leaves 1024MB memory free.
+     * For example, a machine with a 16GB server and 1GB reserved can run 3 containers 5GB each.
      * 
      * @param reservedInMB - amount of reserved memory in MB
      * 
-     * @since 8.0.1
+     * @since 8.0.2
      */
-    long getReservedMemoryCapacityPerMachineInMB();
+    CapacityRequirements getReservedCapacityPerMachine();
     
     /**
      * Gets the list of zones that can be discovered and started by this machine provisioning.
@@ -70,4 +70,5 @@ public interface ElasticMachineProvisioningConfig extends BeanConfig {
      * @since 8.0.1
      */
     boolean isGridServiceAgentZoneMandatory();
+
 }

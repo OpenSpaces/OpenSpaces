@@ -1,6 +1,6 @@
 package org.openspaces.grid.gsm.machines;
 
-import org.openspaces.grid.gsm.capacity.AggregatedAllocatedCapacity;
+import org.openspaces.grid.gsm.capacity.ClusterCapacityRequirements;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestroyedException;
 
 public interface EagerMachinesSlaEnforcementEndpoint {
@@ -20,7 +20,7 @@ public interface EagerMachinesSlaEnforcementEndpoint {
     /**
      * @return a list of agents for this pu including memory/cpu for each.
      */
-    AggregatedAllocatedCapacity getAllocatedCapacity() throws ServiceLevelAgreementEnforcementEndpointDestroyedException;
+    ClusterCapacityRequirements getAllocatedCapacity() throws ServiceLevelAgreementEnforcementEndpointDestroyedException;
 
     boolean isGridServiceAgentsPendingDeallocation();
 

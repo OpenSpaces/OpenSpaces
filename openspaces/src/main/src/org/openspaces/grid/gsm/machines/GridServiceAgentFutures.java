@@ -9,11 +9,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 import org.openspaces.admin.gsa.GridServiceAgent;
-import org.openspaces.core.internal.commons.math.fraction.Fraction;
-import org.openspaces.grid.gsm.capacity.AllocatedCapacity;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
-import org.openspaces.grid.gsm.capacity.CpuCapacityRequirement;
-import org.openspaces.grid.gsm.capacity.MemoryCapacityRequirment;
 import org.openspaces.grid.gsm.capacity.NumberOfMachinesCapacityRequirement;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
 
@@ -21,52 +17,21 @@ import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisi
 class GridServiceAgentFutures {
     
     Collection<FutureGridServiceAgent> futureAgents;
-    AllocatedCapacity expectedCapacity = new AllocatedCapacity(Fraction.ZERO,0);
-    int expectedNumberOfMachines = 0;
-    
-    GridServiceAgentFutures(FutureGridServiceAgent[] futureAgents, int numberOfMachines) {
-        validate(futureAgents);
-        this.expectedNumberOfMachines = numberOfMachines;
-        this.futureAgents = new ArrayList<FutureGridServiceAgent>(Arrays.asList(futureAgents));
-    }
-
-    GridServiceAgentFutures(FutureGridServiceAgent[] futureAgents, AllocatedCapacity capacity) {
-        validate(futureAgents);
-        expectedCapacity = capacity;
-        this.futureAgents = new ArrayList<FutureGridServiceAgent>(Arrays.asList(futureAgents));
-    }
-    
+    CapacityRequirements expectedCapacity = new CapacityRequirements();
+        
     GridServiceAgentFutures(FutureGridServiceAgent[] futureAgents, CapacityRequirements capacityRequirements) {
         validate(futureAgents);
-        this.futureAgents = new ArrayList<FutureGridServiceAgent>(Arrays.asList(futureAgents));
-        expectedNumberOfMachines = convertCapacityRequirementsToNumberOfMachines(capacityRequirements);
-        if (expectedNumberOfMachines == 0) {
-            expectedCapacity = convertCapacityRequirementsToAllocatedCapacity(capacityRequirements);
+        if (capacityRequirements.equalsZero()) {
+            throw new IllegalArgumentException("capacityRequirements cannot be empty");
         }
+        this.futureAgents = new ArrayList<FutureGridServiceAgent>(Arrays.asList(futureAgents));
+        expectedCapacity = capacityRequirements;
     }
     
-    AllocatedCapacity getExpectedCapacity() {
+    CapacityRequirements getExpectedCapacity() {
         return expectedCapacity;
     }
     
-    int getExpectedNumberOfMachines() {
-        return expectedNumberOfMachines;
-    }
-    
-    private static AllocatedCapacity convertCapacityRequirementsToAllocatedCapacity(
-            CapacityRequirements capacityRequirements) {
-        
-        Fraction cpuCores = MachinesSlaUtils.convertCpuCoresFromDoubleToFraction(
-                capacityRequirements.getRequirement(CpuCapacityRequirement.class).getCpu());
-        long memoryInMB = capacityRequirements.getRequirement(MemoryCapacityRequirment.class).getMemoryInMB();
-        return new AllocatedCapacity(cpuCores,memoryInMB);
-    }
-
-    private static int convertCapacityRequirementsToNumberOfMachines(CapacityRequirements capacityRequirements) {
-        
-        return capacityRequirements.getRequirement(NumberOfMachinesCapacityRequirement.class).getNumberOfMahines();
-    }
-
     public Collection<GridServiceAgent> getGridServiceAgents() {
 
         Collection<GridServiceAgent> agents = new HashSet<GridServiceAgent>();

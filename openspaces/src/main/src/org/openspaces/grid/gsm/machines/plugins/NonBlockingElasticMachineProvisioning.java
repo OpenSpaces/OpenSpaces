@@ -91,6 +91,5 @@ public interface NonBlockingElasticMachineProvisioning {
      * @since 8.0 
 	 */
 	void stopMachineAsync(GridServiceAgent agent, long duration, TimeUnit unit);
-
 	
 }

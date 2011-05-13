@@ -23,7 +23,8 @@ import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.core.internal.commons.math.fraction.Fraction;
 import org.openspaces.grid.gsm.LogPerProcessingUnit;
 import org.openspaces.grid.gsm.SingleThreadedPollingLog;
-import org.openspaces.grid.gsm.capacity.AllocatedCapacity;
+import org.openspaces.grid.gsm.capacity.CapacityRequirements;
+import org.openspaces.grid.gsm.capacity.CpuCapacityRequirement;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestroyedException;
 
 import com.gigaspaces.cluster.activeelection.SpaceMode;
@@ -88,9 +89,9 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
                         "does not include agent " + agentUid);
             }
             
-            if (sla.getAllocatedCapacity().getAgentCapacity(agentUid).getCpuCores().equals(Fraction.ZERO)) {
+            if (sla.getAllocatedCapacity().getAgentCapacity(agentUid).getRequirement(new CpuCapacityRequirement().getType()).equalsZero()) {
                 // number of cpu cores per machine cannot be zero (requirement of the primary rebalancing algorithm)
-                sla.setAllocatedCapacity(sla.getAllocatedCapacity().add(agentUid, new AllocatedCapacity(MIN_CPU_CORES_PER_MACHINE_FOR_REBALANCING,0)));
+                sla.setAllocatedCapacity(sla.getAllocatedCapacity().add(agentUid, new CapacityRequirements(new CpuCapacityRequirement(MIN_CPU_CORES_PER_MACHINE_FOR_REBALANCING))));
             }
         }
         

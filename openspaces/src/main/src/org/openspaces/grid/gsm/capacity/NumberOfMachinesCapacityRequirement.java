@@ -1,18 +1,30 @@
 package org.openspaces.grid.gsm.capacity;
 
-public class NumberOfMachinesCapacityRequirement implements CapacityRequirement {
+public class NumberOfMachinesCapacityRequirement extends AbstractCapacityRequirement {
 
-	private final int numberOfMachines;
-	
 	public NumberOfMachinesCapacityRequirement() {
-		this(0);
+		super();
 	}
 	
-	public NumberOfMachinesCapacityRequirement(int numberOfMachines) {
-		this.numberOfMachines = numberOfMachines;
+	public NumberOfMachinesCapacityRequirement(Long numberOfMachines) {
+	    super(numberOfMachines);
 	}
 	
-	public int getNumberOfMahines() {
-		return numberOfMachines;
+	public NumberOfMachinesCapacityRequirement(Integer numberOfMachines) {
+		super(numberOfMachines);
 	}
+	
+	public int getNumberOfMachines() {
+		return Integer.valueOf(value.toString());
+	}
+
+    @SuppressWarnings("unchecked")
+    public CapacityRequirementType<NumberOfMachinesCapacityRequirement> getType() {
+	    return (CapacityRequirementType<NumberOfMachinesCapacityRequirement>) super.getType();
+	}
+	
+    @Override
+    public String toString() {
+        return getNumberOfMachines() +" machines";
+    }
 }

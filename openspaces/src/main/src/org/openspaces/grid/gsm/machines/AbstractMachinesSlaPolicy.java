@@ -3,6 +3,7 @@ package org.openspaces.grid.gsm.machines;
 import java.util.Collection;
 
 import org.openspaces.admin.gsa.GridServiceAgent;
+import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIsolation;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementPolicy;
@@ -26,7 +27,7 @@ public abstract class AbstractMachinesSlaPolicy extends ServiceLevelAgreementPol
     }
     
     public long getReservedMemoryCapacityPerMachineInMB() {
-        return machineProvisioning.getConfig().getReservedMemoryCapacityPerMachineInMB();
+        return MachinesSlaUtils.getMemoryInMB(machineProvisioning.getConfig().getReservedCapacityPerMachine());
     }
     
     public void setContainerMemoryCapacityInMB(long containerMemoryCapacityInMB) {
@@ -45,8 +46,6 @@ public abstract class AbstractMachinesSlaPolicy extends ServiceLevelAgreementPol
         this.agents = agents;
     }
     
-
-    /* Optional Argument */
     public NonBlockingElasticMachineProvisioning getMachineProvisioning() {
         return this.machineProvisioning;
     }
@@ -70,6 +69,11 @@ public abstract class AbstractMachinesSlaPolicy extends ServiceLevelAgreementPol
     public void setMachineIsolation(ElasticProcessingUnitMachineIsolation isolation) {
         this.machineIsolation = isolation;
     }
+
+    public CapacityRequirements getReservedCapacityPerMachine() {
+        return machineProvisioning.getConfig().getReservedCapacityPerMachine();
+    }
+
     
     @Override
     public boolean equals(Object other) {

@@ -20,6 +20,8 @@ import org.openspaces.admin.internal.gsa.InternalGridServiceAgent;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.LogPerProcessingUnit;
 import org.openspaces.grid.gsm.SingleThreadedPollingLog;
+import org.openspaces.grid.gsm.capacity.CapacityRequirements;
+import org.openspaces.grid.gsm.capacity.MemoryCapacityRequirement;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestroyedException;
 
 import com.gigaspaces.grid.gsa.AgentProcessDetails;
@@ -111,7 +113,7 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
 
     private void markForDeallocationContainersOnUnallocatedMachines(final ContainersSlaPolicy sla) {
         {
-        final Collection<String> allocatedAgentUids = sla.getAllocatedCapacity().getAgentUids();
+        final Collection<String> allocatedAgentUids = sla.getClusterCapacityRequirements().getAgentUids();
         final String zone = ContainersSlaUtils.getContainerZone(pu);
         for (final GridServiceContainer container : ContainersSlaUtils.getContainersByZone(pu.getAdmin(), zone)) {
             if (!allocatedAgentUids.contains(container.getGridServiceAgent().getUid())) {
@@ -130,12 +132,12 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
     }
 
     private void markForDeallocationContainersOnMachineWithAllocatedCapacityShortage(final ContainersSlaPolicy sla) {
-        final Collection<String> allocatedAgentUids = sla.getAllocatedCapacity().getAgentUids();
+        final Collection<String> allocatedAgentUids = sla.getClusterCapacityRequirements().getAgentUids();
         final String zone = ContainersSlaUtils.getContainerZone(pu);
         // mark for deallocation all containers that do not fit to the allocated memory on agent
         final Collection<GridServiceContainer> containersMarkedForDeallocation = state.getContainersMarkedForDeallocation(pu);
         for (final String agentUid : allocatedAgentUids) {
-            final long allocatedMemory = sla.getAllocatedCapacity().getAgentCapacity(agentUid).getMemoryInMB();
+            final long allocatedMemory = getMemoryInMB(sla.getClusterCapacityRequirements().getAgentCapacity(agentUid));
             long remainingAllocatedMemory = allocatedMemory;
             for (final GridServiceContainer container : ContainersSlaUtils.getContainersByZoneOnAgentUid(pu.getAdmin(), zone, agentUid)) {
                 final long containerMemoryInMB = ContainersSlaUtils.getMemoryInMB(container);
@@ -147,7 +149,8 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
                     else {
                         if (logger.isInfoEnabled()) {
                             logger.info("Grid Service Container " + ContainersSlaUtils.gscToString(container)+ " "
-                                    + "is marked for shutdown since there is not enough memory allocated for pu" + pu.getName() + " on this machine. "
+                                    + "is marked for shutdown since there is not enough memory allocated for pu" + pu.getName() + " "+
+                                    "on this machine. "
                                     + "Allocated memory " + allocatedMemory + " "  
                                     + "Machine is currently running "
                                     + ContainersSlaUtils.gscsToString(container.getMachine()
@@ -163,13 +166,13 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
 
     private void startContainersOnMachineWithAllocatedCapacitySurplus(final ContainersSlaPolicy sla) {
         final String zone = ContainersSlaUtils.getContainerZone(pu);
-        final Collection<String> allocatedAgentUids = sla.getAllocatedCapacity().getAgentUids();
+        final Collection<String> allocatedAgentUids = sla.getClusterCapacityRequirements().getAgentUids();
         Collection<GridServiceContainer> containersMarkedForDeallocation = state.getContainersMarkedForDeallocation(pu);
         Collection<FutureGridServiceContainer> futureContainers = state.getFutureContainers(pu);
         GridServiceAgents agents = pu.getAdmin().getGridServiceAgents();
         for (String agentUid : allocatedAgentUids) {
             
-            long allocatedMemory = sla.getAllocatedCapacity().getAgentCapacity(agentUid).getMemoryInMB();
+            long allocatedMemory = getMemoryInMB(sla.getClusterCapacityRequirements().getAgentCapacity(agentUid));
             for (GridServiceContainer container : ContainersSlaUtils.getContainersByZoneOnAgentUid(pu.getAdmin(), zone, agentUid)) {
                 final long containerMemoryInMB = ContainersSlaUtils.getMemoryInMB(container);
                 if (!containersMarkedForDeallocation.contains(container)) {
@@ -194,6 +197,10 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
                 startContainer(sla,agent);
             }
         }
+    }
+
+    private long getMemoryInMB(CapacityRequirements capacityRequirements) {
+        return capacityRequirements.getRequirement(new MemoryCapacityRequirement().getType()).getMemoryInMB();
     }
 
     private void startContainer(final ContainersSlaPolicy sla, final GridServiceAgent gsa) {

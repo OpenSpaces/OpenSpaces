@@ -295,6 +295,7 @@ public abstract class AbstractScaleStrategyBean implements
     
     
     private int calcMinimumNumberOfMachines() {
+        
         if (getSchemaConfig().isDefaultSchema()) {
             return 1;
         }

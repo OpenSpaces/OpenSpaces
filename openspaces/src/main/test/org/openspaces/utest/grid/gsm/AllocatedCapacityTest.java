@@ -5,38 +5,35 @@ import junit.framework.TestCase;
 
 import org.junit.Test;
 import org.openspaces.core.internal.commons.math.fraction.Fraction;
-import org.openspaces.grid.gsm.capacity.AllocatedCapacity;
+import org.openspaces.grid.gsm.capacity.CapacityRequirements;
+import org.openspaces.grid.gsm.capacity.CpuCapacityRequirement;
+import org.openspaces.grid.gsm.capacity.MemoryCapacityRequirement;
 
 public class AllocatedCapacityTest extends TestCase {
 
+    private static final CapacityRequirements EMPTY = new CapacityRequirements();
+    private static final CapacityRequirements CPU = new CapacityRequirements(new CpuCapacityRequirement(Fraction.ONE));
+    private static final CapacityRequirements MEMORY = new CapacityRequirements(new MemoryCapacityRequirement(1L));
+    private static final CapacityRequirements MEMORY_CPU = new CapacityRequirements(new MemoryCapacityRequirement(1L),new CpuCapacityRequirement(Fraction.ONE));
+    private static final CapacityRequirements MEMORY2_CPU2 = new CapacityRequirements(new MemoryCapacityRequirement(2L),new CpuCapacityRequirement(Fraction.TWO));
+    
     @Test
     public void testAdd() {
-        AllocatedCapacity c1 = new AllocatedCapacity(Fraction.ZERO,1);
-        AllocatedCapacity c2 = new AllocatedCapacity(Fraction.ONE,0);
-        Assert.assertEquals(
-                new AllocatedCapacity(Fraction.ONE,1), 
-                c1.add(c2));
+        Assert.assertEquals(MEMORY_CPU,MEMORY.add(CPU));
     }
     
     @Test
     public void testEqualsZero() {
-        Assert.assertTrue(new AllocatedCapacity(Fraction.ZERO,0).equalsZero());
-        Assert.assertTrue(new AllocatedCapacity(Fraction.ZERO,0).isCpuCoresEqualsZero());
-        Assert.assertTrue(new AllocatedCapacity(Fraction.ZERO,0).isMemoryEqualsZero());
-        Assert.assertFalse(new AllocatedCapacity(Fraction.ONE,0).equalsZero());
-        Assert.assertFalse(new AllocatedCapacity(Fraction.ONE,0).isCpuCoresEqualsZero());
-        Assert.assertTrue(new AllocatedCapacity(Fraction.ONE,0).isMemoryEqualsZero());
-        Assert.assertFalse(new AllocatedCapacity(Fraction.ZERO,1).equalsZero());
-        Assert.assertTrue(new AllocatedCapacity(Fraction.ZERO,1).isCpuCoresEqualsZero());
-        Assert.assertFalse(new AllocatedCapacity(Fraction.ZERO,1).isMemoryEqualsZero());
+        Assert.assertTrue(EMPTY.equalsZero());
+        Assert.assertTrue(EMPTY.getRequirement(new CpuCapacityRequirement().getType()).equalsZero());
+        Assert.assertFalse(CPU.equalsZero());
+        Assert.assertFalse(CPU.getRequirement(new CpuCapacityRequirement().getType()).equalsZero());
     }
     
     @Test
     public void testNegativeCpuException() {
-        AllocatedCapacity c1 = new AllocatedCapacity(Fraction.ZERO,1);
-        AllocatedCapacity c2 = new AllocatedCapacity(Fraction.ONE,0);
         try {
-            c1.subtract(c2);
+            MEMORY.subtract(CPU);
             Assert.fail("expected exception");
         } catch (IllegalArgumentException e) {
 
@@ -45,10 +42,8 @@ public class AllocatedCapacityTest extends TestCase {
     
     @Test
     public void testNegativeMemoryException() {
-        AllocatedCapacity c1 = new AllocatedCapacity(Fraction.ZERO,1);
-        AllocatedCapacity c2 = new AllocatedCapacity(Fraction.ONE,0);
         try {
-            c2.subtract(c1);
+            CPU.subtract(MEMORY);
             Assert.fail("expected exception");
         } catch (IllegalArgumentException e) {
 
@@ -57,46 +52,72 @@ public class AllocatedCapacityTest extends TestCase {
     
     @Test
     public void testSubtractCpu() {
-        AllocatedCapacity c1 = new AllocatedCapacity(Fraction.ONE,1);
-        AllocatedCapacity c2 = new AllocatedCapacity(Fraction.ONE,0);
-        Assert.assertEquals(new AllocatedCapacity(Fraction.ZERO,1), c1.subtract(c2));
+        Assert.assertEquals(EMPTY, CPU.subtract(CPU));
     }
     
     @Test
     public void testSubtractMemory() {
-        AllocatedCapacity c1 = new AllocatedCapacity(Fraction.ONE,1);
-        AllocatedCapacity c2 = new AllocatedCapacity(Fraction.ZERO,1);
-        Assert.assertEquals(new AllocatedCapacity(Fraction.ONE,0), c1.subtract(c2));
+        Assert.assertEquals(CPU, MEMORY_CPU.subtract(MEMORY));
     }
     
     @Test
     public void testSubtractOrZero() {
-        AllocatedCapacity c1 = new AllocatedCapacity(Fraction.ONE,1);
-        AllocatedCapacity c2 = new AllocatedCapacity(Fraction.ONE,1);
-        Assert.assertTrue(c1.subtractOrZero(c2).equalsZero());
-        
-        AllocatedCapacity c3 = new AllocatedCapacity(Fraction.ZERO,0);
-        AllocatedCapacity c4 = new AllocatedCapacity(Fraction.ONE,1);
-        Assert.assertTrue(c3.subtractOrZero(c4).equalsZero());
+        Assert.assertTrue(CPU.subtractOrZero(CPU).equalsZero());
+        Assert.assertTrue(EMPTY.subtractOrZero(MEMORY_CPU).equalsZero());
     }
     
     @Test
-    public void testSatisfies() {
-        AllocatedCapacity c1 = new AllocatedCapacity(Fraction.ONE,1);
-        AllocatedCapacity c2 = new AllocatedCapacity(Fraction.ONE,1);
-        Assert.assertTrue(c1.satisfies(c2));
-        Assert.assertTrue(c2.satisfies(c1));
-        
-        AllocatedCapacity c3 = new AllocatedCapacity(Fraction.TWO,1);
-        AllocatedCapacity c4 = new AllocatedCapacity(Fraction.ONE,2);
-        Assert.assertTrue(c3.satisfies(c1));
-        Assert.assertTrue(c4.satisfies(c1));
-        Assert.assertFalse(c1.satisfies(c3));
-        Assert.assertFalse(c1.satisfies(c4));
-        
-        AllocatedCapacity c5 = new AllocatedCapacity(Fraction.TWO,2);
-        Assert.assertTrue(c5.satisfies(c1));
-        Assert.assertFalse(c1.satisfies(c5));
+    public void testGreaterOrEquals() {
+        Assert.assertTrue(MEMORY_CPU.greaterOrEquals(MEMORY_CPU));
+        Assert.assertTrue(MEMORY_CPU.add(CPU).greaterOrEquals(MEMORY_CPU));
+        Assert.assertTrue(MEMORY_CPU.add(MEMORY).greaterOrEquals(MEMORY_CPU));
+        Assert.assertFalse(MEMORY_CPU.greaterOrEquals(MEMORY_CPU.add(CPU)));
+        Assert.assertTrue(MEMORY_CPU.multiply(2).greaterOrEquals(MEMORY_CPU));
+        Assert.assertFalse(MEMORY_CPU.greaterOrEquals(MEMORY_CPU.multiply(2)));
     }
-  
+    
+    @Test
+    public void testGreaterThan() {
+        Assert.assertFalse(MEMORY_CPU.greaterThan(MEMORY_CPU));
+        Assert.assertTrue(MEMORY_CPU.add(CPU).greaterThan(MEMORY_CPU));
+        Assert.assertTrue(MEMORY_CPU.add(MEMORY).greaterThan(MEMORY_CPU));
+        Assert.assertFalse(MEMORY_CPU.greaterThan(MEMORY_CPU.add(CPU)));
+        Assert.assertTrue(MEMORY_CPU.multiply(2).greaterThan(MEMORY_CPU));
+        Assert.assertFalse(MEMORY_CPU.greaterThan(MEMORY_CPU.multiply(2)));
+    }
+    
+    
+    @Test
+    public void testMin() {
+        Assert.assertEquals(MEMORY_CPU,MEMORY_CPU.min(MEMORY_CPU));
+        Assert.assertEquals(MEMORY,MEMORY_CPU.min(MEMORY));
+        Assert.assertEquals(CPU,MEMORY_CPU.min(CPU));
+    }
+    
+    @Test
+    public void testMax() {
+        Assert.assertEquals(MEMORY_CPU,MEMORY_CPU.max(MEMORY_CPU));
+        Assert.assertEquals(MEMORY_CPU,MEMORY_CPU.max(MEMORY));
+        Assert.assertEquals(MEMORY_CPU,MEMORY_CPU.max(CPU));
+    }
+    
+    @Test
+    public void testMultiply() {
+        Assert.assertEquals(MEMORY2_CPU2,MEMORY_CPU.multiply(2));
+    }
+    
+    @Test
+    public void testDivide() {
+        Assert.assertEquals(MEMORY_CPU,MEMORY2_CPU2.divide(2));
+    }
+    
+    public void testDivideExactly() {
+        Assert.assertEquals(2,MEMORY2_CPU2.divideExactly(MEMORY_CPU));
+        Assert.assertEquals(-1,MEMORY2_CPU2.divideExactly(CPU));
+        Assert.assertEquals(-1,MEMORY2_CPU2.divideExactly(CPU.add(MEMORY_CPU)));
+    }
+    
+    public void testSet() {
+        Assert.assertEquals(MEMORY2_CPU2.subtract(MEMORY),MEMORY2_CPU2.set(new MemoryCapacityRequirement(1L)));
+    }
 }

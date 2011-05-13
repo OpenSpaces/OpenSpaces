@@ -19,7 +19,9 @@ import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig;
 import org.openspaces.core.internal.commons.math.ConvergenceException;
 import org.openspaces.core.internal.commons.math.fraction.Fraction;
-import org.openspaces.grid.gsm.capacity.AllocatedCapacity;
+import org.openspaces.grid.gsm.capacity.CapacityRequirements;
+import org.openspaces.grid.gsm.capacity.MachineCapacityRequirements;
+import org.openspaces.grid.gsm.capacity.MemoryCapacityRequirement;
 import org.openspaces.grid.gsm.containers.ContainersSlaUtils;
 
 import com.gigaspaces.grid.gsa.AgentProcessDetails;
@@ -40,19 +42,6 @@ public class MachinesSlaUtils {
             machine.getGridServiceManagers().getSize() > 0 ||
             machine.getLookupServices().getSize() > 0 ||
             machine.getElasticServiceManagers().getSize() > 0;
-        
-    }
-    
-    public static long getPhysicalMemoryInMB(Machine machine) {
-        final long total = (long) 
-            machine.getOperatingSystem().getDetails()
-            .getTotalPhysicalMemorySizeInMB();
-        return total;
-    }
-    
-    public static Fraction getCpu(Machine machine) {
-        int availableProcessors = machine.getOperatingSystem().getDetails().getAvailableProcessors();
-        return new Fraction(availableProcessors,1);
         
     }
     
@@ -95,17 +84,11 @@ public class MachinesSlaUtils {
 
     
     
-    public static AllocatedCapacity getMachineTotalCapacity(
+    public static CapacityRequirements getMachineTotalCapacity(
             GridServiceAgent agent,
             AbstractMachinesSlaPolicy sla) {
 
-            long memoryInMB = getPhysicalMemoryInMB(agent.getMachine()) - sla.getReservedMemoryCapacityPerMachineInMB();
-            if (memoryInMB < 0 ) {
-                memoryInMB = 0;
-            }
-            return new AllocatedCapacity(
-                    getCpu(agent.getMachine()),
-                    memoryInMB);
+        return new MachineCapacityRequirements(agent.getMachine()).subtract(sla.getReservedCapacityPerMachine());
     }
 
     public static Fraction convertCpuCoresFromDoubleToFraction(double cpu) {
@@ -193,5 +176,10 @@ public class MachinesSlaUtils {
             }
         }
         return match;
+    }
+
+
+    public static long getMemoryInMB(CapacityRequirements capacity) {
+        return capacity.getRequirement(new MemoryCapacityRequirement().getType()).getMemoryInMB();
     }
 }

@@ -1,23 +1,27 @@
 package org.openspaces.admin.internal.os;
 
-import java.util.HashMap;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.openspaces.admin.os.OperatingSystemDetails;
 import org.openspaces.admin.support.StatisticsUtils;
 
 import com.gigaspaces.internal.os.OSDetails;
+import com.gigaspaces.internal.os.OSDetails.OSDriveDetails;
 import com.gigaspaces.internal.os.OSDetails.OSNetInterfaceDetails;
 
 /**
  * @author kimchy
+ * @author itaif - added DriveDetails in v8.0.3
  */
 public class DefaultOperatingSystemDetails implements OperatingSystemDetails {
 
     private final OSDetails details;
     private Map<String, NetworkDetails> networkDetailsMap = 
                             new HashMap<String, OperatingSystemDetails.NetworkDetails>();
+    private Map<String, DriveDetails> driveDetailsMap = 
+                            new HashMap<String, OperatingSystemDetails.DriveDetails>();
 
     public DefaultOperatingSystemDetails(OSDetails details) {
         this.details = details;
@@ -27,6 +31,14 @@ public class DefaultOperatingSystemDetails implements OperatingSystemDetails {
             for(OSNetInterfaceDetails netInterfaceConfig : netInterfaceConfigs){
                 networkDetailsMap.put( netInterfaceConfig.getName(), 
                         new DefaultNetworkDetails( netInterfaceConfig ) );    
+            }
+        }
+        
+        OSDriveDetails[] driveConfigs = details.getDriveConfigs();
+        if( driveConfigs != null ){
+            for(OSDriveDetails driveConfig : driveConfigs){
+                driveDetailsMap.put( driveConfig.getName(), 
+                        new DefaultDriveDetails( driveConfig ) );    
             }
         }
     }
@@ -92,6 +104,11 @@ public class DefaultOperatingSystemDetails implements OperatingSystemDetails {
         return Collections.unmodifiableMap(networkDetailsMap);
     }
     
+    public Map<String, DriveDetails> getDriveDetails() {
+
+        return Collections.unmodifiableMap(driveDetailsMap);
+    }
+    
     private static class DefaultNetworkDetails implements NetworkDetails {
 
         private final String name;
@@ -115,6 +132,27 @@ public class DefaultOperatingSystemDetails implements OperatingSystemDetails {
 
         public String getAddress() {
             return address;
+        }
+        
+    }
+    
+    private static class DefaultDriveDetails implements DriveDetails {
+
+        private final String name;
+        private final Long capacityInMB;
+        
+        private DefaultDriveDetails( 
+                OSDetails.OSDriveDetails driveDetails ){
+            name = driveDetails.getName();
+            capacityInMB = driveDetails.getCapacityInMB();
+        }
+        
+        public String getName() {
+            return name;
+        }
+
+        public Long getCapacityInMB() {
+            return capacityInMB;
         }
         
     }

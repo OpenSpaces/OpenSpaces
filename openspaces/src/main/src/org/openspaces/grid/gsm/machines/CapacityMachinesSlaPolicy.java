@@ -1,37 +1,28 @@
 package org.openspaces.grid.gsm.machines;
 
+import org.openspaces.grid.gsm.capacity.CapacityRequirements;
+
 
 
 public class CapacityMachinesSlaPolicy extends AbstractMachinesSlaPolicy {
  
-    private long memoryInMB;
-    private double cpu;
-        
-    public void setCpuCapacity(double cpu) {
-        this.cpu = cpu;
-    }
-    
-    public double getCpu() {
-        return this.cpu;
-    }
-    
-    public void setMemoryCapacityInMB(long memory) {
-        this.memoryInMB = memory;
-    }
-    
-    public long getMemoryCapacityInMB() {
-        return this.memoryInMB;
-    }
+    private CapacityRequirements capacityRequirements;
     
     @Override
     public boolean equals(Object other) {
         return other instanceof CapacityMachinesSlaPolicy &&
         super.equals(other) &&
-        ((CapacityMachinesSlaPolicy)other).memoryInMB == this.memoryInMB &&
-        ((CapacityMachinesSlaPolicy)other).cpu == this.cpu;
-        //TODO: Should we also compare machineProvisioning ?
+        ((CapacityMachinesSlaPolicy)other).capacityRequirements.equals(capacityRequirements);
     }
 
+    public CapacityRequirements getCapacityRequirements() {
+        return capacityRequirements;
+    }
+    
+    public void setCapacityRequirements(CapacityRequirements capacityRequirements) {
+        this.capacityRequirements=capacityRequirements;
+    }
+    
     public boolean isStopMachineSupported() {
         return true;
     }
@@ -40,5 +31,4 @@ public class CapacityMachinesSlaPolicy extends AbstractMachinesSlaPolicy {
     public String getScaleStrategyName() {
         return "Manual Capacity Scale Strategy";
     }
-
 }

@@ -9,6 +9,29 @@ package org.openspaces.grid.gsm.capacity;
  * @author itaif
  * @see CapacityRequirements
  */
-public interface CapacityRequirement {
+public interface CapacityRequirement extends Comparable<CapacityRequirement> {
 
+    String toString();
+    
+    boolean equals(Object otherCapacityRequirement);
+
+    boolean equalsZero();
+    
+    CapacityRequirement multiply(int i);
+    
+    CapacityRequirement divide(int numberOfContainers);
+    
+    CapacityRequirement subtract(CapacityRequirement otherCapacityRequirement);
+    
+    CapacityRequirement subtractOrZero(CapacityRequirement otherCapacityRequirement);
+    
+    CapacityRequirement add(CapacityRequirement otherCapacityRequirement);
+
+    CapacityRequirement min(CapacityRequirement otherCapacityRequirement);
+
+    CapacityRequirement max(CapacityRequirement otherCapacityRequirement);
+
+    double divide(CapacityRequirement otherCapacityRequirement);
+
+    CapacityRequirementType<? extends CapacityRequirement> getType();
 }

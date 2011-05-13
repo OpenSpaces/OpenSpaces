@@ -104,7 +104,7 @@ public interface OperatingSystemDetails {
      * <p>Note, currently only available on SUN VM.
      */
     double getTotalPhysicalMemorySizeInGB();
-
+    
     /**
      * Returns the (local) host name of the OS.
      */
@@ -120,6 +120,11 @@ public interface OperatingSystemDetails {
      */
     Map<String,NetworkDetails> getNetworkDetails();
     
+    /**
+     * Returns drive details  
+     * @since 8.0.3
+     */
+    Map<String,DriveDetails> getDriveDetails();
     
     interface NetworkDetails {
 
@@ -138,5 +143,18 @@ public interface OperatingSystemDetails {
          * it has one and if it can be accessed given the current privileges
          */
         String getAddress();
-    }    
+    }
+    
+    interface DriveDetails {
+        /**
+         * @return root directory of the drive (such as "/")
+         */
+        String getName();
+        
+        /**
+         * @return the total drive size in MB
+         */
+        Long getCapacityInMB();
+    }
+    
 }

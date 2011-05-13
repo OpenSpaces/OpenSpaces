@@ -1,5 +1,7 @@
 package org.openspaces.admin.pu.elastic.config;
 
+import java.util.Map;
+
 import org.openspaces.core.util.MemoryUnit;
 
 /**
@@ -47,7 +49,34 @@ public class ManualCapacityScaleConfigurer implements ScaleStrategyConfigurer<Ma
         config.setNumberOfCpuCores(cpuCores);
         return this;
     }
-       
+    
+    /**
+     * @see ManualCapacityScaleConfig#setDriveCapacityInMB(String,long) 
+     * @since 8.0.2
+     */
+    public ManualCapacityScaleConfigurer driveCapacity(String drive, int size, MemoryUnit unit) {
+        setDriveCapacity(drive, unit.toMegaBytes(size));
+        return this;
+    }
+    
+    /**
+     * @see ManualCapacityScaleConfig#setDriveCapacityInMB(String,long)
+     * @since 8.0.2
+     */
+    public ManualCapacityScaleConfigurer driveCapacity(String drive, String size) {
+        setDriveCapacity(drive, MemoryUnit.toMegaBytes(size));
+        return this;
+    }
+
+    private void setDriveCapacity(String drive, long sizeInMB) {
+        final Map<String, Long> drivesCapacityInMB = config.getDrivesCapacityInMB();
+        drivesCapacityInMB.put(drive, sizeInMB);
+        config.setDrivesCapacityInMB(drivesCapacityInMB);
+    }
+
+    /**
+     * @see ManualCapacityScaleConfig#setMaxConcurrentRelocationsPerMachine(int)
+     */
     public ManualCapacityScaleConfigurer maxConcurrentRelocationsPerMachine(int maxNumberOfConcurrentRelocationsPerMachine) {
         config.setMaxConcurrentRelocationsPerMachine(maxNumberOfConcurrentRelocationsPerMachine);
         return this;
