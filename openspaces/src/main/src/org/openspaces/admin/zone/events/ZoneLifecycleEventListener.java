@@ -17,7 +17,7 @@
 package org.openspaces.admin.zone.events;
 
 /**
- * A simple lifecyle event listener that implements both the zone added and zone removed event lisetners.
+ * A simple life-cycle event listener that implements both the zone added and zone removed event listeners.
  *
  * @author kimchy
  */
