@@ -1,10 +1,16 @@
 package org.openspaces.dsl.ui;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class UserInterface {
+public class UserInterface implements Serializable {
 
-	public UserInterface() {
+	/**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
+    public UserInterface() {
 		super();
 	}
 	private List<MetricGroup> metricGroups;

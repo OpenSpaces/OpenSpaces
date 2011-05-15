@@ -1,8 +1,14 @@
 package org.openspaces.dsl.ui;
 
-public class AbstractBasicWidget implements Widget {
+import java.io.Serializable;
 
-	private String metric;
+public class AbstractBasicWidget implements Widget, Serializable {
+
+	/**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+    private String metric;
 
 	public String getMetric() {
 		return metric;

@@ -1,8 +1,15 @@
 package org.openspaces.dsl;
 
-public class ServiceLifecycle  {
+import java.io.Serializable;
 
-	private Object init;
+public class ServiceLifecycle implements Serializable {
+
+	/**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
+    private Object init;
 	
 	private Object preInstall;
 	private Object install;

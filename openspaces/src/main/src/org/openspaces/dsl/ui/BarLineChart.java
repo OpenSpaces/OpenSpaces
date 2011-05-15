@@ -2,7 +2,12 @@ package org.openspaces.dsl.ui;
 
 public class BarLineChart extends AbstractBasicWidget {
 
-	public BarLineChart() {
+	/**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
+    public BarLineChart() {
 		super();
 	}
 	

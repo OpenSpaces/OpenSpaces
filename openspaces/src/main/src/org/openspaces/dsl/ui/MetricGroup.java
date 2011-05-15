@@ -1,10 +1,15 @@
 package org.openspaces.dsl.ui;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class MetricGroup {
+public class MetricGroup implements Serializable {
 
-	private String name;
+	/**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+    private String name;
 	public MetricGroup() {
 		super();
 	}

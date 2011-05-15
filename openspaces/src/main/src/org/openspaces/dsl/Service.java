@@ -3,11 +3,17 @@ package org.openspaces.dsl;
 import groovy.lang.GroovyShell;
 
 import java.io.File;
+import java.io.Serializable;
+import java.util.List;
 
 import org.openspaces.dsl.ui.UserInterface;
 
-public class Service {
+public class Service implements Serializable{
 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
     private String name;
     private String icon;
 
@@ -17,7 +23,9 @@ public class Service {
 
     private ServiceLifecycle lifecycle;
     private UserInterface userInterface;
-
+   
+    private List<PluginDescriptor> plugins;
+    
     public String getName() {
         return name;
     }
@@ -103,5 +111,15 @@ public class Service {
     public void setSupportsScaling(final boolean supportsScaling) {
         this.supportsScaling = supportsScaling;
     }
+
+    public void setPlugins(List<PluginDescriptor> plugins) {
+        this.plugins = plugins;
+    }
+
+    public List<PluginDescriptor> getPlugins() {
+        return plugins;
+    }
+
+   
 
 }

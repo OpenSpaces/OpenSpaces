@@ -1,10 +1,15 @@
 package org.openspaces.dsl.ui;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class WidgetGroup {
+public class WidgetGroup implements Serializable {
 
-	private String name;
+	/**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+    private String name;
 	private List<Widget> widgets;
 	public String getName() {
 		return name;
