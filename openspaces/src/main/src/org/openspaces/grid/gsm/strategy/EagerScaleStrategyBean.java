@@ -163,7 +163,7 @@ public class EagerScaleStrategyBean extends AbstractScaleStrategyBean
         if (getLogger().isDebugEnabled()) {
             getLogger().debug("Containers Eager SLA Policy: "+
                     "#gridServiceAgents=" + sla.getClusterCapacityRequirements().getAgentUids().size() + " "+
-                    "newContainerConfig.maximumJavaHeapSizeInMB="+sla.getNewContainerConfig().getMaximumJavaHeapSizeInMB());
+                    "newContainerConfig.maximumMemoryCapacityInMB="+sla.getNewContainerConfig().getMaximumMemoryCapacityInMB());
         }
         boolean reachedSla = containersEndpoint.enforceSla(sla);
         
@@ -236,7 +236,7 @@ public class EagerScaleStrategyBean extends AbstractScaleStrategyBean
         final EagerMachinesSlaPolicy sla = new EagerMachinesSlaPolicy();      
         sla.setMaximumNumberOfMachines(getMaximumNumberOfInstances());
         sla.setMinimumNumberOfMachines(getMinimumNumberOfMachines());
-        sla.setContainerMemoryCapacityInMB(containersConfig.getMaximumJavaHeapSizeInMB());
+        sla.setContainerMemoryCapacityInMB(containersConfig.getMaximumMemoryCapacityInMB());
         sla.setProvisionedAgents(getDiscoveredAgents());
         sla.setMachineIsolation(getIsolation());
         sla.setMachineProvisioning(super.getMachineProvisioning());

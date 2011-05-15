@@ -22,6 +22,8 @@ public class GridServiceContainerConfig {
     private static final String[] COMMAND_LINE_ARGUMENTS_DEFAULT = new String[] {};
     private static final String USE_SCRIPT_KEY = "container.use-script";
     private static final boolean USE_SCRIPT_DEFAULT = false;
+    private static final String MAXIMUM_MEMORY_CAPACITY_MEGABYTES_KEY = "container.memory-capacity";
+    private static final Long MAXIMUM_MEMORY_CAPACITY_MEGABYTES_DEFAULT = 0L;
 
     StringProperties properties;
     
@@ -85,7 +87,7 @@ public class GridServiceContainerConfig {
      *         found.
      */
     public long getMaximumJavaHeapSizeInMB() {
-        long memoryInMB = 0;
+        long memoryInMB = MAXIMUM_MEMORY_CAPACITY_MEGABYTES_DEFAULT;
 
         String memory = getCommandLineArgumentIfExists("-Xmx");
         if (memory != null) {
@@ -94,6 +96,41 @@ public class GridServiceContainerConfig {
         return memoryInMB;
     }
 
+
+    /**
+     * @return the Xmx settings if available without the prefix. For example "1024m" or 0 if not
+     *         found.
+     */
+    public long getMinimumJavaHeapSizeInMB() {
+        long memoryInMB = 0;
+
+        String memory = getCommandLineArgumentIfExists("-Xms");
+        if (memory != null) {
+            memoryInMB = MemoryUnit.toMegaBytes(memory);
+        }
+        return memoryInMB;
+    }
+    
+    public void addMaximumJavaHeapSizeInMBCommandLineArgument(long maximumMemoryCapacityInMB) {
+        addCommandLineArgument("-Xmx" + maximumMemoryCapacityInMB + MemoryUnit.MEGABYTES.getPostfix());
+    }
+    
+    public void addMinimumJavaHeapSizeInMBCommandLineArgument(long minimumMemoryCapacityInMB) {
+        addCommandLineArgument("-Xms" + minimumMemoryCapacityInMB + MemoryUnit.MEGABYTES.getPostfix());
+    }
+    
+    public long getMaximumMemoryCapacityInMB() {
+        return properties.getLong(MAXIMUM_MEMORY_CAPACITY_MEGABYTES_KEY, MAXIMUM_MEMORY_CAPACITY_MEGABYTES_DEFAULT);
+    }
+
+    /**
+     * Sets the total expected memory being used by this process and any subprocesses it forks
+     * (includes java heap, non-java heap, forked processes, etc...) or 0 if undefined
+     */
+    public void setMaximumMemoryCapacityInMB(long memoryInMB) {
+        properties.putLong(MAXIMUM_MEMORY_CAPACITY_MEGABYTES_KEY, memoryInMB);
+    }
+    
     /**
      * @return the com.gs.zones value if available or null if not found.
      */
@@ -163,5 +200,6 @@ public class GridServiceContainerConfig {
     public Map<String,String> getProperties() {
         return properties.getProperties();
     }
+
     
 }

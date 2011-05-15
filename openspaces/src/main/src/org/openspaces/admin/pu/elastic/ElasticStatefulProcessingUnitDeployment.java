@@ -261,13 +261,13 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
     
     protected int calcNumberOfPartitionsFromMemoryRequirements() {
         
-        long maximumJavaHeapSizeMegabytes = new GridServiceContainerConfig(super.getElasticProperties()).getMaximumJavaHeapSizeInMB();
+        long maximumMemoryCapacityInMB = new GridServiceContainerConfig(super.getElasticProperties()).getMaximumMemoryCapacityInMB();
                 
-        if (maximumJavaHeapSizeMegabytes == 0) {
-            throw new IllegalStateException("-Xmx CommandLineArgument is undefined.");    
+        if (maximumMemoryCapacityInMB <= 0) {
+            throw new IllegalStateException("memoryCapacityPerContainer is undefined.");    
         }
                 
-        double totalNumberOfInstances = Math.ceil(((double)maxMemoryCapacityInMB)/maximumJavaHeapSizeMegabytes);
+        double totalNumberOfInstances = Math.ceil(((double)maxMemoryCapacityInMB)/maximumMemoryCapacityInMB);
         int numberOfPartitions = (int) Math.ceil(totalNumberOfInstances / (numberOfBackupInstancesPerPartition+1));
                 
         return Math.max(1, numberOfPartitions);

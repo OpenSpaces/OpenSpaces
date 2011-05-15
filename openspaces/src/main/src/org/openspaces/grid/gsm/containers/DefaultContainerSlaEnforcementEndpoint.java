@@ -182,12 +182,12 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
             
             for (FutureGridServiceContainer futureContainer : futureContainers) {
                 if (futureContainer.getGridServiceAgent().getUid().equals(agentUid)) {
-                    final long containerMemoryInMB = futureContainer.getGridServiceContainerConfig().getMaximumJavaHeapSizeInMB();
+                    final long containerMemoryInMB = futureContainer.getGridServiceContainerConfig().getMaximumMemoryCapacityInMB();
                     allocatedMemory -= containerMemoryInMB;
                 }
             }
             
-            final long containerMemoryInMB = sla.getNewContainerConfig().getMaximumJavaHeapSizeInMB(); 
+            final long containerMemoryInMB = sla.getNewContainerConfig().getMaximumMemoryCapacityInMB(); 
             while (allocatedMemory >= containerMemoryInMB) {
                 allocatedMemory -= containerMemoryInMB;
                 GridServiceAgent agent = agents.getAgentByUID(agentUid);

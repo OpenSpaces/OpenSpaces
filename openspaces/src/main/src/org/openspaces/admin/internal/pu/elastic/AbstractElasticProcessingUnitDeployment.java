@@ -115,13 +115,16 @@ public abstract class AbstractElasticProcessingUnitDeployment {
     }
 
     protected AbstractElasticProcessingUnitDeployment memoryCapacityPerContainer(String memoryCapacityPerContainer) {
-        commandLineArgument("-Xmx"+memoryCapacityPerContainer);
-        commandLineArgument("-Xms"+memoryCapacityPerContainer);
+        memoryCapacityPerContainer(MemoryUnit.MEGABYTES.convert(memoryCapacityPerContainer));
         return this;
+    }
+
+    private void memoryCapacityPerContainer(long memoryInMB) {
+        containerConfig.setMaximumMemoryCapacityInMB(memoryInMB);
     }
     
     protected AbstractElasticProcessingUnitDeployment memoryCapacityPerContainer(int memoryCapacityPerContainer, MemoryUnit unit) {
-        memoryCapacityPerContainer(unit.toMegaBytes(memoryCapacityPerContainer)+MemoryUnit.MEGABYTES.getPostfix());
+        memoryCapacityPerContainer(unit.toMegaBytes(memoryCapacityPerContainer));
         return this;
     }
     
@@ -190,6 +193,32 @@ public abstract class AbstractElasticProcessingUnitDeployment {
     }
     
     protected ProcessingUnitDeployment toProcessingUnitDeployment() {
+        
+        if (containerConfig.getMaximumMemoryCapacityInMB() <= 0 && containerConfig.getMaximumJavaHeapSizeInMB() <=0) {
+            throw new IllegalArgumentException("maximumMemoryCapacity or Xmx commandline must be defined.");
+        }
+        else if (containerConfig.getMaximumMemoryCapacityInMB() <= 0 && containerConfig.getMaximumJavaHeapSizeInMB() > 0) {
+            // inject Xmx into maximumMemoryCapacityInMB
+            containerConfig.setMaximumMemoryCapacityInMB(containerConfig.getMaximumJavaHeapSizeInMB());
+        }
+        else if (containerConfig.getMaximumMemoryCapacityInMB() > 0 && containerConfig.getMaximumJavaHeapSizeInMB() <= 0) {
+            // inject maximumMemoryCapacityInMB into Xmx
+            containerConfig.addMaximumJavaHeapSizeInMBCommandLineArgument(containerConfig.getMaximumMemoryCapacityInMB());
+        }
+        else if (containerConfig.getMaximumMemoryCapacityInMB() < containerConfig.getMaximumJavaHeapSizeInMB() ) {
+            throw new IllegalArgumentException("maximumMemoryCapacity cannot be less than Xmx commandline argument.");
+        }
+        
+        if (containerConfig.getMinimumJavaHeapSizeInMB() <= 0) {
+            //inject Xmx into Xms
+            containerConfig.addMinimumJavaHeapSizeInMBCommandLineArgument(containerConfig.getMaximumMemoryCapacityInMB());
+        }
+        else if (containerConfig.getMinimumJavaHeapSizeInMB() > containerConfig.getMaximumJavaHeapSizeInMB() ) {
+            throw new IllegalArgumentException("Xmx commandline argument "+ containerConfig.getMaximumJavaHeapSizeInMB() + "MB cannot be less than Xms commandline argument " + containerConfig.getMinimumJavaHeapSizeInMB() +"MB.");
+        }
+        else if (containerConfig.getMinimumJavaHeapSizeInMB() > containerConfig.getMaximumMemoryCapacityInMB()) {
+            throw new IllegalArgumentException("maximumMemoryCapacity " + containerConfig.getMaximumMemoryCapacityInMB() + "MB cannot be less than Xms commandline argument " + containerConfig.getMinimumJavaHeapSizeInMB() +"MB.");
+        }
         
         if (machineProvisioning == null) {
             machineProvisioning = new DiscoveredMachineProvisioningConfig();

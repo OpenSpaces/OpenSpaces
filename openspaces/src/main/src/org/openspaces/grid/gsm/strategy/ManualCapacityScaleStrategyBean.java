@@ -88,7 +88,7 @@ public class ManualCapacityScaleStrategyBean extends AbstractScaleStrategyBean
                 
         int targetNumberOfContainers = calcTargetNumberOfContainers();
         
-        memoryInMB = targetNumberOfContainers * containersConfig.getMaximumJavaHeapSizeInMB();
+        memoryInMB = targetNumberOfContainers * containersConfig.getMaximumMemoryCapacityInMB();
     }
 
     private int calcTargetNumberOfContainers() {
@@ -104,16 +104,22 @@ public class ManualCapacityScaleStrategyBean extends AbstractScaleStrategyBean
     }
 
     private int calcTargetNumberOfContainersForStateless() {
-        int requiredNumberOfContainers = (int)Math.ceil(1.0 * slaConfig.getMemoryCapacityInMB() / containersConfig.getMaximumJavaHeapSizeInMB());
+        int requiredNumberOfContainers = (int)Math.ceil(1.0 * slaConfig.getMemoryCapacityInMB() / containersConfig.getMaximumMemoryCapacityInMB());
         int targetNumberOfContainers = Math.max(
                 getMinimumNumberOfMachines(),
                 requiredNumberOfContainers);
         
         getLogger().info(
                 "targetNumberOfContainers= "+
-                "max(minimumNumberOfMachines, memory/jvm-size)= "+
-                "max("+ getMinimumNumberOfMachines() +","+
-                requiredNumberOfContainers+")= "+
+                "max(minimumNumberOfMachines, ceil(memory/jvm-size))= "+
+                "max("+ 
+                    getMinimumNumberOfMachines() + "," +
+                    "ceil("+
+                        slaConfig.getMemoryCapacityInMB() + "/" +
+                        containersConfig.getMaximumMemoryCapacityInMB() + ")= " +
+                "max("+ 
+                    getMinimumNumberOfMachines() + "," + 
+                    requiredNumberOfContainers+")= "+
                 targetNumberOfContainers);
         
         return targetNumberOfContainers;
@@ -220,15 +226,16 @@ public class ManualCapacityScaleStrategyBean extends AbstractScaleStrategyBean
                 slaConfig.getMemoryCapacityInMB()+"/"+totalNumberOfInstances+"= " +
                 avgInstanceCapacityInMB);
         
-        double containerCapacityInMB = containersConfig.getMaximumJavaHeapSizeInMB();
+        double containerCapacityInMB = containersConfig.getMaximumMemoryCapacityInMB();
         
         if (containerCapacityInMB < avgInstanceCapacityInMB) {
             throw new BeanConfigurationException(
-                    "Container capacity (-Xmx) is " + containerCapacityInMB+"MB , "+
+                    "Reduce total capacity from " + slaConfig.getMemoryCapacityInMB() +"MB to " + containerCapacityInMB*totalNumberOfInstances+"MB. " +
+                    "Container capacity is " + containerCapacityInMB+"MB , "+
                     "given " + totalNumberOfInstances + " instances, the total capacity =" 
                     +containerCapacityInMB+"MB *"+totalNumberOfInstances + "= " + 
-                    containerCapacityInMB*totalNumberOfInstances+"MB. "+
-                    "Reduce total capacity from " + slaConfig.getMemoryCapacityInMB() +"MB to " + containerCapacityInMB*totalNumberOfInstances+"MB."); 
+                    containerCapacityInMB*totalNumberOfInstances+"MB. ");
+                    
         }
         /*
          //this calculation does over provisioning of containers so all containers have the 
@@ -290,7 +297,7 @@ public class ManualCapacityScaleStrategyBean extends AbstractScaleStrategyBean
         sla.setCapacityRequirements(capacityRequirements);
         sla.setMinimumNumberOfMachines(getMinimumNumberOfMachines());
         sla.setMaximumNumberOfMachines(getMaximumNumberOfInstances());
-        sla.setContainerMemoryCapacityInMB(containersConfig.getMaximumJavaHeapSizeInMB());
+        sla.setContainerMemoryCapacityInMB(containersConfig.getMaximumMemoryCapacityInMB());
         sla.setProvisionedAgents(getDiscoveredAgents());
         sla.setMachineIsolation(getIsolation());
         boolean reachedSla = machinesEndpoint.enforceSla(sla);
@@ -326,7 +333,7 @@ public class ManualCapacityScaleStrategyBean extends AbstractScaleStrategyBean
         if (getLogger().isDebugEnabled()) {
             getLogger().debug("Containers Manual SLA Policy: "+
                     "#gridServiceAgents=" + sla.getClusterCapacityRequirements().getAgentUids().size() + " "+
-                    "newContainerConfig.maximumJavaHeapSizeInMB="+sla.getNewContainerConfig().getMaximumJavaHeapSizeInMB());
+                    "newContainerConfig.maximumMemoryCapacityInMB="+sla.getNewContainerConfig().getMaximumMemoryCapacityInMB());
         }
         boolean reachedSla = containersEndpoint.enforceSla(sla);
         
