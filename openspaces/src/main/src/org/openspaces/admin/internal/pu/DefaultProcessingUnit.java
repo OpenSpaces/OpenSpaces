@@ -13,8 +13,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.StatisticsMonitor;
+import org.openspaces.admin.application.Application;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.application.InternalApplication;
 import org.openspaces.admin.internal.gsm.InternalGridServiceManager;
 import org.openspaces.admin.internal.pu.events.DefaultBackupGridServiceManagerChangedEventManager;
 import org.openspaces.admin.internal.pu.events.DefaultManagingGridServiceManagerChangedEventManager;
@@ -117,7 +119,10 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
 
     private final ProcessingUnitType processingUnitType;
 
+    private static final String APPLICATION_NAME_CONTEXT_PROPERTY = "com.gs.application";
 
+    private volatile InternalApplication application;
+    
     public DefaultProcessingUnit(InternalAdmin admin, InternalProcessingUnits processingUnits, PUDetails details) {
         this.admin = admin;
         this.processingUnits = processingUnits;
@@ -622,5 +627,17 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         ((InternalGridServiceManager)getManagingGridServiceManager()).setProcessingUnitElasticProperties(this, properties);
         
     }
-    
+
+    public String getApplicationName() {
+        return getBeanLevelProperties().getContextProperties().getProperty(APPLICATION_NAME_CONTEXT_PROPERTY);
+    }
+
+    public Application getApplication() {
+        return application;
+    }
+
+    public void setApplication(Application application) {
+        assertStateChangesPermitted();
+        this.application = (InternalApplication) application;
+    }
 }

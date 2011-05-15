@@ -26,6 +26,7 @@ import org.openspaces.admin.esm.ElasticServiceManagers;
 import org.openspaces.admin.gsa.GridServiceAgents;
 import org.openspaces.admin.gsc.GridServiceContainers;
 import org.openspaces.admin.gsm.GridServiceManagers;
+import org.openspaces.admin.application.Applications;
 import org.openspaces.admin.lus.LookupServices;
 import org.openspaces.admin.machine.Machines;
 import org.openspaces.admin.os.OperatingSystems;
@@ -180,6 +181,13 @@ public interface Admin extends StatisticsMonitor, DumpProvider {
      * Returns the zones discovered.
      */
     Zones getZones();
+
+    /**
+     * @return the discovered applications
+     * @since 8.0.3
+     */
+    Applications getApplications();
+   
 
     /**
      * Returns the transports discovered.

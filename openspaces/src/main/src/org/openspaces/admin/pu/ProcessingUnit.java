@@ -37,6 +37,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.openspaces.admin.AdminAware;
 import org.openspaces.admin.StatisticsMonitor;
+import org.openspaces.admin.application.Application;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
 import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEventManager;
@@ -320,5 +321,12 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
      * @since 8.0
      */
     void setElasticProperties(Map<String,String> config);
+    
+    /**
+     * @return the application that this pu is associated with or null if this processing unit is not part of an application
+     * 
+     * @since 8.0.3
+     */
+    Application getApplication();
     
 }

@@ -3,6 +3,7 @@ package org.openspaces.admin.internal.pu;
 import java.util.Map;
 
 import org.openspaces.admin.gsm.GridServiceManager;
+import org.openspaces.admin.internal.application.InternalApplicationAware;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.space.Space;
@@ -10,7 +11,7 @@ import org.openspaces.admin.space.Space;
 /**
  * @author kimchy
  */
-public interface InternalProcessingUnit extends ProcessingUnit, InternalProcessingUnitInstancesAware {
+public interface InternalProcessingUnit extends ProcessingUnit, InternalProcessingUnitInstancesAware , InternalApplicationAware {
 
     void setNumberOfInstances(int numberOfInstances);
 
@@ -31,4 +32,6 @@ public interface InternalProcessingUnit extends ProcessingUnit, InternalProcessi
     void addEmbeddedSpace(Space space);
     
     Map<String, String> getElasticProperties();
+
+    String getApplicationName();
 }

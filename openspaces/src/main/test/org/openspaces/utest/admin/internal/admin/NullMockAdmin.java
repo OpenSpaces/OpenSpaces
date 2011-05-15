@@ -13,6 +13,7 @@ import org.openspaces.admin.AdminEventListener;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.GridComponent;
 import org.openspaces.admin.alert.AlertManager;
+import org.openspaces.admin.application.Applications;
 import org.openspaces.admin.dump.DumpGeneratedListener;
 import org.openspaces.admin.dump.DumpProvider;
 import org.openspaces.admin.dump.DumpResult;
@@ -366,6 +367,11 @@ public class NullMockAdmin implements Admin, InternalAdmin {
     }
 
     public String getApplicationName(ProcessingUnit pu) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public Applications getApplications() {
         // TODO Auto-generated method stub
         return null;
     }

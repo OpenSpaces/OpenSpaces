@@ -27,7 +27,7 @@ import org.openspaces.admin.pu.ProcessingUnit;
 public interface ProcessingUnitAddedEventListener {
 
     /**
-     * A callback inidicating that a Processing Unit was added (deployed/discovered).
+     * A callback indicating that a Processing Unit was added (deployed/discovered).
      */
     void processingUnitAdded(ProcessingUnit processingUnit);
 }

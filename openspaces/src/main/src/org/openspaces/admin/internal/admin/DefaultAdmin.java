@@ -1,14 +1,11 @@
 package org.openspaces.admin.internal.admin;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,6 +29,8 @@ import org.openspaces.admin.AdminEventListener;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.GridComponent;
 import org.openspaces.admin.alert.AlertManager;
+import org.openspaces.admin.application.Application;
+import org.openspaces.admin.application.Applications;
 import org.openspaces.admin.dump.CompoundDumpResult;
 import org.openspaces.admin.dump.DumpGeneratedListener;
 import org.openspaces.admin.dump.DumpProvider;
@@ -45,6 +44,11 @@ import org.openspaces.admin.gsc.GridServiceContainers;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.gsm.GridServiceManagers;
 import org.openspaces.admin.internal.alert.DefaultAlertManager;
+import org.openspaces.admin.internal.application.DefaultApplication;
+import org.openspaces.admin.internal.application.DefaultApplications;
+import org.openspaces.admin.internal.application.InternalApplication;
+import org.openspaces.admin.internal.application.InternalApplicationAware;
+import org.openspaces.admin.internal.application.InternalApplications;
 import org.openspaces.admin.internal.discovery.DiscoveryService;
 import org.openspaces.admin.internal.esm.DefaultElasticServiceManagers;
 import org.openspaces.admin.internal.esm.InternalElasticServiceManager;
@@ -133,6 +137,7 @@ import com.gigaspaces.security.directory.UserDetails;
 
 /**
  * @author kimchy
+ * @author itaif - added Applications
  */
 public class DefaultAdmin implements InternalAdmin {
 
@@ -150,6 +155,8 @@ public class DefaultAdmin implements InternalAdmin {
     private final InternalLookupServices lookupServices = new DefaultLookupServices(this);
 
     private final InternalZones zones = new DefaultZones(this);
+    
+    private final InternalApplications applications = new DefaultApplications(this);
 
     private final InternalMachines machines = new DefaultMachines(this);
 
@@ -206,10 +213,6 @@ public class DefaultAdmin implements InternalAdmin {
     private long executorSingleThreadId;
 
     private final AlertManager alertManager;
-
-    //TODO: Move to ProcessingUnit
-    @Deprecated
-    private static final String APPLICATION_NAME_CONTEXT_PROPERTY = "com.gs.application";
 
     public DefaultAdmin() {
         this.discoveryService = new DiscoveryService(this);
@@ -441,6 +444,10 @@ public class DefaultAdmin implements InternalAdmin {
 
     public Zones getZones() {
         return this.zones;
+    }
+    
+    public Applications getApplications() {
+        return this.applications;
     }
 
     public Transports getTransports() {
@@ -945,13 +952,33 @@ public class DefaultAdmin implements InternalAdmin {
             }
         }
     }
-
+    
+    private void processApplicationsOnProcessingUnitAddition(ProcessingUnit processingUnit) {
+        
+        //TODO: [itaif] Discover application through Lookup Service and add orphan PU detection (PU that was discovered before its Application)
+        String applicationName = ((InternalProcessingUnit)processingUnit).getApplicationName();
+        if (applicationName == null) {
+            return;
+        }
+        
+        InternalApplication application = (InternalApplication) applications.getApplication(applicationName);
+        if (application == null) {
+            application = new DefaultApplication(this, applicationName);
+        }
+        applications.addApplication(application, processingUnit);
+    }
+    
     private void processZonesOnServiceRemoval(String zoneUidProvider, ZoneAware zoneAware) {
         for (Zone zone : zoneAware.getZones().values()) {
             zones.removeProvider(zone, zoneUidProvider);
         }
     }
 
+    private void processApplicationsOnProcessingUnitRemoval(ProcessingUnit processingUnit) {
+        applications.removeProcessingUnit(processingUnit);
+
+    }
+    
     private InternalMachine processMachineOnServiceAddition(TransportDetails transportDetails,
             InternalTransport transport, OperatingSystem operatingSystem,
             VirtualMachine virtualMachine, InternalMachineAware... machineAwares) {
@@ -1171,6 +1198,7 @@ public class DefaultAdmin implements InternalAdmin {
             for (ProcessingUnit processingUnit : processingUnits) {
                 if (!holders.containsKey(processingUnit.getName())) {
                     processingUnits.removeProcessingUnit(processingUnit.getName());
+                    processApplicationsOnProcessingUnitRemoval(processingUnit);
                 }
             }
             // now, go over and update what needed to be updated
@@ -1223,6 +1251,8 @@ public class DefaultAdmin implements InternalAdmin {
                     for (GridServiceManager backupGSM : holder.backupGSMs.values()) {
                         processingUnit.addBackupGridServiceManager(backupGSM);
                     }
+                    
+                    processApplicationsOnProcessingUnitAddition(processingUnit);
                 }
 
                 processingUnit.setStatus(details.getStatus());
@@ -1299,35 +1329,5 @@ public class DefaultAdmin implements InternalAdmin {
             }}, 
             
             delay, unit);
-    }
-
-    //TODO: Treat Application as a 1st class citizen in the Admin API (Application object abstraction needed)
-    @Deprecated
-    public ProcessingUnit[] getProcessingUnitsForApplication(String applicationName) {
-        List<ProcessingUnit> applicationProcessingUnits = new ArrayList<ProcessingUnit>();
-        for (ProcessingUnit pu : this.getProcessingUnits()) {
-            String puApplicationName = getApplicationName(pu);
-            if (puApplicationName != null && applicationName.equals(puApplicationName)) {
-                applicationProcessingUnits.add(pu);
-            }
-        }
-        return applicationProcessingUnits.toArray(new ProcessingUnit[applicationProcessingUnits.size()]);
-    }
-    
-    @Deprecated
-    public String[] getApplicationNames() {
-        Set<String> applicationNames= new TreeSet<String>(); //deterministic sorting
-        for (ProcessingUnit pu : this.getProcessingUnits()) {
-            String puApplicationName = getApplicationName(pu);
-            if (puApplicationName != null) {
-                applicationNames.add(puApplicationName);
-            }
-        }
-        return applicationNames.toArray(new String[applicationNames.size()]);
-    }
-
-    @Deprecated
-    public String getApplicationName(ProcessingUnit pu) {
-        return pu.getBeanLevelProperties().getContextProperties().getProperty(APPLICATION_NAME_CONTEXT_PROPERTY);
     }
 }
