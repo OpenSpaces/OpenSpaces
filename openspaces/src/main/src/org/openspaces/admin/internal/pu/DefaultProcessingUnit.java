@@ -38,6 +38,7 @@ import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.ProcessingUnitPartition;
 import org.openspaces.admin.pu.ProcessingUnitType;
 import org.openspaces.admin.pu.ProcessingUnits;
+import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
 import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEvent;
 import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEventManager;
@@ -640,4 +641,11 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         assertStateChangesPermitted();
         this.application = (InternalApplication) application;
     }
+
+
+    public ScaleStrategyConfig getScaleStrategyConfig() {
+        //TODO: Save the scale config notifications from the ESM
+        return new ManualCapacityScaleConfig();
+    }
+
 }
