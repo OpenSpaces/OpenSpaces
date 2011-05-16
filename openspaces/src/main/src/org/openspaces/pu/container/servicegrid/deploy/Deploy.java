@@ -41,6 +41,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.jar.JarEntry;
+import java.util.jar.JarInputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import net.jini.config.Configuration;
 import net.jini.core.discovery.LookupLocator;
@@ -60,6 +64,7 @@ import org.jini.rio.core.ThresholdValues;
 import org.jini.rio.monitor.DeployAdmin;
 import org.jini.rio.opstring.OpString;
 import org.jini.rio.opstring.OpStringLoader;
+import org.openspaces.admin.pu.ProcessingUnitType;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.core.properties.BeanLevelPropertyBeanPostProcessor;
@@ -546,17 +551,27 @@ public class Deploy {
         }
         
         //get pu type
-        beanLevelProperties.getContextProperties().put("pu.type", "STATELESS"); //default
+        String puType = guessProcessingUnitType(puPath, puFile, root, puString, sla, beanLevelProperties);
+        beanLevelProperties.getContextProperties().put("pu.type", puType);
+
+        //deploy to sg
+        return loadDeployment(puString, codeserver, sla, puPath, overridePuName, beanLevelProperties, elasticProperties);
+    }
+
+    private String guessProcessingUnitType(String puPath, File puFile, URL root, String puString, SLA sla, BeanLevelProperties beanLevelProperties) {
+
         if ( containsWEB_INF(puPath, root) ) {
-            beanLevelProperties.getContextProperties().put("pu.type", "WEB"); //Web APP
+            return ProcessingUnitType.WEB.name(); //Web APP
+        } else if (containsEXT(puPath, root) && isUniversalProcessingUnit(puFile)) {
+            return ProcessingUnitType.UNIVERSAL.name(); //USM
         } else if (sla.getClusterSchema() != null) {
-            beanLevelProperties.getContextProperties().put("pu.type", "STATEFUL"); //cluster space
+            return ProcessingUnitType.STATEFUL.name(); //cluster space
         } else {
             String puStringWithoutComments = removeCommentsFromPuString(puString);
             if (puStringWithoutComments.contains("schema=\"mirror\"")) {
-                beanLevelProperties.getContextProperties().put("pu.type", "MIRROR"); //mirror space
+                return ProcessingUnitType.MIRROR.name(); //mirror space
             } else if (puStringWithoutComments.contains("<os-core:space") && puString.contains("url=\"/./")) {
-                beanLevelProperties.getContextProperties().put("pu.type", "STATEFUL"); //embedded space
+                return ProcessingUnitType.STATEFUL.name(); //embedded space
             } else if (puString.contains("url=\"${")) {
                 int beginIndex = puString.indexOf("url=\"${") + 7; //length
                 if (beginIndex != -1) {
@@ -564,17 +579,17 @@ public class Deploy {
                     if (endIndex != -1) {
                         String propertyKey = puString.substring(beginIndex, endIndex);
                         if (beanLevelProperties.getContextProperties().getProperty(propertyKey,"").startsWith("/./")) {
-                            beanLevelProperties.getContextProperties().put("pu.type", "STATEFUL"); //embedded space
+                            return ProcessingUnitType.STATEFUL.name(); //embedded space
                         }
                     }
                 }
             }
         }
-
-        //deploy to sg
-        return loadDeployment(puString, codeserver, sla, puPath, overridePuName, beanLevelProperties, elasticProperties);
+        
+        return ProcessingUnitType.STATELESS.name(); //default
     }
 
+    /** search for /web-inf */
     private boolean containsWEB_INF(String puPath, URL root) {
         boolean containsWebInf = false;
         try {
@@ -588,6 +603,59 @@ public class Deploy {
             // ignore, no file
         }
         return containsWebInf;
+    }
+    
+    /** search for /ext (fast check if USM) */
+    private boolean containsEXT(String puPath, URL root) {
+        boolean containsExt = false;
+        try {
+            URL extURL = new URL(root, puPath + "/ext");
+            InputStream is = extURL.openStream();
+            if (is != null) {
+                containsExt = true;
+                is.close();
+            }
+        } catch (Exception e) {
+            // ignore, no file
+        }
+        return containsExt;
+    }
+    
+    /** search for /ext/*-service.groovy */
+    private boolean isUniversalProcessingUnit(File puFile) {
+        boolean isUniversal = false;
+        try {
+            if (puFile.getName().endsWith(".zip")) {
+                ZipInputStream zip = new ZipInputStream(new FileInputStream(puFile));
+                while (true) {
+                    ZipEntry entry = zip.getNextEntry();
+                    if (entry == null) {
+                        break;
+                    }
+                    if (entry.getName().endsWith("-service.groovy")) {
+                        isUniversal = true;
+                        break;
+                    }
+                }
+                zip.close();
+            } else if (puFile.getName().endsWith(".jar")) {
+                JarInputStream jar = new JarInputStream(new FileInputStream(puFile));
+                while (true) {
+                    JarEntry entry = jar.getNextJarEntry();
+                    if (entry == null) {
+                        break;
+                    }
+                    if (entry.getName().endsWith("-service.groovy")) {
+                        isUniversal = true;
+                        break;
+                    }
+                }
+                jar.close();
+            }
+        } catch (Exception e) {
+            // ignore, no file
+        }
+        return isUniversal;
     }
     
     private String removeCommentsFromPuString(String puString) {

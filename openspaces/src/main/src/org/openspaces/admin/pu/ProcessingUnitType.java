@@ -10,5 +10,6 @@ public enum ProcessingUnitType {
     STATELESS,
     STATEFUL,
     MIRROR,
-    WEB
+    WEB,
+    UNIVERSAL
 }
