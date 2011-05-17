@@ -27,10 +27,18 @@ import org.openspaces.pu.container.ProcessingUnitContainer;
  */
 public class CompoundProcessingUnitContainer implements ProcessingUnitContainer {
 
-    private ProcessingUnitContainer[] containers;
+    private final ProcessingUnitContainer[] containers;
 
     public CompoundProcessingUnitContainer(ProcessingUnitContainer[] containers) {
         this.containers = containers;
+    }
+    
+    /**
+     * @return the underlying processing unit containers.
+     * @since 8.0.3
+     */
+    public ProcessingUnitContainer[] getProcessingUnitContainers() {
+        return containers;
     }
 
     public void close() throws CannotCloseContainerException {
