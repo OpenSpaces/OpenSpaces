@@ -5,8 +5,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.openspaces.admin.application.Application;
 import org.openspaces.admin.application.events.ApplicationAddedEventListener;
-import org.openspaces.admin.gsc.GridServiceContainer;
-import org.openspaces.admin.gsc.events.GridServiceContainerAddedEventListener;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.application.InternalApplications;
 import org.openspaces.admin.internal.support.GroovyHelper;
