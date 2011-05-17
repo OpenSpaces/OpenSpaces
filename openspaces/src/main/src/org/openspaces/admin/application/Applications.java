@@ -8,6 +8,13 @@ import org.openspaces.admin.application.events.ApplicationAddedEventManager;
 import org.openspaces.admin.application.events.ApplicationLifecycleEventListener;
 import org.openspaces.admin.application.events.ApplicationRemovedEventManager;
 
+
+/**
+ * Holds one or more {@link org.openspaces.admin.application.Application}s
+ * 
+ * @author itaif
+ * @since 8.0.3
+ */
 public interface Applications extends Iterable<Application>, AdminAware {
 
     /**
