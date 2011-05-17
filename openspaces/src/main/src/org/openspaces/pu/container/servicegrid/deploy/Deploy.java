@@ -41,10 +41,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.jar.JarEntry;
-import java.util.jar.JarInputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 import net.jini.config.Configuration;
 import net.jini.core.discovery.LookupLocator;
@@ -562,7 +558,7 @@ public class Deploy {
 
         if ( containsWEB_INF(puPath, root) ) {
             return ProcessingUnitType.WEB.name(); //Web APP
-        } else if (containsEXT(puPath, root) && isUniversalProcessingUnit(puFile)) {
+        } else if (containsEXT(puPath, root)) {
             return ProcessingUnitType.UNIVERSAL.name(); //USM
         } else if (sla.getClusterSchema() != null) {
             return ProcessingUnitType.STATEFUL.name(); //cluster space
@@ -605,7 +601,7 @@ public class Deploy {
         return containsWebInf;
     }
     
-    /** search for /ext (fast check if USM) */
+    /** search for /ext (assuming that only USM has this! TODO - find better distinction) */
     private boolean containsEXT(String puPath, URL root) {
         boolean containsExt = false;
         try {
@@ -619,43 +615,6 @@ public class Deploy {
             // ignore, no file
         }
         return containsExt;
-    }
-    
-    /** search for /ext/*-service.groovy */
-    private boolean isUniversalProcessingUnit(File puFile) {
-        boolean isUniversal = false;
-        try {
-            if (puFile.getName().endsWith(".zip")) {
-                ZipInputStream zip = new ZipInputStream(new FileInputStream(puFile));
-                while (true) {
-                    ZipEntry entry = zip.getNextEntry();
-                    if (entry == null) {
-                        break;
-                    }
-                    if (entry.getName().endsWith("-service.groovy")) {
-                        isUniversal = true;
-                        break;
-                    }
-                }
-                zip.close();
-            } else if (puFile.getName().endsWith(".jar")) {
-                JarInputStream jar = new JarInputStream(new FileInputStream(puFile));
-                while (true) {
-                    JarEntry entry = jar.getNextJarEntry();
-                    if (entry == null) {
-                        break;
-                    }
-                    if (entry.getName().endsWith("-service.groovy")) {
-                        isUniversal = true;
-                        break;
-                    }
-                }
-                jar.close();
-            }
-        } catch (Exception e) {
-            // ignore, no file
-        }
-        return isUniversal;
     }
     
     private String removeCommentsFromPuString(String puString) {
