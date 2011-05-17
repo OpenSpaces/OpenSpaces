@@ -27,8 +27,6 @@ public class ManualCapacityScaleConfig
 
     private static final long serialVersionUID = 1L;
 
-    
-    private static final String STRATEGY_NAME = "scale-strategy.manual-memory";
     private static final String MEMORY_CAPACITY_MEGABYTES_KEY = "memory-capacity-megabytes";
     private static final int MEMORY_CAPACITY_MEGABYTES_DEFAULT = 0;
     private static final String CPU_CAPACITY_CORES_KEY = "cpu-capacity-cores";
@@ -95,10 +93,6 @@ public class ManualCapacityScaleConfig
 
     public void setProperties(Map<String, String> properties) {
         this.properties = new StringProperties(properties);
-    }
-
-    public String getStrategyName() {
-        return STRATEGY_NAME;
     }
 
     public String getBeanClassName() {

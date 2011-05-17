@@ -22,8 +22,6 @@ public class EagerScaleConfig
         implements ScaleStrategyConfig , Externalizable {
 
     private static final long serialVersionUID = 1L;
-
-    private static final String STRATEGY_NAME = "scale-strategy.eager.";
  
     private StringProperties properties;
     
@@ -57,10 +55,6 @@ public class EagerScaleConfig
 
     public Map<String,String> getProperties() {
         return properties.getProperties();
-    }
-
-    public String getStrategyName() {
-        return STRATEGY_NAME;
     }
 
     public String getBeanClassName() {
