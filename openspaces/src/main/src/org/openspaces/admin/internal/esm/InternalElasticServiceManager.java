@@ -7,6 +7,7 @@ import net.jini.core.lookup.ServiceID;
 import org.openspaces.admin.esm.ElasticServiceManager;
 import org.openspaces.admin.internal.support.InternalAgentGridComponent;
 import org.openspaces.admin.pu.ProcessingUnit;
+import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
 
 /**
  * @author Moran Avigdor
@@ -18,5 +19,7 @@ public interface InternalElasticServiceManager extends ElasticServiceManager, In
 
     void setProcessingUnitElasticProperties(ProcessingUnit pu, Map<String,String> properties);
     
-    void setScaleStrategy(ProcessingUnit pu, String strategyClassName, Map<String,String> strategyProperties);
+    void setProcessingUnitScaleStrategyConfig(ProcessingUnit pu, ScaleStrategyConfig scaleStrategyConfig);
+
+    ScaleStrategyConfig getProcessingUnitScaleStrategyConfig(ProcessingUnit pu);
 }

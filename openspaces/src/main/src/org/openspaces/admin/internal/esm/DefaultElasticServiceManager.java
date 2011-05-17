@@ -12,6 +12,7 @@ import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.dump.InternalDumpResult;
 import org.openspaces.admin.internal.support.AbstractAgentGridComponent;
 import org.openspaces.admin.pu.ProcessingUnit;
+import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
 import org.openspaces.grid.esm.ESM;
 
 import com.gigaspaces.internal.jvm.JVMDetails;
@@ -137,9 +138,18 @@ public class DefaultElasticServiceManager extends AbstractAgentGridComponent imp
         }
     }
     
-    public void setScaleStrategy(ProcessingUnit pu, String strategyClassName, Map<String,String> strategyProperties) {
+    public void setProcessingUnitScaleStrategyConfig(ProcessingUnit pu, ScaleStrategyConfig scaleStrategyConfig) {
         try {
-            esm.setScaleStrategy(pu.getName(), strategyClassName, strategyProperties);
+            esm.setProcessingUnitScaleStrategy(pu.getName(), scaleStrategyConfig);
+        }
+        catch (RemoteException e) {
+            throw new AdminException("Failed to set processing unit dynamic properties",e);
+        }
+    }
+
+    public ScaleStrategyConfig getProcessingUnitScaleStrategyConfig(ProcessingUnit pu) {
+        try {
+            return esm.getProcessingUnitScaleStrategyConfig(pu.getName());
         }
         catch (RemoteException e) {
             throw new AdminException("Failed to set processing unit dynamic properties",e);

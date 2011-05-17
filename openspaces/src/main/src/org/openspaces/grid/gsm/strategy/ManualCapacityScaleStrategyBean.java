@@ -400,4 +400,8 @@ public class ManualCapacityScaleStrategyBean extends AbstractScaleStrategyBean
         getAdmin().getAlertManager().triggerAlert(alertFactory.toAlert());
         getLogger().debug(alertDescription);
     }
+
+    public ManualCapacityScaleConfig getConfig() {
+        return slaConfig;
+    }
 }

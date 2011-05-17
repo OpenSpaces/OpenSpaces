@@ -7,6 +7,7 @@ import java.util.Map;
 import net.jini.id.Uuid;
 
 import org.jini.rio.resources.servicecore.AbstractProxy;
+import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
 
 import com.gigaspaces.security.SecurityException;
 import com.gigaspaces.security.directory.UserDetails;
@@ -59,9 +60,13 @@ public class ESMProxy extends AbstractProxy implements ESM, Serializable {
         esmServer.setProcessingUnitElasticProperties(processingUnitName, properties);
     }
 
-    public void setScaleStrategy(String puName, String strategyClassName, Map<String, String> strategyProperties)
+    public void setProcessingUnitScaleStrategy(String puName, ScaleStrategyConfig scaleStrategyConfig)
             throws RemoteException {
-        esmServer.setScaleStrategy(puName, strategyClassName, strategyProperties);
+        esmServer.setProcessingUnitScaleStrategy(puName, scaleStrategyConfig);
+    }
+
+    public ScaleStrategyConfig getProcessingUnitScaleStrategyConfig(String processingUnitName)throws RemoteException {
+        return esmServer.getProcessingUnitScaleStrategyConfig(processingUnitName);
     }
 
 }

@@ -6,7 +6,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,6 +31,7 @@ import org.openspaces.admin.internal.pu.elastic.ScaleStrategyBeanPropertiesManag
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.machine.events.MachineLifecycleEventListener;
 import org.openspaces.admin.pu.ProcessingUnit;
+import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
 import org.openspaces.admin.pu.events.ProcessingUnitAddedEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitRemovedEventListener;
 import org.openspaces.grid.gsm.ScaleBeanServer;
@@ -36,6 +39,7 @@ import org.openspaces.grid.gsm.containers.ContainersSlaEnforcement;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcement;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioningAdapterFactory;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcement;
+import org.openspaces.grid.gsm.strategy.ScaleStrategyBean;
 
 import com.gigaspaces.grid.gsa.AgentHelper;
 import com.gigaspaces.grid.zone.ZoneHelper;
@@ -311,7 +315,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
         return elasticPropertiesPerProcessingUnit.get(processingUnitName);
     }
 
-    public void setScaleStrategy(final String puName, final String strategyClassName, final Map<String,String> strategyProperties) {
+    public void setProcessingUnitScaleStrategy(final String puName, final ScaleStrategyConfig scaleStrategyConfig) {
         logger.fine("Queuing scale strategy for " + puName);
         ((InternalAdmin)admin).scheduleNonBlockingStateChange(
                 new Runnable() {
@@ -322,11 +326,12 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
                        {
                            //If there are no properties yet, this is a race condition. We received scale command before the ProcessingUnitAdded
                            //event, keep the scale command for later merge
-                           pendingElasticPropertiesUpdatePerProcessingUnit.put(puName, new PendingElasticPropertiesUpdate(strategyClassName, strategyProperties));
+                           pendingElasticPropertiesUpdatePerProcessingUnit.put(puName, 
+                                   new PendingElasticPropertiesUpdate(scaleStrategyConfig.getBeanClassName(), scaleStrategyConfig.getProperties()));
                        }
                        else
                        {
-                           mergeScaleProperties(strategyClassName, strategyProperties, properties);
+                           mergeScaleProperties(scaleStrategyConfig.getBeanClassName(), scaleStrategyConfig.getProperties(), properties);
                            ESMImpl.this.processingUnitElasticPropertiesChanged(puName,properties);
                        }
                    }
@@ -411,7 +416,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
             }
             
             ScaleBeanServer beanServer = scaleBeanServerPerProcessingUnit.get(pu);
-
+            
             if (beanServer == null) {
                 ProcessingUnitSchemaConfig schemaConfig = new ProcessingUnitSchemaConfig(elasticProperties);
                 ElasticMachineIsolationConfig isolationConfig = new ElasticMachineIsolationConfig(elasticProperties);
@@ -480,6 +485,38 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
             return _scaleCommand;
         }
 
+    }
+
+    public ScaleStrategyConfig getProcessingUnitScaleStrategyConfig(final String processingUnitName) throws RemoteException {
+        
+        final AtomicReference<ScaleStrategyConfig> config = new AtomicReference<ScaleStrategyConfig>();
+        final CountDownLatch latch = new CountDownLatch(1);
+        ((InternalAdmin)admin).scheduleNonBlockingStateChange(
+                new Runnable() {
+
+                    public void run() {
+                        
+                        ProcessingUnit processingUnit = admin.getProcessingUnits().getProcessingUnit(processingUnitName);
+                        if (processingUnit != null) {
+                            ScaleBeanServer beanServer = scaleBeanServerPerProcessingUnit.get(processingUnit);
+                            if (beanServer != null) {
+                                ScaleStrategyBean enabledBean = beanServer.getEnabledBean();
+                                if (enabledBean != null) {
+                                    config.set(enabledBean.getConfig());
+                                }
+                            }
+                            
+                        }
+                        latch.countDown();
+                    }
+                
+                });
+        
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+        }
+        return config.get();
     }
 
 }

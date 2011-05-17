@@ -1,5 +1,9 @@
 package org.openspaces.admin.pu.elastic.config;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,7 +19,9 @@ import org.openspaces.grid.gsm.strategy.EagerScaleStrategyBean;
  * @author itaif
  */
 public class EagerScaleConfig 
-        implements ScaleStrategyConfig {
+        implements ScaleStrategyConfig , Externalizable {
+
+    private static final long serialVersionUID = 1L;
 
     private static final String STRATEGY_NAME = "scale-strategy.eager.";
  
@@ -63,6 +69,29 @@ public class EagerScaleConfig
     
     public String toString() {
         return this.properties.toString();
+    }
+    
+    @Override
+    public boolean equals(Object other) {
+        return (other instanceof EagerScaleConfig) &&
+                this.properties.equals(((EagerScaleConfig)other).properties);
+    }
+    
+    @Override
+    public int hashCode() {
+        return this.properties.hashCode();
+    }
+    
+
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeObject(this.properties.getProperties());
+        
+    }
+
+    @SuppressWarnings("unchecked")
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        this.properties = new StringProperties((Map<String,String>)in.readObject());
+        
     }
 }
 

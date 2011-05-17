@@ -1,5 +1,9 @@
 package org.openspaces.admin.pu.elastic.config;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,7 +23,9 @@ import org.openspaces.grid.gsm.strategy.ManualCapacityScaleStrategyBean;
  * @author itaif
  */
 public class ManualCapacityScaleConfig 
-        implements ScaleStrategyConfig {
+    implements ScaleStrategyConfig , Externalizable {
+
+    private static final long serialVersionUID = 1L;
 
     
     private static final String STRATEGY_NAME = "scale-strategy.manual-memory";
@@ -106,8 +112,10 @@ public class ManualCapacityScaleConfig
     /**
      * Specifies the disk and network drive capacity needed by the processing unit.
      * @param megaBytesPerDrive - a mapping between the file system directory representing the drive and its capacity (in mega-bytes) needed by the pu .
+     * 
+     * For example the drive "/" (on linux) has the size of 50*1024MBs
+     * or the drive "c:\" (on windows)  has the size of 50*1024MBs
      */
-    //TODO: Linux and Windows drive examples
     public void setDrivesCapacityInMB(Map<String,Long> megaBytesPerDrive) {
         Map<String,String> capacityPerDrive = new HashMap<String,String>();
         for (String drive : megaBytesPerDrive.keySet()) {
@@ -132,6 +140,28 @@ public class ManualCapacityScaleConfig
             megaBytesPerDrive.put(drive, Long.valueOf(capacityPerDrive.get(drive)));
         }
         return megaBytesPerDrive;
+    }
+    
+    @Override
+    public boolean equals(Object other) {
+        return (other instanceof ManualCapacityScaleConfig) &&
+                this.properties.equals(((ManualCapacityScaleConfig)other).properties);
+    }
+    
+    @Override
+    public int hashCode() {
+        return this.properties.hashCode();
+    }
+
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeObject(this.properties.getProperties());
+        
+    }
+
+    @SuppressWarnings("unchecked")
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        this.properties = new StringProperties((Map<String,String>)in.readObject());
+        
     }
     
 }

@@ -243,4 +243,7 @@ public class EagerScaleStrategyBean extends AbstractScaleStrategyBean
         return sla;
     }
 
+    public EagerScaleConfig getConfig() {
+        return slaConfig;
+    }
 }

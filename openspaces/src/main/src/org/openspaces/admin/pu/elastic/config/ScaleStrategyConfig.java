@@ -1,8 +1,10 @@
 package org.openspaces.admin.pu.elastic.config;
 
+import java.io.Externalizable;
+
 import org.openspaces.admin.bean.BeanConfig;
 
-public interface ScaleStrategyConfig extends BeanConfig {
+public interface ScaleStrategyConfig extends BeanConfig , Externalizable {
 
     /**
      * Sets the polling interval in which the scale strategy SLA is monitored and enforced.
@@ -30,4 +32,8 @@ public interface ScaleStrategyConfig extends BeanConfig {
      * @param maxNumberOfConcurrentRelocationsPerMachine
      */
     void setMaxConcurrentRelocationsPerMachine(int maxNumberOfConcurrentRelocationsPerMachine);
+    
+    boolean equals(Object other);
+    int hashCode();
+    String toString();
 }

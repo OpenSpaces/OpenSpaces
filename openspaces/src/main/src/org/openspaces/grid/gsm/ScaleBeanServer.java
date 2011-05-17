@@ -129,7 +129,7 @@ public class ScaleBeanServer {
     
     public boolean isUndeployStarted() {
         boolean undeployStarted = false;
-        List<Bean> enabledBeanAssignableTo = beanServer.getEnabledBeanAssignableTo(new Class[] {UndeployScaleStrategyBean.class});
+        List<Bean> enabledBeanAssignableTo = beanServer.getEnabledBeansAssignableTo(new Class[] {UndeployScaleStrategyBean.class});
         if (!enabledBeanAssignableTo.isEmpty()) {
             undeployStarted = true;
         }
@@ -138,7 +138,7 @@ public class ScaleBeanServer {
     
     public boolean isUndeployComplete() {
         boolean undeployComplete = false;
-        List<Bean> enabledBeanAssignableTo = beanServer.getEnabledBeanAssignableTo(new Class[] {UndeployScaleStrategyBean.class});
+        List<Bean> enabledBeanAssignableTo = beanServer.getEnabledBeansAssignableTo(new Class[] {UndeployScaleStrategyBean.class});
         if (!enabledBeanAssignableTo.isEmpty()) {
             undeployComplete = ((UndeployScaleStrategyBean)enabledBeanAssignableTo.get(0)).isUndeployComplete();
         }
@@ -206,6 +206,16 @@ public class ScaleBeanServer {
     
     }
     
+    public ScaleStrategyBean getEnabledBean() {
+        ScaleStrategyBean bean =null;
+        List<Bean> enabledBeanAssignableTo = beanServer.getEnabledBeansAssignableTo(new Class[] {ScaleStrategyBean.class});
+        if (!enabledBeanAssignableTo.isEmpty()) {
+            bean = (ScaleStrategyBean)enabledBeanAssignableTo.get(0);
+        }
+        return bean;
+    }
+    
+    
     private String getEnabledBeanClassName(BeanConfigPropertiesManager propertiesManager) {
         final String[] enabledBeansClassNames = propertiesManager.getEnabledBeansClassNames();
         
@@ -218,5 +228,4 @@ public class ScaleBeanServer {
         }
         return enabledBeanClassName;
     }
-
 }

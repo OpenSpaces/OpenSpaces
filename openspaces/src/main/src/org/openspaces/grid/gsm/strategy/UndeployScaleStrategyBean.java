@@ -5,6 +5,7 @@ import org.openspaces.admin.alert.AlertFactory;
 import org.openspaces.admin.alert.AlertSeverity;
 import org.openspaces.admin.alert.AlertStatus;
 import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
+import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
 import org.openspaces.grid.gsm.GridServiceContainerConfigAware;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.ClusterCapacityRequirements;
@@ -183,6 +184,10 @@ public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
         alertFactory.groupUid(alertGroupUidPrefix + "-" + getProcessingUnit().getName());
         getAdmin().getAlertManager().triggerAlert(alertFactory.toAlert());
         getLogger().debug(alertDescription);
+    }
+
+    public ScaleStrategyConfig getConfig() {
+        return null;
     }
 
 }

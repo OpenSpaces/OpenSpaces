@@ -90,7 +90,7 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
         }
                 
         if (instance instanceof ElasticMachineProvisioningAware) {
-            List<Bean> injectedInstances = beanServer.getEnabledBeanAssignableTo(
+            List<Bean> injectedInstances = beanServer.getEnabledBeansAssignableTo(
                     new Class[]{
                             ElasticMachineProvisioning.class,
                             NonBlockingElasticMachineProvisioning.class});
@@ -134,7 +134,7 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
 
     ElasticConfigBean findElasticConfigBean(BeanServer<Bean> beanServer) {
         
-        List<Bean> injectedInstances = beanServer.getEnabledBeanAssignableTo(
+        List<Bean> injectedInstances = beanServer.getEnabledBeansAssignableTo(
                 new Class[]{ ElasticConfigBean.class });
         if (!injectedInstances.isEmpty()) {
             return (ElasticConfigBean) injectedInstances.get(0);

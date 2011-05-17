@@ -38,6 +38,7 @@ import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.elastic.ElasticStatefulProcessingUnitDeployment;
 import org.openspaces.admin.pu.elastic.ElasticStatelessProcessingUnitDeployment;
+import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
 import org.openspaces.admin.pu.events.ProcessingUnitAddedEventListener;
 import org.openspaces.admin.space.ElasticSpaceDeployment;
 import org.openspaces.admin.space.SpaceDeployment;
@@ -413,10 +414,10 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         getElasticServiceManager().setProcessingUnitElasticProperties(pu, properties);
     }
     
-    public void setScaleStrategy(ProcessingUnit pu, String strategyClassName, Map<String,String> strategyProperties) {
-        getElasticServiceManager().setScaleStrategy(pu, strategyClassName, strategyProperties);
+    public void setProcessingUnitScaleStrategyConfig(ProcessingUnit pu, ScaleStrategyConfig scaleStrategyConfig) {
+        getElasticServiceManager().setProcessingUnitScaleStrategyConfig(pu, scaleStrategyConfig);
     }
-    
+        
     public void updateProcessingUnitElasticPropertiesOnGsm(ProcessingUnit pu, Map<String, String> elasticProperties) {
         try {
             gsm.updateElasticProperties(pu.getName(), elasticProperties);
@@ -426,12 +427,18 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         
     }
 
-
     private InternalElasticServiceManager getElasticServiceManager() {
         if (admin.getElasticServiceManagers().getSize() != 1) {
             throw new AdminException("ElasticScaleHandler requires exactly one ESM server running.");
         }
         final InternalElasticServiceManager esm = (InternalElasticServiceManager) admin.getElasticServiceManagers().getManagers()[0];
         return esm;
+    }
+
+    public ScaleStrategyConfig getProcessingUnitScaleStrategyConfig(ProcessingUnit pu) {
+        if (admin.getElasticServiceManagers().isEmpty()) {
+            return null; //no scale strategy
+        }
+        return getElasticServiceManager().getProcessingUnitScaleStrategyConfig(pu);
     }
 }
