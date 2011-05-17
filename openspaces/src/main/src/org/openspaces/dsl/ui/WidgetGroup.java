@@ -10,12 +10,19 @@ public class WidgetGroup implements Serializable {
      */
     private static final long serialVersionUID = 1L;
     private String name;
+    private String title;
 	private List<Widget> widgets;
 	public String getName() {
 		return name;
 	}
+	public String getTitle(){
+	    return title == null ? getName() : title;
+	}
 	public void setName(String name) {
 		this.name = name;
+	}
+	public void setTtile(String title){
+	    this.title = title;
 	}
 	public List<Widget> getWidgets() {
 		return widgets;
