@@ -35,6 +35,8 @@ import org.springframework.context.ApplicationListener;
  */
 public class SpaceAwareSedaService extends SedaService implements ApplicationListener {
 
+    private static final long serialVersionUID = 5890649175447907409L;
+
     protected OpenSpacesSedaModel sedaModel;
 
     protected GigaSpace gigaSpace;

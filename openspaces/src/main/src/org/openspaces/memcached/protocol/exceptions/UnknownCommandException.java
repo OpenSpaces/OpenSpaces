@@ -4,6 +4,8 @@ package org.openspaces.memcached.protocol.exceptions;
  */
 public class UnknownCommandException extends ClientException {
 
+    private static final long serialVersionUID = 322896615625776078L;
+
     public UnknownCommandException() {
     }
 

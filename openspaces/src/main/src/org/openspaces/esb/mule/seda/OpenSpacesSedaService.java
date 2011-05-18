@@ -38,6 +38,8 @@ import com.j_spaces.core.exception.SpaceUnavailableException;
  */
 public class OpenSpacesSedaService extends SpaceAwareSedaService implements Work, WorkListener {
 
+    private static final long serialVersionUID = 4383803244198827878L;
+
     private Object template;
 
     /**

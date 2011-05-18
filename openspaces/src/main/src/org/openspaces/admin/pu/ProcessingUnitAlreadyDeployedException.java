@@ -7,6 +7,8 @@ import org.openspaces.admin.AdminException;
  */
 public class ProcessingUnitAlreadyDeployedException extends AdminException {
 
+    private static final long serialVersionUID = 7237728063214305847L;
+
     public ProcessingUnitAlreadyDeployedException(String name) {
         super("processing unit [" + name + "] already deployed");
     }

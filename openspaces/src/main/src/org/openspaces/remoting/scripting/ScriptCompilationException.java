@@ -23,6 +23,8 @@ package org.openspaces.remoting.scripting;
  */
 public class ScriptCompilationException extends ScriptingException {
 
+    private static final long serialVersionUID = -5925711640061072928L;
+
     public ScriptCompilationException(String msg) {
         super(msg);
     }

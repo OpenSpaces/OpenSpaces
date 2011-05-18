@@ -3,6 +3,9 @@ package org.openspaces.memcached.protocol.exceptions;
 /**
  */
 public class ClientException extends Exception {
+
+    private static final long serialVersionUID = 1687924360498338545L;
+
     public ClientException() {
     }
 

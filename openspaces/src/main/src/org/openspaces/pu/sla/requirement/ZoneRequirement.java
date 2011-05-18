@@ -5,6 +5,8 @@ package org.openspaces.pu.sla.requirement;
  */
 public class ZoneRequirement implements Requirement {
 
+    private static final long serialVersionUID = 8258292384533829725L;
+
     private String zone;
 
     public ZoneRequirement() {

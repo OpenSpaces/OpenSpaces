@@ -25,6 +25,8 @@ import org.springframework.core.NestedRuntimeException;
  */
 public abstract class ProcessingUnitContainerException extends NestedRuntimeException {
 
+    private static final long serialVersionUID = 6307779488420075585L;
+
     public ProcessingUnitContainerException(String msg) {
         super(msg);
     }

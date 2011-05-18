@@ -27,6 +27,8 @@ import java.util.Arrays;
  */
 public class GSMNotFoundException extends NestedRuntimeException {
 
+    private static final long serialVersionUID = -8073595538933440181L;
+
     private String[] groups;
 
     private long timeout;

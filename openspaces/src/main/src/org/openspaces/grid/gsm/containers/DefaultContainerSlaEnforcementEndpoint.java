@@ -355,6 +355,8 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
     
     @SuppressWarnings("serial")
     private static class OperationInProgressException extends Exception {
+
+        private static final long serialVersionUID = -5017788679551801723L;
     }
   
 } 

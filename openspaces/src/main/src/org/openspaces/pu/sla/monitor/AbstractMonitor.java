@@ -23,6 +23,8 @@ package org.openspaces.pu.sla.monitor;
  */
 public abstract class AbstractMonitor implements Monitor {
 
+    private static final long serialVersionUID = 6622476878904436821L;
+
     private String name;
 
     private long period = 5000;

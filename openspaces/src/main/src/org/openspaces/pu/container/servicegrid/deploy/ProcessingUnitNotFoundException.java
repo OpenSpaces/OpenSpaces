@@ -27,6 +27,8 @@ import com.gigaspaces.grid.gsm.GSM;
  */
 public class ProcessingUnitNotFoundException extends NestedRuntimeException {
 
+    private static final long serialVersionUID = 2795475112878615318L;
+
     public ProcessingUnitNotFoundException(String name, GSM gsm) {
         super("Failed to find Processing Unit [" + name + "] under GSM [" + gsm + "]");
     }

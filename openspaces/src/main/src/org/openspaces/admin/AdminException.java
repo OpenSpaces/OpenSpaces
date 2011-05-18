@@ -23,6 +23,8 @@ package org.openspaces.admin;
  */
 public class AdminException extends RuntimeException {
 
+    private static final long serialVersionUID = 7131796349428030405L;
+
     public AdminException(String message) {
         super(message);
     }

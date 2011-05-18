@@ -7,6 +7,8 @@ import java.io.Serializable;
  */
 public final class SessionStatus implements Serializable {
 
+    private static final long serialVersionUID = 8948155047611447607L;
+
     /**
      * Possible states that the current session is in.
      */

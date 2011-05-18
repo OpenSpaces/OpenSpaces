@@ -60,6 +60,9 @@ public class LRUNonThreadSafeCompiledScriptCache implements CompiledScriptCache 
         this.size = cacheSize;
         this.compiledScriptPoolFactory = compiledScriptPoolFactory;
         cache = new LinkedHashMap<String, CompiledScriptPool>() {
+            private static final long serialVersionUID = 4717730055494117794L;
+
+            @Override
             protected boolean removeEldestEntry(Map.Entry eldest) {
                 boolean remove = size() > size;
                 if (remove) {

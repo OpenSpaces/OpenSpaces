@@ -21,6 +21,8 @@ package org.openspaces.pu.sla.requirement;
  */
 public class MemoryRequirement extends RangeRequirement {
 
+    private static final long serialVersionUID = 8686073499439795782L;
+
     public MemoryRequirement() {
         setWatch("Memory");
     }

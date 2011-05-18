@@ -30,6 +30,8 @@ import java.util.List;
  */
 public class RegisterDistributedEventContainerTask extends RegisterEventContainerTask implements DistributedTask<Serializable, Object> {
 
+    private static final long serialVersionUID = 463040102712604939L;
+
     protected RegisterDistributedEventContainerTask() {
         super();
     }

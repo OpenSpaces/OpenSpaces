@@ -23,6 +23,8 @@ package org.openspaces.pu.sla;
  */
 public abstract class AbstractPolicy implements Policy {
 
+    private static final long serialVersionUID = 3791695622307938554L;
+
     private String monitor;
 
     private double low;

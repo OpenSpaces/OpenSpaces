@@ -33,5 +33,7 @@ public interface SimpleService {
 
     class MyException extends RuntimeException {
 
+        private static final long serialVersionUID = 4286999982167551193L;
+
     }
 }

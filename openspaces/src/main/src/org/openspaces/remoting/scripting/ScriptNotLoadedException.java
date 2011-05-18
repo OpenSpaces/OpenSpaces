@@ -24,6 +24,8 @@ package org.openspaces.remoting.scripting;
  */
 public class ScriptNotLoadedException extends ScriptingException {
 
+    private static final long serialVersionUID = 3647203046037478786L;
+
     public ScriptNotLoadedException(String msg) {
         super(msg);
     }

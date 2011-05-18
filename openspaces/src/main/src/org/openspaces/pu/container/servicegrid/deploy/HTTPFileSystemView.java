@@ -109,6 +109,8 @@ public class HTTPFileSystemView {
     }
 
     static class HTTPFile extends File {
+        private static final long serialVersionUID = -3743494534964914431L;
+
         private long time;
         private boolean dir;
 

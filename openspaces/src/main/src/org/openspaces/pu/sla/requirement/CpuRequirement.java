@@ -21,6 +21,8 @@ package org.openspaces.pu.sla.requirement;
  */
 public class CpuRequirement extends RangeRequirement {
 
+    private static final long serialVersionUID = -6255973207623718927L;
+
     public CpuRequirement() {
         setWatch("CPU");
     }

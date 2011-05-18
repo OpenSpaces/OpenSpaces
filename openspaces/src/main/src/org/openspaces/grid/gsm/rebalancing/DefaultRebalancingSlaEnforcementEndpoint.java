@@ -1054,5 +1054,7 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
 
     @SuppressWarnings("serial")
     private static class ConflictingOperationInProgressException extends Exception {
+
+        private static final long serialVersionUID = -8765801883846053374L;
     }
 }

@@ -30,6 +30,8 @@ import java.io.Serializable;
  */
 public class RegisterEventContainerTask implements Task<Serializable>, ProcessObjectsProvider, AutowireTaskMarker {
 
+    private static final long serialVersionUID = -6134368200139357734L;
+
     private Object eventContainer;
 
     protected RegisterEventContainerTask() {

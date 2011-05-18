@@ -27,6 +27,8 @@ import java.util.concurrent.ExecutionException;
  */
 public class SpaceRemoteExecutionException extends ExecutionException {
 
+    private static final long serialVersionUID = -8990362587695315894L;
+
     private SpaceRemotingInvocation remoteInvocation;
 
     private SpaceRemotingResult remoteResult;

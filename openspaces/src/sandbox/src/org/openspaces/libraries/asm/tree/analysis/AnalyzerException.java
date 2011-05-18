@@ -37,6 +37,8 @@ package org.openspaces.libraries.asm.tree.analysis;
  */
 public class AnalyzerException extends Exception {
 
+    private static final long serialVersionUID = 3056120746802860560L;
+
     public AnalyzerException(final String msg) {
         super(msg);
     }

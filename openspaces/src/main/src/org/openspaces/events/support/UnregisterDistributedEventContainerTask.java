@@ -30,6 +30,8 @@ import java.util.List;
  */
 public class UnregisterDistributedEventContainerTask extends UnregisterEventContainerTask implements DistributedTask<Boolean, Boolean> {
 
+    private static final long serialVersionUID = 5973430519765798233L;
+
     protected UnregisterDistributedEventContainerTask() {
         super();
     }

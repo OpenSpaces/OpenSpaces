@@ -68,6 +68,8 @@ import com.gigaspaces.grid.zone.ZoneHelper;
  */
 public class SLA implements Serializable {
 
+    private static final long serialVersionUID = -7596100914791517899L;
+
     private static final Map<String, Integer> EMPTY_MAP = new HashMap<String, Integer>();
 
     private int numberOfInstances = 1;

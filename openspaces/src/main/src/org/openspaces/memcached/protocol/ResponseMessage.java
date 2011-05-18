@@ -12,6 +12,8 @@ import java.util.Set;
  */
 public final class ResponseMessage implements Serializable {
 
+    private static final long serialVersionUID = -363616355081114688L;
+
     public ResponseMessage(CommandMessage cmd) {
         this.cmd = cmd;
     }

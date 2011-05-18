@@ -34,6 +34,8 @@ import java.util.StringTokenizer;
  */
 public class WebsterFile extends File {
 
+    private static final long serialVersionUID = 6166390927496427656L;
+
     private URL root;
 
     private URL url;

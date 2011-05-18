@@ -33,6 +33,8 @@ import java.util.Arrays;
  */
 public class BeanPropertyMonitor extends AbstractMonitor implements ApplicationContextMonitor {
 
+    private static final long serialVersionUID = -6401809881237930697L;
+
     private String ref;
 
     private String propertyName;

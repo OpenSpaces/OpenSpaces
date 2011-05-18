@@ -30,6 +30,8 @@ import org.springframework.context.ApplicationContextAware;
  */
 public class UnregisterEventContainerTask implements Task<Boolean>, ApplicationContextAware {
 
+    private static final long serialVersionUID = -6927651658526034507L;
+
     private transient ApplicationContext applicationContext;
 
     private String containerName;

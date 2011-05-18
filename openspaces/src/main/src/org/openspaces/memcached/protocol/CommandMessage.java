@@ -27,6 +27,8 @@ import java.util.List;
  */
 public final class CommandMessage implements Serializable {
 
+    private static final long serialVersionUID = 1663628151791997691L;
+
     public static enum ErrorType {
         OK, ERROR, CLIENT_ERROR
     }

@@ -21,6 +21,8 @@ package org.openspaces.pu.sla.requirement;
  */
 public class HostRequirement implements Requirement {
 
+    private static final long serialVersionUID = -6179177751732620342L;
+
     private String ip;
 
     public String getIp() {

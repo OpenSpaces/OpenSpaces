@@ -21,6 +21,8 @@ package org.openspaces.pu.sla.requirement;
  */
 public class RangeRequirement implements Requirement {
 
+    private static final long serialVersionUID = 1018763306450762584L;
+
     private String watch;
 
     private double low;

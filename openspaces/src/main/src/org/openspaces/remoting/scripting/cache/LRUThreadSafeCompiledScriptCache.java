@@ -50,6 +50,9 @@ public class LRUThreadSafeCompiledScriptCache implements CompiledScriptCache {
     public LRUThreadSafeCompiledScriptCache(int cacheSize) {
         this.size = cacheSize;
         cache = new LinkedHashMap<String, Object>() {
+            private static final long serialVersionUID = 3509768785591597933L;
+
+            @Override
             protected boolean removeEldestEntry(Map.Entry eldest) {
                 boolean remove =  size() > size;
                 if (remove) {

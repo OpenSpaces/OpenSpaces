@@ -3,6 +3,8 @@ package org.openspaces.memcached.protocol.exceptions;
 /**
  */
 public class IncorrectlyTerminatedPayloadException extends ClientException {
+    private static final long serialVersionUID = 1009982290187803006L;
+
     public IncorrectlyTerminatedPayloadException() {
     }
 

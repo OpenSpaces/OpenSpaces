@@ -3,6 +3,8 @@ package org.openspaces.memcached.protocol.exceptions;
 /**
  */
 public class MalformedCommandException extends ClientException {
+    private static final long serialVersionUID = 968285939188557080L;
+
     public MalformedCommandException() {
     }
 

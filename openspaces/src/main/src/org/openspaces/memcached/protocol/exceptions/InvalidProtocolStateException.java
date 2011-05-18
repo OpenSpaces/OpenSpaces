@@ -3,6 +3,8 @@ package org.openspaces.memcached.protocol.exceptions;
 /**
  */
 public class InvalidProtocolStateException extends Exception {
+    private static final long serialVersionUID = 5256244010783276271L;
+
     public InvalidProtocolStateException() {
     }
 

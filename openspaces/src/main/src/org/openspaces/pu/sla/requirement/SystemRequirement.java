@@ -22,6 +22,8 @@ import java.util.Map;
  */
 public class SystemRequirement implements Requirement {
 
+    private static final long serialVersionUID = 8797739149606784670L;
+
     private String name;
 
     private Map attributes;

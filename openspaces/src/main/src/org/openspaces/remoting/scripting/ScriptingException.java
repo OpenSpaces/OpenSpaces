@@ -25,6 +25,8 @@ import org.springframework.core.NestedRuntimeException;
  */
 public class ScriptingException extends NestedRuntimeException {
 
+    private static final long serialVersionUID = 6494455177771792452L;
+
     public ScriptingException(String msg) {
         super(msg);
     }

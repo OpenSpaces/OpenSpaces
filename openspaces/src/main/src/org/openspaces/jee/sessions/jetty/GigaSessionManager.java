@@ -451,6 +451,8 @@ public class GigaSessionManager extends AbstractSessionManager {
      * A session in memory of a Context. Adds behavior around SessionData.
      */
     public class Session extends AbstractSessionManager.Session {
+        private static final long serialVersionUID = -2019532886095399423L;
+
         private final SessionData _data;
 
         private volatile boolean _dirty = false;

@@ -237,5 +237,7 @@ public class PUFaultDetectionHandler extends AbstractFaultDetectionHandler {
 
     private static class MemberReturnFalseException extends Exception {
 
+        private static final long serialVersionUID = -1770702442289427619L;
+
     }
 }

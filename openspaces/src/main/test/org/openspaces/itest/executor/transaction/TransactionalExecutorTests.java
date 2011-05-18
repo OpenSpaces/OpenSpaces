@@ -273,6 +273,8 @@ public class TransactionalExecutorTests extends AbstractDependencyInjectionSprin
     @AutowireTask
     private static class SimpleDistributedTask1 implements DistributedTask<Integer, Integer> {
 
+        private static final long serialVersionUID = -3310722770744601471L;
+
         @Resource(name = "gigaSpace1")
         transient GigaSpace gigaSpace1;
 
@@ -300,6 +302,10 @@ public class TransactionalExecutorTests extends AbstractDependencyInjectionSprin
     @AutowireTask
     private static class SimpleTask1 implements Task<Integer> {
 
+        /**
+         * 
+         */
+        private static final long serialVersionUID = -4297787552872006580L;
         @Resource(name = "gigaSpace1")
         transient GigaSpace gigaSpace;
 
@@ -311,6 +317,10 @@ public class TransactionalExecutorTests extends AbstractDependencyInjectionSprin
 
     private static class SimpleTask2 implements Task<Integer> {
 
+        /**
+         * 
+         */
+        private static final long serialVersionUID = -7606733098742774260L;
         @TaskGigaSpace
         transient GigaSpace gigaSpace;
 
@@ -322,6 +332,8 @@ public class TransactionalExecutorTests extends AbstractDependencyInjectionSprin
 
     @AutowireTask
     private static class DelayedSimpleTask1 implements Task<Integer> {
+
+        private static final long serialVersionUID = 4699319020233503249L;
 
         @Resource(name = "gigaSpace1")
         transient GigaSpace gigaSpace;

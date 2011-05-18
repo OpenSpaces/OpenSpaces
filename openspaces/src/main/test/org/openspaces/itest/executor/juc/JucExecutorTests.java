@@ -57,6 +57,8 @@ public class JucExecutorTests extends AbstractDependencyInjectionSpringContextTe
 
     private static class MyCallable1 implements Callable<Integer>, Serializable {
 
+        private static final long serialVersionUID = 2373484063403026358L;
+
         @SpaceRouting
         public int routing() {
             return 1;
@@ -68,6 +70,11 @@ public class JucExecutorTests extends AbstractDependencyInjectionSpringContextTe
     }
 
     private static class MyRunnable1 implements Runnable, Serializable {
+
+        /**
+         * 
+         */
+        private static final long serialVersionUID = -7397964765805393730L;
 
         @SpaceRouting
         public int routing() {

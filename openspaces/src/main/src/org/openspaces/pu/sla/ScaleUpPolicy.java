@@ -24,6 +24,8 @@ package org.openspaces.pu.sla;
  */
 public class ScaleUpPolicy extends AbstractPolicy {
 
+    private static final long serialVersionUID = 4455422998317289836L;
+
     private int maxInstances;
 
     /**

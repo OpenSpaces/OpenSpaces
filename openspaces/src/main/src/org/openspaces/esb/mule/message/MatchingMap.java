@@ -24,6 +24,8 @@ import java.util.Map;
  */
 public class MatchingMap<K, V> extends HashMap {
 
+    private static final long serialVersionUID = 8305860726762313026L;
+
     public boolean equals(Object o) {
 
         if (this == o) return true;

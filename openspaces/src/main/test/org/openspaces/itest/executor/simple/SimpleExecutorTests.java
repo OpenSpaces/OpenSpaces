@@ -222,6 +222,8 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
 
     private static class DelayedTask implements Task<Integer> {
 
+        private static final long serialVersionUID = 1634028927365954125L;
+
         private int waitTime;
 
         public DelayedTask(int waitTime) {
@@ -240,12 +242,22 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
     }
 
     private static class Task1 implements Task<Integer> {
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 2487185379603770011L;
+
         public Integer execute() throws Exception {
             return 1;
         }
     }
 
     private static class TaskException implements Task<Integer> {
+        /**
+         * 
+         */
+        private static final long serialVersionUID = -1613500503552258837L;
+
         public Integer execute() throws Exception {
             throw new IllegalArgumentException("test");
         }
@@ -253,6 +265,10 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
 
     private static class IncrementalTask implements Task<Integer> {
 
+        /**
+         * 
+         */
+        private static final long serialVersionUID = -7307260935406936546L;
         private AtomicInteger val = new AtomicInteger();
 
         public Integer execute() throws Exception {
@@ -262,6 +278,10 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
 
     private static class Task1Routing implements Task<Integer> {
 
+        /**
+         * 
+         */
+        private static final long serialVersionUID = -8725666976817740173L;
         private int routing;
 
         public Task1Routing(int routing) {
@@ -279,6 +299,8 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
     }
 
     private static class AggregatorContinue implements DistributedTask<Integer, Integer>, AsyncResultFilter<Integer> {
+
+        private static final long serialVersionUID = -4407221792856085786L;
 
         public Integer execute() throws Exception {
             return 1;
@@ -298,6 +320,8 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
     }
 
     private static class AggregatorBreak implements DistributedTask<Integer, Integer>, AsyncResultFilter<Integer> {
+
+        private static final long serialVersionUID = 5834972877652282334L;
 
         public Integer execute() throws Exception {
             return 1;
@@ -322,6 +346,8 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
     @AutowireTask
     private static class ApplicationContextInjectable extends AggregatorContinue implements ApplicationContextAware {
 
+        private static final long serialVersionUID = 5147868972962459385L;
+
         private transient ApplicationContext applicationContext;
 
         public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
@@ -338,6 +364,10 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
 
     public static class TaskGigaSpaceInjectable extends AggregatorContinue {
 
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 6277227272803527328L;
         @TaskGigaSpace
         public transient GigaSpace gigaSpace;
 
@@ -351,6 +381,10 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
 
     private static class MyDistributedTask implements DistributedTask<Integer, Integer>, AutowireTaskMarker {
 
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 1800948712203273136L;
         @Resource(name = "gigaSpace1")
         transient GigaSpace gigaSpace;
 
@@ -375,6 +409,11 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
 
     private static class MyTask implements Task<Integer> {
 
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 7362616027645953535L;
+
         @SpaceRouting
         public int routing() {
             return 1;
@@ -386,12 +425,22 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
     }
 
     private static class MyTask2 implements Task<Integer> {
+        /**
+         * 
+         */
+        private static final long serialVersionUID = -958021222284719357L;
+
         public Integer execute() throws Exception {
             return 1;
         }
     }
 
     private static class MyDistributedTask1 implements DistributedTask<Integer, Integer> {
+        /**
+         * 
+         */
+        private static final long serialVersionUID = -4671759902442878489L;
+
         public Integer execute() throws Exception {
             return 1;
         }
@@ -406,6 +455,11 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
     }
 
     private static class MyDistributedTask2 implements DistributedTask<Integer, Integer> {
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 5326111789007790663L;
+
         public Integer execute() throws Exception {
             return 1;
         }
@@ -421,6 +475,10 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
 
     private static class MyTask3 implements Task {
 
+        /**
+         * 
+         */
+        private static final long serialVersionUID = -3702895368375709799L;
         @TaskGigaSpace
             private GigaSpace gigaSpace;
 
@@ -433,6 +491,11 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
     }
 
     private static class MyTask4 implements Task<Integer> {
+        /**
+         * 
+         */
+        private static final long serialVersionUID = -4625270048389454690L;
+
         public Integer execute() throws Exception {
             return 1;
         }

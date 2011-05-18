@@ -189,7 +189,10 @@ public class MethodNode extends MemberNode implements MethodVisitor {
     // ------------------------------------------------------------------------
 
     public AnnotationVisitor visitAnnotationDefault() {
-        return new AnnotationNode(new ArrayList(0) {
+        return new AnnotationNode(new ArrayList<Object>(0) {
+            private static final long serialVersionUID = 5096071492358452276L;
+
+            @Override
             public boolean add(final Object o) {
                 annotationDefault = o;
                 return super.add(o);

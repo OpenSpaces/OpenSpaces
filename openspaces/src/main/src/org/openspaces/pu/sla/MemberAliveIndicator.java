@@ -27,6 +27,8 @@ import java.io.Serializable;
  */
 public class MemberAliveIndicator implements Serializable {
 
+    private static final long serialVersionUID = -7738144705717881390L;
+
     private long invocationDelay = 5000;
 
     private long retryTimeout = 500;

@@ -26,6 +26,8 @@ package org.openspaces.pu.sla;
  */
 public class RelocationPolicy extends AbstractPolicy {
 
+    private static final long serialVersionUID = 4958476938556141813L;
+
     public String toString() {
         return "RelocationPolicy monitor [" + getMonitor() + "] low [" + getLow() + "] high [" + getHigh() + "]";
     }

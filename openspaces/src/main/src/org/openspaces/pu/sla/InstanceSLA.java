@@ -26,6 +26,8 @@ import java.util.List;
  */
 public class InstanceSLA implements Serializable {
 
+    private static final long serialVersionUID = -7882449868172478036L;
+
     private Integer instanceId;
 
     private Integer backupId;
