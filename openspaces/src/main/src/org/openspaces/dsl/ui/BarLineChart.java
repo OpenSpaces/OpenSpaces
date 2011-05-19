@@ -10,7 +10,8 @@ public class BarLineChart extends AbstractBasicWidget {
     public enum Unit {
         REGULAR,
         PERCENTAGE,
-        MEMORY
+        MEMORY,
+        DURATION
     }
     
     private Unit axisYUnit = Unit.REGULAR; 
@@ -29,8 +30,4 @@ public class BarLineChart extends AbstractBasicWidget {
     public void setAxisYUnit(Unit axisYUnit) {
         this.axisYUnit = axisYUnit;
     }
-
-    
-	
-	
 }
