@@ -146,7 +146,7 @@ public class HeapMemoryUtilizationAlertBean implements AlertBean, VirtualMachine
             
             factory.putProperty(HeapMemoryUtilizationAlert.HOST_ADDRESS, event.getVirtualMachine().getMachine().getHostAddress());
             factory.putProperty(HeapMemoryUtilizationAlert.HOST_NAME, event.getVirtualMachine().getMachine().getHostName());
-            factory.putProperty(HeapMemoryUtilizationAlert.CPU_UTILIZATION, String.valueOf(event.getStatistics().getCpuPerc()*100.0));
+            factory.putProperty(HeapMemoryUtilizationAlert.CPU_UTILIZATION, AlertBeanUtils.getCpuPercToString(event.getStatistics().getCpuPerc()));
             factory.putProperty(HeapMemoryUtilizationAlert.PROCESS_ID, String.valueOf(event.getVirtualMachine().getDetails().getPid()));
             factory.putProperty(HeapMemoryUtilizationAlert.COMPONENT_NAME, AlertBeanUtils.getGridComponentFullName(event.getVirtualMachine()));
             factory.putProperty(HeapMemoryUtilizationAlert.HEAP_UTILIZATION, String.valueOf(event.getStatistics().getMemoryHeapUsedPerc()));
@@ -174,7 +174,7 @@ public class HeapMemoryUtilizationAlertBean implements AlertBean, VirtualMachine
                 
                 factory.putProperty(HeapMemoryUtilizationAlert.HOST_ADDRESS, event.getVirtualMachine().getMachine().getHostAddress());
                 factory.putProperty(HeapMemoryUtilizationAlert.HOST_NAME, event.getVirtualMachine().getMachine().getHostName());
-                factory.putProperty(HeapMemoryUtilizationAlert.CPU_UTILIZATION, String.valueOf(event.getStatistics().getCpuPerc()*100.0));
+                factory.putProperty(HeapMemoryUtilizationAlert.CPU_UTILIZATION, AlertBeanUtils.getCpuPercToString(event.getStatistics().getCpuPerc()));
                 factory.putProperty(HeapMemoryUtilizationAlert.PROCESS_ID, String.valueOf(event.getVirtualMachine().getDetails().getPid()));
                 factory.putProperty(HeapMemoryUtilizationAlert.COMPONENT_NAME, AlertBeanUtils.getGridComponentFullName(event.getVirtualMachine()));
                 factory.putProperty(HeapMemoryUtilizationAlert.HEAP_UTILIZATION, String.valueOf(event.getStatistics().getMemoryHeapUsedPerc()));

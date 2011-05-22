@@ -33,6 +33,7 @@
 package org.openspaces.admin.vm;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Statistics on a single virtual machine level.
@@ -148,4 +149,19 @@ public interface VirtualMachineStatistics {
     double getCpuPerc();
 
     String getCpuPercFormatted();
+
+    /**
+     * Calculates the average number of cpu cores used by the java virtual machine over the specified period of time.
+     * 
+     * If not enough statistics have been accumulated, -1 is returned. 
+     * In that case either call this method again after enough time has elapsed, or increase
+     * history size {@link org.openspaces.admin.Admin#setStatisticsHistorySize(int)}
+     * or increase statistics interval {@link org.openspaces.admin.Admin#setStatisticsInterval(long, TimeUnit)}.
+     * 
+     * @param requestedTotalTime The period of time to average the cpu percentage starting with this statistics
+     * @param timeUnit Time units for totalTime
+     * @return A value between 0 and number of CPU cores representing the average number of CPU cores used, or -1 if not enough statistics have been accumulated. 
+     */
+    public double getCpuPercAverage(long requestedTotalTime, TimeUnit timeUnit);
+    
 }

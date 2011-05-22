@@ -138,7 +138,7 @@ public class GarbageCollectionAlertBean implements AlertBean, VirtualMachineStat
             
             factory.putProperty(GarbageCollectionAlert.HOST_ADDRESS, event.getVirtualMachine().getMachine().getHostAddress());
             factory.putProperty(GarbageCollectionAlert.HOST_NAME, event.getVirtualMachine().getMachine().getHostName());
-            factory.putProperty(GarbageCollectionAlert.CPU_UTILIZATION, String.valueOf(event.getStatistics().getCpuPerc()*100.0));
+            factory.putProperty(GarbageCollectionAlert.CPU_UTILIZATION, AlertBeanUtils.getCpuPercToString(event.getStatistics().getCpuPerc()));
             factory.putProperty(GarbageCollectionAlert.PROCESS_ID, String.valueOf(event.getVirtualMachine().getDetails().getPid()));
             factory.putProperty(GarbageCollectionAlert.COMPONENT_NAME, AlertBeanUtils.getGridComponentFullName(event.getVirtualMachine()));
             factory.putProperty(GarbageCollectionAlert.GC_DURATION_MILLISECONDS, String.valueOf(gcPauseTime));
@@ -166,7 +166,7 @@ public class GarbageCollectionAlertBean implements AlertBean, VirtualMachineStat
                 
                 factory.putProperty(GarbageCollectionAlert.HOST_ADDRESS, event.getVirtualMachine().getMachine().getHostAddress());
                 factory.putProperty(GarbageCollectionAlert.HOST_NAME, event.getVirtualMachine().getMachine().getHostName());
-                factory.putProperty(GarbageCollectionAlert.CPU_UTILIZATION, String.valueOf(event.getStatistics().getCpuPerc()*100.0));
+                factory.putProperty(GarbageCollectionAlert.CPU_UTILIZATION, AlertBeanUtils.getCpuPercToString(event.getStatistics().getCpuPerc()));
                 factory.putProperty(GarbageCollectionAlert.PROCESS_ID, String.valueOf(event.getVirtualMachine().getDetails().getPid()));
                 factory.putProperty(GarbageCollectionAlert.COMPONENT_NAME, AlertBeanUtils.getGridComponentFullName(event.getVirtualMachine()));
                 factory.putProperty(GarbageCollectionAlert.GC_DURATION_MILLISECONDS, String.valueOf(gcPauseTime));

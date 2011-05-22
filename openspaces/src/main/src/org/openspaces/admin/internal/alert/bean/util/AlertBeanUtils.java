@@ -167,4 +167,10 @@ public class AlertBeanUtils {
     public static String getProcessingUnitDescription(ProcessingUnit processingUnit) {
         return processingUnit.getName();
     }
+    
+    
+    public static String getCpuPercToString(double cpuPerc) {
+        return String.valueOf((cpuPerc == -1 ? 0 : cpuPerc) * 100.0);
+    }
+    
 }

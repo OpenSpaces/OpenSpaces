@@ -1,13 +1,14 @@
 package org.openspaces.admin.internal.vm;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 import org.openspaces.admin.support.StatisticsUtils;
 import org.openspaces.admin.vm.VirtualMachineDetails;
 import org.openspaces.admin.vm.VirtualMachineStatistics;
 
 import com.gigaspaces.internal.jvm.JVMStatistics;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author kimchy
@@ -24,6 +25,12 @@ public class DefaultVirtualMachineStatistics implements VirtualMachineStatistics
 
     private volatile VirtualMachineStatistics previousStats;
 
+    private final double cpuPerc;
+    
+    private final double gcCollectionPerc;
+    
+    private final long previousTimeStamp;
+    
     public DefaultVirtualMachineStatistics() {
         this(NA_STATS, null, null, 0, -1);
     }
@@ -34,7 +41,18 @@ public class DefaultVirtualMachineStatistics implements VirtualMachineStatistics
         this.details = details;
         this.timeDelta = timeDelta;
 
+        if (previousStats == null) {
+            this.cpuPerc = -1;
+            this.gcCollectionPerc = -1;
+            this.previousTimeStamp = -1;
+        } else { 
+            this.cpuPerc = stats.computeCpuPerc(((DefaultVirtualMachineStatistics)previousStats).stats);
+            this.previousTimeStamp = previousStats.getTimestamp();
+            this.gcCollectionPerc = StatisticsUtils.computePercByTime(getGcCollectionTime(), previousStats.getGcCollectionTime(), getTimestamp(), previousTimeStamp);
+        }
+        
         VirtualMachineStatistics lastStats = previousStats;
+        
         if (lastStats != null) {
             for (int i = 0; i < historySize; i++) {
                 if (lastStats.getPrevious() == null) {
@@ -85,10 +103,7 @@ public class DefaultVirtualMachineStatistics implements VirtualMachineStatistics
     }
 
     public long getPreviousTimestamp() {
-        if (previousStats == null) {
-            return -1;
-        }
-        return previousStats.getTimestamp();
+        return previousTimeStamp;
     }
 
     public long getUptime() {
@@ -184,16 +199,61 @@ public class DefaultVirtualMachineStatistics implements VirtualMachineStatistics
     }
 
     public double getGcCollectionPerc() {
-        if (previousStats == null) {
-            return -1;
-        }
-        return StatisticsUtils.computePercByTime(getGcCollectionTime(), previousStats.getGcCollectionTime(), getTimestamp(), getPreviousTimestamp());
+       return gcCollectionPerc;
     }
 
     public double getCpuPerc() {
-        return stats.getCpuPerc();
+        return cpuPerc;
     }
 
+    public double getCpuPercAverage(long requestedTotalTime, TimeUnit timeUnit) {
+        if (requestedTotalTime <= 0) {
+            throw new IllegalArgumentException("Total time has to be positive");
+        }
+        
+        long requestedTotalTimeMillis = TimeUnit.MILLISECONDS.convert(requestedTotalTime, timeUnit);
+
+        long endTimeStamp = stats.getTimestamp();
+        
+        DefaultVirtualMachineStatistics start = (DefaultVirtualMachineStatistics)getPrevious();
+        DefaultVirtualMachineStatistics previousStart = null;
+
+        long duration = endTimeStamp - start.getTimestamp();
+        long previousDuration = 0;
+        while (duration < requestedTotalTimeMillis) {
+            previousStart = start;
+            previousDuration = duration;
+            
+            start = (DefaultVirtualMachineStatistics)previousStart.getPrevious();
+            
+            if (start == null) {
+                return -1;
+            }
+            
+            duration = endTimeStamp - start.getTimestamp();
+        }
+        
+        if (duration == previousDuration) {
+            throw new IllegalStateException("This can never happen");
+        } 
+        
+        double result;
+        
+        if (previousDuration == 0) {
+            result = stats.computeCpuPerc(start.stats);
+        } else {
+            // weighted average of duration and previousDuration to get a precise average based on the requestedTotalTime
+            long timeSlot = duration - previousDuration;
+            double rightWeight = (double)(requestedTotalTimeMillis - previousDuration) / timeSlot;
+            double leftWeight = (double)(duration - requestedTotalTimeMillis) / timeSlot;
+            
+            result = rightWeight * stats.computeCpuPerc(start.stats) +
+                     leftWeight  * stats.computeCpuPerc(previousStart.stats);
+        }
+
+        return result;
+    }
+    
     public String getCpuPercFormatted() {
         return StatisticsUtils.formatPerc(getCpuPerc());
     }
