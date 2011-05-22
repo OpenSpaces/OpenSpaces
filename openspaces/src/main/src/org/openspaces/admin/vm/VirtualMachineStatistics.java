@@ -161,6 +161,7 @@ public interface VirtualMachineStatistics {
      * @param requestedTotalTime The period of time to average the cpu percentage starting with this statistics
      * @param timeUnit Time units for totalTime
      * @return A value between 0 and number of CPU cores representing the average number of CPU cores used, or -1 if not enough statistics have been accumulated. 
+     * @since 8.0.3
      */
     public double getCpuPercAverage(long requestedTotalTime, TimeUnit timeUnit);
     
