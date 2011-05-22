@@ -4,7 +4,9 @@ import groovy.lang.GroovyShell;
 
 import java.io.File;
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.openspaces.dsl.ui.UserInterface;
 
@@ -19,12 +21,19 @@ public class Service implements Serializable{
 
     private String imageTemplate;
     private String defaultScalingUnit;
+    private String pidFile;
     private boolean supportsScaling;
 
     private ServiceLifecycle lifecycle;
     private UserInterface userInterface;
    
     private List<PluginDescriptor> plugins;
+    
+    private int numInstances = 1;
+    private long maxJarSize = 150 * 1024 * 1024; //in bytes
+    private boolean keepFile = false;
+    
+    private Map<String, String> customProperties = new HashMap<String, String>();
     
     public String getName() {
         return name;
@@ -120,6 +129,44 @@ public class Service implements Serializable{
         return plugins;
     }
 
-   
+    public int getNumInstances() {
+        return numInstances;
+    }
+
+    public void setNumInstances(int numInstances) {
+        this.numInstances = numInstances;
+    }
+
+    public long getMaxJarSize() {
+        return maxJarSize;
+    }
+
+    public void setMaxJarSize(long maxJarSize) {
+        this.maxJarSize = maxJarSize;
+    }
+
+    public boolean isKeepFile() {
+        return keepFile;
+    }
+
+    public void setKeepFile(boolean keepFile) {
+        this.keepFile = keepFile;
+    }
+
+    public Map<String, String> getCustomProperties() {
+        return customProperties;
+    }
+
+    public void setCustomProperties(Map<String, String> customProperties) {
+        this.customProperties = customProperties;
+    }
+
+    public String getPidFile() {
+        return pidFile;
+    }
+
+    public void setPidFile(String pidFile) {
+        this.pidFile = pidFile;
+    }
 
 }
