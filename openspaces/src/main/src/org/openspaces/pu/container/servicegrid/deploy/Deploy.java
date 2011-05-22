@@ -579,6 +579,8 @@ public class Deploy {
                         }
                     }
                 }
+            } else if (puString.length() == 0 && beanLevelProperties.getContextProperties().containsKey("dataGridName")) {
+                return ProcessingUnitType.STATEFUL.name(); //.Net stateful
             }
         }
         
