@@ -216,6 +216,11 @@ public class DefaultVirtualMachineStatistics implements VirtualMachineStatistics
         long endTimeStamp = stats.getTimestamp();
         
         DefaultVirtualMachineStatistics start = (DefaultVirtualMachineStatistics)getPrevious();
+        
+        if (start == null) {
+            return -1;
+        }
+        
         DefaultVirtualMachineStatistics previousStart = null;
 
         long duration = endTimeStamp - start.getTimestamp();
