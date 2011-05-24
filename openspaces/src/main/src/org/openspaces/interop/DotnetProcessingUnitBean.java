@@ -20,14 +20,15 @@ import org.openspaces.events.notify.NotifyEventContainerServiceMonitors;
 import org.openspaces.events.polling.PollingEventContainerServiceDetails;
 import org.openspaces.events.polling.PollingEventContainerServiceMonitors;
 import org.openspaces.pu.container.DeployableProcessingUnitContainerProvider;
-import org.openspaces.pu.service.PlainServiceMonitors;
+import org.openspaces.pu.service.CustomServiceDetails;
+import org.openspaces.pu.service.CustomServiceMonitors;
 import org.openspaces.pu.service.ServiceDetails;
 import org.openspaces.pu.service.ServiceDetailsProvider;
 import org.openspaces.pu.service.ServiceMonitors;
 import org.openspaces.pu.service.ServiceMonitorsProvider;
 import org.openspaces.remoting.RemotingServiceDetails;
-import org.openspaces.remoting.RemotingServiceMonitors;
 import org.openspaces.remoting.RemotingServiceDetails.RemoteService;
+import org.openspaces.remoting.RemotingServiceMonitors;
 import org.openspaces.remoting.RemotingServiceMonitors.RemoteServiceStats;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -210,7 +211,7 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
                 return buildNotifyContainerServiceDetails(id, properties);
         }
         
-        return new DotnetServiceDetails(id, serviceType, subServiceType, description, longDescription);
+        return new CustomServiceDetails(id, serviceType, subServiceType, description, longDescription);
     }
     
     private ServiceDetails buildNotifyContainerServiceDetails(String id, Map<String, String> props) {        
@@ -331,7 +332,7 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
             return new NotifyEventContainerServiceMonitors(id, procEvent, failEvent, status);
         }
         
-        PlainServiceMonitors plainServiceMonitors = new PlainServiceMonitors(id);
+        CustomServiceMonitors plainServiceMonitors = new CustomServiceMonitors(id);
         Map<String, Object> plainMonitors = plainServiceMonitors.getMonitors();
         for(Map.Entry<String, String> entry : monitors.entrySet())
             plainMonitors.put(entry.getKey(), entry.getValue());
