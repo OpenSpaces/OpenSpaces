@@ -48,6 +48,19 @@ public class EagerScaleConfig
     public void setMaxConcurrentRelocationsPerMachine(int maxNumberOfConcurrentRelocationsPerMachine) {
         ScaleStrategyConfigUtils.setMaxConcurrentRelocationsPerMachine(properties, maxNumberOfConcurrentRelocationsPerMachine);
     }
+
+    public boolean isAtMostOneContainersPerMachine() {
+        return ScaleStrategyConfigUtils.isSingleContainerPerMachine(properties);
+    }
+
+    /**
+     * When set to true, at most one Grid Service Container for this Processing Unit is started per machine.
+     * @since 8.0.3
+     */
+    public void setAtMostOneContainerPerMachine(boolean atMostOneContainerPerMachine) {
+        ScaleStrategyConfigUtils.setAtMostOneContainerPerMachine(properties, atMostOneContainerPerMachine);
+    }
+    
     
     public void setProperties(Map<String, String> properties) {
         this.properties = new StringProperties(properties);
@@ -79,13 +92,11 @@ public class EagerScaleConfig
 
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeObject(this.properties.getProperties());
-        
     }
 
     @SuppressWarnings("unchecked")
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         this.properties = new StringProperties((Map<String,String>)in.readObject());
-        
     }
 }
 

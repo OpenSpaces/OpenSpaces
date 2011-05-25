@@ -37,6 +37,7 @@ public class BinPackingSolver {
     private long maxMemoryCapacityInMB;
     private int minimumNumberOfMachines;
     private HashMap<String, Integer> agentPriority;
+    private long maxMemoryCapacityPerMachineInMB;
 
     public BinPackingSolver() {
         debugTrace ="";
@@ -99,6 +100,13 @@ public class BinPackingSolver {
     }
 
 
+    /**
+     * Sets the maximum total memory that can be allocated for PU on a single machine
+     */
+    public void setMaxAllocatedMemoryCapacityOfPuPerMachineInMB(long maxMemoryCapacityPerMachineInMB) {
+        this.maxMemoryCapacityPerMachineInMB = maxMemoryCapacityPerMachineInMB;        
+    }
+
     public void solveManualCapacityScaleIn(CapacityRequirements capacityToDeallocate) {
         boolean success = false;
         try {
@@ -139,9 +147,8 @@ public class BinPackingSolver {
         }
         
         if (allocatedCapacityForPu.getAgentUids().size() >= minimumNumberOfMachines) {
-            long totalMemory = getMemoryInMB(allocatedCapacityForPu);
-            long maxMemoryPerMachine = (long) Math.ceil(totalMemory/(1.0*minimumNumberOfMachines));
-        
+            long maxMemoryPerMachine = getMaxMemoryPerMachine();
+                
             for (String agentUid : allocatedCapacityForPu.getAgentUids()) {
                 long agentMemory = getMemoryInMB(allocatedCapacityForPu.getAgentCapacity(agentUid));
                 if (agentMemory > maxMemoryPerMachine) {
@@ -150,6 +157,10 @@ public class BinPackingSolver {
                 }
             }
         }
+    }
+
+    private long getMaxMemoryPerMachine() {
+        return getMaxMemoryPerMachine(0);
     }
 
     public void solveManualCapacityScaleOut(CapacityRequirements capacityToAllocate) {
@@ -188,7 +199,7 @@ public class BinPackingSolver {
             // try to remove complete machines then try to remove part of machines (containers)
             removeExcessMachines(realisticGoalCapacity);
             removeExcessContainers(realisticGoalCapacity);
-            removeOverMaximumContainers(realisticGoalCapacity);    
+            //TODO:removeOverMaximumContainers(realisticGoalCapacity);    
             
             // rebalance containers between machines (without adding/removing containers)
             rebalanceExistingContainers();
@@ -453,7 +464,9 @@ public class BinPackingSolver {
             // calc how much can be relocated from source to target based on 
             // unallocated capacity and maxMemoryPerMachine restriction on target.
             CapacityRequirements unallocatedCapacityOnTarget = unallocatedCapacity.getAgentCapacityOrZero(targetAgentUid);
-            long maxMemoryPerMachine = (long) Math.ceil(getMemoryInMB(goalCapacity)/(1.0*minimumNumberOfMachines));
+            long maxMemoryPerMachine = 
+                Math.min(maxMemoryCapacityPerMachineInMB, 
+                (long) Math.ceil(getMemoryInMB(goalCapacity)/(1.0*minimumNumberOfMachines)));
             long maxUnallocatedMemoryOnTarget = 
                 Math.max(
                         0,
@@ -700,7 +713,12 @@ public class BinPackingSolver {
 
     private long getMaxMemoryPerMachine(long additionalMemoryToAllocate) {
         long totalMemory = getMemoryInMB(allocatedCapacityForPu)+additionalMemoryToAllocate;
-        return Math.max(containerMemoryCapacityInMB, (long) Math.ceil(totalMemory/(1.0*minimumNumberOfMachines)));
+        
+        long halfOfTotalMemory = (long) Math.ceil(totalMemory/(1.0*minimumNumberOfMachines));
+        
+        return Math.max(containerMemoryCapacityInMB, 
+                Math.min(halfOfTotalMemory,
+                         maxMemoryCapacityPerMachineInMB));
     }
 
 
@@ -964,7 +982,7 @@ public class BinPackingSolver {
         capacityToAllocate = capacityToAllocate.min(unallocatedCapacity.getTotalAllocatedCapacity());
         CapacityRequirements goalCapacity = allocatedCapacityForPu.getTotalAllocatedCapacity().add(capacityToAllocate);
         goalCapacity = roundCeilMemoryToContainerMemory(goalCapacity);
-        goalCapacity.max(new MemoryCapacityRequirement(maxMemoryCapacityInMB));
+        goalCapacity = goalCapacity.max(new MemoryCapacityRequirement(maxMemoryCapacityInMB));
         return goalCapacity;
     }
     
@@ -1166,7 +1184,8 @@ public class BinPackingSolver {
             " maxMemoryCapacityInMB=" + maxMemoryCapacityInMB + 
             " unallocatedCapacity=" + unallocatedCapacity.toDetailedString() +
             " allocatedCapacityForPu=" + allocatedCapacityForPu.toDetailedString() + 
-            " minimumNumberOfMachines=" + + minimumNumberOfMachines;
+            " minimumNumberOfMachines=" + minimumNumberOfMachines +
+            " maxMemoryCapacityPerMachineInMB="+ maxMemoryCapacityPerMachineInMB;
         
         if (containerMemoryCapacityInMB == 0) {
             throw new IllegalArgumentException("containerMemoryCapacityInMB");
@@ -1181,10 +1200,27 @@ public class BinPackingSolver {
         }
         
         if (getMemoryInMB(allocatedCapacityForPu) > maxMemoryCapacityInMB) {
-            throw new IllegalArgumentException("total PU allocated capacity exceeds the specified max number of containers");
+            throw new IllegalArgumentException("total PU allocated capacity "+"("+getMemoryInMB(allocatedCapacityForPu)+"MB) exceeds the specified max memory ("+maxMemoryCapacityInMB+"MB)");
         }
         
-       for (String agentUid : allocatedCapacityForPu.getAgentUids()) {
+        if (maxMemoryCapacityPerMachineInMB == 0) {
+            throw new IllegalArgumentException("maxMemoryCapacityPerMachineInMB");
+        }
+        
+        if (maxMemoryCapacityPerMachineInMB % containerMemoryCapacityInMB != 0) {
+            throw new IllegalArgumentException("max memory capacity per machine must divide by " + containerMemoryCapacityInMB);
+        }
+        
+        for (String agentUid : allocatedCapacityForPu.getAgentUids()) {
+                
+            if (getMemoryInMB(allocatedCapacityForPu.getAgentCapacity(agentUid)) > 
+                maxMemoryCapacityPerMachineInMB) {
+                
+                throw new IllegalArgumentException("PU allocated capacity on agent " + agentUid +" exceeds the specified max memory capacity per container");
+            }
+        }
+        
+        for (String agentUid : allocatedCapacityForPu.getAgentUids()) {
            CapacityRequirements agentCapacity = allocatedCapacityForPu.getAgentCapacity(agentUid);
            if (getMemoryInMB(agentCapacity) % containerMemoryCapacityInMB != 0) {
                throw new IllegalArgumentException("agentCapacity memory (" + getMemoryInMB(agentCapacity) + "MB) must divide by containerMemoryCapacityInMB (" + containerMemoryCapacityInMB + "MB)");

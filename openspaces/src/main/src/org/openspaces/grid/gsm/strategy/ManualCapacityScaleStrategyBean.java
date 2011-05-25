@@ -297,6 +297,7 @@ public class ManualCapacityScaleStrategyBean extends AbstractScaleStrategyBean
         sla.setCapacityRequirements(capacityRequirements);
         sla.setMinimumNumberOfMachines(getMinimumNumberOfMachines());
         sla.setMaximumNumberOfMachines(getMaximumNumberOfInstances());
+        sla.setMaximumNumberOfContainersPerMachine(getMaximumNumberOfContainersPerMachine());
         sla.setContainerMemoryCapacityInMB(containersConfig.getMaximumMemoryCapacityInMB());
         sla.setProvisionedAgents(getDiscoveredAgents());
         sla.setMachineIsolation(getIsolation());
@@ -403,5 +404,9 @@ public class ManualCapacityScaleStrategyBean extends AbstractScaleStrategyBean
 
     public ManualCapacityScaleConfig getConfig() {
         return slaConfig;
+    }
+    
+    private int getMaximumNumberOfContainersPerMachine() {
+        return slaConfig.isAtMostOneContainersPerMachine()?1:getMaximumNumberOfInstances();
     }
 }

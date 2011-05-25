@@ -16,6 +16,8 @@ public class ScaleStrategyConfigUtils {
     private static final String POLLING_INTERVAL_SECONDS_KEY = "polling-interval-seconds";
     private static final String MAX_NUMBER_OF_CONCURRENT_RELOCATIONS_PER_MACHINE_KEY = "max-number-of-concurrent-relocations-per-machine";
     private static final int MAX_NUMBER_OF_CONCURRENT_RELOCATIONS_PER_MACHINE_DEFAULT = 1;
+    private static final boolean AT_MOST_ONE_CONTAINER_PER_MACHINE_DEFAULT = false;
+    private static final String AT_MOST_ONE_CONTAINER_PER_MACHINE_KEY = "at-most-one-container-per-machine";
     
     public static void setMaxNumberOfContainersPerMachine(
             StringProperties properties,
@@ -86,6 +88,14 @@ public class ScaleStrategyConfigUtils {
             throw new IllegalArgumentException("maxNumberOfConcurrentRelocationsPerMachine must be 1 or higher.");
         }
         properties.putInteger(MAX_NUMBER_OF_CONCURRENT_RELOCATIONS_PER_MACHINE_KEY,maxNumberOfConcurrentRelocationsPerMachine);        
+    }
+
+    public static void setAtMostOneContainerPerMachine(StringProperties properties, boolean isSingleContainersPerMachine) {
+        properties.putBoolean(AT_MOST_ONE_CONTAINER_PER_MACHINE_KEY,isSingleContainersPerMachine);
+    }
+    
+    public static boolean isSingleContainerPerMachine(StringProperties properties) {
+        return properties.getBoolean(AT_MOST_ONE_CONTAINER_PER_MACHINE_KEY,AT_MOST_ONE_CONTAINER_PER_MACHINE_DEFAULT);
     }
 
 }

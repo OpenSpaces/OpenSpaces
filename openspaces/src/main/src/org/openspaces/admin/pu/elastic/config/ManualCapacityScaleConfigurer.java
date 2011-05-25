@@ -81,7 +81,15 @@ public class ManualCapacityScaleConfigurer implements ScaleStrategyConfigurer<Ma
         config.setMaxConcurrentRelocationsPerMachine(maxNumberOfConcurrentRelocationsPerMachine);
         return this;
     }
-        
+
+    /**
+     * @see ManualCapacityScaleConfig#setAtMostOneContainersPerMachine(boolean)
+     */
+    public ManualCapacityScaleConfigurer atMostOneContainerPerMachine() {
+        config.setAtMostOneContainerPerMachine(true);
+        return this;
+    }
+    
     public ManualCapacityScaleConfig create() {
         return config;
     }

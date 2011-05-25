@@ -17,6 +17,7 @@ public abstract class AbstractMachinesSlaPolicy extends ServiceLevelAgreementPol
     private ElasticProcessingUnitMachineIsolation machineIsolation;
     
     private Collection<GridServiceAgent> agents;
+    private int maxNumberOfContainersPerMachine;
     
     public int getMinimumNumberOfMachines() {
         return minimumNumberOfMachines;
@@ -74,6 +75,14 @@ public abstract class AbstractMachinesSlaPolicy extends ServiceLevelAgreementPol
         return machineProvisioning.getConfig().getReservedCapacityPerMachine();
     }
 
+
+    public void setMaximumNumberOfContainersPerMachine(int maxNumberOfContainersPerMachine) {
+        this.maxNumberOfContainersPerMachine = maxNumberOfContainersPerMachine;
+    }
+    
+    public int getMaximumNumberOfContainersPerMachine() {
+        return maxNumberOfContainersPerMachine;
+    }
     
     @Override
     public boolean equals(Object other) {
@@ -83,6 +92,7 @@ public abstract class AbstractMachinesSlaPolicy extends ServiceLevelAgreementPol
         ((AbstractMachinesSlaPolicy)other).minimumNumberOfMachines == this.minimumNumberOfMachines &&
         ((AbstractMachinesSlaPolicy)other).machineIsolation.equals(this.machineIsolation) &&
         ((AbstractMachinesSlaPolicy)other).maxNumberOfMachines == maxNumberOfMachines &&
+        ((AbstractMachinesSlaPolicy)other).maxNumberOfContainersPerMachine == this.maxNumberOfContainersPerMachine &&
         ((AbstractMachinesSlaPolicy)other).isStopMachineSupported() == isStopMachineSupported() &&
         ((AbstractMachinesSlaPolicy)other).agents.equals(agents);
     }
@@ -90,4 +100,5 @@ public abstract class AbstractMachinesSlaPolicy extends ServiceLevelAgreementPol
     public abstract boolean isStopMachineSupported();
 
     public abstract String getScaleStrategyName();
+
 }

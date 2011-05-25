@@ -118,6 +118,7 @@ public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
         sla.setCapacityRequirements(new CapacityRequirements());
         sla.setMinimumNumberOfMachines(0);
         sla.setMaximumNumberOfMachines(getMaximumNumberOfInstances());
+        sla.setMaximumNumberOfContainersPerMachine(getMaximumNumberOfInstances());
         sla.setContainerMemoryCapacityInMB(containersConfig.getMaximumMemoryCapacityInMB());
         sla.setProvisionedAgents(getDiscoveredAgents());
         sla.setMachineIsolation(getIsolation());

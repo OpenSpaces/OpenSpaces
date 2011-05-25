@@ -966,6 +966,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         solver.setUnallocatedCapacity(unallocatedCapacity);
         solver.setAllocatedCapacityForPu(state.getAllocatedCapacity(pu));
         solver.setMaxAllocatedMemoryCapacityOfPuInMB(sla.getMaximumNumberOfMachines()*sla.getContainerMemoryCapacityInMB());
+        solver.setMaxAllocatedMemoryCapacityOfPuPerMachineInMB(sla.getMaximumNumberOfContainersPerMachine()*sla.getContainerMemoryCapacityInMB());
         solver.setMinimumNumberOfMachines(sla.getMinimumNumberOfMachines());
         
         // the higher the priority the less likely the machine to be scaled in.

@@ -32,7 +32,17 @@ public class EagerScaleConfigurer implements ScaleStrategyConfigurer<EagerScaleC
         return this;
     }
     
+    /**
+     * @see EagerScaleConfig#setAtMostOneContainersPerMachine(boolean)
+     */
+    public EagerScaleConfigurer atMostOneContainerPerMachine() {
+        config.setAtMostOneContainerPerMachine(true);
+        return this;
+    }
+
     public EagerScaleConfig create() {
         return config;
     }
+    
+    
 }

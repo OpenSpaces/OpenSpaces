@@ -86,7 +86,19 @@ public class ManualCapacityScaleConfig
     public void setMaxConcurrentRelocationsPerMachine(int maxNumberOfConcurrentRelocationsPerMachine) {
         ScaleStrategyConfigUtils.setMaxConcurrentRelocationsPerMachine(properties, maxNumberOfConcurrentRelocationsPerMachine);
     }
-        
+
+    public boolean isAtMostOneContainersPerMachine() {
+        return ScaleStrategyConfigUtils.isSingleContainerPerMachine(properties);
+    }
+
+    /**
+     * When set to true, at most one Grid Service Container for this Processing Unit is started per machine.
+     * @since 8.0.3
+     */
+    public void setAtMostOneContainerPerMachine(boolean atMostOneContainerPerMachine) {
+        ScaleStrategyConfigUtils.setAtMostOneContainerPerMachine(properties, atMostOneContainerPerMachine);
+    }
+    
     public Map<String,String> getProperties() {
         return properties.getProperties();
     }
@@ -109,6 +121,8 @@ public class ManualCapacityScaleConfig
      * 
      * For example the drive "/" (on linux) has the size of 50*1024MBs
      * or the drive "c:\" (on windows)  has the size of 50*1024MBs
+     * 
+     * @since 8.0.3
      */
     public void setDrivesCapacityInMB(Map<String,Long> megaBytesPerDrive) {
         Map<String,String> capacityPerDrive = new HashMap<String,String>();
@@ -157,5 +171,4 @@ public class ManualCapacityScaleConfig
         this.properties = new StringProperties((Map<String,String>)in.readObject());
         
     }
-    
 }
