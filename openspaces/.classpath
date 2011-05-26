@@ -63,7 +63,6 @@
 	<classpathentry kind="lib" path="lib/external/jsr223/script-js.jar"/>
 	<classpathentry kind="lib" path="lib/external/junit/junit.jar"/>
 	<classpathentry kind="lib" path="lib/external/maven/maven-dependency-tree-1.1.jar"/>
-	<classpathentry kind="lib" path="lib/external/retrotranslator/retrotranslator-runtime.jar"/>
 	<classpathentry kind="lib" path="lib/external/backport/backport-util-concurrent.jar"/>
 	<classpathentry kind="lib" path="tools/groovy/embeddable/groovy-all-1.8.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/required/com.springsource.org.aopalliance-1.0.0.jar"/>

@@ -49,10 +49,6 @@
 
     </path>
 
-    <taskdef name="retrotranslator" classname="net.sf.retrotranslator.transformer.RetrotranslatorTask">
-        <classpath refid="all-libs"/>
-    </taskdef>
-
     <target name="usage">
         <echo message=""/>
         <echo message="OpenSpaces build script"/>
