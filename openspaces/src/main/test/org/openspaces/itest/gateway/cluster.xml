@@ -22,11 +22,11 @@
  
 	<os-core:space id="space" url="${spaceUrl}" lookup-groups="${user.name}" gateway-targets="gatewayTargets"/>
 
-    <os-gateway:targets id="gatewayTargets" local-gateway-name="${localGatewayName}" bulk-size="9991" idle-time-threshold="9992" max-redo-log-capacity="9994">
+    <os-gateway:targets id="gatewayTargets" local-gateway-name="${localGatewayName}" bulk-size="9991" idle-time-threshold="9992" max-redo-log-capacity="9994" on-redo-log-capacity-exceeded="drop-oldest">
     	<os-gateway:target name="${gatewayTarget}" bulk-size="${bulkSize}" idle-time-threshold="${idleTimeThreshold}" pending-operation-threshold="${pendingOperationThreshold}" max-redo-log-capacity="${maxRedoLogCapacity}" />    	    	        	        
     	<os-gateway:target name="NY" bulk-size="10" idle-time-threshold="20" pending-operation-threshold="30" max-redo-log-capacity="40" />    	    	        	        
-    	<os-gateway:target name="CHINA" idle-time-threshold="200" max-redo-log-capacity="400" />
-    	<os-gateway:target name="MADRID" />
+    	<os-gateway:target name="CHINA" idle-time-threshold="200" max-redo-log-capacity="400" on-redo-log-capacity-exceeded="drop-oldest" />
+    	<os-gateway:target name="MADRID" on-redo-log-capacity-exceeded="block-operations" max-redo-log-capacity="-1"/>
     </os-gateway:targets>
 
 </beans>
