@@ -251,7 +251,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Spac
                 }
                 methodInvocationLookup = new HashMap<String, Map<RemotingUtils.MethodHash, IMethod>>();
                 for (ServiceInfo serviceInfo : servicesInfo) {
-                    Class<?>[] interfaces = ClassUtils.getAllInterfaces(serviceInfo.getService());
+                    Set<Class> interfaces = ReflectionUtil.getAllInterfacesForClassAsSet(serviceInfo.getService().getClass());
                     for (Class<?> anInterface : interfaces) {
                         interfaceToService.put(anInterface.getName(), serviceInfo.getService());
                         methodInvocationLookup.put(anInterface.getName(), RemotingUtils.buildHashToMethodLookupForInterface(anInterface, useFastReflection));
@@ -376,7 +376,6 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Spac
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void writeResponse(GigaSpace gigaSpace, SpaceRemotingEntry remotingEntry, Throwable e) {
         if (remotingEntry.getOneWay() == null || !remotingEntry.getOneWay()) {
             SpaceRemotingEntry result = remotingEntry.buildResult(e);
