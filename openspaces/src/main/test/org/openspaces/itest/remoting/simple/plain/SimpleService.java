@@ -11,7 +11,7 @@ import java.util.concurrent.Future;
  * @author kimchy
  */
 @AutowireArguments
-public interface SimpleService {
+public interface SimpleService extends SuperSimpleService{
 
     String say(@Routing String message);
 

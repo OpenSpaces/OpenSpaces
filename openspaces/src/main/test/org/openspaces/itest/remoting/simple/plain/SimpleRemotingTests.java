@@ -45,6 +45,8 @@ public class SimpleRemotingTests extends AbstractDependencyInjectionSpringContex
 
     protected SimpleService simpleService;
 
+    protected SuperSimpleService superSimpleService;
+
     protected SimpleServiceAsync simpleServiceAsync;
 
     protected SimpleService simpleServiceExecutor;
@@ -65,6 +67,13 @@ public class SimpleRemotingTests extends AbstractDependencyInjectionSpringContex
     public void testAsyncSyncExecution() {
         String reply = simpleService.say("test");
         assertEquals("SAY test", reply);
+        String reply1 = simpleService.superSay("test");
+        assertEquals("Super SAY test", reply1);
+    }
+
+    public void testSuperAsyncSyncExecution() {
+        String reply = superSimpleService.superSay("test");
+        assertEquals("Super SAY test", reply);
     }
 
     public void testAsyncSyncExecutionWithException() {

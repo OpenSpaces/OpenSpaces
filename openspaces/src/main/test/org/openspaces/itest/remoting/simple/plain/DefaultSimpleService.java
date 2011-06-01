@@ -1,6 +1,7 @@
 package org.openspaces.itest.remoting.simple.plain;
 
 import org.openspaces.remoting.RemotingService;
+import org.openspaces.remoting.Routing;
 
 import java.util.List;
 import java.util.Map;
@@ -47,4 +48,9 @@ public class DefaultSimpleService implements SimpleService {
     public Future<String> asyncOverloaded(Map map) {
         return null;
     }
+
+    public String superSay(String message) {
+        return "Super SAY " + message;
+    }
+
 }

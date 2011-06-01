@@ -38,4 +38,8 @@
 
     <os-remoting:executor-proxy id="simpleServiceExecutor" giga-space="gigaSpace"
                                 interface="org.openspaces.itest.remoting.simple.plain.SimpleService"/>
+
+<os-remoting:executor-proxy id="superSimpleService" giga-space="gigaSpace"
+                             interface="org.openspaces.itest.remoting.simple.plain.SuperSimpleService" timeout="150000"/>
+
 </beans>
