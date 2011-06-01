@@ -115,7 +115,7 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
 
     private void executePartialUpdate(Session session, BulkItem bulkItem) {
         if (logger.isTraceEnabled()) {
-            logger.trace("Partial Update Entry [" + bulkItem.toString() + "]");
+            logger.trace("Partial Update Entry [" + bulkItem.toString() + ']');
         }
 
         String hql = getPartialUpdateHQL(bulkItem);
@@ -132,7 +132,7 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
         Object entry = bulkItem.getItem();
         
         if (logger.isTraceEnabled()) {
-            logger.trace("Write Entry [" + entry + "]");
+            logger.trace("Write Entry [" + entry + ']');
         }
         if (useMerge) {
             session.merge(entry);
@@ -150,7 +150,7 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
         Object entry = bulkItem.getItem();
         
         if (logger.isTraceEnabled()) {
-            logger.trace("Update Entry [" + entry + "]");
+            logger.trace("Update Entry [" + entry + ']');
         }
         if (useMerge) {
             session.merge(entry);
@@ -168,7 +168,7 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
         Object entry = bulkItem.getItem();
         
         if (logger.isTraceEnabled()) {
-            logger.trace("Deleting Entry [" + entry + "]");
+            logger.trace("Deleting Entry [" + entry + ']');
         }
         
         
@@ -189,7 +189,7 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
             {  
                // ignore non existing objects - avoid unnecessary failures
                 if (logger.isTraceEnabled()) {
-                    logger.trace("Delete Entry failed [" + entry + "]",e);
+                    logger.trace("Delete Entry failed [" + entry + ']',e);
                 }
             }
    
@@ -214,11 +214,11 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
     public DataIterator iterator(SQLQuery sqlQuery) throws DataSourceException {
         if (!isManagedEntry(sqlQuery.getTypeName())) {
             if (logger.isTraceEnabled()) {
-                logger.trace("Ignoring query (no mapping in hibernate) [" + sqlQuery + "]");
+                logger.trace("Ignoring query (no mapping in hibernate) [" + sqlQuery + ']');
             }
         }
         if (logger.isTraceEnabled()) {
-            logger.trace("Iterator over query [" + sqlQuery + "]");
+            logger.trace("Iterator over query [" + sqlQuery + ']');
         }
         return new HibernateProxyRemoverIterator(new DefaultListQueryDataIterator(sqlQuery, getSessionFactory()));
     }

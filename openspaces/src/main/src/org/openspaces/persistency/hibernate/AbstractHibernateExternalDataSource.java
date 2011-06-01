@@ -255,9 +255,8 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
         if (managedEntries == null) {
             managedEntries = new HashSet<String>();
             // try and derive the managedEntries
-            Map allClassMetaData = sessionFactory.getAllClassMetadata();
-            for (Iterator it = allClassMetaData.keySet().iterator(); it.hasNext();) {
-                String entityname = (String) it.next();
+            Map<String, ClassMetadata> allClassMetaData = sessionFactory.getAllClassMetadata();
+            for (String entityname : allClassMetaData.keySet()) {
                 managedEntries.add(entityname);
             }
         }
@@ -332,8 +331,8 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
     protected String getPartialUpdateHQL(BulkItem updateBulkItem) {
         Map<String, Object> updatedValues = updateBulkItem.getItemValues();
     
-        StringBuilder updateQueryBuilder = new StringBuilder();
-        updateQueryBuilder.append("update " + updateBulkItem.getTypeName() + " set ");
+        StringBuilder updateQueryBuilder = new StringBuilder("update ");
+        updateQueryBuilder.append(updateBulkItem.getTypeName() ).append(" set ");
     
         int i  = 0;
         for (Map.Entry<String, Object> updateEntry : updatedValues.entrySet()) {
