@@ -18,7 +18,6 @@ package org.openspaces.persistency.hibernate;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -330,22 +329,23 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
 
     protected String getPartialUpdateHQL(BulkItem updateBulkItem) {
         Map<String, Object> updatedValues = updateBulkItem.getItemValues();
-    
+
         StringBuilder updateQueryBuilder = new StringBuilder("update ");
         updateQueryBuilder.append(updateBulkItem.getTypeName() ).append(" set ");
-    
+
         int i  = 0;
         for (Map.Entry<String, Object> updateEntry : updatedValues.entrySet()) {
-            updateQueryBuilder.append(updateEntry.getKey() + "=:" + updateEntry.getKey());
+            updateQueryBuilder.append(updateEntry.getKey()).append("=:").append(updateEntry.getKey());
             if(i < updatedValues.size()-1)
-                updateQueryBuilder.append(",");
+                updateQueryBuilder.append(',');
             i++;
         }
-    
-        updateQueryBuilder.append( " where " + updateBulkItem.getIdPropertyName() + "=:id_" + updateBulkItem.getIdPropertyName());
+
+        updateQueryBuilder.append( " where ").append(updateBulkItem.getIdPropertyName())
+        .append("=:id_"). append(updateBulkItem.getIdPropertyName());
         String hql = updateQueryBuilder.toString();
         if (logger.isTraceEnabled()) {
-            logger.trace("Partial Update HQL [" + hql + "]");
+            logger.trace("Partial Update HQL [" + hql + ']');
         }
         return hql;
     }
