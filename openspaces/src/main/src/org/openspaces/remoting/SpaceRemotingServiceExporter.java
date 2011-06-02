@@ -44,7 +44,6 @@ import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteLookupFailureException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
