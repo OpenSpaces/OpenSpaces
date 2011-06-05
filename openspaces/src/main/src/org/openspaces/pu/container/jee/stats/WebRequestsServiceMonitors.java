@@ -31,8 +31,8 @@ public class WebRequestsServiceMonitors extends PlainServiceMonitors {
         getMonitors().put(Attributes.TOTAL, requests);
         getMonitors().put(Attributes.ACTIVE, requestsActive);
         getMonitors().put(Attributes.TOTAL_DURATION, requestsDurationTotal);
-        getMonitors().put( Attributes.REQUESTS_THROUGHPUT, -1 );
-        getMonitors().put( Attributes.AVERAGE_REQUESTS_LATENCY, -1 );
+        getMonitors().put( Attributes.REQUESTS_THROUGHPUT, -1f );
+        getMonitors().put( Attributes.AVERAGE_REQUESTS_LATENCY, -1f );
     }
     
     public void setPrevious(WebRequestsServiceMonitors previous, long timeout) {
