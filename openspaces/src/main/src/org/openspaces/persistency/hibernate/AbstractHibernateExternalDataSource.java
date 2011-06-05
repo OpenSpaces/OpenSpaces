@@ -18,6 +18,8 @@ package org.openspaces.persistency.hibernate;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -114,6 +116,25 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
      */
     protected boolean isManagedEntry(String entityName) {
         return managedEntries.contains(entityName);
+    }
+    
+    /**
+     * Filter from the input map the unmapped field of this entity
+     * 
+     * @param entityName 
+     * @param itemValues map of properties to filter
+     * 
+     */
+    protected Map<String, Object> filterItemValue( String entityName, Map<String, Object> itemValues){
+        ClassMetadata classMetadata = sessionFactory.getClassMetadata(entityName);
+        String[] propertyNames = classMetadata.getPropertyNames();
+        List<String> names = Arrays.asList(propertyNames);
+        Iterator<String> iterator = itemValues.keySet().iterator();
+        while(iterator.hasNext()){
+            if(!names.contains(iterator.next()))
+                iterator.remove();
+        }
+        return itemValues;
     }
 
     /**
@@ -327,10 +348,9 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
         return true;
     }
 
-    protected String getPartialUpdateHQL(BulkItem updateBulkItem) {
-        Map<String, Object> updatedValues = updateBulkItem.getItemValues();
+    protected String getPartialUpdateHQL(BulkItem updateBulkItem, Map<String, Object> updatedValues) {
 
-        StringBuilder updateQueryBuilder = new StringBuilder("update ");
+        final StringBuilder updateQueryBuilder = new StringBuilder("update ");
         updateQueryBuilder.append(updateBulkItem.getTypeName() ).append(" set ");
 
         int i  = 0;

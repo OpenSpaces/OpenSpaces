@@ -218,12 +218,14 @@ public class StatelessHibernateExternalDataSource extends AbstractHibernateExter
             logger.trace("Partial Update Entry [" + bulkItem.toString() + "]");
         }
 
-        String hql = getPartialUpdateHQL(bulkItem);
+        // filter non mapped properties 
+        final Map<String, Object> itemValues = filterItemValue(bulkItem.getTypeName(), bulkItem.getItemValues());
+        
+        String hql = getPartialUpdateHQL(bulkItem, itemValues);
 
         Query query = session.createQuery(hql);
 
-        for (Map.Entry<String, Object> updateEntry : bulkItem.getItemValues().entrySet()) {
-
+        for (Map.Entry<String, Object> updateEntry : itemValues.entrySet()) {
             query.setParameter(updateEntry.getKey(), updateEntry.getValue());
         }
         query.setParameter("id_" +bulkItem.getIdPropertyName() ,bulkItem.getIdPropertyValue());
