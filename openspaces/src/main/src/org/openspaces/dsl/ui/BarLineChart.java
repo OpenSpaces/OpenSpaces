@@ -7,7 +7,7 @@ public class BarLineChart extends AbstractBasicWidget {
      */
     private static final long serialVersionUID = 1L;
 
-    public enum Unit {
+    public static enum Unit {
         REGULAR,
         PERCENTAGE,
         MEMORY,
