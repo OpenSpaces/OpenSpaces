@@ -9,6 +9,9 @@ import org.openspaces.admin.pu.ProcessingUnitPartition;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.pu.container.servicegrid.PUServiceBean;
 
+import java.util.Map;
+import java.util.concurrent.Future;
+
 /**
  * @author kimchy
  */
@@ -32,4 +35,8 @@ public interface InternalProcessingUnitInstance extends ProcessingUnitInstance, 
     void removeSpaceInstance(String uid);
 
     PUServiceBean getPUServiceBean();
+
+    Future<Object> invoke(String serviceBeanName, Map<String, Object> namedArgs);
+
+
 }

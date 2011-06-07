@@ -32,10 +32,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import net.jini.core.lookup.ServiceID;
 
@@ -78,10 +75,7 @@ import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainer
 import org.openspaces.pu.container.support.BeanLevelPropertiesUtils;
 import org.openspaces.pu.container.support.ClusterInfoParser;
 import org.openspaces.pu.container.support.WebsterFile;
-import org.openspaces.pu.service.ServiceDetails;
-import org.openspaces.pu.service.ServiceDetailsProvider;
-import org.openspaces.pu.service.ServiceMonitors;
-import org.openspaces.pu.service.ServiceMonitorsProvider;
+import org.openspaces.pu.service.*;
 import org.openspaces.pu.sla.monitor.ApplicationContextMonitor;
 import org.openspaces.pu.sla.monitor.Monitor;
 import org.springframework.context.ApplicationContext;
@@ -152,6 +146,8 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     final private List<Callable> serviceMonitors = new ArrayList<Callable>();
 
     final private List<InternalDumpProcessor> dumpProcessors = new ArrayList<InternalDumpProcessor>();
+
+    final private Map<String, InvocableService> invocableServiceMap = new ConcurrentHashMap<String, InvocableService>();
 
     private volatile boolean stopping = false;
 
@@ -623,6 +619,8 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
         buildServiceMonitors();
 
+        buildInvocableServices();
+
         this.puDetails = new PUDetails(context.getParentServiceID(), clusterInfo, beanLevelProperties, serviceDetails.toArray(new Object[serviceDetails.size()]));
 
         if (container instanceof ApplicationContextProcessingUnitContainer) {
@@ -641,6 +639,20 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                 }
                 executorService.scheduleAtFixedRate(watchTask, watchTask.getMonitor().getPeriod(), watchTask.getMonitor().getPeriod(), TimeUnit.MILLISECONDS);
             }
+        }
+    }
+
+
+    protected void buildInvocableServices() {
+        if (container instanceof InvocableService) {
+            invocableServiceMap.put("__container__", (InvocableService) container);
+        }
+        //not always true (e.g. DotNet and JEE PU container)
+        if (container instanceof ApplicationContextProcessingUnitContainer) {
+            ConfigurableApplicationContext applicationContext = (ConfigurableApplicationContext) ((ApplicationContextProcessingUnitContainer) container).getApplicationContext();
+            final Map<String, InvocableService> appContextInvocableServiceMap = applicationContext.getBeansOfType(InvocableService.class);
+            logger.info("registering invocable services: " + appContextInvocableServiceMap);
+            invocableServiceMap.putAll(appContextInvocableServiceMap);
         }
     }
 
@@ -1241,5 +1253,16 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         } finally {
             ClassLoaderHelper.setContextClassLoader(prevClassLoader, true);
         }
+    }
+
+    public Object invoke(String serviceBeanName, Map<String, Object> namedArgs) throws RemoteException {
+        InvocableService invocableService = invocableServiceMap.get(serviceBeanName);
+        if (invocableService == null) {
+            throw new InvocableServiceLookupFailureException("Could not find an InvocableService with name " + serviceBeanName);
+        }
+        if (logger.isDebugEnabled()) {
+            logger.debug("invoking service " + serviceBeanName + " with args " + namedArgs);
+        }
+        return invocableService.invoke(namedArgs);
     }
 }

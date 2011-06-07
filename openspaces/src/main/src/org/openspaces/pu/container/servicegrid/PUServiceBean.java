@@ -16,23 +16,26 @@
 
 package org.openspaces.pu.container.servicegrid;
 
+import com.gigaspaces.annotation.lrmi.AsyncRemoteCall;
 import com.gigaspaces.cluster.activeelection.SpaceMode;
+import com.gigaspaces.grid.zone.GridZoneProvider;
 import com.gigaspaces.internal.jvm.JVMInfoProvider;
 import com.gigaspaces.internal.os.OSInfoProvider;
 import com.gigaspaces.lrmi.nio.info.NIOInfoProvider;
-import com.gigaspaces.grid.zone.GridZoneProvider;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.admin.RuntimeHolder;
 import com.j_spaces.core.client.SpaceURL;
 import com.j_spaces.core.filters.StatisticsHolder;
 import com.sun.jini.start.ServiceProxyAccessor;
 import net.jini.core.lookup.ServiceID;
-import org.openspaces.core.cluster.ClusterInfo;
 import org.jini.rio.core.jsb.ServiceState;
 import org.jini.rio.resources.servicecore.Service;
+import org.openspaces.core.cluster.ClusterInfo;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.Map;
+import java.util.concurrent.Future;
 
 /**
  * @author kimchy
@@ -69,4 +72,7 @@ public interface PUServiceBean extends NIOInfoProvider, OSInfoProvider, JVMInfoP
     SpaceURL[] listSpacesURLs() throws RemoteException;
 
     SpaceMode[] listSpacesModes() throws RemoteException;
+
+    @AsyncRemoteCall
+    Object invoke(String serviceBeanName, Map<String, Object> namedArgs) throws RemoteException;
 }

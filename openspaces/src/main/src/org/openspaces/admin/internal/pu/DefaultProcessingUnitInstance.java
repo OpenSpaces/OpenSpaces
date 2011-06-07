@@ -597,4 +597,12 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
     public void runGc() throws RemoteException {
         puServiceBean.runGc();
     }
+
+    public Future<Object> invoke(String serviceBeanName, Map<String, Object> namedArgs) {
+        try {
+            return (Future<Object>) puServiceBean.invoke(serviceBeanName, namedArgs);
+        } catch (RemoteException e) {
+            throw new AdminException("Failed to invoke processing unit instance", e);
+        }
+    }
 }

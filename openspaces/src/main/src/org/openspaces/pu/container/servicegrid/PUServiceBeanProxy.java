@@ -1,6 +1,7 @@
 package org.openspaces.pu.container.servicegrid;
 
 import com.gigaspaces.cluster.activeelection.SpaceMode;
+import com.gigaspaces.lrmi.nio.async.FutureContext;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.admin.RuntimeHolder;
 import com.j_spaces.core.client.SpaceURL;
@@ -11,6 +12,8 @@ import org.jini.rio.resources.servicecore.AbstractProxy;
 import org.openspaces.core.cluster.ClusterInfo;
 
 import java.rmi.RemoteException;
+import java.util.Map;
+import java.util.concurrent.Future;
 
 /**
  * @author kimchy
@@ -108,5 +111,11 @@ public class PUServiceBeanProxy extends AbstractProxy implements PUServiceBean {
 
     public Object getServiceProxy() throws RemoteException {
         return ((PUServiceBean) server).getServiceProxy();
+    }
+
+    public Future<Object> invoke(String serviceBeanName, Map<String, Object> namedArgs) throws RemoteException {
+        ((PUServiceBean) server).invoke(serviceBeanName, namedArgs);
+        return FutureContext.getFutureResult();
+
     }
 }
