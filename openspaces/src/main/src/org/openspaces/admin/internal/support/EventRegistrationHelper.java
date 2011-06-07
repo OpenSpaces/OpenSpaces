@@ -1,7 +1,8 @@
 package org.openspaces.admin.internal.support;
 
 import org.openspaces.admin.AdminEventListener;
-import org.openspaces.admin.application.events.ApplicationLifecycleEventListener;
+import org.openspaces.admin.application.events.ApplicationAddedEventListener;
+import org.openspaces.admin.application.events.ApplicationRemovedEventListener;
 import org.openspaces.admin.esm.events.ElasticServiceManagerAddedEventListener;
 import org.openspaces.admin.esm.events.ElasticServiceManagerRemovedEventListener;
 import org.openspaces.admin.gsa.events.GridServiceAgentAddedEventListener;
@@ -162,8 +163,11 @@ public abstract class EventRegistrationHelper {
         if (eventListener instanceof SpaceInstanceStatisticsChangedEventListener) {
             admin.getSpaces().getSpaceInstanceStatisticsChanged().add((SpaceInstanceStatisticsChangedEventListener) eventListener);
         }
-        if (eventListener instanceof ApplicationLifecycleEventListener ){
-            admin.getApplications().addLifecycleListener( (ApplicationLifecycleEventListener) eventListener);
+        if (eventListener instanceof ApplicationAddedEventListener ){
+            admin.getApplications().getApplicationAdded().add( (ApplicationAddedEventListener ) eventListener);
+        }
+        if (eventListener instanceof ApplicationRemovedEventListener ){
+            admin.getApplications().getApplicationRemoved().add( ( ApplicationRemovedEventListener ) eventListener);
         }
     }
 
@@ -276,8 +280,11 @@ public abstract class EventRegistrationHelper {
         if (eventListener instanceof SpaceInstanceStatisticsChangedEventListener) {
             admin.getSpaces().getSpaceInstanceStatisticsChanged().remove((SpaceInstanceStatisticsChangedEventListener) eventListener);
         }
-        if (eventListener instanceof ApplicationLifecycleEventListener ){
-            admin.getApplications().removeLifecycleListener( (ApplicationLifecycleEventListener) eventListener);
-        }        
+        if (eventListener instanceof ApplicationAddedEventListener ){
+            admin.getApplications().getApplicationAdded().remove( (ApplicationAddedEventListener ) eventListener);
+        }
+        if (eventListener instanceof ApplicationRemovedEventListener ){
+            admin.getApplications().getApplicationRemoved().remove( ( ApplicationRemovedEventListener ) eventListener);
+        }
     }
 }
