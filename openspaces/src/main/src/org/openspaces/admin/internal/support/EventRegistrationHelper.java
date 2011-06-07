@@ -276,5 +276,8 @@ public abstract class EventRegistrationHelper {
         if (eventListener instanceof SpaceInstanceStatisticsChangedEventListener) {
             admin.getSpaces().getSpaceInstanceStatisticsChanged().remove((SpaceInstanceStatisticsChangedEventListener) eventListener);
         }
+        if (eventListener instanceof ApplicationLifecycleEventListener ){
+            admin.getApplications().removeLifecycleListener( (ApplicationLifecycleEventListener) eventListener);
+        }        
     }
 }
