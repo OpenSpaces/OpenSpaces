@@ -220,6 +220,12 @@ public abstract class EventRegistrationHelper {
         if (eventListener instanceof GridServiceManagerRemovedEventListener) {
             admin.getGridServiceManagers().getGridServiceManagerRemoved().remove((GridServiceManagerRemovedEventListener) eventListener);
         }
+        if (eventListener instanceof GridServiceAgentAddedEventListener) {
+            admin.getGridServiceAgents().getGridServiceAgentAdded().remove((GridServiceAgentAddedEventListener) eventListener);
+        }
+        if (eventListener instanceof GridServiceAgentRemovedEventListener) {
+            admin.getGridServiceAgents().getGridServiceAgentRemoved().remove((GridServiceAgentRemovedEventListener) eventListener);
+        }
         if (eventListener instanceof ElasticServiceManagerAddedEventListener) {
             admin.getElasticServiceManagers().getElasticServiceManagerAdded().remove((ElasticServiceManagerAddedEventListener) eventListener);
         }
