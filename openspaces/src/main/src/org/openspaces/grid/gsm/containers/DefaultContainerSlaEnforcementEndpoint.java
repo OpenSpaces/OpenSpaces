@@ -69,6 +69,14 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
             throw new IllegalArgumentException("sla cannot be null");
         }
 
+        if (sla.getNewContainerConfig().getMaximumMemoryCapacityInMB() <=0) {
+            throw new IllegalStateException("container memory capacity cannot be zero.");
+        }
+        
+        if (sla.getNewContainerConfig().getMaximumJavaHeapSizeInMB() <=0) {
+            throw new IllegalStateException("container memory capacity cannot be zero.");
+        }
+        
         String[] zoneInContainerOptions = sla.getNewContainerConfig().getZones();
 
         String zone = ContainersSlaUtils.getContainerZone(pu);
