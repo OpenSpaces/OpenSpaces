@@ -35,7 +35,6 @@ import org.openspaces.core.cluster.ClusterInfo;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Map;
-import java.util.concurrent.Future;
 
 /**
  * @author kimchy
