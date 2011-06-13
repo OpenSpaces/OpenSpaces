@@ -4,7 +4,16 @@
 
     <property file="project.properties"/>
     <property file="build.properties"/>
+	<property environment="env"/>
 
+	<condition property="mvn.executable" value="mvn.bat">
+            <os family="windows" />
+    </condition>
+
+    <condition property="mvn.executable" value="mvn">
+            <os family="unix" />
+    </condition>
+	
     <path id="all-libs">
 
         <fileset dir="${basedir}/deploy">
@@ -251,7 +260,7 @@
     </target>
 
     <target name="dist_1_5"
-            depends="build_1_5, fulljar, srczip, javadoc, schema, license"
+            depends="build_1_5, fulljar, install.maven, srczip, javadoc, schema, license"
             description="Creates the OpenSpaces distribution">
         <mkdir dir="${dist.dir}"/>
         <delete file="${dist.dir}/${name}-1.5.zip"/>
@@ -282,6 +291,25 @@
         	</zipfileset>
         </zip>
     </target>
+	
+	<target name="install.maven" if="productversion">
+		<property name="maven.tmp.dir" value="${basedir}/maven.tmp.dir" />
+	 	<java classname="org.openspaces.maven.support.POMGenerator" fork="true">
+	 		<arg value="${maven.tmp.dir}"/>
+	 		<arg value="${productversion}"/>
+	 		<classpath refid="all-libs"/>
+            <classpath location="${target.classes.dir}"/>
+	 	</java>	
+		<replaceregexp file="${maven.tmp.dir}/gs-openspaces-pom.xml" 
+             match="&lt;version&gt;${productversion}-(.*)&lt;/version&gt;"
+             replace="&lt;version&gt;${productversion}&lt;/version&gt;"/>
+		<echo message="${productversion}" />
+    	<!-- Install newly created jar in local maven repository -->
+		<exec executable="${env.MAVEN_HOME}\bin\${mvn.executable}"> 
+			<arg line="install:install-file -DgroupId=com.gigaspaces -DartifactId=gs-openspaces -Dversion=${productversion} -Dpackaging=jar -DpomFile=${maven.tmp.dir}/gs-openspaces-pom.xml -Dfile=${lib.dir}/required/gs-openspaces.jar"/>
+		</exec>
+		<delete dir="${maven.tmp.dir}"/>
+	</target>
 
     <target name="dist">
         <antcall target="dist_1_5"/>
