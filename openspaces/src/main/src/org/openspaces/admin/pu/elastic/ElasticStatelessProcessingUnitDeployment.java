@@ -98,8 +98,8 @@ public class ElasticStatelessProcessingUnitDeployment extends AbstractElasticPro
     }
  
     @Override
-    public ElasticStatefulProcessingUnitDeployment addContextProperty(String key, String value) {
-        return (ElasticStatefulProcessingUnitDeployment) super.addContextProperty(key, value);
+    public ElasticStatelessProcessingUnitDeployment addContextProperty(String key, String value) {
+        return (ElasticStatelessProcessingUnitDeployment) super.addContextProperty(key, value);
     }
        
     public ElasticStatelessProcessingUnitDeployment dedicatedMachineProvisioning(ElasticMachineProvisioningConfig config) {
