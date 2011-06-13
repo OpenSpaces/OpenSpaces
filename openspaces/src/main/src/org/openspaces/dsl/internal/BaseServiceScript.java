@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 
+import org.openspaces.dsl.CustomCommand;
 import org.openspaces.dsl.PluginDescriptor;
 import org.openspaces.dsl.Service;
 import org.openspaces.dsl.ServiceLifecycle;
@@ -91,7 +92,7 @@ public abstract class BaseServiceScript extends Script {
 	public Service service(final Closure<Object> closure) {
 		final Service service = new Service();
 		if (context == null) {
-			context = new ServiceContext(service);
+			context = new ServiceContext(service, null, null); //TODO - fix this
 		}
 
 		swapActiveObject(closure, service);
@@ -122,7 +123,9 @@ public abstract class BaseServiceScript extends Script {
 			return new BalanceGauge();
 		} else if (name.equals("barLineChart")) {
 			return new BarLineChart();
-		}
+		} else if (name.equals("customCommand")) {
+            return new CustomCommand();
+        }
 
 		return null;
 	}

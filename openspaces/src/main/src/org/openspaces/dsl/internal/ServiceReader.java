@@ -15,9 +15,9 @@ import org.openspaces.dsl.ui.BarLineChart.Unit;
 
 public class ServiceReader {
 
-	public static Service getServiceFromFile(final File dslFile) throws Exception {
+	public static Service getServiceFromFile(final File dslFile, final File workDir) throws Exception {
 
-		final GroovyShell gs = createGroovyShell();
+		final GroovyShell gs = createGroovyShell(null);
 
 		Object result = null;
 		try {
@@ -39,14 +39,18 @@ public class ServiceReader {
 		}
 
 		final Service service = (Service) result;
+		
+		ServiceContext ctx =  (ServiceContext) gs.getContext().getProperty("context");
+		ctx.setService(service);
 		return service;
 	}
 
 	@SuppressWarnings("unchecked")
-	private static GroovyShell createGroovyShell() {
+	private static GroovyShell createGroovyShell(final String workDir) {
 		final CompilerConfiguration cc = createCompilerConfiguration();
 		final Binding binding = new Binding();
-		final ServiceContext context = new ServiceContext(null);
+		// TODO -- add Admin here!!!!
+		final ServiceContext context = new ServiceContext(null, null, workDir);
 		binding.getVariables().put("context", context);
 
 		final GroovyShell gs = new GroovyShell(

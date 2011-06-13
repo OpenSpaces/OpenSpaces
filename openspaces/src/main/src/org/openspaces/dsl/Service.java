@@ -34,6 +34,7 @@ public class Service implements Serializable{
     private boolean keepFile = false;
     
     private Map<String, String> customProperties = new HashMap<String, String>();
+    private Map<String, CustomCommand> customCommands = new HashMap<String, CustomCommand>();
     
     public String getName() {
         return name;
@@ -167,6 +168,14 @@ public class Service implements Serializable{
 
     public void setPidFile(String pidFile) {
         this.pidFile = pidFile;
+    }
+
+    public Map<String, CustomCommand> getCustomCommands() {
+        return customCommands;
+    }
+
+    public void setCustomCommands(Map<String, CustomCommand> customCommands) {
+        this.customCommands = customCommands;
     }
 
 }
