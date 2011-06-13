@@ -160,9 +160,11 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 final OSDetails osDetails = lookupService.getOSDetails();
                 final JVMDetails jvmDetails = lookupService.getJVMDetails();
                 final String[] zones = ((GridZoneProvider) registrar.getRegistrar()).getZones();
+                final Entry[] attributeSets = ((com.sun.jini.reggie.Registrar)registrar.getRegistrar()).getLookupAttributes();
                 admin.scheduleNonBlockingStateChange(new Runnable() {
                     public void run() {
-                        admin.addLookupService(lookupService, nioDetails, osDetails, jvmDetails, null, zones);
+                        String jmxUrl = getJMXConnection( attributeSets );
+                        admin.addLookupService(lookupService, nioDetails, osDetails, jvmDetails, jmxUrl, zones);
                     }
                 });
 
