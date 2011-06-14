@@ -22,129 +22,129 @@ import org.openspaces.dsl.ui.WidgetGroup;
 
 public abstract class BaseServiceScript extends Script {
 
-	private static java.util.logging.Logger logger =
-			java.util.logging.Logger.getLogger(BaseServiceScript.class.getName());
-	protected ServiceContext context;
+    private static java.util.logging.Logger logger =
+            java.util.logging.Logger.getLogger(BaseServiceScript.class.getName());
+    // protected ServiceContext context;
 
-	private Object activeObject = null;
+    private Object activeObject = null;
 
-	private Map<String, Method> activeMethods;
-	
-	public void setProperty(String name, Object value) {
-		methodMissing(name, new Object[]{value});
-	}
+    private Map<String, Method> activeMethods;
+    private Service service;
 
+    @Override
+    public void setProperty(final String name, final Object value) {
+        methodMissing(name, new Object[] { value });
+    }
 
-	@SuppressWarnings("unchecked")
-	public Object methodMissing(final String name, final Object args) {
-		final Object[] argsArray = (Object[]) args;
+    @SuppressWarnings("unchecked")
+    public Object methodMissing(final String name, final Object args) {
+        final Object[] argsArray = (Object[]) args;
 
-		
-		// first check if this is an object declaration
-		final Object obj = createDslObject(name);
-		if (obj != null) {
+        // first check if this is an object declaration
+        final Object obj = createDslObject(name);
+        if (obj != null) {
 
-			if (this.activeObject != null) {
-				final Collection<Method> methods = this.activeMethods.values();
-				for (final Method method : methods) {
-					if (method.getName().startsWith("set") && (method.getParameterTypes().length == 1)
-								&& (method.getParameterTypes()[0].equals(obj.getClass()))) {
+            if (this.activeObject != null) {
+                final Collection<Method> methods = this.activeMethods.values();
+                for (final Method method : methods) {
+                    if (method.getName().startsWith("set") && (method.getParameterTypes().length == 1)
+                                && (method.getParameterTypes()[0].equals(obj.getClass()))) {
 
-						try {
-							method.invoke(this.activeObject, new Object[] { obj });
-						} catch (final Exception e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						break;
-					}
-				}
-			}
-			swapActiveObject((Closure<Object>) argsArray[0], obj);
-			return obj;
-		}
+                        try {
+                            method.invoke(this.activeObject, new Object[] { obj });
+                        } catch (final Exception e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        }
+                        break;
+                    }
+                }
+            }
+            swapActiveObject((Closure<Object>) argsArray[0], obj);
+            return obj;
+        }
 
-		// next check if this is a property assignment
+        // next check if this is a property assignment
 
-		if (argsArray.length != 1) {
-			throw new MissingMethodException(name, Service.class, argsArray);
-		}
+        if (argsArray.length != 1) {
+            throw new MissingMethodException(name, Service.class, argsArray);
+        }
 
-		final Object arg = argsArray[0];
+        final Object arg = argsArray[0];
 
+        final String methodName = "set" + name.substring(0, 1).toUpperCase() + name.substring(1);
 
-		final String methodName = "set" + name.substring(0, 1).toUpperCase() + name.substring(1);
+        try {
+            final Method m = this.activeMethods.get(methodName);
+            if (m != null) {
+                m.invoke(this.activeObject, arg);
+            } else {
+                logger.warning("Method " + methodName + " not found");
+            }
+        } catch (final Exception e) {
+            logger.log(Level.SEVERE, "Failed to invoke method " + methodName, e);
+        }
 
-		try {
-			final Method m = this.activeMethods.get(methodName);
-			if (m != null) {
-				m.invoke(this.activeObject, arg);
-			} else {
-				 logger.warning("Method " + methodName + " not found");
-			}
-		} catch (final Exception e) {
-			logger.log(Level.SEVERE, "Failed to invoke method " + methodName, e);
-		}
+        return this.activeObject;
+    }
 
-		return this.activeObject;
-	}
+    public Service service(final Closure<Object> closure) {
+        this.service = new Service();
+        // if (context == null) {
+        // context = new ServiceContext(service, null, null); //TODO - fix this
+        // }
 
-	public Service service(final Closure<Object> closure) {
-		final Service service = new Service();
-		if (context == null) {
-			context = new ServiceContext(service, null, null); //TODO - fix this
-		}
+        swapActiveObject(closure, service);
+        return service;
 
-		swapActiveObject(closure, service);
-		return service;
+    }
 
-	}
+    public ServiceLifecycle lifecycle(final Closure<Object> closure) {
+        final ServiceLifecycle sl = new ServiceLifecycle();
 
-	public ServiceLifecycle lifecycle(final Closure<Object> closure) {
-		final ServiceLifecycle sl = new ServiceLifecycle();
+        swapActiveObject(closure, sl);
 
-		swapActiveObject(closure, sl);
+        this.service.setLifecycle(sl);
+        // this.context.getService().setLifecycle(sl);
+        return sl;
 
-		this.context.getService().setLifecycle(sl);
-		return sl;
+    }
 
-	}
-
-	public Object createDslObject(final String name) {
-		if (name.equals("userInterface")) {
-			return new UserInterface();
-		} else if (name.equals("plugin")) {
-			return new PluginDescriptor();
-		} else if (name.equals("metricGroup")) {
-			return new MetricGroup();
-		} else if (name.equals("widgetGroup")) {
-			return new WidgetGroup();
-		} else if (name.equals("balanceGauge")) {
-			return new BalanceGauge();
-		} else if (name.equals("barLineChart")) {
-			return new BarLineChart();
-		} else if (name.equals("customCommand")) {
+    public Object createDslObject(final String name) {
+        if (name.equals("userInterface")) {
+            return new UserInterface();
+        } else if (name.equals("plugin")) {
+            return new PluginDescriptor();
+        } else if (name.equals("metricGroup")) {
+            return new MetricGroup();
+        } else if (name.equals("widgetGroup")) {
+            return new WidgetGroup();
+        } else if (name.equals("balanceGauge")) {
+            return new BalanceGauge();
+        } else if (name.equals("barLineChart")) {
+            return new BarLineChart();
+        } else if (name.equals("customCommand")) {
             return new CustomCommand();
         }
 
-		return null;
-	}
+        return null;
+    }
 
-	protected Object swapActiveObject(final Closure<Object> closure, final Object obj) {
-		final Object prevObject = this.activeObject;
-		this.activeObject = obj;
-		final Map<String, Method> prevMethods = this.activeMethods;
-		this.activeMethods = new HashMap<String, Method>();
-		final Method[] methods = this.activeObject.getClass().getMethods();
-		for (final Method method : methods) {
-			this.activeMethods.put(method.getName(), method);
-		}
+    protected Object swapActiveObject(final Closure<Object> closure, final Object obj) {
+        final Object prevObject = this.activeObject;
+        this.activeObject = obj;
+        final Map<String, Method> prevMethods = this.activeMethods;
+        this.activeMethods = new HashMap<String, Method>();
+        final Method[] methods = this.activeObject.getClass().getMethods();
+        for (final Method method : methods) {
+            this.activeMethods.put(method.getName(), method);
+        }
 
-		closure.setResolveStrategy(Closure.OWNER_ONLY);
-		final Object res = closure.call();
-		activeObject = prevObject;
-		this.activeMethods = prevMethods;
-		return res;
-	}
+        closure.setResolveStrategy(Closure.OWNER_ONLY);
+        final Object res = closure.call();
+        activeObject = prevObject;
+        this.activeMethods = prevMethods;
+        return res;
+    }
 
 }

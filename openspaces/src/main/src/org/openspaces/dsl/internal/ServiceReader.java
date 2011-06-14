@@ -9,13 +9,16 @@ import java.io.IOException;
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
+import org.openspaces.admin.Admin;
+import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.dsl.Service;
+import org.openspaces.dsl.context.ServiceContext;
 import org.openspaces.dsl.ui.BarLineChart.Unit;
 
 
 public class ServiceReader {
 
-	public static Service getServiceFromFile(final File dslFile, final File workDir) throws Exception {
+	public static Service getServiceFromFile(final File dslFile, final File workDir, Admin admin, ClusterInfo clusterInfo) throws Exception {
 
 		final GroovyShell gs = createGroovyShell(null);
 
@@ -40,18 +43,17 @@ public class ServiceReader {
 
 		final Service service = (Service) result;
 		
-		ServiceContext ctx =  (ServiceContext) gs.getContext().getProperty("context");
-		ctx.setService(service);
+		ServiceContext ctx = new ServiceContext(service, admin, workDir.getAbsolutePath(), clusterInfo);
+		gs.getContext().setProperty("context", ctx);
+		
+		
 		return service;
 	}
 
-	@SuppressWarnings("unchecked")
 	private static GroovyShell createGroovyShell(final String workDir) {
 		final CompilerConfiguration cc = createCompilerConfiguration();
 		final Binding binding = new Binding();
-		// TODO -- add Admin here!!!!
-		final ServiceContext context = new ServiceContext(null, null, workDir);
-		binding.getVariables().put("context", context);
+
 
 		final GroovyShell gs = new GroovyShell(
 				ServiceReader.class.getClassLoader(), // this.getClass().getClassLoader(),

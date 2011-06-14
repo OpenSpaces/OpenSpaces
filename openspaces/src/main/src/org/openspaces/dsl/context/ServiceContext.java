@@ -1,4 +1,4 @@
-package org.openspaces.dsl.internal;
+package org.openspaces.dsl.context;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,6 +8,7 @@ import org.openspaces.admin.Admin;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
+import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.dsl.Service;
 
 public class ServiceContext {
@@ -15,16 +16,35 @@ public class ServiceContext {
     private Service service;
     private Admin admin;
     private String dir;
+    private ClusterInfo clusterInfo;
 
-    public ServiceContext(final Service service, final Admin admin, final String dir) {
+    public ServiceContext(final Service service, final Admin admin, final String dir, ClusterInfo clusterInfo) {
         super();
         this.service = service;
         this.admin = admin;
         this.dir = dir;
+        this.clusterInfo = clusterInfo;
 
+    }    
+    
+    public int getInstanceId() {
+        return clusterInfo.getRunningNumber();
     }
-
-    private String text = "Some Text";
+    
+    public org.openspaces.dsl.context.Service getService() {
+        final String name = this.service.getName();
+        return getService(name);
+    }
+    public org.openspaces.dsl.context.Service getService(String name) {
+        
+        ProcessingUnit pu = getProcessingUnitFromAdmin(name);
+        if(pu == null) {
+            throw new IllegalArgumentException("Could not find Processing Unit with name: " + service.getName());
+        }
+        return new org.openspaces.dsl.context.Service(pu);
+        
+    }
+    
 
     public List<ProcessingUnitInstance> getServiceInstances() {
         final ProcessingUnit pu = getProcessingUnitFromAdmin();
@@ -57,7 +77,11 @@ public class ServiceContext {
     }
 
     private ProcessingUnit getProcessingUnitFromAdmin() {
-        final String name = this.service.getName();
+        return getProcessingUnitFromAdmin(this.service.getName());
+    }
+    
+    private ProcessingUnit getProcessingUnitFromAdmin(String name) {
+
         final ProcessingUnit pu = admin.getProcessingUnits().getProcessingUnit(name);
         if (pu == null) {
             throw new IllegalStateException("Processing unit with name: " + name
@@ -65,22 +89,6 @@ public class ServiceContext {
         }
 
         return pu;
-    }
-
-    public String getText() {
-        return text;
-    }
-
-    public void setText(final String text) {
-        this.text = text;
-    }
-
-    public Service getService() {
-        return service;
-    }
-
-    public void setService(final Service service) {
-        this.service = service;
     }
 
     public String getDir() {
@@ -91,12 +99,10 @@ public class ServiceContext {
         return admin;
     }
 
-    public void setAdmin(Admin admin) {
-        this.admin = admin;
-    }
 
-    public void setDir(String dir) {
-        this.dir = dir;
+    void setService(Service service) {
+        this.service = service;
     }
+  
 
 }
