@@ -17,7 +17,10 @@ import org.openspaces.dsl.ui.BarLineChart.Unit;
 
 
 public class ServiceReader {
-
+    public static Service getServiceFromFile(final File dslFile, final File workDir) throws Exception {
+        return getServiceFromFile(dslFile, workDir, null, null);
+    }
+    
 	public static Service getServiceFromFile(final File dslFile, final File workDir, Admin admin, ClusterInfo clusterInfo) throws Exception {
 
 		final GroovyShell gs = createGroovyShell(null);
