@@ -38,9 +38,7 @@ public class ServiceContext {
     public org.openspaces.dsl.context.Service getService(String name) {
         
         ProcessingUnit pu = getProcessingUnitFromAdmin(name);
-        if(pu == null) {
-            throw new IllegalArgumentException("Could not find Processing Unit with name: " + service.getName());
-        }
+
         return new org.openspaces.dsl.context.Service(pu);
         
     }
@@ -85,7 +83,7 @@ public class ServiceContext {
         final ProcessingUnit pu = admin.getProcessingUnits().getProcessingUnit(name);
         if (pu == null) {
             throw new IllegalStateException("Processing unit with name: " + name
-                    + " was not found in the cluster. That should not be possible");
+                    + " was not found in the cluster. Are you running in an IntegratedProcessingUnitContainer?");
         }
 
         return pu;
