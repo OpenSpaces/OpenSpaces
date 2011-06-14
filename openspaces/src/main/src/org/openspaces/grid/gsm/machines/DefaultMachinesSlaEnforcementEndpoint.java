@@ -874,7 +874,12 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             capacityToAllocate = capacityToAllocate.subtract(
                     new MemoryCapacityRequirement(unallocatedMemory - maxEagerMemoryCapacity));
         }
-        
+        if (logger.isDebugEnabled()) {
+            logger.debug(
+                    "capacityToAllocate=" + capacityToAllocate + " "+
+                    "maxAllocatedMemoryForPu="+maxAllocatedMemoryForPu + " "+
+                    "unallocatedCapacity="+unallocatedCapacity.toDetailedString() );
+        }
         // allocate memory and CPU eagerly
         if (!capacityToAllocate.equalsZero()) { 
             allocateManualCapacity(sla, capacityToAllocate, unallocatedCapacity);
