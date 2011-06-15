@@ -140,7 +140,7 @@ public class BootstrapWebApplicationContextListener implements ServletContextLis
             servletContext.setAttribute(JeeProcessingUnitContainerProvider.APPLICATION_CONTEXT_CONTEXT, applicationContext);
             String[] beanNames = applicationContext.getBeanDefinitionNames();
             for (String beanName : beanNames) {
-                if(!applicationContext.isSingleton(beanName))
+                if(applicationContext.getType(beanName) != null)
                     servletContext.setAttribute(beanName, applicationContext.getBean(beanName));
             }
 
