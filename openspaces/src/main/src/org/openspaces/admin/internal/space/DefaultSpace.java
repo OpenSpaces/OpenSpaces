@@ -33,6 +33,7 @@ import org.openspaces.admin.pu.DeploymentStatus;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.space.ReplicationStatus;
 import org.openspaces.admin.space.ReplicationTarget;
+import org.openspaces.admin.space.ReplicationTargetType;
 import org.openspaces.admin.space.Space;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.space.SpaceInstanceStatistics;
@@ -571,15 +572,17 @@ public class DefaultSpace implements InternalSpace {
                             continue;
                         }
                         SpaceInstance targetSpaceInstance = spaceInstancesByMemberName.get(memberNames[i]);
-                        /*
-                         * If mirror-service is one of the replication target names, find its SpaceInstance.
-                         */
-                        boolean isMirrorService = false;
-                        if (targetSpaceInstance == null) {                            
-                            //we don't know the name of the mirror-service space (it can be any name that is different from the cluster name)
-                            if (!((String)memberNames[i]).endsWith(":"+name)) {
-                                //Check if target is not a delegator, so we cannot locate a target space instance for it
-                                if (!((String)memberNames[i]).startsWith(GatewayPolicy.GATEWAY_NAME_PREFIX)){
+                        ReplicationTargetType replicationTargetType = ReplicationTargetType.SPACE_INSTANCE;
+                        //Check if target is a gateway, so we cannot locate a target space instance for it
+                        if (((String)memberNames[i]).startsWith(GatewayPolicy.GATEWAY_NAME_PREFIX)){
+                            replicationTargetType = ReplicationTargetType.GATEWAY;                            
+                        }else {
+                            /*
+                             * If mirror-service is one of the replication target names, find its SpaceInstance.
+                             */
+                            if (targetSpaceInstance == null) {                            
+                                //we don't know the name of the mirror-service space (it can be any name that is different from the cluster name)
+                                if (!((String)memberNames[i]).endsWith(":"+name)) {
                                     String mirrorServiceName = ((String)memberNames[i]).split(":")[1];
                                     Space mirrorServiceSpace = spaceInstance.getAdmin().getSpaces().getSpaceByName(mirrorServiceName);
                                     if (mirrorServiceSpace != null) {
@@ -587,16 +590,16 @@ public class DefaultSpace implements InternalSpace {
                                         if (mirrorInstance != null && mirrorInstance.getSpaceUrl().getSchema().equals("mirror")) {
                                             //note: don't cache it in spaceInstanceByMemberName map since we don't get a removal event on this instance
                                             targetSpaceInstance = mirrorInstance;
-                                            isMirrorService = true;
+                                            replicationTargetType = ReplicationTargetType.MIRROR_SERVICE;
                                         }
                                     } else {
-                                        isMirrorService = true; //we guess this is a mirror (since 8.0.1)
+                                        replicationTargetType = ReplicationTargetType.MIRROR_SERVICE; //we guess this is a mirror (since 8.0.1)
                                     }
                                 }
-                            }
-                        }else {
-                            if (targetSpaceInstance != null && targetSpaceInstance.getSpaceUrl().getSchema().equals("mirror")) {
-                                isMirrorService = true;
+                            }else {
+                                if (targetSpaceInstance != null && targetSpaceInstance.getSpaceUrl().getSchema().equals("mirror")) {
+                                    replicationTargetType = ReplicationTargetType.MIRROR_SERVICE;;
+                                }
                             }
                         }
                         ReplicationStatus replStatus = null;
@@ -611,7 +614,7 @@ public class DefaultSpace implements InternalSpace {
                                 replStatus = ReplicationStatus.DISABLED;
                                 break;
                         }
-                        replicationTargets[i] = new ReplicationTarget((InternalSpaceInstance) targetSpaceInstance, replStatus, (String)memberNames[i], isMirrorService);
+                        replicationTargets[i] = new ReplicationTarget((InternalSpaceInstance) targetSpaceInstance, replStatus, (String)memberNames[i], replicationTargetType);
                     }
                     spaceInstance.setReplicationTargets(replicationTargets);
                 }

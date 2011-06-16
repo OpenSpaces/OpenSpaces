@@ -48,18 +48,18 @@ public class ReplicationTarget {
     
     private final String memberName;
 
-    private final boolean isMirror;
+    private final ReplicationTargetType targetType;
 
-    public ReplicationTarget(InternalSpaceInstance spaceInstance, ReplicationStatus replicationStatus, String memberName, boolean isMirror) {
+    public ReplicationTarget(InternalSpaceInstance spaceInstance, ReplicationStatus replicationStatus, String memberName, ReplicationTargetType targetType) {
         this.spaceInstance = spaceInstance;
         this.replicationStatus = replicationStatus;
         this.memberName = memberName;
-        this.isMirror = isMirror;
+        this.targetType = targetType;
     }
 
     /**
      * Returns the space instance that will be replicated to. Can be <code>null</code>
-     * if replication is disabled/disconnected or the replication target is not a space (gateway).
+     * if replication is disabled/disconnected or the replication target is not a space ({@link ReplicationTargetType#GATEWAY}).
      */
     public InternalSpaceInstance getSpaceInstance() {
         return spaceInstance;
@@ -81,8 +81,18 @@ public class ReplicationTarget {
     
     /**
      * @return true if target is a Mirror Space.
+     * @deprecated Since 8.0.3 - use {@link #getTargetType()} instead.
      */
+    @Deprecated
     public boolean isMirror() {
-        return isMirror;
+        return getTargetType() == ReplicationTargetType.MIRROR_SERVICE;
+    }
+    
+    /**
+     * @return the target type
+     * @since 8.0.3
+     */
+    public ReplicationTargetType getTargetType(){
+        return targetType;
     }
 }
