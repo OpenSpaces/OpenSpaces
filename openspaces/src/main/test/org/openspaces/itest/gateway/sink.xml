@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:os-gateway="http://www.openspaces.org/schema/core/gateway"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.openspaces.org/schema/core/gateway http://www.openspaces.org/schema/8.0/core/gateway/openspaces-gateway.xsd">
+
+
+    <bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"/>
+
+    <context:annotation-config/>
+ 
+	<bean id="conflictResolver" class="org.openspaces.itest.gateway.MyConflictResolver" />
+	
+    <os-gateway:sink id="sink" local-gateway-name="localGateway" gateway-lookups="gatewayLookups" local-space-url="jini://*/*/localCluster" requires-bootstrap="true">
+	    <os-gateway:sources>    
+	    	<os-gateway:source name="localGateway" />
+	    	<os-gateway:source name="targetGateway" />
+	    </os-gateway:sources>
+		<os-gateway:error-handling conflict-resolver="conflictResolver" max-retries-on-tx-lock="5" tx-lock-retry-interval="1000" />
+    </os-gateway:sink>
+
+    <os-gateway:lookups id="gatewayLookups">
+    	<os-gateway:lookup gateway-name="local" host="localhost" discovery-port="123" lrmi-port="456" />
+    </os-gateway:lookups>
+
+</beans>
