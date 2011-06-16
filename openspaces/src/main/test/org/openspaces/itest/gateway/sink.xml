@@ -23,7 +23,7 @@
     </os-gateway:sink>
 
     <os-gateway:lookups id="gatewayLookups">
-    	<os-gateway:lookup gateway-name="local" host="localhost" discovery-port="123" lrmi-port="456" />
+    	<os-gateway:lookup gateway-name="local" host="localhost" discovery-port="123" communication-port="456" />
     </os-gateway:lookups>
 
 </beans>
