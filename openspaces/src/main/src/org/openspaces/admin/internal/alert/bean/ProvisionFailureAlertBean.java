@@ -13,10 +13,11 @@ import org.openspaces.admin.internal.alert.InternalAlertManager;
 import org.openspaces.admin.internal.alert.bean.util.AlertBeanUtils;
 import org.openspaces.admin.pu.DeploymentStatus;
 import org.openspaces.admin.pu.ProcessingUnit;
+import org.openspaces.admin.pu.events.ProcessingUnitRemovedEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEvent;
 import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEventListener;
 
-public class ProvisionFailureAlertBean implements AlertBean, ProcessingUnitStatusChangedEventListener {
+public class ProvisionFailureAlertBean implements AlertBean, ProcessingUnitStatusChangedEventListener, ProcessingUnitRemovedEventListener {
 
     public static final String beanUID = "7d04ff97-6d49b2fc-e1f2-4805-add9-a0885a389994";
     public static final String ALERT_NAME = "Provision Failure";
@@ -41,6 +42,11 @@ public class ProvisionFailureAlertBean implements AlertBean, ProcessingUnitStatu
 
     public void setProperties(Map<String, String> properties) {
         config.setProperties(properties);
+    }
+    
+
+    public void processingUnitRemoved(ProcessingUnit processingUnit) {
+        handleProcessingUnitEvent(processingUnit);
     }
 
     public void processingUnitStatusChanged(ProcessingUnitStatusChangedEvent event) {
