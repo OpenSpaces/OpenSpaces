@@ -12,6 +12,7 @@ import org.openspaces.admin.alert.config.ReplicationChannelDisconnectedAlertConf
 import org.openspaces.admin.internal.alert.InternalAlertManager;
 import org.openspaces.admin.internal.alert.bean.util.AlertBeanUtils;
 import org.openspaces.admin.space.ReplicationStatus;
+import org.openspaces.admin.space.ReplicationTarget;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.space.events.ReplicationStatusChangedEvent;
 import org.openspaces.admin.space.events.ReplicationStatusChangedEventListener;
@@ -58,21 +59,23 @@ public class ReplicationChannelDisconnectedAlertBean implements AlertBean, Repli
     }
     
     public void spaceInstanceRemoved(SpaceInstance spaceInstance) {
-        final String groupUid = generateGroupUid(spaceInstance.getUid());
-        Alert[] alertsByGroupUid = ((InternalAlertManager)admin.getAlertManager()).getAlertRepository().getAlertsByGroupUid(groupUid);
-        if (alertsByGroupUid.length != 0 && !alertsByGroupUid[0].getStatus().isResolved()) {
-            AlertFactory factory = new AlertFactory();
-            factory.name(ALERT_NAME);
-            factory.groupUid(groupUid);
-            factory.description("Replication channel status is unavailable; " + spaceInstance + " has been removed.");
-            factory.severity(AlertSeverity.SEVERE);
-            factory.status(AlertStatus.NA);
-            factory.componentUid(spaceInstance.getUid());
-            factory.componentDescription(AlertBeanUtils.getSpaceInstanceDescription(spaceInstance));
-            factory.config(config.getProperties());
-
-            Alert alert = factory.toAlert();
-            admin.getAlertManager().triggerAlert( new ReplicationChannelDisconnectedAlert(alert));
+        for (ReplicationTarget replicationTarget : spaceInstance.getReplicationTargets()) {
+            final String groupUid = generateGroupUid(spaceInstance.getUid()+"-"+replicationTarget.getMemberName());
+            Alert[] alertsByGroupUid = ((InternalAlertManager)admin.getAlertManager()).getAlertRepository().getAlertsByGroupUid(groupUid);
+            if (alertsByGroupUid.length != 0 && !alertsByGroupUid[0].getStatus().isResolved()) {
+                AlertFactory factory = new AlertFactory();
+                factory.name(ALERT_NAME);
+                factory.groupUid(groupUid);
+                factory.description("Replication channel status is unavailable; " + spaceInstance + " has been removed.");
+                factory.severity(AlertSeverity.SEVERE);
+                factory.status(AlertStatus.NA);
+                factory.componentUid(spaceInstance.getUid());
+                factory.componentDescription(AlertBeanUtils.getSpaceInstanceDescription(spaceInstance));
+                factory.config(config.getProperties());
+                factory.putProperty(ReplicationChannelDisconnectedAlert.TARGET_IS_MIRROR, Boolean.toString(replicationTarget.isMirror()));
+                Alert alert = factory.toAlert();
+                admin.getAlertManager().triggerAlert( new ReplicationChannelDisconnectedAlert(alert));
+            }
         }
     }
     
@@ -85,7 +88,7 @@ public class ReplicationChannelDisconnectedAlertBean implements AlertBean, Repli
         
         switch (replicationStatus) {
             case DISCONNECTED: {
-                final String groupUid = generateGroupUid(source.getUid());
+                final String groupUid = generateGroupUid(source.getUid()+"-"+event.getReplicationTarget().getMemberName());
                 AlertFactory factory = new AlertFactory();
                 factory.name(ALERT_NAME);
                 factory.groupUid(groupUid);
@@ -118,7 +121,7 @@ public class ReplicationChannelDisconnectedAlertBean implements AlertBean, Repli
                 break;
             }
             case ACTIVE: {
-                final String groupUid = generateGroupUid(source.getUid());
+                final String groupUid = generateGroupUid(source.getUid()+"-"+event.getReplicationTarget().getMemberName());
                 Alert[] alertsByGroupUid = ((InternalAlertManager)admin.getAlertManager()).getAlertRepository().getAlertsByGroupUid(groupUid);
                 if (alertsByGroupUid.length != 0 && !alertsByGroupUid[0].getStatus().isResolved()) {
                     AlertFactory factory = new AlertFactory();
