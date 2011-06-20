@@ -7,9 +7,10 @@ package org.openspaces.admin.pu;
  * @author Moran Avigdor
  */
 public enum ProcessingUnitType {
+    UNKNOWN,
     STATELESS,
     STATEFUL,
     MIRROR,
     WEB,
-    UNIVERSAL
+    UNIVERSAL,
 }

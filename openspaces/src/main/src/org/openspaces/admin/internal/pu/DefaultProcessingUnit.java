@@ -129,7 +129,15 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         this.name = details.getName();
         this.numberOfInstances = details.getNumberOfInstances();
         this.numberOfBackups = details.getNumberOfBackups();
-        this.processingUnitType = ProcessingUnitType.valueOf(details.getType());
+        
+        ProcessingUnitType type = ProcessingUnitType.UNKNOWN;
+        try {
+            type = ProcessingUnitType.valueOf(details.getType());
+        }catch(Exception e) {
+            //ignore
+        }
+        this.processingUnitType = type;
+        
         this.elasticProperties = details.getElasticProperties();
         try {
             this.beanLevelProperties = (BeanLevelProperties) details.getBeanLevelProperties().get();
