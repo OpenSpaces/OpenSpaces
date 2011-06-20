@@ -1244,12 +1244,12 @@ public class DefaultAdmin implements InternalAdmin {
                         }
                     }
                 } else { // we have a new processing unit
-                    processingUnits.addProcessingUnit(processingUnit);
                     processingUnit.setManagingGridServiceManager(holder.managingGSM);
                     for (GridServiceManager backupGSM : holder.backupGSMs.values()) {
                         processingUnit.addBackupGridServiceManager(backupGSM);
                     }
                     
+                    processingUnits.addProcessingUnit(processingUnit);
                     processApplicationsOnProcessingUnitAddition(processingUnit);
                 }
 
