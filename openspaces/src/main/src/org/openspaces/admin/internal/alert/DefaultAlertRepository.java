@@ -9,7 +9,7 @@ import org.openspaces.admin.alert.AlertStatus;
 import org.openspaces.admin.alert.alerts.AbstractAlert;
 
 
-public class DefaultAlertRepository implements AlertRepository {
+public class DefaultAlertRepository implements InternalAlertRepository {
 
     public class AlertGroup {
         private final ArrayList<Alert> alertsInGroupList = new ArrayList<Alert>();
@@ -33,7 +33,7 @@ public class DefaultAlertRepository implements AlertRepository {
         }
     }
 
-    public final static int STORE_LIMIT = 2000;
+    private int storeLimit = 200;
     
     private int incrementalAlertUid = 0;
 
@@ -50,6 +50,11 @@ public class DefaultAlertRepository implements AlertRepository {
      */
     private final LinkedList<AlertGroup> alertGroupList = new LinkedList<AlertGroup>();
 
+    //called under "this" lock
+    public synchronized void setStoreLimit(int limit) {
+        storeLimit = limit;
+    }
+    
     //called under "this" lock
     public synchronized void addAlert(Alert alert) {
         
@@ -109,7 +114,7 @@ public class DefaultAlertRepository implements AlertRepository {
      */
     //called under "this" lock
     private void ensureStoreLimit() {
-        if (size() <= STORE_LIMIT) {
+        if (size() <= storeLimit) {
             return;
         }
         

@@ -226,7 +226,8 @@ public class DefaultAlertRepositoryTest extends TestCase {
     /** limit repository size */
     public void test7() {
 
-        final int LIMIT = DefaultAlertRepository.STORE_LIMIT;
+        final int LIMIT = 200;
+        repository.setStoreLimit(LIMIT);
         
         for (int i=0; i<LIMIT+10; ++i) {
             for (int j=0; j<7; ++j) {
