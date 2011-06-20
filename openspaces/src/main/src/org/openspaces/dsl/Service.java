@@ -18,7 +18,9 @@ public class Service implements Serializable{
     private static final long serialVersionUID = 1L;
     private String name;
     private String icon;
-
+    private String errorLoggerName;
+    private String outputLoggerName;
+    
     private String imageTemplate;
     private String defaultScalingUnit;
     private String pidFile;
@@ -176,6 +178,22 @@ public class Service implements Serializable{
 
     public void setCustomCommands(Map<String, CustomCommand> customCommands) {
         this.customCommands = customCommands;
+    }
+
+    public String getErrorLoggerName() {
+        return this.errorLoggerName;
+    }
+
+    public String getOutputLoggerName() {
+        return outputLoggerName;
+    }
+
+    public void setOutputLoggerName(String outputLoggerName) {
+        this.outputLoggerName = outputLoggerName;
+    }
+
+    public void setErrorLoggerName(String errorLoggerName) {
+        this.errorLoggerName = errorLoggerName;
     }
 
 }

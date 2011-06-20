@@ -17,6 +17,7 @@ public class ServiceContext {
     private Admin admin;
     private String dir;
     private ClusterInfo clusterInfo;
+     
 
     public ServiceContext(final Service service, final Admin admin, final String dir, ClusterInfo clusterInfo) {
         super();
