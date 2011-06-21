@@ -1,10 +1,12 @@
 package org.openspaces.dsl;
 
+import java.util.concurrent.Callable;
+
 public class CustomCommand {
 
     private String name;
-    private Runnable executeOnce;
-    private Runnable executeOnAllInstances;
+    private Callable<Object> executeOnce;
+    private Callable<Object> executeOnAllInstances;
     
     
     public String getName() {
@@ -13,16 +15,16 @@ public class CustomCommand {
     public void setName(String name) {
         this.name = name;
     }
-    public Runnable getExecuteOnce() {
+    public Callable<Object> getExecuteOnce() {
         return executeOnce;
     }
-    public void setExecuteOnce(Runnable executeOnce) {
+    public void setExecuteOnce(Callable<Object> executeOnce) {
         this.executeOnce = executeOnce;
     }
-    public Runnable getExecuteOnAllInstances() {
+    public Callable<Object> getExecuteOnAllInstances() {
         return executeOnAllInstances;
     }
-    public void setExecuteOnAllInstances(Runnable executeOnAllInstances) {
+    public void setExecuteOnAllInstances(Callable<Object> executeOnAllInstances) {
         this.executeOnAllInstances = executeOnAllInstances;
     }
 
