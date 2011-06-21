@@ -29,8 +29,6 @@ public interface ElasticMachineProvisioningConfig extends BeanConfig {
      * 
      * For example, a machine with a 16GB server and 1GB reserved can run 3 containers 5GB each.
      * 
-     * @param reservedInMB - amount of reserved memory in MB
-     * 
      * @since 8.0.2
      */
     CapacityRequirements getReservedCapacityPerMachine();
@@ -53,9 +51,9 @@ public interface ElasticMachineProvisioningConfig extends BeanConfig {
      * By default is false, which means that a Grid Service Agents may run a management process. 
      * If true, it means that agents started and discovered by this machine provisioning 
      * cannot run a {@link org.openspaces.admin.gsm.GridServiceManager} nor {@link org.openspaces.admin.lus.LookupService} 
-     * nor {@link org.openspaces.admin.gsm.ElasticServiceManager}
+     * nor {@link org.openspaces.admin.esm.ElasticServiceManager}
      * 
-     * Usually setting this value to true means that {@link #getReservedMemoryCapacityPerMachineInMB()} can be decreased, 
+     * Usually setting this value to true means that {@link #getReservedCapacityPerMachineInMB()} memory can be decreased, 
      * since no memory needs to be reserved for management processes.
      * 
      * @since 8.0.1

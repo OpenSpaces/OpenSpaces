@@ -233,7 +233,7 @@ public class DiscoveredMachineProvisioningConfig implements ElasticMachineProvis
      * A false value indicates that Grid Service Agents may run a management process. 
      * True indicates that agents started and discovered by this machine provisioning 
      * cannot run a {@link org.openspaces.admin.gsm.GridServiceManager} nor {@link org.openspaces.admin.lus.LookupService} 
-     * nor {@link org.openspaces.admin.gsm.ElasticServiceManager}
+     * nor {@link org.openspaces.admin.esm.ElasticServiceManager}
      * 
      * Usually setting this value to true means that {@link #setReservedMemoryCapacityPerMachineInMB(long)} can be decreased, 
      * since no memory needs to be reserved for management processes.
