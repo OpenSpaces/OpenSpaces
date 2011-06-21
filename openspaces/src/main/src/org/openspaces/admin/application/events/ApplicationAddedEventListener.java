@@ -3,7 +3,7 @@ package org.openspaces.admin.application.events;
 import org.openspaces.admin.application.Application;
 
 /**
- * An event listener allowing to listen for {@link org.openspaces.admin.pu.Application} additions (deployment).
+ * An event listener allowing to listen for {@link org.openspaces.admin.application.Application} additions (deployment).
  *
  * @author itaif
  * @see org.openspaces.admin.application.Applications#getApplicationAdded() 

@@ -5,7 +5,7 @@ package org.openspaces.admin.application.events;
  * An event manager allowing to add and remove {@link ApplicationAddedEventListener}s.
  * 
  * @author itaif
- * @see org.openspaces.admin.pu.Applications#getApplicationsAdded()
+ * @see org.openspaces.admin.application.Applications#getApplicationsAdded()
  */
 public interface ApplicationAddedEventManager {
 
