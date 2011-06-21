@@ -51,7 +51,7 @@ public class ManualCapacityScaleConfigurer implements ScaleStrategyConfigurer<Ma
     }
     
     /**
-     * @see ManualCapacityScaleConfig#setDriveCapacityInMB(String,long) 
+     * @see ManualCapacityScaleConfig#setDrivesCapacityInMB(String,long) 
      * @since 8.0.2
      */
     public ManualCapacityScaleConfigurer driveCapacity(String drive, int size, MemoryUnit unit) {
@@ -60,7 +60,7 @@ public class ManualCapacityScaleConfigurer implements ScaleStrategyConfigurer<Ma
     }
     
     /**
-     * @see ManualCapacityScaleConfig#setDriveCapacityInMB(String,long)
+     * @see ManualCapacityScaleConfig#setDrivesCapacityInMB(String,long)
      * @since 8.0.2
      */
     public ManualCapacityScaleConfigurer driveCapacity(String drive, String size) {
@@ -83,7 +83,7 @@ public class ManualCapacityScaleConfigurer implements ScaleStrategyConfigurer<Ma
     }
 
     /**
-     * @see ManualCapacityScaleConfig#setAtMostOneContainersPerMachine(boolean)
+     * @see ManualCapacityScaleConfig#setAtMostOneContainerPerMachine(boolean)
      */
     public ManualCapacityScaleConfigurer atMostOneContainerPerMachine() {
         config.setAtMostOneContainerPerMachine(true);
