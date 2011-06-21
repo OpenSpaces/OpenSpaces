@@ -5,7 +5,7 @@ package org.openspaces.admin.application.events;
  * An event manager allowing to add and remove {@link ApplicationRemovedEventListener}s.
  * 
  * @author itaif
- * @see org.openspaces.admin.pu.Applications#getApplicationsRemoved()
+ * @see org.openspaces.admin.application.Applications#getApplicationsRemoved()
  */
 public interface ApplicationRemovedEventManager {
 

@@ -4,7 +4,7 @@ import org.openspaces.admin.AdminEventListener;
 import org.openspaces.admin.application.Application;
 
 /**
- * An event listener allowing to listen for {@link org.openspaces.admin.pu.Application} removal (undeployment).
+ * An event listener allowing to listen for {@link org.openspaces.admin.application.Application} removal (undeployment).
  *
  * @author itaif
  * @see org.openspaces.admin.application.Applications#getApplicationRemoved()
