@@ -251,7 +251,7 @@ public class DiscoveredMachineProvisioningConfig implements ElasticMachineProvis
     
     /**
      * A false value indicates that Grid Service Agents without a zone can be started and discovered by this machine provisioning.
-     * True indicates that each started or discovered agent much have one or more of the zones described in {@link #setGridServiceAgentZones(String[]))}
+     * True indicates that each started or discovered agent much have one or more of the zones described in {@link #setGridServiceAgentZones(String[])}
      * 
      * @since 8.0.1
      */
