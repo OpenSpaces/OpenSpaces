@@ -102,6 +102,10 @@ public class ServiceContext {
     void setService(Service service) {
         this.service = service;
     }
+
+    public ClusterInfo getClusterInfo() {
+        return clusterInfo;
+    }
   
 
 }
