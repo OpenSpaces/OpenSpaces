@@ -1,6 +1,6 @@
 package org.openspaces.pu.service;
 
-public class InovcationResult {
+public class InvocationResult {
 
     private Integer instanceId;
     private boolean executeOnce;
