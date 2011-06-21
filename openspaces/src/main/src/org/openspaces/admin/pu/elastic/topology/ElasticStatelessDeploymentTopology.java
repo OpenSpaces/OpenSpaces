@@ -3,6 +3,7 @@ package org.openspaces.admin.pu.elastic.topology;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfigurer;
 import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
+import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfigurer;
 
 /*
 * The advantage of a state-less topology is that it does not have any inherit 
@@ -15,8 +16,8 @@ public interface ElasticStatelessDeploymentTopology extends ElasticDeploymentTop
     /**
      * Enables the specified scale strategy, and disables all other scale strategies. 
      * Scale strategies can also be reconfigured after deployment.
-     * @see ManualContainersScaleConfig
-     * @see ManualContainersScaleConfigurer
+     * @see ManualCapacityScaleConfig
+     * @see ManualCapacityScaleConfigurer
      */
     ElasticStatelessDeploymentTopology scale(
             ManualCapacityScaleConfig strategy);
