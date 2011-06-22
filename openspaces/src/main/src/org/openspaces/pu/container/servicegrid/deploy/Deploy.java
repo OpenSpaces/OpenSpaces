@@ -619,9 +619,28 @@ public class Deploy {
         return containsExt;
     }
     
-    private String removeCommentsFromPuString(String puString) {
+    /*
+     * Remove all comments from pu.xml string
+     * in JDK1.6, there is a stack overflow bug when using regex matching to remove the comments:
+     *  puString.replaceAll("<!--(?:[^-]|-(?!->))*-->","")
+     */
+    private String removeCommentsFromPuString(final String puString) {
         if (puString.length() == 0) return puString;
-        return puString.replaceAll("<!--(?:[^-]|-(?!->))*-->","");
+        final String openComment = "<!--";
+        final String closeComment = "-->";
+        String parsedString = puString;
+        String newString = "";
+        for (;;) {
+            int startCommentIdx = parsedString.indexOf(openComment);
+            int endCommentIdx = parsedString.indexOf(closeComment, startCommentIdx);
+            if (startCommentIdx == -1 || endCommentIdx == -1) {
+                newString = newString.concat(parsedString);
+                break;
+            }
+            newString = newString.concat(parsedString.substring(0, startCommentIdx));
+            parsedString = parsedString.substring(endCommentIdx+closeComment.length());
+        }
+        return newString;
     }
 
     //copied from opstringloader
