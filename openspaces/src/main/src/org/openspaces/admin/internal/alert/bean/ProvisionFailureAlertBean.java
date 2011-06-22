@@ -26,10 +26,12 @@ public class ProvisionFailureAlertBean implements AlertBean, ProcessingUnitStatu
     
     public void afterPropertiesSet() throws Exception {
         admin.getProcessingUnits().getProcessingUnitStatusChanged().add(this);
+        admin.getProcessingUnits().getProcessingUnitRemoved().add(this);
     }
 
     public void destroy() throws Exception {
         admin.getProcessingUnits().getProcessingUnitStatusChanged().remove(this);
+        admin.getProcessingUnits().getProcessingUnitRemoved().remove(this);
     }
 
     public Map<String, String> getProperties() {
