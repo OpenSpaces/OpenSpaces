@@ -13,4 +13,5 @@ public enum ProcessingUnitType {
     MIRROR,
     WEB,
     UNIVERSAL,
+    GATEWAY
 }

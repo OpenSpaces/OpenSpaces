@@ -16,17 +16,22 @@
 
 package org.openspaces.admin;
 
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
 import net.jini.core.discovery.LookupLocator;
 
 import org.openspaces.admin.alert.AlertManager;
+import org.openspaces.admin.application.Applications;
 import org.openspaces.admin.dump.DumpGeneratedListener;
 import org.openspaces.admin.dump.DumpProvider;
 import org.openspaces.admin.dump.DumpResult;
 import org.openspaces.admin.esm.ElasticServiceManagers;
+import org.openspaces.admin.gateway.Gateways;
 import org.openspaces.admin.gsa.GridServiceAgents;
 import org.openspaces.admin.gsc.GridServiceContainers;
 import org.openspaces.admin.gsm.GridServiceManagers;
-import org.openspaces.admin.application.Applications;
 import org.openspaces.admin.lus.LookupServices;
 import org.openspaces.admin.machine.Machines;
 import org.openspaces.admin.os.OperatingSystems;
@@ -35,10 +40,6 @@ import org.openspaces.admin.space.Spaces;
 import org.openspaces.admin.transport.Transports;
 import org.openspaces.admin.vm.VirtualMachines;
 import org.openspaces.admin.zone.Zones;
-
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 /**
  * The main interface for accessing Admin API. Created using the {@link org.openspaces.admin.AdminFactory}
@@ -219,6 +220,12 @@ public interface Admin extends StatisticsMonitor, DumpProvider {
      * alert events are registered for.
      */
     AlertManager getAlertManager();
+    
+    /**
+     * Returns the Gateways discovered.
+     * @since 8.0.3
+     */
+    Gateways getGateways();
 
     /**
      * Smart addition of event listeners. Will automatically add to the correct place any interface

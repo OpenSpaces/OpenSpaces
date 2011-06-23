@@ -579,10 +579,12 @@ public class Deploy {
                         }
                     }
                 }
+            } else if (puString.contains("os-gateway:sink") || puString.contains("os-gateway:delegator")) {
+                return ProcessingUnitType.GATEWAY.name();            
             } else if (puString.length() == 0 && beanLevelProperties.getContextProperties().containsKey("dataGridName")) {
                 return ProcessingUnitType.STATEFUL.name(); //.Net stateful
             }
-        }
+        } 
         
         return ProcessingUnitType.STATELESS.name(); //default
     }
