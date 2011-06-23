@@ -8,6 +8,7 @@ import org.openspaces.admin.gateway.Sink;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.os.OperatingSystem;
+import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.transport.Transport;
 import org.openspaces.admin.vm.VirtualMachine;
@@ -33,16 +34,20 @@ public class DefaultGateway implements Gateway {
         if (sinkDetails == null)
             return null;
         
-        return new DefaultSink(sinkDetails, admin, processingUnitInstance);
+        return new DefaultSink(this, sinkDetails, admin);
+    }
+    
+    public ProcessingUnitInstance getProcessingUnitInstance() {
+        return processingUnitInstance;
     }
 
-    public String getLookupName() {
+    public String getName() {
         if (sinkDetails != null)
             return sinkDetails.getLocalGatewayName();
         return delegatorDetails.getLocalGatewayName();
     }
     
-    public String getProcessingUnitName() {
+    public String getHostingProcessingUnitName() {
         return processingUnitInstance.getName();
     }
 
@@ -76,6 +81,10 @@ public class DefaultGateway implements Gateway {
 
     public Map<String, Zone> getZones() {
         return processingUnitInstance.getZones();
+    }
+    
+    public ProcessingUnit getHostingProcessingUnit() {
+        return processingUnitInstance.getProcessingUnit();
     }
 
 }

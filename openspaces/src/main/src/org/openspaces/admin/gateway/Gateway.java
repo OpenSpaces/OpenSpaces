@@ -16,15 +16,20 @@ public interface Gateway extends GridComponent{
     /**
      * Returns the name which is used by the other gateways to locate this gateway.
      */
-    String getLookupName();
+    String getName();
     
     /**
      * Returns the name of the processing unit hosting this gateway.
      */
-    String getProcessingUnitName();
+    String getHostingProcessingUnitName();
     
     /**
      * Returns the sink of this gateway or <code>null</code> if no sink exists in this gateway. 
      */
     Sink getSink();
+    
+    /**
+     * Returns the hosting {@link ProcessingUnit}.
+     */
+    ProcessingUnit getHostingProcessingUnit();
 }

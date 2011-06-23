@@ -106,7 +106,7 @@ public class DefaultGateways implements Gateways {
         Gateway[] gateways = getGateways();
         Map<String, Gateway> names = new HashMap<String, Gateway>();
         for (Gateway gateway : gateways) {
-            names.put(gateway.getProcessingUnitName(), gateway);
+            names.put(gateway.getHostingProcessingUnitName(), gateway);
         }
         return names;
     }

@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.openspaces.admin.gateway.BootstrapResult;
+import org.openspaces.admin.gateway.Gateway;
 import org.openspaces.admin.gateway.Sink;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.pu.InternalProcessingUnitInstance;
@@ -19,13 +20,19 @@ public class DefaultSink implements Sink {
     private final GatewaySinkServiceDetails sinkDetails;
     private final ProcessingUnitInstance processingUnitInstance;
     private final InternalAdmin admin;
+    private final DefaultGateway gateway;
 
-    public DefaultSink(GatewaySinkServiceDetails sinkDetails, InternalAdmin admin, ProcessingUnitInstance processingUnitInstance) {
+    public DefaultSink(DefaultGateway gateway, GatewaySinkServiceDetails sinkDetails, InternalAdmin admin) {
+        this.gateway = gateway;
         this.sinkDetails = sinkDetails;
         this.admin = admin;
-        this.processingUnitInstance = processingUnitInstance;
+        this.processingUnitInstance = gateway.getProcessingUnitInstance();
     }
 
+    public Gateway getGateway() {
+        return gateway;
+    }
+    
     public BootstrapResult bootstrapFromGatewayAndWait(String bootstrapSourceGatewayName) {
         return bootstrapFromGatewayAndWait(bootstrapSourceGatewayName, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
@@ -60,6 +67,18 @@ public class DefaultSink implements Sink {
             //TODO WAN: return some failure?
             return;
         }
+    }
+    
+    public String[] getSourceGatewayNames() {
+        return sinkDetails.getGatewaySourceNames();
+    }
+    
+    public boolean requiresBootstrapOnStartup() {
+        return sinkDetails.requiresBootstrap();
+    }
+    
+    public String getLocalSpaceUrl() {
+        return sinkDetails.getLocalSpaceUrl();
     }
 
 }

@@ -24,7 +24,7 @@ public interface Gateways extends AdminAware, Iterable<Gateway> {
      * Returns the {@link Gateway} for the given processing unit name. Returns <code>null</code> if the processing unit
      * is not currently discovered or not hosting a {@link Gateway}.
      */
-    Gateway getGateway(String processingUnitName);
+    Gateway getGateway(String hostingProcessingUnitName);
     
     /**
      * Returns a map of {@link Gateway} keyed by their respective hosting processing unit names.
@@ -36,14 +36,14 @@ public interface Gateways extends AdminAware, Iterable<Gateway> {
      * Return <code>null</code> if the hosting processing unit is not deployed
      * within the specified timeout or not hosting a {@link Gateway}.
      */
-    Gateway waitFor(String processingUnitName);
+    Gateway waitFor(String hostingProcessingUnitName);
 
     /**
      * Waits for the specified timeout (in time interval) till the gateway hosted in the specified processing unit is identified as deployed. Returns the
      * {@link Gateway}. Return <code>null</code> if the hosting processing unit is not deployed
      * within the specified timeout or not hosting a {@link Gateway}.
      */
-    Gateway waitFor(String processingUnitName, long timeout, TimeUnit timeUnit);
+    Gateway waitFor(String hostingProcessingUnitName, long timeout, TimeUnit timeUnit);
     
     /**
      * Returns the number of gateways currently discovered.
