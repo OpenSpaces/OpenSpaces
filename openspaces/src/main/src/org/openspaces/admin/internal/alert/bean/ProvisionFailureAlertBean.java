@@ -66,65 +66,49 @@ public class ProvisionFailureAlertBean implements AlertBean, ProcessingUnitStatu
      * Handling of processing unit event - alert when planned > actual (less actual instances than planned).
      */
     private void handleProcessingUnitEvent(ProcessingUnit processingUnit) {
-        final int planned = processingUnit.getTotalNumberOfInstances();
-        final int actual = processingUnit.getInstances().length;
         final DeploymentStatus status = processingUnit.getStatus();
-                
-        if (planned>actual && (status.equals(DeploymentStatus.BROKEN) || status.equals(DeploymentStatus.COMPROMISED))) {
-            final String groupUid = generateGroupUid(processingUnit.getName());
-            AlertFactory factory = new AlertFactory();
-            factory.name(ALERT_NAME);
-            factory.groupUid(groupUid);
-            if (status.equals(DeploymentStatus.BROKEN)) {
-                factory.description("Processing unit " + processingUnit.getName() + " has zero instances running instead of " + planned);
-            } else {
-                factory.description("Processing unit " + processingUnit.getName() + " has less than " + planned + " instances running");
-            }
-            factory.severity(AlertSeverity.SEVERE);
+        final String groupUid = generateGroupUid(processingUnit.getName());
+        AlertFactory factory = new AlertFactory();
+        factory.name(ALERT_NAME);
+        factory.groupUid(groupUid);
+        factory.componentUid(processingUnit.getName());
+        factory.componentDescription(AlertBeanUtils.getProcessingUnitDescription(processingUnit));
+        factory.config(config.getProperties());
+        factory.severity(AlertSeverity.SEVERE);
+        
+        switch(status) {
+        case BROKEN:
+            factory.description("Processing unit " + processingUnit.getName() + " has zero instances running instead of " + processingUnit.getTotalNumberOfInstances());
             factory.status(AlertStatus.RAISED);
-            factory.componentUid(processingUnit.getName());
-            factory.componentDescription(AlertBeanUtils.getProcessingUnitDescription(processingUnit));
-            factory.config(config.getProperties());
-
-            Alert alert = factory.toAlert();
-            admin.getAlertManager().triggerAlert( new ProvisionFailureAlert(alert));
+            break;
+        case COMPROMISED:
+            factory.description("Processing unit " + processingUnit.getName() + " has less than " + processingUnit.getTotalNumberOfInstances() + " instances running");
+            factory.status(AlertStatus.RAISED);
+            break;
+        case INTACT:
+            factory.description("Processing unit " + processingUnit.getName() + " has " + processingUnit.getTotalNumberOfInstances() + " instances running");
+            factory.status(AlertStatus.RESOLVED);
+            break;
+        case UNDEPLOYED:
+            factory.description("Processing unit " + processingUnit.getName() + " has been undeployed");
+            factory.status(AlertStatus.RESOLVED);
+            break;
+        default:
+            return; //don't trigger alert
         }
-        else if ( (planned == actual && status.equals(DeploymentStatus.INTACT))
-                  || ((actual == 0) && status.equals(DeploymentStatus.UNDEPLOYED)) ) {
-            final String groupUid = generateGroupUid(processingUnit.getName());
+        
+        Alert alert = factory.toAlert();
+        
+        boolean triggerAlert = false;
+        if (alert.getStatus().isResolved()) {
             Alert[] alertsByGroupUid = ((InternalAlertManager)admin.getAlertManager()).getAlertRepository().getAlertsByGroupUid(groupUid);
             if (alertsByGroupUid.length != 0 && !alertsByGroupUid[0].getStatus().isResolved()) {
-                AlertFactory factory = new AlertFactory();
-                factory.name(ALERT_NAME);
-                factory.groupUid(groupUid);
-                if (status.equals(DeploymentStatus.UNDEPLOYED)) {
-                    factory.description("Processing unit " + processingUnit.getName() + " undeployed");
-                } else {
-                    factory.description("Processing unit " + processingUnit.getName() + " has " + actual
-                            + " instances running");
-                }
-                factory.severity(AlertSeverity.SEVERE);
-                factory.status(AlertStatus.RESOLVED);
-                factory.componentUid(processingUnit.getName());
-                factory.componentDescription(AlertBeanUtils.getProcessingUnitDescription(processingUnit));
-                factory.config(config.getProperties());
-
-                Alert alert = factory.toAlert();
-                admin.getAlertManager().triggerAlert( new ProvisionFailureAlert(alert));
+                triggerAlert = true; //trigger a 'resolution' alert
             }
-        } else if (actual>planned && (status.equals(DeploymentStatus.INTACT))) {
-            final String groupUid = generateGroupUid(processingUnit.getName());
-            AlertFactory factory = new AlertFactory();
-            factory.name(ALERT_NAME);
-            factory.groupUid(groupUid);
-            factory.description("Processing unit " + processingUnit.getName() + " has extra instances running instead of " + planned);
-            factory.severity(AlertSeverity.WARNING);
-            factory.status(AlertStatus.RAISED);
-            factory.componentUid(processingUnit.getName());
-            factory.componentDescription(AlertBeanUtils.getProcessingUnitDescription(processingUnit));
-            factory.config(config.getProperties());
-
-            Alert alert = factory.toAlert();
+        } else {
+            triggerAlert = true; //trigger an 'unresolved' alert
+        }
+        if (triggerAlert) {
             admin.getAlertManager().triggerAlert( new ProvisionFailureAlert(alert));
         }
     }
