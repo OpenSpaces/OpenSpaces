@@ -15,7 +15,7 @@ import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.ProcessingUnitType;
 import org.openspaces.admin.pu.ProcessingUnits;
-import org.openspaces.core.gateway.GateDelegatorServiceDetails;
+import org.openspaces.core.gateway.GatewayDelegatorServiceDetails;
 import org.openspaces.core.gateway.GatewaySinkServiceDetails;
 import org.openspaces.pu.service.ServiceDetails;
 
@@ -55,12 +55,12 @@ public class DefaultGateways implements Gateways {
             if (serviceDetails != null && serviceDetails.length > 0){
                 //This is a gateway pu
                 GatewaySinkServiceDetails sinkDetails = null;
-                GateDelegatorServiceDetails delegatorDetails = null; 
+                GatewayDelegatorServiceDetails delegatorDetails = null; 
                 for (ServiceDetails serviceDetail : serviceDetails) {
                     if (serviceDetail instanceof GatewaySinkServiceDetails)
                         sinkDetails = (GatewaySinkServiceDetails) serviceDetail;
-                    if (serviceDetail instanceof GateDelegatorServiceDetails)
-                        delegatorDetails = (GateDelegatorServiceDetails) serviceDetail;
+                    if (serviceDetail instanceof GatewayDelegatorServiceDetails)
+                        delegatorDetails = (GatewayDelegatorServiceDetails) serviceDetail;
                 }
                 return new DefaultGateway(processingUnitInstance, admin, sinkDetails, delegatorDetails);
             }

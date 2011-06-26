@@ -3,6 +3,7 @@ package org.openspaces.admin.internal.gateway;
 import java.util.Map;
 
 import org.openspaces.admin.Admin;
+import org.openspaces.admin.gateway.Delegator;
 import org.openspaces.admin.gateway.Gateway;
 import org.openspaces.admin.gateway.Sink;
 import org.openspaces.admin.internal.admin.InternalAdmin;
@@ -13,7 +14,7 @@ import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.transport.Transport;
 import org.openspaces.admin.vm.VirtualMachine;
 import org.openspaces.admin.zone.Zone;
-import org.openspaces.core.gateway.GateDelegatorServiceDetails;
+import org.openspaces.core.gateway.GatewayDelegatorServiceDetails;
 import org.openspaces.core.gateway.GatewaySinkServiceDetails;
 
 public class DefaultGateway implements Gateway {
@@ -21,9 +22,9 @@ public class DefaultGateway implements Gateway {
     private final ProcessingUnitInstance processingUnitInstance;
     private final InternalAdmin admin;
     private final GatewaySinkServiceDetails sinkDetails;
-    private final GateDelegatorServiceDetails delegatorDetails;
+    private final GatewayDelegatorServiceDetails delegatorDetails;
 
-    public DefaultGateway(ProcessingUnitInstance processingUnitInstance, InternalAdmin admin, GatewaySinkServiceDetails sinkDetails, GateDelegatorServiceDetails delegatorDetails) {
+    public DefaultGateway(ProcessingUnitInstance processingUnitInstance, InternalAdmin admin, GatewaySinkServiceDetails sinkDetails, GatewayDelegatorServiceDetails delegatorDetails) {
         this.processingUnitInstance = processingUnitInstance;
         this.admin = admin;
         this.sinkDetails = sinkDetails;
@@ -35,6 +36,13 @@ public class DefaultGateway implements Gateway {
             return null;
         
         return new DefaultSink(this, sinkDetails, admin);
+    }
+    
+    public Delegator getDelegator() {
+        if (delegatorDetails == null)
+            return null;
+        
+        return new DefaultDelegator(this, delegatorDetails);
     }
     
     public ProcessingUnitInstance getProcessingUnitInstance() {

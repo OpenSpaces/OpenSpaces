@@ -29,6 +29,11 @@ public interface Gateway extends GridComponent{
     Sink getSink();
     
     /**
+     * Returns the delegator of this gateway or <code>null</code> if no delegator exists in this gateway. 
+     */
+    Delegator getDelegator();
+    
+    /**
      * Returns the hosting {@link ProcessingUnit}.
      */
     ProcessingUnit getHostingProcessingUnit();

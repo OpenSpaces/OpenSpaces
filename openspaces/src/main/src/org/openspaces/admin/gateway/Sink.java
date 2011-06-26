@@ -5,8 +5,8 @@ import java.util.concurrent.TimeUnit;
 import org.openspaces.admin.Admin;
 
 /**
- * A sink is a {@link Gateway} component which handles incoming replication.
- * The sink is used to bootstrap a space from another space, and it takes part in both sides of the
+ * A sink is a {@link Gateway} component which handles incoming replication from other gateways.
+ * The sink is also used to bootstrap a space from another space, and it takes part in both sides of the
  * bootstrap process. It is used for initiating a bootstrap process and replicate incoming data of the
  * bootstrap process to the local {@link Space}. 
  * And it is used to respond to a remote bootstrap request by providing the relevant bootstrap data
