@@ -18,7 +18,6 @@ import org.openspaces.admin.dump.DumpGeneratedListener;
 import org.openspaces.admin.dump.DumpProvider;
 import org.openspaces.admin.dump.DumpResult;
 import org.openspaces.admin.esm.ElasticServiceManagers;
-import org.openspaces.admin.gateway.Gateways;
 import org.openspaces.admin.gsa.GridServiceAgents;
 import org.openspaces.admin.gsc.GridServiceContainers;
 import org.openspaces.admin.gsm.GridServiceManagers;
@@ -377,8 +376,4 @@ public class NullMockAdmin implements Admin, InternalAdmin {
         return null;
     }
 
-    public Gateways getGateways() {
-        // TODO Auto-generated method stub
-        return null;
-    }
 }

@@ -36,7 +36,6 @@ import org.openspaces.admin.dump.DumpProvider;
 import org.openspaces.admin.dump.DumpResult;
 import org.openspaces.admin.esm.ElasticServiceManager;
 import org.openspaces.admin.esm.ElasticServiceManagers;
-import org.openspaces.admin.gateway.Gateways;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsa.GridServiceAgents;
 import org.openspaces.admin.gsc.GridServiceContainer;
@@ -52,7 +51,6 @@ import org.openspaces.admin.internal.discovery.DiscoveryService;
 import org.openspaces.admin.internal.esm.DefaultElasticServiceManagers;
 import org.openspaces.admin.internal.esm.InternalElasticServiceManager;
 import org.openspaces.admin.internal.esm.InternalElasticServiceManagers;
-import org.openspaces.admin.internal.gateway.DefaultGateways;
 import org.openspaces.admin.internal.gsa.DefaultGridServiceAgents;
 import org.openspaces.admin.internal.gsa.InternalGridServiceAgent;
 import org.openspaces.admin.internal.gsa.InternalGridServiceAgents;
@@ -181,8 +179,6 @@ public class DefaultAdmin implements InternalAdmin {
     private final Map<String, InternalAgentGridComponent> orphanedAgentGridComponents = new ConcurrentHashMap<String, InternalAgentGridComponent>();
 
     private final InternalSpaces spaces = new DefaultSpaces(this);
-    
-    private final Gateways gateways = new DefaultGateways(this);
 
     private ExecutorService[] eventsExecutorServices;
 
@@ -470,10 +466,6 @@ public class DefaultAdmin implements InternalAdmin {
 
     public Spaces getSpaces() {
         return this.spaces;
-    }
-    
-    public Gateways getGateways() {
-        return this.gateways;
     }
     
     public AlertManager getAlertManager() {

@@ -28,7 +28,6 @@ import org.openspaces.admin.dump.DumpGeneratedListener;
 import org.openspaces.admin.dump.DumpProvider;
 import org.openspaces.admin.dump.DumpResult;
 import org.openspaces.admin.esm.ElasticServiceManagers;
-import org.openspaces.admin.gateway.Gateways;
 import org.openspaces.admin.gsa.GridServiceAgents;
 import org.openspaces.admin.gsc.GridServiceContainers;
 import org.openspaces.admin.gsm.GridServiceManagers;
@@ -221,12 +220,6 @@ public interface Admin extends StatisticsMonitor, DumpProvider {
      */
     AlertManager getAlertManager();
     
-    /**
-     * Returns the Gateways discovered.
-     * @since 8.0.3
-     */
-    Gateways getGateways();
-
     /**
      * Smart addition of event listeners. Will automatically add to the correct place any interface
      * that extends the {@link org.openspaces.admin.AdminEventListener} interface.
