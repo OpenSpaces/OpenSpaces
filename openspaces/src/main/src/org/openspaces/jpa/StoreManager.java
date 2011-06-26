@@ -313,7 +313,7 @@ public class StoreManager extends AbstractStoreManager {
         } else {
             final ISpaceProxy proxy = (ISpaceProxy) getConfiguration().getSpace();
             final IEntryPacket entry = proxy.getDirectProxy().getTypeManager().getEntryPacketFromObject(
-                    fieldValue, ObjectType.POJO, proxy);
+                    fieldValue, ObjectType.POJO);
             final ClassMetaData cmd = fmd.getDeclaredTypeMetaData();
             final Object oid = ApplicationIds.fromPKValues(new Object[] { entry.getID() }, cmd);
             final BitSet exclude = new BitSet(cmd.getFields().length);                               
@@ -339,7 +339,7 @@ public class StoreManager extends AbstractStoreManager {
                 sm.storeObject(fmd.getIndex(), em.getManagedInstance());
                 final ISpaceProxy proxy = (ISpaceProxy) getConfiguration().getSpace();                      
                 final IEntryPacket entry = proxy.getDirectProxy().getTypeManager().getEntryPacketFromObject(
-                        fieldValue, ObjectType.POJO, proxy);
+                        fieldValue, ObjectType.POJO);
                 loadFields(em, entry, fmd.getDeclaredTypeMetaData().getFields());
             }
         }
@@ -363,7 +363,7 @@ public class StoreManager extends AbstractStoreManager {
             // Initialize each of the collection's items
             for (Object item : (Collection<?>) fieldValue) {
                 final IEntryPacket entry = proxy.getDirectProxy().getTypeManager().getEntryPacketFromObject(
-                        item, ObjectType.POJO, proxy);
+                        item, ObjectType.POJO);
                 final Object oid = ApplicationIds.fromPKValues(new Object[] { entry.getID() }, cmd);
                 // Initialize a state manager for the current item
                 final Object managedObject = getContext().find(oid, null, exclude, entry, 0);
@@ -642,7 +642,7 @@ public class StoreManager extends AbstractStoreManager {
             final ISpaceProxy proxy = (ISpaceProxy) space;
             sm.getPersistenceCapable().pcReplaceStateManager(null);        
             IEntryPacket entry = proxy.getDirectProxy().getTypeManager().getEntryPacketFromObject(
-                    sm.getManagedInstance(), ObjectType.POJO, proxy);
+                    sm.getManagedInstance(), ObjectType.POJO);
             return entry;
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
@@ -669,13 +669,13 @@ public class StoreManager extends AbstractStoreManager {
             try {
                 pc.pcReplaceStateManager(null);
                 entry = proxy.getDirectProxy().getTypeManager().getEntryPacketFromObject(
-                        entity, ObjectType.POJO, proxy);
+                        entity, ObjectType.POJO);
             } finally {
                 pc.pcReplaceStateManager(sm);
             }
         } else {
             entry = proxy.getDirectProxy().getTypeManager().getEntryPacketFromObject(
-                    entity, ObjectType.POJO, proxy);            
+                    entity, ObjectType.POJO);
         }
         return entry;
     }

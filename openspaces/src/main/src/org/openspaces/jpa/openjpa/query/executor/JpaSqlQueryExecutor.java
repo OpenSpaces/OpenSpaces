@@ -33,7 +33,7 @@ class JpaSqlQueryExecutor extends AbstractJpaQueryExecutor {
         final IEntryPacket[] entries = new IEntryPacket[result.length];
         for (int i = 0; i < result.length; i++) {
             entries[i] = proxy.getDirectProxy().getTypeManager().getEntryPacketFromObject(result[i],
-                    ObjectType.POJO, proxy);
+                    ObjectType.POJO);
         }
         return new SpaceResultObjectProvider(_classMetaData, entries, store);
     }
