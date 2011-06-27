@@ -142,8 +142,8 @@ public class MachinesSlaUtils {
     /**
      * filters grid service agents by zone, 
      * and if configuration allows management machines, place them first
-     * @param usedAgents
-     * @param allowDeploymentOnManagementMachine 
+     * @param agent - the agent to check
+     * @param machineProvisioningConfig 
      * @return true if agent meets the sla filter, or false if not (and should be excluded)
      */   
     public static boolean isAgentConformsToMachineProvisioningConfig(GridServiceAgent agent, ElasticMachineProvisioningConfig machineProvisioningConfig) {
