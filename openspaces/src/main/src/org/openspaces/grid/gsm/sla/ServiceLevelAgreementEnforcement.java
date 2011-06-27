@@ -7,17 +7,17 @@ public interface ServiceLevelAgreementEnforcement
      ENDPOINT extends ServiceLevelAgreementEnforcementEndpoint<POLICY>> {
 
     /**
-     * Creates a new endpoint for the specified id, if one does not already exist.
+     * Creates a new endpoint for the specified pu, if one does not already exist.
      * If an endpoint already exists an exception is raised. 
-     * @param id
+     * @param pu target processing unit for the endpoint creation
      * @return the new endpoint
      * @throws ServiceLevelAgreementEnforcementEndpointAlreadyExistsException
      */
     ENDPOINT createEndpoint(ProcessingUnit pu) throws ServiceLevelAgreementEnforcementEndpointAlreadyExistsException;
     
     /**
-     * Destroys the endpoint with the specified id. 
-     * @param id
+     * Destroys the endpoint for the specified pu. 
+     * @param pu target processing unit for the endpoint destruction 
      */
     void destroyEndpoint(ProcessingUnit pu);
 }
