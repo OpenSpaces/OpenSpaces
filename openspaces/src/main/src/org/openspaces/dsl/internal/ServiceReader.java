@@ -99,7 +99,7 @@ public class ServiceReader {
     private static CompilerConfiguration createCompilerConfiguration() {
         final CompilerConfiguration cc = new CompilerConfiguration();
         final ImportCustomizer ic = new ImportCustomizer();
-        ic.addStarImports("org.openspaces.dsl", "org.openspaces.dsl.ui");
+        ic.addStarImports("org.openspaces.dsl", "org.openspaces.dsl.ui", "org.openspaces.dsl.context");
         // ic.addStaticStars(USMUtils.class.getName());
         ic.addImports(Unit.class.getName());
         cc.addCompilationCustomizers(ic);

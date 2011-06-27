@@ -33,7 +33,7 @@ public class ServiceContext {
     }
     
     public org.openspaces.dsl.context.Service getService() {
-        final String name = this.service.getName();
+        final String name = this.clusterInfo.getName();
         return getService(name);
     }
     public org.openspaces.dsl.context.Service getService(String name) {
