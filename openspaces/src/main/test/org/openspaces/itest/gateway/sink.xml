@@ -14,7 +14,7 @@
  
 	<bean id="conflictResolver" class="org.openspaces.itest.gateway.MyConflictResolver" />
 	
-    <os-gateway:sink id="sink" local-gateway-name="localGateway" gateway-lookups="gatewayLookups" local-space-url="jini://*/*/localCluster" requires-bootstrap="true">
+    <os-gateway:sink id="sink" local-gateway-name="localGateway" gateway-lookups="gatewayLookups" local-space-url="jini://*/*/localCluster" requires-bootstrap="true" tx-timeout="7500" local-space-lookup-timeout="10">
 	    <os-gateway:sources>    
 	    	<os-gateway:source name="localGateway" />
 	    	<os-gateway:source name="targetGateway" />

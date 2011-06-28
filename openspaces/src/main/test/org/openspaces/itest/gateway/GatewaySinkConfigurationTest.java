@@ -29,6 +29,8 @@ public class GatewaySinkConfigurationTest extends AbstractDependencyInjectionSpr
         assertEquals(Integer.valueOf(5), error.getMaximumRetriesOnTransactionLock());
         assertEquals(Integer.valueOf(1000), error.getTransactionLockRetryInterval());
         assertTrue(error.getConflictResolver() instanceof MyConflictResolver);
+        assertEquals(Long.valueOf(7500), sink.getTransactionTimeout());
+        assertEquals(Long.valueOf(10), sink.getLocalSpaceLookupTimeout());
     }
 
 
