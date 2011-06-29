@@ -4,6 +4,7 @@ package org.openspaces.admin.alert.alerts;
 import org.openspaces.admin.alert.Alert;
 import org.openspaces.admin.alert.config.CpuUtilizationAlertConfigurer;
 import org.openspaces.admin.alert.events.AlertTriggeredEventListener;
+import org.openspaces.admin.os.OperatingSystem;
 
 /**
  * A CPU Utilization alert fired upon triggered CPU thresholds. The alert is raised when CPU crosses
@@ -32,6 +33,15 @@ public class CpuUtilizationAlert extends AbstractAlert {
     
     public CpuUtilizationAlert(Alert alert) {
         super(alert);
+    }
+
+    /**
+     * {@inheritDoc}
+     * The component UID is equivalent to {@link OperatingSystem#getUid()}
+     */
+    @Override
+    public String getComponentUid() {
+        return super.getComponentUid();
     }
     
     /**

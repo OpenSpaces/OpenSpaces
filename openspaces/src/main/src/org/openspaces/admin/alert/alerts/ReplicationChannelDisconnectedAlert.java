@@ -49,6 +49,15 @@ public class ReplicationChannelDisconnectedAlert extends AbstractAlert {
     }
     
     /**
+     * {@inheritDoc}
+     * The component UID is equivalent to {@link SpaceInstance#getUid()}
+     */
+    @Override
+    public String getComponentUid() {
+        return super.getComponentUid();
+    }
+    
+    /**
      * The host address of the source machine that this alert corresponds to.
      * @return the host address; may be <code>null</code>.
      */

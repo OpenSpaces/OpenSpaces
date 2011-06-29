@@ -5,6 +5,7 @@ import org.openspaces.admin.alert.Alert;
 import org.openspaces.admin.alert.config.ReplicationRedoLogSizeAlertConfigurer;
 import org.openspaces.admin.alert.events.AlertTriggeredEventListener;
 import org.openspaces.admin.space.ReplicationStatus;
+import org.openspaces.admin.space.SpaceInstance;
 
 /**
  * A replication redo-log size alert, fired upon redo-log increase, indicating that packets are not
@@ -40,6 +41,15 @@ public class ReplicationRedoLogSizeAlert extends AbstractAlert {
     
     public ReplicationRedoLogSizeAlert(Alert alert) {
         super(alert);
+    }
+    
+    /**
+     * {@inheritDoc}
+     * The component UID is equivalent to {@link SpaceInstance#getUid()}
+     */
+    @Override
+    public String getComponentUid() {
+        return super.getComponentUid();
     }
     
     /**

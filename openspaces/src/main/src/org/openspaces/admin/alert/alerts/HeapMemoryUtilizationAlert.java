@@ -4,6 +4,7 @@ package org.openspaces.admin.alert.alerts;
 import org.openspaces.admin.alert.Alert;
 import org.openspaces.admin.alert.config.HeapMemoryUtilizationAlertConfigurer;
 import org.openspaces.admin.alert.events.AlertTriggeredEventListener;
+import org.openspaces.admin.vm.VirtualMachine;
 
 /**
  * A heap memory utilization alert, fired upon triggered JVM heap-memory thresholds. The alert is
@@ -37,6 +38,15 @@ public class HeapMemoryUtilizationAlert extends AbstractAlert {
     
     public HeapMemoryUtilizationAlert(Alert alert) {
         super(alert);
+    }
+    
+    /**
+     * {@inheritDoc}
+     * The component UID is equivalent to {@link VirtualMachine#getUid()}
+     */
+    @Override
+    public String getComponentUid() {
+        return super.getComponentUid();
     }
     
     /**

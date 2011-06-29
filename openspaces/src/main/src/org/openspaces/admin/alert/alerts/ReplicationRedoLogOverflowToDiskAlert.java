@@ -5,6 +5,7 @@ import org.openspaces.admin.alert.Alert;
 import org.openspaces.admin.alert.config.ReplicationRedoLogOverflowToDiskAlertConfigurer;
 import org.openspaces.admin.alert.events.AlertTriggeredEventListener;
 import org.openspaces.admin.space.ReplicationStatus;
+import org.openspaces.admin.space.SpaceInstance;
 
 /**
  * A replication redo-log overflow to disk alert, fired when the redo-log exceeds the defined
@@ -39,6 +40,15 @@ public class ReplicationRedoLogOverflowToDiskAlert extends AbstractAlert {
     
     public ReplicationRedoLogOverflowToDiskAlert(Alert alert) {
         super(alert);
+    }
+    
+    /**
+     * {@inheritDoc}
+     * The component UID is equivalent to {@link SpaceInstance#getUid()}
+     */
+    @Override
+    public String getComponentUid() {
+        return super.getComponentUid();
     }
     
     /**

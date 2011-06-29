@@ -4,6 +4,7 @@ package org.openspaces.admin.alert.alerts;
 import org.openspaces.admin.alert.Alert;
 import org.openspaces.admin.alert.events.AlertTriggeredEventListener;
 import org.openspaces.admin.space.ReplicationStatus;
+import org.openspaces.admin.space.SpaceInstance;
 
 /**
  * A Mirror persistency failure alert, triggered upon a failed replication from primary Space to
@@ -38,6 +39,15 @@ public class MirrorPersistenceFailureAlert extends AbstractAlert {
     
     public MirrorPersistenceFailureAlert(Alert alert) {
         super(alert);
+    }
+    
+    /**
+     * {@inheritDoc}
+     * The component UID is equivalent to {@link SpaceInstance#getUid()}
+     */
+    @Override
+    public String getComponentUid() {
+        return super.getComponentUid();
     }
 
     /**

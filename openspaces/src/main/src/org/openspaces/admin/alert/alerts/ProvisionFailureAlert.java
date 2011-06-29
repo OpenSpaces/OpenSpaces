@@ -2,6 +2,7 @@ package org.openspaces.admin.alert.alerts;
 
 import org.openspaces.admin.alert.Alert;
 import org.openspaces.admin.alert.events.AlertTriggeredEventListener;
+import org.openspaces.admin.pu.ProcessingUnit;
 
 /**
  * A provision failure alert triggered when a processing unit has less actual instances than planned
@@ -25,7 +26,8 @@ public class ProvisionFailureAlert extends AbstractAlert {
     }
     
     /**
-     * @return The processing unit name.
+     * {@inheritDoc}
+     * The component UID is equivalent to {@link ProcessingUnit#getName()}
      */
     @Override
     public String getComponentUid() {

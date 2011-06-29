@@ -4,6 +4,7 @@ package org.openspaces.admin.alert.alerts;
 import org.openspaces.admin.alert.Alert;
 import org.openspaces.admin.alert.config.GarbageCollectionAlertConfigurer;
 import org.openspaces.admin.alert.events.AlertTriggeredEventListener;
+import org.openspaces.admin.vm.VirtualMachine;
 
 /**
  * A Garbage Collection duration alert, fired upon triggered GC thresholds. The alert is raised when
@@ -38,6 +39,15 @@ public class GarbageCollectionAlert extends AbstractAlert {
     
     public GarbageCollectionAlert(Alert alert) {
         super(alert);
+    }
+    
+    /**
+     * {@inheritDoc}
+     * The component UID is equivalent to {@link VirtualMachine#getUid()}
+     */
+    @Override
+    public String getComponentUid() {
+        return super.getComponentUid();
     }
     
     /**

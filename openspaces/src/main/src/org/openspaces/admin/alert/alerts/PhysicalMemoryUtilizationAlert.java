@@ -4,6 +4,7 @@ package org.openspaces.admin.alert.alerts;
 import org.openspaces.admin.alert.Alert;
 import org.openspaces.admin.alert.config.PhysicalMemoryUtilizationAlertConfigurer;
 import org.openspaces.admin.alert.events.AlertTriggeredEventListener;
+import org.openspaces.admin.os.OperatingSystem;
 
 /**
  * A physical memory utilization alert, fired upon triggered machine physical memory thresholds. The
@@ -33,6 +34,15 @@ public class PhysicalMemoryUtilizationAlert extends AbstractAlert {
     
     public PhysicalMemoryUtilizationAlert(Alert alert) {
         super(alert);
+    }
+    
+    /**
+     * {@inheritDoc}
+     * The component UID is equivalent to {@link OperatingSystem#getUid()}
+     */
+    @Override
+    public String getComponentUid() {
+        return super.getComponentUid();
     }
     
     /**
