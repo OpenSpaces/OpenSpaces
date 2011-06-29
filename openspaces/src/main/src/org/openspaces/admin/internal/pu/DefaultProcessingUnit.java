@@ -185,7 +185,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         return beanLevelProperties;
     }
     
-    public ProcessingUnitType getProcessingUnitType() {
+    public ProcessingUnitType getType() {
         return processingUnitType;
     }
 
