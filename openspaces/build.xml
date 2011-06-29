@@ -231,8 +231,8 @@
 	      		<include name="com/sun/**/*.java"/>
         		<include name="net/**/*.java"/>
 		    </fileset>
-            <link href="http://java.sun.com/j2se/1.5.0/docs/api"/>
-        	<link href="http://java.sun.com/products/jini/2.1/doc/api"/>
+            <link href="http://download.oracle.com/javase/1,5.0/docs/api/"/>
+        	<link href="http://www.gigaspaces.com/docs/JiniApi"/>
             <link href="http://static.springframework.org/spring/docs/2.5.x/api"/>
             <link href="http://aopalliance.sourceforge.net/doc"/>
             <!-- Caucho Burlap/Hessian -->
