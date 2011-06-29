@@ -23,10 +23,15 @@
         </resources>
     </build>
     <dependencies>
+		<dependency>
+			<groupId>javassist</groupId>
+			<artifactId>javassist</artifactId>
+			<version>3.12.1.GA</version>
+		</dependency>
         <dependency>
             <groupId>org.hibernate</groupId>
-            <artifactId>hibernate</artifactId>
-            <version>3.2.6.ga</version>
+            <artifactId>hibernate-core</artifactId>
+            <version>3.6.5.Final</version>
             <exclusions>
                 <exclusion>
                     <groupId>javax.transaction</groupId>
