@@ -1,6 +1,6 @@
 package org.openspaces.itest.gateway;
 
-import com.gigaspaces.cluster.replication.gateway.ConflictResolver;
+import com.gigaspaces.cluster.replication.gateway.conflict.ConflictResolver;
 
 /**
  * 
