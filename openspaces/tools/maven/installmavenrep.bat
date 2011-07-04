@@ -21,8 +21,8 @@ echo ""
 echo ""
 
 REM GigaSpaces Jars
-call mvn install:install-file -DgroupId=com.gigaspaces -DartifactId=gs-runtime -Dversion=%VERSION% -DpomFile=%TEMP%/gs-runtime-pom.xml -Dpackaging=jar -Dfile="%JSHOMEDIR%/lib/required/gs-runtime.jar"
-call mvn install:install-file -DgroupId=com.gigaspaces -DartifactId=gs-openspaces -Dversion=%VERSION% -DpomFile=%TEMP%/gs-openspaces-pom.xml -Dpackaging=jar -Dfile="%JSHOMEDIR%/lib/required/gs-openspaces.jar"
+call mvn install:install-file -DgroupId=com.gigaspaces -DartifactId=gs-runtime -Dversion=%VERSION% -DpomFile=%TEMP%/gs-runtime-pom.xml -Dpackaging=jar -Dfile="%JSHOMEDIR%/lib/required/gs-runtime.jar" -Djavadoc="%JSHOMEDIR%/docs/javadoc.zip" 
+call mvn install:install-file -DgroupId=com.gigaspaces -DartifactId=gs-openspaces -Dversion=%VERSION% -DpomFile=%TEMP%/gs-openspaces-pom.xml -Dpackaging=jar -Dfile="%JSHOMEDIR%/lib/required/gs-openspaces.jar" -Djavadoc="%JSHOMEDIR%/docs/javadoc.zip" -Dsources="%JSHOMEDIR%/lib/optional/openspaces/gs-openspaces-src.zip"  
 call mvn install:install-file -DgroupId=com.gigaspaces -DartifactId=mule-os -Dversion=%VERSION% -Dpackaging=jar -DpomFile=%TEMP%/mule-os-pom.xml -Dfile="%JSHOMEDIR%/lib/optional/openspaces/mule-os.jar"
 call mvn install:install-file -DgroupId=com.gigaspaces -DartifactId=jetty-os -Dversion=%VERSION% -Dpackaging=jar -DpomFile=%TEMP%/jetty-os-pom.xml -Dfile="%JSHOMEDIR%/lib/platform/openspaces/gs-openspaces-jetty.jar"
 
