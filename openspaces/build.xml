@@ -269,7 +269,7 @@
                 <include name="bin/pu*"/>
                 <include name="bin/gs-m*"/>
                 <include name="deploy/**"/>
-                <include name="docs/javadoc/**"/>
+                <include name="docs/**"/>
                 <include name="tools/**"/>
             	<exclude name="tools/maven/maven-openspaces-plugin/target/**" />
                 <exclude name="tools/**/*.iml" />
