@@ -291,24 +291,15 @@ public class DefaultAdmin implements InternalAdmin {
                 return new Thread(r,"Admin-state-change-thread");
             }});
         
-        
-        if (singleThreadedEventListeners ) { 
-            eventsExecutorServices = new ExecutorService[1];
-            eventsQueue = new LinkedList[1];
-            eventsQueue[0] = new LinkedList<Runnable>();
-            eventsExecutorServices[0] = createEventExecutorService();            
+     
+        int numberOfThreads = singleThreadedEventListeners ? 1 :  DEFAULT_EVENT_LISTENER_THREADS;
+        this.eventsExecutorServices = new ExecutorService[numberOfThreads];
+        eventsQueue = new LinkedList[numberOfThreads];
+        for (int i = 0; i < numberOfThreads; i++) {
+            eventsExecutorServices[i] = createEventExecutorService();
+            eventsQueue[i] = new LinkedList<Runnable>();
         }
-        else {
-        
-            this.eventsExecutorServices = new ExecutorService[DEFAULT_EVENT_LISTENER_THREADS];
-            
-            eventsQueue = new LinkedList[DEFAULT_EVENT_LISTENER_THREADS];
-            for (int i = 0; i < DEFAULT_EVENT_LISTENER_THREADS; i++) {
-                eventsExecutorServices[i] = createEventExecutorService();
-                eventsQueue[i] = new LinkedList<Runnable>();
-            }
-        }
-
+    
         this.scheduledExecutorService = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(5);
         discoveryService.start();
         scheduledProcessingUnitMonitorFuture = scheduledExecutorService.scheduleWithFixedDelay(
