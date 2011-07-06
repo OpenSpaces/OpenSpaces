@@ -28,9 +28,9 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 
 /**
- * An extension to Mule SEDA component that will only start when working with a PRIMARY space
- * and won't start when working with BACKUP space.
- *
+ * An extension to Mule SEDA component that will only start when working with a PRIMARY space and
+ * won't start when working with BACKUP space.
+ * 
  * @author kimchy
  */
 public class SpaceAwareSedaService extends SedaService implements ApplicationListener {
@@ -41,11 +41,10 @@ public class SpaceAwareSedaService extends SedaService implements ApplicationLis
 
     protected GigaSpace gigaSpace;
 
-    
     public SpaceAwareSedaService(MuleContext muleContext) {
         super(muleContext);
     }
-    
+
     public synchronized void doInitialise() throws InitialisationException {
         super.doInitialise();
         this.sedaModel = (OpenSpacesSedaModel) model;
@@ -62,13 +61,17 @@ public class SpaceAwareSedaService extends SedaService implements ApplicationLis
 
     protected void doDispose() {
         try {
-            // we need to stop here if was not stopped since during dispose it needs
-            // to be stopped and we override stop to do nothing
-            if (!isStopped()) {
+            if (lifecycleManager.getState().isDisposing() || lifecycleManager.getState().isDisposed()) {
+                // Dispose was called again. Nothing to do.
+                return;
+
+            } else if (!isStopped()) {
+                // we need to stop here if was not stopped since during dispose it needs
+                // to be stopped and we override stop to do nothing
+
                 super.stop();
             }
-        }
-        catch (MuleException e) {
+        } catch (MuleException e) {
             logger.error("Failed to stop component: " + name, e);
         }
     }
