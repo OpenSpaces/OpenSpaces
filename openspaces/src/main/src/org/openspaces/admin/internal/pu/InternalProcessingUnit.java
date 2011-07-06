@@ -19,6 +19,8 @@ public interface InternalProcessingUnit extends ProcessingUnit, InternalProcessi
     void setNumberOfBackups(int numberOfBackups);
 
     void setManagingGridServiceManager(GridServiceManager gridServiceManager);
+    
+    void addManagingGridServiceManager(GridServiceManager gridServiceManager);
 
     void addBackupGridServiceManager(GridServiceManager backupGridServiceManager);
 

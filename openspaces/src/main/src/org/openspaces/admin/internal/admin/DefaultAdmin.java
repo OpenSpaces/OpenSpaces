@@ -1214,12 +1214,12 @@ public class DefaultAdmin implements InternalAdmin {
                     if (holder.managingGSM == null) {
                         if (processingUnit.isManaged()) {
                             // event since we no longer have a managing GSM
-                            processingUnit.setManagingGridServiceManager(null);
+                            processingUnit.addManagingGridServiceManager(null);
                         }
                     } else {
                         if (!processingUnit.isManaged() || !processingUnit.getManagingGridServiceManager().getUid().equals(holder.managingGSM.getUid())) {
                             // we changed managing GSM
-                            processingUnit.setManagingGridServiceManager(holder.managingGSM);
+                            processingUnit.addManagingGridServiceManager(holder.managingGSM);
                             // if it was in the backups, remove it from it
                             if (processingUnit.getBackupGridServiceManager(holder.managingGSM.getUid()) != null) {
                                 processingUnit.removeBackupGridServiceManager(holder.managingGSM.getUid());
@@ -1239,8 +1239,9 @@ public class DefaultAdmin implements InternalAdmin {
                         }
                     }
                 } else { // we have a new processing unit
-                    processingUnits.addProcessingUnit(processingUnit);
                     processingUnit.setManagingGridServiceManager(holder.managingGSM);
+                    processingUnits.addProcessingUnit(processingUnit);
+                    processingUnit.addManagingGridServiceManager(holder.managingGSM);
                     for (GridServiceManager backupGSM : holder.backupGSMs.values()) {
                         processingUnit.addBackupGridServiceManager(backupGSM);
                     }

@@ -438,7 +438,12 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
 
     public void setManagingGridServiceManager(GridServiceManager gridServiceManager) {
         assertStateChangesPermitted();
-        final GridServiceManager previousManaging = this.managingGridServiceManager;
+        this.managingGridServiceManager = gridServiceManager;
+    }
+    
+    public void addManagingGridServiceManager(GridServiceManager gridServiceManager) {
+        assertStateChangesPermitted();
+        final GridServiceManager previousManaging = (gridServiceManager == this.managingGridServiceManager) ? null : this.managingGridServiceManager;
         final GridServiceManager newManaging = gridServiceManager;
 
         this.managingGridServiceManager = gridServiceManager;
