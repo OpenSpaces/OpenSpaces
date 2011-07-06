@@ -296,18 +296,7 @@ public class DefaultAdmin implements InternalAdmin {
             eventsExecutorServices = new ExecutorService[1];
             eventsQueue = new LinkedList[1];
             eventsQueue[0] = new LinkedList<Runnable>();
-            eventsExecutorServices[0] = Executors.newFixedThreadPool(1, new ThreadFactory() {
-
-                public Thread newThread(Runnable r) {
-                    Thread thread = new Thread(r,"GS-ADMIN-event-executor-tread");
-                    DefaultAdmin.this.executorSingleThreadId = thread.getId();
-                    return thread;
-                }});
-            // must explicitly create thread with this classloader
-            // otherwise could lazily create thread on the wrong class loader (jetty/lrmi issues)
-            ((ThreadPoolExecutor)eventsExecutorServices[0]).prestartAllCoreThreads();
-            ((ThreadPoolExecutor)eventsExecutorServices[0]).setRejectedExecutionHandler(DEFAULT_EVENT_LISTENER_REJECTED_POLICY);
-            
+            eventsExecutorServices[0] = createEventExecutorService();            
         }
         else {
         
@@ -315,17 +304,7 @@ public class DefaultAdmin implements InternalAdmin {
             
             eventsQueue = new LinkedList[DEFAULT_EVENT_LISTENER_THREADS];
             for (int i = 0; i < DEFAULT_EVENT_LISTENER_THREADS; i++) {
-                eventsExecutorServices[i] = Executors.newFixedThreadPool(1, new ThreadFactory() {
-
-                    public Thread newThread(Runnable r) {
-                        return new Thread(r,"GS-ADMIN-event-executor-thread");
-                    }});
-                
-                // must explicitly create thread with this classloader
-                // otherwise could lazily create thread on the wrong class loader (jetty/lrmi issues)
-                ((ThreadPoolExecutor)eventsExecutorServices[i]).prestartAllCoreThreads();
-                
-                ((ThreadPoolExecutor)eventsExecutorServices[i]).setRejectedExecutionHandler(DEFAULT_EVENT_LISTENER_REJECTED_POLICY);
+                eventsExecutorServices[i] = createEventExecutorService();
                 eventsQueue[i] = new LinkedList<Runnable>();
             }
         }
@@ -336,6 +315,22 @@ public class DefaultAdmin implements InternalAdmin {
                 new ScheduledProcessingUnitMonitor(), scheduledProcessingUnitMonitorInterval, scheduledProcessingUnitMonitorInterval, TimeUnit.MILLISECONDS);
         scheduledAgentProcessessMonitorFuture = scheduledExecutorService.scheduleWithFixedDelay(new ScheduledAgentProcessessMonitor(),
                 scheduledAgentProcessessMonitorInterval, scheduledAgentProcessessMonitorInterval, TimeUnit.MILLISECONDS);
+    }
+
+    private ExecutorService createEventExecutorService() {
+        ThreadPoolExecutor executorService = 
+            (ThreadPoolExecutor) Executors.newFixedThreadPool(1, new ThreadFactory() {
+   
+            public Thread newThread(Runnable r) {
+                Thread thread = new Thread(r,"GS-ADMIN-event-executor-tread");
+                DefaultAdmin.this.executorSingleThreadId = thread.getId();
+                return thread;
+            }});
+        // must explicitly create thread with this classloader
+        // otherwise could lazily create thread on the wrong class loader (jetty/lrmi issues)
+        executorService.prestartAllCoreThreads();
+        executorService.setRejectedExecutionHandler(DEFAULT_EVENT_LISTENER_REJECTED_POLICY);
+        return executorService;
     }
 
     public void setProcessingUnitMonitorInterval(long interval, TimeUnit timeUnit) {
