@@ -58,7 +58,7 @@ import java.util.concurrent.Callable;
  * can be read when the {@link #contextInitialized(javax.servlet.ServletContextEvent)} is called. It will also
  * change the web.xml in order to add this class as a context listener.
  * <p/>
- * <p>During context initializtion, the marshalled ClusterInfo and BeanLevelProperties can be read and
+ * <p>During context initialization, the marshalled ClusterInfo and BeanLevelProperties can be read and
  * put in the servlet context (allowing us to support any web container).
  * <p/>
  * <p>If there is a pu.xml file, it will be started as well, with the application context itself set in the

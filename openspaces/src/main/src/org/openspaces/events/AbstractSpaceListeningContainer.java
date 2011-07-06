@@ -72,7 +72,7 @@ import java.util.List;
  * @author kimchy
  */
 public abstract class AbstractSpaceListeningContainer implements Lifecycle, BeanNameAware, InitializingBean,
-        DisposableBean, ApplicationListener, ServiceDetailsProvider, ServiceMonitorsProvider {
+        DisposableBean, ApplicationListener<ApplicationEvent>, ServiceDetailsProvider, ServiceMonitorsProvider {
 
     protected final Log logger = LogFactory.getLog(getClass());
 
