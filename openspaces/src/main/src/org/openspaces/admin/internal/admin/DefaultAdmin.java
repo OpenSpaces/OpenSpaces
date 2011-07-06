@@ -600,6 +600,7 @@ public class DefaultAdmin implements InternalAdmin {
         processAgentOnServiceAddition(lookupService);
 
         ((InternalLookupServices) machine.getLookupServices()).addLookupService(lookupService);
+        ((InternalLookupServices) ((InternalVirtualMachine) virtualMachine).getLookupServices()).addLookupService(lookupService);
 
         for (Zone zone : lookupService.getZones().values()) {
             ((InternalLookupServices) zone.getLookupServices()).addLookupService(lookupService);
