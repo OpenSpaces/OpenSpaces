@@ -303,7 +303,9 @@ public class DefaultAdmin implements InternalAdmin {
                     DefaultAdmin.this.executorSingleThreadId = thread.getId();
                     return thread;
                 }});
-            
+            // must explicitly create thread with this classloader
+            // otherwise could lazily create thread on the wrong class loader (jetty/lrmi issues)
+            ((ThreadPoolExecutor)eventsExecutorServices[0]).prestartAllCoreThreads();
             ((ThreadPoolExecutor)eventsExecutorServices[0]).setRejectedExecutionHandler(DEFAULT_EVENT_LISTENER_REJECTED_POLICY);
             
         }
@@ -318,6 +320,12 @@ public class DefaultAdmin implements InternalAdmin {
                     public Thread newThread(Runnable r) {
                         return new Thread(r,"GS-ADMIN-event-executor-thread");
                     }});
+                
+                // must explicitly create thread with this classloader
+                // otherwise could lazily create thread on the wrong class loader (jetty/lrmi issues)
+                ((ThreadPoolExecutor)eventsExecutorServices[i]).prestartAllCoreThreads();
+                
+                ((ThreadPoolExecutor)eventsExecutorServices[i]).setRejectedExecutionHandler(DEFAULT_EVENT_LISTENER_REJECTED_POLICY);
                 eventsQueue[i] = new LinkedList<Runnable>();
             }
         }
