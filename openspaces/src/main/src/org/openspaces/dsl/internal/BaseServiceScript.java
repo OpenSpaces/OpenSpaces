@@ -80,13 +80,13 @@ public abstract class BaseServiceScript extends Script {
                 m.invoke(this.activeObject, arg);
             } else {
                 logger.severe("Method " + methodName + " not found on object: " + this.activeObject);
-                throw new MissingMethodException( name, this.activeObject.getClass(), new Object[0]);
-                
+                throw new MissingMethodException(name, this.activeObject.getClass(), new Object[0]);
+
             }
         } catch (final Exception e) {
             logger.log(Level.SEVERE, "Failed to invoke method " + methodName, e);
-            throw new IllegalStateException("Failed to invoke method " + methodName 
-                    + " on object " + this.activeObject, e);                    
+            throw new IllegalStateException("Failed to invoke method " + methodName
+                    + " on object " + this.activeObject, e);
         }
 
         return this.activeObject;
@@ -149,6 +149,10 @@ public abstract class BaseServiceScript extends Script {
         activeObject = prevObject;
         this.activeMethods = prevMethods;
         return res;
+    }
+    
+    public void println(Object obj) {        
+        logger.info(obj.toString());
     }
 
 }
