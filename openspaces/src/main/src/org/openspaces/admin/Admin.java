@@ -28,6 +28,7 @@ import org.openspaces.admin.dump.DumpGeneratedListener;
 import org.openspaces.admin.dump.DumpProvider;
 import org.openspaces.admin.dump.DumpResult;
 import org.openspaces.admin.esm.ElasticServiceManagers;
+import org.openspaces.admin.gateway.Gateways;
 import org.openspaces.admin.gsa.GridServiceAgents;
 import org.openspaces.admin.gsc.GridServiceContainers;
 import org.openspaces.admin.gsm.GridServiceManagers;
@@ -161,6 +162,12 @@ public interface Admin extends StatisticsMonitor, DumpProvider {
      * Returns the grid service containers discovered.
      */
     GridServiceContainers getGridServiceContainers();
+    
+    /**
+     * Returns the gateways discovered.
+     * @since 8.0.4
+     */
+    Gateways getGateways();
 
     /**
      * Returns the Grid Component represented by this UID; e.g. ESM, GSA, LUS, GSM, GSC
