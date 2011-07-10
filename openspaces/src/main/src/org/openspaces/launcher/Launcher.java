@@ -1,5 +1,6 @@
 package org.openspaces.launcher;
 
+import com.gigaspaces.admin.cli.RuntimeInfo;
 import com.gigaspaces.logger.GSLogConfigLoader;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
@@ -16,7 +17,7 @@ public class Launcher {
 
     public static void main(String[] args) throws Exception {
         
-        int port = Integer.getInteger("org.openspaces.launcher.port", 8099);
+        int port = Integer.getInteger("org.openspaces.launcher.port", 8099); // backward compatibility
         String name = "launcher";
         String path = null;
         String work = "./work";
@@ -45,7 +46,6 @@ public class Launcher {
             System.out.println("Launcher -path <path> [-work <work>] [-port <port>] [-name <name>] [-logger <logger>]");
             return;
         }
-        // TODO set the name, path, work in the scripts
         GSLogConfigLoader.getLoader(name);
         GSLogConfigLoader.getLoader();
         Server server = new Server(port);
@@ -59,10 +59,12 @@ public class Launcher {
         webAppContext.setParentLoaderPriority(true);
 
         server.setHandler(webAppContext);
-
+        
+        Logger.getLogger(logger).info(RuntimeInfo.getShortEnvironmentInfo());
+        
         server.start();
         webAppContext.start();
-
+        
         Logger.getLogger(logger).info(name + " server started on port [" + port + "]");
     }
 }
