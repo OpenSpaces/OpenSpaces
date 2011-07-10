@@ -304,7 +304,14 @@ public class DefaultAdmin implements InternalAdmin {
             eventsQueue[i] = new LinkedList<Runnable>();
         }
     
-        this.scheduledExecutorService = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(5);
+        this.scheduledExecutorService = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(5,
+                new ThreadFactory() {
+            public Thread newThread(Runnable r) {
+                Thread thread = new Thread(r, "GS-ADMIN-scheduled-executor-thread");
+                return thread;
+            }
+        });
+
         discoveryService.start();
         scheduledProcessingUnitMonitorFuture = scheduledExecutorService.scheduleWithFixedDelay(
                 new ScheduledProcessingUnitMonitor(), scheduledProcessingUnitMonitorInterval, scheduledProcessingUnitMonitorInterval, TimeUnit.MILLISECONDS);
@@ -317,7 +324,7 @@ public class DefaultAdmin implements InternalAdmin {
             (ThreadPoolExecutor) Executors.newFixedThreadPool(1, new ThreadFactory() {
    
             public Thread newThread(Runnable r) {
-                Thread thread = new Thread(r,"GS-ADMIN-event-executor-tread");
+                Thread thread = new Thread(r,"GS-ADMIN-event-executor-thread");
                 DefaultAdmin.this.executorSingleThreadId = thread.getId();
                 return thread;
             }});
