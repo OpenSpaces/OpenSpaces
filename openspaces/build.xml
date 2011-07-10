@@ -87,7 +87,7 @@
         <mkdir dir="${target.classes.dir}"/>
         <mkdir dir="${target.classes.dir}/META-INF"/>
 
-        <javac destdir="${target.classes.dir}" source="1.5" target="1.5" debug="${debug}"
+        <javac  destdir="${target.classes.dir}" source="1.6" target="1.6" debug="${debug}"
                deprecation="false" optimize="false" failonerror="true">
             <src path="${main.src.dir}"/>
             <classpath refid="all-libs"/>
@@ -210,7 +210,7 @@
         <mkdir dir="${target.javadoc.dir}"/>
 
         <javadoc sourcepath="${main.src.dir}" destdir="${target.javadoc.dir}" windowtitle="GigaSpaces XAP 8.0 API"
-                 source="1.5" access="protected" author="true" version="true" use="true"
+                 source="1.6" access="protected" author="true" version="true" use="true"
                  useexternalfile="yes"
                  defaultexcludes="true"
                  header='&lt;a href="index.html" target=\"_top\"&gt;GigaSpaces XAP 8.0 API&lt;/a&gt;'
@@ -333,7 +333,7 @@
 
         <mkdir dir="${target.testclasses.dir}"/>
 
-        <javac destdir="${target.testclasses.dir}" source="1.5" target="1.5" debug="${debug}"
+        <javac destdir="${target.testclasses.dir}" source="1.6" target="1.6" debug="${debug}"
                deprecation="false" optimize="false" failonerror="true">
             <src path="${main.test.dir}"/>
             <classpath refid="all-libs"/>
@@ -444,7 +444,7 @@
         <mkdir dir="${target.sandbox-classes.dir}"/>
         <mkdir dir="${target.sandbox-classes.dir}/META-INF"/>
 
-        <javac destdir="${target.sandbox-classes.dir}" source="1.5" target="1.5" debug="${debug}"
+        <javac destdir="${target.sandbox-classes.dir}" source="1.6" target="1.6" debug="${debug}"
                deprecation="false" optimize="false" failonerror="true">
             <src path="${sandbox.src.dir}"/>
             <classpath refid="all-libs"/>
