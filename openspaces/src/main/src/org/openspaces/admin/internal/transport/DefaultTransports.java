@@ -175,7 +175,7 @@ public class DefaultTransports implements InternalTransports {
         if (scheduledStatisticsMonitor != null) {
             scheduledStatisticsMonitor.cancel(false);
         }
-        scheduledStatisticsMonitor = admin.getScheduler().scheduleWithFixedDelay(new Runnable() {
+        scheduledStatisticsMonitor = admin.scheduleWithFixedDelay(new Runnable() {
             public void run() {
                 TransportsStatistics stats = getStatistics();
                 TransportsStatisticsChangedEvent event = new TransportsStatisticsChangedEvent(DefaultTransports.this, stats);

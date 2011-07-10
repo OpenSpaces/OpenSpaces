@@ -335,7 +335,7 @@ public class DefaultAdmin implements InternalAdmin {
         this.scheduledProcessingUnitMonitorInterval = timeUnit.toMillis(interval);
         if (scheduledProcessingUnitMonitorFuture != null) { // during initialization
             scheduledProcessingUnitMonitorFuture.cancel(false);
-            scheduledProcessingUnitMonitorFuture = getScheduler().scheduleWithFixedDelay(new ScheduledProcessingUnitMonitor(), interval, interval, timeUnit);
+            scheduledProcessingUnitMonitorFuture = this.scheduleWithFixedDelay(new ScheduledProcessingUnitMonitor(), interval, interval, timeUnit);
         }
     }
 
@@ -346,7 +346,7 @@ public class DefaultAdmin implements InternalAdmin {
         this.scheduledAgentProcessessMonitorInterval = timeUnit.toMillis(interval);
         if (scheduledAgentProcessessMonitorFuture != null) { // during initialization
             scheduledAgentProcessessMonitorFuture.cancel(false);
-            scheduledAgentProcessessMonitorFuture = getScheduler().scheduleWithFixedDelay(new ScheduledAgentProcessessMonitor(), interval, interval, timeUnit);
+            scheduledAgentProcessessMonitorFuture = this.scheduleWithFixedDelay(new ScheduledAgentProcessessMonitor(), interval, interval, timeUnit);
         }
     }
 
@@ -373,6 +373,10 @@ public class DefaultAdmin implements InternalAdmin {
 
     public ScheduledThreadPoolExecutor getScheduler() {
         return this.scheduledExecutorService;
+    }
+    
+    public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit) {
+        return getScheduler().scheduleWithFixedDelay(new LoggerRunnable(command), initialDelay, delay, unit);
     }
 
     public void setSchedulerCorePoolSize(int coreThreads) {
@@ -1302,9 +1306,9 @@ public class DefaultAdmin implements InternalAdmin {
             try {
                 runnable.run();
             } catch (Exception e) {
-                logger.warn("Failed to executed event listener", e);
+                logger.warn("Failed to execute: " + runnable, e);
             } catch (Error e) {
-                logger.error("Failed to executed event listener", e);
+                logger.error("Failed to execute: " + runnable, e);
                 throw e;
             }
         }
@@ -1312,7 +1316,7 @@ public class DefaultAdmin implements InternalAdmin {
 
     public ScheduledFuture<?> scheduleWithFixedDelayNonBlockingStateChange(final Runnable command, long initialDelay,
             long delay, TimeUnit unit) {
-        return this.getScheduler().scheduleWithFixedDelay(new Runnable() {
+        return this.scheduleWithFixedDelay(new Runnable() {
 
             public void run() {
                 scheduleNonBlockingStateChange(command);

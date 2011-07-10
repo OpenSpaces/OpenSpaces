@@ -148,7 +148,7 @@ public class DefaultOperatingSystems implements InternalOperatingSystems {
         if (scheduledStatisticsMonitor != null) {
             scheduledStatisticsMonitor.cancel(false);
         }
-        scheduledStatisticsMonitor = admin.getScheduler().scheduleWithFixedDelay(new Runnable() {
+        scheduledStatisticsMonitor = admin.scheduleWithFixedDelay(new Runnable() {
             public void run() {
                 OperatingSystemsStatistics stats = getStatistics();
                 OperatingSystemsStatisticsChangedEvent event = new OperatingSystemsStatisticsChangedEvent(DefaultOperatingSystems.this, stats);

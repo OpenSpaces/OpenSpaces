@@ -314,7 +314,7 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
             scheduledStatisticsMonitor.cancel(false);
         }
         final VirtualMachine virtualMachine = this;
-        scheduledStatisticsMonitor = admin.getScheduler().scheduleWithFixedDelay(new Runnable() {
+        scheduledStatisticsMonitor = admin.scheduleWithFixedDelay(new Runnable() {
             public void run() {
                 VirtualMachineStatistics stats = virtualMachine.getStatistics();
                 VirtualMachineStatisticsChangedEvent event = new VirtualMachineStatisticsChangedEvent(virtualMachine, stats);

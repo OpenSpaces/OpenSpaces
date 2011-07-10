@@ -164,7 +164,7 @@ public class DefaultOperatingSystem implements InternalOperatingSystem {
             scheduledStatisticsMonitor.cancel(false);
         }
         final OperatingSystem operatingSystem = this;
-        scheduledStatisticsMonitor = admin.getScheduler().scheduleWithFixedDelay(new Runnable() {
+        scheduledStatisticsMonitor = admin.scheduleWithFixedDelay(new Runnable() {
             public void run() {
                 OperatingSystemStatistics stats = operatingSystem.getStatistics();
                 OperatingSystemStatisticsChangedEvent event = new OperatingSystemStatisticsChangedEvent(operatingSystem, stats);

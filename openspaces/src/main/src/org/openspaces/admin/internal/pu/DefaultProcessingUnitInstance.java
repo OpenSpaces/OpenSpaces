@@ -540,7 +540,7 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
             scheduledStatisticsMonitor.cancel(false);
         }
         final ProcessingUnitInstance processingUnitInstance = this;
-        scheduledStatisticsMonitor = admin.getScheduler().scheduleWithFixedDelay(new Runnable() {
+        scheduledStatisticsMonitor = admin.scheduleWithFixedDelay(new Runnable() {
             public void run() {
                 ProcessingUnitInstanceStatistics stats = processingUnitInstance.getStatistics();
                 ProcessingUnitInstanceStatisticsChangedEvent event = new ProcessingUnitInstanceStatisticsChangedEvent(processingUnitInstance, stats);

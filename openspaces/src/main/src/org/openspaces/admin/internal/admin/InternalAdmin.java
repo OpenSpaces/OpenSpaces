@@ -24,6 +24,8 @@ import com.gigaspaces.security.directory.UserDetails;
 public interface InternalAdmin extends Admin {
 
     ScheduledThreadPoolExecutor getScheduler();
+    
+    ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit);
 
     long getScheduledSpaceMonitorInterval();
     

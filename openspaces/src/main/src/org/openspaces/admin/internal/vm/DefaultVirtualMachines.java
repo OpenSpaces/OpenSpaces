@@ -181,7 +181,7 @@ public class DefaultVirtualMachines implements InternalVirtualMachines {
         if (scheduledStatisticsMonitor != null) {
             scheduledStatisticsMonitor.cancel(false);
         }
-        scheduledStatisticsMonitor = admin.getScheduler().scheduleWithFixedDelay(new Runnable() {
+        scheduledStatisticsMonitor = admin.scheduleWithFixedDelay(new Runnable() {
             public void run() {
                 VirtualMachinesStatistics stats = getStatistics();
                 VirtualMachinesStatisticsChangedEvent event = new VirtualMachinesStatisticsChangedEvent(DefaultVirtualMachines.this, stats);

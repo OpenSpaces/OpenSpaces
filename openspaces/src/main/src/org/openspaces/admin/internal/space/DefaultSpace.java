@@ -205,7 +205,7 @@ public class DefaultSpace implements InternalSpace {
         if (scheduledStatisticsMonitor != null) {
             scheduledStatisticsMonitor.cancel(false);
         }
-        scheduledStatisticsMonitor = admin.getScheduler().scheduleWithFixedDelay(new Runnable() {
+        scheduledStatisticsMonitor = admin.scheduleWithFixedDelay(new Runnable() {
             public void run() {
                 SpaceStatistics stats = getStatistics();
                 SpaceStatisticsChangedEvent event = new SpaceStatisticsChangedEvent(DefaultSpace.this, stats);
@@ -372,7 +372,7 @@ public class DefaultSpace implements InternalSpace {
         // start the scheduler
         Future fetcher = scheduledRuntimeFetchers.get(spaceInstance.getUid());
         if (fetcher == null) {
-            fetcher = admin.getScheduler().scheduleWithFixedDelay(new ScheduledRuntimeFetcher(spaceInstance), admin.getScheduledSpaceMonitorInterval(), admin.getScheduledSpaceMonitorInterval(), TimeUnit.MILLISECONDS);
+            fetcher = admin.scheduleWithFixedDelay(new ScheduledRuntimeFetcher(spaceInstance), admin.getScheduledSpaceMonitorInterval(), admin.getScheduledSpaceMonitorInterval(), TimeUnit.MILLISECONDS);
             scheduledRuntimeFetchers.put(spaceInstance.getUid(), fetcher);
         }
     }
@@ -414,7 +414,7 @@ public class DefaultSpace implements InternalSpace {
             fetcher.cancel(false);
         }
         for (SpaceInstance spaceInstance : this) {
-            Future fetcher = admin.getScheduler().scheduleWithFixedDelay(new ScheduledRuntimeFetcher(spaceInstance), admin.getScheduledSpaceMonitorInterval(), admin.getScheduledSpaceMonitorInterval(), TimeUnit.MILLISECONDS);
+            Future fetcher = admin.scheduleWithFixedDelay(new ScheduledRuntimeFetcher(spaceInstance), admin.getScheduledSpaceMonitorInterval(), admin.getScheduledSpaceMonitorInterval(), TimeUnit.MILLISECONDS);
             scheduledRuntimeFetchers.put(spaceInstance.getUid(), fetcher);
         }
     }

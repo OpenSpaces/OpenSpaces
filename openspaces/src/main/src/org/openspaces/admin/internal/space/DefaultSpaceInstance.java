@@ -217,7 +217,7 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
             scheduledStatisticsMonitor.cancel(false);
         }
         final SpaceInstance spaceInstance = this;
-        scheduledStatisticsMonitor = ((InternalAdmin) getAdmin()).getScheduler().scheduleWithFixedDelay(new Runnable() {
+        scheduledStatisticsMonitor = ((InternalAdmin) getAdmin()).scheduleWithFixedDelay(new Runnable() {
             public void run() {
                 SpaceInstanceStatistics stats = spaceInstance.getStatistics();
                 SpaceInstanceStatisticsChangedEvent event = new SpaceInstanceStatisticsChangedEvent(spaceInstance, stats);
