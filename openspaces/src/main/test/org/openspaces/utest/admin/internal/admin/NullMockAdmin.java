@@ -275,6 +275,11 @@ public class NullMockAdmin implements Admin, InternalAdmin {
         // TODO Auto-generated method stub
         return null;
     }
+    
+    public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
     public UserDetails getUserDetails() {
         // TODO Auto-generated method stub
