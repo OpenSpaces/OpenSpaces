@@ -38,6 +38,15 @@ public class DefaultGatewayDelegator implements GatewayDelegator {
         return result;
     }
     
+    public boolean containsTarget(String targetGatewayName) {
+        GatewayDelegation[] delegationTargets = serviceDetails.getDelegationTargets();
+        for (GatewayDelegation gatewayDelegation : delegationTargets) {
+            if (gatewayDelegation.getTarget().equals(targetGatewayName))
+                return true;
+        }
+        return false;
+    }
+    
     public class DefaultGatewayDelegatorTarget implements GatewayDelegatorTarget {
 
         private final String target;

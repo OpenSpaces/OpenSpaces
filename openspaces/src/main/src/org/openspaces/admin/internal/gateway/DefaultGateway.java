@@ -1,7 +1,11 @@
 package org.openspaces.admin.internal.gateway;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
@@ -17,6 +21,8 @@ import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventListener;
 import org.openspaces.core.gateway.GatewayUtils;
+
+import com.gigaspaces.internal.utils.concurrent.ExchangeCountDownLatch;
 
 /**
  * 
@@ -34,13 +40,17 @@ public class DefaultGateway implements Gateway {
     }
 
     public Iterator<GatewayProcessingUnit> iterator() {
-        // TODO Auto-generated method stub
-        return null;
+        return Arrays.asList(getGatewayProcessingUnits()).iterator();
     }
 
     public GatewayProcessingUnit[] getGatewayProcessingUnits() {
-        // TODO Auto-generated method stub
-        return null;
+        List<GatewayProcessingUnit> result = new LinkedList<GatewayProcessingUnit>();
+        for (ProcessingUnit processingUnit : admin.getProcessingUnits()) {
+            ProcessingUnitInstance puInstance = GatewayUtils.extractInstanceIfPuOfGateway(gatewayName, processingUnit);
+            if (puInstance != null)
+                result.add(new DefaultGatewayProcessingUnit(admin, this, puInstance));
+        } 
+        return result.toArray(new GatewayProcessingUnit[result.size()]);
     }
 
     public String getName() {
@@ -102,53 +112,123 @@ public class DefaultGateway implements Gateway {
     }
 
     public Map<String, GatewayProcessingUnit> getNames() {
-        // TODO Auto-generated method stub
-        return null;
+        Map<String, GatewayProcessingUnit> names = new HashMap<String, GatewayProcessingUnit>();
+        for (GatewayProcessingUnit gatewayProcessingUnit : this) {
+            names.put(gatewayProcessingUnit.getProcessingUnit().getName(), gatewayProcessingUnit);
+        }
+        return names;
     }
 
     public GatewaySink getSink(String sourceGatewayName) {
-        // TODO Auto-generated method stub
+        for (GatewayProcessingUnit gatewayProcessingUnit: this) {
+            GatewaySink sink = gatewayProcessingUnit.getSink();
+            if (sink != null && sink.containsSource(sourceGatewayName)){
+                return sink; 
+            }
+        }
         return null;
     }
 
     public GatewaySink waitForSink(String sourceGatewayName) {
-        // TODO Auto-generated method stub
-        return null;
+        return waitForSink(sourceGatewayName, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
 
-    public GatewaySink waitForSink(String sourceGatewayName, long timeout, TimeUnit unit) {
-        // TODO Auto-generated method stub
-        return null;
+    public GatewaySink waitForSink(final String sourceGatewayName, long timeout, TimeUnit timeUnit) {
+        final ExchangeCountDownLatch<GatewaySink> latch = new ExchangeCountDownLatch<GatewaySink>(1);
+        ProcessingUnitInstanceAddedEventListener added = new ProcessingUnitInstanceAddedEventListener() {
+            
+            public void processingUnitInstanceAdded(ProcessingUnitInstance processingUnitInstance) {
+                if (GatewayUtils.isPuInstanceOfGateway(gatewayName, processingUnitInstance)){
+                    DefaultGatewayProcessingUnit tempPUI = new DefaultGatewayProcessingUnit(admin, DefaultGateway.this, processingUnitInstance);
+                    GatewaySink sink = tempPUI.getSink();
+                    if (sink != null && sink.containsSource(sourceGatewayName)){
+                        latch.exchange(sink);
+                        latch.countDown();
+                    }
+                }
+            }
+        };
+        
+        admin.getProcessingUnits().getProcessingUnitInstanceAdded().add(added);
+        try {
+            if (latch.await(timeout, timeUnit))
+                return latch.get();
+            return null;
+        } catch (InterruptedException e) {
+            return null;
+        } finally {
+            admin.getProcessingUnits().getProcessingUnitInstanceAdded().remove(added);
+        }
     }
 
+    public GatewaySinkSource getSinkSource(String sourceGatewayName) {
+        GatewaySink sink = getSink(sourceGatewayName);
+        if (sink != null)
+            return sink.getSourceByName(sourceGatewayName);
+        
+        return null;
+    }
+    
     public GatewaySinkSource waitForSinkSource(String sourceGatewayName) {
-        // TODO Auto-generated method stub
-        return null;
+        return waitForSinkSource(sourceGatewayName, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
 
-    public GatewaySinkSource waitForSinkSource(String sourceGatewayName, long timeout, TimeUnit unit) {
-        // TODO Auto-generated method stub
+    public GatewaySinkSource waitForSinkSource(String sourceGatewayName, long timeout, TimeUnit timeUnit) {
+        GatewaySink sink = waitForSink(sourceGatewayName, timeout, timeUnit);
+        if (sink != null)
+            return sink.getSourceByName(sourceGatewayName);
+        
         return null;
     }
 
     public GatewayDelegator getDelegator(String targetGatewayName) {
-        // TODO Auto-generated method stub
+        for (GatewayProcessingUnit gatewayProcessingUnit: this) {
+            GatewayDelegator delegator = gatewayProcessingUnit.getDelegator();
+            if (delegator != null && delegator.containsTarget(targetGatewayName)){
+                return delegator; 
+            }
+        }
         return null;
     }
 
-    public GatewayDelegator waitForDelegator(String targetGatewayName, long timeout, TimeUnit unit) {
-        // TODO Auto-generated method stub
-        return null;
+    public GatewayDelegator waitForDelegator(String targetGatewayName) {
+        return waitForDelegator(targetGatewayName, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
+    }
+    
+    public GatewayDelegator waitForDelegator(final String targetGatewayName, long timeout, TimeUnit timeUnit) {
+        final ExchangeCountDownLatch<GatewayDelegator> latch = new ExchangeCountDownLatch<GatewayDelegator>(1);
+        ProcessingUnitInstanceAddedEventListener added = new ProcessingUnitInstanceAddedEventListener() {
+            
+            public void processingUnitInstanceAdded(ProcessingUnitInstance processingUnitInstance) {
+                if (GatewayUtils.isPuInstanceOfGateway(gatewayName, processingUnitInstance)){
+                    DefaultGatewayProcessingUnit tempPUI = new DefaultGatewayProcessingUnit(admin, DefaultGateway.this, processingUnitInstance);
+                    GatewayDelegator delegator = tempPUI.getDelegator();
+                    if (delegator != null && delegator.containsTarget(targetGatewayName)){
+                        latch.exchange(delegator);
+                        latch.countDown();
+                    }
+                }
+            }
+        };
+        
+        admin.getProcessingUnits().getProcessingUnitInstanceAdded().add(added);
+        try {
+            if (latch.await(timeout, timeUnit))
+                return latch.get();
+            return null;
+        } catch (InterruptedException e) {
+            return null;
+        } finally {
+            admin.getProcessingUnits().getProcessingUnitInstanceAdded().remove(added);
+        }
     }
 
     public int getSize() {
-        // TODO Auto-generated method stub
-        return 0;
+        return getGatewayProcessingUnits().length;
     }
 
     public boolean isEmpty() {
-        // TODO Auto-generated method stub
-        return false;
+        return getSize() == 0;
     }
 
 }

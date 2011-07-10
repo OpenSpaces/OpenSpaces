@@ -18,6 +18,8 @@ public interface GatewayDelegator {
     /**
      * Returns all the delegation targets of this delegator. 
      */
-    GatewayDelegatorTarget[] getDelegationTargets(); 
+    GatewayDelegatorTarget[] getDelegationTargets();
+
+    boolean containsTarget(String targetGatewayName); 
 
 }

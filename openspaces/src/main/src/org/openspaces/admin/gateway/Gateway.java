@@ -47,11 +47,15 @@ public interface Gateway extends Iterable<GatewayProcessingUnit>{
     
     GatewaySink waitForSink(String sourceGatewayName, long timeout, TimeUnit timeUnit);
     
+    GatewaySinkSource getSinkSource(String sourceGatewayName);
+    
     GatewaySinkSource waitForSinkSource(String sourceGatewayName);
     
     GatewaySinkSource waitForSinkSource(String sourceGatewayName, long timeout, TimeUnit timeUnit);
     
     GatewayDelegator getDelegator(String targetGatewayName);
+    
+    GatewayDelegator waitForDelegator(String targetGatewayName);
     
     GatewayDelegator waitForDelegator(String targetGatewayName, long timeout, TimeUnit timeUnit);
     
