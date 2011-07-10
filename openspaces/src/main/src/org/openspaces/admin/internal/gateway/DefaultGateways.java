@@ -1,6 +1,9 @@
 package org.openspaces.admin.internal.gateway;
 
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -12,6 +15,9 @@ import org.openspaces.admin.internal.admin.DefaultAdmin;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventListener;
+import org.openspaces.core.gateway.GatewayUtils;
+
+import edu.emory.mathcs.backport.java.util.Arrays;
 /**
  * 
  * @author eitany
@@ -29,14 +35,19 @@ public class DefaultGateways implements Gateways {
         return admin;
     }
 
+    @SuppressWarnings("unchecked")
     public Iterator<Gateway> iterator() {
-        // TODO Auto-generated method stub
-        return null;
+        return Arrays.asList(getGateways()).iterator();
     }
 
     public Gateway[] getGateways() {
-        // TODO Auto-generated method stub
-        return null;
+        List<Gateway> gateways = new LinkedList<Gateway>();
+        for (ProcessingUnit processingUnit : admin.getProcessingUnits()) {
+            String gatewayName = GatewayUtils.extractGatewayNameIfExists(processingUnit);
+            if (gatewayName != null)
+                gateways.add(new DefaultGateway(admin, gatewayName));
+        }
+        return gateways.toArray(new Gateway[gateways.size()]);
     }
 
     public Gateway getGateway(String gatewayName) {
@@ -50,8 +61,11 @@ public class DefaultGateways implements Gateways {
     }
 
     public Map<String, Gateway> getNames() {
-        // TODO Auto-generated method stub
-        return null;
+        Map<String, Gateway> names = new HashMap<String, Gateway>();
+        for (Gateway gateway : this) {
+            names.put(gateway.getName(), gateway);
+        }
+        return names;
     }
 
     public Gateway waitFor(String gatewayName) {
@@ -81,13 +95,11 @@ public class DefaultGateways implements Gateways {
     }
 
     public int getSize() {
-        // TODO Auto-generated method stub
-        return 0;
+        return getGateways().length;
     }
 
     public boolean isEmpty() {
-        // TODO Auto-generated method stub
-        return false;
+        return getSize() == 0;
     }
 
 }

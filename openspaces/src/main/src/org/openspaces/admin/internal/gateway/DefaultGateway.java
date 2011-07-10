@@ -16,6 +16,7 @@ import org.openspaces.admin.internal.admin.DefaultAdmin;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventListener;
+import org.openspaces.core.gateway.GatewayUtils;
 
 /**
  * 
@@ -75,8 +76,7 @@ public class DefaultGateway implements Gateway {
     }
 
     public GatewayProcessingUnit waitForGatewayProcessingUnit(String processingUnitName) {
-        // TODO Auto-generated method stub
-        return null;
+        return waitForGatewayProcessingUnit(processingUnitName, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
 
     public GatewayProcessingUnit waitForGatewayProcessingUnit(String processingUnitName, long timeout, TimeUnit timeUnit) {
@@ -91,8 +91,14 @@ public class DefaultGateway implements Gateway {
     }
 
     public GatewayProcessingUnit getGatewayProcessingUnit(String processingUnitName) {
-        // TODO Auto-generated method stub
-        return null;
+        ProcessingUnit processingUnit = admin.getProcessingUnits().getProcessingUnit(processingUnitName);
+        ProcessingUnitInstance[] instances = processingUnit.getInstances();
+        if (instances == null || instances.length == 0)
+            return null;
+        
+        if (GatewayUtils.isPuInstanceOfGateway(gatewayName, instances[0]))
+            return new DefaultGatewayProcessingUnit(admin, this, instances[0]);
+        throw new IllegalArgumentException("requested processing unit is not part of this gateway [" + processingUnitName + "]");
     }
 
     public Map<String, GatewayProcessingUnit> getNames() {
