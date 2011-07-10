@@ -25,7 +25,7 @@ public interface Gateway extends Iterable<GatewayProcessingUnit>{
     String getName();
     
     /**
-     * Waits for the default timeout specified by {@link Admin#setDefaultTimeout(long, TimeUnit)} Waits till 
+     * Waits for the default timeout specified by {@link Admin#setDefaultTimeout(long, TimeUnit)} till 
      * at least the provided number of Gateway Processing Unit Instances are up. Returns <code>true</code> if
      * the specified number of gateway processing units are deployed, <code> false</code> otherwise;
      */

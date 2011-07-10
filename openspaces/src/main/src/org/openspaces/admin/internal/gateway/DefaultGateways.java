@@ -1,5 +1,6 @@
 package org.openspaces.admin.internal.gateway;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -17,7 +18,6 @@ import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventListener;
 import org.openspaces.core.gateway.GatewayUtils;
 
-import edu.emory.mathcs.backport.java.util.Arrays;
 /**
  * 
  * @author eitany
@@ -35,7 +35,6 @@ public class DefaultGateways implements Gateways {
         return admin;
     }
 
-    @SuppressWarnings("unchecked")
     public Iterator<Gateway> iterator() {
         return Arrays.asList(getGateways()).iterator();
     }
