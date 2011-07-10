@@ -65,5 +65,5 @@ public @interface NotifyLease {
      *
      * @see SimpleNotifyEventListenerContainer#setLeaseListener(net.jini.lease.LeaseListener)
      */
-    Class<LeaseListener> leaseListener() default LeaseListener.class;
+    Class<LeaseListener> leaseListener() default net.jini.lease.LeaseListener.class;
 }

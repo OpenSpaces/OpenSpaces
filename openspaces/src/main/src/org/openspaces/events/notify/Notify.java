@@ -84,7 +84,7 @@ public @interface Notify {
     /**
      * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setComType(int)
      */
-    NotifyComType commType() default NotifyComType.UNICAST;
+    NotifyComType commType() default org.openspaces.events.notify.NotifyComType.UNICAST;
 
     /**
      * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setFifo(boolean)
@@ -102,7 +102,7 @@ public @interface Notify {
     /**
      * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setNotifyFilter(com.j_spaces.core.client.INotifyDelegatorFilter)
      */
-    Class<INotifyDelegatorFilter> notifyFilter() default INotifyDelegatorFilter.class;
+    Class<INotifyDelegatorFilter> notifyFilter() default  com.j_spaces.core.client.INotifyDelegatorFilter.class;
 
     /**
      * Set whether this container will start once instantiated.
@@ -115,10 +115,10 @@ public @interface Notify {
     /**
      * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setReplicateNotifyTemplate(boolean)
      */
-    ReplicateNotifyTemplateType replicateNotifyTemplate() default ReplicateNotifyTemplateType.DEFAULT;
+    ReplicateNotifyTemplateType replicateNotifyTemplate() default org.openspaces.events.notify.ReplicateNotifyTemplateType.DEFAULT;
 
     /**
      * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setTriggerNotifyTemplate(boolean)
      */
-    TriggerNotifyTemplateType triggerNotifyTemplate() default TriggerNotifyTemplateType.DEFAULT;
+    TriggerNotifyTemplateType triggerNotifyTemplate() default org.openspaces.events.notify.TriggerNotifyTemplateType.DEFAULT;
 }

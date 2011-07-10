@@ -39,13 +39,13 @@ public @interface TransactionalEvent {
      * The transaction propagation type.
      * <p>Defaults to {@link org.springframework.transaction.annotation.Propagation#REQUIRED}.
      */
-    Propagation propagation() default Propagation.REQUIRED;
+    Propagation propagation() default org.springframework.transaction.annotation.Propagation.REQUIRED;
 
     /**
      * The transaction isolation level.
      * <p>Defaults to {@link org.springframework.transaction.annotation.Isolation#DEFAULT}.
      */
-    Isolation isolation() default Isolation.DEFAULT;
+    Isolation isolation() default org.springframework.transaction.annotation.Isolation.DEFAULT;
 
     /**
      * The timeout for this transaction.

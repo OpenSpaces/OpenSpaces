@@ -65,7 +65,7 @@ public @interface EventDrivenProxy {
     /**
      * @see org.openspaces.remoting.EventDrivenSpaceRemotingProxyFactoryBean#setAsyncMethodPrefix(String)
      */
-    String asyncMethodPrefix() default EventDrivenSpaceRemotingProxyFactoryBean.DEFAULT_ASYNC_METHOD_PREFIX;
+    String asyncMethodPrefix() default org.openspaces.remoting.EventDrivenSpaceRemotingProxyFactoryBean.DEFAULT_ASYNC_METHOD_PREFIX;
 
     /**
      * The bean name that implements this interface.
