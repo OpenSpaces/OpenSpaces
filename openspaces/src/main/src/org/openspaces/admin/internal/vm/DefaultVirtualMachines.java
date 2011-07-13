@@ -212,10 +212,15 @@ public class DefaultVirtualMachines implements InternalVirtualMachines {
         assertStateChangesPermmited();
         VirtualMachine existingVM = virtualMachinesByUID.put(virtualMachine.getUid(), virtualMachine);
         if (existingVM == null) {
-            virtualMachine.setStatisticsInterval(statisticsInterval, TimeUnit.MILLISECONDS);
-            virtualMachine.setStatisticsHistorySize(statisticsHistorySize);
             if (isMonitoring()) {
-                virtualMachine.startStatisticsMonitor();
+                admin.raiseEvent(this, new Runnable() {
+                    @Override
+                    public void run() {
+                        virtualMachine.setStatisticsInterval(statisticsInterval, TimeUnit.MILLISECONDS);
+                        virtualMachine.setStatisticsHistorySize(statisticsHistorySize);
+                        virtualMachine.startStatisticsMonitor();
+                    }
+                });
             }
             virtualMachineAddedEventManager.virtualMachineAdded(virtualMachine);
         }

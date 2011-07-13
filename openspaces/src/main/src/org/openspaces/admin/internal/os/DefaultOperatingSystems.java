@@ -173,14 +173,19 @@ public class DefaultOperatingSystems implements InternalOperatingSystems {
         return Collections.unmodifiableMap(operatingSystemsByUID);
     }
 
-    public void addOperatingSystem(OperatingSystem operatingSystem) {
+    public void addOperatingSystem(final OperatingSystem operatingSystem) {
         assertStateChangesPermitted();
         OperatingSystem existing = operatingSystemsByUID.put(operatingSystem.getUid(), operatingSystem);
         if (existing == null) {
-            operatingSystem.setStatisticsHistorySize(statisticsHistorySize);
-            operatingSystem.setStatisticsInterval(statisticsInterval, TimeUnit.MILLISECONDS);
             if (isMonitoring()) {
-                operatingSystem.startStatisticsMonitor();
+                admin.raiseEvent(this, new Runnable() {
+                    @Override
+                    public void run() {
+                        operatingSystem.setStatisticsHistorySize(statisticsHistorySize);
+                        operatingSystem.setStatisticsInterval(statisticsInterval, TimeUnit.MILLISECONDS);
+                        operatingSystem.startStatisticsMonitor();
+                    }
+                });
             }
         }
     }

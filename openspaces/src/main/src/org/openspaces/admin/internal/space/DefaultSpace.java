@@ -329,7 +329,7 @@ public class DefaultSpace implements InternalSpace {
         return spaceRuntimeDetails;
     }
 
-    public void addInstance(SpaceInstance spaceInstance) {
+    public void addInstance(final SpaceInstance spaceInstance) {
         assertStateChangesPermitted();
         InternalSpaceInstance internalSpaceInstance = (InternalSpaceInstance) spaceInstance;
         // the first addition (which we make sure is added before the space becomes visible) will
@@ -366,7 +366,12 @@ public class DefaultSpace implements InternalSpace {
         spaceInstance.setStatisticsInterval(statisticsInterval, TimeUnit.MILLISECONDS);
         spaceInstance.setStatisticsHistorySize(statisticsHistorySize);
         if (isMonitoring()) {
-            spaceInstance.startStatisticsMonitor();
+            admin.raiseEvent(this, new Runnable() {
+                @Override
+                public void run() {
+                    spaceInstance.startStatisticsMonitor();
+                }
+            });
         }
 
         // start the scheduler

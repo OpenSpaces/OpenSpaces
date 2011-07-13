@@ -210,7 +210,7 @@ public class DefaultSpaces implements InternalSpaces {
         spaceInstanceRemovedEventManager.remove(eventListener);
     }
 
-    public synchronized void addSpace(Space space) {
+    public synchronized void addSpace(final Space space) {
         assertStateChangesPermitted();
         Space existingSpace = spacesByUID.put(space.getUid(), space);
         spacesByName.put(space.getName(), space);
@@ -220,7 +220,12 @@ public class DefaultSpaces implements InternalSpaces {
         space.setStatisticsInterval(statisticsInterval, TimeUnit.MILLISECONDS);
         space.setStatisticsHistorySize(statisticsHistorySize);
         if (isMonitoring()) {
-            space.startStatisticsMonitor();
+            admin.raiseEvent(this, new Runnable() {
+                @Override
+                public void run() {
+                    space.startStatisticsMonitor();
+                }
+            });
         }
     }
 

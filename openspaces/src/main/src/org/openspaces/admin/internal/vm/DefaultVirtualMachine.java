@@ -286,6 +286,7 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
         lastStatisticsTimestamp = currentTime;
         for (InternalVirtualMachineInfoProvider provider : virtualMachineInfoProviders) {
             try {
+                if (getMachine() == null) continue; //machine has not yet been set
                 lastStatistics = new DefaultVirtualMachineStatistics(provider.getJVMStatistics(), previousStatistics, getDetails(), statisticsHistorySize, getMachine().getOperatingSystem().getTimeDelta());
                 break;
             } catch (RemoteException e) {

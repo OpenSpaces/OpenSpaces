@@ -540,7 +540,12 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
             processingUnitInstance.setStatisticsInterval(statisticsInterval, TimeUnit.MILLISECONDS);
             processingUnitInstance.setStatisticsHistorySize(statisticsHistorySize);
             if (isMonitoring()) {
-                processingUnitInstance.startStatisticsMonitor();
+                admin.raiseEvent(this, new Runnable() {
+                    @Override
+                    public void run() {
+                        processingUnitInstance.startStatisticsMonitor();
+                    }
+                });
             }
             processingUnitInstanceAddedEventManager.processingUnitInstanceAdded(processingUnitInstance);
             ((InternalProcessingUnitInstanceAddedEventManager) processingUnits.getProcessingUnitInstanceAdded()).processingUnitInstanceAdded(processingUnitInstance);
