@@ -15,7 +15,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor.DiscardPolicy;
 import java.util.concurrent.TimeUnit;
@@ -134,6 +133,7 @@ import com.gigaspaces.internal.jvm.JVMDetails;
 import com.gigaspaces.internal.os.OSDetails;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.security.directory.UserDetails;
+import com.j_spaces.kernel.GSThreadFactory;
 
 /**
  * @author kimchy
@@ -288,29 +288,18 @@ public class DefaultAdmin implements InternalAdmin {
     }
     
     public void begin() {
-
-        longRunningExecutorService = Executors.newFixedThreadPool(DEFAULT_STATE_CHANGE_THREADS, new ThreadFactory() {
-
-            public Thread newThread(Runnable r) {
-                return new Thread(r,"Admin-state-change-thread");
-            }});
         
-     
+        this.longRunningExecutorService = createThreadPoolExecutor("admin-state-change-thread",DEFAULT_STATE_CHANGE_THREADS);
+        
         int numberOfThreads = singleThreadedEventListeners ? 1 :  DEFAULT_EVENT_LISTENER_THREADS;
         this.eventsExecutorServices = new ExecutorService[numberOfThreads];
         eventsQueue = new LinkedList[numberOfThreads];
         for (int i = 0; i < numberOfThreads; i++) {
-            eventsExecutorServices[i] = createEventExecutorService();
+            eventsExecutorServices[i] = createThreadPoolExecutor("admin-event-executor-tread", 1, singleThreadedEventListeners);
             eventsQueue[i] = new LinkedList<Runnable>();
         }
     
-        this.scheduledExecutorService = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(5,
-                new ThreadFactory() {
-            public Thread newThread(Runnable r) {
-                Thread thread = new Thread(r, "GS-ADMIN-scheduled-executor-thread");
-                return thread;
-            }
-        });
+        this.scheduledExecutorService = createScheduledThreadPoolExecutor("admin-scheduled-executor-thread",5);
 
         discoveryService.start();
         scheduledProcessingUnitMonitorFuture = scheduledExecutorService.scheduleWithFixedDelay(
@@ -319,19 +308,39 @@ public class DefaultAdmin implements InternalAdmin {
                 scheduledAgentProcessessMonitorInterval, scheduledAgentProcessessMonitorInterval, TimeUnit.MILLISECONDS);
     }
 
-    private ExecutorService createEventExecutorService() {
+    private ScheduledThreadPoolExecutor createScheduledThreadPoolExecutor(String threadName, int numberOfThreads) {
+        final ClassLoader correctClassLoader = Thread.currentThread().getContextClassLoader();
+        ScheduledThreadPoolExecutor executorService = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(numberOfThreads, 
+                   new GSThreadFactory(threadName,false) {
+                        @Override
+                        public Thread newThread(Runnable r) {
+                            Thread thread = super.newThread(r);
+                            thread.setContextClassLoader(correctClassLoader);
+                            return thread;
+                    }});
+        return executorService;
+    }
+    
+    private ThreadPoolExecutor createThreadPoolExecutor(String threadName, int numberOfThreads) {
+        return createThreadPoolExecutor(threadName,numberOfThreads,false);
+    }
+    
+    private ThreadPoolExecutor createThreadPoolExecutor(String threadName, int numberOfThreads, final boolean updateSingleThreadId) {
+        final ClassLoader correctClassLoader = Thread.currentThread().getContextClassLoader();
         ThreadPoolExecutor executorService = 
-            (ThreadPoolExecutor) Executors.newFixedThreadPool(1, new ThreadFactory() {
-   
-            public Thread newThread(Runnable r) {
-                Thread thread = new Thread(r,"GS-ADMIN-event-executor-thread");
-                DefaultAdmin.this.executorSingleThreadId = thread.getId();
-                return thread;
-            }});
-        // must explicitly create thread with this classloader
-        // otherwise could lazily create thread on the wrong class loader (jetty/lrmi issues)
-        executorService.prestartAllCoreThreads();
-        executorService.setRejectedExecutionHandler(DEFAULT_EVENT_LISTENER_REJECTED_POLICY);
+            (ThreadPoolExecutor) Executors.newFixedThreadPool(numberOfThreads, 
+                    new GSThreadFactory(threadName,false) {
+           
+                    @Override
+                    public Thread newThread(Runnable r) {
+                        Thread thread = super.newThread(r);
+                        thread.setContextClassLoader(correctClassLoader);
+                        if (updateSingleThreadId) {
+                            DefaultAdmin.this.executorSingleThreadId = thread.getId();
+                        }
+                        return thread;
+                    }});
+                executorService.setRejectedExecutionHandler(DEFAULT_EVENT_LISTENER_REJECTED_POLICY);
         return executorService;
     }
 
