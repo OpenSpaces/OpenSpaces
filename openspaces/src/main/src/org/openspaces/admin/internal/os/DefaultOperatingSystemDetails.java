@@ -10,6 +10,7 @@ import org.openspaces.admin.support.StatisticsUtils;
 import com.gigaspaces.internal.os.OSDetails;
 import com.gigaspaces.internal.os.OSDetails.OSDriveDetails;
 import com.gigaspaces.internal.os.OSDetails.OSNetInterfaceDetails;
+import com.gigaspaces.internal.os.OSDetails.OSVendorDetails;
 
 /**
  * @author kimchy
@@ -18,11 +19,12 @@ import com.gigaspaces.internal.os.OSDetails.OSNetInterfaceDetails;
 public class DefaultOperatingSystemDetails implements OperatingSystemDetails {
 
     private final OSDetails details;
-    private Map<String, NetworkDetails> networkDetailsMap = 
+    private final Map<String, NetworkDetails> networkDetailsMap = 
                             new HashMap<String, OperatingSystemDetails.NetworkDetails>();
-    private Map<String, DriveDetails> driveDetailsMap = 
+    private final Map<String, DriveDetails> driveDetailsMap = 
                             new HashMap<String, OperatingSystemDetails.DriveDetails>();
-
+    private final VendorDetails vendorDetails;
+    
     public DefaultOperatingSystemDetails(OSDetails details) {
         this.details = details;
         
@@ -41,6 +43,7 @@ public class DefaultOperatingSystemDetails implements OperatingSystemDetails {
                         new DefaultDriveDetails( driveConfig ) );    
             }
         }
+        this.vendorDetails = new DefaultVendorDetails(details.getVendorDetails());
     }
 
     public boolean isNA() {
@@ -109,6 +112,10 @@ public class DefaultOperatingSystemDetails implements OperatingSystemDetails {
         return Collections.unmodifiableMap(driveDetailsMap);
     }
     
+    public VendorDetails getVendorDetails() {
+        return vendorDetails;
+    }
+    
     private static class DefaultNetworkDetails implements NetworkDetails {
 
         private final String name;
@@ -153,6 +160,42 @@ public class DefaultOperatingSystemDetails implements OperatingSystemDetails {
 
         public Long getCapacityInMB() {
             return capacityInMB;
+        }
+        
+    }
+    
+    private static class DefaultVendorDetails implements VendorDetails {
+
+        private final String vendor;
+        private final String vendorCodeName;
+        private final String vendorName;
+        private final String vendorVersion;
+
+        public DefaultVendorDetails(OSVendorDetails vendorDetails) {
+            vendor = vendorDetails.getVendor();
+            vendorCodeName = vendorDetails.getVendorCodeName();
+            vendorName = vendorDetails.getVendorName();
+            vendorVersion = vendorDetails.getVendorVersion();
+        }
+        
+        @Override
+        public String getVendor() {
+            return vendor;
+        }
+
+        @Override
+        public String getVendorCodeName() {
+            return vendorCodeName;
+        }
+
+        @Override
+        public String getVendorName() {
+            return vendorName;
+        }
+
+        @Override
+        public String getVendorVersion() {
+            return vendorVersion;
         }
         
     }

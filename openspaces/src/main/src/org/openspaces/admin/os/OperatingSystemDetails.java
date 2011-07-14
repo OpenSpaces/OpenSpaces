@@ -157,4 +157,27 @@ public interface OperatingSystemDetails {
         Long getCapacityInMB();
     }
     
+    /** @since 8.0.4 */
+    interface VendorDetails {
+     
+        /**
+         * @return the vendor (e.g. Microsoft).
+         */
+        public String getVendor();
+        /**
+         * @return the vendor code-name (e.g. Whistler).
+         */
+        public String getVendorCodeName();
+        /**
+         * @return the vendor name (e.g. Microsoft XP).
+         */
+        public String getVendorName();
+        
+        /**
+         * @return the vendor version (e.g. XP).
+         */
+        public String getVendorVersion();
+
+    }
+    
 }
