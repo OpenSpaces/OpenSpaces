@@ -221,7 +221,6 @@ public class DefaultSpaces implements InternalSpaces {
         space.setStatisticsHistorySize(statisticsHistorySize);
         if (isMonitoring()) {
             admin.raiseEvent(this, new Runnable() {
-                @Override
                 public void run() {
                     space.startStatisticsMonitor();
                 }

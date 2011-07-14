@@ -214,7 +214,6 @@ public class DefaultVirtualMachines implements InternalVirtualMachines {
         if (existingVM == null) {
             if (isMonitoring()) {
                 admin.raiseEvent(this, new Runnable() {
-                    @Override
                     public void run() {
                         virtualMachine.setStatisticsInterval(statisticsInterval, TimeUnit.MILLISECONDS);
                         virtualMachine.setStatisticsHistorySize(statisticsHistorySize);

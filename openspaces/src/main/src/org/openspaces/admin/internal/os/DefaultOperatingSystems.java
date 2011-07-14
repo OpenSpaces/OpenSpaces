@@ -179,7 +179,6 @@ public class DefaultOperatingSystems implements InternalOperatingSystems {
         if (existing == null) {
             if (isMonitoring()) {
                 admin.raiseEvent(this, new Runnable() {
-                    @Override
                     public void run() {
                         operatingSystem.setStatisticsHistorySize(statisticsHistorySize);
                         operatingSystem.setStatisticsInterval(statisticsInterval, TimeUnit.MILLISECONDS);

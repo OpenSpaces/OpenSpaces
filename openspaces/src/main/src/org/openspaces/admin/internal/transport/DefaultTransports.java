@@ -192,7 +192,6 @@ public class DefaultTransports implements InternalTransports {
             // a new one, set the stats on it
             if (isMonitoring()) {
                 admin.raiseEvent(this, new Runnable() {
-                    @Override
                     public void run() {
                         transport.setStatisticsInterval(statisticsInterval, TimeUnit.MILLISECONDS);
                         transport.setStatisticsHistorySize(statisticsHistorySize);

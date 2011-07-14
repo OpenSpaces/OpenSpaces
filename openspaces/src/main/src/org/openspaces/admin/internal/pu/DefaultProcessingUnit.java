@@ -541,7 +541,6 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
             processingUnitInstance.setStatisticsHistorySize(statisticsHistorySize);
             if (isMonitoring()) {
                 admin.raiseEvent(this, new Runnable() {
-                    @Override
                     public void run() {
                         processingUnitInstance.startStatisticsMonitor();
                     }
