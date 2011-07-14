@@ -43,7 +43,11 @@ public class DefaultOperatingSystemDetails implements OperatingSystemDetails {
                         new DefaultDriveDetails( driveConfig ) );    
             }
         }
-        this.vendorDetails = new DefaultVendorDetails(details.getVendorDetails());
+        if (details.getVendorDetails() != null) {
+            this.vendorDetails = new DefaultVendorDetails(details.getVendorDetails());
+        } else {
+            this.vendorDetails = null;
+        }
     }
 
     public boolean isNA() {
