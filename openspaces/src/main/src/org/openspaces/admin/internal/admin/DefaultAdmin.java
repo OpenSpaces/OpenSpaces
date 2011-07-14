@@ -216,6 +216,8 @@ public class DefaultAdmin implements InternalAdmin {
 
     private final AlertManager alertManager;
 
+    private boolean useDaemonThreads;
+
     public DefaultAdmin() {
         this.discoveryService = new DiscoveryService(this);
         this.alertManager = new DefaultAlertManager(this);
@@ -261,6 +263,10 @@ public class DefaultAdmin implements InternalAdmin {
         this.processingUnits.setStatisticsHistorySize(historySize);
     }
 
+    public void setUseDaemonThreads(boolean useDaemonThreads) {
+        this.useDaemonThreads = useDaemonThreads;
+    }
+    
     public void singleThreadedEventListeners() {
       this.singleThreadedEventListeners = true;
     }
@@ -311,7 +317,7 @@ public class DefaultAdmin implements InternalAdmin {
     private ScheduledThreadPoolExecutor createScheduledThreadPoolExecutor(String threadName, int numberOfThreads) {
         final ClassLoader correctClassLoader = Thread.currentThread().getContextClassLoader();
         ScheduledThreadPoolExecutor executorService = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(numberOfThreads, 
-                   new GSThreadFactory(threadName,false) {
+                   new GSThreadFactory(threadName,useDaemonThreads) {
                         @Override
                         public Thread newThread(Runnable r) {
                             Thread thread = super.newThread(r);
@@ -329,7 +335,7 @@ public class DefaultAdmin implements InternalAdmin {
         final ClassLoader correctClassLoader = Thread.currentThread().getContextClassLoader();
         ThreadPoolExecutor executorService = 
             (ThreadPoolExecutor) Executors.newFixedThreadPool(numberOfThreads, 
-                    new GSThreadFactory(threadName,false) {
+                    new GSThreadFactory(threadName,useDaemonThreads) {
            
                     @Override
                     public Thread newThread(Runnable r) {
@@ -1352,5 +1358,4 @@ public class DefaultAdmin implements InternalAdmin {
             
             delay, unit);
     }
-
 }

@@ -40,9 +40,14 @@ public class AdminFactory {
     private final DefaultAdmin admin = new DefaultAdmin();
 
     private boolean useGsLogging = true;
-
+    
     public AdminFactory useGsLogging(boolean useGsLogging) {
         this.useGsLogging = useGsLogging;
+        return this;
+    }
+
+    public AdminFactory useDaemonThreads(boolean useDaemonThreads) {
+        admin.setUseDaemonThreads(useDaemonThreads);
         return this;
     }
 
