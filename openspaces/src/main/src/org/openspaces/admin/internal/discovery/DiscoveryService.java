@@ -155,6 +155,11 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 final InternalLookupService lookupService = new DefaultLookupService(registrar,
                         registrar.getServiceID(), admin, ((AgentIdAware) registrar.getRegistrar()).getAgentId(),
                         ((AgentIdAware) registrar.getRegistrar()).getGSAServiceID());
+                
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Service Added [LUS] with uid [" + registrar.getServiceID() + "]");
+                }
+                
                 // get the details here, on the thread pool
                 final NIODetails nioDetails = lookupService.getNIODetails();
                 final OSDetails osDetails = lookupService.getOSDetails();
@@ -165,7 +170,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                     public void run() {
                         String jmxUrl = getJMXConnection( attributeSets );
                         admin.addLookupService(lookupService, nioDetails, osDetails, jvmDetails, jmxUrl, zones);
-                    }
+                        }
                 });
 
             } catch (Exception e) {
