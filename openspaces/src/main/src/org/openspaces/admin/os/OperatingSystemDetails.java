@@ -125,6 +125,12 @@ public interface OperatingSystemDetails {
      * @since 8.0.3
      */
     Map<String,DriveDetails> getDriveDetails();
+
+    /**
+     * @return Returns the vendor details
+     * @since 8.0.4
+     */
+    VendorDetails getVendorDetails();
     
     interface NetworkDetails {
 
