@@ -1,7 +1,9 @@
 package org.openspaces.itest.gateway;
 
 import org.openspaces.core.gateway.GatewaySinkFactoryBean;
+import org.openspaces.core.gateway.GatewaySinkServiceDetails;
 import org.openspaces.core.gateway.SinkErrorHandlingFactoryBean;
+import org.openspaces.pu.service.ServiceDetails;
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 
 /**
@@ -31,6 +33,14 @@ public class GatewaySinkConfigurationTest extends AbstractDependencyInjectionSpr
         assertTrue(error.getConflictResolver() instanceof MyConflictResolver);
         assertEquals(Long.valueOf(7500), sink.getTransactionTimeout());
         assertEquals(Long.valueOf(10), sink.getLocalSpaceLookupTimeout());
+        
+        ServiceDetails[] serviceDetails = sink.getServicesDetails();
+        assertEquals(1, serviceDetails.length);
+        
+        GatewaySinkServiceDetails sinkDetails = (GatewaySinkServiceDetails) serviceDetails[0];
+        assertEquals(2, sinkDetails.getGatewaySourceNames().length);
+        assertEquals("localGateway", sinkDetails.getGatewaySourceNames()[0]);        
+        assertEquals("targetGateway", sinkDetails.getGatewaySourceNames()[1]);
     }
 
 
