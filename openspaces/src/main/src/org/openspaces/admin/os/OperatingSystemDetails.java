@@ -127,7 +127,8 @@ public interface OperatingSystemDetails {
     Map<String,DriveDetails> getDriveDetails();
 
     /**
-     * @return Returns the vendor details
+     * @return Returns the vendor details; <code>null</code> if no vendor details available (e.g.
+     *         when using JMX and not Sigar).
      * @since 8.0.4
      */
     VendorDetails getVendorDetails();
