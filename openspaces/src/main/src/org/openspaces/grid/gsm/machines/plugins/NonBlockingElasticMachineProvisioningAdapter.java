@@ -14,6 +14,7 @@ import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig;
 import org.openspaces.grid.gsm.capacity.CapacityRequirement;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
+import org.openspaces.grid.gsm.capacity.NumberOfMachinesCapacityRequirement;
 import org.openspaces.grid.gsm.machines.FutureGridServiceAgent;
 import org.openspaces.grid.gsm.machines.FutureGridServiceAgents;
 
@@ -272,7 +273,11 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
             CapacityRequirements capacityRequirements, 
             ElasticMachineProvisioning machineProvisioning) {
         
-        int maxNumberOfMachines = 1;
+        NumberOfMachinesCapacityRequirement numberOfMachinesCapacityRequirement = capacityRequirements.getRequirement(new NumberOfMachinesCapacityRequirement().getType());
+        
+        int maxNumberOfMachines = 
+            Math.max (1,numberOfMachinesCapacityRequirement.getNumberOfMachines());
+        
         CapacityRequirements singleMachineCapacityRequirements = 
             machineProvisioning.getCapacityOfSingleMachine()
             .subtractOrZero(machineProvisioning.getConfig().getReservedCapacityPerMachine());
