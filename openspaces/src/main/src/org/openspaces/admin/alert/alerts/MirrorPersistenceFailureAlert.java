@@ -22,6 +22,9 @@ public class MirrorPersistenceFailureAlert extends AbstractAlert {
 
     private static final long serialVersionUID = 1L;
     
+    public static final String HOST_ADDRESS = "host-address";
+    public static final String HOST_NAME = "host-name";
+    
     public static final String INCONSISTENCY_REASON = "inconsistency-reason";
     public static final String ROOT_CAUSE_MESSAGE = "root-cause-message";
     public static final String ROOT_CAUSE_TRACE = "root-cause-trace";
@@ -48,6 +51,22 @@ public class MirrorPersistenceFailureAlert extends AbstractAlert {
     @Override
     public String getComponentUid() {
         return super.getComponentUid();
+    }
+    
+    /**
+     * The host address of the machine that this alert corresponds to.
+     * @return the host address; may be <code>null</code>.
+     */
+    public String getHostAddress() {
+        return getProperties().get(HOST_ADDRESS);
+    }
+    
+    /**
+     * The host name of the machine that this alert corresponds to.
+     * @return the host name; may be <code>null</code>.
+     */
+    public String getHostName() {
+        return getProperties().get(HOST_NAME);
     }
 
     /**
