@@ -216,9 +216,11 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         ClusterCapacityRequirements capacityAllocatedAndMarked = 
             capacityMarkedForDeallocation.add(capacityAllocated);
         
+        int machineShortage = getMachineShortageInOrderToReachMinimumNumberOfMachines(sla);
+        
         if (!capacityAllocatedAndMarked.getTotalAllocatedCapacity().equals(target) &&
             capacityAllocatedAndMarked.getTotalAllocatedCapacity().greaterOrEquals(target) &&
-            capacityAllocatedAndMarked.getAgentUids().size() >= sla.getMinimumNumberOfMachines()) {
+            machineShortage == 0) {
             
             logger.debug("Considering scale in: "+
                     "target is "+ target + " " +
@@ -262,53 +264,6 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                 // scale in now
                 deallocateManualCapacity(sla,surplusCapacity);
             }
-        }
-
-        else if (capacityAllocated.getAgentUids().size() <  sla.getMinimumNumberOfMachines()) {
-            
-            logger.info("Considering to start more machines to reach required minimum number of machines: " + 
-                    capacityAllocated + " started, " +
-                    capacityMarkedForDeallocation + " marked for deallocation, " +
-                    sla.getMinimumNumberOfMachines() + " is the required minimum number of machines."
-            );
-            
-               
-            unmarkAgentsMarkedForDeallocationToSatisfyMinimumNumberOfMachines(sla);
-            
-            int machineShortage = getMachineShortageInOrderToReachMinimumNumberOfMachines(sla);
-            
-            if (machineShortage > 0) {
-                //try allocate on new machines, that have other PUs on it.
-                allocateNumberOfMachines(machineShortage, sla);
-                machineShortage = getMachineShortageInOrderToReachMinimumNumberOfMachines(sla);
-            }
-            
-            if (machineShortage > 0) {
-                
-                if (!sla.getMachineProvisioning().isStartMachineSupported()) {
-                    throw new NeedMoreMachinesException(machineShortage);
-                }
-                
-                
-                // scale out to get to the minimum number of agents
-                CapacityRequirements capacityRequirements = new CapacityRequirements(
-                        new NumberOfMachinesCapacityRequirement(machineShortage));
-                FutureGridServiceAgent[] futureAgents = sla.getMachineProvisioning().startMachinesAsync(
-                        capacityRequirements,
-                        START_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-                
-                state.futureAgents(pu, futureAgents, capacityRequirements);
-                
-                logger.info(
-                        machineShortage+ " new machine(s) is scheduled to be started in order to reach the minimum of " + 
-                        sla.getMinimumNumberOfMachines() + " machines. " +
-                        "Allocated machine agents are: " + state.getAllocatedCapacity(pu));
-                
-            }
-            
-            // even if machineShortage is 0, we still need to come back to this method 
-            // to check the capacity is satisfied (scale out)
-            throw new OperationInProgressException();
         }
         
         else if (!capacityAllocatedAndMarked.getTotalAllocatedCapacity().greaterOrEquals(target)) {
@@ -365,6 +320,53 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
            }
             
         }
+        // we check minimum number of machines last since it was likely dealt with 
+        // by enforcing the capacity requirements.
+        else if (machineShortage > 0) {
+            
+            logger.info("Considering to start more machines to reach required minimum number of machines: " + 
+                    capacityAllocated + " started, " +
+                    capacityMarkedForDeallocation + " marked for deallocation, " +
+                    sla.getMinimumNumberOfMachines() + " is the required minimum number of machines."
+            );
+            
+               
+            machineShortage = unmarkAgentsMarkedForDeallocationToSatisfyMinimumNumberOfMachines(sla);
+            
+            
+            if (machineShortage > 0) {
+                //try allocate on new machines, that have other PUs on it.
+                allocateNumberOfMachines(machineShortage, sla);
+                machineShortage = getMachineShortageInOrderToReachMinimumNumberOfMachines(sla);
+            }
+            
+            if (machineShortage > 0) {
+                
+                if (!sla.getMachineProvisioning().isStartMachineSupported()) {
+                    throw new NeedMoreMachinesException(machineShortage);
+                }
+                
+                
+                // scale out to get to the minimum number of agents
+                CapacityRequirements capacityRequirements = new CapacityRequirements(
+                        new NumberOfMachinesCapacityRequirement(machineShortage));
+                FutureGridServiceAgent[] futureAgents = sla.getMachineProvisioning().startMachinesAsync(
+                        capacityRequirements,
+                        START_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+                
+                state.futureAgents(pu, futureAgents, capacityRequirements);
+                
+                logger.info(
+                        machineShortage+ " new machine(s) is scheduled to be started in order to reach the minimum of " + 
+                        sla.getMinimumNumberOfMachines() + " machines. " +
+                        "Allocated machine agents are: " + state.getAllocatedCapacity(pu));
+                
+            }
+            
+            // even if machineShortage is 0, we still need to come back to this method 
+            // to check the capacity is satisfied (scale out)
+            throw new OperationInProgressException();
+        }
         else {
             logger.debug("No action required in order to enforce machines sla. "+
                     "target="+target + "| " + 
@@ -419,7 +421,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
      * if minimum number of machines is breached then
      * unmark machines that have only containers that are pending for deallocation
      */
-    private void unmarkAgentsMarkedForDeallocationToSatisfyMinimumNumberOfMachines(AbstractMachinesSlaPolicy sla) throws OperationInProgressException {
+    private int unmarkAgentsMarkedForDeallocationToSatisfyMinimumNumberOfMachines(AbstractMachinesSlaPolicy sla) throws OperationInProgressException {
         
         int machineShortage = getMachineShortageInOrderToReachMinimumNumberOfMachines(sla);
         
@@ -448,6 +450,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                 }
             }
         }
+        return machineShortage;
     }
 
     /**
@@ -456,6 +459,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
     private int getMachineShortageInOrderToReachMinimumNumberOfMachines(AbstractMachinesSlaPolicy sla)
             throws OperationInProgressException {
         
+        boolean cannotDetermineExpectedNumberOfMachines = false;
         final ClusterCapacityRequirements capacityAllocated = state.getAllocatedCapacity(pu);
         int machineShortage = sla.getMinimumNumberOfMachines() - capacityAllocated.getAgentUids().size();
         if (state.getNumberOfFutureAgents(pu) > 0) {
@@ -464,11 +468,18 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                 
                 final int expectedNumberOfMachines = numberOfMachines(future.getExpectedCapacity());
                 if (expectedNumberOfMachines == 0) {
-                    throw new OperationInProgressException();
+                    cannotDetermineExpectedNumberOfMachines = true;
                 }
-                machineShortage -= expectedNumberOfMachines;
+                else {
+                    machineShortage -= expectedNumberOfMachines;
+                }
             }
         }
+        
+        if (machineShortage > 0 && cannotDetermineExpectedNumberOfMachines) {
+            throw new OperationInProgressException();
+        }
+        
         return machineShortage;
     }
 
