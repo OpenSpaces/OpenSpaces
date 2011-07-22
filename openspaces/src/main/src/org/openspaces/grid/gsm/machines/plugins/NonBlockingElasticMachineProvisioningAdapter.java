@@ -62,12 +62,14 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
     		
     		final int throttlingDelay = i*THROTTLING_DELAY_SECONDS;
     		final long start = System.currentTimeMillis();
-    		final long end = start+ throttlingDelay+unit.toMillis(duration);
+    		final long end = start+ throttlingDelay*1000+unit.toMillis(duration);
     		submit(new Runnable() {
     			public void run() {
     				try {
+   			            logger.info("{THID="+Thread.currentThread().getId() + "} Starting a new machine");
     					GridServiceAgent agent = machineProvisioning.startMachine(duration, unit);
     					ref.set(agent);
+    					logger.info("{THID="+Thread.currentThread().getId() + "} New machine started");
     				} catch (ElasticMachineProvisioningException e) {
     					ref.set(new ExecutionException(e));
     				} catch (InterruptedException e) {
@@ -158,8 +160,10 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
 		submit(new Runnable() {
 			public void run() {
 				try {
-					if (NonBlockingElasticMachineProvisioningAdapter.this.machineProvisioning.stopMachine(agent, duration, unit)) {
-					    logger.info(hostAddress + " stopped succesfully.");
+				    
+		            logger.info("{THID="+Thread.currentThread().getId() + "} Stopping machine " + hostAddress);
+			    	if (NonBlockingElasticMachineProvisioningAdapter.this.machineProvisioning.stopMachine(agent, duration, unit)) {
+					    logger.info("{THID="+Thread.currentThread().getId() + "} machine " + hostAddress + " succesfully stopped.");
 					}
 				} catch (ElasticMachineProvisioningException e) {
 					logger.warn("Error while stopping " + hostAddress,e);
