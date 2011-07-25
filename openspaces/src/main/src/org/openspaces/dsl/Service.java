@@ -31,6 +31,8 @@ public class Service implements Serializable{
    
     private List<PluginDescriptor> plugins;
     
+    private ServiceNetwork network;
+    
     private int numInstances = 1;
     private long maxJarSize = 150 * 1024 * 1024; //in bytes
     private boolean keepFile = false;
@@ -92,6 +94,14 @@ public class Service implements Serializable{
         this.lifecycle = lifecycle;
     }
 
+    public ServiceNetwork getNetwork() {
+        return this.network;
+    }
+    
+    public void setNetwork(final ServiceNetwork network) {
+        this.network = network;
+    }
+    
     public UserInterface getUserInterface() {
         return userInterface;
     }
