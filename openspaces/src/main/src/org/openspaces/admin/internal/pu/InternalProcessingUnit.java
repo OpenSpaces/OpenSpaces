@@ -52,4 +52,10 @@ public interface InternalProcessingUnit extends ProcessingUnit, InternalProcessi
      */
     ScaleStrategyConfig getScaleStrategyConfig();
 
+    /**
+     * Decrements a planned instance if the number of planned instances is less then the actual instances to maintain.
+     * @return <code>true</code> if a planned instance was successfully decremented; <code>false</code> planned instances hasn't changed.
+     * @since 8.0.4
+     */
+    boolean decrementPlannedInstances();
 }

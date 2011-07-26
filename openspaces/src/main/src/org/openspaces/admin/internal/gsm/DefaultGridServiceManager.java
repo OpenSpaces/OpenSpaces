@@ -205,6 +205,25 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             }
         }
     }
+    
+    @Override
+    public boolean decrementPlannedInstances(ProcessingUnit processingUnit) {
+        if (!processingUnit.canDecrementInstance()) {
+            throw new AdminException("Processing unit does not allow to decrement instances on it");
+        }
+        try {
+            return gsm.decrementPlannedIfPending(processingUnit.getName());
+        } catch (SecurityException se) {
+            throw new AdminException("No privileges to decrement a processing unit instance", se);
+        } catch (Exception e) {
+            if (NetworkExceptionHelper.isConnectOrCloseException(e)) {
+                // all is well
+                return true;
+            } else {
+                throw new AdminException("Failed to decrement processing unit instance", e);
+            }
+        }
+    }
 
     public void decrementInstance(ProcessingUnitInstance processingUnitInstance) {
         if (!processingUnitInstance.getProcessingUnit().canDecrementInstance()) {
@@ -235,7 +254,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             if (NetworkExceptionHelper.isConnectOrCloseException(e)) {
                 // all is well
             } else {
-                throw new AdminException("Failed to destroy processing unit instance", e);
+                throw new AdminException("Failed to increment processing unit instance", e);
             }
         }
     }

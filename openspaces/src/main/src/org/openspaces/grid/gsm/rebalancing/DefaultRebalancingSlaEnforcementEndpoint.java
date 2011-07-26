@@ -16,6 +16,7 @@ import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.pu.InternalProcessingUnit;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.pu.DeploymentStatus;
 import org.openspaces.admin.pu.ProcessingUnit;
@@ -203,14 +204,20 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
                      pu.getInstances().length > 1) {
                 // the number of instances is more than the sla.
                 // there has been an sla changed that leaved us with too many instances.
-                // the problem is that our current API does not allow to decrement spare instances
-                // so we need to decrement a deployed instance, just to watch it redeployed again.
-                ProcessingUnitInstance victimInstance = pu.getInstances()[0];
-                logger.info(
-                        "Number of instances is " + pu.getNumberOfInstances() + " "+
-                        "instead of " + sla.getContainers().length +". "+
-                        "removing victim pu instance " + RebalancingUtils.puInstanceToString(victimInstance));
-                removeInstance(victimInstance);
+                int numberOfInstancesBeforeDecrement = pu.getNumberOfInstances();
+                boolean decremented = ((InternalProcessingUnit)pu).decrementPlannedInstances();
+                if (decremented) {
+                    logger.info(
+                            "Number of instances is " + numberOfInstancesBeforeDecrement + " "+
+                            "instead of " + sla.getContainers().length +". "+
+                            "Removed one pu instance of " + pu.getName());
+                } else {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Number of instances is " + numberOfInstancesBeforeDecrement + " "+
+                                "instead of " + sla.getContainers().length +". "+
+                                "Retry to remove one pu instance of " + pu.getName() + " next time.");
+                    }
+                }
             }
         }           
     }

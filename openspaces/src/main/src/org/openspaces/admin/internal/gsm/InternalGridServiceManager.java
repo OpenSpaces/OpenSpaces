@@ -30,6 +30,13 @@ public interface InternalGridServiceManager extends GridServiceManager, Internal
 
     void destroyInstance(ProcessingUnitInstance processingUnitInstance);
 
+    /**
+     * Decrements a planned instance if the number of planned instances is less then the actual instances to maintain.
+     * @return <code>true</code> if a planned instance was successfully decremented; <code>false</code> planned instances hasn't changed.
+     * @since 8.0.4
+     */
+    boolean decrementPlannedInstances(ProcessingUnit processingUnit);
+    
     void decrementInstance(ProcessingUnitInstance processingUnitInstance);
 
     void incrementInstance(ProcessingUnit processingUnit);

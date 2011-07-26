@@ -665,5 +665,9 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         }
         return ((InternalGridServiceManager)getManagingGridServiceManager()).getProcessingUnitScaleStrategyConfig(this);
     }
+    
+    public boolean decrementPlannedInstances() {
+        return ((InternalGridServiceManager) managingGridServiceManager).decrementPlannedInstances(this);
+    }
 
 }
