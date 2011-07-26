@@ -480,6 +480,10 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             throw new OperationInProgressException();
         }
         
+        if (machineShortage < 0) {
+            machineShortage = 0;
+        }
+        
         return machineShortage;
     }
 
