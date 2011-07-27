@@ -17,30 +17,27 @@ public class Launcher {
 
     public static void main(String[] args) throws Exception {
         
-        int port = Integer.getInteger("org.openspaces.launcher.port", 8099); // backward compatibility
-        String name = "launcher";
-        String path = null;
-        String work = "./work";
-        String logger = "org.openspaces.launcher"; 
+        int port = Integer.getInteger("org.openspaces.launcher.port", 8099);
+        String name = System.getProperty("org.openspaces.launcher.name", "launcher");
+        String path = System.getProperty("org.openspaces.launcher.path", null);
+        String work = System.getProperty("org.openspaces.launcher.work", "./work");
+        String logger = System.getProperty("org.openspaces.launcher.logger", "org.openspaces.launcher"); 
         boolean help  = false;
         CommandLineParser.Parameter[] params = CommandLineParser.parse(args);
         for (CommandLineParser.Parameter param : params) {
-            if ("port".equals(param.getName())) {
+            String paramName = param.getName();
+            if ("port".equals(paramName))
                 port = Integer.parseInt(param.getArguments()[0]);
-            }else if ("name".equals(param.getName())){
+            else if ("name".equals(paramName))
                 name = param.getArguments()[0];
-            }else if ("path".equals(param.getName())){
+            else if ("path".equals(paramName))
                 path = param.getArguments()[0];
-            }
-            else if ("work".equals(param.getName())){
+            else if ("work".equals(paramName))
                 work = param.getArguments()[0];
-            }
-            else if ("logger".equals(param.getName())){
+            else if ("logger".equals(paramName))
                 logger = param.getArguments()[0];
-            }
-            else if("help".equals(param.getName()) || "h".equals(param.getName())){
+            else if("help".equals(paramName) || "h".equals(paramName))
                 help = true;
-            }
         }
         if(path==null || help){
             System.out.println("Launcher -path <path> [-work <work>] [-port <port>] [-name <name>] [-logger <logger>]");
