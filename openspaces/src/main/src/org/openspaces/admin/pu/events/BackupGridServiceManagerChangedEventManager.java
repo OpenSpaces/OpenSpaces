@@ -27,10 +27,17 @@ package org.openspaces.admin.pu.events;
 public interface BackupGridServiceManagerChangedEventManager {
 
     /**
-     * Adds an event listener.
+     * Adds an event listener. Note, the add callback will be called for currently discovered backup managers as well.
      */
     void add(BackupGridServiceManagerChangedEventListener eventListener);
 
+    /**
+     * Adds an event listener. Allows to control if the event will be called for existing backup grid
+     * service managers as well.
+     * @since 8.0.4
+     */
+    void add(BackupGridServiceManagerChangedEventListener eventListener, boolean includeExisting);
+    
     /**
      * Removes an event listener.
      */

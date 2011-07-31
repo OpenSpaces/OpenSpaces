@@ -27,10 +27,18 @@ package org.openspaces.admin.pu.events;
 public interface ProcessingUnitStatusChangedEventManager {
 
     /**
-     * Adds an event listener.
+     * Adds an event listener. Note, the add callback will be called for currently discovered
+     * processing units as well.
      */
     void add(ProcessingUnitStatusChangedEventListener eventListener);
 
+    /**
+     * Adds an event listener. Allows to control if the event will be called for existing processing
+     * units as well.
+     * @since 8.0.4
+     */
+    void add(ProcessingUnitStatusChangedEventListener eventListener, boolean includeExisting);
+    
     /**
      * Removes an event listener.
      */

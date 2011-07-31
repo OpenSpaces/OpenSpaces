@@ -1,7 +1,9 @@
 package org.openspaces.admin.internal.pu.events;
 
 import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.pu.DefaultProcessingUnit;
 import org.openspaces.admin.internal.support.GroovyHelper;
+import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEvent;
 import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEventListener;
 
@@ -17,8 +19,16 @@ public class DefaultManagingGridServiceManagerChangedEventManager implements Int
 
     private final List<ManagingGridServiceManagerChangedEventListener> listeners = new CopyOnWriteArrayList<ManagingGridServiceManagerChangedEventListener>();
 
+    private final DefaultProcessingUnit processingUnit;
+
     public DefaultManagingGridServiceManagerChangedEventManager(InternalAdmin admin) {
+        this(admin, null);
+    }
+
+    public DefaultManagingGridServiceManagerChangedEventManager(InternalAdmin admin, DefaultProcessingUnit processingUnit) {
+        this.processingUnit = processingUnit;
         this.admin = admin;
+        
     }
 
     public void processingUnitManagingGridServiceManagerChanged(final ManagingGridServiceManagerChangedEvent event) {
@@ -32,6 +42,25 @@ public class DefaultManagingGridServiceManagerChangedEventManager implements Int
     }
 
     public void add(ManagingGridServiceManagerChangedEventListener eventListener) {
+        add(eventListener, true);
+    }
+    
+    public void add(final ManagingGridServiceManagerChangedEventListener eventListener, boolean includeExisting) {
+        if (includeExisting) {
+            admin.raiseEvent(eventListener, new Runnable() {
+                public void run() {
+                    if (processingUnit == null) {
+                        for (ProcessingUnit pu : admin.getProcessingUnits()) {
+                            eventListener.processingUnitManagingGridServiceManagerChanged(new ManagingGridServiceManagerChangedEvent(
+                                    pu, pu.getManagingGridServiceManager(), null));
+                        }
+                    } else {
+                        eventListener.processingUnitManagingGridServiceManagerChanged(new ManagingGridServiceManagerChangedEvent(
+                                processingUnit, processingUnit.getManagingGridServiceManager(), null));
+                    }
+                }
+            });
+        }
         listeners.add(eventListener);
     }
 

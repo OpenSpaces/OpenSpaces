@@ -27,10 +27,18 @@ package org.openspaces.admin.pu.events;
 public interface ManagingGridServiceManagerChangedEventManager {
 
     /**
-     * Adds an event listener.
+     * Adds an event listener. Note, the add callback will be called for currently discovered
+     * managers as well.
      */
     void add(ManagingGridServiceManagerChangedEventListener eventListener);
 
+    /**
+     * Adds an event listener. Allows to control if the event will be called for existing grid
+     * service managers as well.
+     * @since 8.0.4
+     */
+    void add(ManagingGridServiceManagerChangedEventListener eventListener, boolean includeExisting);
+    
     /**
      * Removes an event listener.
      */
