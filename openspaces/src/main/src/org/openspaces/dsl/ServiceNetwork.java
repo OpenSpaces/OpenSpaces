@@ -1,23 +1,39 @@
 package org.openspaces.dsl;
 
+import java.io.Serializable;
+
 /**
  * Configuration of network elements of a specific service
  * @author itaif
  *
  */
-public class ServiceNetwork {
+public class ServiceNetwork implements Serializable{
 
-    int defaultPort;
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+    
+    private int port;
+    private String protocolDescription;
     
     public ServiceNetwork() {
         
     }
-    
-    public void setDefaultPort(int defaultPort) {
-        this.defaultPort = defaultPort;
+
+    public int getPort() {
+        return port;
     }
-    
-    public int getDefaultPort() {
-        return this.defaultPort;
+
+    public void setPort(int port) {
+        this.port = port;
+    }
+
+    public String getProtocolDescription() {
+        return protocolDescription;
+    }
+
+    public void setProtocolDescription(String protocolDescription) {
+        this.protocolDescription = protocolDescription;
     }
 }

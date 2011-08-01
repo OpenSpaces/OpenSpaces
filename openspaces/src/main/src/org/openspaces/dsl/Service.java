@@ -1,8 +1,5 @@
 package org.openspaces.dsl;
 
-import groovy.lang.GroovyShell;
-
-import java.io.File;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
@@ -10,7 +7,7 @@ import java.util.Map;
 
 import org.openspaces.dsl.ui.UserInterface;
 
-public class Service implements Serializable{
+public class Service implements Serializable {
 
     /**
      * 
@@ -20,7 +17,7 @@ public class Service implements Serializable{
     private String icon;
     private String errorLoggerName;
     private String outputLoggerName;
-    
+
     private String imageTemplate;
     private String defaultScalingUnit;
     private String pidFile;
@@ -28,49 +25,26 @@ public class Service implements Serializable{
 
     private ServiceLifecycle lifecycle;
     private UserInterface userInterface;
-   
+
     private List<PluginDescriptor> plugins;
-    
+
     private ServiceNetwork network;
-    
+
     private int numInstances = 1;
-    private long maxJarSize = 150 * 1024 * 1024; //in bytes
+    private long maxJarSize = 150 * 1024 * 1024; // in bytes
     private boolean keepFile = false;
-    
+
     private Map<String, String> customProperties = new HashMap<String, String>();
     private Map<String, CustomCommand> customCommands = new HashMap<String, CustomCommand>();
-    
+
+    private String type;
+
     public String getName() {
         return name;
     }
 
     public void setName(final String name) {
         this.name = name;
-    }
-
-    // TODO - Remove this
-    public static void main(final String[] args) throws Exception {
-
-        /*
-         * final BufferedReader reader = new BufferedReader(new FileReader("test-service.groovy"));
-         * final StringBuilder sb = new StringBuilder(); while (true) { final String line =
-         * reader.readLine(); if (line == null) { break; } else { sb.append(line).append("\n"); } }
-         * reader.close();
-         * 
-         * final String exp = sb.toString();
-         */
-
-        // ((GroovyObject) new
-        // GroovyClassLoader().parseClass(exp).newInstance()).run();
-        // GroovyEngine engine = new GroovyEngine();
-
-        final GroovyShell gs = new GroovyShell();
-        final Object obj = gs.evaluate(new File("test-service.groovy"));
-        // final Object obj = Eval.me(exp);
-        final Service service = (Service) obj;
-
-        System.out.println(service);
-
     }
 
     @Override
@@ -97,11 +71,11 @@ public class Service implements Serializable{
     public ServiceNetwork getNetwork() {
         return this.network;
     }
-    
+
     public void setNetwork(final ServiceNetwork network) {
         this.network = network;
     }
-    
+
     public UserInterface getUserInterface() {
         return userInterface;
     }
@@ -134,7 +108,7 @@ public class Service implements Serializable{
         this.supportsScaling = supportsScaling;
     }
 
-    public void setPlugins(List<PluginDescriptor> plugins) {
+    public void setPlugins(final List<PluginDescriptor> plugins) {
         this.plugins = plugins;
     }
 
@@ -146,7 +120,7 @@ public class Service implements Serializable{
         return numInstances;
     }
 
-    public void setNumInstances(int numInstances) {
+    public void setNumInstances(final int numInstances) {
         this.numInstances = numInstances;
     }
 
@@ -154,7 +128,7 @@ public class Service implements Serializable{
         return maxJarSize;
     }
 
-    public void setMaxJarSize(long maxJarSize) {
+    public void setMaxJarSize(final long maxJarSize) {
         this.maxJarSize = maxJarSize;
     }
 
@@ -162,7 +136,7 @@ public class Service implements Serializable{
         return keepFile;
     }
 
-    public void setKeepFile(boolean keepFile) {
+    public void setKeepFile(final boolean keepFile) {
         this.keepFile = keepFile;
     }
 
@@ -170,7 +144,7 @@ public class Service implements Serializable{
         return customProperties;
     }
 
-    public void setCustomProperties(Map<String, String> customProperties) {
+    public void setCustomProperties(final Map<String, String> customProperties) {
         this.customProperties = customProperties;
     }
 
@@ -178,7 +152,7 @@ public class Service implements Serializable{
         return pidFile;
     }
 
-    public void setPidFile(String pidFile) {
+    public void setPidFile(final String pidFile) {
         this.pidFile = pidFile;
     }
 
@@ -186,7 +160,7 @@ public class Service implements Serializable{
         return customCommands;
     }
 
-    public void setCustomCommands(Map<String, CustomCommand> customCommands) {
+    public void setCustomCommands(final Map<String, CustomCommand> customCommands) {
         this.customCommands = customCommands;
     }
 
@@ -198,12 +172,20 @@ public class Service implements Serializable{
         return outputLoggerName;
     }
 
-    public void setOutputLoggerName(String outputLoggerName) {
+    public void setOutputLoggerName(final String outputLoggerName) {
         this.outputLoggerName = outputLoggerName;
     }
 
-    public void setErrorLoggerName(String errorLoggerName) {
+    public void setErrorLoggerName(final String errorLoggerName) {
         this.errorLoggerName = errorLoggerName;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(final String type) {
+        this.type = type;
     }
 
 }
