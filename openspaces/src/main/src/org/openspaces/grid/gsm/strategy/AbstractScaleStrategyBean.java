@@ -271,7 +271,7 @@ public abstract class AbstractScaleStrategyBean implements
             	futureAgents = null;
                 if (exception != null) {
                     logger.error("Failed retrieving list of machines from " + machineProvisioning.getClass() + ". " +
-                                 "Retrying in " + GET_DISCOVERED_MACHINES_RETRY_SECONDS + " seconds.");
+                                 "Retrying in " + GET_DISCOVERED_MACHINES_RETRY_SECONDS + " seconds.",exception);
                     admin.scheduleOneTimeWithDelayNonBlockingStateChange(new Runnable() {
 
                         public void run() {
