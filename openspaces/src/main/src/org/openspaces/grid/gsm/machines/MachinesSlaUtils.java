@@ -138,6 +138,23 @@ public class MachinesSlaUtils {
         }
         return agents;
     }
+    
+    /**
+     * Converts the specified agent UUIDs into GridServiceAgent objects unless these agents are not discovered.
+     */
+    public static Collection<GridServiceAgent> convertAgentUidsToAgentsIfDiscovered(
+            Iterable<String> agentUids, 
+            Admin admin) {
+        final Collection<GridServiceAgent> agents = new ArrayList<GridServiceAgent>();
+        final GridServiceAgents gridServiceAgents = admin.getGridServiceAgents();
+        for (final String agentUid : agentUids) {
+            final GridServiceAgent agent = gridServiceAgents.getAgentByUID(agentUid);
+            if (agent != null) {
+                agents.add(agent);
+            }
+        }
+        return agents;
+    }
 
     /**
      * filters grid service agents by zone, 
