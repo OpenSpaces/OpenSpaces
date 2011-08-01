@@ -29,7 +29,7 @@ public class ServiceContext {
     }    
     
     public int getInstanceId() {
-        return clusterInfo.getRunningNumber();
+        return clusterInfo.getInstanceId();
     }
     
     public org.openspaces.dsl.context.Service getService() {
