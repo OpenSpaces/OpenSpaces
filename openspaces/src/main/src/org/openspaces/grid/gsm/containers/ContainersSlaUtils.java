@@ -197,7 +197,7 @@ public class ContainersSlaUtils {
         String prefix = "-Xmx";
         String xmxArgument = getCommandLineArgumentRemovePrefix(container,prefix);
         if (xmxArgument == null) {
-            throw new IllegalStateException("Container " + gscToString(container) + " does not have an -Xmx commandline argument.");
+            throw new IllegalStateException("Container " + gscToString(container) + " does not have an -Xmx commandline argument. If it was started manually please close it.");
         }
         return MemoryUnit.MEGABYTES.convert(xmxArgument);
     }
