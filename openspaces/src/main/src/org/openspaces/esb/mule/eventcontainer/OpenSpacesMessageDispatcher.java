@@ -111,7 +111,7 @@ public class OpenSpacesMessageDispatcher extends AbstractMessageDispatcher {
         } else {
             super.dispose();
         }
-    };
+    }
     
     protected void doDispose() {
     }

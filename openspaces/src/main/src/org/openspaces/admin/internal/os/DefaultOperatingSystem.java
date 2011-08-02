@@ -45,7 +45,7 @@ public class DefaultOperatingSystem implements InternalOperatingSystem {
     private OperatingSystemStatistics lastStatistics;
 
     private Future scheduledStatisticsMonitor;
-    private int scheduledStatisticsRefCount = 0;;
+    private int scheduledStatisticsRefCount = 0;
 
     private volatile long timeDelta = Integer.MIN_VALUE;
 

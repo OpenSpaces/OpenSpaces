@@ -121,7 +121,7 @@ public class OpenSpacesQueueMessageDispatcher extends AbstractMessageDispatcher 
             }
         };
         MuleEvent muleEvent = (MuleEvent) tt.execute(cb); 
-        retMessage = (MuleMessage) muleEvent.getMessage();
+        retMessage = muleEvent.getMessage();
 
         if (logger.isDebugEnabled()) {
             logger.debug("sent event on endpointUri: " + event.getEndpoint().getEndpointURI());

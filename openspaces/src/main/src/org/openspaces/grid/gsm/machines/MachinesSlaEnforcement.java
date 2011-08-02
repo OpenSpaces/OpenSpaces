@@ -31,7 +31,7 @@ public class MachinesSlaEnforcement implements
     public MachinesSlaEnforcement(Admin admin) {
 
         this.endpoints = new HashMap<ProcessingUnit, MachinesSlaEnforcementEndpoint>();
-        this.state = new MachinesSlaEnforcementState();;
+        this.state = new MachinesSlaEnforcementState();
         this.admin = admin;
     }
 

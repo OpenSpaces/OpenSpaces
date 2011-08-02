@@ -233,9 +233,9 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
         Integer batchTime = props.get("batch-time") == null? null : Integer.parseInt("batch-time");
         boolean autoRenew = Boolean.parseBoolean(props.get("auto-renew"));
         boolean notifyWrite = Boolean.parseBoolean(props.get("notify-write"));
-        boolean notifyUpdate = Boolean.parseBoolean(props.get("notify-update"));;
-        boolean notifyTake = Boolean.parseBoolean(props.get("notify-take"));;
-        boolean notifyLease = Boolean.parseBoolean(props.get("notify-lease-expire"));;
+        boolean notifyUpdate = Boolean.parseBoolean(props.get("notify-update"));
+        boolean notifyTake = Boolean.parseBoolean(props.get("notify-take"));
+        boolean notifyLease = Boolean.parseBoolean(props.get("notify-lease-expire"));
         Boolean triggerNotifyTemplate = props.get("trigger-notify-template") == null? null : Boolean.parseBoolean(props.get("trigger-notify-template"));
         Boolean replicateNotifyTemplate = props.get("replicate-notify-template") == null? null : Boolean.parseBoolean(props.get("replicate-notify-template"));
         boolean performTakeOnNotify = Boolean.parseBoolean(props.get("perform-take-on-notify"));

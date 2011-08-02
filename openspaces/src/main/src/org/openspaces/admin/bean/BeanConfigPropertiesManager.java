@@ -114,7 +114,7 @@ public interface BeanConfigPropertiesManager {
      * @throws BeanConfigNotFoundException
      *             bean configuration cannot be found. Put the configuration first.
      */
-	Map<String,String> getBeanConfig(String beanClassName) throws BeanConfigNotFoundException;;
+	Map<String,String> getBeanConfig(String beanClassName) throws BeanConfigNotFoundException;
 
     /**
      * Lists the class names of configured beans.

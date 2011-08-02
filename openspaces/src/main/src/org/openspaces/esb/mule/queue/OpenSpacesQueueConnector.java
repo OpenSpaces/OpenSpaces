@@ -199,7 +199,7 @@ public class OpenSpacesQueueConnector extends AbstractConnector implements Appli
 
         MessageReceiver receiver;
         // If we have an exact match, use it
-        receiver = (MessageReceiver) receivers.get(endpointUri.getAddress());
+        receiver = receivers.get(endpointUri.getAddress());
         if (receiver != null) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Found exact receiver match on endpointUri: " + endpointUri);

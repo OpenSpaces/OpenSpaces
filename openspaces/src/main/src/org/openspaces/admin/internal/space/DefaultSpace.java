@@ -602,7 +602,7 @@ public class DefaultSpace implements InternalSpace {
                                 }
                             }else {
                                 if (targetSpaceInstance != null && targetSpaceInstance.getSpaceUrl().getSchema().equals("mirror")) {
-                                    replicationTargetType = ReplicationTargetType.MIRROR_SERVICE;;
+                                    replicationTargetType = ReplicationTargetType.MIRROR_SERVICE;
                                 }
                             }
                         }
