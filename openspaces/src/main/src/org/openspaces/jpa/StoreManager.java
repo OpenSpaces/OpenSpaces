@@ -89,7 +89,7 @@ public class StoreManager extends AbstractStoreManager {
     
     @Override
     protected Collection<String> getUnsupportedOptions() {
-        Collection<String> unsupportedOptions = (Collection<String>) super.getUnsupportedOptions();
+        Collection<String> unsupportedOptions = super.getUnsupportedOptions();
         unsupportedOptions.remove(OpenJPAConfiguration.OPTION_ID_DATASTORE);        
         unsupportedOptions.remove(OpenJPAConfiguration.OPTION_OPTIMISTIC);        
         unsupportedOptions.remove(OpenJPAConfiguration.OPTION_INC_FLUSH);        
@@ -404,7 +404,7 @@ public class StoreManager extends AbstractStoreManager {
      */
     @Override
     public boolean load(OpenJPAStateManager sm, BitSet fields, FetchConfiguration fetch, int lockLevel, Object context) {
-        final ClassMetaData cm = (ClassMetaData) sm.getMetaData();
+        final ClassMetaData cm = sm.getMetaData();
         final StateManager stateManager = (StateManager) sm;
         final SpaceTypeInfo typeInfo = SpaceTypeInfoRepository.getTypeInfo(cm.getDescribedType());
         final StateManager gsm = (StateManager) sm;

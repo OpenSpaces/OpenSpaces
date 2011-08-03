@@ -59,11 +59,13 @@ public class DbcpBasicDataSource implements DataSource, InitializingBean, Dispos
         this.space = gigaSpace.getSpace();
     }
 
+    @Override
     public void afterPropertiesSet() throws Exception {
         Assert.notNull(space, "space property is required");
         createDataSource();
     }
 
+    @Override
     public void destroy() throws Exception {
         close();
     }
@@ -378,11 +380,10 @@ public class DbcpBasicDataSource implements DataSource, InitializingBean, Dispos
      * allocated from this data source.
      */
     public synchronized int getNumActive() {
-        if (connectionPool != null) {
-            return connectionPool.getNumActive();
-        } else {
+        if (connectionPool == null) 
             return 0;
-        }
+
+        return connectionPool.getNumActive();
     }
 
 
@@ -391,11 +392,10 @@ public class DbcpBasicDataSource implements DataSource, InitializingBean, Dispos
      * to be allocated from this data source.
      */
     public synchronized int getNumIdle() {
-        if (connectionPool != null) {
-            return connectionPool.getNumIdle();
-        } else {
+        if (connectionPool == null) 
             return 0;
-        }
+
+        return connectionPool.getNumIdle();
     }
 
     /**
@@ -493,6 +493,7 @@ public class DbcpBasicDataSource implements DataSource, InitializingBean, Dispos
      *
      * @throws SQLException if a database access error occurs
      */
+    @Override
     public Connection getConnection() throws SQLException {
         return dataSource.getConnection();
     }
@@ -506,6 +507,7 @@ public class DbcpBasicDataSource implements DataSource, InitializingBean, Dispos
      * @param password The database user's password
      * @throws SQLException if a database access error occurs
      */
+    @Override
     public Connection getConnection(String username, String password) throws SQLException {
         return dataSource.getConnection(username, password);
     }
@@ -516,6 +518,7 @@ public class DbcpBasicDataSource implements DataSource, InitializingBean, Dispos
      *
      * @throws SQLException if a database access error occurs
      */
+    @Override
     public int getLoginTimeout() throws SQLException {
         return dataSource.getLoginTimeout();
     }
@@ -526,6 +529,7 @@ public class DbcpBasicDataSource implements DataSource, InitializingBean, Dispos
      *
      * @throws SQLException if a database access error occurs
      */
+    @Override
     public PrintWriter getLogWriter() throws SQLException {
         return dataSource.getLogWriter();
     }
@@ -537,6 +541,7 @@ public class DbcpBasicDataSource implements DataSource, InitializingBean, Dispos
      * @param loginTimeout The new login timeout, or zero for no timeout
      * @throws SQLException if a database access error occurs
      */
+    @Override
     public void setLoginTimeout(int loginTimeout) throws SQLException {
         dataSource.setLoginTimeout(loginTimeout);
     }
@@ -548,6 +553,7 @@ public class DbcpBasicDataSource implements DataSource, InitializingBean, Dispos
      * @param logWriter The new log writer
      * @throws SQLException if a database access error occurs
      */
+    @Override
     public void setLogWriter(PrintWriter logWriter) throws SQLException {
         dataSource.setLogWriter(logWriter);
         this.logWriter = logWriter;
@@ -749,9 +755,8 @@ public class DbcpBasicDataSource implements DataSource, InitializingBean, Dispos
         DataSourceConnectionFactory dataSourceConnectionFactory = new DataSourceConnectionFactory(new SpaceDriverManagerDataSource(space));
 
         // Set up the poolable connection factory we will use
-        PoolableConnectionFactory connectionFactory = null;
         try {
-            connectionFactory =
+            PoolableConnectionFactory connectionFactory =
                     new PoolableConnectionFactory(dataSourceConnectionFactory,
                             connectionPool,
                             statementPoolFactory,
@@ -761,9 +766,6 @@ public class DbcpBasicDataSource implements DataSource, InitializingBean, Dispos
                             defaultTransactionIsolation,
                             defaultCatalog,
                             abandonedConfig);
-            if (connectionFactory == null) {
-                throw new SQLException("Cannot create PoolableConnectionFactory");
-            }
             validateConnectionFactory(connectionFactory);
         } catch (RuntimeException e) {
             throw e;
