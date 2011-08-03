@@ -16,9 +16,12 @@
 
 package org.openspaces.pu.container.servicegrid;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -32,7 +35,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import net.jini.core.lookup.ServiceID;
 
@@ -75,7 +82,12 @@ import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainer
 import org.openspaces.pu.container.support.BeanLevelPropertiesUtils;
 import org.openspaces.pu.container.support.ClusterInfoParser;
 import org.openspaces.pu.container.support.WebsterFile;
-import org.openspaces.pu.service.*;
+import org.openspaces.pu.service.InvocableService;
+import org.openspaces.pu.service.InvocableServiceLookupFailureException;
+import org.openspaces.pu.service.ServiceDetails;
+import org.openspaces.pu.service.ServiceDetailsProvider;
+import org.openspaces.pu.service.ServiceMonitors;
+import org.openspaces.pu.service.ServiceMonitorsProvider;
 import org.openspaces.pu.sla.monitor.ApplicationContextMonitor;
 import org.openspaces.pu.sla.monitor.Monitor;
 import org.springframework.context.ApplicationContext;
@@ -151,6 +163,8 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
     private volatile boolean stopping = false;
 
+    private static final String LINE_SEPARATOR = System.getProperty("line.separator", "\n");
+    
     public PUServiceBeanImpl() {
         super();
     }
@@ -590,6 +604,17 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         // only load the spring xml file if it is not a web application (if it is a web application, we will load it with the Bootstrap servlet context loader)
         if (webXml == null && factory instanceof ApplicationContextProcessingUnitContainerProvider) {
             if (StringUtils.hasText(springXml)) {
+                // GS-9350: if this is a processing unit with gateway declarations, always try to
+                // re-load the pu.xml to support "hot-deploy" (refresh)
+                if (springXml.contains("os-gateway:")) {
+                    String deployPath = beanLevelProperties.getContextProperties().getProperty("deployPath");
+                    if (StringUtils.hasText(deployPath)) {
+                        String newSpringXml = readFile(deployPath+"/META-INF/spring/pu.xml");
+                        if (StringUtils.hasText(newSpringXml)) {
+                            springXml = newSpringXml; //override with new one
+                        }
+                    }
+                }
                 Resource resource = new ByteArrayResource(springXml.getBytes());
                 ((ApplicationContextProcessingUnitContainerProvider) factory).addConfigLocation(resource);
             }
@@ -640,6 +665,24 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                 executorService.scheduleAtFixedRate(watchTask, watchTask.getMonitor().getPeriod(), watchTask.getMonitor().getPeriod(), TimeUnit.MILLISECONDS);
             }
         }
+    }
+    
+    private static String readFile(String filePath) throws IOException {
+        File file = new File(filePath);
+        if (!file.exists()) {
+            return null;
+        }
+        FileInputStream fis = new FileInputStream(file);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
+
+        StringBuffer buffer = new StringBuffer();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            buffer.append(line).append(LINE_SEPARATOR);
+        }
+        reader.close();
+        fis.close();
+        return buffer.toString();
     }
 
 
