@@ -14,6 +14,7 @@ import org.openspaces.dsl.CustomCommand;
 import org.openspaces.dsl.PluginDescriptor;
 import org.openspaces.dsl.Service;
 import org.openspaces.dsl.ServiceLifecycle;
+import org.openspaces.dsl.ServiceNetwork;
 import org.openspaces.dsl.ui.BalanceGauge;
 import org.openspaces.dsl.ui.BarLineChart;
 import org.openspaces.dsl.ui.MetricGroup;
@@ -129,6 +130,8 @@ public abstract class BaseServiceScript extends Script {
             return new BarLineChart();
         } else if (name.equals("customCommand")) {
             return new CustomCommand();
+        } else if (name.equals("network")) {
+            return new ServiceNetwork();
         }
 
         return null;
@@ -150,8 +153,8 @@ public abstract class BaseServiceScript extends Script {
         this.activeMethods = prevMethods;
         return res;
     }
-    
-    public void println(Object obj) {        
+
+    public void println(Object obj) {
         logger.info(obj.toString());
     }
 
