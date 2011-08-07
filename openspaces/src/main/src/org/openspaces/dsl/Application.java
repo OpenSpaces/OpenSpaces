@@ -32,6 +32,12 @@ public class Application {
     public void setServices(List<Service> services) {
         this.services = services;
     }
+
+    @Override
+    public String toString() {
+        return "Application [name=" + name + ", serviceNames=" + serviceNames + "]";
+    }
+
     
     
 }
