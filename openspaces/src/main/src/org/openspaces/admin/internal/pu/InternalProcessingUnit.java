@@ -39,6 +39,12 @@ public interface InternalProcessingUnit extends ProcessingUnit, InternalProcessi
     String getApplicationName();
 
     /**
+     * Retrieves a context property containing the order of dependencies within an application.
+     * @return The property value, in a CSV format. 
+     */
+    String getApplicationServicesNames();
+    
+    /**
      * Returns an event manager allowing to register {@link org.openspaces.admin.pu.events.ScaleStrategyConfigEventListener}s.
      *
      * @since 8.0.3

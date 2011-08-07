@@ -121,6 +121,8 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
 
     private static final String APPLICATION_NAME_CONTEXT_PROPERTY = "com.gs.application";
 
+    private static final String APPLICATION_SERVICES_NAMES_CONTEXT_PROPERTY = "com.gs.application.services";
+
     private volatile InternalApplication application;
     
     public DefaultProcessingUnit(InternalAdmin admin, InternalProcessingUnits processingUnits, PUDetails details) {
@@ -668,6 +670,11 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     
     public boolean decrementPlannedInstances() {
         return ((InternalGridServiceManager) managingGridServiceManager).decrementPlannedInstances(this);
+    }
+
+    // TEMPORARY SOLUTION - services dependencies (application map connectors) //
+    public String getApplicationServicesNames() {
+        return getBeanLevelProperties().getContextProperties().getProperty(APPLICATION_SERVICES_NAMES_CONTEXT_PROPERTY);
     }
 
 }
