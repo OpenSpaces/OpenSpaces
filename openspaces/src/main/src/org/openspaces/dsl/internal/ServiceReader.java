@@ -31,10 +31,54 @@ import org.openspaces.dsl.context.ServiceContext;
 public class ServiceReader {
 
     /*****
-     * Private Constructor to prevent instantitaion.
+     * Private Constructor to prevent instantiation.
      * 
      */
     private ServiceReader() {
+
+    }
+
+    public static File getServiceFileFromDir(final File serviceDir) {
+        return getServiceFileFromDir(serviceDir, null);
+    }
+    public static File getServiceFileFromDir(final File serviceDir, final String serviceFileName) {
+
+        final File[] files = serviceDir.listFiles(new FilenameFilter() {
+
+            @Override
+            public boolean accept(final File dir, final String name) {
+                if (serviceFileName != null) {
+                    return name.equals(serviceFileName);
+                } else {
+                    return name.endsWith("-service.groovy");
+                }
+            }
+        });
+
+        if (serviceFileName == null) {
+            if (files.length > 1) {
+                throw new IllegalArgumentException("Found multiple service configuration files: "
+                            + Arrays.toString(files) + ". " +
+                                    "Only one may be supplied in the ext folder of the PU Jar file.");
+            }
+
+            if (files.length == 0) {
+                return null;
+            }
+            return files[0];
+        } else {
+            if (files.length > 1) {
+                // probably not possible, but better safe then sorry
+                throw new IllegalArgumentException("Found multiple service configuration files: "
+                            + Arrays.toString(files) + ", " +
+                                    "was expecting only one file - " + serviceFileName + ".");
+            }
+
+            if (files.length == 0) {
+                return null;
+            }
+            return files[0];
+        }
 
     }
 
@@ -51,6 +95,7 @@ public class ServiceReader {
     public static Service getServiceFromFile(final File dir) {
         final File[] files = dir.listFiles(new FilenameFilter() {
 
+            @Override
             public boolean accept(final File dir, final String name) {
                 return name.endsWith("-service.groovy");
             }
@@ -141,12 +186,12 @@ public class ServiceReader {
 
     // TODO - Support Zip files in application
     public static Application getApplicationFromFile(final File inputFile) throws IOException {
-    
+
         File actualApplicationDslFile = inputFile;
 
         if (inputFile.isFile()) {
             if (inputFile.getName().endsWith(".zip") || inputFile.getName().endsWith(".jar")) {
-                    actualApplicationDslFile = ServiceReader.unzipApplicationFile(inputFile);
+                actualApplicationDslFile = ServiceReader.unzipApplicationFile(inputFile);
             }
         }
         final File dslFile = ServiceReader.getApplicationDslFile(actualApplicationDslFile);
@@ -253,6 +298,7 @@ public class ServiceReader {
 
     protected static File getApplicationDSLFileFromDirectory(final File dir) {
         final File[] files = dir.listFiles(new FilenameFilter() {
+            @Override
             public boolean accept(final File dir, final String name) {
                 return (name.endsWith("-application.groovy"));
             }
