@@ -198,10 +198,12 @@ public class DefaultVirtualMachineStatistics implements VirtualMachineStatistics
         return stats.getGcCollectionTime();
     }
 
+    @Override
     public double getGcCollectionPerc() {
        return gcCollectionPerc;
     }
 
+    @Override
     public double getCpuPerc() {
         return cpuPerc;
     }
