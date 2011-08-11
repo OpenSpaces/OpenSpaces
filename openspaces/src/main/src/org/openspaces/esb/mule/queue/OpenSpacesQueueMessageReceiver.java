@@ -17,8 +17,11 @@
 package org.openspaces.esb.mule.queue;
 
 
-import com.j_spaces.core.exception.SpaceUnavailableException;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.mule.DefaultMuleMessage;
+import org.mule.api.MuleEvent;
 import org.mule.api.MuleException;
 import org.mule.api.MuleMessage;
 import org.mule.api.construct.FlowConstruct;
@@ -31,12 +34,13 @@ import org.mule.transport.TransactedPollingMessageReceiver;
 import org.openspaces.core.SpaceClosedException;
 import org.openspaces.core.SpaceInterruptedException;
 
-import java.util.LinkedList;
-import java.util.List;
+import com.gigaspaces.query.ISpaceQuery;
+import com.j_spaces.core.client.ReadModifiers;
+import com.j_spaces.core.exception.SpaceUnavailableException;
 
 /**
  * Receives (takes) a message from an internal queue. The queue is a virtualized queue represented
- * by the {@link org.openspaces.esb.mule.queue.InternalQueueEntry} with its endpoint address
+ * by the {@link org.openspaces.esb.mule.queue.OpenSpacesQueueObject} with its endpoint address
  * set (and not the message).
  *
  * @author kimchy
@@ -46,7 +50,7 @@ public class OpenSpacesQueueMessageReceiver extends TransactedPollingMessageRece
     private OpenSpacesQueueConnector connector;
 
 
-    private Object template;
+    private ISpaceQuery<OpenSpacesQueueObject> template;
     
     public OpenSpacesQueueMessageReceiver(Connector connector, FlowConstruct flowConstruct, InboundEndpoint endpoint) throws CreateException {
         super(connector, flowConstruct, endpoint);
@@ -66,14 +70,9 @@ public class OpenSpacesQueueMessageReceiver extends TransactedPollingMessageRece
     }
 
     protected void doConnect() throws Exception {
-        InternalQueueEntry internalTemplate = new InternalQueueEntry();
+        OpenSpacesQueueObject internalTemplate = new OpenSpacesQueueObject();
         internalTemplate.setEndpointURI(endpoint.getEndpointURI().getAddress());
-        internalTemplate.setFifo(connector.isFifo());
-        if (connector.isPersistent()) {
-            internalTemplate.makePersistent();
-        } else {
-            internalTemplate.makeTransient();
-        }
+        internalTemplate.setPersistent(connector.isPersistent()) ;
         template = connector.getGigaSpaceObj().snapshot(internalTemplate);
     }
 
@@ -107,16 +106,19 @@ public class OpenSpacesQueueMessageReceiver extends TransactedPollingMessageRece
             // also make sure batchSize is always at least 1
             int batchSize = Math.max(1, ((maxThreads / 2) - 1));
             
-            InternalQueueEntry entry = (InternalQueueEntry) connector.getGigaSpaceObj().take(template, connector.getTimeout());
+            int takeModifier =  connector.getGigaSpaceObj().getSpace().getReadModifiers();
+            if(connector.isFifo())
+                takeModifier |= ReadModifiers.FIFO;
+            
+            OpenSpacesQueueObject entry =  connector.getGigaSpaceObj().take(template, connector.getTimeout(),takeModifier);
 
             if (entry != null) {
-                // keep first dequeued event
-                messages.add(entry.getMessage());
+                appendMessage(messages, entry);
                 // batch more messages if needed
-                Object[] entries = connector.getGigaSpaceObj().takeMultiple(template, batchSize);
+                OpenSpacesQueueObject[] entries = connector.getGigaSpaceObj().takeMultiple(template, batchSize,takeModifier);
                 if (entries != null) {
-                    for (Object entry1 : entries) {
-                        messages.add(((InternalQueueEntry) entry1).getMessage());
+                    for (OpenSpacesQueueObject entry1 : entries) {
+                        appendMessage(messages, entry1);
                     }
                 }
             }
@@ -132,13 +134,38 @@ public class OpenSpacesQueueMessageReceiver extends TransactedPollingMessageRece
         return messages;
     }
 
+    private void appendMessage(List<MuleMessage> messages, OpenSpacesQueueObject entry) throws Exception{
+        MuleMessage inboundMessage = createMuleMessage(entry);
+        // keep first dequeued event
+        messages.add(inboundMessage);
+    }
     protected void processMessage(Object msg) throws Exception {
         // getMessages() returns UMOEvents
         MuleMessage message = (MuleMessage) msg;
 
         // Rewrite the message to treat it as a new message
         MuleMessage newMessage = new DefaultMuleMessage(message, this.connector.getMuleContext());
-        routeMessage(newMessage);
+        MuleEvent response = routeMessage(newMessage);
+        
+        //write response 
+        //should send back only if remote synch is set or no outbound endpoints
+        if (endpoint.getExchangePattern().hasResponse() && response != null) {
+
+            MuleMessage responseMessage = response.getMessage();
+
+            String correlationId = message.getCorrelationId();
+
+            OpenSpacesQueueObject responseEntry = new OpenSpacesQueueObject();
+            responseEntry.setCorrelationID(correlationId);
+            responseEntry.setEndpointURI(getEndpointURI().getAddress() + OpenSpacesQueueMessageDispatcher.DEFAULT_RESPONSE_QUEUE);
+            responseEntry.setPayload(responseMessage.getPayload());
+            
+            if (logger.isDebugEnabled()) {
+                logger.debug(getEndpointURI() + " sending response to client  " + responseEntry);
+            }
+
+            connector.getGigaSpaceObj().write(responseEntry);
+        }
     }
 
     /*

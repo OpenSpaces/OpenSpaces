@@ -16,6 +16,8 @@
 
 package org.openspaces.esb.mule.queue;
 
+import java.util.Iterator;
+
 import org.mule.api.MuleContext;
 import org.mule.api.MuleException;
 import org.mule.api.endpoint.EndpointException;
@@ -31,8 +33,6 @@ import org.openspaces.core.GigaSpace;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-
-import java.util.Iterator;
 
 /**
  * An OS queue connector. Holding the actual {@link org.openspaces.core.GigaSpace} instance that will
@@ -228,5 +228,11 @@ public class OpenSpacesQueueConnector extends AbstractConnector implements Appli
             logger.debug("No receiver found for endpointUri: " + endpointUri);
         }
         return null;
+    }
+    
+    @Override
+    public boolean isResponseEnabled()
+    {
+        return true;
     }
 }

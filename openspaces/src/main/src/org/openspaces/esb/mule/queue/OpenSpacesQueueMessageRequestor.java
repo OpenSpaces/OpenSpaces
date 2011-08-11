@@ -16,7 +16,6 @@
 
 package org.openspaces.esb.mule.queue;
 
-import com.j_spaces.core.exception.SpaceUnavailableException;
 import org.mule.api.MuleMessage;
 import org.mule.api.ThreadSafeAccess;
 import org.mule.api.endpoint.InboundEndpoint;
@@ -24,9 +23,11 @@ import org.mule.transport.AbstractMessageRequester;
 import org.openspaces.core.SpaceClosedException;
 import org.openspaces.core.SpaceInterruptedException;
 
+import com.j_spaces.core.client.ReadModifiers;
+
 /**
  * Requests (takes) a message from an internal queue. The queue is a virtualized queue represented
- * by the {@link org.openspaces.esb.mule.queue.InternalQueueEntry} with its endpoint address
+ * by the {@link org.openspaces.esb.mule.queue.OpenSpacesQueueObject} with its endpoint address
  * set (and not the message).
  *
  * @author kimchy
@@ -60,17 +61,19 @@ public class OpenSpacesQueueMessageRequestor extends AbstractMessageRequester {
                 logger.debug("Waiting for a message on " + endpoint.getEndpointURI().getAddress());
             }
             try {
-                InternalQueueEntry entry = (InternalQueueEntry) connector.getGigaSpaceObj().take(template, timeout);
+                int takeModifier =  connector.getGigaSpaceObj().getSpace().getReadModifiers();
+                if(connector.isFifo())
+                    takeModifier |= ReadModifiers.FIFO;
+                
+                OpenSpacesQueueObject entry = (OpenSpacesQueueObject) connector.getGigaSpaceObj().take(template, timeout,takeModifier);
                 if (entry != null) {
-                    message = entry.getMessage();
+                    message = createMuleMessage(entry);
                 }
             } catch (SpaceInterruptedException e) {
                 // do nothing, we are being stopped
             } catch (SpaceClosedException e) {
                 // do nothing, we are being stopped
-            } catch (SpaceUnavailableException e) {
-                // do nothing, we are being stopped
-            }
+            } 
             if (message != null) {
                 //The message will contain old thread information, we need to reset it
                 if(message instanceof ThreadSafeAccess)
@@ -98,14 +101,10 @@ public class OpenSpacesQueueMessageRequestor extends AbstractMessageRequester {
     }
 
     protected void doConnect() throws Exception {
-        InternalQueueEntry internalTemplate = new InternalQueueEntry();
+        OpenSpacesQueueObject internalTemplate = new OpenSpacesQueueObject();
         internalTemplate.setEndpointURI(endpoint.getEndpointURI().getAddress());
-        internalTemplate.setFifo(connector.isFifo());
-        if (connector.isPersistent()) {
-            internalTemplate.makePersistent();
-        } else {
-            internalTemplate.makeTransient();
-        }
+        internalTemplate.setPersistent(connector.isPersistent()) ;
+        
         template = connector.getGigaSpaceObj().snapshot(internalTemplate);
     }
 

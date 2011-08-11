@@ -15,6 +15,7 @@ public class TxSimpleQueueTests extends AbstractMuleTests {
         muleClient.dispatch("os-queue://test1", "testme", null);
 
         MuleMessage message = muleClient.request("os-queue://test3", 5000);
+        System.out.println(gigaSpace.read(null));
         assertEquals("testmeAppender1Appender2", message.getPayload());
     }
 

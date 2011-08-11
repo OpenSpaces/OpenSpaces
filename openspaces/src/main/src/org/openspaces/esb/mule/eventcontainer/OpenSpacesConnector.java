@@ -79,4 +79,10 @@ public class OpenSpacesConnector extends AbstractConnector implements Applicatio
     public ApplicationContext getApplicationContext() {
         return applicationContext;
     }
+
+    @Override
+    public boolean isResponseEnabled() {
+        return true;
+    }
+    
 }

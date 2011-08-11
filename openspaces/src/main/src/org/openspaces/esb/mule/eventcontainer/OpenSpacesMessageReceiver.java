@@ -17,6 +17,7 @@
 package org.openspaces.esb.mule.eventcontainer;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import org.mule.api.MuleEvent;
@@ -163,27 +164,55 @@ public class OpenSpacesMessageReceiver extends AbstractMessageReceiver implement
 
     protected void doReceiveEvent(Object data, GigaSpace gigaSpace, TransactionStatus txStatus, Object source) throws Exception{
         if (workManager) {
-            getWorkManager().scheduleWork(new GigaSpaceWorker(data, this));
+            getWorkManager().scheduleWork(new GigaSpaceWorker(data, this,gigaSpace));
         } else {
             MuleMessageFactory factory = connector.getMuleMessageFactory();
             MuleMessage message = factory.create(data, endpoint.getEncoding());
             MuleEvent muleEvent = routeMessage(message);
             
-            // nothing to do with the result
-            //MuleMessage routedMessage = muleEvent.getMessage(); 
+            //write response 
+            //should send back only if remote synch is set or no outbound endpoints
+            if (endpoint.getExchangePattern().hasResponse()) {
+                MuleMessage responseMessage = muleEvent.getMessage();
+                Object payload = responseMessage.getPayload();
+
+                if (logger.isDebugEnabled()) {
+                    logger.debug(getEndpointURI() + " sending response to client  " + payload);
+                }              
+
+                gigaSpace.write(payload);
+            }
+
         }
     }
 
 
     protected static class GigaSpaceWorker extends AbstractReceiverWorker {
 
-        public GigaSpaceWorker(Object message, AbstractMessageReceiver receiver) {
+        private final GigaSpace gigaSpace;
+
+        public GigaSpaceWorker(Object message, OpenSpacesMessageReceiver receiver, GigaSpace gigaSpace) {
             super(new ArrayList<Object>(1), receiver);
+            this.gigaSpace = gigaSpace;
             messages.add(message);
         }
 
         protected void bindTransaction(Transaction tx) throws TransactionException {
             //TODO support transaction
+        }
+        
+        @Override
+        protected void handleResults(List messages) throws Exception
+        {
+            // write response
+            // should send back only if remote synch is set or no outbound endpoints
+            if (endpoint.getExchangePattern().hasResponse()) {
+                for (Object message : messages) {
+                    MuleMessage responseMessage = (MuleMessage) message;
+                    Object payload = responseMessage.getPayload();
+                    gigaSpace.write(payload);
+                }
+            }
         }
     }
 

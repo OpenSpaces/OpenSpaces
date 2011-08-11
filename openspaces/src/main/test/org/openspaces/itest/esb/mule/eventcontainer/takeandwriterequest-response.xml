@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:os-events="http://www.openspaces.org/schema/events"
+      xmlns:os-core="http://www.openspaces.org/schema/core"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:spring="http://www.springframework.org/schema/beans"
+      xmlns:os-queue="http://www.openspaces.org/schema/mule/os-queue"
+      xmlns:os-eventcontainer="http://www.openspaces.org/schema/mule/os-eventcontainer"
+      xmlns:stdio="http://www.mulesoft.org/schema/mule/stdio"
+ 	xmlns:os-seda="http://www.openspaces.org/schema/mule/os-seda"
+ 
+      xsi:schemaLocation="http://www.openspaces.org/schema/core http://www.openspaces.org/schema/core/openspaces-core.xsd
+       http://www.openspaces.org/schema/events http://www.openspaces.org/schema/events/openspaces-events.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+       http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/3.0/mule.xsd
+       http://www.mulesoft.org/schema/mule/stdio ttp://www.mulesoft.org/schema/mule/stdio/3.0/mule-stdio.xsd
+       http://www.openspaces.org/schema/mule/os-queue http://www.openspaces.org/schema/8.0/mule/3.1/mule-os-queue.xsd
+       http://www.openspaces.org/schema/mule/os-eventcontainer http://www.openspaces.org/schema/8.0/mule/3.1/mule-os-eventcontainer.xsd
+       http://www.openspaces.org/schema/mule/os-seda http://www.openspaces.org/schema/8.0/mule/3.1/mule-os-seda.xsd
+       ">
+
+    <description>Tests mule connector, receive and process single object at a time.</description>
+
+    <spring:beans>
+        <!--
+            A bean representing a space (an IJSpace implementation).
+        -->
+        <os-core:space id="space" url="/./space" lookup-groups="${user.name}"/>
+
+        <!--
+            OpenSpaces simplified space API built on top of IJSpace/JavaSpace.
+        -->
+        <os-core:giga-space id="gigaSpace" space="space"/>
+
+
+        <os-events:polling-container id="helloPollingEventContainer1" giga-space="gigaSpace">
+            <os-core:template>
+                <spring:bean class="org.openspaces.itest.esb.mule.eventcontainer.TakeAndWriteRequestResponseTests$SyncMessage">
+                    <spring:property name="stage" value="0"/>
+                </spring:bean>
+            </os-core:template>
+        </os-events:polling-container>
+    </spring:beans>
+
+    <!-- this connector must be declared ,in order to inject the  Spring appliction context -->
+
+    <os-eventcontainer:connector name="gigaSpacesConnector"/>
+	
+    <!--The Mule model initialises and manages your UMO components-->
+
+    <model name="helloSample">
+
+        <service name="MessageReaderUMO">
+            <inbound>
+                <os-eventcontainer:inbound-endpoint 
+                        address="os-eventcontainer://helloPollingEventContainer1" exchange-pattern="request-response"/>
+            </inbound>
+            <component class="org.openspaces.itest.esb.mule.eventcontainer.TakeAndWriteRequestResponseTests$MessageReader"/>
+        </service>
+    </model>
+
+</mule>
