@@ -1273,14 +1273,16 @@ public class DefaultAdmin implements InternalAdmin {
                         }
                     }
                 } else { // we have a new processing unit
-                    processingUnit.setManagingGridServiceManager(holder.managingGSM);
-                    processingUnits.addProcessingUnit(processingUnit);
-                    processingUnit.addManagingGridServiceManager(holder.managingGSM);
-                    for (GridServiceManager backupGSM : holder.backupGSMs.values()) {
-                        processingUnit.addBackupGridServiceManager(backupGSM);
+                    if (holder.managingGSM != null) {
+                        processingUnit.setManagingGridServiceManager(holder.managingGSM);
+                        processingUnits.addProcessingUnit(processingUnit);
+                        processingUnit.addManagingGridServiceManager(holder.managingGSM);
+                        for (GridServiceManager backupGSM : holder.backupGSMs.values()) {
+                            processingUnit.addBackupGridServiceManager(backupGSM);
+                        }
+
+                        processApplicationsOnProcessingUnitAddition(processingUnit);
                     }
-                    
-                    processApplicationsOnProcessingUnitAddition(processingUnit);
                 }
 
                 processingUnit.setStatus(details.getStatus());
