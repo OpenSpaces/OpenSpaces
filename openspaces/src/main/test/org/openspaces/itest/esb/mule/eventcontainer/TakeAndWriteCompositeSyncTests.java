@@ -52,8 +52,10 @@ public class TakeAndWriteCompositeSyncTests extends AbstractMuleTests {
     }
     
     
-    public static class SyncMessage implements Message,Serializable{
-
+    public static class SyncMessage implements Message,Serializable
+    {
+        private static final long serialVersionUID = 1L;
+        
         private String message;
         private int stage;
 
