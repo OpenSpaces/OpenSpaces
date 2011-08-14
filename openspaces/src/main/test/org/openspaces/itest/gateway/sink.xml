@@ -20,6 +20,7 @@
 	    	<os-gateway:source name="targetGateway" />
 	    </os-gateway:sources>
 		<os-gateway:error-handling conflict-resolver="conflictResolver" max-retries-on-tx-lock="5" tx-lock-retry-interval="1000" />
+		<os-gateway:tx-support dist-tx-wait-timeout-millis="15000" dist-tx-wait-for-opers="50" />
     </os-gateway:sink>
 
     <os-gateway:lookups id="gatewayLookups">
