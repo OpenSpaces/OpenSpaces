@@ -38,4 +38,6 @@
         <property name="space" ref="space2"/>
         <property name="clustered" value="true"/>
     </bean>
+
+    <bean id="myBean" class="org.openspaces.itest.executor.simple.MyBean"></bean>
 </beans>

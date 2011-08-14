@@ -1,19 +1,13 @@
 package org.openspaces.itest.executor.simple;
 
 import com.gigaspaces.annotation.pojo.SpaceRouting;
-import com.gigaspaces.async.*;
+import com.gigaspaces.async.AsyncFuture;
+import com.gigaspaces.async.AsyncResult;
+import com.gigaspaces.async.AsyncResultFilter;
+import com.gigaspaces.async.AsyncResultFilterEvent;
 import org.openspaces.core.GigaSpace;
-import org.openspaces.core.executor.AutowireTask;
-import org.openspaces.core.executor.AutowireTaskMarker;
-import org.openspaces.core.executor.DistributedTask;
-import org.openspaces.core.executor.Task;
-import org.openspaces.core.executor.TaskGigaSpace;
-import org.openspaces.core.executor.support.AvgTask;
-import org.openspaces.core.executor.support.MaxTask;
-import org.openspaces.core.executor.support.MinTask;
-import org.openspaces.core.executor.support.SumTask;
-import org.openspaces.core.executor.support.WaitForAllListener;
-import org.openspaces.core.executor.support.WaitForAnyListener;
+import org.openspaces.core.executor.*;
+import org.openspaces.core.executor.support.*;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -72,6 +66,11 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
     public void testMultiRoutingExecution() throws Exception {
         AsyncFuture<Integer> result = clusteredGigaSpace1.execute(new MyDistributedTask1(), 1, 2);
         assertEquals(2, (int) result.get(1000, TimeUnit.MILLISECONDS));
+    }
+
+    public void testAutoWiredTaskInjectTest() throws Exception {
+        AsyncFuture<Integer> result = clusteredGigaSpace1.execute(new MyTaskAuto());
+        assertEquals(5, (int) result.get(1000, TimeUnit.MILLISECONDS));
     }
 
     public void testException1() throws Exception {
@@ -243,7 +242,7 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
 
     private static class Task1 implements Task<Integer> {
         /**
-         * 
+         *
          */
         private static final long serialVersionUID = 2487185379603770011L;
 
@@ -254,7 +253,7 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
 
     private static class TaskException implements Task<Integer> {
         /**
-         * 
+         *
          */
         private static final long serialVersionUID = -1613500503552258837L;
 
@@ -266,7 +265,7 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
     private static class IncrementalTask implements Task<Integer> {
 
         /**
-         * 
+         *
          */
         private static final long serialVersionUID = -7307260935406936546L;
         private AtomicInteger val = new AtomicInteger();
@@ -279,7 +278,7 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
     private static class Task1Routing implements Task<Integer> {
 
         /**
-         * 
+         *
          */
         private static final long serialVersionUID = -8725666976817740173L;
         private int routing;
@@ -365,7 +364,7 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
     public static class TaskGigaSpaceInjectable extends AggregatorContinue {
 
         /**
-         * 
+         *
          */
         private static final long serialVersionUID = 6277227272803527328L;
         @TaskGigaSpace
@@ -380,10 +379,6 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
     }
 
     private static class MyDistributedTask implements DistributedTask<Integer, Integer>, AutowireTaskMarker {
-
-        /**
-         * 
-         */
         private static final long serialVersionUID = 1800948712203273136L;
         @Resource(name = "gigaSpace1")
         transient GigaSpace gigaSpace;
@@ -407,10 +402,25 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
         }
     }
 
+    @AutowireTask
+    private static class MyTaskAuto implements Task<Integer> {
+        private static final long serialVersionUID = 1800948712203273136L;
+        @Resource(name = "myBean")
+        transient MyBean myBean;
+
+        public Integer execute() throws Exception {
+            if (myBean == null) {
+                throw new Exception();
+            } else {
+                return myBean.count();
+            }
+        }
+    }
+
     private static class MyTask implements Task<Integer> {
 
         /**
-         * 
+         *
          */
         private static final long serialVersionUID = 7362616027645953535L;
 
@@ -426,7 +436,7 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
 
     private static class MyTask2 implements Task<Integer> {
         /**
-         * 
+         *
          */
         private static final long serialVersionUID = -958021222284719357L;
 
@@ -437,7 +447,7 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
 
     private static class MyDistributedTask1 implements DistributedTask<Integer, Integer> {
         /**
-         * 
+         *
          */
         private static final long serialVersionUID = -4671759902442878489L;
 
@@ -456,7 +466,7 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
 
     private static class MyDistributedTask2 implements DistributedTask<Integer, Integer> {
         /**
-         * 
+         *
          */
         private static final long serialVersionUID = 5326111789007790663L;
 
@@ -476,11 +486,11 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
     private static class MyTask3 implements Task {
 
         /**
-         * 
+         *
          */
         private static final long serialVersionUID = -3702895368375709799L;
         @TaskGigaSpace
-            private GigaSpace gigaSpace;
+        private GigaSpace gigaSpace;
 
         public Serializable execute() throws Exception {
             if (gigaSpace == null) {
@@ -492,7 +502,7 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
 
     private static class MyTask4 implements Task<Integer> {
         /**
-         * 
+         *
          */
         private static final long serialVersionUID = -4625270048389454690L;
 
