@@ -1,22 +1,15 @@
 package org.openspaces.grid.gsm.strategy;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.gsa.GridServiceAgent;
-import org.openspaces.admin.gsa.events.GridServiceAgentAddedEventListener;
-import org.openspaces.admin.gsa.events.GridServiceAgentRemovedEventListener;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.pu.elastic.ElasticMachineIsolationConfig;
 import org.openspaces.admin.internal.pu.elastic.ProcessingUnitSchemaConfig;
@@ -30,26 +23,18 @@ import org.openspaces.grid.gsm.ElasticMachineProvisioningAware;
 import org.openspaces.grid.gsm.LogPerProcessingUnit;
 import org.openspaces.grid.gsm.ProcessingUnitAware;
 import org.openspaces.grid.gsm.SingleThreadedPollingLog;
-import org.openspaces.grid.gsm.machines.FutureGridServiceAgents;
 import org.openspaces.grid.gsm.machines.MachinesSlaUtils;
 import org.openspaces.grid.gsm.machines.isolation.DedicatedMachineIsolation;
 import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIsolation;
 import org.openspaces.grid.gsm.machines.isolation.SharedMachineIsolation;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
 
-
 public abstract class AbstractScaleStrategyBean implements 
-    GridServiceAgentAddedEventListener, 
-    GridServiceAgentRemovedEventListener , 
     ElasticMachineProvisioningAware ,
     ProcessingUnitAware,
     ScaleStrategyBean,
     Bean,
     Runnable{
-    
-
-    private static final long GET_DISCOVERED_MACHINES_TIMEOUT_SECONDS = 60;
-    private static final long GET_DISCOVERED_MACHINES_RETRY_SECONDS = 60;
     
     private static final int MAX_NUMBER_OF_MACHINES = 1000; // a very large number representing max number of machines per pu, but that would not overflow when multiplied by container capacity in MB
 
@@ -64,13 +49,13 @@ public abstract class AbstractScaleStrategyBean implements
     
     // created by afterPropertiesSet()
     private Log logger;
-    private ScheduledFuture<?> scheduledTask;
     private int minimumNumberOfMachines;    
     private ElasticProcessingUnitMachineIsolation isolation;
+    private ScheduledFuture<?> scheduledTask;
     
     // state
-    private boolean syncAgents;
-    private FutureGridServiceAgents futureAgents;
+    private ProvisionedMachinesCache provisionedMachines;
+    
     
     protected InternalAdmin getAdmin() {
         return this.admin;
@@ -97,6 +82,10 @@ public abstract class AbstractScaleStrategyBean implements
         return pu;
     }
 
+    public long getPollingIntervalSeconds() {
+        return ScaleStrategyConfigUtils.getPollingIntervalSeconds(properties);
+    }
+    
     public void setElasticMachineIsolation(ElasticMachineIsolationConfig isolationConfig) {
         this.isolationConfig = isolationConfig;
     }
@@ -168,22 +157,19 @@ public abstract class AbstractScaleStrategyBean implements
                     pu);
         
         logger.info("properties: "+properties);
-        
-        admin.getGridServiceAgents().getGridServiceAgentAdded().add(this);
-        admin.getGridServiceAgents().getGridServiceAgentRemoved().add(this);
-
+    
         minimumNumberOfMachines = calcMinimumNumberOfMachines();
-        int pollingIntervalSeconds = ScaleStrategyConfigUtils.getPollingIntervalSeconds(properties);
-        syncAgents = true;
+        provisionedMachines = new ProvisionedMachinesCache(pu,machineProvisioning, getPollingIntervalSeconds());
+        
+
         scheduledTask = 
-        (admin).scheduleWithFixedDelayNonBlockingStateChange(
-                this, 
-                0L, 
-                pollingIntervalSeconds, 
-                TimeUnit.SECONDS);
+            admin.scheduleWithFixedDelayNonBlockingStateChange(
+                    this, 
+                    0L, 
+                    getPollingIntervalSeconds(), 
+                    TimeUnit.SECONDS);
         
-        
-        logger.debug(pu.getName() + " is being monitored for SLA violations every " + pollingIntervalSeconds + " seconds");
+        logger.debug(pu.getName() + " is being monitored for SLA violations every " + getPollingIntervalSeconds() + " seconds");
     }
 
     public void destroy() {
@@ -193,8 +179,7 @@ public abstract class AbstractScaleStrategyBean implements
             scheduledTask = null;
         }
         
-        admin.getGridServiceAgents().getGridServiceAgentAdded().remove(this);
-        admin.getGridServiceAgents().getGridServiceAgentRemoved().remove(this);
+        provisionedMachines.destroy();
         
     }
 
@@ -202,89 +187,11 @@ public abstract class AbstractScaleStrategyBean implements
         this.properties = new StringProperties(properties);
     }
 
-    protected Collection<GridServiceAgent> getDiscoveredAgents() throws AgentsNotYetDiscoveredException {
-        
-        if (futureAgents == null || !futureAgents.isDone()) {
-            throw new AgentsNotYetDiscoveredException(
-                    "Need to wait until retrieved list of machines from " + machineProvisioning.getClass() );
-        }
-        
-        Set<GridServiceAgent> filteredAgents = new HashSet<GridServiceAgent>(); 
-        
-        try {
-            GridServiceAgent[] agents = futureAgents.get();
-            for (GridServiceAgent agent : agents) {
-                if (!agent.isDiscovered()) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Agent " + MachinesSlaUtils.machineToString(agent.getMachine()) + " has shutdown.");
-                    }
-                }
-                else if (!MachinesSlaUtils.isAgentConformsToMachineProvisioningConfig(agent, machineProvisioning.getConfig())) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Agent " + MachinesSlaUtils.machineToString(agent.getMachine()) + " does not conform to machine provisioning SLA.");
-                    }
-                }
-                else {
-                    filteredAgents.add(agent);
-                }
-            }
-            //TODO: Move this sort into the bin packing solver. It already has the priority of each machine
-            // so it can sort it by itself.
-            List<GridServiceAgent> sortedFilteredAgents = MachinesSlaUtils.sortManagementFirst(filteredAgents);
-            if (logger.isDebugEnabled()) {
-                logger.debug("Provisioned Agents: " + MachinesSlaUtils.machinesToString(sortedFilteredAgents));
-            }
-            return sortedFilteredAgents;
-        } catch (ExecutionException e) {
-            throw new AgentsNotYetDiscoveredException("Failed retrieving list of machines from " + machineProvisioning.getClass() , e);
-        } catch (TimeoutException e) {
-            throw new AgentsNotYetDiscoveredException("Failed retrieving list of machines from " + machineProvisioning.getClass(), e);
-        }
-    }
-    
-    public void gridServiceAgentRemoved(GridServiceAgent gridServiceAgent) {
-        syncAgents = true;
-    }
+    protected Collection<GridServiceAgent> getDiscoveredAgents() throws org.openspaces.grid.gsm.strategy.ProvisionedMachinesCache.AgentsNotYetDiscoveredException {
 
-    public void gridServiceAgentAdded(GridServiceAgent gridServiceAgent) {
-        syncAgents = true;
+        return provisionedMachines.getDiscoveredAgents();
     }
-
-    /**
-     * Synchronizes the list of agents with the machine provisioning bean
-     * We use the syncAgents flag to make sure there is no more than one concurrent call to machineProvisioning
-     */
-    public void run() {
-        
-        logger.debug("Enforcing sla for processing unit " + pu.getName());
-        //TODO: Move this check to EsmImpl, this component should not be aware it is running in an ESM
-        //TODO: Raise an alert
-        int numberOfEsms = admin.getElasticServiceManagers().getSize();
-        if (numberOfEsms != 1) {
-            logger.error("Number of ESMs must be 1. Currently " + numberOfEsms + " running.");
-            return;
-        }
-    
-        if (syncAgents) {
-            syncAgents = false;
-            futureAgents = machineProvisioning.getDiscoveredMachinesAsync(GET_DISCOVERED_MACHINES_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-        }
-        
-        if (futureAgents != null &&  futureAgents.getException() != null) {
-            
-            logger.error("Failed retrieving list of machines from " + machineProvisioning.getClass() + ". " +
-                         "Retrying in " + GET_DISCOVERED_MACHINES_RETRY_SECONDS + " seconds.", futureAgents.getException());
-            
-            admin.scheduleOneTimeWithDelayNonBlockingStateChange(new Runnable() {
-    
-                public void run() {
-                   syncAgents = true;
-                }},
-                GET_DISCOVERED_MACHINES_RETRY_SECONDS, TimeUnit.SECONDS);
-        }
-    }
-    
-    
+       
     private int calcMinimumNumberOfMachines() {
         
         if (getSchemaConfig().isDefaultSchema()) {
@@ -333,24 +240,5 @@ public abstract class AbstractScaleStrategyBean implements
         else {
             return Fraction.ONE;
         }
-    }
-    
-    static class AgentsNotYetDiscoveredException extends Exception {
-        private static final long serialVersionUID = 1L; 
-        public AgentsNotYetDiscoveredException(String message, Exception inner) {
-            super(message,inner);
-        }
-        public AgentsNotYetDiscoveredException(String message) {
-            super(message);
-        }
-        /**
-         * Override the method to avoid expensive stack build and synchronization,
-         * since no one uses it anyway.
-         */
-        @Override
-        public Throwable fillInStackTrace()
-        {
-            return null;
-        }    
     }
 }

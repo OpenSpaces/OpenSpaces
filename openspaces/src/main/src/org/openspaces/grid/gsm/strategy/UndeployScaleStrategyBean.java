@@ -17,6 +17,7 @@ import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpointAware;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestroyedException;
+import org.openspaces.grid.gsm.strategy.ProvisionedMachinesCache.AgentsNotYetDiscoveredException;
 
 public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
 
@@ -65,8 +66,6 @@ public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
         if (undeployComplete) {
             return;
         }
-        
-        super.run();
         
         getLogger().debug("Undeploying processing unit " + getProcessingUnit().getName());
         

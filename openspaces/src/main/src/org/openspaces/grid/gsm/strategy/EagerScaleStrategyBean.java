@@ -19,6 +19,7 @@ import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcementEndpointAware;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaPolicy;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestroyedException;
+import org.openspaces.grid.gsm.strategy.ProvisionedMachinesCache.AgentsNotYetDiscoveredException;
 
 public class EagerScaleStrategyBean extends AbstractScaleStrategyBean 
 
@@ -76,7 +77,6 @@ public class EagerScaleStrategyBean extends AbstractScaleStrategyBean
 
     @Override
     public void run() {
-        super.run();
         
         try {
             getLogger().debug("Enforcing machines SLA.");
