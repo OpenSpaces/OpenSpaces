@@ -71,9 +71,6 @@ public abstract class AbstractScaleStrategyBean implements
     // state
     private boolean syncAgents;
     private FutureGridServiceAgents futureAgents;
-    private Collection<GridServiceAgent> agents;
-    private boolean agentsRefreshed;
-    
     
     protected InternalAdmin getAdmin() {
         return this.admin;
@@ -174,12 +171,10 @@ public abstract class AbstractScaleStrategyBean implements
         
         admin.getGridServiceAgents().getGridServiceAgentAdded().add(this);
         admin.getGridServiceAgents().getGridServiceAgentRemoved().add(this);
-        
-        agents = new HashSet<GridServiceAgent>();
-        agentsRefreshed = false;
 
         minimumNumberOfMachines = calcMinimumNumberOfMachines();
         int pollingIntervalSeconds = ScaleStrategyConfigUtils.getPollingIntervalSeconds(properties);
+        syncAgents = true;
         scheduledTask = 
         (admin).scheduleWithFixedDelayNonBlockingStateChange(
                 this, 
@@ -208,10 +203,43 @@ public abstract class AbstractScaleStrategyBean implements
     }
 
     protected Collection<GridServiceAgent> getDiscoveredAgents() throws AgentsNotYetDiscoveredException {
-        if (!agentsRefreshed) {
-            throw new AgentsNotYetDiscoveredException();
+        
+        if (futureAgents == null || !futureAgents.isDone()) {
+            throw new AgentsNotYetDiscoveredException(
+                    "Need to wait until retrieved list of machines from " + machineProvisioning.getClass() );
         }
-        return this.agents;
+        
+        Set<GridServiceAgent> filteredAgents = new HashSet<GridServiceAgent>(); 
+        
+        try {
+            GridServiceAgent[] agents = futureAgents.get();
+            for (GridServiceAgent agent : agents) {
+                if (!agent.isDiscovered()) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Agent " + MachinesSlaUtils.machineToString(agent.getMachine()) + " has shutdown.");
+                    }
+                }
+                else if (!MachinesSlaUtils.isAgentConformsToMachineProvisioningConfig(agent, machineProvisioning.getConfig())) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Agent " + MachinesSlaUtils.machineToString(agent.getMachine()) + " does not conform to machine provisioning SLA.");
+                    }
+                }
+                else {
+                    filteredAgents.add(agent);
+                }
+            }
+            //TODO: Move this sort into the bin packing solver. It already has the priority of each machine
+            // so it can sort it by itself.
+            List<GridServiceAgent> sortedFilteredAgents = MachinesSlaUtils.sortManagementFirst(filteredAgents);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Provisioned Agents: " + MachinesSlaUtils.machinesToString(sortedFilteredAgents));
+            }
+            return sortedFilteredAgents;
+        } catch (ExecutionException e) {
+            throw new AgentsNotYetDiscoveredException("Failed retrieving list of machines from " + machineProvisioning.getClass() , e);
+        } catch (TimeoutException e) {
+            throw new AgentsNotYetDiscoveredException("Failed retrieving list of machines from " + machineProvisioning.getClass(), e);
+        }
     }
     
     public void gridServiceAgentRemoved(GridServiceAgent gridServiceAgent) {
@@ -224,6 +252,7 @@ public abstract class AbstractScaleStrategyBean implements
 
     /**
      * Synchronizes the list of agents with the machine provisioning bean
+     * We use the syncAgents flag to make sure there is no more than one concurrent call to machineProvisioning
      */
     public void run() {
         
@@ -236,60 +265,22 @@ public abstract class AbstractScaleStrategyBean implements
             return;
         }
     
-        if (futureAgents == null && syncAgents) {
+        if (syncAgents) {
             syncAgents = false;
             futureAgents = machineProvisioning.getDiscoveredMachinesAsync(GET_DISCOVERED_MACHINES_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         }
         
-        if (futureAgents != null && futureAgents.isDone()) {
-            Set<GridServiceAgent> filteredAgents = new HashSet<GridServiceAgent>(); 
+        if (futureAgents != null &&  futureAgents.getException() != null) {
             
-            Exception exception = null;
-            try {
-                GridServiceAgent[] agents = futureAgents.get();
-                for (GridServiceAgent agent : agents) {
-                    if (!agent.isDiscovered()) {
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("Agent " + MachinesSlaUtils.machineToString(agent.getMachine()) + " has shutdown.");
-                        }
-                    }
-                    else if (!MachinesSlaUtils.isAgentConformsToMachineProvisioningConfig(agent, machineProvisioning.getConfig())) {
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("Agent " + MachinesSlaUtils.machineToString(agent.getMachine()) + " does not conform to machine provisioning SLA.");
-                        }
-                    }
-                    else {
-                        filteredAgents.add(agent);
-                    }
-                }
-            } catch (ExecutionException e) {
-                exception = e;
-            } catch (TimeoutException e) {
-                exception = e;
-            }
-            finally {
-            	futureAgents = null;
-                if (exception != null) {
-                    logger.error("Failed retrieving list of machines from " + machineProvisioning.getClass() + ". " +
-                                 "Retrying in " + GET_DISCOVERED_MACHINES_RETRY_SECONDS + " seconds.",exception);
-                    admin.scheduleOneTimeWithDelayNonBlockingStateChange(new Runnable() {
-
-                        public void run() {
-                           syncAgents = true;
-                        }},
-                        GET_DISCOVERED_MACHINES_RETRY_SECONDS, TimeUnit.SECONDS);
-                }
-                else {
-                    //TODO: Move this sort into the bin packing solver. It already has the priority of each machine
-                    // so it can sort it by itself.
-                    List<GridServiceAgent> sortedFilteredAgents = MachinesSlaUtils.sortManagementFirst(filteredAgents);
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Provisioned Agents: " + MachinesSlaUtils.machinesToString(sortedFilteredAgents));
-                    }
-                    agents = sortedFilteredAgents;
-                    agentsRefreshed=true;
-                }
-            }
+            logger.error("Failed retrieving list of machines from " + machineProvisioning.getClass() + ". " +
+                         "Retrying in " + GET_DISCOVERED_MACHINES_RETRY_SECONDS + " seconds.", futureAgents.getException());
+            
+            admin.scheduleOneTimeWithDelayNonBlockingStateChange(new Runnable() {
+    
+                public void run() {
+                   syncAgents = true;
+                }},
+                GET_DISCOVERED_MACHINES_RETRY_SECONDS, TimeUnit.SECONDS);
         }
     }
     
@@ -346,6 +337,12 @@ public abstract class AbstractScaleStrategyBean implements
     
     static class AgentsNotYetDiscoveredException extends Exception {
         private static final long serialVersionUID = 1L; 
+        public AgentsNotYetDiscoveredException(String message, Exception inner) {
+            super(message,inner);
+        }
+        public AgentsNotYetDiscoveredException(String message) {
+            super(message);
+        }
         /**
          * Override the method to avoid expensive stack build and synchronization,
          * since no one uses it anyway.
