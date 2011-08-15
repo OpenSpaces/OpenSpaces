@@ -625,7 +625,7 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
     protected DataEventSession createDataEventSession(EventSessionFactory factory) throws DataAccessException {
         EventSessionConfig config = createEventSessionConfig();
         try {
-            return factory.newDataEventSession(config, null);
+            return factory.newDataEventSession(config);
         } catch (RemoteException e) {
             throw new CannotCreateNotifySessionException("Failed to create new data event session", config, e);
         }
