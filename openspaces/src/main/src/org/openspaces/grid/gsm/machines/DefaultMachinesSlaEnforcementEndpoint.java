@@ -908,19 +908,27 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
      * Eagerly allocates all unallocated capacity that match the specified SLA
      */
     private void allocateEagerCapacity(AbstractMachinesSlaPolicy sla) {
+        
         ClusterCapacityRequirements unallocatedCapacity = getUnallocatedCapacity(sla);
-        CapacityRequirements capacityToAllocate = unallocatedCapacity.getTotalAllocatedCapacity();
         
         // limit the memory to the maximum possible by this PU
         long maxAllocatedMemoryForPu = sla.getMaximumNumberOfMachines()*sla.getContainerMemoryCapacityInMB();
         long allocatedMemoryForPu = MachinesSlaUtils.getMemoryInMB(state.getAllocatedCapacity(pu).getTotalAllocatedCapacity());
-        long unallocatedMemory = MachinesSlaUtils.getMemoryInMB(capacityToAllocate);
-        long maxEagerMemoryCapacity = maxAllocatedMemoryForPu - allocatedMemoryForPu;
-        if (maxEagerMemoryCapacity < unallocatedMemory) {
-            // reduce unallocated so allocating it will not reach the maximum allowed allocated memory 
-            capacityToAllocate = capacityToAllocate.subtract(
-                    new MemoryCapacityRequirement(unallocatedMemory - maxEagerMemoryCapacity));
+
+        // validate not breached max eager capacity
+        if (allocatedMemoryForPu > maxAllocatedMemoryForPu) {
+            throw new IllegalStateException(
+                    "maxAllocatedMemoryForPu="+sla.getMaximumNumberOfMachines()+"*"+sla.getContainerMemoryCapacityInMB()+"="+
+                    maxAllocatedMemoryForPu+" "+
+                    "cannot be smaller than allocatedMemoryForPu="+state.getAllocatedCapacity(pu).toDetailedString());
         }
+        long unallocatedMemory = MachinesSlaUtils.getMemoryInMB(unallocatedCapacity.getTotalAllocatedCapacity());
+        long memoryToAllocate = Math.min(maxAllocatedMemoryForPu - allocatedMemoryForPu, unallocatedMemory);
+        
+        CapacityRequirements capacityToAllocate = 
+            unallocatedCapacity.getTotalAllocatedCapacity()
+            .set(new MemoryCapacityRequirement(memoryToAllocate));
+        
         if (logger.isDebugEnabled()) {
             logger.debug(
                     "capacityToAllocate=" + capacityToAllocate + " "+
@@ -930,6 +938,17 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         // allocate memory and CPU eagerly
         if (!capacityToAllocate.equalsZero()) { 
             allocateManualCapacity(sla, capacityToAllocate, unallocatedCapacity);
+        }
+        
+        //validate not breached max eager capacity
+        long allocatedMemoryForPuAfter = MachinesSlaUtils.getMemoryInMB(state.getAllocatedCapacity(pu).getTotalAllocatedCapacity());
+        if ( allocatedMemoryForPuAfter > maxAllocatedMemoryForPu) {
+            throw new IllegalStateException("allocatedMemoryForPuAfter="+allocatedMemoryForPuAfter+" greater than "+
+                    "maxAllocatedMemoryForPu="+sla.getMaximumNumberOfMachines()+"*"+sla.getContainerMemoryCapacityInMB()+"="+maxAllocatedMemoryForPu+
+                    "allocatedMemoryForPu="+allocatedMemoryForPu+"="+state.getAllocatedCapacity(pu).toDetailedString()+ " "+
+                    "capacityToAllocate=" + capacityToAllocate + " "+
+                    "maxAllocatedMemoryForPu="+maxAllocatedMemoryForPu + " "+
+                    "unallocatedCapacity="+unallocatedCapacity.toDetailedString() );
         }
     }
     
