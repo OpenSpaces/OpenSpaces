@@ -88,7 +88,7 @@ public class MachinesSlaUtils {
             GridServiceAgent agent,
             AbstractMachinesSlaPolicy sla) {
 
-        return new MachineCapacityRequirements(agent.getMachine()).subtract(sla.getReservedCapacityPerMachine());
+        return new MachineCapacityRequirements(agent.getMachine()).subtractOrZero(sla.getReservedCapacityPerMachine());
     }
 
     public static Fraction convertCpuCoresFromDoubleToFraction(double cpu) {
