@@ -81,7 +81,8 @@ public class ServiceReader {
             }
 
             if (files.length == 0) {
-                return null;
+                throw new IllegalArgumentException("Could not find service configuration file: "
+                        + serviceFileName + ".");
             }
             return files[0];
         }
