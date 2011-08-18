@@ -19,11 +19,14 @@ public abstract class BaseApplicationScript extends Script {
     @Override
     public void setProperty(final String name, final Object value) {
         try {
+            BeanUtils.getProperty(this.activeObject, name); // first check that property exists
             BeanUtils.setProperty(this.activeObject, name, value);
         } catch (final IllegalAccessException e) {
-            throw new IllegalArgumentException("Failed to set application property " + name + " to " + name, e);
+            throw new IllegalArgumentException("Failed to set property " + name + " to " + value, e);
         } catch (final InvocationTargetException e) {
-            throw new IllegalArgumentException("Failed to set application property " + name + " to " + name, e);
+            throw new IllegalArgumentException("Failed to set property " + name + " to " + value, e);
+        } catch (NoSuchMethodException e) {
+            throw new IllegalArgumentException("Property " + name + " does not exist in class: " + this.activeObject.getClass().getName(), e);
         }
     }
 

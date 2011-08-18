@@ -4,12 +4,15 @@ import groovy.lang.Closure;
 import groovy.lang.MissingMethodException;
 import groovy.lang.Script;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 
+import org.apache.commons.beanutils.BeanUtils;
+import org.codehaus.groovy.runtime.GStringImpl;
 import org.openspaces.dsl.CustomCommand;
 import org.openspaces.dsl.PluginDescriptor;
 import org.openspaces.dsl.Service;
@@ -71,31 +74,47 @@ public abstract class BaseServiceScript extends Script {
             throw new MissingMethodException(name, Service.class, argsArray);
         }
 
-        final Object arg = argsArray[0];
-
-        final String methodName = "set" + name.substring(0, 1).toUpperCase() + name.substring(1);
+        Object arg = argsArray[0];
 
         try {
-            final Method m = this.activeMethods.get(methodName);
-            if (m != null) {
-                m.invoke(this.activeObject, arg);
-            } else {
-                logger.severe("Method " + methodName + " not found on object: " + this.activeObject);
-                throw new MissingMethodException(name, this.activeObject.getClass(), new Object[0]);
-
+            BeanUtils.getProperty(this.activeObject, name);
+            // Special handling for Groovy Strings - use their toString() values.
+            if(arg != null && arg instanceof GStringImpl) {
+                arg = arg.toString();
             }
-        } catch (final Exception e) {
-            logger.log(Level.SEVERE, "Failed to invoke method " + methodName, e);
-            throw new IllegalStateException("Failed to invoke method " + methodName
-                    + " on object " + this.activeObject, e);
+            BeanUtils.setProperty(this.activeObject, name, arg);
+        } catch (IllegalAccessException e) {
+            throw new IllegalArgumentException("Failed to set property " + name + " with value " + arg +". Error was: " + e, e);
+        } catch (InvocationTargetException e) {
+            throw new IllegalArgumentException("Failed to set property " + name + " with value " + arg +". Error was: " + e, e);
+        }catch (NoSuchMethodException e) {
+            throw new IllegalArgumentException("Property " + name + " does not exist for Object of type: " + this.activeObject.getClass().getName(), e);
+
         }
+//        final String methodName = "set" + name.substring(0, 1).toUpperCase() + name.substring(1);
+//
+//        try {
+//            final Method m = this.activeMethods.get(methodName);
+//            if (m != null) {
+//                m.invoke(this.activeObject, arg);
+//            } else {
+//                logger.severe("Method " + methodName + " not found on object: " + this.activeObject);
+//                throw new MissingMethodException(name, this.activeObject.getClass(), new Object[0]);
+//
+//            }
+//        } catch (final Exception e) {
+//            logger.log(Level.SEVERE, "Failed to invoke method " + methodName, e);
+//            throw new IllegalStateException("Failed to invoke method " + methodName
+//                    + " on object " + this.activeObject, e);
+//        }
+        
 
         return this.activeObject;
     }
 
     public Service service(final Closure<Object> closure) {
         this.service = new Service();
-        // if (context == null) {
+        // if (context == null) {O
         // context = new ServiceContext(service, null, null); //TODO - fix this
         // }
 

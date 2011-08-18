@@ -17,7 +17,6 @@ public class ServiceContext {
     private Admin admin;
     private String dir;
     private ClusterInfo clusterInfo;
-     
 
     public ServiceContext(final Service service, final Admin admin, final String dir, ClusterInfo clusterInfo) {
         super();
@@ -26,59 +25,53 @@ public class ServiceContext {
         this.dir = dir;
         this.clusterInfo = clusterInfo;
 
-    }    
-    
+    }
+
+    /*********
+     * Constructor used when running in IntegratedProcessingUnitContainer.
+     * 
+     * @param service
+     *            .
+     * @param dir
+     *            .
+     */
+    public ServiceContext(final Service service, final String dir) {
+        this.service = service;
+        this.dir = dir;
+        this.clusterInfo = new ClusterInfo(null, 1, 0, 1, 0);
+        this.clusterInfo.setName(service.getName());
+
+    }
+
     public int getInstanceId() {
         return clusterInfo.getInstanceId();
     }
-    
+
     public org.openspaces.dsl.context.Service getService() {
         final String name = this.clusterInfo.getName();
         return getService(name);
     }
+
     public org.openspaces.dsl.context.Service getService(String name) {
-        
-        ProcessingUnit pu = getProcessingUnitFromAdmin(name);
 
-        return new org.openspaces.dsl.context.Service(pu);
-        
-    }
-    
+        if (this.admin != null) {
+            ProcessingUnit pu = getProcessingUnitFromAdmin(name);
 
-    public List<ProcessingUnitInstance> getServiceInstances() {
-        final ProcessingUnit pu = getProcessingUnitFromAdmin();
-
-        return Arrays.asList(pu.getInstances());
-    }
-
-    public List<GridServiceAgent> getAgents() {
-
-        final List<ProcessingUnitInstance> puis = getServiceInstances();
-        final List<GridServiceAgent> gsas = new ArrayList<GridServiceAgent>(puis.size());
-        for (final ProcessingUnitInstance pui : puis) {
-            final GridServiceAgent agent = pui.getGridServiceContainer().getGridServiceAgent();
-            gsas.add(agent);
+            return new org.openspaces.dsl.context.Service(pu);
+        } else {
+            // running in integrated container
+            if(name.equals(this.service.getName())) {
+                return new org.openspaces.dsl.context.Service(name, service.getNumInstances());
+            } else {
+                return null;
+            }
         }
 
-        return gsas;
-
     }
 
-    public List<String> getIPs() {
-        final List<GridServiceAgent> agents = getAgents();
 
-        final List<String> ips = new ArrayList<String>(agents.size());
-        for (final GridServiceAgent agent : agents) {
-            ips.add(agent.getMachine().getHostAddress());
-        }
-
-        return ips;
-    }
-
-    private ProcessingUnit getProcessingUnitFromAdmin() {
-        return getProcessingUnitFromAdmin(this.service.getName());
-    }
     
+
     private ProcessingUnit getProcessingUnitFromAdmin(String name) {
 
         final ProcessingUnit pu = admin.getProcessingUnits().getProcessingUnit(name);
@@ -89,6 +82,8 @@ public class ServiceContext {
 
         return pu;
     }
+    
+    
 
     public String getDir() {
         return dir;
@@ -98,7 +93,6 @@ public class ServiceContext {
         return admin;
     }
 
-
     void setService(Service service) {
         this.service = service;
     }
@@ -106,6 +100,11 @@ public class ServiceContext {
     public ClusterInfo getClusterInfo() {
         return clusterInfo;
     }
-  
 
+    @Override
+    public String toString() {
+        return "ServiceContext [dir=" + dir + ", clusterInfo=" + clusterInfo + ", getService()=" + getService() + "]";
+    }
+
+    
 }
