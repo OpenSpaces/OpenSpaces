@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
@@ -32,7 +31,6 @@ import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.dsl.Application;
 import org.openspaces.dsl.Service;
 import org.openspaces.dsl.context.ServiceContext;
-import org.springframework.beans.factory.access.SingletonBeanFactoryLocator;
 
 public class ServiceReader {
 

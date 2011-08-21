@@ -3,7 +3,6 @@ package org.openspaces.dsl.context;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 
