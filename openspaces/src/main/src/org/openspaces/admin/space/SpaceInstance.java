@@ -52,6 +52,15 @@ import java.util.concurrent.TimeUnit;
 public interface SpaceInstance extends GridComponent, StatisticsMonitor {
 
     /**
+     * Get this Space instance String representation.<br>
+     * If the Space is part of a highly-available partition (i.e. with backups), returns: {Space name}.{instance/partition id} [backup id] - for example, MySpace.3 [1]<br>
+     * Otherwise, when there are no backups (i.e. only partitioned), returns: {Space name} [instance/partition id]  - for example, MySpace [3]
+     * @return  this Space instance String representation.
+     * @since 8.0.4
+     */
+    String getSpaceInstanceName();
+    
+    /**
      * Returns the instance id of the space (starting from 1).
      */
     int getInstanceId();

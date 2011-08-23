@@ -272,6 +272,21 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
     public SpaceInstanceStatisticsChangedEventManager getStatisticsChanged() {
         return this.statisticsChangedEventManager;
     }
+    
+    public String getSpaceInstanceName() {
+        String name = this.getSpace().getName();
+        Integer id = this.getInstanceId();
+        if (this.getSpace().getNumberOfBackups() > 0) {
+            Integer bid = this.getBackupId();
+            if (bid == null) {
+                bid = Integer.valueOf(0);
+            }
+            name += "."+id+" ["+(bid+1)+"]";
+        } else {
+            name += " ["+id+"]";
+        }
+        return name;
+    }
 
     public int getInstanceId() {
         return instanceId;
@@ -505,17 +520,7 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
     
     @Override
     public String toString() {
-        String name = this.getSpace().getName();
-        Integer id = this.getInstanceId();
-        if (this.getSpace().getNumberOfBackups() > 0) {
-            Integer bid = this.getBackupId();
-            if (bid == null) {
-                bid = Integer.valueOf(0);
-            }
-            name += "."+id+" ["+(bid+1)+"]";
-        } else {
-            name += " ["+id+"]";
-        }
+        String name = getSpaceInstanceName();
         switch(this.spaceMode) {
         case PRIMARY:
             name += "(P)";
