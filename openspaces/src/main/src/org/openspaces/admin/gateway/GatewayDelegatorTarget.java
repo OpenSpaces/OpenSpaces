@@ -7,6 +7,9 @@ package org.openspaces.admin.gateway;
  */
 public interface GatewayDelegatorTarget {
     
+    /**
+     * Returns the delegator this delegation target is part of. 
+     */
     GatewayDelegator getDelegator();
     
     /**

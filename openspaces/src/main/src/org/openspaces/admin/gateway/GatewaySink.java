@@ -32,8 +32,14 @@ public interface GatewaySink {
      */
     GatewaySinkSource[] getSources();
     
+    /**
+     * Returns <code>true</code> if this sink has a source gateway with the specified name; <code>false</code> otherwise.
+     */
     boolean containsSource(String sourceGatewayName);
     
+    /**
+     * Returns the specified source gateway or null if no such source gateway exists. 
+     */
     GatewaySinkSource getSourceByName(String sourceGatewayName);
     
     /**

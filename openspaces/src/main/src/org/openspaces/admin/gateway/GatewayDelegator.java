@@ -20,6 +20,9 @@ public interface GatewayDelegator {
      */
     GatewayDelegatorTarget[] getDelegationTargets();
 
+    /**
+     * Returns <code>true</code> if this delegator has a target gateway with the specified name; <code>false</code> otherwise.
+     */
     boolean containsTarget(String targetGatewayName); 
 
 }

@@ -5,14 +5,20 @@ import java.util.concurrent.TimeUnit;
 import org.openspaces.admin.Admin;
 
 /**
- * 
+ * A sink source is the target end point of a remote {@link Gateway} which is replicating into this gateway's sink. 
  * @author eitany
  * @since 8.0.4
  */
 public interface GatewaySinkSource {
     
+    /**
+     * Returns the sink this source is part of.
+     */
     GatewaySink getSink();
     
+    /**
+     * Returns the name of the remote gateway which this source acts as its end point.
+     */
     String getSourceGatewayName();
     
     /**

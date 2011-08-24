@@ -31,36 +31,106 @@ public interface Gateway extends Iterable<GatewayProcessingUnit>{
      */
     boolean waitFor(int numberOfGatewayProcessingUnits);
     
+    /**
+     * Waits for the specified timeout (in time interval) till at least the provided number of Gateway Processing Unit Instances are up. 
+     * Returns <code>true</code> if the specified number of gateway processing units are deployed within the specified timeout, 
+     * <code>false</code> otherwise;
+     */
     boolean waitFor(int numberOfGatewayProcessingUnits, long timeout, TimeUnit timeUnit);
     
+    /**
+     * Waits for the default timeout specified by {@link Admin#setDefaultTimeout(long, TimeUnit)} till 
+     * the processing unit of this gateway is identified as deployed. Return <code>null</code> if the processing unit is not deployed
+     * within the specified timeout.
+     */
     GatewayProcessingUnit waitForGatewayProcessingUnit(String processingUnitName);
-    
+
+    /**
+     * Waits for the specified timeout (in time interval) till 
+     * the processing unit of this gateway is identified as deployed. Return <code>null</code> if the processing unit is not deployed
+     * within the specified timeout.
+     */
     GatewayProcessingUnit waitForGatewayProcessingUnit(String processingUnitName, long timeout, TimeUnit timeUnit);
     
+    /**
+     * Returns the gateway processing unit for the given processing unit name. Returns <code>null</code> if the gateway 
+     * processing unit is not currently discovered.
+     */
     GatewayProcessingUnit getGatewayProcessingUnit(String processingUnitName);
     
+    /**
+     * Returns a map of {@link GatewayProcessingUnit} keyed by their respective names.
+     */
     Map<String, GatewayProcessingUnit> getNames();
     
+    /**
+     * Returns a gateway sink which has a source gateway with the given name. Returns <code>null</code> if the gateway sink is 
+     * not currently discovered or this gateway has no sink with source gateway with the given name.
+     */
     GatewaySink getSink(String sourceGatewayName);
     
+    /**
+     * Waits for the default timeout specified by {@link Admin#setDefaultTimeout(long, TimeUnit)} till 
+     * the gateway sink with the given source gateway name is identified as deployed. Return <code>null</code> 
+     * if the sink is not deployed within the specified timeout.
+     */
     GatewaySink waitForSink(String sourceGatewayName);
     
+    /**
+     * Waits for the specified timeout (in time interval) till 
+     * the gateway sink with the given source gateway name is identified as deployed. Return <code>null</code> 
+     * if the sink is not deployed within the specified timeout.
+     */
     GatewaySink waitForSink(String sourceGatewayName, long timeout, TimeUnit timeUnit);
     
+    /**
+     * Returns a sink source gateway with the given name. Returns <code>null</code> if the sink source is 
+     * not currently discovered or this gateway has no sink with source gateway with the given name.
+     */
     GatewaySinkSource getSinkSource(String sourceGatewayName);
     
+    /**
+     * Waits for the default timeout specified by {@link Admin#setDefaultTimeout(long, TimeUnit)} till 
+     * the gateway sink with the given source gateway name is identified as deployed. Returns <code>null</code> 
+     * if the sink source is not deployed within the specified timeout.
+     */
     GatewaySinkSource waitForSinkSource(String sourceGatewayName);
     
+    /**
+     * Waits for the specified timeout (in time interval) till 
+     * the gateway sink with the given source gateway name is identified as deployed. Returns <code>null</code> 
+     * if the sink source is not deployed within the specified timeout.
+     */
     GatewaySinkSource waitForSinkSource(String sourceGatewayName, long timeout, TimeUnit timeUnit);
     
+    /**
+     * Returns a gateway delegator which has a target gateway with the given name. Returns <code>null</code> if the gateway delegator is 
+     * not currently discovered or this gateway has no target with target gateway with the given name.
+     */
     GatewayDelegator getDelegator(String targetGatewayName);
-    
+
+    /**
+     * Waits for the default timeout specified by {@link Admin#setDefaultTimeout(long, TimeUnit)} till 
+     * the gateway delegator with the given target gateway name is identified as deployed. Returns <code>null</code> 
+     * if the delegator target is not deployed within the specified timeout.
+     */
     GatewayDelegator waitForDelegator(String targetGatewayName);
     
+    /**
+     * Waits for the specified timeout (in time interval) till 
+     * the gateway delegator with the given target gateway name is identified as deployed. Returns <code>null</code> 
+     * if the delegator target is not deployed within the specified timeout.
+     */
     GatewayDelegator waitForDelegator(String targetGatewayName, long timeout, TimeUnit timeUnit);
     
+    /**
+     * Returns the number of deployed {@link GatewayProcessingUnit} which are part of this gateway.  
+     */
     int getSize();
     
+    /**
+     * Returns <code>true</code> if there are no deployed {@link GatewayProcessingUnit} which are part of this gateway; <code>false<code> otherwise.
+     */
     boolean isEmpty();
     
     //Events for addition and removal of gateways processing units
