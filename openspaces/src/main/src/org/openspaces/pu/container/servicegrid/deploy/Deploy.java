@@ -556,35 +556,41 @@ public class Deploy {
 
     private String guessProcessingUnitType(String puPath, File puFile, URL root, String puString, SLA sla, BeanLevelProperties beanLevelProperties) {
 
-        if ( containsWEB_INF(puPath, root) ) {
+        if (containsWEB_INF(puPath, root)) {
             return ProcessingUnitType.WEB.name(); //Web APP
-        } else if (containsEXT(puPath, root)) {
+        } 
+        if (containsEXT(puPath, root)) {
             return ProcessingUnitType.UNIVERSAL.name(); //USM
-        } else if (sla.getClusterSchema() != null) {
+        }         
+        if (sla.getClusterSchema() != null) {
             return ProcessingUnitType.STATEFUL.name(); //cluster space
-        } else {
-            String puStringWithoutComments = removeCommentsFromPuString(puString);
-            if (puStringWithoutComments.contains("schema=\"mirror\"")) {
-                return ProcessingUnitType.MIRROR.name(); //mirror space
-            } else if (puStringWithoutComments.contains("<os-core:space") && puString.contains("url=\"/./")) {
+        } 
+        
+        String puStringWithoutComments = removeCommentsFromPuString(puString);
+        if (puStringWithoutComments.contains("schema=\"mirror\"")) {
+            return ProcessingUnitType.MIRROR.name(); //mirror space
+        } 
+        if (puStringWithoutComments.contains("os-core:space")) {
+            if (puStringWithoutComments.contains("url=\"/./")) {
                 return ProcessingUnitType.STATEFUL.name(); //embedded space
-            } else if (puString.contains("url=\"${")) {
-                int beginIndex = puString.indexOf("url=\"${") + 7; //length
+            }
+            if (puStringWithoutComments.contains("url=\"${")) { //Extract place holder
+                int beginIndex = puStringWithoutComments.indexOf("url=\"${") + 7; //length
                 if (beginIndex != -1) {
-                    int endIndex = puString.indexOf("}", beginIndex);
+                    int endIndex = puStringWithoutComments.indexOf("}", beginIndex);
                     if (endIndex != -1) {
-                        String propertyKey = puString.substring(beginIndex, endIndex);
+                        String propertyKey = puStringWithoutComments.substring(beginIndex, endIndex);
                         if (beanLevelProperties.getContextProperties().getProperty(propertyKey,"").startsWith("/./")) {
                             return ProcessingUnitType.STATEFUL.name(); //embedded space
                         }
                     }
                 }
-            } else if (puString.contains("os-gateway:sink") || puString.contains("os-gateway:delegator")) {
-                return ProcessingUnitType.GATEWAY.name();            
-            } else if (puString.length() == 0 && beanLevelProperties.getContextProperties().containsKey("dataGridName")) {
-                return ProcessingUnitType.STATEFUL.name(); //.Net stateful
             }
-        } 
+        } if (puStringWithoutComments.contains("os-gateway:sink") || puStringWithoutComments.contains("os-gateway:delegator")) {
+            return ProcessingUnitType.GATEWAY.name();            
+        } if (puStringWithoutComments.length() == 0 && beanLevelProperties.getContextProperties().containsKey("dataGridName")) {
+            return ProcessingUnitType.STATEFUL.name(); //.Net stateful
+        }
         
         return ProcessingUnitType.STATELESS.name(); //default
     }
