@@ -142,13 +142,17 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
         if (sla.getSchemaConfig().isPartitionedSync2BackupSchema()) {
             enfroceSlaStatefulProcessingUnit(sla);
             boolean balanced = isBalanced(sla);
-            logger.debug("Number of deployments in progress is " + state.getNumberOfFutureDeployments(pu) + " balanced = " + balanced);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Number of deployments in progress is " + state.getNumberOfFutureDeployments(pu) + " balanced = " + balanced + " sla capacity="+ sla.getAllocatedCapacity().toDetailedString());
+            }
             return balanced;
         }
         else if (sla.getSchemaConfig().isDefaultSchema()) {
             enforceSlaStatelessProcessingUnit(sla);
             boolean deployed = isDeployedOnContainers(sla.getContainers(),pu);
-            logger.debug("Number of deployments in progress is " + state.getNumberOfFutureDeployments(pu) + " deployed = " + deployed);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Number of deployments in progress is " + state.getNumberOfFutureDeployments(pu) + " deployed = " + deployed + " sla capacity="+ sla.getAllocatedCapacity().toDetailedString());
+            }
             return deployed; 
         }
         else {
