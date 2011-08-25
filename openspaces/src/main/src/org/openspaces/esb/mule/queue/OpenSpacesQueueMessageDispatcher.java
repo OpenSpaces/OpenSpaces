@@ -26,6 +26,7 @@ import org.mule.api.endpoint.OutboundEndpoint;
 import org.mule.api.processor.MessageProcessor;
 import org.mule.api.transaction.TransactionCallback;
 import org.mule.api.transport.DispatchException;
+import org.mule.api.transport.PropertyScope;
 import org.mule.config.i18n.CoreMessages;
 import org.mule.config.i18n.Message;
 import org.mule.transaction.TransactionTemplate;
@@ -142,8 +143,8 @@ public class OpenSpacesQueueMessageDispatcher extends AbstractMessageDispatcher 
         
         //copy the message properties
         DocumentProperties payloadMetaData = new DocumentProperties();
-        for (String propertyName : message.getPropertyNames()) {
-            payloadMetaData.put(propertyName, message.getProperty(propertyName));
+        for (String propertyName : message.getPropertyNames(PropertyScope.OUTBOUND)) {
+            payloadMetaData.put(propertyName, message.getProperty(propertyName, PropertyScope.OUTBOUND));
         }
         entry.setPayloadMetaData(payloadMetaData);
         return entry;

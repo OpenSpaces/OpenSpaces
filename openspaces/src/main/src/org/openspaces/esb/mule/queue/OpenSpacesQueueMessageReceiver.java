@@ -29,6 +29,7 @@ import org.mule.api.endpoint.InboundEndpoint;
 import org.mule.api.lifecycle.CreateException;
 import org.mule.api.service.Service;
 import org.mule.api.transport.Connector;
+import org.mule.transport.NullPayload;
 import org.mule.transport.PollingReceiverWorker;
 import org.mule.transport.TransactedPollingMessageReceiver;
 import org.openspaces.core.SpaceClosedException;
@@ -152,13 +153,18 @@ public class OpenSpacesQueueMessageReceiver extends TransactedPollingMessageRece
         if (endpoint.getExchangePattern().hasResponse() && response != null) {
 
             MuleMessage responseMessage = response.getMessage();
-
+           
             String correlationId = message.getCorrelationId();
 
             OpenSpacesQueueObject responseEntry = new OpenSpacesQueueObject();
             responseEntry.setCorrelationID(correlationId);
             responseEntry.setEndpointURI(getEndpointURI().getAddress() + OpenSpacesQueueMessageDispatcher.DEFAULT_RESPONSE_QUEUE);
-            responseEntry.setPayload(responseMessage.getPayload());
+            
+            Object payload = responseMessage.getPayload();
+            if(payload instanceof NullPayload)
+                payload = null;
+                
+            responseEntry.setPayload(payload);
             
             if (logger.isDebugEnabled()) {
                 logger.debug(getEndpointURI() + " sending response to client  " + responseEntry);

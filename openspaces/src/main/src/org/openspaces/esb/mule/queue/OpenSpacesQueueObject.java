@@ -29,6 +29,7 @@ import com.gigaspaces.annotation.pojo.SpaceDynamicProperties;
 import com.gigaspaces.annotation.pojo.SpaceExclude;
 import com.gigaspaces.annotation.pojo.SpaceIndex;
 import com.gigaspaces.annotation.pojo.SpacePersist;
+import com.gigaspaces.annotation.pojo.SpaceRouting;
 import com.gigaspaces.document.DocumentProperties;
 import com.gigaspaces.internal.io.IOUtils;
 
@@ -62,7 +63,7 @@ public class OpenSpacesQueueObject implements Externalizable {
         this.endpointURI = endpointURI;
     }
 
-    @SpaceIndex
+    @SpaceRouting
     public String getEndpointURI() {
         return endpointURI;
     }

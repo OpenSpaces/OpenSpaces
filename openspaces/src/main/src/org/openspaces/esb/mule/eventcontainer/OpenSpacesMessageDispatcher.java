@@ -101,18 +101,6 @@ public class OpenSpacesMessageDispatcher extends AbstractMessageDispatcher {
         }
     }
 
-    /**
-     * It is possible for dispose to be called twice in some cases. We handle this situation here:
-     * the second call is just ignored.
-     */
-    public void dispose() {
-        if(this.getLifecycleState().isDisposed() || this.getLifecycleState().isDisposing()) {
-            return;
-        } else {
-            super.dispose();
-        }
-    }
-    
     protected void doDispose() {
     }
 
