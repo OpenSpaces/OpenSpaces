@@ -40,7 +40,6 @@ public class TakeAndWriteCompositeSyncTests extends AbstractMuleTests {
         for (int i = 0; i < numberOfMsgs; i++) {
             SyncMessage template = new SyncMessage("Hello World " + i, 4);
             SyncMessage message = gigaSpace.take(template, TIMEOUT);
-            System.out.println(gigaSpace.read(null));
             assertNotNull(message);
         }
         assertEquals(0, gigaSpace.count(new SyncMessage()));
