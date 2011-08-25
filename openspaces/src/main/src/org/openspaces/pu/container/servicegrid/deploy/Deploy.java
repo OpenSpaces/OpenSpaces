@@ -567,7 +567,7 @@ public class Deploy {
         } 
         
         String puStringWithoutComments = removeCommentsFromPuString(puString);
-        if (puStringWithoutComments.contains("schema=\"mirror\"")) {
+        if (puStringWithoutComments.contains("os-core:mirror") || puStringWithoutComments.contains("schema=\"mirror\"")) {
             return ProcessingUnitType.MIRROR.name(); //mirror space
         } 
         if (puStringWithoutComments.contains("os-core:space")) {
