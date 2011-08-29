@@ -9,7 +9,7 @@
 
     <description>
         This mule config file using helloPollingEventContainer and gigaSpace beans that declared in puembedmuleref.xml
-        and loaded by the parent appliction context
+        and loaded by the parent application context
     </description>
 
     <os-eventcontainer:connector name="gigaSpacesConnector"/>
