@@ -24,6 +24,7 @@ public interface InternalGridServiceContainer extends GridServiceContainer, Inte
     /**
      * @return false only when all processing unit instances have completed shutdown.
      * @see ProcessingUnitInstanceRemovedEventListener - use this event to get an indication when processing unit instance has started shutdown.
+     * @since 8.0.4
      */
     boolean hasProcessingUnitInstances() throws RemoteException;
     
