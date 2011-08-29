@@ -1,5 +1,6 @@
 package org.openspaces.grid.gsm.containers;
 
+import java.rmi.RemoteException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -17,6 +18,7 @@ import org.openspaces.admin.gsa.GridServiceAgents;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.gsa.InternalGridServiceAgent;
+import org.openspaces.admin.internal.gsc.InternalGridServiceContainer;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.LogPerProcessingUnit;
 import org.openspaces.grid.gsm.SingleThreadedPollingLog;
@@ -110,11 +112,11 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
         startContainersOnMachineWithAllocatedCapacitySurplus(sla);
         
         if (state.getNumberOfContainersMarkedForShutdown(pu) > 0) {
-            throw new OperationInProgressException();
+            throw new OperationInProgressException("Containers still pending shutdown.");
         }
         
         if (state.getNumberOfFutureContainers(pu) > 0) {
-            throw new OperationInProgressException();
+            throw new OperationInProgressException("Containers still being started.");
         }
         
     }
@@ -274,26 +276,43 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
     /**
      * kills and removes containers that are marked for shutdown and have no pu instances deployed
      * on them.
+     * @throws OperationInProgressException 
      */
-    private void cleanContainersMarkedForShutdown(ProcessingUnit pu) {
+    private void cleanContainersMarkedForShutdown(ProcessingUnit pu) throws OperationInProgressException {
 
         for (final GridServiceContainer container : state.getContainersMarkedForDeallocation(pu)) {
 
-            if (!container.isDiscovered()) {
+            boolean isContainerDiscovered = container.isDiscovered();
+            
+            if (!isContainerDiscovered) {
                 // container kill completed
                 state.unmarkForShutdownContainer(pu, container);
             }
-
-            else if (container.getProcessingUnitInstances().length == 0) {
+            else if (container.getProcessingUnitInstances().length > 0) {
+                // cannot kill container since it still has pu instances on it.
+                logger.debug("Processing unit instances in container " + ContainersSlaUtils.gscToString(container) + " are still running.");
+            }
+            else {
                 // kill container
                 ((InternalAdmin) pu.getAdmin()).scheduleAdminOperation(new Runnable() {
-
                     public void run() {
-                        container.kill();
+                        boolean hasProcessingUnitInstances;
+                        try {
+                            hasProcessingUnitInstances = ((InternalGridServiceContainer)container).hasProcessingUnitInstances();
+                        } catch (RemoteException e) {
+                            logger.info("Cannot determine number of processing unit instances running on conatiner " + ContainersSlaUtils.gscToString(container),e);
+                            return;
+                        }
+                        
+                        if (hasProcessingUnitInstances) {
+                            logger.debug("Processing unit instances in container " + ContainersSlaUtils.gscToString(container) + " are shutting down.");
+                        }
+                        else {
+                            logger.info("Killing container " + ContainersSlaUtils.gscToString(container) + " since it is not running any processing unit instances.");
+                            container.kill();
+                        }
                     }
                 });
-            } else {
-                // cannot kill container since it still has pu instances on it.
             }
         }
     }
@@ -361,8 +380,15 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
         }
     }
     
-    @SuppressWarnings("serial")
     private static class OperationInProgressException extends Exception {
+
+        public OperationInProgressException(String message) {
+            super(message);
+        }
+        
+        public OperationInProgressException(String message, Throwable cause) {
+            super(message,cause);
+        }
 
         private static final long serialVersionUID = -5017788679551801723L;
     }

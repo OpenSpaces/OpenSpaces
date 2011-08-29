@@ -12,6 +12,7 @@ import com.gigaspaces.log.LogEntries;
 import com.gigaspaces.log.LogProcessType;
 import net.jini.core.lookup.ServiceID;
 
+import org.jini.rio.core.provision.ServiceRecord;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.pu.DefaultProcessingUnitInstances;
 import org.openspaces.admin.internal.pu.InternalProcessingUnitInstances;
@@ -219,6 +220,10 @@ public class DefaultGridServiceContainer extends AbstractAgentGridComponent impl
         gsc.runGc();
     }
 
+    public boolean hasProcessingUnitInstances() throws RemoteException {
+        return gsc.getServiceRecords(ServiceRecord.ACTIVE_SERVICE_RECORD | ServiceRecord.INACTIVE_SERVICE_RECORD).length > 0;  
+    }
+    
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -231,4 +236,6 @@ public class DefaultGridServiceContainer extends AbstractAgentGridComponent impl
     public int hashCode() {
         return serviceID.hashCode();
     }
+    
+    
 }

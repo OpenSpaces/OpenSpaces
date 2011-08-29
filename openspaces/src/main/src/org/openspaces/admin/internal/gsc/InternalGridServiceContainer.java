@@ -1,5 +1,7 @@
 package org.openspaces.admin.internal.gsc;
 
+import java.rmi.RemoteException;
+
 import com.gigaspaces.grid.gsc.GSC;
 import net.jini.core.lookup.ServiceID;
 import org.openspaces.admin.gsc.GridServiceContainer;
@@ -18,4 +20,11 @@ public interface InternalGridServiceContainer extends GridServiceContainer, Inte
     void addProcessingUnitInstance(ProcessingUnitInstance processingUnitInstance);
 
     void removeProcessingUnitInstance(String uid);
+    
+    /**
+     * @return false only when all processing unit instances have completed shutdown.
+     * @see ProcessingUnitInstanceRemovedEventListener - use this event to get an indication when processing unit instance has started shutdown.
+     */
+    boolean hasProcessingUnitInstances() throws RemoteException;
+    
 }
