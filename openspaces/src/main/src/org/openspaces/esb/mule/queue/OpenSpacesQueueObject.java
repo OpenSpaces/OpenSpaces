@@ -27,7 +27,6 @@ import com.gigaspaces.annotation.pojo.FifoSupport;
 import com.gigaspaces.annotation.pojo.SpaceClass;
 import com.gigaspaces.annotation.pojo.SpaceDynamicProperties;
 import com.gigaspaces.annotation.pojo.SpaceExclude;
-import com.gigaspaces.annotation.pojo.SpaceIndex;
 import com.gigaspaces.annotation.pojo.SpacePersist;
 import com.gigaspaces.annotation.pojo.SpaceRouting;
 import com.gigaspaces.document.DocumentProperties;
@@ -40,7 +39,7 @@ import com.gigaspaces.internal.io.IOUtils;
  * 
  * @author anna
  */
-@SpaceClass(replicate = true, fifoSupport = FifoSupport.OPERATION)
+@SpaceClass(replicate = true,fifoSupport=FifoSupport.OPERATION)
 public class OpenSpacesQueueObject implements Externalizable {
 
     private static final long serialVersionUID = 1L;
@@ -63,7 +62,6 @@ public class OpenSpacesQueueObject implements Externalizable {
         this.endpointURI = endpointURI;
     }
 
-    @SpaceRouting
     public String getEndpointURI() {
         return endpointURI;
     }
@@ -106,7 +104,7 @@ public class OpenSpacesQueueObject implements Externalizable {
         this.payloadMetaData = payloadMetaData;
     }
 
-    @SpaceIndex
+    @SpaceRouting
     public String getCorrelationID() {
         return correlationID;
     }
@@ -126,6 +124,7 @@ public class OpenSpacesQueueObject implements Externalizable {
 
     public void writeExternal(ObjectOutput out) throws IOException {
         IOUtils.writeString(out, endpointURI);
+        IOUtils.writeString(out, correlationID);
         out.writeBoolean(isPersistent);
         IOUtils.writeObject(out, internalPayload);
         IOUtils.writeObject(out, payloadMetaData);
@@ -133,6 +132,7 @@ public class OpenSpacesQueueObject implements Externalizable {
 
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         endpointURI = IOUtils.readString(in);
+        correlationID = IOUtils.readString(in);
         isPersistent = in.readBoolean();
         internalPayload = IOUtils.readObject(in);
         payloadMetaData = IOUtils.readObject(in);
@@ -140,7 +140,7 @@ public class OpenSpacesQueueObject implements Externalizable {
 
     @Override
     public String toString() {
-        return "OpenSpacesQueueObject [endpointURI=" + endpointURI + ", internalPayload=" + internalPayload
+        return getClass().getSimpleName() + " [endpointURI=" + endpointURI + ", correlationId=" + correlationID + ", internalPayload=" + internalPayload
                 + ", payloadMetaData=" + payloadMetaData + ", isPersistent=" + isPersistent + "]";
     }
 

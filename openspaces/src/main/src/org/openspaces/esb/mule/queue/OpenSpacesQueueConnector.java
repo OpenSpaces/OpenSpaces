@@ -230,6 +230,30 @@ public class OpenSpacesQueueConnector extends AbstractConnector implements Appli
         return null;
     }
     
+    /**
+     * Creates a new template for querying the queue 
+     * @param queueName 
+     * @return
+     */
+    public OpenSpacesQueueObject newQueueTemplate(String queueName) {
+        OpenSpacesQueueObject queueObject = isFifo() ? new OpenSpacesFifoQueueObject() : new OpenSpacesQueueObject();
+        queueObject.setPersistent(isPersistent());
+        queueObject.setEndpointURI(queueName);
+        return queueObject;
+    }
+    
+    /**
+     * Creates a new entry to put in the queue 
+     * @param queueName 
+     * @return
+     */
+    public OpenSpacesQueueObject newQueueEntry(String queueName) {
+        OpenSpacesQueueObject queueObject = isFifo() ? new OpenSpacesFifoQueueObject() : new OpenSpacesQueueObject();
+        queueObject.setPersistent(isPersistent());
+        queueObject.setEndpointURI(queueName);
+        return queueObject;
+    }
+    
     @Override
     public boolean isResponseEnabled()
     {

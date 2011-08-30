@@ -36,7 +36,6 @@ import org.openspaces.core.SpaceClosedException;
 import org.openspaces.core.SpaceInterruptedException;
 
 import com.gigaspaces.query.ISpaceQuery;
-import com.j_spaces.core.client.ReadModifiers;
 import com.j_spaces.core.exception.SpaceUnavailableException;
 
 /**
@@ -71,9 +70,7 @@ public class OpenSpacesQueueMessageReceiver extends TransactedPollingMessageRece
     }
 
     protected void doConnect() throws Exception {
-        OpenSpacesQueueObject internalTemplate = new OpenSpacesQueueObject();
-        internalTemplate.setEndpointURI(endpoint.getEndpointURI().getAddress());
-        internalTemplate.setPersistent(connector.isPersistent()) ;
+        OpenSpacesQueueObject internalTemplate = connector.newQueueTemplate(endpoint.getEndpointURI().getAddress());
         template = connector.getGigaSpaceObj().snapshot(internalTemplate);
     }
 
@@ -107,16 +104,12 @@ public class OpenSpacesQueueMessageReceiver extends TransactedPollingMessageRece
             // also make sure batchSize is always at least 1
             int batchSize = Math.max(1, ((maxThreads / 2) - 1));
             
-            int takeModifier =  connector.getGigaSpaceObj().getSpace().getReadModifiers();
-            if(connector.isFifo())
-                takeModifier |= ReadModifiers.FIFO;
-            
-            OpenSpacesQueueObject entry =  connector.getGigaSpaceObj().take(template, connector.getTimeout(),takeModifier);
+            OpenSpacesQueueObject entry =  connector.getGigaSpaceObj().take(template);
 
             if (entry != null) {
                 appendMessage(messages, entry);
                 // batch more messages if needed
-                OpenSpacesQueueObject[] entries = connector.getGigaSpaceObj().takeMultiple(template, batchSize,takeModifier);
+                OpenSpacesQueueObject[] entries = connector.getGigaSpaceObj().takeMultiple(template, batchSize);
                 if (entries != null) {
                     for (OpenSpacesQueueObject entry1 : entries) {
                         appendMessage(messages, entry1);

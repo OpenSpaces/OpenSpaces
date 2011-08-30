@@ -93,7 +93,7 @@ public class OpenSpacesQueueMessageDispatcher extends AbstractMessageDispatcher 
 
             TransactionCallback cb = new TransactionCallback() {
                 public Object doInTransaction() throws Exception {
-                    return receiver.onCall(event.getMessage(), true);
+                    return receiver.onCall(event.getMessage(),true);
                 }
             };
             MuleEvent muleEvent = (MuleEvent) tt.execute(cb);
@@ -104,7 +104,7 @@ public class OpenSpacesQueueMessageDispatcher extends AbstractMessageDispatcher 
         boolean returnResponse = returnResponse(event, doSend) && !isTransactional;
        
         //assign correlationId for sync invocations - so that the request can be correlated with the response
-        final String correlationId = createCorrelationId(event.getMessage(),returnResponse);
+        final String correlationId = createCorrelationId();
         
         MuleMessage message = event.getMessage();
         connector.getSessionHandler().storeSessionInfoToMessage(event.getSession(), message);
@@ -135,11 +135,9 @@ public class OpenSpacesQueueMessageDispatcher extends AbstractMessageDispatcher 
 
     private OpenSpacesQueueObject prepareMessageForDispatch(final  MuleMessage message,
             final EndpointURI endpointUri, final String correlationId) throws IOException {
-        OpenSpacesQueueObject entry = new OpenSpacesQueueObject();
-        entry.setPayload(message.getPayload());
-        entry.setEndpointURI(endpointUri.getAddress());
-        entry.setPersistent(connector.isPersistent());
+        OpenSpacesQueueObject entry = connector.newQueueEntry(endpointUri.getAddress());
         entry.setCorrelationID(correlationId);
+        entry.setPayload(message.getPayload());
         
         //copy the message properties
         DocumentProperties payloadMetaData = new DocumentProperties();
@@ -158,10 +156,9 @@ public class OpenSpacesQueueMessageDispatcher extends AbstractMessageDispatcher 
         if (logger.isDebugEnabled()) {
             logger.debug("waiting for response Event on endpointUri: " + replyTo);
         } 
-       
-        OpenSpacesQueueObject template = new OpenSpacesQueueObject();
+        
+        OpenSpacesQueueObject template = connector.newQueueTemplate(replyTo);
         template.setCorrelationID(correlationId);
-        template.setEndpointURI(replyTo);
         
         try {
             OpenSpacesQueueObject responseEntry = connector.getGigaSpaceObj().take(template, timeout);
@@ -179,11 +176,11 @@ public class OpenSpacesQueueMessageDispatcher extends AbstractMessageDispatcher 
         }
     }
 
-    private String createCorrelationId(MuleMessage muleMessage, boolean returnResponse) {
-        String correlationId = muleMessage.getCorrelationId();
-        if(returnResponse && correlationId == null)
-            correlationId = UUID.randomUUID().toString();
-        return correlationId;
+    /**
+     * Always create a correlation id since it is used as object routing
+     */
+    private String createCorrelationId() {
+       return UUID.randomUUID().toString();
     }
 
     protected void doDispose() {

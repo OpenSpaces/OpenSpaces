@@ -23,8 +23,6 @@ import org.mule.transport.AbstractMessageRequester;
 import org.openspaces.core.SpaceClosedException;
 import org.openspaces.core.SpaceInterruptedException;
 
-import com.j_spaces.core.client.ReadModifiers;
-
 /**
  * Requests (takes) a message from an internal queue. The queue is a virtualized queue represented
  * by the {@link org.openspaces.esb.mule.queue.OpenSpacesQueueObject} with its endpoint address
@@ -61,14 +59,19 @@ public class OpenSpacesQueueMessageRequestor extends AbstractMessageRequester {
                 logger.debug("Waiting for a message on " + endpoint.getEndpointURI().getAddress());
             }
             try {
-                int takeModifier =  connector.getGigaSpaceObj().getSpace().getReadModifiers();
-                if(connector.isFifo())
-                    takeModifier |= ReadModifiers.FIFO;
-                
-                OpenSpacesQueueObject entry = (OpenSpacesQueueObject) connector.getGigaSpaceObj().take(template, timeout,takeModifier);
-                if (entry != null) {
-                    message = createMuleMessage(entry);
-                }
+                long startTime = System.currentTimeMillis();
+                long currentTime = System.currentTimeMillis();
+                long interval = 100;
+                do {
+
+                    OpenSpacesQueueObject entry = (OpenSpacesQueueObject) connector.getGigaSpaceObj().take(template);
+                    if (entry != null) {
+                        return createMuleMessage(entry);                        
+                    }
+                    // entry was not found or taken by another thread
+                    Thread.sleep(interval);
+                    currentTime = System.currentTimeMillis();
+                } while (timeout == -1 || currentTime - startTime < timeout);
             } catch (SpaceInterruptedException e) {
                 // do nothing, we are being stopped
             } catch (SpaceClosedException e) {
@@ -101,10 +104,7 @@ public class OpenSpacesQueueMessageRequestor extends AbstractMessageRequester {
     }
 
     protected void doConnect() throws Exception {
-        OpenSpacesQueueObject internalTemplate = new OpenSpacesQueueObject();
-        internalTemplate.setEndpointURI(endpoint.getEndpointURI().getAddress());
-        internalTemplate.setPersistent(connector.isPersistent()) ;
-        
+        OpenSpacesQueueObject internalTemplate = connector.newQueueTemplate(endpoint.getEndpointURI().getAddress());
         template = connector.getGigaSpaceObj().snapshot(internalTemplate);
     }
 
