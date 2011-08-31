@@ -47,7 +47,8 @@ public class CpuUtilizationAlertConfigurer implements AlertConfigurer {
 	 * (non-Javadoc)
 	 * @see org.openspaces.admin.alert.config.AlertConfigurer#enable(boolean)
 	 */
-	public CpuUtilizationAlertConfigurer enable(boolean enabled) {
+	@Override
+    public CpuUtilizationAlertConfigurer enable(boolean enabled) {
 	    config.setEnabled(enabled);
 	    return this;
 	}
@@ -99,7 +100,8 @@ public class CpuUtilizationAlertConfigurer implements AlertConfigurer {
 	 * Get a fully configured machine CPU utilization configuration (after all properties have been set).
 	 * @return a fully configured alert bean configuration.
 	 */
-	public CpuUtilizationAlertConfiguration create() {
+	@Override
+    public CpuUtilizationAlertConfiguration create() {
 		return config;
 	}
 }

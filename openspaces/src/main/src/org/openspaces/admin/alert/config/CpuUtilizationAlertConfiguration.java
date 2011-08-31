@@ -126,7 +126,8 @@ public class CpuUtilizationAlertConfiguration implements AlertConfiguration {
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setProperties(Map<String, String> properties) {
+	@Override
+    public void setProperties(Map<String, String> properties) {
 	    this.properties.clear();
 	    this.properties.putAll(properties);
 	}
@@ -134,20 +135,23 @@ public class CpuUtilizationAlertConfiguration implements AlertConfiguration {
 	/**
      * {@inheritDoc}
      */
-	public Map<String, String> getProperties() {
+	@Override
+    public Map<String, String> getProperties() {
 		return properties;
 	}
 
 	/**
      * {@inheritDoc}
      */
-	public String getBeanClassName() {
+	@Override
+    public String getBeanClassName() {
 		return CpuUtilizationAlertBean.class.getName();
 	}
 
 	/**
      * {@inheritDoc}
      */
+    @Override
     public boolean isEnabled() {
         return enabled;
     }
@@ -155,6 +159,7 @@ public class CpuUtilizationAlertConfiguration implements AlertConfiguration {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }

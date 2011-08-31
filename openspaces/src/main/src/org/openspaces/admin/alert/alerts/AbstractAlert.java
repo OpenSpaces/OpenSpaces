@@ -35,46 +35,57 @@ public class AbstractAlert implements Alert {
         return alert;
     }
 
+    @Override
     public String getAlertUid() {
         return alert.getAlertUid();
     }
 
+    @Override
     public String getComponentUid() {
         return alert.getComponentUid();
     }
     
+    @Override
     public String getComponentDescription() {
         return alert.getComponentDescription();
     }
 
+    @Override
     public String getDescription() {
         return alert.getDescription();
     }
 
+    @Override
     public String getGroupUid() {
         return alert.getGroupUid();
     }
 
+    @Override
     public String getName() {
         return alert.getName();
     }
 
+    @Override
     public Map<String, String> getProperties() {
         return alert.getProperties();
     }
 
+    @Override
     public Map<String, String> getConfig() {
         return alert.getConfig();
     }
 
+    @Override
     public AlertSeverity getSeverity() {
         return alert.getSeverity();
     }
 
+    @Override
     public AlertStatus getStatus() {
         return alert.getStatus();
     }
 
+    @Override
     public long getTimestamp() {
         return alert.getTimestamp();
     }
@@ -84,10 +95,12 @@ public class AbstractAlert implements Alert {
         return alert.toString();
     }
 
+    @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         alert = (Alert)in.readObject();
     }
 
+    @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeObject(alert);
     }

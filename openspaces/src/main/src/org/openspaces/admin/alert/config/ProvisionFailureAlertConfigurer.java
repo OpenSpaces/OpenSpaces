@@ -27,6 +27,7 @@ public class ProvisionFailureAlertConfigurer implements AlertConfigurer {
      * (non-Javadoc)
      * @see org.openspaces.admin.alert.config.AlertConfigurer#enable(boolean)
      */
+    @Override
     public ProvisionFailureAlertConfigurer enable(boolean enabled) {
         config.setEnabled(enabled);
         return this;
@@ -36,6 +37,7 @@ public class ProvisionFailureAlertConfigurer implements AlertConfigurer {
      * Get a fully configured provision failure alert configuration (after all properties have been set).
      * @return a fully configured alert configuration.
      */
+    @Override
     public AlertConfiguration create() {
         return config;
     }

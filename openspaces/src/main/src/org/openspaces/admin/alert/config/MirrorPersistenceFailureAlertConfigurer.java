@@ -43,6 +43,7 @@ public class MirrorPersistenceFailureAlertConfigurer implements AlertConfigurer 
      * (non-Javadoc)
      * @see org.openspaces.admin.alert.config.AlertConfigurer#enable(boolean)
      */
+    @Override
     public MirrorPersistenceFailureAlertConfigurer enable(boolean enabled) {
         config.setEnabled(enabled);
         return this;
@@ -52,7 +53,8 @@ public class MirrorPersistenceFailureAlertConfigurer implements AlertConfigurer 
 	 * Get a fully configured replication channel disconnection configuration (after all properties have been set).
 	 * @return a fully configured alert bean configuration.
 	 */
-	public MirrorPersistenceFailureAlertConfiguration create() {
+	@Override
+    public MirrorPersistenceFailureAlertConfiguration create() {
 		return config;
 	}
 }

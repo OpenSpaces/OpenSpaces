@@ -44,6 +44,7 @@ public class ReplicationRedoLogSizeAlertConfigurer implements AlertConfigurer {
      * (non-Javadoc)
      * @see org.openspaces.admin.alert.config.AlertConfigurer#enable(boolean)
      */
+    @Override
     public ReplicationRedoLogSizeAlertConfigurer enable(boolean enabled) {
         config.setEnabled(enabled);
         return this;
@@ -77,7 +78,8 @@ public class ReplicationRedoLogSizeAlertConfigurer implements AlertConfigurer {
 	 * Get a fully configured configuration (after all properties have been set).
 	 * @return a fully configured alert bean configuration.
 	 */
-	public ReplicationRedoLogSizeAlertConfiguration create() {
+	@Override
+    public ReplicationRedoLogSizeAlertConfiguration create() {
 		return config;
 	}
 }

@@ -43,6 +43,7 @@ public class ReplicationChannelDisconnectedAlertConfigurer implements AlertConfi
      * (non-Javadoc)
      * @see org.openspaces.admin.alert.config.AlertConfigurer#enable(boolean)
      */
+    @Override
     public ReplicationChannelDisconnectedAlertConfigurer enable(boolean enabled) {
         config.setEnabled(enabled);
         return this;
@@ -52,7 +53,8 @@ public class ReplicationChannelDisconnectedAlertConfigurer implements AlertConfi
 	 * Get a fully configured replication channel disconnection configuration (after all properties have been set).
 	 * @return a fully configured alert bean configuration.
 	 */
-	public ReplicationChannelDisconnectedAlertConfiguration create() {
+	@Override
+    public ReplicationChannelDisconnectedAlertConfiguration create() {
 		return config;
 	}
 }

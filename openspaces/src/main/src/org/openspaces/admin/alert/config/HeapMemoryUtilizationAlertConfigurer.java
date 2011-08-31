@@ -47,6 +47,7 @@ public class HeapMemoryUtilizationAlertConfigurer implements AlertConfigurer {
      * (non-Javadoc)
      * @see org.openspaces.admin.alert.config.AlertConfigurer#enable(boolean)
      */
+    @Override
     public HeapMemoryUtilizationAlertConfigurer enable(boolean enabled) {
         config.setEnabled(enabled);
         return this;
@@ -104,6 +105,7 @@ public class HeapMemoryUtilizationAlertConfigurer implements AlertConfigurer {
      * 
      * @return a fully configured alert bean configuration.
      */
+    @Override
     public HeapMemoryUtilizationAlertConfiguration create() {
         return config;
     }

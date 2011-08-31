@@ -46,6 +46,7 @@ public class GarbageCollectionAlertConfigurer implements AlertConfigurer {
      * (non-Javadoc)
      * @see org.openspaces.admin.alert.config.AlertConfigurer#enable(boolean)
      */
+    @Override
     public GarbageCollectionAlertConfigurer enable(boolean enabled) {
         config.setEnabled(enabled);
         return this;
@@ -87,6 +88,7 @@ public class GarbageCollectionAlertConfigurer implements AlertConfigurer {
      * 
      * @return a fully configured alert bean configuration.
      */
+    @Override
     public GarbageCollectionAlertConfiguration create() {
         return config;
     }

@@ -30,6 +30,7 @@ public class ProvisionFailureAlertConfiguration implements AlertConfiguration {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isEnabled() {
         return enabled;
     }
@@ -37,6 +38,7 @@ public class ProvisionFailureAlertConfiguration implements AlertConfiguration {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
 
@@ -45,6 +47,7 @@ public class ProvisionFailureAlertConfiguration implements AlertConfiguration {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getBeanClassName() {
         return ProvisionFailureAlertBean.class.getName();
     }
@@ -52,6 +55,7 @@ public class ProvisionFailureAlertConfiguration implements AlertConfiguration {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Map<String, String> getProperties() {
         return properties;
     }
@@ -59,6 +63,7 @@ public class ProvisionFailureAlertConfiguration implements AlertConfiguration {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void setProperties(Map<String, String> properties) {
         this.properties.clear();
         this.properties.putAll(properties);

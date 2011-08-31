@@ -48,6 +48,7 @@ public class PhysicalMemoryUtilizationAlertConfigurer implements AlertConfigurer
      * (non-Javadoc)
      * @see org.openspaces.admin.alert.config.AlertConfigurer#enable(boolean)
      */
+    @Override
     public PhysicalMemoryUtilizationAlertConfigurer enable(boolean enabled) {
         config.setEnabled(enabled);
         return this;
@@ -103,7 +104,8 @@ public class PhysicalMemoryUtilizationAlertConfigurer implements AlertConfigurer
 	 * Get a fully configured physical memory utilization configuration (after all properties have been set).
 	 * @return a fully configured alert bean configuration.
 	 */
-	public PhysicalMemoryUtilizationAlertConfiguration create() {
+	@Override
+    public PhysicalMemoryUtilizationAlertConfiguration create() {
 		return config;
 	}
 }

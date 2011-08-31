@@ -47,7 +47,8 @@ public class MirrorPersistenceFailureAlertConfiguration implements AlertConfigur
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setProperties(Map<String, String> properties) {
+	@Override
+    public void setProperties(Map<String, String> properties) {
 	    this.properties.clear();
 	    this.properties.putAll(properties);
 	}
@@ -55,14 +56,16 @@ public class MirrorPersistenceFailureAlertConfiguration implements AlertConfigur
 	/**
      * {@inheritDoc}
      */
-	public Map<String, String> getProperties() {
+	@Override
+    public Map<String, String> getProperties() {
 		return properties;
 	}
 
 	/**
      * {@inheritDoc}
      */
-	public String getBeanClassName() {
+	@Override
+    public String getBeanClassName() {
 		return MirrorPersistenceFailureAlertBean.class.getName();
 	}
 	
@@ -70,6 +73,7 @@ public class MirrorPersistenceFailureAlertConfiguration implements AlertConfigur
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isEnabled() {
         return enabled;
     }
@@ -77,6 +81,7 @@ public class MirrorPersistenceFailureAlertConfiguration implements AlertConfigur
     /**
      * {@inheritDoc}
      */
+    @Override
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }

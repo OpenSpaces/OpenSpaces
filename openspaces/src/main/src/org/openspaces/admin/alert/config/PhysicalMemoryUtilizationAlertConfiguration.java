@@ -127,7 +127,8 @@ public class PhysicalMemoryUtilizationAlertConfiguration implements AlertConfigu
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setProperties(Map<String, String> properties) {
+	@Override
+    public void setProperties(Map<String, String> properties) {
 	    this.properties.clear();
 	    this.properties.putAll(properties);
 	}
@@ -135,20 +136,23 @@ public class PhysicalMemoryUtilizationAlertConfiguration implements AlertConfigu
 	/**
      * {@inheritDoc}
      */
-	public Map<String, String> getProperties() {
+	@Override
+    public Map<String, String> getProperties() {
 		return properties;
 	}
 
 	/**
      * {@inheritDoc}
      */
-	public String getBeanClassName() {
+	@Override
+    public String getBeanClassName() {
 		return PhysicalMemoryUtilizationAlertBean.class.getName();
 	}
 	   
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isEnabled() {
         return enabled;
     }
@@ -156,6 +160,7 @@ public class PhysicalMemoryUtilizationAlertConfiguration implements AlertConfigu
     /**
      * {@inheritDoc}
      */
+    @Override
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }

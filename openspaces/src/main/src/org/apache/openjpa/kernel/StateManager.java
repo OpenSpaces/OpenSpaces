@@ -107,7 +107,7 @@ public class StateManager extends StateManagerImpl {
                     stateManager.setOwnerInformation(this, fmd);
                 break;
             case JavaTypes.ARRAY:
-                broker.persistCollection((Collection<?>) Arrays.asList((Object[]) value), true, call, this, fmd);
+                broker.persistCollection(Arrays.asList((Object[]) value), true, call, this, fmd);
                 break;
             case JavaTypes.COLLECTION:
                 broker.persistCollection((Collection<?>) value, true, call, this, fmd);

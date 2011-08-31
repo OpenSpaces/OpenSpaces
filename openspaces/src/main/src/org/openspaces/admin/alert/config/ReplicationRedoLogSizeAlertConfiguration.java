@@ -97,7 +97,8 @@ public class ReplicationRedoLogSizeAlertConfiguration implements AlertConfigurat
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setProperties(Map<String, String> properties) {
+	@Override
+    public void setProperties(Map<String, String> properties) {
 	    this.properties.clear();
 	    this.properties.putAll(properties);
 	}
@@ -105,14 +106,16 @@ public class ReplicationRedoLogSizeAlertConfiguration implements AlertConfigurat
 	/**
      * {@inheritDoc}
      */
-	public Map<String, String> getProperties() {
+	@Override
+    public Map<String, String> getProperties() {
 		return properties;
 	}
 
 	/**
      * {@inheritDoc}
      */
-	public String getBeanClassName() {
+	@Override
+    public String getBeanClassName() {
 		return ReplicationRedoLogSizeAlertBean.class.getName();
 	}
 	
@@ -120,6 +123,7 @@ public class ReplicationRedoLogSizeAlertConfiguration implements AlertConfigurat
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isEnabled() {
         return enabled;
     }
@@ -127,6 +131,7 @@ public class ReplicationRedoLogSizeAlertConfiguration implements AlertConfigurat
     /**
      * {@inheritDoc}
      */
+    @Override
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
