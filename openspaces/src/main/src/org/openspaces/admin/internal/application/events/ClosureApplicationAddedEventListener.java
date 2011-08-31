@@ -13,6 +13,7 @@ public class ClosureApplicationAddedEventListener extends AbstractClosureEventLi
         super(closure);
     }
 
+    @Override
     public void applicationAdded(Application application) {
         getClosure().call(application);
     }

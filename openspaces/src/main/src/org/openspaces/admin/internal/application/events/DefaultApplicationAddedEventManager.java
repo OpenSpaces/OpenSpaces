@@ -22,9 +22,11 @@ public class DefaultApplicationAddedEventManager implements InternalApplicationA
         this.admin = (InternalAdmin) applications.getAdmin();
     }
 
+    @Override
     public void applicationAdded(final Application application) {
         for (final ApplicationAddedEventListener listener : applicationAddedEventListeners) {
             admin.pushEvent(listener, new Runnable() {
+                @Override
                 public void run() {
                     listener.applicationAdded(application);
                 }
@@ -35,6 +37,7 @@ public class DefaultApplicationAddedEventManager implements InternalApplicationA
     public void add(final ApplicationAddedEventListener eventListener, boolean includeExisting) {
         if (includeExisting) {
             admin.raiseEvent(eventListener, new Runnable() {
+                @Override
                 public void run() {
                     for (Application application : applications) {
                         eventListener.applicationAdded(application);
@@ -45,10 +48,12 @@ public class DefaultApplicationAddedEventManager implements InternalApplicationA
         applicationAddedEventListeners.add(eventListener);
     }
 
+    @Override
     public void add(final ApplicationAddedEventListener  eventListener) {
         add(eventListener, true);
     }
 
+    @Override
     public void remove(ApplicationAddedEventListener eventListener) {
         applicationAddedEventListeners.remove(eventListener);
     }

@@ -149,6 +149,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
         sdm.terminate();
     }
 
+    @Override
     public void discovered(final DiscoveryEvent disEvent) {
         for (final ServiceRegistrar registrar : disEvent.getRegistrars()) {
             try {
@@ -167,6 +168,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 final String[] zones = ((GridZoneProvider) registrar.getRegistrar()).getZones();
                 final Entry[] attributeSets = ((com.sun.jini.reggie.Registrar)registrar.getRegistrar()).getLookupAttributes();
                 admin.scheduleNonBlockingStateChange(new Runnable() {
+                    @Override
                     public void run() {
                         String jmxUrl = getJMXConnection( attributeSets );
                         admin.addLookupService(lookupService, nioDetails, osDetails, jvmDetails, jmxUrl, zones);
@@ -180,9 +182,11 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
 
     }
 
+    @Override
     public void discarded(final DiscoveryEvent e) {
         for (final ServiceRegistrar registrar : e.getRegistrars()) {
             admin.scheduleNonBlockingStateChange(new Runnable() {
+                @Override
                 public void run() {
                     admin.removeLookupService(registrar.getServiceID().toString());
                 }
@@ -190,6 +194,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
         }
     }
 
+    @Override
     public void serviceAdded(final ServiceDiscoveryEvent event) {
         final ServiceItem serviceItem = event.getPostEventServiceItem();
         Object service = serviceItem.service;
@@ -211,6 +216,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 final JVMDetails jvmDetails = gridServiceManager.getJVMDetails();
                 final String[] zones = gsm.getZones();
                 admin.scheduleNonBlockingStateChange(new Runnable() {
+                    @Override
                     public void run() {
                         String jmxUrl = getJMXConnection( serviceItem.attributeSets );
                         admin.addGridServiceManager(gridServiceManager, nioDetails, osDetails, jvmDetails, jmxUrl, zones);
@@ -237,6 +243,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 final JVMDetails jvmDetails = elasticServiceManager.getJVMDetails();
                 final String[] zones = esm.getZones();
                 admin.scheduleNonBlockingStateChange(new Runnable() {
+                    @Override
                     public void run() {
                         String jmxUrl = getJMXConnection( serviceItem.attributeSets );
                         admin.addElasticServiceManager(elasticServiceManager, nioDetails, 
@@ -264,6 +271,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 final JVMDetails jvmDetails = gridServiceAgent.getJVMDetails();
                 final String[] zones = gsa.getZones();
                 admin.scheduleNonBlockingStateChange(new Runnable() {
+                    @Override
                     public void run() {
                         String jmxUrl = getJMXConnection( serviceItem.attributeSets );
                         admin.addGridServiceAgent(gridServiceAgent, nioDetails, osDetails, jvmDetails, jmxUrl, zones);
@@ -289,6 +297,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 final JVMDetails jvmDetails = gridServiceContainer.getJVMDetails();
                 final String[] zones = gsc.getZones();
                 admin.scheduleNonBlockingStateChange(new Runnable() {
+                    @Override
                     public void run() {
                         String jmxUrl = getJMXConnection( serviceItem.attributeSets );
                         admin.addGridServiceContainer(gridServiceContainer, nioDetails, 
@@ -312,6 +321,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 final JVMDetails jvmDetails = processingUnitInstance.getJVMDetails();
                 final String[] zones = puServiceBean.getZones();
                 admin.scheduleNonBlockingStateChange(new Runnable() {
+                    @Override
                     public void run() {
                         String jmxUrl = getJMXConnection( serviceItem.attributeSets );
                         admin.addProcessingUnitInstance(processingUnitInstance, nioDetails, osDetails, jvmDetails, jmxUrl,
@@ -390,8 +400,10 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
         return jmxConn;
     }  
 
+    @Override
     public void serviceRemoved(final ServiceDiscoveryEvent event) {
         admin.scheduleNonBlockingStateChange(new Runnable() {
+            @Override
             public void run() {
                 Object service = event.getPreEventServiceItem().service;
                 ServiceID serviceID = event.getPreEventServiceItem().serviceID;
@@ -430,6 +442,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
         });
     }
 
+    @Override
     public void serviceChanged(ServiceDiscoveryEvent event) {
         // TODO do we really care about this?
     }

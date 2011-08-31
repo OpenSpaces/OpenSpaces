@@ -15,10 +15,12 @@ public class DefaultApplication implements InternalApplication {
         this.name = name;
     }
 
+    @Override
     public ProcessingUnits getProcessingUnits() {
         return processingUnits;
     }
 
+    @Override
     public String getName() {
         return name;
     }

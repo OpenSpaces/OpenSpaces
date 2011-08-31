@@ -40,36 +40,44 @@ public class DefaultApplications implements InternalApplications {
         this.applicationRemovedEventManager = new DefaultApplicationRemovedEventManager(this);
     }
 
+    @Override
     public Application[] getApplications() {
         Collection<Application> applications = applicationsByName.values();
         return applications.toArray(new Application[applications.size()]);
     }
 
+    @Override
     public int getSize() {
         return applicationsByName.size();
     }
 
+    @Override
     public boolean isEmpty() {
         return applicationsByName.isEmpty();
     }
 
+    @Override
     public Application getApplication(String name) {
         return applicationsByName.get(name);
     }
 
+    @Override
     public Map<String, Application> getNames() {
         return Collections.unmodifiableMap(applicationsByName);
     }
 
+    @Override
     public Application waitFor(String applicationName) {
         return waitFor(applicationName, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());    
     }
 
+    @Override
     public Application waitFor(final String applicationName, long timeout, TimeUnit timeUnit) {
         final CountDownLatch latch = new CountDownLatch(1);
         final AtomicReference<Application> ref = new AtomicReference<Application>();
         ApplicationAddedEventListener added = new ApplicationAddedEventListener() {
             
+            @Override
             public void applicationAdded(Application application) {
                 if (application.getName().equals(applicationName)) {
                     ref.set(application);
@@ -89,32 +97,39 @@ public class DefaultApplications implements InternalApplications {
         }
     }
 
+    @Override
     public ApplicationAddedEventManager getApplicationAdded() {
         return this.applicationAddedEventManager;
     }
 
+    @Override
     public ApplicationRemovedEventManager getApplicationRemoved() {
         return this.applicationRemovedEventManager;
     }
 
+    @Override
     public void addLifecycleListener(ApplicationLifecycleEventListener eventListener) {
         getApplicationAdded().add(eventListener);
         getApplicationRemoved().add(eventListener);
     }
 
+    @Override
     public void removeLifecycleListener(ApplicationLifecycleEventListener eventListener) {
         getApplicationAdded().remove(eventListener);
         getApplicationRemoved().remove(eventListener);
     }
 
+    @Override
     public Iterator<Application> iterator() {
         return Collections.unmodifiableCollection(applicationsByName.values()).iterator();
     }
 
+    @Override
     public Admin getAdmin() {
         return this.admin;
     }
 
+    @Override
     public void addApplication(Application application, ProcessingUnit processingUnit) {
         assertStateChangesPermitted();
         if (!applicationsByName.containsKey(application.getName())) {
@@ -129,6 +144,7 @@ public class DefaultApplications implements InternalApplications {
         }
     }
 
+    @Override
     public void removeProcessingUnit(ProcessingUnit processingUnit) {
             
         Application application = processingUnit.getApplication();

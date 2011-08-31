@@ -22,9 +22,11 @@ public class DefaultApplicationRemovedEventManager implements InternalApplicatio
         this.admin = (InternalAdmin) applications.getAdmin();
     }
 
+    @Override
     public void applicationRemoved(final Application application) {
         for (final ApplicationRemovedEventListener listener : applicationRemovedEventListeners) {
             admin.pushEvent(listener, new Runnable() {
+                @Override
                 public void run() {
                     listener.applicationRemoved(application);
                 }
@@ -32,10 +34,12 @@ public class DefaultApplicationRemovedEventManager implements InternalApplicatio
         }
     }
 
+    @Override
     public void add(ApplicationRemovedEventListener eventListener) {
         applicationRemovedEventListeners.add(eventListener);
     }
 
+    @Override
     public void remove(ApplicationRemovedEventListener eventListener) {
         applicationRemovedEventListeners.remove(eventListener);
     }

@@ -18,6 +18,7 @@ public class InternalDumpDownloadListenerAdapter implements InternalDumpDownload
         this.listener = listener;
     }
 
+    @Override
     public void onDownload(long downloadedBytes, String name, String fileName) {
         if (listener != null) {
             listener.onDownload(dumpProvider, downloadedBytes, name, fileName);

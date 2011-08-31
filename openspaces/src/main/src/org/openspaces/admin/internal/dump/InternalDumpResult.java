@@ -27,10 +27,12 @@ public class InternalDumpResult implements DumpResult {
         this.internalResult = internalResult;
     }
 
+    @Override
     public String getName() {
         return internalResult.getName();
     }
 
+    @Override
     public long downloadSize() {
         return internalResult.downloadSize();
     }
@@ -39,6 +41,7 @@ public class InternalDumpResult implements DumpResult {
         internalResult.download(internalDumpProvider, zos, new InternalDumpDownloadListenerAdapter(dumpProvider, listener));
     }
 
+    @Override
     public void download(File target, DumpDownloadListener listener) throws AdminException {
         try {
             internalResult.download(internalDumpProvider, target, new InternalDumpDownloadListenerAdapter(dumpProvider, listener));
@@ -47,6 +50,7 @@ public class InternalDumpResult implements DumpResult {
         }
     }
 
+    @Override
     public void download(File targetDirectory, String fileName, DumpDownloadListener listener) throws AdminException {
         try {
             internalResult.download(internalDumpProvider, targetDirectory, fileName, new InternalDumpDownloadListenerAdapter(dumpProvider, listener));
