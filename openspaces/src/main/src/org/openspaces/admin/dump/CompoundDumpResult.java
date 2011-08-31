@@ -24,6 +24,7 @@ public class CompoundDumpResult implements DumpResult {
         return this;
     }
 
+    @Override
     public String getName() {
         StringBuilder sb = new StringBuilder();
         for (DumpResult dumpResult : dumpResults) {
@@ -36,6 +37,7 @@ public class CompoundDumpResult implements DumpResult {
         return dumpResults.toArray(new DumpResult[dumpResults.size()]);
     }
 
+    @Override
     public long downloadSize() {
         long downloadSize = 0;
         for (DumpResult dumpResult : dumpResults) {
@@ -44,6 +46,7 @@ public class CompoundDumpResult implements DumpResult {
         return downloadSize;
     }
 
+    @Override
     public void download(File targetDirectory, String fileName, DumpDownloadListener listener) throws AdminException {
         if (!fileName.endsWith(".zip")) {
             fileName = fileName + ".zip";
@@ -52,6 +55,7 @@ public class CompoundDumpResult implements DumpResult {
         download(zipFile, listener);
     }
 
+    @Override
     public void download(File target, DumpDownloadListener listener) throws AdminException {
         try {
             ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(target));

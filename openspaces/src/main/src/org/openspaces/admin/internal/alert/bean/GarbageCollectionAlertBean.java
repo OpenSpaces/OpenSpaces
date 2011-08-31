@@ -35,6 +35,7 @@ public class GarbageCollectionAlertBean implements AlertBean, VirtualMachineStat
         NUMBER_FORMAT.setMaximumFractionDigits(2);
     }
 
+    @Override
     public void afterPropertiesSet() throws Exception {
         validateProperties();
         
@@ -43,20 +44,24 @@ public class GarbageCollectionAlertBean implements AlertBean, VirtualMachineStat
         admin.getVirtualMachines().startStatisticsMonitor();
     }
 
+    @Override
     public void destroy() throws Exception {
         admin.getVirtualMachines().getVirtualMachineRemoved().remove(this);
         admin.getVirtualMachines().getVirtualMachineStatisticsChanged().remove(this);
         admin.getVirtualMachines().stopStatisticsMonitor();
     }
 
+    @Override
     public Map<String, String> getProperties() {
         return config.getProperties();
     }
 
+    @Override
     public void setAdmin(Admin admin) {
         this.admin = admin;
     }
 
+    @Override
     public void setProperties(Map<String, String> properties) {
         config.setProperties(properties);
     }
@@ -83,6 +88,7 @@ public class GarbageCollectionAlertBean implements AlertBean, VirtualMachineStat
     }
     
 
+    @Override
     public void virtualMachineRemoved(VirtualMachine virtualMachine) {
 
         final String groupUid = generateGroupUid(virtualMachine.getUid());
@@ -104,6 +110,7 @@ public class GarbageCollectionAlertBean implements AlertBean, VirtualMachineStat
         }
     }
 
+    @Override
     public void virtualMachineStatisticsChanged(VirtualMachineStatisticsChangedEvent event) {
 
         long longGcPausePeriod = config.getLongGcPausePeriod();

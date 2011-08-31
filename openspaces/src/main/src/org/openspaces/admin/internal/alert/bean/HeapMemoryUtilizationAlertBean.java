@@ -39,6 +39,7 @@ public class HeapMemoryUtilizationAlertBean implements AlertBean, VirtualMachine
         NUMBER_FORMAT.setMaximumFractionDigits(2);
     }
 
+    @Override
     public void afterPropertiesSet() throws Exception {
         validateProperties();
         
@@ -47,20 +48,24 @@ public class HeapMemoryUtilizationAlertBean implements AlertBean, VirtualMachine
         admin.getVirtualMachines().startStatisticsMonitor();
     }
 
+    @Override
     public void destroy() throws Exception {
         admin.getVirtualMachines().getVirtualMachineRemoved().remove(this);
         admin.getVirtualMachines().getVirtualMachineStatisticsChanged().remove(this);
         admin.getVirtualMachines().stopStatisticsMonitor();
     }
 
+    @Override
     public Map<String, String> getProperties() {
         return config.getProperties();
     }
 
+    @Override
     public void setAdmin(Admin admin) {
         this.admin = admin;
     }
 
+    @Override
     public void setProperties(Map<String, String> properties) {
         config.setProperties(properties);
     }
@@ -101,6 +106,7 @@ public class HeapMemoryUtilizationAlertBean implements AlertBean, VirtualMachine
     }
     
 
+    @Override
     public void virtualMachineRemoved(VirtualMachine virtualMachine) {
 
         final String groupUid = generateGroupUid(virtualMachine.getUid());
@@ -122,6 +128,7 @@ public class HeapMemoryUtilizationAlertBean implements AlertBean, VirtualMachine
         }
     }
 
+    @Override
     public void virtualMachineStatisticsChanged(VirtualMachineStatisticsChangedEvent event) {
 
         int highThreshold = config.getHighThresholdPerc();

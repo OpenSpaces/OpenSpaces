@@ -125,6 +125,7 @@ public class XmlAlertConfigurationParser implements AlertConfigurationParser {
     }
     
     
+    @Override
     public AlertConfiguration[] parse() throws AlertConfigurationParserException {
         List<AlertConfiguration> alertConfigurations = new ArrayList<AlertConfiguration>();
         try {
@@ -174,14 +175,17 @@ public class XmlAlertConfigurationParser implements AlertConfigurationParser {
     
     private static class SimpleSaxErrorHandler implements ErrorHandler {
 
+        @Override
         public void warning(SAXParseException ex) throws SAXException {
             logger.warn("Ignored XML validation warning [" + ex.getMessage() + "]", ex);
         }
 
+        @Override
         public void error(SAXParseException ex) throws SAXException {
             throw ex;
         }
 
+        @Override
         public void fatalError(SAXParseException ex) throws SAXException {
             throw ex;
         }

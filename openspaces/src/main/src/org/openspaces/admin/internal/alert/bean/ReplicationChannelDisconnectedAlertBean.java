@@ -32,25 +32,30 @@ public class ReplicationChannelDisconnectedAlertBean implements AlertBean, Repli
     public ReplicationChannelDisconnectedAlertBean() {
     }
 
+    @Override
     public void afterPropertiesSet() throws Exception {
         validateProperties();
         admin.getSpaces().getSpaceInstanceRemoved().add(this);
         admin.getSpaces().getReplicationStatusChanged().add(this);
     }
 
+    @Override
     public void destroy() throws Exception {
         admin.getSpaces().getSpaceInstanceRemoved().remove(this);
         admin.getSpaces().getReplicationStatusChanged().remove(this);
     }
 
+    @Override
     public Map<String, String> getProperties() {
         return config.getProperties();
     }
 
+    @Override
     public void setAdmin(Admin admin) {
         this.admin = admin;
     }
 
+    @Override
     public void setProperties(Map<String, String> properties) {
         config.setProperties(properties);
     }
@@ -58,6 +63,7 @@ public class ReplicationChannelDisconnectedAlertBean implements AlertBean, Repli
     private void validateProperties() {
     }
     
+    @Override
     public void spaceInstanceRemoved(SpaceInstance spaceInstance) {
         for (ReplicationTarget replicationTarget : spaceInstance.getReplicationTargets()) {
             final String groupUid = generateGroupUid(spaceInstance.getUid()+"-"+replicationTarget.getMemberName());
@@ -80,6 +86,7 @@ public class ReplicationChannelDisconnectedAlertBean implements AlertBean, Repli
     }
     
     
+    @Override
     public void replicationStatusChanged(ReplicationStatusChangedEvent event) {
 
         final ReplicationStatus replicationStatus = event.getNewStatus();

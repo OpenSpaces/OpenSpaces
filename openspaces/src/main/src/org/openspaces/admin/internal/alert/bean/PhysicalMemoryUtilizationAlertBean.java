@@ -39,6 +39,7 @@ public class PhysicalMemoryUtilizationAlertBean implements AlertBean,
         NUMBER_FORMAT.setMaximumFractionDigits(2);
     }
 
+    @Override
     public void afterPropertiesSet() throws Exception {
         validateProperties();
         
@@ -47,20 +48,24 @@ public class PhysicalMemoryUtilizationAlertBean implements AlertBean,
         admin.getOperatingSystems().startStatisticsMonitor();
     }
 
+    @Override
     public void destroy() throws Exception {
         admin.getMachines().getMachineRemoved().remove(this);
         admin.getOperatingSystems().getOperatingSystemStatisticsChanged().remove(this);
         admin.getOperatingSystems().stopStatisticsMonitor();
     }
 
+    @Override
     public Map<String, String> getProperties() {
         return config.getProperties();
     }
 
+    @Override
     public void setAdmin(Admin admin) {
         this.admin = admin;
     }
 
+    @Override
     public void setProperties(Map<String, String> properties) {
         config.setProperties(properties);
     }
@@ -102,6 +107,7 @@ public class PhysicalMemoryUtilizationAlertBean implements AlertBean,
     
 
         //unreachable machine
+    @Override
     public void machineRemoved(final Machine machine) {
         final String groupUid = generateGroupUid(machine.getOperatingSystem().getUid());
         Alert[] alertsByGroupUid = ((InternalAlertManager)admin.getAlertManager()).getAlertRepository().getAlertsByGroupUid(groupUid);
@@ -121,6 +127,7 @@ public class PhysicalMemoryUtilizationAlertBean implements AlertBean,
         }
     }
 
+    @Override
     public void operatingSystemStatisticsChanged(OperatingSystemStatisticsChangedEvent event) {
 
         int highThreshold = config.getHighThresholdPerc();

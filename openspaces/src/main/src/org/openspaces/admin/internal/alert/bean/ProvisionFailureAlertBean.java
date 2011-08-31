@@ -24,33 +24,40 @@ public class ProvisionFailureAlertBean implements AlertBean, ProcessingUnitStatu
     private Admin admin;
     private final ProvisionFailureAlertConfiguration config = new ProvisionFailureAlertConfiguration();
     
+    @Override
     public void afterPropertiesSet() throws Exception {
         admin.getProcessingUnits().getProcessingUnitStatusChanged().add(this);
         admin.getProcessingUnits().getProcessingUnitRemoved().add(this);
     }
 
+    @Override
     public void destroy() throws Exception {
         admin.getProcessingUnits().getProcessingUnitStatusChanged().remove(this);
         admin.getProcessingUnits().getProcessingUnitRemoved().remove(this);
     }
 
+    @Override
     public Map<String, String> getProperties() {
         return config.getProperties();
     }
 
+    @Override
     public void setAdmin(Admin admin) {
         this.admin = admin;
     }
 
+    @Override
     public void setProperties(Map<String, String> properties) {
         config.setProperties(properties);
     }
     
 
+    @Override
     public void processingUnitRemoved(ProcessingUnit processingUnit) {
         handleProcessingUnitEvent(processingUnit);
     }
 
+    @Override
     public void processingUnitStatusChanged(ProcessingUnitStatusChangedEvent event) {
         ProcessingUnit processingUnit = event.getProcessingUnit();
 

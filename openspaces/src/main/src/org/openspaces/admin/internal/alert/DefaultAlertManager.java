@@ -29,27 +29,33 @@ public class DefaultAlertManager implements InternalAlertManager {
         this.beanConfigPropertiesManager = new DefaultBeanServer<AlertBean>(admin);
     }
 
+    @Override
     public AlertRepository getAlertRepository() {
         return alertRepository;
     }
     
+    @Override
     public AlertTriggeredEventManager getAlertTriggered() {
         return alertEventManager;
     }
 
+    @Override
     public void triggerAlert(Alert alert) {
         alertRepository.addAlert(alert);
         alertEventManager.alertTriggered(alert);
     }
 
+    @Override
     public Admin getAdmin() {
         return admin;
     }
 
+    @Override
     public BeanConfigPropertiesManager getBeanConfigPropertiesManager() {
         return beanConfigPropertiesManager;
     }
 
+    @Override
     public void disableAlert(Class<? extends AlertConfiguration> clazz) throws AlertConfigurationException {
         try {
             BeanConfig configInstance = getConfigInstance(clazz);
@@ -59,6 +65,7 @@ public class DefaultAlertManager implements InternalAlertManager {
         }
     }
 
+    @Override
     public void enableAlert(Class<? extends AlertConfiguration> clazz) throws AlertConfigurationException {
         try {
             BeanConfig configInstance = getConfigInstance(clazz);
@@ -68,6 +75,7 @@ public class DefaultAlertManager implements InternalAlertManager {
         }
     }
 
+    @Override
     public <T extends AlertConfiguration> T getConfig(Class<T> clazz) throws AlertConfigurationException {
         try {
             T configInstance = getConfigInstance(clazz);
@@ -80,6 +88,7 @@ public class DefaultAlertManager implements InternalAlertManager {
         }
     }
 
+    @Override
     public boolean removeConfig(Class<? extends AlertConfiguration> clazz) throws AlertConfigurationException {
         try {
             BeanConfig configInstance = getConfigInstance(clazz);
@@ -89,6 +98,7 @@ public class DefaultAlertManager implements InternalAlertManager {
         }
     }
 
+    @Override
     public void setConfig(AlertConfiguration config) throws AlertConfigurationException {
         try {
             beanConfigPropertiesManager.setBeanConfig(config.getBeanClassName(), config.getProperties());
@@ -97,6 +107,7 @@ public class DefaultAlertManager implements InternalAlertManager {
         }
     }
 
+    @Override
     public boolean isAlertEnabled(Class<? extends AlertConfiguration> clazz) {
         try {
             BeanConfig configInstance = getConfigInstance(clazz);
@@ -106,6 +117,7 @@ public class DefaultAlertManager implements InternalAlertManager {
         }
     }
     
+    @Override
     public void configure(AlertConfiguration... configurations) throws AlertConfigurationException {
         for (AlertConfiguration configuration : configurations) {
             try {

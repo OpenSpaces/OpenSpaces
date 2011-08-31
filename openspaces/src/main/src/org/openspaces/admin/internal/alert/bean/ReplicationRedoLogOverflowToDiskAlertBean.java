@@ -35,6 +35,7 @@ public class ReplicationRedoLogOverflowToDiskAlertBean implements AlertBean, Spa
     public ReplicationRedoLogOverflowToDiskAlertBean() {
     }
 
+    @Override
     public void afterPropertiesSet() throws Exception {
         validateProperties();
         admin.getSpaces().getSpaceInstanceRemoved().add(this);
@@ -42,20 +43,24 @@ public class ReplicationRedoLogOverflowToDiskAlertBean implements AlertBean, Spa
         admin.getSpaces().startStatisticsMonitor();
     }
 
+    @Override
     public void destroy() throws Exception {
         admin.getSpaces().getSpaceInstanceRemoved().remove(this);
         admin.getSpaces().getSpaceInstanceStatisticsChanged().remove(this);
         admin.getSpaces().stopStatisticsMonitor();
     }
 
+    @Override
     public Map<String, String> getProperties() {
         return config.getProperties();
     }
 
+    @Override
     public void setAdmin(Admin admin) {
         this.admin = admin;
     }
 
+    @Override
     public void setProperties(Map<String, String> properties) {
         config.setProperties(properties);
     }
@@ -63,6 +68,7 @@ public class ReplicationRedoLogOverflowToDiskAlertBean implements AlertBean, Spa
     private void validateProperties() {
     }
     
+    @Override
     public void spaceInstanceRemoved(SpaceInstance spaceInstance) {
         final String groupUid = generateGroupUid(spaceInstance.getUid());
         Alert[] alertsByGroupUid = ((InternalAlertManager)admin.getAlertManager()).getAlertRepository().getAlertsByGroupUid(groupUid);
@@ -83,6 +89,7 @@ public class ReplicationRedoLogOverflowToDiskAlertBean implements AlertBean, Spa
     }
     
     
+    @Override
     public void spaceInstanceStatisticsChanged(SpaceInstanceStatisticsChangedEvent event) {
         
         final SpaceInstance source = event.getSpaceInstance();

@@ -51,11 +51,13 @@ public class DefaultAlertRepository implements InternalAlertRepository {
     private final LinkedList<AlertGroup> alertGroupList = new LinkedList<AlertGroup>();
 
     //called under "this" lock
+    @Override
     public synchronized void setStoreLimit(int limit) {
         storeLimit = limit;
     }
     
     //called under "this" lock
+    @Override
     public synchronized void addAlert(Alert alert) {
         
         setAlertUid(alert);
@@ -158,6 +160,7 @@ public class DefaultAlertRepository implements InternalAlertRepository {
     }
 
     //called under "this" lock
+    @Override
     public synchronized Alert getAlertByAlertUid(String alertUid) {
         for (AlertGroup alertGroup : alertGroupList) {
             for (Alert alert : alertGroup.alertsInGroupList) {
@@ -170,6 +173,7 @@ public class DefaultAlertRepository implements InternalAlertRepository {
     }
 
     //called under "this" lock
+    @Override
     public synchronized Alert[] getAlertsByGroupUid(String groupUid) {
         for (AlertGroup alertGroup : alertGroupList) {
             if (alertGroup.getGroupUid().equals(groupUid)) {
@@ -180,6 +184,7 @@ public class DefaultAlertRepository implements InternalAlertRepository {
     }
 
     //called under "this" lock
+    @Override
     public synchronized Iterable<Alert> iterateFifo() {
         ArrayList<Alert> list = new ArrayList<Alert>(Math.max(10, alertGroupList.size()));
         for (int i=(alertGroupList.size() -1); i>=0; --i) {
@@ -193,6 +198,7 @@ public class DefaultAlertRepository implements InternalAlertRepository {
     }
     
     //called under "this" lock
+    @Override
     public synchronized Iterable<Alert> iterateLifo() {
         ArrayList<Alert> list = new ArrayList<Alert>(Math.max(10, alertGroupList.size()));
         for (int i=0; i<alertGroupList.size(); ++i) {
@@ -206,6 +212,7 @@ public class DefaultAlertRepository implements InternalAlertRepository {
     }
     
     //called under "this" lock
+    @Override
     public synchronized Iterable<Iterable<Alert>> list() {
         ArrayList<Iterable<Alert>> list = new ArrayList<Iterable<Alert>>(Math.max(10, alertGroupList.size()));
         for (int i=0; i<alertGroupList.size(); ++i) {
@@ -217,6 +224,7 @@ public class DefaultAlertRepository implements InternalAlertRepository {
     }
 
     //called under "this" lock
+    @Override
     public synchronized int size() {
         int size = 0;
         for (AlertGroup alertGroup : alertGroupList) {

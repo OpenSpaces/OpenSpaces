@@ -96,6 +96,7 @@ public class GridServiceContainerOptions {
         return options;
     }
     
+    @Override
     public boolean equals(Object other) {
         return other instanceof GridServiceContainerOptions &&
                ((GridServiceContainerOptions) other).useScript == this.useScript &&

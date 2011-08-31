@@ -61,7 +61,8 @@ public class DefaultAlert implements InternalAlert {
 	/* (non-Javadoc)
      * @see org.openspaces.admin.alert.Alert#getName()
      */
-	public String getName() {
+	@Override
+    public String getName() {
         return name;
     }
 	
@@ -72,7 +73,8 @@ public class DefaultAlert implements InternalAlert {
 	/* (non-Javadoc)
      * @see org.openspaces.admin.alert.Alert#getDescription()
      */
-	public String getDescription() {
+	@Override
+    public String getDescription() {
         return description;
     }
 	
@@ -83,7 +85,8 @@ public class DefaultAlert implements InternalAlert {
 	/* (non-Javadoc)
      * @see org.openspaces.admin.alert.Alert#getTimestamp()
      */
-	public long getTimestamp() {
+	@Override
+    public long getTimestamp() {
         return timestamp;
     }
 	
@@ -94,7 +97,8 @@ public class DefaultAlert implements InternalAlert {
 	/* (non-Javadoc)
      * @see org.openspaces.admin.alert.Alert#getSeverity()
      */
-	public AlertSeverity getSeverity() {
+	@Override
+    public AlertSeverity getSeverity() {
         return severity;
     }
 	
@@ -106,6 +110,7 @@ public class DefaultAlert implements InternalAlert {
      * (non-Javadoc)
      * @see org.openspaces.admin.alert.Alert#getStatus()
      */
+    @Override
     public AlertStatus getStatus() {
         return status;
     }
@@ -117,18 +122,21 @@ public class DefaultAlert implements InternalAlert {
 	/* (non-Javadoc)
      * @see org.openspaces.admin.alert.Alert#getAlertUid()
      */
-	public String getAlertUid() {
+	@Override
+    public String getAlertUid() {
         return alertUid;
     }
 	
-	public void setAlertUid(String alertUid) {
+	@Override
+    public void setAlertUid(String alertUid) {
         this.alertUid = alertUid;
     }
 	
 	/* (non-Javadoc)
      * @see org.openspaces.admin.alert.Alert#getGroupUid()
      */
-	public String getGroupUid() {
+	@Override
+    public String getGroupUid() {
         return groupUid;
     }
 	
@@ -139,7 +147,8 @@ public class DefaultAlert implements InternalAlert {
 	/* (non-Javadoc)
      * @see org.openspaces.admin.alert.Alert#getComponentUid()
      */
-	public String getComponentUid() {
+	@Override
+    public String getComponentUid() {
         return componentUid;
     }
 	
@@ -151,7 +160,8 @@ public class DefaultAlert implements InternalAlert {
 	 * (non-Javadoc)
 	 * @see org.openspaces.admin.alert.Alert#getComponentDescription()
 	 */
-	public String getComponentDescription() {
+	@Override
+    public String getComponentDescription() {
 	    return componentDescription;
 	}
 	
@@ -162,7 +172,8 @@ public class DefaultAlert implements InternalAlert {
 	/*
 	 * @see org.openspaces.admin.alert.Alert#getConfig()
 	 */
-	public Map<String, String> getConfig() {
+	@Override
+    public Map<String, String> getConfig() {
 	    return config;
 	}
 	
@@ -173,7 +184,8 @@ public class DefaultAlert implements InternalAlert {
     /* (non-Javadoc)
      * @see org.openspaces.admin.alert.Alert#getProperties()
      */
-	public Map<String, String> getProperties() {
+	@Override
+    public Map<String, String> getProperties() {
 		return properties;
 	}
 	
@@ -186,6 +198,7 @@ public class DefaultAlert implements InternalAlert {
 	    return getStatus() + " | " + getSeverity() + " | " + getName() + " |" + getDescription() + " | " + getComponentDescription() + " | " + new Date(getTimestamp());
 	}
 	
+    @Override
     @SuppressWarnings("unchecked")
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         alertUid = in.readUTF();
@@ -204,6 +217,7 @@ public class DefaultAlert implements InternalAlert {
         }
     }
 
+    @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeUTF(alertUid);
         out.writeUTF(componentUid);

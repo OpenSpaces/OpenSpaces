@@ -34,6 +34,7 @@ public class ReplicationRedoLogSizeAlertBean implements AlertBean, SpaceInstance
     public ReplicationRedoLogSizeAlertBean() {
     }
 
+    @Override
     public void afterPropertiesSet() throws Exception {
         validateProperties();
         admin.getSpaces().getSpaceInstanceRemoved().add(this);
@@ -41,20 +42,24 @@ public class ReplicationRedoLogSizeAlertBean implements AlertBean, SpaceInstance
         admin.getSpaces().startStatisticsMonitor();
     }
 
+    @Override
     public void destroy() throws Exception {
         admin.getSpaces().getSpaceInstanceRemoved().remove(this);
         admin.getSpaces().getSpaceInstanceStatisticsChanged().remove(this);
         admin.getSpaces().stopStatisticsMonitor();
     }
 
+    @Override
     public Map<String, String> getProperties() {
         return config.getProperties();
     }
 
+    @Override
     public void setAdmin(Admin admin) {
         this.admin = admin;
     }
 
+    @Override
     public void setProperties(Map<String, String> properties) {
         config.setProperties(properties);
     }
@@ -85,6 +90,7 @@ public class ReplicationRedoLogSizeAlertBean implements AlertBean, SpaceInstance
         }
     }
     
+    @Override
     public void spaceInstanceRemoved(SpaceInstance spaceInstance) {
         final String groupUid = generateGroupUid(spaceInstance.getUid());
         Alert[] alertsByGroupUid = ((InternalAlertManager)admin.getAlertManager()).getAlertRepository().getAlertsByGroupUid(groupUid);
@@ -105,6 +111,7 @@ public class ReplicationRedoLogSizeAlertBean implements AlertBean, SpaceInstance
     }
     
     
+    @Override
     public void spaceInstanceStatisticsChanged(SpaceInstanceStatisticsChangedEvent event) {
         
         int highThreshold = config.getHighThresholdRedoLogSize();

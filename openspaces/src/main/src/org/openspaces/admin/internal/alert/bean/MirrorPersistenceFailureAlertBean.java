@@ -37,6 +37,7 @@ public class MirrorPersistenceFailureAlertBean implements AlertBean, SpaceInstan
     public MirrorPersistenceFailureAlertBean() {
     }
 
+    @Override
     public void afterPropertiesSet() throws Exception {
         validateProperties();
         admin.getSpaces().getSpaceInstanceRemoved().add(this);
@@ -44,20 +45,24 @@ public class MirrorPersistenceFailureAlertBean implements AlertBean, SpaceInstan
         admin.getSpaces().startStatisticsMonitor();
     }
 
+    @Override
     public void destroy() throws Exception {
         admin.getSpaces().getSpaceInstanceRemoved().remove(this);
         admin.getSpaces().getSpaceInstanceStatisticsChanged().remove(this);
         admin.getSpaces().stopStatisticsMonitor();
     }
 
+    @Override
     public Map<String, String> getProperties() {
         return config.getProperties();
     }
 
+    @Override
     public void setAdmin(Admin admin) {
         this.admin = admin;
     }
 
+    @Override
     public void setProperties(Map<String, String> properties) {
         config.setProperties(properties);
     }
@@ -65,6 +70,7 @@ public class MirrorPersistenceFailureAlertBean implements AlertBean, SpaceInstan
     private void validateProperties() {
     }
     
+    @Override
     public void spaceInstanceRemoved(SpaceInstance spaceInstance) {
         if (!spaceInstance.getSpaceUrl().getSchema().equals("mirror")) {
             return; //not a mirror
@@ -90,6 +96,7 @@ public class MirrorPersistenceFailureAlertBean implements AlertBean, SpaceInstan
     }
     
     
+    @Override
     public void spaceInstanceStatisticsChanged(SpaceInstanceStatisticsChangedEvent event) {
         
         final SpaceInstance source = event.getSpaceInstance();
