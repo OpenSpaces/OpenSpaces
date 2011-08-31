@@ -41,38 +41,47 @@ public class DefaultMachines implements InternalMachines {
         this.machineRemovedEventManager = new DefaultMachineRemovedEventManager(this);
     }
 
+    @Override
     public Admin getAdmin() {
         return this.admin;
     }
 
+    @Override
     public Machine[] getMachines() {
         return machinesById.values().toArray(new Machine[0]);
     }
 
+    @Override
     public MachineAddedEventManager getMachineAdded() {
         return this.machineAddedEventManager;
     }
 
+    @Override
     public MachineRemovedEventManager getMachineRemoved() {
         return this.machineRemovedEventManager;
     }
 
+    @Override
     public int getSize() {
         return machinesById.size();
     }
 
+    @Override
     public boolean isEmpty() {
         return machinesById.size() == 0;
     }
 
+    @Override
     public boolean waitFor(int numberOfMachines) {
         return waitFor(numberOfMachines, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
 
+    @Override
     public boolean waitFor(int numberOfMachines, long timeout, TimeUnit timeUnit) {
         if (numberOfMachines == 0) {
             final CountDownLatch latch = new CountDownLatch(getSize());
             MachineRemovedEventListener removed = new MachineRemovedEventListener() {
+                @Override
                 public void machineRemoved(Machine machine) {
                     latch.countDown();
                 }
@@ -88,6 +97,7 @@ public class DefaultMachines implements InternalMachines {
         } else {
             final CountDownLatch latch = new CountDownLatch(numberOfMachines);
             MachineAddedEventListener added = new MachineAddedEventListener() {
+                @Override
                 public void machineAdded(Machine machine) {
                     latch.countDown();
                 }
@@ -103,14 +113,17 @@ public class DefaultMachines implements InternalMachines {
         }
     }
 
+    @Override
     public Machine waitFor(String hostAddress) {
         return waitFor(hostAddress, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
 
+    @Override
     public Machine waitFor(final String hostAddress, long timeout, TimeUnit timeUnit) {
         final CountDownLatch latch = new CountDownLatch(1);
         final AtomicReference<Machine> ref = new AtomicReference<Machine>();
         MachineAddedEventListener added = new MachineAddedEventListener() {
+            @Override
             public void machineAdded(Machine machine) {
                 if (machine.getHostAddress().equalsIgnoreCase(hostAddress) || machine.getHostName().equalsIgnoreCase(hostAddress)) {
                     ref.set(machine);
@@ -129,44 +142,54 @@ public class DefaultMachines implements InternalMachines {
         }
     }
 
+    @Override
     public Iterator<Machine> iterator() {
         return Collections.unmodifiableCollection(machinesById.values()).iterator();
     }
 
+    @Override
     public Machine getMachineByUID(String uid) {
         return machinesById.get(uid);
     }
 
+    @Override
     public Machine getMachineByHostAddress(String ipAddress) {
         return machinesByHostAddress.get(ipAddress);
     }
 
+    @Override
     public Machine getMachineByHostName(String hostName) {
         return machinesByHostNames.get(hostName);
     }
 
+    @Override
     public Map<String, Machine> getUids() {
         return Collections.unmodifiableMap(machinesById);
     }
 
+    @Override
     public Map<String, Machine> getHostsByAddress() {
         return Collections.unmodifiableMap(machinesByHostAddress);
     }
 
+    @Override
     public Map<String, Machine> getHostsByName() {
         return Collections.unmodifiableMap(machinesByHostNames);
     }
 
+    @Override
     public void addLifecycleListener(MachineLifecycleEventListener eventListener) {
         getMachineAdded().add(eventListener);
         getMachineRemoved().add(eventListener);
     }
 
+    @Override
     public void removeLifeycleListener(MachineLifecycleEventListener eventListener) {
         getMachineAdded().remove(eventListener);
         getMachineRemoved().remove(eventListener);
     }
 
+    @Override
     public void addMachine(final InternalMachine machine) {
         assertStateChangesPermitted();
         machinesByHostAddress.put(machine.getHostAddress(), machine);
@@ -177,6 +200,7 @@ public class DefaultMachines implements InternalMachines {
         }
     }
 
+    @Override
     public void removeMachine(final Machine machine) {
         assertStateChangesPermitted();
         // if no vms on the machine, we can remove them

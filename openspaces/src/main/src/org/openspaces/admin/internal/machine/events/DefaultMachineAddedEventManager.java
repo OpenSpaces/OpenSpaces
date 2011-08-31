@@ -25,9 +25,11 @@ public class DefaultMachineAddedEventManager implements InternalMachineAddedEven
         this.admin = (InternalAdmin) machines.getAdmin();
     }
 
+    @Override
     public void machineAdded(final Machine machine) {
         for (final MachineAddedEventListener listener : machineAddedEventListeners) {
             admin.pushEventAsFirst(listener, new Runnable() {
+                @Override
                 public void run() {
                     listener.machineAdded(machine);
                 }
@@ -35,9 +37,11 @@ public class DefaultMachineAddedEventManager implements InternalMachineAddedEven
         }
     }
 
+    @Override
     public void add(final MachineAddedEventListener eventListener, boolean includeExisting) {
         if (includeExisting) {
             admin.raiseEvent(eventListener, new Runnable() {
+                @Override
                 public void run() {
                     for (Machine machine : machines.getMachines()) {
                         eventListener.machineAdded(machine);
@@ -48,10 +52,12 @@ public class DefaultMachineAddedEventManager implements InternalMachineAddedEven
         machineAddedEventListeners.add(eventListener);
     }
 
+    @Override
     public void add(final MachineAddedEventListener eventListener) {
         add(eventListener, true);
     }
 
+    @Override
     public void remove(MachineAddedEventListener eventListener) {
         machineAddedEventListeners.remove(eventListener);
     }

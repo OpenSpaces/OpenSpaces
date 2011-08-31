@@ -13,6 +13,7 @@ public class ClosureMachineAddedEventListener extends AbstractClosureEventListen
         super(closure);
     }
 
+    @Override
     public void machineAdded(Machine machine) {
         getClosure().call(machine);
     }

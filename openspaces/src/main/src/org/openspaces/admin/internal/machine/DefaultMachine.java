@@ -96,18 +96,22 @@ public class DefaultMachine implements InternalMachine {
         this.transports = new DefaultTransports(admin);
     }
 
+    @Override
     public String getUid() {
         return this.uid;
     }
 
+    @Override
     public String getHostAddress() {
         return this.hostAddress;
     }
 
+    @Override
     public String getHostName() {
         return operatingSystem.getDetails().getHostName();
     }
 
+    @Override
     public GridServiceAgent getGridServiceAgent() {
         Iterator<GridServiceAgent> it = gridServiceAgents.iterator();
         if (it.hasNext()) {
@@ -116,34 +120,42 @@ public class DefaultMachine implements InternalMachine {
         return null;
     }
 
+    @Override
     public GridServiceAgents getGridServiceAgents() {
         return this.gridServiceAgents;
     }
 
+    @Override
     public LookupServices getLookupServices() {
         return lookupServices;
     }
 
+    @Override
     public GridServiceManagers getGridServiceManagers() {
         return gridServiceManagers;
     }
     
+    @Override
     public ElasticServiceManagers getElasticServiceManagers() {
         return elasticServiceManagers;
     }
 
+    @Override
     public GridServiceContainers getGridServiceContainers() {
         return gridServiceContainers;
     }
 
+    @Override
     public boolean hasGridComponents() {
         return !gridServiceAgents.isEmpty() || !gridServiceManagers.isEmpty() || !elasticServiceManagers.isEmpty() || !gridServiceContainers.isEmpty() || !lookupServices.isEmpty();
     }
 
+    @Override
     public Transports getTransports() {
         return transports;
     }
 
+    @Override
     public void setOperatingSystem(OperatingSystem operatingSystem) {
         assertStateChangesPermitted();
         this.operatingSystem = operatingSystem;
@@ -155,6 +167,7 @@ public class DefaultMachine implements InternalMachine {
 
     private static OperatingSystem NA_OPERATING_SYSTEM = new DefaultOperatingSystem(new OSDetails(), null);
 
+    @Override
     public OperatingSystem getOperatingSystem() {
         if (operatingSystem == null) {
             return NA_OPERATING_SYSTEM;
@@ -162,82 +175,102 @@ public class DefaultMachine implements InternalMachine {
         return this.operatingSystem;
     }
 
+    @Override
     public VirtualMachines getVirtualMachines() {
         return this.virtualMachines;
     }
 
+    @Override
     public ProcessingUnitInstanceAddedEventManager getProcessingUnitInstanceAdded() {
         return processingUnitInstances.getProcessingUnitInstanceAdded();
     }
 
+    @Override
     public ProcessingUnitInstanceRemovedEventManager getProcessingUnitInstanceRemoved() {
         return processingUnitInstances.getProcessingUnitInstanceRemoved();
     }
 
+    @Override
     public void addLifecycleEventListener(ProcessingUnitInstanceLifecycleEventListener eventListener) {
         processingUnitInstances.addProcessingUnitInstanceLifecycleEventListener(eventListener);
     }
 
+    @Override
     public void removeLifecycleEventListener(ProcessingUnitInstanceLifecycleEventListener eventListener) {
         processingUnitInstances.removeProcessingUnitInstanceLifecycleEventListener(eventListener);
     }
 
+    @Override
     public ProcessingUnitInstance[] getProcessingUnitInstances() {
         return processingUnitInstances.getInstances();
     }
 
+    @Override
     public ProcessingUnitInstance[] getProcessingUnitInstances(String processingUnitName) {
         return processingUnitInstances.getInstances(processingUnitName);
     }
 
+    @Override
     public boolean contains(ProcessingUnitInstance processingUnitInstance) {
         return processingUnitInstances.contains(processingUnitInstance);
     }
 
+    @Override
     public SpaceInstance[] getSpaceInstances() {
         return spaceInstances.getSpaceInstances();
     }
 
+    @Override
     public boolean contains(SpaceInstance spaceInstance) {
         return spaceInstances.contains(spaceInstance);
     }
 
+    @Override
     public SpaceInstanceAddedEventManager getSpaceInstanceAdded() {
         return spaceInstances.getSpaceInstanceAdded();
     }
 
+    @Override
     public SpaceInstanceRemovedEventManager getSpaceInstanceRemoved() {
         return spaceInstances.getSpaceInstanceRemoved();
     }
 
+    @Override
     public void addLifecycleListener(SpaceInstanceLifecycleEventListener eventListener) {
         spaceInstances.addLifecycleListener(eventListener);
     }
 
+    @Override
     public void removeLifecycleListener(SpaceInstanceLifecycleEventListener eventListener) {
         spaceInstances.removeLifecycleListener(eventListener);
     }
 
+    @Override
     public void addProcessingUnitInstance(ProcessingUnitInstance processingUnitInstance) {
         processingUnitInstances.addInstance(processingUnitInstance);
     }
 
+    @Override
     public void removeProcessingUnitInstance(String uid) {
         processingUnitInstances.removeInstance(uid);
     }
 
+    @Override
     public void addSpaceInstance(SpaceInstance spaceInstance) {
         spaceInstances.addSpaceInstance(spaceInstance);
     }
 
+    @Override
     public void removeSpaceInstance(String uid) {
         spaceInstances.removeSpaceInstance(uid);
     }
 
+    @Override
     public DumpResult generateDump(String cause, Map<String, Object> context) throws AdminException {
         return generateDump(cause, context, (String[]) null);
     }
 
+    @Override
     public DumpResult generateDump(String cause, Map<String, Object> context, String... processor) throws AdminException {
         CompoundDumpResult dumpResult = new CompoundDumpResult();
         for (ElasticServiceManager esm : elasticServiceManagers) {

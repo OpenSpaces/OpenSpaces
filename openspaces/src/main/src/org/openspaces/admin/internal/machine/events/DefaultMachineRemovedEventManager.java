@@ -25,9 +25,11 @@ public class DefaultMachineRemovedEventManager implements InternalMachineRemoved
         this.admin = (InternalAdmin) machines.getAdmin();
     }
 
+    @Override
     public void machineRemoved(final Machine machine) {
         for (final MachineRemovedEventListener listener : machineRemovedEventListeners) {
             admin.pushEvent(listener, new Runnable() {
+                @Override
                 public void run() {
                     listener.machineRemoved(machine);
                 }
@@ -35,10 +37,12 @@ public class DefaultMachineRemovedEventManager implements InternalMachineRemoved
         }
     }
 
+    @Override
     public void add(MachineRemovedEventListener eventListener) {
         machineRemovedEventListeners.add(eventListener);
     }
 
+    @Override
     public void remove(MachineRemovedEventListener eventListener) {
         machineRemovedEventListeners.remove(eventListener);
     }
