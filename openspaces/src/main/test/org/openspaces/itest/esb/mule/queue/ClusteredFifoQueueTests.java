@@ -7,7 +7,8 @@ import org.openspaces.itest.esb.mule.AbstractMuleTests;
 /**
  * @author kimchy
  */
-public class SimpleFifoQueueTests extends AbstractMuleTests {
+public class ClusteredFifoQueueTests extends AbstractMuleTests {
+
 
     private static int OBJECTS = 5;
     public void testClusteredSimpleQueueHandling() throws Exception {
@@ -27,11 +28,11 @@ public class SimpleFifoQueueTests extends AbstractMuleTests {
             
             OpenSpacesFifoQueueObject response = gigaSpace.take(responseTemplate,5000);
           
-            assertEquals("testme" + i +"Appender1", response.getPayload());
+            assertEquals("testme" + i +"Appender1Appender2", response.getPayload());
         }
     }
     @Override
     protected String getConfigResources() {
-        return "org/openspaces/itest/esb/mule/queue/simple-fifo.xml";
+        return "org/openspaces/itest/esb/mule/queue/clustered-fifo.xml";
     }
 }

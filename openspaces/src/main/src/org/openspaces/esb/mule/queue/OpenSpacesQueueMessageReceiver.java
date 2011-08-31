@@ -149,9 +149,8 @@ public class OpenSpacesQueueMessageReceiver extends TransactedPollingMessageRece
            
             String correlationId = message.getCorrelationId();
 
-            OpenSpacesQueueObject responseEntry = new OpenSpacesQueueObject();
+            OpenSpacesQueueObject responseEntry = connector.newQueueEntry(getEndpointURI().getAddress() + OpenSpacesQueueMessageDispatcher.DEFAULT_RESPONSE_QUEUE);
             responseEntry.setCorrelationID(correlationId);
-            responseEntry.setEndpointURI(getEndpointURI().getAddress() + OpenSpacesQueueMessageDispatcher.DEFAULT_RESPONSE_QUEUE);
             
             Object payload = responseMessage.getPayload();
             if(payload instanceof NullPayload)

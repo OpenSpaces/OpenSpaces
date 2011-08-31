@@ -15,14 +15,14 @@
        http://www.openspaces.org/schema/mule/os-queue http://www.openspaces.org/schema/8.0/mule/3.1/mule-os-queue.xsd">
 
     <spring:beans>
-        <os-core:space id="space1" url="/./space" lookup-groups="${user.name}"/>
+        <os-core:space id="space1" url="/./space?cluster_schema=partitioned-sync2backup&amp;total_members=2,0&amp;id=1" lookup-groups="${user.name}"/>
+        <os-core:space id="space2" url="/./space?cluster_schema=partitioned-sync2backup&amp;total_members=2,0&amp;id=2" lookup-groups="${user.name}"/>
         <os-core:giga-space id="gigaSpace" space="space1" clustered="true"/>
     </spring:beans>
 
     <!-- this connector must be declared ,in order to inject the  Spring appliction context -->
     <os-queue:connector name="queueConnector" giga-space="gigaSpace" fifo="true" >
     <receiver-threading-profile maxThreadsActive="1"/>
-
     </os-queue:connector>
 
        <model name="helloSample">
@@ -30,11 +30,31 @@
         <service name="Appender1">
 
             <inbound>
-                <os-queue:inbound-endpoint path="test1" exchange-pattern="request-response"/>
+                <os-queue:inbound-endpoint path="test1"/>
             </inbound>
 
             <component class="org.openspaces.itest.esb.mule.queue.EchoeComponentAppender"/>
+
+            <outbound>
+                <pass-through-router>
+                    <os-queue:outbound-endpoint path="test2"/>
+                </pass-through-router>
+            </outbound>
+
         </service>
+
+        <service name="Appender2">
+
+            <inbound>
+                <os-queue:inbound-endpoint path="test2"/>
+            </inbound>
+
+            <component class="org.openspaces.itest.esb.mule.queue.EchoeComponentAppender"/>
+
+        
+
+        </service>
+
     </model>
 
 </mule>
