@@ -60,6 +60,7 @@ import com.gigaspaces.cluster.activeelection.SpaceMode;
 import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
 import com.gigaspaces.internal.cluster.node.impl.gateway.GatewayPolicy;
 import com.j_spaces.core.IJSpace;
+import com.j_spaces.core.ISpaceState;
 import com.j_spaces.core.admin.IRemoteJSpaceAdmin;
 import com.j_spaces.core.admin.RuntimeHolder;
 import com.j_spaces.core.exception.SpaceUnavailableException;
@@ -563,7 +564,12 @@ public class DefaultSpace implements InternalSpace {
         public void run() {
             try {
                 final RuntimeHolder runtimeHolder = spaceInstance.getRuntimeHolder();
-                
+                if (runtimeHolder.getSpaceState() == ISpaceState.STOPPED ||
+                    runtimeHolder.getSpaceState() == ISpaceState.STARTING) {
+                    // we don't want to update the space mode to until the space state is STARTED
+                    // The space instance starts as STOPPED then changes to STARTING and only after recovery is complete it's state STARTED
+                    return;
+                }
                 DefaultSpace.this.admin.scheduleNonBlockingStateChange(new Runnable() {
                     public void run() {
                 spaceInstance.setMode(runtimeHolder.getSpaceMode());
