@@ -11,7 +11,7 @@ import org.openspaces.admin.alert.alerts.AbstractAlert;
 
 public class DefaultAlertRepository implements InternalAlertRepository {
 
-    public class AlertGroup {
+    public static class AlertGroup {
         private final ArrayList<Alert> alertsInGroupList = new ArrayList<Alert>();
         public void addAlert(Alert alert) {
             alertsInGroupList.add(0,alert);
