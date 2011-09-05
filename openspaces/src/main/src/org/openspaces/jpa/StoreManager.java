@@ -798,16 +798,13 @@ public class StoreManager extends AbstractStoreManager {
      */
     public GConnection getJdbcConnection() throws SQLException {
         if (_connection == null) {
-            if (_connection == null) {
-                Properties connectionProperties = new Properties();
-                connectionProperties.put(
-                        QueryProcessorFactory.COM_GIGASPACES_EMBEDDED_QP_ENABLED, "true");
-                _connection = GConnection.getInstance(getConfiguration().getSpace(), connectionProperties);
-                if (_connection.getAutoCommit())
-                    _connection.setAutoCommit(false);
-            }
+            Properties connectionProperties = new Properties();
+            connectionProperties.put(QueryProcessorFactory.COM_GIGASPACES_EMBEDDED_QP_ENABLED, "true");
+            _connection = GConnection.getInstance(getConfiguration().getSpace(), connectionProperties);
+            if (_connection.getAutoCommit())
+                _connection.setAutoCommit(false);
         }
-        return _connection;        
+        return _connection;
     }
     
     /**
