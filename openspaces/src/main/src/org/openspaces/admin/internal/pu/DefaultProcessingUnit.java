@@ -279,6 +279,11 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         return sla.getMaxInstancesPerMachine();
     }
 
+    @Override
+    public String getClusterSchema(){
+        return sla.getClusterSchema();
+    }
+    
     public Map<String, Integer> getMaxInstancesPerZone() {
         return Collections.unmodifiableMap(sla.getMaxInstancesPerZone());
     }

@@ -37,6 +37,8 @@ public interface InternalProcessingUnit extends ProcessingUnit, InternalProcessi
     Map<String, String> getElasticProperties();
 
     String getApplicationName();
+    
+    String getClusterSchema();
 
     /**
      * Retrieves a context property containing the order of dependencies within an application.
