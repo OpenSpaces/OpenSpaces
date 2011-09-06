@@ -339,7 +339,7 @@ private static GridServiceContainer[] getContainers(final ProcessingUnit pu) {
                                         "Relocation of processing unit instance to container " +
                                         gscToString(targetContainer) + " "+
                                         "failed since the instance was eventually deployed on a different container " + 
-                                        puInstance.getGridServiceContainer())); 
+                                        gscToString(puInstance.getGridServiceContainer()))); 
                         }
                     }
                     else {
