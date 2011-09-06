@@ -564,10 +564,15 @@ public class DefaultSpace implements InternalSpace {
         public void run() {
             try {
                 final RuntimeHolder runtimeHolder = spaceInstance.getRuntimeHolder();
-                if (runtimeHolder.getSpaceState() == ISpaceState.STOPPED ||
-                    runtimeHolder.getSpaceState() == ISpaceState.STARTING) {
+                if (runtimeHolder.getSpaceState() != null &&
+                    (runtimeHolder.getSpaceState() == ISpaceState.STOPPED ||
+                     runtimeHolder.getSpaceState() == ISpaceState.STARTING)) {
                     // we don't want to update the space mode to until the space state is STARTED
                     // The space instance starts as STOPPED then changes to STARTING and only after recovery is complete it's state STARTED
+                    
+                    if (logger.isTraceEnabled()) {
+                        logger.trace("Ignoring runtimeHolder of space:" + spaceInstance.getSpaceName() + " serviceID:" + spaceInstance.getServiceID() + " state="+runtimeHolder.getSpaceState());
+                    }
                     return;
                 }
                 DefaultSpace.this.admin.scheduleNonBlockingStateChange(new Runnable() {
