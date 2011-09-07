@@ -1,6 +1,6 @@
 package org.openspaces.hibernate.cache;
 
-import com.gigaspaces.internal.client.dcache.ISpaceLocalCache;
+import com.gigaspaces.internal.client.cache.ISpaceCache;
 import com.j_spaces.core.Constants;
 import com.j_spaces.core.client.FinderException;
 import com.j_spaces.map.CacheFinder;
@@ -93,8 +93,8 @@ public abstract class AbstractMapCacheProvider implements CacheProvider {
      */
     public void stop() {
         doStop();
-        if (map.getLocalSpace() instanceof ISpaceLocalCache) {
-            ((ISpaceLocalCache) map.getLocalSpace()).close();
+        if (map.getLocalSpace() instanceof ISpaceCache) {
+            ((ISpaceCache) map.getLocalSpace()).close();
         }
         // if it is an embedde Space, stop it
         if (!SpaceUtils.isRemoteProtocol(map.getMasterSpace())) {
