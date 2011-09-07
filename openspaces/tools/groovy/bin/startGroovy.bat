@@ -61,7 +61,7 @@ goto end
 
 :default_JAVA_EXE
 set JAVA_EXE=java.exe
-goto check_GROOVY_HOME
+goto check_GS_GROOVY_HOME
 
 :valid_JAVA_HOME_DIR
 set JAVA_EXE=%JAVA_HOME%\bin\java.exe
