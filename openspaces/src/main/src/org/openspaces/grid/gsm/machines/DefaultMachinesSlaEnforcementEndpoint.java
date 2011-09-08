@@ -895,7 +895,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         }
         
         if (logger.isInfoEnabled()) {
-            logger.info("Agents that were started by" + 
+            logger.info("Agents that were started by " + 
                     "machineProvisioning class=" + machineProvisioning.getClass() + " " +
                     "new agents: " + MachinesSlaUtils.machinesToString(healthyAgents) + " " +
                     "existing provisioned agents:" + MachinesSlaUtils.machinesToString(provisionedAgents));
@@ -992,8 +992,8 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
     private void allocateCapacity(ClusterCapacityRequirements capacityToAllocate) {
         for (String agentUid : capacityToAllocate.getAgentUids()) {
             state.allocateCapacity(pu, agentUid, capacityToAllocate.getAgentCapacity(agentUid));
-            if (logger.isDebugEnabled()) {
-                logger.debug("allocating capacity "+capacityToAllocate.getAgentCapacity(agentUid) + " on agent uid " + agentUid);
+            if (logger.isInfoEnabled()) {
+                logger.info("allocating capacity "+capacityToAllocate.getAgentCapacity(agentUid) + " on " + MachinesSlaUtils.agentToString(pu.getAdmin(), agentUid));
             }
         }
     }
@@ -1001,8 +1001,8 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
     private void markCapacityForDeallocation(ClusterCapacityRequirements capacityToMarkForDeallocation) {
         for (String agentUid : capacityToMarkForDeallocation.getAgentUids()) {
             state.markCapacityForDeallocation(pu, agentUid, capacityToMarkForDeallocation.getAgentCapacity(agentUid));
-            if (logger.isDebugEnabled()) {
-                logger.debug("marking capacity for deallocation "+capacityToMarkForDeallocation.getAgentCapacity(agentUid) + " on agent uid " + agentUid);
+            if (logger.isInfoEnabled()) {
+                logger.info("marking capacity for deallocation "+capacityToMarkForDeallocation.getAgentCapacity(agentUid) + " on " + MachinesSlaUtils.agentToString(pu.getAdmin(), agentUid));
             }
         }
     }

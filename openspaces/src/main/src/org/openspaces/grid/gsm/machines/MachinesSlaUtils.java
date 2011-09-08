@@ -64,6 +64,14 @@ public class MachinesSlaUtils {
         return sortedAgents;
     }
 
+    public static String agentToString(Admin admin, String agentUid) {
+        GridServiceAgent agent = admin.getGridServiceAgents().getAgentByUID(agentUid);
+        if (agent != null) {
+            return machineToString(agent.getMachine());
+        }
+        return "agent uid " + agentUid;
+    }
+    
     public static String machineToString(Machine machine) {
         return machine.getHostName() + "/" + machine.getHostAddress();
     }
