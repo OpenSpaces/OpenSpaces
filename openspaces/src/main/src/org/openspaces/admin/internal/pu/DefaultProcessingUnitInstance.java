@@ -215,6 +215,14 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
     public String getName() {
         return puDetails.getClusterInfo().getName();
     }
+    
+    public String getProcessingUnitInstanceName() {
+        SpaceInstance spaceInstance = getSpaceInstance();
+        if (spaceInstance != null) {
+            return spaceInstance.getSpaceInstanceName();
+        }
+        return getName() + " ["+getInstanceId()+"]";
+    }
 
     public void setProcessingUnit(ProcessingUnit processingUnit) {
         assertStateChangesPermitted();

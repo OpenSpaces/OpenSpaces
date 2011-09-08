@@ -60,6 +60,18 @@ import java.util.concurrent.TimeUnit;
 public interface ProcessingUnitInstance extends GridComponent, Iterable<ServiceDetails>, StatisticsMonitor {
 
     /**
+     * Get this processing unit instance String representation.<br>
+     * If this processing unit instance represents a Space instance, this method will return
+     * {@link SpaceInstance#getSpaceInstanceName()}. Otherwise, it will return: {Processing unit
+     * name} [instance id] - the name of this processing unit (see {@link #getName()}) and the
+     * instance id (see {@link #getInstanceId()}); for example, MyPU [3]
+     * 
+     * @return this processing unit instance String representation.
+     * @since 8.0.5
+     */
+    String getProcessingUnitInstanceName();
+    
+    /**
      * Destroy the instance. If breaches the SLA, will instantiate the instance again.
      */
     void destroy();
