@@ -14,7 +14,11 @@ import org.openspaces.admin.internal.gsm.events.InternalGridServiceManagerAddedE
 import org.openspaces.admin.internal.gsm.events.InternalGridServiceManagerRemovedEventManager;
 import org.openspaces.admin.memcached.MemcachedDeployment;
 import org.openspaces.admin.pu.ProcessingUnit;
+import org.openspaces.admin.pu.ProcessingUnitAlreadyDeployedException;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
+import org.openspaces.admin.pu.elastic.ElasticStatefulProcessingUnitDeployment;
+import org.openspaces.admin.pu.elastic.ElasticStatelessProcessingUnitDeployment;
+import org.openspaces.admin.space.ElasticSpaceDeployment;
 import org.openspaces.admin.space.SpaceDeployment;
 
 import java.util.Collections;
@@ -183,6 +187,38 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
             throw new AdminException("No Grid Service Manager found to deploy [" + deployment.getSpaceUrl() + "]");
         }
         return gridServiceManager.deploy(deployment);
+    }
+
+    public ProcessingUnit deploy(ElasticSpaceDeployment deployment) throws ProcessingUnitAlreadyDeployedException {
+        return deploy(deployment.toElasticStatefulProcessingUnitDeployment());
+    }
+
+    public ProcessingUnit deploy(ElasticSpaceDeployment deployment, long timeout, TimeUnit timeUnit)
+            throws ProcessingUnitAlreadyDeployedException {
+        return deploy(deployment.toElasticStatefulProcessingUnitDeployment(),timeout,timeUnit);
+    }
+
+    public ProcessingUnit deploy(ElasticStatefulProcessingUnitDeployment deployment)
+            throws ProcessingUnitAlreadyDeployedException {
+        return deploy(deployment,admin.getDefaultTimeout(),admin.getDefaultTimeoutTimeUnit());
+    }
+
+    public ProcessingUnit deploy(ElasticStatefulProcessingUnitDeployment deployment, long timeout, TimeUnit timeUnit)
+            throws ProcessingUnitAlreadyDeployedException {
+        
+        return deploy(deployment.toProcessingUnitDeployment(admin),timeout,timeUnit);
+    }
+
+    public ProcessingUnit deploy(ElasticStatelessProcessingUnitDeployment deployment)
+        throws ProcessingUnitAlreadyDeployedException {
+    
+        return deploy(deployment,admin.getDefaultTimeout(),admin.getDefaultTimeoutTimeUnit());
+    }
+    
+    public ProcessingUnit deploy(ElasticStatelessProcessingUnitDeployment deployment, long timeout, TimeUnit timeUnit)
+        throws ProcessingUnitAlreadyDeployedException {
+
+        return deploy(deployment.toProcessingUnitDeployment(admin),timeout,timeUnit);
     }
 
     private GridServiceManager getGridServiceManager() {

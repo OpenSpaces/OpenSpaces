@@ -121,18 +121,68 @@ public interface GridServiceManager extends AgentGridComponent, LogProviderGridC
      * to a space (holding the memcached entries) and exposing the memcached protocol.
      */
     ProcessingUnit deploy(MemcachedDeployment deployment, long timeout, TimeUnit timeUnit) throws ProcessingUnitAlreadyDeployedException;
-    
-    boolean isDeployed( String processingUnitName );
 
+    /**
+     * Deploys an elastic space based on the space deployment information on the given grid
+     * service manager (it will act as the primary GSM for the deployed processing unit).
+     *
+     * <p>The deployment process will wait indefinitely and return the actual processing unit that can be used.
+     *
+     * <p>Note, deploying just a space is simply deploying a built in processing unit that starts
+     * just an embedded space.
+     */
     ProcessingUnit deploy(ElasticSpaceDeployment deployment) throws ProcessingUnitAlreadyDeployedException;
     
+    /**
+     * Deploys an elastic space based on the space deployment information on the given grid
+     * service manager (it will act as the primary GSM for the deployed processing unit).
+     *
+     * <p>The deployment process will wait for the given timeout and return the actual processing unit that can be used.
+     *
+     * <p>Note, deploying just a space is simply deploying a built in processing unit that starts
+     * just an embedded space.
+     */
     ProcessingUnit deploy(ElasticSpaceDeployment deployment, long timeout, TimeUnit timeUnit) throws ProcessingUnitAlreadyDeployedException;
-    
+
+    /**
+     * Deploys an elastic processing unit that has an embedded space based on the processing unit deployment information on the given grid
+     * service manager (it will act as the primary GSM for the deployed processing unit).
+     *
+     * <p>The deployment process will wait indefinitely and return the actual processing unit that can be used.
+     * 
+     * @throws ProcessingUnitAlreadyDeployedException - processing unit with the same name has already been deployed.
+     */
     ProcessingUnit deploy(ElasticStatefulProcessingUnitDeployment deployment) throws ProcessingUnitAlreadyDeployedException;
     
+    /**
+     * Deploys an elastic processing unit that has an embedded space based on the processing unit deployment information on the given grid
+     * service manager (it will act as the primary GSM for the deployed processing unit).
+     *
+     * <p>The deployment process will wait for the given timeout and return the actual processing unit that can be used.
+     * 
+     * @throws ProcessingUnitAlreadyDeployedException - processing unit with the same name has already been deployed.
+     */
     ProcessingUnit deploy(ElasticStatefulProcessingUnitDeployment deployment, long timeout, TimeUnit timeUnit) throws ProcessingUnitAlreadyDeployedException;
     
+    /**
+     * Deploys an elastic processing unit that does not have an embedded space based on the processing unit deployment information on the given grid
+     * service manager (it will act as the primary GSM for the deployed processing unit).
+     *
+     * <p>The deployment process will wait indefinitely and return the actual processing unit that can be used.
+     * 
+     * @throws ProcessingUnitAlreadyDeployedException - processing unit with the same name has already been deployed.
+     */
     ProcessingUnit deploy(ElasticStatelessProcessingUnitDeployment deployment) throws ProcessingUnitAlreadyDeployedException;
     
+    /**
+     * Deploys an elastic processing unit that does not have an embedded space based on the processing unit deployment information on the given grid
+     * service manager (it will act as the primary GSM for the deployed processing unit).
+     *
+     * <p>The deployment process will wait for the given timeout and return the actual processing unit that can be used.
+     * 
+     * @throws ProcessingUnitAlreadyDeployedException - processing unit with the same name has already been deployed.
+     */
     ProcessingUnit deploy(ElasticStatelessProcessingUnitDeployment deployment, long timeout, TimeUnit timeUnit) throws ProcessingUnitAlreadyDeployedException;
+    
+    boolean isDeployed( String processingUnitName );    
 }
