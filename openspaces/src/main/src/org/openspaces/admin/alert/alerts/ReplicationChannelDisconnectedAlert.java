@@ -77,7 +77,7 @@ public class ReplicationChannelDisconnectedAlert extends AbstractAlert {
     
     /**
      * The uid of the source virtual machine that this alert corresponds to.
-     * @return the host name; may be <code>null</code>.
+     * @return the source virtual machine uid; may be <code>null</code>.
      */
     public String getSourceVirtualMachineUid() {
         return getProperties().get(SOURCE_VIRTUAL_MACHINE_UID);
@@ -121,7 +121,7 @@ public class ReplicationChannelDisconnectedAlert extends AbstractAlert {
 
     /**
      * The uid of the target virtual machine that this alert corresponds to.
-     * @return the host name; may be <code>null</code>.
+     * @return the target virtual machine uid; may be <code>null</code>.
      */
     public String getTargetVirtualMachineUid() {
         return getProperties().get(TARGET_VIRTUAL_MACHINE_UID);

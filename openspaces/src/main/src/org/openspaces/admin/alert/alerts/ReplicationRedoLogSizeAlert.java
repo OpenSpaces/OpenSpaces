@@ -71,7 +71,7 @@ public class ReplicationRedoLogSizeAlert extends AbstractAlert {
 
     /**
      * The uid of the virtual machine that this alert corresponds to.
-     * @return the host name; may be <code>null</code>.
+     * @return the virtual machine uid; may be <code>null</code>.
      */
     public String getVirtualMachineUid() {
         return getProperties().get(VIRTUAL_MACHINE_UID);
