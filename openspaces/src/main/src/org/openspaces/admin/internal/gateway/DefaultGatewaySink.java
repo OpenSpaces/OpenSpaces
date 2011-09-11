@@ -31,16 +31,19 @@ public class DefaultGatewaySink implements GatewaySink {
                 this.sinkServiceDetails = sinkServiceDetails;
     }
 
+    @Override
     public GatewayProcessingUnit getGatewayProcessingUnit() {
         return gatewayProcessingUnit;
     }
 
+    @Override
     public void enableIncomingReplication() {
         Map<String, Object> namedArgs = new HashMap<String, Object>();
         namedArgs.put("enableIncomingReplication", "");
         ((InternalProcessingUnitInstance)gatewayProcessingUnit.getProcessingUnitInstance()).invoke("sink", namedArgs);
     }
 
+    @Override
     public GatewaySinkSource[] getSources() {
         String[] gatewaySourceNames = sinkServiceDetails.getGatewaySourceNames();
         GatewaySinkSource[] sources = new GatewaySinkSource[gatewaySourceNames.length];
@@ -50,11 +53,13 @@ public class DefaultGatewaySink implements GatewaySink {
         return null;
     }
 
+    @Override
     public boolean containsSource(String sourceGatewayName) {
         String[] gatewaySourceNames = sinkServiceDetails.getGatewaySourceNames();
         return Arrays.asList(gatewaySourceNames).contains(sourceGatewayName);
     }
 
+    @Override
     public GatewaySinkSource getSourceByName(String sourceGatewayName) {
         if (!containsSource(sourceGatewayName))
             return null;
@@ -62,10 +67,12 @@ public class DefaultGatewaySink implements GatewaySink {
         return new DefaultGatewaySinkSource(sourceGatewayName);
     }
 
+    @Override
     public boolean requiresBootstrapOnStartup() {
         return sinkServiceDetails.requiresBootstrap();
     }
 
+    @Override
     public String getLocalSpaceUrl() {
         return sinkServiceDetails.getLocalSpaceUrl();
     }
@@ -78,18 +85,22 @@ public class DefaultGatewaySink implements GatewaySink {
             this.sourceGatewayName = sourceGatewayName;
         }
 
+        @Override
         public GatewaySink getSink() {
             return DefaultGatewaySink.this;
         }
 
+        @Override
         public String getSourceGatewayName() {
             return sourceGatewayName;
         }
 
+        @Override
         public BootstrapResult bootstrapFromGatewayAndWait() {
             return bootstrapFromGatewayAndWait(gatewayProcessingUnit.getAdmin().getDefaultTimeout(), gatewayProcessingUnit.getAdmin().getDefaultTimeoutTimeUnit());
         }
 
+        @Override
         public BootstrapResult bootstrapFromGatewayAndWait(long timeout, TimeUnit timeUnit) {
             Map<String, Object> namedArgs = new HashMap<String, Object>();
             namedArgs.put("bootstrapFromGateway", sourceGatewayName);
@@ -99,10 +110,12 @@ public class DefaultGatewaySink implements GatewaySink {
                 future.get(timeout, timeUnit);
                 return new BootstrapResult() {
                     
+                    @Override
                     public boolean isSucceeded() {
                         return true;
                     }
                     
+                    @Override
                     public Throwable getFailureCause() {
                         return null;
                     }
@@ -110,10 +123,12 @@ public class DefaultGatewaySink implements GatewaySink {
             } catch (final InterruptedException e) {
                 return new BootstrapResult() {
                     
+                    @Override
                     public boolean isSucceeded() {
                         return false;
                     }
                     
+                    @Override
                     public Throwable getFailureCause() {
                         return e;
                     }
@@ -121,10 +136,12 @@ public class DefaultGatewaySink implements GatewaySink {
             } catch (final ExecutionException e) {
                 return new BootstrapResult() {
                     
+                    @Override
                     public boolean isSucceeded() {
                         return false;
                     }
                     
+                    @Override
                     public Throwable getFailureCause() {
                         return e.getCause();
                     }
@@ -132,10 +149,12 @@ public class DefaultGatewaySink implements GatewaySink {
             } catch (final TimeoutException e) {
                 return new BootstrapResult() {
                     
+                    @Override
                     public boolean isSucceeded() {
                         return false;
                     }
                     
+                    @Override
                     public Throwable getFailureCause() {
                         return e;
                     }

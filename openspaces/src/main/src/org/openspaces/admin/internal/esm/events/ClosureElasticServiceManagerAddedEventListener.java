@@ -14,6 +14,7 @@ public class ClosureElasticServiceManagerAddedEventListener extends AbstractClos
         super(closure);
     }
 
+    @Override
     public void elasticServiceManagerAdded(ElasticServiceManager elasticServiceManager) {
         getClosure().call(elasticServiceManager);
     }

@@ -39,10 +39,12 @@ public class DefaultGateway implements Gateway {
         this.gatewayName = gatewayName;
     }
 
+    @Override
     public Iterator<GatewayProcessingUnit> iterator() {
         return Arrays.asList(getGatewayProcessingUnits()).iterator();
     }
 
+    @Override
     public GatewayProcessingUnit[] getGatewayProcessingUnits() {
         List<GatewayProcessingUnit> result = new LinkedList<GatewayProcessingUnit>();
         for (ProcessingUnit processingUnit : admin.getProcessingUnits()) {
@@ -53,20 +55,24 @@ public class DefaultGateway implements Gateway {
         return result.toArray(new GatewayProcessingUnit[result.size()]);
     }
 
+    @Override
     public String getName() {
         return gatewayName;
     }
 
+    @Override
     public boolean waitFor(int numberOfGatewayProcessingUnits) {
         return waitFor(numberOfGatewayProcessingUnits, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
 
+    @Override
     public boolean waitFor(int numberOfGatewayProcessingUnits, long timeout, TimeUnit timeUnit) {
         final CountDownLatch latch = new CountDownLatch(numberOfGatewayProcessingUnits);
         ProcessingUnitInstanceAddedEventListener added = new ProcessingUnitInstanceAddedEventListener() {
             
             private final Set<String> gatewayProcessingUnitNames = new HashSet<String>();
             
+            @Override
             public void processingUnitInstanceAdded(ProcessingUnitInstance processingUnitInstance) {
                 if (GatewayUtils.isPuInstanceOfGateway(gatewayName, processingUnitInstance)){
                     if (gatewayProcessingUnitNames.add(processingUnitInstance.getProcessingUnit().getName())){
@@ -85,10 +91,12 @@ public class DefaultGateway implements Gateway {
         }
     }
 
+    @Override
     public GatewayProcessingUnit waitForGatewayProcessingUnit(String processingUnitName) {
         return waitForGatewayProcessingUnit(processingUnitName, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
 
+    @Override
     public GatewayProcessingUnit waitForGatewayProcessingUnit(String processingUnitName, long timeout, TimeUnit timeUnit) {
         //TODO WAN: calculate new timeout
         ProcessingUnit processingUnit = admin.getProcessingUnits().waitFor(processingUnitName, timeout, timeUnit);
@@ -100,6 +108,7 @@ public class DefaultGateway implements Gateway {
         return null;
     }
 
+    @Override
     public GatewayProcessingUnit getGatewayProcessingUnit(String processingUnitName) {
         ProcessingUnit processingUnit = admin.getProcessingUnits().getProcessingUnit(processingUnitName);
         ProcessingUnitInstance[] instances = processingUnit.getInstances();
@@ -111,6 +120,7 @@ public class DefaultGateway implements Gateway {
         throw new IllegalArgumentException("requested processing unit is not part of this gateway [" + processingUnitName + "]");
     }
 
+    @Override
     public Map<String, GatewayProcessingUnit> getNames() {
         Map<String, GatewayProcessingUnit> names = new HashMap<String, GatewayProcessingUnit>();
         for (GatewayProcessingUnit gatewayProcessingUnit : this) {
@@ -119,6 +129,7 @@ public class DefaultGateway implements Gateway {
         return names;
     }
 
+    @Override
     public GatewaySink getSink(String sourceGatewayName) {
         for (GatewayProcessingUnit gatewayProcessingUnit: this) {
             GatewaySink sink = gatewayProcessingUnit.getSink();
@@ -129,14 +140,17 @@ public class DefaultGateway implements Gateway {
         return null;
     }
 
+    @Override
     public GatewaySink waitForSink(String sourceGatewayName) {
         return waitForSink(sourceGatewayName, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
 
+    @Override
     public GatewaySink waitForSink(final String sourceGatewayName, long timeout, TimeUnit timeUnit) {
         final ExchangeCountDownLatch<GatewaySink> latch = new ExchangeCountDownLatch<GatewaySink>(1);
         ProcessingUnitInstanceAddedEventListener added = new ProcessingUnitInstanceAddedEventListener() {
             
+            @Override
             public void processingUnitInstanceAdded(ProcessingUnitInstance processingUnitInstance) {
                 if (GatewayUtils.isPuInstanceOfGateway(gatewayName, processingUnitInstance)){
                     DefaultGatewayProcessingUnit tempPUI = new DefaultGatewayProcessingUnit(admin, DefaultGateway.this, processingUnitInstance);
@@ -161,6 +175,7 @@ public class DefaultGateway implements Gateway {
         }
     }
 
+    @Override
     public GatewaySinkSource getSinkSource(String sourceGatewayName) {
         GatewaySink sink = getSink(sourceGatewayName);
         if (sink != null)
@@ -169,10 +184,12 @@ public class DefaultGateway implements Gateway {
         return null;
     }
     
+    @Override
     public GatewaySinkSource waitForSinkSource(String sourceGatewayName) {
         return waitForSinkSource(sourceGatewayName, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
 
+    @Override
     public GatewaySinkSource waitForSinkSource(String sourceGatewayName, long timeout, TimeUnit timeUnit) {
         GatewaySink sink = waitForSink(sourceGatewayName, timeout, timeUnit);
         if (sink != null)
@@ -181,6 +198,7 @@ public class DefaultGateway implements Gateway {
         return null;
     }
 
+    @Override
     public GatewayDelegator getDelegator(String targetGatewayName) {
         for (GatewayProcessingUnit gatewayProcessingUnit: this) {
             GatewayDelegator delegator = gatewayProcessingUnit.getDelegator();
@@ -191,14 +209,17 @@ public class DefaultGateway implements Gateway {
         return null;
     }
 
+    @Override
     public GatewayDelegator waitForDelegator(String targetGatewayName) {
         return waitForDelegator(targetGatewayName, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
     
+    @Override
     public GatewayDelegator waitForDelegator(final String targetGatewayName, long timeout, TimeUnit timeUnit) {
         final ExchangeCountDownLatch<GatewayDelegator> latch = new ExchangeCountDownLatch<GatewayDelegator>(1);
         ProcessingUnitInstanceAddedEventListener added = new ProcessingUnitInstanceAddedEventListener() {
             
+            @Override
             public void processingUnitInstanceAdded(ProcessingUnitInstance processingUnitInstance) {
                 if (GatewayUtils.isPuInstanceOfGateway(gatewayName, processingUnitInstance)){
                     DefaultGatewayProcessingUnit tempPUI = new DefaultGatewayProcessingUnit(admin, DefaultGateway.this, processingUnitInstance);
@@ -223,10 +244,12 @@ public class DefaultGateway implements Gateway {
         }
     }
 
+    @Override
     public int getSize() {
         return getGatewayProcessingUnits().length;
     }
 
+    @Override
     public boolean isEmpty() {
         return getSize() == 0;
     }

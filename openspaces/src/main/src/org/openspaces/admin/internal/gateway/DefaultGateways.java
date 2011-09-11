@@ -31,14 +31,17 @@ public class DefaultGateways implements Gateways {
         this.admin = admin;
     }
 
+    @Override
     public Admin getAdmin() {
         return admin;
     }
 
+    @Override
     public Iterator<Gateway> iterator() {
         return Arrays.asList(getGateways()).iterator();
     }
 
+    @Override
     public Gateway[] getGateways() {
         List<Gateway> gateways = new LinkedList<Gateway>();
         for (ProcessingUnit processingUnit : admin.getProcessingUnits()) {
@@ -49,6 +52,7 @@ public class DefaultGateways implements Gateways {
         return gateways.toArray(new Gateway[gateways.size()]);
     }
 
+    @Override
     public Gateway getGateway(String gatewayName) {
         for (ProcessingUnit processingUnit : admin.getProcessingUnits()) {
             for (ProcessingUnitInstance processingUnitInstance : processingUnit) {
@@ -59,6 +63,7 @@ public class DefaultGateways implements Gateways {
         return null;
     }
 
+    @Override
     public Map<String, Gateway> getNames() {
         Map<String, Gateway> names = new HashMap<String, Gateway>();
         for (Gateway gateway : this) {
@@ -67,14 +72,17 @@ public class DefaultGateways implements Gateways {
         return names;
     }
 
+    @Override
     public Gateway waitFor(String gatewayName) {
         return waitFor(gatewayName, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
 
+    @Override
     public Gateway waitFor(final String gatewayName, long timeout, TimeUnit timeUnit) {
         final CountDownLatch latch = new CountDownLatch(1);
         ProcessingUnitInstanceAddedEventListener added = new ProcessingUnitInstanceAddedEventListener() {
             
+            @Override
             public void processingUnitInstanceAdded(ProcessingUnitInstance processingUnitInstance) {
                 if (GatewayUtils.isPuInstanceOfGateway(gatewayName, processingUnitInstance))
                     latch.countDown();
@@ -93,10 +101,12 @@ public class DefaultGateways implements Gateways {
         }
     }
 
+    @Override
     public int getSize() {
         return getGateways().length;
     }
 
+    @Override
     public boolean isEmpty() {
         return getSize() == 0;
     }

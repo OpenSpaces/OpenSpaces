@@ -24,10 +24,12 @@ public class DefaultGatewayDelegator implements GatewayDelegator {
                 this.serviceDetails = serviceDetails;
     }
 
+    @Override
     public GatewayProcessingUnit getGatewayProcessingUnit() {
         return gatewayProcessingUnit;
     }
 
+    @Override
     public GatewayDelegatorTarget[] getDelegationTargets() {
         GatewayDelegation[] delegationTargets = serviceDetails.getDelegationTargets();
         DefaultGatewayDelegatorTarget[] result = new DefaultGatewayDelegatorTarget[delegationTargets.length];
@@ -38,6 +40,7 @@ public class DefaultGatewayDelegator implements GatewayDelegator {
         return result;
     }
     
+    @Override
     public boolean containsTarget(String targetGatewayName) {
         GatewayDelegation[] delegationTargets = serviceDetails.getDelegationTargets();
         for (GatewayDelegation gatewayDelegation : delegationTargets) {
@@ -57,18 +60,22 @@ public class DefaultGatewayDelegator implements GatewayDelegator {
             this.delegateThrough = delegateThrough;
         }
 
+        @Override
         public GatewayDelegator getDelegator() {
             return DefaultGatewayDelegator.this;
         }
 
+        @Override
         public String getTargetGatewayName() {
             return target;
         }
 
+        @Override
         public boolean isDelegateThroughOtherGateway() {
             return StringUtils.hasText(getDelegateThroughGatewayName());
         }
 
+        @Override
         public String getDelegateThroughGatewayName() {
             return delegateThrough;
         }

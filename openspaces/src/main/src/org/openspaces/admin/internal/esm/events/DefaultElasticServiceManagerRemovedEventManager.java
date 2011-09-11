@@ -25,9 +25,11 @@ public class DefaultElasticServiceManagerRemovedEventManager implements Internal
         this.admin = (InternalAdmin) elasticServiceManagers.getAdmin();
     }
 
+    @Override
     public void elasticServiceManagerRemoved(final ElasticServiceManager elasticServiceManager) {
         for (final ElasticServiceManagerRemovedEventListener listener : listeners) {
             admin.pushEvent(listener, new Runnable() {
+                @Override
                 public void run() {
                     listener.elasticServiceManagerRemoved(elasticServiceManager);
                 }
@@ -35,10 +37,12 @@ public class DefaultElasticServiceManagerRemovedEventManager implements Internal
         }
     }
 
+    @Override
     public void add(ElasticServiceManagerRemovedEventListener eventListener) {
         listeners.add(eventListener);
     }
 
+    @Override
     public void remove(ElasticServiceManagerRemovedEventListener eventListener) {
         listeners.remove(eventListener);
     }

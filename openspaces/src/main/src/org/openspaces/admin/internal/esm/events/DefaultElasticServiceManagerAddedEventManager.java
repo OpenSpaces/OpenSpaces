@@ -25,9 +25,11 @@ public class DefaultElasticServiceManagerAddedEventManager implements InternalEl
         this.admin = (InternalAdmin) elasticServiceManagers.getAdmin();
     }
 
+    @Override
     public void elasticServiceManagerAdded(final ElasticServiceManager elasticServiceManager) {
         for (final ElasticServiceManagerAddedEventListener listener : listeners) {
             admin.pushEvent(listener, new Runnable() {
+                @Override
                 public void run() {
                     listener.elasticServiceManagerAdded(elasticServiceManager);
                 }
@@ -35,9 +37,11 @@ public class DefaultElasticServiceManagerAddedEventManager implements InternalEl
         }
     }
 
+    @Override
     public void add(final ElasticServiceManagerAddedEventListener eventListener, boolean includeExisting) {
         if (includeExisting) {
             admin.raiseEvent(eventListener, new Runnable() {
+                @Override
                 public void run() {
                     for (ElasticServiceManager elasticServiceManager : elasticServiceManagers) {
                         eventListener.elasticServiceManagerAdded(elasticServiceManager);
@@ -48,10 +52,12 @@ public class DefaultElasticServiceManagerAddedEventManager implements InternalEl
         listeners.add(eventListener);
     }
 
+    @Override
     public void add(final ElasticServiceManagerAddedEventListener eventListener) {
         add(eventListener, true);
     }
 
+    @Override
     public void remove(ElasticServiceManagerAddedEventListener eventListener) {
         listeners.remove(eventListener);
     }

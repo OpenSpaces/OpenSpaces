@@ -13,6 +13,7 @@ public class ClosureElasticServiceManagerRemovedEventListener extends AbstractCl
         super(closure);
     }
 
+    @Override
     public void elasticServiceManagerRemoved(ElasticServiceManager elasticServiceManager) {
         getClosure().call(elasticServiceManager);
     }
