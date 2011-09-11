@@ -115,6 +115,7 @@ public class ReplicationRedoLogOverflowToDiskAlertBean implements AlertBean, Spa
             
             factory.putProperty(ReplicationRedoLogSizeAlert.HOST_ADDRESS, source.getMachine().getHostAddress());
             factory.putProperty(ReplicationRedoLogSizeAlert.HOST_NAME, source.getMachine().getHostName());
+            factory.putProperty(ReplicationRedoLogSizeAlert.VIRTUAL_MACHINE_UID, source.getVirtualMachine().getUid());
             factory.putProperty(ReplicationRedoLogSizeAlert.CPU_UTILIZATION, String.valueOf(source.getOperatingSystem().getStatistics().getCpuPerc()*100.0));
             factory.putProperty(ReplicationRedoLogSizeAlert.HEAP_UTILIZATION, String.valueOf(source.getVirtualMachine().getStatistics().getMemoryHeapUsedPerc()));
             
@@ -142,6 +143,7 @@ public class ReplicationRedoLogOverflowToDiskAlertBean implements AlertBean, Spa
                 
                 factory.putProperty(ReplicationRedoLogSizeAlert.HOST_ADDRESS, source.getMachine().getHostAddress());
                 factory.putProperty(ReplicationRedoLogSizeAlert.HOST_NAME, source.getMachine().getHostName());
+                factory.putProperty(ReplicationRedoLogSizeAlert.VIRTUAL_MACHINE_UID, source.getVirtualMachine().getUid());
                 factory.putProperty(ReplicationRedoLogSizeAlert.CPU_UTILIZATION, String.valueOf(source.getOperatingSystem().getStatistics().getCpuPerc()*100.0));
                 factory.putProperty(ReplicationRedoLogSizeAlert.HEAP_UTILIZATION, String.valueOf(source.getVirtualMachine().getStatistics().getMemoryHeapUsedPerc()));
                 

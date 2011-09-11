@@ -89,6 +89,7 @@ public class MirrorPersistenceFailureAlertBean implements AlertBean, SpaceInstan
             factory.config(config.getProperties());
             factory.putProperty(MirrorPersistenceFailureAlert.HOST_NAME, spaceInstance.getMachine().getHostName());
             factory.putProperty(MirrorPersistenceFailureAlert.HOST_ADDRESS, spaceInstance.getMachine().getHostAddress());
+            factory.putProperty(MirrorPersistenceFailureAlert.VIRTUAL_MACHINE_UID, spaceInstance.getVirtualMachine().getUid());
 
             Alert alert = factory.toAlert();
             admin.getAlertManager().triggerAlert( new MirrorPersistenceFailureAlert(alert));
@@ -144,6 +145,7 @@ public class MirrorPersistenceFailureAlertBean implements AlertBean, SpaceInstan
             
             factory.putProperty(MirrorPersistenceFailureAlert.HOST_NAME, mirrorInstance.getMachine().getHostName());
             factory.putProperty(MirrorPersistenceFailureAlert.HOST_ADDRESS, mirrorInstance.getMachine().getHostAddress());
+            factory.putProperty(MirrorPersistenceFailureAlert.VIRTUAL_MACHINE_UID, mirrorInstance.getVirtualMachine().getUid());
             
             factory.putProperty(MirrorPersistenceFailureAlert.INCONSISTENCY_REASON, reason);
             factory.putProperty(MirrorPersistenceFailureAlert.ROOT_CAUSE_MESSAGE, getRootCauseMessage(reason));
@@ -178,6 +180,7 @@ public class MirrorPersistenceFailureAlertBean implements AlertBean, SpaceInstan
                 
                 factory.putProperty(MirrorPersistenceFailureAlert.HOST_NAME, mirrorInstance.getMachine().getHostName());
                 factory.putProperty(MirrorPersistenceFailureAlert.HOST_ADDRESS, mirrorInstance.getMachine().getHostAddress());
+                factory.putProperty(MirrorPersistenceFailureAlert.VIRTUAL_MACHINE_UID, mirrorInstance.getVirtualMachine().getUid());
                 
                 factory.putProperty(MirrorPersistenceFailureAlert.REPLICATION_STATUS, getReplicationStatus(source));
                 factory.putProperty(MirrorPersistenceFailureAlert.REDO_LOG_SIZE, String.valueOf(replicationStatistics.getOutgoingReplication().getRedoLogSize()));

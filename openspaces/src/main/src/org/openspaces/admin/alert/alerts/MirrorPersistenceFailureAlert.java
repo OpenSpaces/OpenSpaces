@@ -24,6 +24,7 @@ public class MirrorPersistenceFailureAlert extends AbstractAlert {
     
     public static final String HOST_ADDRESS = "host-address";
     public static final String HOST_NAME = "host-name";
+    public static final String VIRTUAL_MACHINE_UID = "vm-uid";
     
     public static final String INCONSISTENCY_REASON = "inconsistency-reason";
     public static final String ROOT_CAUSE_MESSAGE = "root-cause-message";
@@ -68,6 +69,14 @@ public class MirrorPersistenceFailureAlert extends AbstractAlert {
     public String getHostName() {
         return getProperties().get(HOST_NAME);
     }
+    
+    /**
+     * The uid of the virtual machine that this alert corresponds to.
+     * @return the host name; may be <code>null</code>.
+     */
+    public String getVirtualMachineUid() {
+        return getProperties().get(VIRTUAL_MACHINE_UID);
+    }       
 
     /**
      * The reason why a source (primary Space) could not replicate to a target (Mirror Space). This

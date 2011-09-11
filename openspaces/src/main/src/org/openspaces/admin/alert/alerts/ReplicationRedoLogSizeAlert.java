@@ -27,6 +27,7 @@ public class ReplicationRedoLogSizeAlert extends AbstractAlert {
     
     public static final String HOST_ADDRESS = "host-address";
     public static final String HOST_NAME = "host-name";
+    public static final String VIRTUAL_MACHINE_UID = "vm-uid";
     public static final String CPU_UTILIZATION = "cpu-utilization";
     public static final String HEAP_UTILIZATION = "heap-utilization";
     
@@ -67,6 +68,14 @@ public class ReplicationRedoLogSizeAlert extends AbstractAlert {
     public String getHostName() {
         return getProperties().get(HOST_NAME);
     }
+
+    /**
+     * The uid of the virtual machine that this alert corresponds to.
+     * @return the host name; may be <code>null</code>.
+     */
+    public String getVirtualMachineUid() {
+        return getProperties().get(VIRTUAL_MACHINE_UID);
+    }    
     
     /**
      * The CPU utilization reading when this alert was fired.

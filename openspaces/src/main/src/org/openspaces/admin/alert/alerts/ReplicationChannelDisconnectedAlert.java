@@ -27,11 +27,13 @@ public class ReplicationChannelDisconnectedAlert extends AbstractAlert {
     
     public static final String SOURCE_HOST_ADDRESS = "source-host-address";
     public static final String SOURCE_HOST_NAME = "source-host-name";
+    public static final String SOURCE_VIRTUAL_MACHINE_UID = "source-vm-uid";
     public static final String SOURCE_CPU_UTILIZATION = "source-cpu-utilization";
     public static final String SOURCE_HEAP_UTILIZATION = "source-heap-utilization";
     
     public static final String TARGET_HOST_ADDRESS = "target-host-address";
     public static final String TARGET_HOST_NAME = "target-host-name";
+    public static final String TARGET_VIRTUAL_MACHINE_UID = "target-vm-uid";
     public static final String TARGET_CPU_UTILIZATION = "target-cpu-utilization";
     public static final String TARGET_HEAP_UTILIZATION = "target-heap-utilization";
     
@@ -74,6 +76,14 @@ public class ReplicationChannelDisconnectedAlert extends AbstractAlert {
     }
     
     /**
+     * The uid of the source virtual machine that this alert corresponds to.
+     * @return the host name; may be <code>null</code>.
+     */
+    public String getSourceVirtualMachineUid() {
+        return getProperties().get(SOURCE_VIRTUAL_MACHINE_UID);
+    }       
+    
+    /**
      * The CPU utilization reading when this alert was fired.
      * @return the CPU utilization; may be <code>null</code>.
      */
@@ -108,6 +118,14 @@ public class ReplicationChannelDisconnectedAlert extends AbstractAlert {
     public String getTargetHostName() {
         return getProperties().get(TARGET_HOST_NAME);
     }
+
+    /**
+     * The uid of the target virtual machine that this alert corresponds to.
+     * @return the host name; may be <code>null</code>.
+     */
+    public String getTargetVirtualMachineUid() {
+        return getProperties().get(TARGET_VIRTUAL_MACHINE_UID);
+    }       
     
     /**
      * The CPU utilization reading when this alert was fired.
