@@ -28,7 +28,7 @@ public interface GatewaySink {
     void enableIncomingReplication();
     
     /**
-     * Returns the source gateway names of this sink. 
+     * Returns the gateway sink sources of this sink. 
      */
     GatewaySinkSource[] getSources();
     

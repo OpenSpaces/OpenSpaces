@@ -50,7 +50,7 @@ public class DefaultGatewaySink implements GatewaySink {
         for (int i = 0; i < sources.length; i++) {
             sources[i] = new DefaultGatewaySinkSource(gatewaySourceNames[i]);
         }
-        return null;
+        return sources;
     }
 
     @Override
