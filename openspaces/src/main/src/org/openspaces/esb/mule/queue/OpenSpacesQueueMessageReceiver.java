@@ -65,8 +65,10 @@ public class OpenSpacesQueueMessageReceiver extends TransactedPollingMessageRece
     }
 
     private void init(Connector connector, final InboundEndpoint endpoint) {
-        this.setReceiveMessagesInTransaction(endpoint.getTransactionConfig().isTransacted());
         this.connector = (OpenSpacesQueueConnector) connector;
+        this.setReceiveMessagesInTransaction(endpoint.getTransactionConfig().isTransacted());
+        // use the defined timeout to set the frequency of the non-blocking polling
+        this.setFrequency(this.connector.getTimeout()/10);
     }
 
     protected void doConnect() throws Exception {
@@ -191,7 +193,7 @@ public class OpenSpacesQueueMessageReceiver extends TransactedPollingMessageRece
              * blocking wait defined by VMConnector.getQueueTimeout() will prevent this worker's receiver
              * thread from busy-waiting.
              */
-            while (this.getReceiver().isConnected()) {
+            if (this.getReceiver().isConnected()) {
                 super.run();
             }
         }
