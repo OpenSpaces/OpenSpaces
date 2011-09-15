@@ -17,6 +17,7 @@ import com.j_spaces.core.filters.StatisticsHolder;
 import net.jini.core.lookup.ServiceID;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.StatisticsMonitor;
+import org.openspaces.admin.internal.NameUtils;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.space.events.*;
 import org.openspaces.admin.internal.support.AbstractGridComponent;
@@ -274,18 +275,9 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
     }
     
     public String getSpaceInstanceName() {
-        String name = this.getSpace().getName();
-        Integer id = this.getInstanceId();
-        if (this.getSpace().getNumberOfBackups() > 0) {
-            Integer bid = this.getBackupId();
-            if (bid == null) {
-                bid = Integer.valueOf(0);
-            }
-            name += "."+id+" ["+(bid+1)+"]";
-        } else {
-            name += " ["+id+"]";
-        }
-        return name;
+
+        return NameUtils.getSpaceInstanceName( getSpace().getName(), getInstanceId(),
+                                        getBackupId(), getSpace().getNumberOfBackups() );
     }
 
     public int getInstanceId() {

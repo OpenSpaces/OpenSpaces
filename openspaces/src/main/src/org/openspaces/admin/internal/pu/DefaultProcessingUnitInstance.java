@@ -10,6 +10,7 @@ import net.jini.core.lookup.ServiceID;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.gsc.GridServiceContainer;
+import org.openspaces.admin.internal.NameUtils;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.gsm.InternalGridServiceManager;
 import org.openspaces.admin.internal.pu.events.DefaultProcessingUnitInstanceStatisticsChangedEventManager;
@@ -218,10 +219,13 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
     
     public String getProcessingUnitInstanceName() {
         SpaceInstance spaceInstance = getSpaceInstance();
+        
         if (spaceInstance != null) {
             return spaceInstance.getSpaceInstanceName();
         }
-        return getName() + " ["+getInstanceId()+"]";
+        
+        return NameUtils.getSpaceInstanceName( getName(), getClusterInfo().getInstanceId(), 
+                                   getBackupId(), getClusterInfo().getNumberOfBackups() );
     }
 
     public void setProcessingUnit(ProcessingUnit processingUnit) {
