@@ -38,7 +38,7 @@ public interface GatewaySink {
     boolean containsSource(String sourceGatewayName);
     
     /**
-     * Returns the specified source gateway or null if no such source gateway exists. 
+     * Returns a gateway sink source for the specified source gateway name or null if no such gateway sink source exists. 
      */
     GatewaySinkSource getSourceByName(String sourceGatewayName);
     
