@@ -5,6 +5,7 @@ import java.rmi.RemoteException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -67,23 +68,23 @@ import com.gigaspaces.start.SystemBoot;
 import com.sun.jini.start.LifeCycle;
 
 public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRemovedEventListener, ProcessingUnitAddedEventListener,MachineLifecycleEventListener
-		/*, RemoteSecuredService*//*, ServiceDiscoveryListener*/ {
+/*, RemoteSecuredService*//*, ServiceDiscoveryListener*/ {
 
 
     private static final long CHECK_SINGLE_THREAD_EVENT_PUMP_EVERY_SECONDS=60;
-	private static final String CONFIG_COMPONENT = "org.openspaces.grid.esm";
-	private static final Logger logger = Logger.getLogger(CONFIG_COMPONENT);
-	private final Admin admin;
-	private final MachinesSlaEnforcement machinesSlaEnforcement;
-	private final ContainersSlaEnforcement containersSlaEnforcement;
-	private final RebalancingSlaEnforcement rebalancingSlaEnforcement;
-	private final Map<ProcessingUnit,ScaleBeanServer> scaleBeanServerPerProcessingUnit;
-	private final Map<String,Map<String,String>> elasticPropertiesPerProcessingUnit;
-	private final Map<String, PendingElasticPropertiesUpdate> pendingElasticPropertiesUpdatePerProcessingUnit;
+    private static final String CONFIG_COMPONENT = "org.openspaces.grid.esm";
+    private static final Logger logger = Logger.getLogger(CONFIG_COMPONENT);
+    private final Admin admin;
+    private final MachinesSlaEnforcement machinesSlaEnforcement;
+    private final ContainersSlaEnforcement containersSlaEnforcement;
+    private final RebalancingSlaEnforcement rebalancingSlaEnforcement;
+    private final Map<ProcessingUnit,ScaleBeanServer> scaleBeanServerPerProcessingUnit;
+    private final Map<String,Map<String,String>> elasticPropertiesPerProcessingUnit;
+    private final Map<String, PendingElasticPropertiesUpdate> pendingElasticPropertiesUpdatePerProcessingUnit;
     private LifeCycle lifeCycle;
     private String[] configArgs;
     private final NonBlockingElasticMachineProvisioningAdapterFactory nonBlockingAdapterFactory;
-	
+
     /**
      * Create an ESM
      */
@@ -93,7 +94,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
         scaleBeanServerPerProcessingUnit = new HashMap<ProcessingUnit,ScaleBeanServer>();
         elasticPropertiesPerProcessingUnit = new ConcurrentHashMap<String, Map<String,String>>();
         pendingElasticPropertiesUpdatePerProcessingUnit = new ConcurrentHashMap<String, PendingElasticPropertiesUpdate>();
-        
+
         admin = new InternalAdminFactory().singleThreadedEventListeners().createAdmin();
         admin.getProcessingUnits().getProcessingUnitAdded().add(this);
         admin.getProcessingUnits().getProcessingUnitRemoved().add(this);
@@ -105,7 +106,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
                     public void run() {
                         long now = System.currentTimeMillis();
                         if (timestamp == 0 || 
-                            now-timestamp - delay < delayError) {
+                                now-timestamp - delay < delayError) {
                         }
                         else {
                             logger.warning(
@@ -131,7 +132,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
         this.configArgs = configArgs;
         bootstrap(configArgs);
     }
-    
+
     protected void bootstrap(String[] configArgs) throws Exception {
         try {
 
@@ -172,36 +173,36 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
             throw e;
         }
     }
-    
+
     @Override
     public synchronized void initialize(ServiceBeanContext context) throws Exception {
         logger.info("Starting ESM ...");
         super.initialize(context);
-        
+
         /* Get the JMX Service URL */
         String jmxServiceURL = SystemBoot.getJMXServiceURL();
         if (jmxServiceURL != null) {
             String hostName = BootUtil.getHostAddress();
             int port = SystemBoot.getRegistryPort();
             String name = context.getServiceElement().getName() +
-                    "_" +
-                    hostName +
-                    "_" +
-                    port;
+            "_" +
+            hostName +
+            "_" +
+            port;
             addAttribute(new JMXConnection(jmxServiceURL, name));
         }
     }
-    
+
     @Override
     public void advertise() throws IOException {
         super.advertise();
         logger.info("ESM started successfully with groups " + Arrays.toString(admin.getGroups()) + " and locators " + Arrays.toString(admin.getLocators()) + "");
     }
-    
+
     @Override
     public synchronized void destroy(boolean force) {
         logger.info("Stopping ESM ...");
-        
+
         admin.getProcessingUnits().getProcessingUnitRemoved().remove(this);
         admin.getProcessingUnits().getProcessingUnitAdded().remove(this);
         synchronized (scaleBeanServerPerProcessingUnit) {
@@ -210,96 +211,103 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
             }
             this.scaleBeanServerPerProcessingUnit.clear();
         }
-        
+
         if (lifeCycle != null) {
             lifeCycle.unregister(this);
         }
         super.destroy(force);
         logger.info("ESM stopped successfully");
     }
-  
+
     @Override
     protected Object createProxy() {
         Object proxy = ESMProxy.getInstance((ESM)getExportedProxy(), getUuid());
         return(proxy);
     }
 
-	public int getAgentId() throws RemoteException {
-		return AgentHelper.getAgentId();
-	}
+    public int getAgentId() throws RemoteException {
+        return AgentHelper.getAgentId();
+    }
 
-	public String getGSAServiceID() throws RemoteException {
-		return AgentHelper.getGSAServiceID();
-	}
-	
-	public NIODetails getNIODetails() throws RemoteException {
-		return NIOInfoHelper.getDetails();
-	}
+    public String getGSAServiceID() throws RemoteException {
+        return AgentHelper.getGSAServiceID();
+    }
 
-	public NIOStatistics getNIOStatistics() throws RemoteException {
-		return NIOInfoHelper.getNIOStatistics();
-	}
+    public NIODetails getNIODetails() throws RemoteException {
+        return NIOInfoHelper.getDetails();
+    }
+
+    public NIOStatistics getNIOStatistics() throws RemoteException {
+        return NIOInfoHelper.getNIOStatistics();
+    }
 
     public long getCurrentTimestamp() throws RemoteException {
         return System.currentTimeMillis();
     }
 
     public OSDetails getOSDetails() throws RemoteException {
-		return OSHelper.getDetails();
-	}
+        return OSHelper.getDetails();
+    }
 
-	public OSStatistics getOSStatistics() throws RemoteException {
-		return OSHelper.getStatistics();
-	}
+    public OSStatistics getOSStatistics() throws RemoteException {
+        return OSHelper.getStatistics();
+    }
 
-	public JVMDetails getJVMDetails() throws RemoteException {
-		return JVMHelper.getDetails();
-	}
+    public JVMDetails getJVMDetails() throws RemoteException {
+        return JVMHelper.getDetails();
+    }
 
-	public JVMStatistics getJVMStatistics() throws RemoteException {
-		return JVMHelper.getStatistics();
-	}
+    public JVMStatistics getJVMStatistics() throws RemoteException {
+        return JVMHelper.getStatistics();
+    }
 
-	public void runGc() throws RemoteException {
-		System.gc();
-	}
+    public void runGc() throws RemoteException {
+        System.gc();
+    }
 
-	public String[] getZones() throws RemoteException {
-		return ZoneHelper.getSystemZones();
-	}
+    public String[] getZones() throws RemoteException {
+        return ZoneHelper.getSystemZones();
+    }
 
-	public LogEntries logEntriesDirect(LogEntryMatcher matcher)
-			throws RemoteException, IOException {
-		return InternalLogHelper.logEntriesDirect(LogProcessType.ESM, matcher);
-	}
+    public LogEntries logEntriesDirect(LogEntryMatcher matcher)
+    throws RemoteException, IOException {
+        return InternalLogHelper.logEntriesDirect(LogProcessType.ESM, matcher);
+    }
 
-	public byte[] dumpBytes(String file, long from, int length)
-			throws RemoteException, IOException {
-		return InternalDumpHelper.dumpBytes(file, from, length);
-	}
+    public byte[] dumpBytes(String file, long from, int length)
+    throws RemoteException, IOException {
+        return InternalDumpHelper.dumpBytes(file, from, length);
+    }
 
-	public InternalDumpResult generateDump(String cause,
-			Map<String, Object> context) throws RemoteException,
-			InternalDumpException {
-		if (context == null) {
+    public InternalDumpResult generateDump(String cause,
+            Map<String, Object> context) throws RemoteException,
+            InternalDumpException {
+        if (context == null) {
             context = new HashMap<String, Object>();
         }
         context.put("esm", this);
         return InternalDumpHelper.generateDump(cause, context);
-	}
+    }
 
-	public InternalDumpResult generateDump(String cause,
-			Map<String, Object> context, String... contributors)
-			throws RemoteException, InternalDumpException {
-		if (context == null) {
+    public InternalDumpResult generateDump(String cause,
+            Map<String, Object> context, String... contributors)
+    throws RemoteException, InternalDumpException {
+        if (context == null) {
             context = new HashMap<String, Object>();
         }
         context.put("esm", this);
         return InternalDumpHelper.generateDump(cause, context, contributors);
-	}
-   
+    }
+
     public String[] getManagedProcessingUnits() {
-        return scaleBeanServerPerProcessingUnit.keySet().toArray(new String[]{});
+        Set<ProcessingUnit> puSet = scaleBeanServerPerProcessingUnit.keySet();
+        String [] puNames = new String[puSet.size()];
+        int i = 0;
+        for (ProcessingUnit pu : puSet) {
+            puNames[i] = pu.getName();
+            i++;
+        }
+        return puNames;
     }
 
     public boolean isServiceSecured() throws RemoteException {
@@ -320,25 +328,25 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
         ((InternalAdmin)admin).scheduleNonBlockingStateChange(
                 new Runnable() {
 
-                   public void run() {
-                       Map<String, String> properties = elasticPropertiesPerProcessingUnit.get(puName);
-                       if (properties == null)
-                       {
-                           //If there are no properties yet, this is a race condition. We received scale command before the ProcessingUnitAdded
-                           //event, keep the scale command for later merge
-                           pendingElasticPropertiesUpdatePerProcessingUnit.put(puName, 
-                                   new PendingElasticPropertiesUpdate(scaleStrategyConfig.getBeanClassName(), scaleStrategyConfig.getProperties()));
-                       }
-                       else
-                       {
-                           mergeScaleProperties(scaleStrategyConfig.getBeanClassName(), scaleStrategyConfig.getProperties(), properties);
-                           ESMImpl.this.processingUnitElasticPropertiesChanged(puName,properties);
-                       }
-                   }
+                    public void run() {
+                        Map<String, String> properties = elasticPropertiesPerProcessingUnit.get(puName);
+                        if (properties == null)
+                        {
+                            //If there are no properties yet, this is a race condition. We received scale command before the ProcessingUnitAdded
+                            //event, keep the scale command for later merge
+                            pendingElasticPropertiesUpdatePerProcessingUnit.put(puName, 
+                                    new PendingElasticPropertiesUpdate(scaleStrategyConfig.getBeanClassName(), scaleStrategyConfig.getProperties()));
+                        }
+                        else
+                        {
+                            mergeScaleProperties(scaleStrategyConfig.getBeanClassName(), scaleStrategyConfig.getProperties(), properties);
+                            ESMImpl.this.processingUnitElasticPropertiesChanged(puName,properties);
+                        }
+                    }
                 }
-       );
+        );
     }
-    
+
     private void mergeScaleProperties(final String strategyClassName, final Map<String, String> strategyProperties,
             Map<String, String> properties) {
         ScaleStrategyBeanPropertiesManager propertiesManager = new ScaleStrategyBeanPropertiesManager(properties);
@@ -346,11 +354,11 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
         propertiesManager.setBeanConfig(strategyClassName, strategyProperties);
         propertiesManager.enableBean(strategyClassName);
     }
-    
+
     public void setProcessingUnitElasticProperties(final String puName, final Map<String, String> properties) throws RemoteException {
         logger.fine("Queuing elastic properties for " + puName);
         ((InternalAdmin)admin).scheduleNonBlockingStateChange(
-                 new Runnable() {
+                new Runnable() {
 
                     public void run() {
                         Map<String, String> properties = elasticPropertiesPerProcessingUnit.get(puName);
@@ -365,10 +373,10 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
                             ESMImpl.this.processingUnitElasticPropertiesChanged(puName,properties);
                         }
                     }
-                 }
+                }
         );
     }
-    
+
     public void processingUnitRemoved(final ProcessingUnit pu) {
 
         pendingElasticPropertiesUpdatePerProcessingUnit.remove(pu.getName());
@@ -381,12 +389,12 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
     }
 
     public void processingUnitAdded(ProcessingUnit pu) {
-        
+
         ScaleBeanServer undeployedBeanServer = scaleBeanServerPerProcessingUnit.remove(pu);
         if (undeployedBeanServer != null) {
             undeployedBeanServer.destroy();
         }
-        
+
         InternalProcessingUnit internalPu = (InternalProcessingUnit) pu;
         Map<String, String> elasticProperties = internalPu.getElasticProperties();
         if (elasticProperties != null && !elasticProperties.isEmpty())
@@ -410,13 +418,13 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
     private void refreshProcessingUnitElasticConfig(ProcessingUnit pu, Map<String,String> elasticProperties) {
 
         try {
-        
+
             if (pu.getRequiredZones().length != 1) {
                 throw new BeanConfigurationException("Processing Unit must have exactly one container zone defined.");
             }
-            
+
             ScaleBeanServer beanServer = scaleBeanServerPerProcessingUnit.get(pu);
-            
+
             if (beanServer == null) {
                 ProcessingUnitSchemaConfig schemaConfig = new ProcessingUnitSchemaConfig(elasticProperties);
                 ElasticMachineIsolationConfig isolationConfig = new ElasticMachineIsolationConfig(elasticProperties);
@@ -432,7 +440,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
             logger.log(Level.SEVERE,"Error configuring elasitc scale bean.",e);
         }
     }
-    
+
     private void processingUnitElasticPropertiesChanged(String puName, Map<String,String> elasticProperties) {
         elasticPropertiesPerProcessingUnit.put(puName,elasticProperties);
         ProcessingUnit pu = admin.getProcessingUnits().getProcessingUnit(puName);
@@ -453,7 +461,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
     public void machineRemoved(Machine machine) {
         machine.getOperatingSystem().stopStatisticsMonitor();
     }
-    
+
     public static class PendingElasticPropertiesUpdate 
     {
 
@@ -488,14 +496,14 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
     }
 
     public ScaleStrategyConfig getProcessingUnitScaleStrategyConfig(final String processingUnitName) throws RemoteException {
-        
+
         final AtomicReference<ScaleStrategyConfig> config = new AtomicReference<ScaleStrategyConfig>();
         final CountDownLatch latch = new CountDownLatch(1);
         ((InternalAdmin)admin).scheduleNonBlockingStateChange(
                 new Runnable() {
 
                     public void run() {
-                        
+
                         ProcessingUnit processingUnit = admin.getProcessingUnits().getProcessingUnit(processingUnitName);
                         if (processingUnit != null) {
                             ScaleBeanServer beanServer = scaleBeanServerPerProcessingUnit.get(processingUnit);
@@ -505,13 +513,13 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
                                     config.set(enabledBean.getConfig());
                                 }
                             }
-                            
+
                         }
                         latch.countDown();
                     }
-                
+
                 });
-        
+
         try {
             latch.await();
         } catch (InterruptedException e) {
