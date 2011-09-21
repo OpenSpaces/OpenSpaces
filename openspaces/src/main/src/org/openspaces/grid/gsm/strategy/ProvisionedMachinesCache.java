@@ -139,7 +139,7 @@ public class ProvisionedMachinesCache implements
      */
     public void run() {
         
-        logger.debug("Enforcing sla for processing unit " + pu.getName());
+        
         //TODO: Move this check to EsmImpl, this component should not be aware it is running in an ESM
         //TODO: Raise an alert
         int numberOfEsms = admin.getElasticServiceManagers().getSize();
@@ -150,6 +150,7 @@ public class ProvisionedMachinesCache implements
     
         if (syncAgents) {
             syncAgents = false;
+            logger.debug("Retrieving list of provisioned machines");
             futureAgents = machineProvisioning.getDiscoveredMachinesAsync(GET_DISCOVERED_MACHINES_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         }
         
