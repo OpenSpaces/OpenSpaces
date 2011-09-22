@@ -246,7 +246,7 @@ fi
 
 ## GigaSpaces - Call setenv
 JSHOMEDIR=$GS_GROOVY_HOME/../../
-bash . $JSHOMEDIR/bin/setenv.sh
+bash $JSHOMEDIR/bin/setenv.sh
 JAVA_OPTS="-Xmx512m $JAVA_OPTS ${LOOKUP_GROUPS_PROP} ${LOOKUP_LOCATORS_PROP}"
 
 
