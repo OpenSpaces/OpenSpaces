@@ -216,9 +216,6 @@ public abstract class AbstractElasticProcessingUnitDeployment {
         else if (containerConfig.getMinimumJavaHeapSizeInMB() > containerConfig.getMaximumJavaHeapSizeInMB() ) {
             throw new IllegalArgumentException("Xmx commandline argument "+ containerConfig.getMaximumJavaHeapSizeInMB() + "MB cannot be less than Xms commandline argument " + containerConfig.getMinimumJavaHeapSizeInMB() +"MB.");
         }
-        else if (containerConfig.getMinimumJavaHeapSizeInMB() > containerConfig.getMaximumMemoryCapacityInMB()) {
-            throw new IllegalArgumentException("maximumMemoryCapacity " + containerConfig.getMaximumMemoryCapacityInMB() + "MB cannot be less than Xms commandline argument " + containerConfig.getMinimumJavaHeapSizeInMB() +"MB.");
-        }
         
         if (machineProvisioning == null) {
             machineProvisioning = new DiscoveredMachineProvisioningConfig();
