@@ -51,7 +51,7 @@
     	<fileset dir="${deploy.templates.dir}">
             <include name="**/*.jar"/>
         </fileset>
-    	<path path="${basedir}/tools/groovy/embeddable/groovy-all-1.8.0.jar" />
+    	<path path="${basedir}/tools/groovy/embeddable/groovy-all-1.8.2.jar" />
         <path path="${basedir}/../gigaspaces" />
     	<path path="${basedir}/../gigaspaces/classes" />
         <path path="${basedir}/../gigaspaces/src/java/resources" />
