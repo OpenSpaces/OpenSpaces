@@ -1,12 +1,8 @@
 package org.openspaces.admin.pu.elastic.topology;
 
-import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
-import org.openspaces.admin.pu.elastic.config.EagerScaleConfigurer;
-import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
-import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfigurer;
 import org.openspaces.core.util.MemoryUnit;
 
-public interface ElasticStatefulDeploymentTopology extends ElasticDeploymentTopology {
+public interface ElasticStatefulDeploymentTopology extends ElasticDeploymentTopology , EagerScaleTopology , ManualCapacityScaleTopology{
 
     /**
      * Specifies an estimate of the maximum memory capacity for this processing unit.
@@ -36,20 +32,4 @@ public interface ElasticStatefulDeploymentTopology extends ElasticDeploymentTopo
      */
     ElasticStatefulDeploymentTopology highlyAvailable(boolean highlyAvailable);
     
-    /**
-     * Enables the specified scale strategy, and disables all other scale strategies.
-     * Scale strategies can also be reconfigured after deployment.
-     * @see EagerScaleConfig
-     * @see EagerScaleConfigurer
-     */
-    ElasticStatefulDeploymentTopology scale(EagerScaleConfig strategy);
-
-    /**
-     * Enables the specified scale strategy, and disables all other scale strategies.
-     * Scale strategies can also be reconfigured after deployment.
-     * @see ManualCapacityScaleConfig
-     * @see ManualCapacityScaleConfigurer
-     */
-    ElasticStatefulDeploymentTopology scale(
-            ManualCapacityScaleConfig strategy);
-}
+ }
