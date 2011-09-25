@@ -122,7 +122,6 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
     }
 
     private void markForDeallocationContainersOnUnallocatedMachines(final ContainersSlaPolicy sla) {
-        {
         final Collection<String> allocatedAgentUids = sla.getClusterCapacityRequirements().getAgentUids();
         final String zone = ContainersSlaUtils.getContainerZone(pu);
         for (final GridServiceContainer container : ContainersSlaUtils.getContainersByZone(pu.getAdmin(), zone)) {
@@ -138,7 +137,6 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
                 state.markContainerForDeallocation(pu, container);
             }
         }
-        }
     }
 
     private void markForDeallocationContainersOnMachineWithAllocatedCapacityShortage(final ContainersSlaPolicy sla) {
@@ -149,8 +147,10 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
         for (final String agentUid : allocatedAgentUids) {
             final long allocatedMemory = getMemoryInMB(sla.getClusterCapacityRequirements().getAgentCapacity(agentUid));
             long remainingAllocatedMemory = allocatedMemory;
-            for (final GridServiceContainer container : ContainersSlaUtils.getContainersByZoneOnAgentUid(pu.getAdmin(), zone, agentUid)) {
-                final long containerMemoryInMB = ContainersSlaUtils.getMemoryInMB(container);
+            List<GridServiceContainer> containersByZoneOnAgent = ContainersSlaUtils.getContainersByZoneOnAgentUid(pu.getAdmin(), zone, agentUid);
+            final long containerMemoryInMB = sla.getNewContainerConfig().getMaximumMemoryCapacityInMB();
+            for (final GridServiceContainer container : containersByZoneOnAgent) {
+                
                 if (!containersMarkedForDeallocation.contains(container)) {
                     
                     if (remainingAllocatedMemory >= containerMemoryInMB) {
@@ -161,15 +161,16 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
                     else {
                         if (logger.isInfoEnabled()) {
                             logger.info("Grid Service Container " + ContainersSlaUtils.gscToString(container)+ " "
-                                    + "is marked for shutdown since there is not enough memory allocated for pu" + pu.getName() + " "+
+                                    + "is marked for shutdown since there is not enough memory allocated for pu " + pu.getName() + " "+
                                     "on this machine. "
-                                    + "Allocated memory " + allocatedMemory + " "  
-                                    + "Machine is currently running "
+                                    + "Allocated memory " + allocatedMemory + " "
+                                    + "Containers on machine in zone " + zone + " " + ContainersSlaUtils.gscsToString(containersByZoneOnAgent) + " "
+                                    + "All container on machine "
                                     + ContainersSlaUtils.gscsToString(container.getMachine()
                                         .getGridServiceContainers()
                                         .getContainers())
-                                    + "Cluster allocated capacity: " + sla.getClusterCapacityRequirements().toDetailedString() +
-                                      "Container memory in MB: " + containerMemoryInMB);
+                                    + "Cluster allocated capacity: " + sla.getClusterCapacityRequirements().toDetailedString() + " "
+                                    + "Container memory in MB: " + containerMemoryInMB);
                         }
                         state.markContainerForDeallocation(pu, container);
                     }
@@ -188,31 +189,41 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
             
             long allocatedMemory = getMemoryInMB(sla.getClusterCapacityRequirements().getAgentCapacity(agentUid));
             final long containerMemoryInMB = sla.getNewContainerConfig().getMaximumMemoryCapacityInMB();
+            int numberOfRunningContainers = 0;
             for (GridServiceContainer container : ContainersSlaUtils.getContainersByZoneOnAgentUid(pu.getAdmin(), zone, agentUid)) {
                 
                 if (!containersMarkedForDeallocation.contains(container)) {
-                    allocatedMemory -= containerMemoryInMB;
+                    numberOfRunningContainers++;
                 }
             }
-            
+            int numberOfFutureContainers = 0;
             for (FutureGridServiceContainer futureContainer : futureContainers) {
                 if (futureContainer.getGridServiceAgent().getUid().equals(agentUid)) {
-                    allocatedMemory -= containerMemoryInMB;
+                    numberOfFutureContainers++;
                 }
             }
-            
             
             GridServiceAgent agent = agents.getAgentByUID(agentUid);
             if (agent == null) {
                 throw new IllegalStateException("agent " + agentUid +" is not discovered");
             }
-            int numberOfContainersToStart = (int)Math.ceil(1.0*allocatedMemory/containerMemoryInMB);
-            if (allocatedMemory > 0) {
-                logger.info("Starting (" + allocatedMemory +"/" + containerMemoryInMB + ")="+ numberOfContainersToStart +" containers on machine " + ContainersSlaUtils.machineToString(agent.getMachine()));
-            }
-            
-            for (int i = 0 ; i < numberOfContainersToStart ; i++) {
-                startContainer(sla,agent);
+            int numberOfContainersToStart = (int)Math.ceil(1.0*allocatedMemory/containerMemoryInMB) - numberOfRunningContainers - numberOfFutureContainers;
+            if (numberOfContainersToStart > 0) {
+              
+                if (logger.isInfoEnabled()) {
+                    logger.info(
+                        "Starting " + numberOfContainersToStart + " containers = ceil(allocatedMemory/containerMemory) - runningContainers - futureContainers =" + 
+                        "ceil(" + allocatedMemory +"/" + containerMemoryInMB + ") - " + numberOfRunningContainers + " - " + numberOfFutureContainers + "= "+ 
+                        numberOfContainersToStart);
+                    
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Containers on machine " + ContainersSlaUtils.machineToString(agent.getMachine()));
+                    }
+                }
+                
+                for (int i = 0 ; i < numberOfContainersToStart ; i++) {
+                    startContainer(sla,agent);
+                }
             }
         }
     }
@@ -222,16 +233,6 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
     }
 
     private void startContainer(final ContainersSlaPolicy sla, final GridServiceAgent gsa) {
-        if (logger.isInfoEnabled()) {
-            logger.info("Starting a new Grid Service Container on "
-                    + ContainersSlaUtils.machineToString(gsa.getMachine())
-                    + " since more containers are needed for pu " + pu.getName() + " on the machine. "
-                    + "Machine is currently running "
-                    + ContainersSlaUtils.gscsToString(gsa.getMachine()
-                        .getGridServiceContainers()
-                        .getContainers()));
-        }
-        
         state.addFutureContainer(pu,
                 ContainersSlaUtils.startGridServiceContainerAsync(
                     (InternalAdmin) pu.getAdmin(),
@@ -250,31 +251,29 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
 
         for (FutureGridServiceContainer future : futureContainers) {
 
-            if (future.isDone()) {
-                Exception exception = null;
-    
-                try {
-                    GridServiceContainer container = future.get();
-                    if (container.isDiscovered()) {
-                        logger.info("Container started succesfully " + ContainersSlaUtils.gscToString(container));
-                    }
-    
-                } catch (ExecutionException e) {
-                    if (e.getCause() instanceof AdminException) {
-                        exception = (AdminException) e.getCause();
-                    } else {
-                        throw new IllegalStateException("Unexpected runtime exception", e);
-                    }
-                } catch (TimeoutException e) {
-                    exception = e;
+            Exception exception = null;
+
+            try {
+                GridServiceContainer container = future.get();
+                if (container.isDiscovered()) {
+                    logger.info("Container started succesfully " + ContainersSlaUtils.gscToString(container));
                 }
-    
-                if (exception != null) {
-                    final String errorMessage = "Failed to start container on machine "
-                            + ContainersSlaUtils.machineToString(future.getGridServiceAgent().getMachine());
-                    logger.warn(errorMessage, exception);
-                    state.failedFutureContainer(future);
+
+            } catch (ExecutionException e) {
+                if (e.getCause() instanceof AdminException) {
+                    exception = (AdminException) e.getCause();
+                } else {
+                    throw new IllegalStateException("Unexpected runtime exception", e);
                 }
+            } catch (TimeoutException e) {
+                exception = e;
+            }
+
+            if (exception != null) {
+                final String errorMessage = "Failed to start container on machine "
+                        + ContainersSlaUtils.machineToString(future.getGridServiceAgent().getMachine());
+                logger.warn(errorMessage, exception);
+                state.failedFutureContainer(future);
             }
         }
 

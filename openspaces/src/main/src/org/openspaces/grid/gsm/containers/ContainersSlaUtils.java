@@ -255,7 +255,8 @@ public class ContainersSlaUtils {
     }
     
     public static String gscToString(GridComponent container) {
-        return "pid["+container.getVirtualMachine().getDetails().getPid()+"] host["+machineToString(container.getMachine())+"]";
+        String[] zones = container.getZones().keySet().toArray(new String[container.getZones().keySet().size()]);
+        return "pid["+container.getVirtualMachine().getDetails().getPid()+"] host["+machineToString(container.getMachine())+"] zones [" + Arrays.toString(zones) +"]";
     }
 
     public static String gscsToString(GridServiceContainer[] containers) {
@@ -264,5 +265,9 @@ public class ContainersSlaUtils {
             containersToString[i] = gscToString(containers[i]);
         }
         return Arrays.toString(containersToString);
+    }
+
+    public static String gscsToString(List<GridServiceContainer> containers) {
+        return gscsToString(containers.toArray(new GridServiceContainer[containers.size()]));
     }
 }
