@@ -78,7 +78,7 @@ goto end
 
 :default_JAVA_EXE
 set JAVA_EXE=java.exe
-goto check_GROOVY_HOME
+goto check_GS_GROOVY_HOME
 
 :valid_JAVA_HOME_DIR
 set JAVA_EXE=%JAVA_HOME%\bin\java.exe
@@ -250,6 +250,7 @@ if exist "%USERPROFILE%/.groovy/postinit.bat" call "%USERPROFILE%/.groovy/postin
 @rem GigaSpaces - Call setenv
 SET JSHOMEDIR=%GS_GROOVY_HOME%\..\..\
 call "%JSHOMEDIR%\bin\setenv.bat"
+set JAVA_OPTS=%JAVA_OPTS% %LOOKUP_GROUPS_PROP% %LOOKUP_LOCATORS_PROP%
 
 @rem Execute Groovy
 "%JAVA_EXE%" %GROOVY_OPTS% %JAVA_OPTS% -classpath "%STARTER_CLASSPATH%" %STARTER_MAIN_CLASS% --main %CLASS% --conf "%STARTER_CONF%" --classpath "%CP%" %CMD_LINE_ARGS%
