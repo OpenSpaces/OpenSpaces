@@ -18,7 +18,7 @@ public class ElasticMultiTenancyLicenseVerifier {
             licenseManager.getLogger()
                 .warning(
                         "Warning: you have deployed a multitenant elastic processing unit. " +
-                        "Multitenant deployments require an add on license which is not part of your XAP license. " +
+                        "Multitenant deployments require an add on license which is not part of your current license. " +
                         "Please contact the GigaSpaces support team at support@gigaspaces.com");
         }
     }
