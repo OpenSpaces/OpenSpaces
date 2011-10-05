@@ -15,6 +15,7 @@ import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
 import org.openspaces.core.util.MemoryUnit;
 import org.openspaces.core.util.StringProperties;
 
+import com.gigaspaces.grid.gsa.GSProcessRestartOnExit;
 import com.gigaspaces.security.directory.User;
 import com.gigaspaces.security.directory.UserDetails;
 
@@ -38,7 +39,7 @@ public abstract class AbstractElasticProcessingUnitDeployment {
     public AbstractElasticProcessingUnitDeployment(String processingUnit) {
         this.processingUnit = processingUnit;
         elasticProperties = new HashMap<String,String>();
-        containerConfig = new GridServiceContainerConfig(elasticProperties);
+        containerConfig = new GridServiceContainerConfig(elasticProperties);       
         isolationConfig = new ElasticMachineIsolationConfig(elasticProperties);
         machineProvisioningPropertiesManager = new MachineProvisioningBeanPropertiesManager(elasticProperties);
         scaleStrategyPropertiesManager = new ScaleStrategyBeanPropertiesManager(elasticProperties);
@@ -216,6 +217,9 @@ public abstract class AbstractElasticProcessingUnitDeployment {
         else if (containerConfig.getMinimumJavaHeapSizeInMB() > containerConfig.getMaximumJavaHeapSizeInMB() ) {
             throw new IllegalArgumentException("Xmx commandline argument "+ containerConfig.getMaximumJavaHeapSizeInMB() + "MB cannot be less than Xms commandline argument " + containerConfig.getMinimumJavaHeapSizeInMB() +"MB.");
         }
+        
+        // ESM takes care of GSC restart, no need for GSA to restart GSC
+        containerConfig.setRestartOnExit(GSProcessRestartOnExit.NEVER); 
         
         if (machineProvisioning == null) {
             machineProvisioning = new DiscoveredMachineProvisioningConfig();

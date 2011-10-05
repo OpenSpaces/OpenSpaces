@@ -10,6 +10,7 @@ import org.openspaces.core.util.MemoryUnit;
 import org.openspaces.core.util.StringProperties;
 
 import com.gigaspaces.grid.gsa.GSProcessOptions;
+import com.gigaspaces.grid.gsa.GSProcessRestartOnExit;
 
 
 public class GridServiceContainerConfig {
@@ -24,9 +25,10 @@ public class GridServiceContainerConfig {
     private static final boolean USE_SCRIPT_DEFAULT = false;
     private static final String MAXIMUM_MEMORY_CAPACITY_MEGABYTES_KEY = "container.memory-capacity";
     private static final Long MAXIMUM_MEMORY_CAPACITY_MEGABYTES_DEFAULT = 0L;
-
-    StringProperties properties;
+    private static final String RESTART_ON_EXIT_KEY = "restart-on-exit";
     
+    StringProperties properties;
+        
     public GridServiceContainerConfig(Map<String,String> properties) {
         this.properties = new StringProperties(properties);
     }
@@ -184,6 +186,21 @@ public class GridServiceContainerConfig {
         this.setEnvironmentVariables(environmentVariables);
     }
 
+
+    public GSProcessRestartOnExit getRestartOnExit() {
+        
+        GSProcessRestartOnExit restartOnExit = null;
+        String value = properties.get(RESTART_ON_EXIT_KEY);
+        if (value != null) {
+            restartOnExit = GSProcessRestartOnExit.valueOf(value);
+        }
+        return restartOnExit;
+    }
+    
+    public void setRestartOnExit(GSProcessRestartOnExit restartOnExit) {
+        properties.put(RESTART_ON_EXIT_KEY, restartOnExit.toString());
+    }
+    
     public GSProcessOptions getOptions() {
         
         GSProcessOptions options = new GSProcessOptions("gsc");
@@ -194,6 +211,7 @@ public class GridServiceContainerConfig {
             options.setVmAppendableInputArguments(getCommandLineArguments());
         }
         options.setEnvironmentVariables(getEnvironmentVariables());
+        options.setRestartOnExit(getRestartOnExit());
         return options;
     }
     

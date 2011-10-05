@@ -16,12 +16,13 @@
 
 package org.openspaces.admin.gsa;
 
-import com.gigaspaces.grid.gsa.GSProcessOptions;
-
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
+
+import com.gigaspaces.grid.gsa.GSProcessOptions;
+import com.gigaspaces.grid.gsa.GSProcessRestartOnExit;
 
 /**
  * {@link org.openspaces.admin.gsc.GridServiceContainer} process options to be started by the
@@ -39,6 +40,8 @@ public class GridServiceContainerOptions {
     private boolean useScript = false;
 
     private final Map<String, String> environmentVariables = new HashMap<String, String>();
+
+    private GSProcessRestartOnExit restartOnExit;
     
     /**
      * Constructs a new grid service container options. By default will use JVM process execution.
@@ -82,6 +85,14 @@ public class GridServiceContainerOptions {
     }
 
     /**
+     * Sets the agent policy for be restart the container on exit.
+     */
+    public GridServiceContainerOptions restartOnExit(GSProcessRestartOnExit restartOnExit) {
+        this.restartOnExit= restartOnExit;
+        return this;
+    }
+    
+    /**
      * Returns the agent process options that represents what was set on this GSC options.
      */
     public GSProcessOptions getOptions() {
@@ -93,6 +104,7 @@ public class GridServiceContainerOptions {
             options.setVmAppendableInputArguments(vmInputArguments.toArray(new String[vmInputArguments.size()]));
         }
         options.setEnvironmentVariables(environmentVariables);
+        options.setRestartOnExit(restartOnExit);
         return options;
     }
     
@@ -102,6 +114,7 @@ public class GridServiceContainerOptions {
                ((GridServiceContainerOptions) other).useScript == this.useScript &&
                ((GridServiceContainerOptions) other).overrideVmInputArguments == this.overrideVmInputArguments &&
                ((GridServiceContainerOptions) other).vmInputArguments.equals(this.vmInputArguments) &&
-               ((GridServiceContainerOptions) other).environmentVariables.equals(this.environmentVariables);
+               ((GridServiceContainerOptions) other).environmentVariables.equals(this.environmentVariables) &&
+               (((GridServiceContainerOptions) other).restartOnExit == this.restartOnExit);
     }
 }
