@@ -393,11 +393,11 @@
     </target>
 	
 	<target name="create.dummy.file.if.tests.failed" if="junit.tests.failed">
-		<touch file="${target.junit.summary.dir}/failed" />
+		<touch file="${target.junit.reports.dir}/failed" />
 	</target>
 	
 	<target name="create.dummy.file.if.error.in.tests" if="junit.tests.error">
-		<touch file="${target.junit.summary.dir}/error" />
+		<touch file="${target.junit.reports.dir}/error" />
 	</target>
 		
     <target name="clean_tests" depends="clean,tests"/>
