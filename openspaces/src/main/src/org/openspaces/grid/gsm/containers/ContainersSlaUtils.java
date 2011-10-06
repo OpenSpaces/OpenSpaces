@@ -130,8 +130,6 @@ public class ContainersSlaUtils {
                     return true;
                 }
                 
-                
-                
                 return false;                
            }
             
@@ -158,6 +156,28 @@ public class ContainersSlaUtils {
 
             public Date getTimestamp() {
                 return new Date(startTimestamp);
+            }
+
+            @Override
+            public int getAgentId() throws ExecutionException, TimeoutException  {
+                ExecutionException exception = getException();
+                if (exception != null) {
+                    throw exception;
+                }
+                
+                if (isTimedOut() && ref.get() == null) {
+                    throw new TimeoutException("Starting a new container on machine "+ gsa.getMachine().getHostAddress() + " took more than " + timeoutUnit.toSeconds(timeoutDuration) + " seconds to complete.");
+                }
+               
+                if (ref.get() == null) {
+                    throw new IllegalStateException("Async operation is not done yet.");
+                }
+                
+                return (Integer)ref.get();
+            }
+            
+            public boolean isStarted() {
+                return ref.get() != null;
             }
         };
         

@@ -375,6 +375,18 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
             }
         }
 
+        for (FutureGridServiceContainer future : state.getFutureContainers()) {
+            if (future.getGridServiceAgent().equals(agent) && future.isStarted()) {
+                try {
+                    agentIds.remove(future.getAgentId());
+                } catch (ExecutionException e) {
+                    // ignore
+                } catch (TimeoutException e) {
+                    // ignore
+                }
+            }
+        }
+        
         for (final int agentId : agentIds) {
             try {
                 agent.killByAgentId(agentId);

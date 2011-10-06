@@ -119,8 +119,16 @@ class ContainersSlaEnforcementState {
         return Collections.unmodifiableCollection(
                 new ArrayList<FutureGridServiceContainer>(futureContainersPerProcessingUnit.get(pu)));
     }
+    public Collection<FutureGridServiceContainer> getFutureContainers() {
+        List<FutureGridServiceContainer> futures = new ArrayList<FutureGridServiceContainer>();
+        for (List<FutureGridServiceContainer> future : futureContainersPerProcessingUnit.values()) {
+            futures.addAll(future);
+        }
+        return Collections.unmodifiableCollection(futures); 
+    }
 
     public void addFutureContainer(ProcessingUnit pu, FutureGridServiceContainer future) {
         futureContainersPerProcessingUnit.get(pu).add(future);        
-    }    
+    }
+    
 }
