@@ -1,5 +1,0 @@
-http\://www.openspaces.org/schema/mule/os-eventcontainer=org.openspaces.esb.mule.eventcontainer.config.OpenSpacesEventContainerNamespaceHandler
-http\://www.openspaces.org/schema/mule/os-queue=org.openspaces.esb.mule.queue.config.OpenSpacesQueueNamespaceHandler
-http\://www.openspaces.org/schema/mule/os-seda=org.openspaces.esb.mule.seda.config.OpenSpacesSedaNamespaceHandler
-
-

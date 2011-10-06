@@ -122,15 +122,10 @@
                 <include name="META-INF/**"/>
                 <include name="org/openspaces/**"/>
             	<include name="org/apache/openjpa/**"/>
-                <exclude name="org/mule/**"/>
-                <exclude name="org/openspaces/esb/mule/**"/>
                 <exclude name="org/openspaces/pu/container/jee/jetty/holder/**"/>
                 <exclude name="org/openspaces/pu/container/jee/jetty/support/**"/>
                 <exclude name="org/apache/catalina/**"/>
                 <exclude name="com/sun/**"/>
-                <exclude name="META-INF/services/org/mule/**"/>
-                <exclude name="META-INF/mule-spring.handlers"/>
-                <exclude name="META-INF/mule-spring.schemas"/>
             </fileset>
             <manifest>
                 <attribute name="Implementation-Title" value="${openspaces-title}"/>
@@ -138,35 +133,10 @@
                 <attribute name="OpenSpaces-Version" value="${openspaces-version}"/>
             </manifest>
         </jar>
-
-        <copy file="${target.classes.dir}/META-INF/spring.handlers"
-              tofile="${target.classes.dir}/META-INF/spring.handlers.orig"/>
-        <copy file="${target.classes.dir}/META-INF/spring.schemas"
-              tofile="${target.classes.dir}/META-INF/spring.schemas.orig"/>
-        <copy file="${target.classes.dir}/META-INF/mule-spring.handlers"
-              tofile="${target.classes.dir}/META-INF/spring.handlers" overwrite="true"/>
-        <copy file="${target.classes.dir}/META-INF/mule-spring.schemas"
-              tofile="${target.classes.dir}/META-INF/spring.schemas" overwrite="true"/>
 
         <mkdir dir="${lib.dir}/optional/openspaces"/>
 
-        <delete file="${lib.dir}/optional/openspaces/mule-os.jar"/>
-        <jar jarfile="${lib.dir}/optional/openspaces/mule-os.jar">
-            <fileset dir="${target.classes.dir}">
-                <include name="org/openspaces/esb/mule/**"/>
-                <include name="META-INF/services/org/mule/**"/>
-                <include name="META-INF/spring.handlers"/>
-                <include name="META-INF/spring.schemas"/>
-            </fileset>
-            <manifest>
-                <attribute name="Implementation-Title" value="${openspaces-title}"/>
-                <attribute name="Implementation-Version" value="${openspaces-version}"/>
-                <attribute name="OpenSpaces-Version" value="${openspaces-version}"/>
-            </manifest>
-        </jar>
-
-        <mkdir dir="${lib.dir}/platform/openspaces"/>
-
+        
         <delete file="${lib.dir}/platform/openspaces/gs-openspaces-jetty.jar"/>
         <jar jarfile="${lib.dir}/platform/openspaces/gs-openspaces-jetty.jar">
             <fileset dir="${target.classes.dir}">
@@ -179,14 +149,6 @@
                 <attribute name="OpenSpaces-Version" value="${openspaces-version}"/>
             </manifest>
         </jar>
-
-        <copy file="${target.classes.dir}/META-INF/spring.handlers.orig"
-              tofile="${target.classes.dir}/META-INF/spring.handlers" overwrite="true"/>
-        <copy file="${target.classes.dir}/META-INF/spring.schemas.orig"
-              tofile="${target.classes.dir}/META-INF/spring.schemas" overwrite="true"/>
-        <delete file="${target.classes.dir}/META-INF/spring.handlers.orig"/>
-        <delete file="${target.classes.dir}/META-INF/spring.schemas.orig"/>
-
     </target>
 
     <target name="srczip" description="Create source ZIP (containing Java sources)">
