@@ -1,5 +1,44 @@
 package org.openspaces.admin.internal.space;
 
+import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import net.jini.core.lookup.ServiceID;
+
+import org.openspaces.admin.AdminException;
+import org.openspaces.admin.StatisticsMonitor;
+import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.space.events.DefaultReplicationStatusChangedEventManager;
+import org.openspaces.admin.internal.space.events.DefaultSpaceInstanceStatisticsChangedEventManager;
+import org.openspaces.admin.internal.space.events.DefaultSpaceModeChangedEventManager;
+import org.openspaces.admin.internal.space.events.InternalReplicationStatusChangedEventManager;
+import org.openspaces.admin.internal.space.events.InternalSpaceInstanceStatisticsChangedEventManager;
+import org.openspaces.admin.internal.space.events.InternalSpaceModeChangedEventManager;
+import org.openspaces.admin.internal.support.AbstractGridComponent;
+import org.openspaces.admin.internal.utils.NameUtils;
+import org.openspaces.admin.space.ReplicationTarget;
+import org.openspaces.admin.space.Space;
+import org.openspaces.admin.space.SpaceInstance;
+import org.openspaces.admin.space.SpaceInstanceRuntimeDetails;
+import org.openspaces.admin.space.SpaceInstanceStatistics;
+import org.openspaces.admin.space.SpacePartition;
+import org.openspaces.admin.space.events.ReplicationStatusChangedEvent;
+import org.openspaces.admin.space.events.ReplicationStatusChangedEventManager;
+import org.openspaces.admin.space.events.SpaceInstanceStatisticsChangedEvent;
+import org.openspaces.admin.space.events.SpaceInstanceStatisticsChangedEventManager;
+import org.openspaces.admin.space.events.SpaceModeChangedEvent;
+import org.openspaces.admin.space.events.SpaceModeChangedEventListener;
+import org.openspaces.admin.space.events.SpaceModeChangedEventManager;
+import org.openspaces.core.GigaSpace;
+import org.openspaces.core.GigaSpaceConfigurer;
+import org.openspaces.core.space.SpaceServiceDetails;
+import org.openspaces.pu.container.servicegrid.PUServiceBean;
+
 import com.gigaspaces.cluster.activeelection.SpaceMode;
 import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
 import com.gigaspaces.internal.jvm.JVMDetails;
@@ -14,27 +53,6 @@ import com.j_spaces.core.admin.RuntimeHolder;
 import com.j_spaces.core.admin.StatisticsAdmin;
 import com.j_spaces.core.client.SpaceURL;
 import com.j_spaces.core.filters.StatisticsHolder;
-import net.jini.core.lookup.ServiceID;
-import org.openspaces.admin.AdminException;
-import org.openspaces.admin.StatisticsMonitor;
-import org.openspaces.admin.internal.NameUtils;
-import org.openspaces.admin.internal.admin.InternalAdmin;
-import org.openspaces.admin.internal.space.events.*;
-import org.openspaces.admin.internal.support.AbstractGridComponent;
-import org.openspaces.admin.space.*;
-import org.openspaces.admin.space.events.*;
-import org.openspaces.core.GigaSpace;
-import org.openspaces.core.GigaSpaceConfigurer;
-import org.openspaces.core.space.SpaceServiceDetails;
-import org.openspaces.pu.container.servicegrid.PUServiceBean;
-
-import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author kimchy
