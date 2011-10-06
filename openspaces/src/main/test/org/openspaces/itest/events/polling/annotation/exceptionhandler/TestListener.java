@@ -1,7 +1,11 @@
 package org.openspaces.itest.events.polling.annotation.exceptionhandler;
 
 import org.openspaces.core.GigaSpace;
-import org.openspaces.events.*;
+import org.openspaces.events.EventExceptionHandler;
+import org.openspaces.events.EventTemplate;
+import org.openspaces.events.ExceptionHandler;
+import org.openspaces.events.ListenerExecutionFailedException;
+import org.openspaces.events.TransactionalEvent;
 import org.openspaces.events.adapter.SpaceDataEvent;
 import org.openspaces.events.polling.Polling;
 import org.springframework.transaction.TransactionStatus;
