@@ -5,7 +5,9 @@ import java.rmi.RemoteException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -41,6 +43,7 @@ import org.openspaces.grid.gsm.machines.MachinesSlaEnforcement;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioningAdapterFactory;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcement;
 import org.openspaces.grid.gsm.strategy.ScaleStrategyBean;
+import org.openspaces.grid.gsm.strategy.UndeployScaleStrategyBean;
 
 import com.gigaspaces.grid.gsa.AgentHelper;
 import com.gigaspaces.grid.zone.ZoneHelper;
@@ -318,33 +321,84 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
         return null;
     }
 
-    public Map<String, String> getProcessingUnitElasticProperties(String processingUnitName) throws RemoteException {
-        // uses a concurrent hashmap. Consistency not guaranteed with #setPRocessingUnitElasticConfig
-        return elasticPropertiesPerProcessingUnit.get(processingUnitName);
-    }
-
     public void setProcessingUnitScaleStrategy(final String puName, final ScaleStrategyConfig scaleStrategyConfig) {
         logger.fine("Queuing scale strategy for " + puName);
+        submitAndWait(new Callable<Void>() {
+
+                @Override
+                public Void call() {
+                    Map<String, String> properties = elasticPropertiesPerProcessingUnit.get(puName);
+                    if (properties == null)
+                    {
+                        //If there are no properties yet, this is a race condition. We received scale command before the ProcessingUnitAdded
+                        //event, keep the scale command for later merge
+                        pendingElasticPropertiesUpdatePerProcessingUnit.put(puName, 
+                                new PendingElasticPropertiesUpdate(scaleStrategyConfig.getBeanClassName(), scaleStrategyConfig.getProperties()));
+                    }
+                    else
+                    {
+                        mergeScaleProperties(scaleStrategyConfig.getBeanClassName(), scaleStrategyConfig.getProperties(), properties);
+                        ESMImpl.this.processingUnitElasticPropertiesChanged(puName,properties);
+                    }
+                    return null;
+                }
+            }
+        );
+    }
+    
+    /**
+     * Note: Not thread safe. Call only from submitAndWait
+     */
+    private ScaleStrategyBean getScaleStrategyBean(String puName) {
+        if (!pendingElasticPropertiesUpdatePerProcessingUnit.containsKey(puName)) {
+            for(Entry<ProcessingUnit,ScaleBeanServer> pair : scaleBeanServerPerProcessingUnit.entrySet())
+                if (pair.getKey().getName().equals(puName)) {
+                final ScaleBeanServer beanServer = pair.getValue();        
+                if (beanServer.getEnabledBean() != null) {
+                    return beanServer.getEnabledBean();
+                }
+            }
+        }
+        return null;
+    }
+    
+    @SuppressWarnings("unchecked")
+    <T> T submitAndWait(final Callable<T> task) {
+        final AtomicReference<Object> future = new AtomicReference<Object>();
+        final CountDownLatch latch = new CountDownLatch(1);
         ((InternalAdmin)admin).scheduleNonBlockingStateChange(
                 new Runnable() {
 
+                    @Override
                     public void run() {
-                        Map<String, String> properties = elasticPropertiesPerProcessingUnit.get(puName);
-                        if (properties == null)
-                        {
-                            //If there are no properties yet, this is a race condition. We received scale command before the ProcessingUnitAdded
-                            //event, keep the scale command for later merge
-                            pendingElasticPropertiesUpdatePerProcessingUnit.put(puName, 
-                                    new PendingElasticPropertiesUpdate(scaleStrategyConfig.getBeanClassName(), scaleStrategyConfig.getProperties()));
+                        try {
+                            future.set(task.call());
+                        } catch (Throwable e) {
+                            future.set(e);
                         }
-                        else
-                        {
-                            mergeScaleProperties(scaleStrategyConfig.getBeanClassName(), scaleStrategyConfig.getProperties(), properties);
-                            ESMImpl.this.processingUnitElasticPropertiesChanged(puName,properties);
+                        finally {
+                            latch.countDown();
                         }
                     }
+                    
                 }
-        );
+                );
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+        }
+        Object result = future.get();
+        if (result instanceof RuntimeException) {
+            throw (RuntimeException)result;
+        }
+        
+        if (result instanceof Error) {
+            throw (Error)result;
+        }
+        if (result instanceof Exception) {
+            throw new IllegalStateException("Unexpected exception",((Exception)result));
+        }
+        return (T)result;
     }
 
     private void mergeScaleProperties(final String strategyClassName, final Map<String, String> strategyProperties,
@@ -357,23 +411,23 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
 
     public void setProcessingUnitElasticProperties(final String puName, final Map<String, String> properties) throws RemoteException {
         logger.fine("Queuing elastic properties for " + puName);
-        ((InternalAdmin)admin).scheduleNonBlockingStateChange(
-                new Runnable() {
-
-                    public void run() {
-                        Map<String, String> properties = elasticPropertiesPerProcessingUnit.get(puName);
-                        if (properties == null)
-                        {
-                            //If there are no properties yet, this is a race condition. We received set elastic properties command before the ProcessingUnitAdded
-                            //event, keep the set command for later override
-                            pendingElasticPropertiesUpdatePerProcessingUnit.put(puName, new PendingElasticPropertiesUpdate(new HashMap<String, String>(0)));
-                        }
-                        else
-                        {
-                            ESMImpl.this.processingUnitElasticPropertiesChanged(puName,properties);
-                        }
+        submitAndWait(new Callable<Void>() {
+                @Override
+                public Void call() {
+                    Map<String, String> properties = elasticPropertiesPerProcessingUnit.get(puName);
+                    if (properties == null)
+                    {
+                        //If there are no properties yet, this is a race condition. We received set elastic properties command before the ProcessingUnitAdded
+                        //event, keep the set command for later override
+                        pendingElasticPropertiesUpdatePerProcessingUnit.put(puName, new PendingElasticPropertiesUpdate(new HashMap<String, String>(0)));
                     }
-                }
+                    else
+                    {
+                        ESMImpl.this.processingUnitElasticPropertiesChanged(puName,properties);
+                    }
+                    return null;                  
+              }
+            }
         );
     }
 
@@ -392,6 +446,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
 
         ScaleBeanServer undeployedBeanServer = scaleBeanServerPerProcessingUnit.remove(pu);
         if (undeployedBeanServer != null) {
+            //TODO: Check isSlaMet() and handle this case ?!@
             undeployedBeanServer.destroy();
         }
 
@@ -497,34 +552,54 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
 
     public ScaleStrategyConfig getProcessingUnitScaleStrategyConfig(final String processingUnitName) throws RemoteException {
 
-        final AtomicReference<ScaleStrategyConfig> config = new AtomicReference<ScaleStrategyConfig>();
-        final CountDownLatch latch = new CountDownLatch(1);
-        ((InternalAdmin)admin).scheduleNonBlockingStateChange(
-                new Runnable() {
+        return submitAndWait( new Callable<ScaleStrategyConfig>() {
 
-                    public void run() {
+            @Override
+            public ScaleStrategyConfig call() {
 
-                        ProcessingUnit processingUnit = admin.getProcessingUnits().getProcessingUnit(processingUnitName);
-                        if (processingUnit != null) {
-                            ScaleBeanServer beanServer = scaleBeanServerPerProcessingUnit.get(processingUnit);
-                            if (beanServer != null) {
-                                ScaleStrategyBean enabledBean = beanServer.getEnabledBean();
-                                if (enabledBean != null) {
-                                    config.set(enabledBean.getConfig());
-                                }
-                            }
-
+                ScaleStrategyConfig config = null;
+                ScaleStrategyBean scaleStrategyBean = getScaleStrategyBean(processingUnitName);
+                if (scaleStrategyBean != null) {
+                    config = scaleStrategyBean.getConfig();
+                }
+                return config;
+            }
+            
+        });
+    }
+    
+    @Override
+    public boolean isManagingProcessingUnit(final String processingUnitName) throws RemoteException {
+        return submitAndWait(new Callable<Boolean>() {
+            @Override
+            public Boolean call() {
+                boolean isManaging = false;
+                ScaleStrategyBean scaleStrategyBean = getScaleStrategyBean(processingUnitName);
+                if (scaleStrategyBean != null) {
+                    if (scaleStrategyBean instanceof UndeployScaleStrategyBean) {
+                        if (scaleStrategyBean.isScaleInProgress()) {
+                            // undeploy is still in progress
+                            isManaging = true;
                         }
-                        latch.countDown();
                     }
+                    else {
+                        isManaging = true;
+                    }
+                }
+                return isManaging;
+            }
+        });
+    }
 
-                });
-
-        try {
-            latch.await();
-        } catch (InterruptedException e) {
-        }
-        return config.get();
+    @Override
+    public boolean isManagingProcessingUnitAndScaleNotInProgress(final String processingUnitName) throws RemoteException {
+        return submitAndWait(new Callable<Boolean>() {
+            @Override
+            public Boolean call() {
+                ScaleStrategyBean scaleStrategyBean = getScaleStrategyBean(processingUnitName);
+                return scaleStrategyBean != null && !scaleStrategyBean.isScaleInProgress();
+            }
+        });
     }
 
 }

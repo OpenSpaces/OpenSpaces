@@ -1,7 +1,8 @@
 package org.openspaces.grid.gsm.machines;
 
 import org.openspaces.grid.gsm.capacity.ClusterCapacityRequirements;
-import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestroyedException;
+import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementEndpointDestroyedException;
+import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementException;
 
 public interface EagerMachinesSlaEnforcementEndpoint {
 
@@ -13,15 +14,12 @@ public interface EagerMachinesSlaEnforcementEndpoint {
      * 
      * @param sla - the sla parameters or null if the sla is to be cleared.
      * @return true if the sla was reached (steady state).
-     * @throws ServiceLevelAgreementEnforcementEndpointDestroyedException - this object has already been destroyed
      */
-    boolean enforceSla(EagerMachinesSlaPolicy sla) throws ServiceLevelAgreementEnforcementEndpointDestroyedException;
+    void enforceSla(EagerMachinesSlaPolicy sla) throws SlaEnforcementException;
 
     /**
      * @return a list of agents for this pu including memory/cpu for each.
      */
-    ClusterCapacityRequirements getAllocatedCapacity() throws ServiceLevelAgreementEnforcementEndpointDestroyedException;
-
-    boolean isGridServiceAgentsPendingDeallocation();
+    ClusterCapacityRequirements getAllocatedCapacity() throws SlaEnforcementEndpointDestroyedException;
 
 }

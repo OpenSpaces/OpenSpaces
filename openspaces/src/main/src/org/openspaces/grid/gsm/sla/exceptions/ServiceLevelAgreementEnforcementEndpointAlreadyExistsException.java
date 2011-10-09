@@ -1,4 +1,4 @@
-package org.openspaces.grid.gsm.sla;
+package org.openspaces.grid.gsm.sla.exceptions;
 
 public class ServiceLevelAgreementEnforcementEndpointAlreadyExistsException extends RuntimeException {
 

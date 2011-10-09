@@ -21,6 +21,7 @@ import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.machines.FutureGridServiceAgents;
 import org.openspaces.grid.gsm.machines.MachinesSlaUtils;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
+import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementInProgressException;
 
 
 public class ProvisionedMachinesCache implements 
@@ -168,7 +169,7 @@ public class ProvisionedMachinesCache implements
         }
     }
     
-    static class AgentsNotYetDiscoveredException extends Exception {
+    static class AgentsNotYetDiscoveredException extends SlaEnforcementInProgressException {
         private static final long serialVersionUID = 1L; 
         public AgentsNotYetDiscoveredException(String message, Exception inner) {
             super(message,inner);

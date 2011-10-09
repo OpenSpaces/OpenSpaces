@@ -155,4 +155,24 @@ public class DefaultElasticServiceManager extends AbstractAgentGridComponent imp
             throw new AdminException("Failed to set processing unit dynamic properties",e);
         }
     }
+
+    @Override
+    public boolean isManagingProcessingUnit(ProcessingUnit pu) {
+        try {
+            return esm.isManagingProcessingUnit(pu.getName());
+        }
+        catch (RemoteException e) {
+            throw new AdminException("Failed to determine if scale strategy is enforced",e);
+        }
+    }
+
+    @Override
+    public boolean isManagingProcessingUnitAndScaleNotInProgress(ProcessingUnit pu) {
+        try {
+            return esm.isManagingProcessingUnitAndScaleNotInProgress(pu.getName());
+        }
+        catch (RemoteException e) {
+            throw new AdminException("Failed to determine if scale strategy is enforced",e);
+        }
+    }
 }

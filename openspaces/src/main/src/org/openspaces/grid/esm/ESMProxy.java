@@ -69,4 +69,14 @@ public class ESMProxy extends AbstractProxy implements ESM, Serializable {
         return esmServer.getProcessingUnitScaleStrategyConfig(processingUnitName);
     }
 
+    @Override
+    public boolean isManagingProcessingUnit(String processingUnitName) throws RemoteException {
+         return esmServer.isManagingProcessingUnit(processingUnitName);
+    }
+
+    @Override
+    public boolean isManagingProcessingUnitAndScaleNotInProgress(String processingUnitName) throws RemoteException {
+        return esmServer.isManagingProcessingUnitAndScaleNotInProgress(processingUnitName);
+    }
+
 }

@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcement;
-import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointAlreadyExistsException;
+import org.openspaces.grid.gsm.sla.exceptions.ServiceLevelAgreementEnforcementEndpointAlreadyExistsException;
 
 /**
  * Implements the elastic re-balancing algorithm based on the specified SLA. Each endpoint is

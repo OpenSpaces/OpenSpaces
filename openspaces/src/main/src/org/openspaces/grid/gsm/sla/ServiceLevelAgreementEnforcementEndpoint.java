@@ -1,6 +1,8 @@
 package org.openspaces.grid.gsm.sla;
 
-import org.openspaces.admin.pu.ProcessingUnit;
+import org.openspaces.grid.gsm.machines.exceptions.NeedToStartMoreMachinesException;
+import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementEndpointDestroyedException;
+import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementException;
 
 
 
@@ -14,8 +16,6 @@ import org.openspaces.admin.pu.ProcessingUnit;
  * @param <POLICY> - service level agreement
  */
 public interface ServiceLevelAgreementEnforcementEndpoint<POLICY extends ServiceLevelAgreementPolicy> {
-
-    ProcessingUnit getProcessingUnit();
     
     /**
      * 
@@ -25,7 +25,7 @@ public interface ServiceLevelAgreementEnforcementEndpoint<POLICY extends Service
      * 
      * @param sla - the sla parameters or null if the sla is to be cleared.
      * @return true if the sla was reached (steady state).
-     * @throws ServiceLevelAgreementEnforcementEndpointDestroyedException - this object has already been destroyed
+     * @throws SlaEnforcementEndpointDestroyedException - this object has already been destroyed
      * 
      * {@code
      *      // Usage example for AdminService
@@ -55,7 +55,8 @@ public interface ServiceLevelAgreementEnforcementEndpoint<POLICY extends Service
      *       }
      *    }
      * }
+     * @throws NeedToStartMoreMachinesException 
      * 
      */   
-     boolean enforceSla(POLICY sla) throws ServiceLevelAgreementEnforcementEndpointDestroyedException;
+     void enforceSla(POLICY sla) throws SlaEnforcementException;
 }

@@ -24,7 +24,9 @@ import org.openspaces.grid.gsm.LogPerProcessingUnit;
 import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.MemoryCapacityRequirement;
-import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestroyedException;
+import org.openspaces.grid.gsm.containers.exceptions.ContainersSlaEnforcementInProgressException;
+import org.openspaces.grid.gsm.containers.exceptions.ContainersSlaEnforcementPendingProcessingUnitDeallocationException;
+import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementEndpointDestroyedException;
 
 import com.gigaspaces.grid.gsa.AgentProcessDetails;
 
@@ -47,7 +49,7 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
         this.state = state;
     }
 
-    public GridServiceContainer[] getContainers() throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
+    public GridServiceContainer[] getContainers() throws SlaEnforcementEndpointDestroyedException {
         validateEndpointNotDestroyed(pu);
 
         Collection<GridServiceContainer> approvedContainers = ContainersSlaUtils.getContainersByZone(
@@ -59,13 +61,13 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
     }
 
     public boolean isContainersPendingDeallocation()
-            throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
+            throws SlaEnforcementEndpointDestroyedException {
         validateEndpointNotDestroyed(pu);
         return !state.getContainersMarkedForDeallocation(pu).isEmpty();
     }
 
-    public boolean enforceSla(ContainersSlaPolicy sla)
-            throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
+    public void enforceSla(ContainersSlaPolicy sla)
+            throws SlaEnforcementEndpointDestroyedException, ContainersSlaEnforcementInProgressException {
         validateEndpointNotDestroyed(pu);
         if (sla == null) {
             throw new IllegalArgumentException("sla cannot be null");
@@ -87,22 +89,14 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
                     + " and instead it should be " + zone);
         }
 
-        try {
-            enforceSlaInternal(sla);
-            return true;
-        } catch (OperationInProgressException e) {
-            logger.info("Cannot enforce Containers SLA since a conflicting operation is in progress. Try again later.",
-                    e);
-            return false; // try again next time
-        }
-
+        enforceSlaInternal(sla);
     }
 
     public ProcessingUnit getProcessingUnit() {
         return pu;
     }
 
-    private void enforceSlaInternal(final ContainersSlaPolicy sla) throws OperationInProgressException {
+    private void enforceSlaInternal(final ContainersSlaPolicy sla) throws ContainersSlaEnforcementInProgressException {
 
         cleanContainersMarkedForShutdown(pu);
         cleanFutureContainers();
@@ -112,11 +106,15 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
         startContainersOnMachineWithAllocatedCapacitySurplus(sla);
         
         if (state.getNumberOfContainersMarkedForShutdown(pu) > 0) {
-            throw new OperationInProgressException("Containers still pending shutdown.");
+            throw new ContainersSlaEnforcementInProgressException(state.getNumberOfContainersMarkedForShutdown(pu) + " containers are pending shutdown.");
         }
         
         if (state.getNumberOfFutureContainers(pu) > 0) {
-            throw new OperationInProgressException("Containers still being started.");
+            throw new ContainersSlaEnforcementInProgressException("Containers still being started.");
+        }
+        
+        if (!state.getContainersMarkedForDeallocation(pu).isEmpty()) {
+            throw new ContainersSlaEnforcementPendingProcessingUnitDeallocationException(state.getContainersMarkedForDeallocation(pu)); 
         }
         
     }
@@ -285,7 +283,7 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
      * on them.
      * @throws OperationInProgressException 
      */
-    private void cleanContainersMarkedForShutdown(ProcessingUnit pu) throws OperationInProgressException {
+    private void cleanContainersMarkedForShutdown(ProcessingUnit pu) {
 
         for (final GridServiceContainer container : state.getContainersMarkedForDeallocation(pu)) {
 
@@ -325,7 +323,7 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
     }
 
     private void validateEndpointNotDestroyed(ProcessingUnit pu)
-            throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
+            throws SlaEnforcementEndpointDestroyedException {
 
         if (pu == null) {
             throw new IllegalArgumentException("pu cannot be null");
@@ -333,7 +331,7 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
         
         if (state.isProcessingUnitDestroyed(pu)) {
 
-            throw new ServiceLevelAgreementEnforcementEndpointDestroyedException();
+            throw new SlaEnforcementEndpointDestroyedException();
         }
     }
 
@@ -398,18 +396,5 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
             }
         }
     }
-    
-    private static class OperationInProgressException extends Exception {
 
-        public OperationInProgressException(String message) {
-            super(message);
-        }
-        
-        public OperationInProgressException(String message, Throwable cause) {
-            super(message,cause);
-        }
-
-        private static final long serialVersionUID = -5017788679551801723L;
-    }
-  
 } 

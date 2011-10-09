@@ -127,24 +127,6 @@ public class ScaleBeanServer {
         }
     }
     
-    public boolean isUndeployStarted() {
-        boolean undeployStarted = false;
-        List<Bean> enabledBeanAssignableTo = beanServer.getEnabledBeansAssignableTo(new Class[] {UndeployScaleStrategyBean.class});
-        if (!enabledBeanAssignableTo.isEmpty()) {
-            undeployStarted = true;
-        }
-        return undeployStarted;
-    }
-    
-    public boolean isUndeployComplete() {
-        boolean undeployComplete = false;
-        List<Bean> enabledBeanAssignableTo = beanServer.getEnabledBeansAssignableTo(new Class[] {UndeployScaleStrategyBean.class});
-        if (!enabledBeanAssignableTo.isEmpty()) {
-            undeployComplete = ((UndeployScaleStrategyBean)enabledBeanAssignableTo.get(0)).isUndeployComplete();
-        }
-        return undeployComplete;
-    }
-    
     public void destroy() {
         this.beanServer.destroy();
         this.rebalancingSlaEnforcement.destroyEndpoint(pu);

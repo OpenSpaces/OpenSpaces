@@ -1,5 +1,6 @@
 package org.openspaces.grid.gsm.machines;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,8 +22,16 @@ import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.ClusterCapacityRequirements;
 import org.openspaces.grid.gsm.capacity.MemoryCapacityRequirement;
 import org.openspaces.grid.gsm.capacity.NumberOfMachinesCapacityRequirement;
+import org.openspaces.grid.gsm.machines.exceptions.FailedToStartNewMachineException;
+import org.openspaces.grid.gsm.machines.exceptions.InconsistentMachineProvisioningException;
+import org.openspaces.grid.gsm.machines.exceptions.MachinesSlaEnforcementInProgressException;
+import org.openspaces.grid.gsm.machines.exceptions.MachinesSlaEnforcementPendingContainerDeallocationException;
+import org.openspaces.grid.gsm.machines.exceptions.NeedToStartMoreMachinesException;
+import org.openspaces.grid.gsm.machines.exceptions.StartedTooManyMachinesException;
+import org.openspaces.grid.gsm.machines.exceptions.UnexpectedShutdownOfNewMachineException;
+import org.openspaces.grid.gsm.machines.plugins.ElasticMachineProvisioningException;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
-import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestroyedException;
+import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementEndpointDestroyedException;
 
 /**
  * This class tracks started and shutdown machines while the operating is in progress. 
@@ -57,25 +66,18 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                 pu);
     }
 
-    private void validateEndpointNotDestroyed(ProcessingUnit pu) {
+    private void validateEndpointNotDestroyed(ProcessingUnit pu) throws SlaEnforcementEndpointDestroyedException {
         if (state.isProcessingUnitDestroyed(pu)) {
-            throw new ServiceLevelAgreementEnforcementEndpointDestroyedException();
+            throw new SlaEnforcementEndpointDestroyedException();
         }
     }
     
-    public ClusterCapacityRequirements getAllocatedCapacity() throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
+    public ClusterCapacityRequirements getAllocatedCapacity() throws SlaEnforcementEndpointDestroyedException {
        validateEndpointNotDestroyed(pu);
        return state.getAllocatedCapacity(pu);
     }
 
-     
-    public boolean isGridServiceAgentsPendingDeallocation() throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
-        validateEndpointNotDestroyed(pu);
-        
-        return !state.getCapacityMarkedForDeallocation(pu).equalsZero();
-    }
-
-    public boolean enforceSla(CapacityMachinesSlaPolicy sla) throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
+    public void enforceSla(CapacityMachinesSlaPolicy sla) throws SlaEnforcementEndpointDestroyedException, MachinesSlaEnforcementPendingContainerDeallocationException, MachinesSlaEnforcementInProgressException, NeedToStartMoreMachinesException {
         validateEndpointNotDestroyed(pu);
         
         validateSla(sla);
@@ -97,27 +99,10 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         }
         
         state.setMachineIsolation(pu, sla.getMachineIsolation());
-        
-        try {
-            validateProvisionedMachines(sla);
-            enforceSlaInternal(sla);
-            return true;
-        } catch (OperationInProgressException e) {
-            logger.info(e, e);
-            return false; // try again next time
-        } catch (NeedMoreMachinesException e) {
-            logger.info(e, e);
-            return false; // try again next time
-        } catch (NeedMoreCapacityException e) {
-            logger.info(e, e);
-            return false; // try again next time
-        } catch (ScaleInObstructedException e) {
-            logger.info(e, e);
-            return false; // try again next time
-        } catch (InconsistentMachineProvisioningException e) {
-            logger.info(e, e);
-            return false; // try again next time
-        }
+    
+        validateProvisionedMachines(sla);
+        enforceSlaInternal(sla);
+            
     }
 
     /**
@@ -139,7 +124,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
            }
         }
         if (undiscoveredAgents.size() > 0) {
-            throw new InconsistentMachineProvisioningException("Machines " + MachinesSlaUtils.machinesToString(undiscoveredAgents)+ " are no longer provisioned by the cloud for pu "+ pu.getName());
+            throw new InconsistentMachineProvisioningException(undiscoveredAgents);
         }
     }
 
@@ -181,31 +166,20 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         }
     }
     
-    public boolean enforceSla(EagerMachinesSlaPolicy sla)
-            throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
+    public void enforceSla(EagerMachinesSlaPolicy sla)
+            throws SlaEnforcementEndpointDestroyedException, InconsistentMachineProvisioningException, MachinesSlaEnforcementInProgressException, NeedToStartMoreMachinesException {
         
         validateEndpointNotDestroyed(pu);
         validateSla(sla);
        
         state.setMachineIsolation(pu, sla.getMachineIsolation());
         
-        try {
-            validateProvisionedMachines(sla);
-            enforceSlaInternal(sla);
-            return true;
-        } catch (OperationInProgressException e) {
-            logger.info(e, e);
-            return false; // try again next time
-        } catch (NeedMoreMachinesException e) {
-            logger.info(e, e);
-            return false; // try again next time
-        } catch (InconsistentMachineProvisioningException e) {
-            logger.info(e, e);
-            return false; // try again next time
-        }
+        validateProvisionedMachines(sla);
+        enforceSlaInternal(sla);
     }
 
-    private void enforceSlaInternal(EagerMachinesSlaPolicy sla) throws OperationInProgressException, NeedMoreMachinesException, InconsistentMachineProvisioningException {
+    private void enforceSlaInternal(EagerMachinesSlaPolicy sla) 
+            throws MachinesSlaEnforcementInProgressException, InconsistentMachineProvisioningException, NeedToStartMoreMachinesException {
         
         updateFutureAgentsState(sla);
         updateFailedAndUnprovisionedMachinesState(sla);
@@ -218,7 +192,14 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                 
         int machineShortage = getMachineShortageInOrderToReachMinimumNumberOfMachines(sla);
         if (machineShortage > 0) {
-            throw new NeedMoreMachinesException(machineShortage);
+            CapacityRequirements capacityRequirements = new CapacityRequirements(
+                    new NumberOfMachinesCapacityRequirement(machineShortage));
+            throw new NeedToStartMoreMachinesException(capacityRequirements);
+        }
+        
+        if (!state.getCapacityMarkedForDeallocation(pu).equalsZero()) {
+            // containers need to be removed (required when number of containers per machine changes)
+            throw new MachinesSlaEnforcementPendingContainerDeallocationException(state.getCapacityMarkedForDeallocation(pu));
         }
     }
 
@@ -227,7 +208,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
     }
             
     private void enforceSlaInternal(CapacityMachinesSlaPolicy sla)
-            throws OperationInProgressException, NeedMoreMachinesException, NeedMoreCapacityException, ScaleInObstructedException, InconsistentMachineProvisioningException {
+            throws MachinesSlaEnforcementInProgressException, NeedToStartMoreMachinesException, InconsistentMachineProvisioningException, MachinesSlaEnforcementPendingContainerDeallocationException {
 
         updateFutureAgentsState(sla);
         updateFailedAndUnprovisionedMachinesState(sla);
@@ -333,7 +314,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
            
            if (!shortageCapacity.equalsZero()) {
                if (!sla.getMachineProvisioning().isStartMachineSupported()) {
-                   throw new NeedMoreCapacityException(shortageCapacity);
+                   throw new NeedToStartMoreMachinesException(shortageCapacity);
                }
                
                 FutureGridServiceAgent[] futureAgents = sla.getMachineProvisioning().startMachinesAsync(
@@ -372,14 +353,14 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             
             if (machineShortage > 0) {
                 
-                if (!sla.getMachineProvisioning().isStartMachineSupported()) {
-                    throw new NeedMoreMachinesException(machineShortage);
-                }
-                
-                
                 // scale out to get to the minimum number of agents
                 CapacityRequirements capacityRequirements = new CapacityRequirements(
                         new NumberOfMachinesCapacityRequirement(machineShortage));
+                
+                if (!sla.getMachineProvisioning().isStartMachineSupported()) {
+                    throw new NeedToStartMoreMachinesException(capacityRequirements);
+                }
+                
                 FutureGridServiceAgent[] futureAgents = sla.getMachineProvisioning().startMachinesAsync(
                         capacityRequirements,
                         START_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
@@ -395,7 +376,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             
             // even if machineShortage is 0, we still need to come back to this method 
             // to check the capacity is satisfied (scale out)
-            throw new OperationInProgressException();
+            throw new MachinesSlaEnforcementInProgressException();
         }
         else {
             logger.debug("No action required in order to enforce machines sla. "+
@@ -409,21 +390,21 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
 
         if (!state.getCapacityMarkedForDeallocation(pu).equalsZero()) {
             // containers need to move to another machine
-            throw new ScaleInObstructedException();
+            throw new MachinesSlaEnforcementPendingContainerDeallocationException(state.getCapacityMarkedForDeallocation(pu));
         }
         
         if (state.getNumberOfFutureAgents(pu) > 0) {
             // new machines need to be started
-            throw new OperationInProgressException();
+            throw new MachinesSlaEnforcementInProgressException();
         }
         
         if (!state.getAgentUidsGoingDown(pu).isEmpty()) {
             // old machines need to complete shutdown
-            throw new OperationInProgressException();
+            throw new MachinesSlaEnforcementInProgressException();
         }
     }
 
-    private CapacityRequirements getCapacityShortage(CapacityRequirements target) throws OperationInProgressException {
+    private CapacityRequirements getCapacityShortage(CapacityRequirements target) throws MachinesSlaEnforcementInProgressException {
         CapacityRequirements shortageCapacity = 
             target.subtractOrZero(state.getAllocatedCapacity(pu).getTotalAllocatedCapacity());
         
@@ -437,7 +418,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                 if (!shortageCapacityRequirement.equalsZero() && expectedCapacityRequirement.equalsZero()) {
                     // cannot determine expected capacity, it could be enough to satisfy shortage 
                     // and if that is the case, there is no point in declaring there is shortage.
-                    throw new OperationInProgressException();
+                    throw new MachinesSlaEnforcementInProgressException();
                 }
             }
             
@@ -451,7 +432,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
      * if minimum number of machines is breached then
      * unmark machines that have only containers that are pending for deallocation
      */
-    private int unmarkAgentsMarkedForDeallocationToSatisfyMinimumNumberOfMachines(AbstractMachinesSlaPolicy sla) throws OperationInProgressException {
+    private int unmarkAgentsMarkedForDeallocationToSatisfyMinimumNumberOfMachines(AbstractMachinesSlaPolicy sla) throws MachinesSlaEnforcementInProgressException {
         
         int machineShortage = getMachineShortageInOrderToReachMinimumNumberOfMachines(sla);
         
@@ -487,7 +468,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
      * @return minimumNumberOfMachines - allocatedMachines - futureMachines
      */
     private int getMachineShortageInOrderToReachMinimumNumberOfMachines(AbstractMachinesSlaPolicy sla)
-            throws OperationInProgressException {
+            throws MachinesSlaEnforcementInProgressException {
         
         boolean cannotDetermineExpectedNumberOfMachines = false;
         final ClusterCapacityRequirements capacityAllocated = state.getAllocatedCapacity(pu);
@@ -507,7 +488,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         }
         
         if (machineShortage > 0 && cannotDetermineExpectedNumberOfMachines) {
-            throw new OperationInProgressException();
+            throw new MachinesSlaEnforcementInProgressException();
         }
         
         if (machineShortage < 0) {
@@ -673,46 +654,72 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
      * 
      * This is done by removing the future state, and adding pu allocation state on these machines.
      * @throws InconsistentMachineProvisioningException 
+     * @throws UnexpectedShutdownOfNewMachineException 
+     * @throws FailedToStartNewMachineException 
+     * @throws StartedTooManyMachinesException 
      */
-    private void updateFutureAgentsState(AbstractMachinesSlaPolicy sla) throws InconsistentMachineProvisioningException {
+    private void updateFutureAgentsState(AbstractMachinesSlaPolicy sla) throws InconsistentMachineProvisioningException, UnexpectedShutdownOfNewMachineException, FailedToStartNewMachineException, StartedTooManyMachinesException  {
        
         // each futureAgents object contains an array of FutureGridServiceAgent
         // only when all future in the array is done, the futureAgents object is done.
         Collection<GridServiceAgentFutures> doneFutureAgentss = state.getAllDoneFutureAgents(pu);
         
         for (GridServiceAgentFutures doneFutureAgents : doneFutureAgentss) {
-       
-            Collection<GridServiceAgent> healthyAgents = null;
-            try {
-                // returns only futures that are healthy.
-                healthyAgents = filterOnlyHealthyAgents(
-                        sla.getProvisionedAgents(), 
-                        sla.getMachineProvisioning(), 
-                        doneFutureAgents);
-            } catch (NewGridServiceAgentNotProvisionedYetException e) {
-                // Better luck next time. We cannot accept an agent that has been started but not in sla.getProvisionedAgents()
-                continue;
-            }
             
-            ClusterCapacityRequirements unallocatedCapacity = 
-                getUnallocatedCapacityIncludeNewMachines(sla, healthyAgents);
-                        
-            //update state 1: allocate capacity
-            if (numberOfMachines(doneFutureAgents.getExpectedCapacity()) > 0) {
-                allocateNumberOfMachines(
-                        numberOfMachines(doneFutureAgents.getExpectedCapacity()), 
-                        sla, 
-                        unallocatedCapacity);
+            for (FutureGridServiceAgent doneFutureAgent : doneFutureAgents.getFutureGridServiceAgents()) {
+                try {
+                    validateHealthyAgent(
+                            sla.getProvisionedAgents(), 
+                            sla.getMachineProvisioning(),
+                            doneFutureAgent);
+                }
+                catch (InconsistentMachineProvisioningException e) {
+                    // should be fixed by next time we get here
+                    // do not remove the future
+                    throw e;
+                } catch (FailedToStartNewMachineException e) {
+                    // we remove the future, next time we wont find it
+                    doneFutureAgents.removeFutureAgent(doneFutureAgent);
+                    throw e;
+                } catch (UnexpectedShutdownOfNewMachineException e) {
+                 // we remove the future, next time we wont find it
+                    doneFutureAgents.removeFutureAgent(doneFutureAgent);
+                    throw e;
+                }
             }
-            else if (!doneFutureAgents.getExpectedCapacity().equalsZero()) {
-                allocateManualCapacity(
-                        sla, 
-                        doneFutureAgents.getExpectedCapacity(), 
-                        unallocatedCapacity); 
-            }
-            else {
-                throw new InconsistentMachineProvisioningException("futureAgents expected capacity malformed. doneFutureAgents=" + 
-                        doneFutureAgents.getExpectedCapacity());
+        }
+        
+        for (GridServiceAgentFutures doneFutureAgents : doneFutureAgentss) {
+       
+            Collection<GridServiceAgent> healthyAgents = doneFutureAgents.getGridServiceAgents();
+            
+            if (healthyAgents.size() > 0) {
+                if (logger.isInfoEnabled()) {
+                    logger.info("Agents that were started by " + 
+                            "machineProvisioning class=" + sla.getMachineProvisioning().getClass() + " " +
+                            "new agents: " + MachinesSlaUtils.machinesToString(healthyAgents) + " " +
+                            "provisioned agents:" + MachinesSlaUtils.machinesToString(sla.getProvisionedAgents()));
+                }
+                ClusterCapacityRequirements unallocatedCapacity = 
+                    getUnallocatedCapacityIncludeNewMachines(sla, healthyAgents);
+                            
+                //update state 1: allocate capacity based on expectation (even if it was not met)
+                if (numberOfMachines(doneFutureAgents.getExpectedCapacity()) > 0) {
+                    allocateNumberOfMachines(
+                            numberOfMachines(doneFutureAgents.getExpectedCapacity()), 
+                            sla, 
+                            unallocatedCapacity);
+                }
+                else if (!doneFutureAgents.getExpectedCapacity().equalsZero()) {
+                    allocateManualCapacity(
+                            sla, 
+                            doneFutureAgents.getExpectedCapacity(), 
+                            unallocatedCapacity); 
+                }
+                else {
+                    throw new IllegalStateException("futureAgents expected capacity malformed. doneFutureAgents=" + 
+                            doneFutureAgents.getExpectedCapacity());
+                }
             }
             
             //update state 2: remove futures from list
@@ -732,26 +739,34 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             // these are all future agents that should have been used by the binpacking solver. 
             // The fact that they have not been used suggests that the number of started 
             // machines by machineProvisioning is more than we asked for.
+            Collection<GridServiceAgent> unallocatedAgents = new ArrayList<GridServiceAgent>();
+            
             for (GridServiceAgent newAgent : healthyAgents) {
                 String agentUid = newAgent.getUid();
                 CapacityRequirements agentCapacity = state.getAllocatedCapacity(pu).getAgentCapacityOrZero(agentUid);
                 if (agentCapacity.equalsZero()) {
-                    
-                    if (!sla.getMachineProvisioning().isStartMachineSupported()) {
-                        logger.info("Agent running on machine " + newAgent.getMachine().getHostAddress()
-                                + " is not stopped since machine provisioning " + sla.getMachineProvisioning().getClass()
-                                + "does not support automatic start/stop of machines");
-                        continue;
-                    }
-                    
-                    logger.warn(
-                            "Stopping machine " + MachinesSlaUtils.machineToString(newAgent.getMachine()) + " "+
-                            "since it is not really needed by the PU that asked for it (processing unit " + pu.getName()+")." + 
-                            "Agents provisioned by cloud: " + MachinesSlaUtils.machinesToString(sla.getProvisionedAgents()));
-                    stopMachine(sla.getMachineProvisioning(), newAgent);
+                    unallocatedAgents.add(newAgent);
                 }
             }
-        
+            
+            if (unallocatedAgents.size() > 0) {
+                if (!sla.getMachineProvisioning().isStartMachineSupported()) {
+                    logger.info(
+                            "Agents " + MachinesSlaUtils.machinesToString(unallocatedAgents) +
+                             " are not needed for pu " + pu.getName());
+                }
+                else {
+                    StartedTooManyMachinesException tooManyMachinesExceptions = new StartedTooManyMachinesException(pu,unallocatedAgents);
+                    logger.warn(
+                            "Stopping machines " + MachinesSlaUtils.machinesToString(unallocatedAgents) + " "+
+                            "Agents provisioned by cloud: " + MachinesSlaUtils.machinesToString(sla.getProvisionedAgents()), 
+                            tooManyMachinesExceptions);
+                    for (GridServiceAgent unallocatedAgent : unallocatedAgents) {
+                        stopMachine(sla.getMachineProvisioning(), unallocatedAgent);
+                    }
+                    throw tooManyMachinesExceptions;
+                }
+            }
         }
         
     }
@@ -789,25 +804,42 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
     /**
      * @return true - if removed future agent from the state
      * @throws InconsistentMachineProvisioningException 
+     * @throws FailedToStartNewMachineException 
+     * @throws UnexpectedShutdownOfNewMachineException 
+     * @throws FailedMachineProvisioningException 
      */
-    private Collection<GridServiceAgent> filterOnlyHealthyAgents(
+    private void validateHealthyAgent(
             Collection<GridServiceAgent> provisionedAgents, 
             NonBlockingElasticMachineProvisioning machineProvisioning,
-            GridServiceAgentFutures futureAgents) throws NewGridServiceAgentNotProvisionedYetException, InconsistentMachineProvisioningException {
-        
-        final Collection<GridServiceAgent> healthyAgents = new HashSet<GridServiceAgent>();
+            FutureGridServiceAgent futureAgent) throws InconsistentMachineProvisioningException, FailedToStartNewMachineException, UnexpectedShutdownOfNewMachineException {
+
+        //TODO: raise exception in addition to logging the error !!
         final Collection<String> usedAgentUids = state.getAllUsedAgentUids();
         final Collection<String> usedAgentUidsForPu = state.getAllUsedAgentUidsForPu(pu);
-                
-        for (FutureGridServiceAgent futureAgent : futureAgents.getFutureGridServiceAgents()) {
-            
-            Throwable exception = null;
-            GridServiceAgent newAgent = null;
+        
+        GridServiceAgent newAgent = null;
+        {
+            Exception exception = null;
             try {
-                newAgent = futureAgent.get(); // throws an exception if something went wrong.
+                newAgent = futureAgent.get(); 
             } catch (ExecutionException e) {
-                exception = e.getCause();
+                // if runtime or error propage exception "as-is"
+                Throwable cause = e.getCause();
+                if (cause instanceof RuntimeException) {
+                    throw (RuntimeException)cause;
+                }
+                else if (cause instanceof Error) {
+                    throw (Error)cause;
+                }
+                else if (cause instanceof TimeoutException || cause instanceof ElasticMachineProvisioningException || cause instanceof InterruptedException) {
+                    // expected exception
+                    exception = (Exception)cause;
+                }
+                else {
+                    throw new IllegalStateException("Unexpected Exception from machine provisioning.",e);
+                }
             } catch (TimeoutException e) {
+                // expected exception
                 exception = e;
             }
             
@@ -816,92 +848,61 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                 if (logger.isWarnEnabled()) {
                     logger.warn(errorMessage , exception);
                 }
+                throw new FailedToStartNewMachineException(exception);
             }
-            else if (newAgent == null) {
-                throw new InconsistentMachineProvisioningException("Future is done without exception, but returned a null agent");
+        }
+        if (newAgent == null) {
+            throw new IllegalStateException("Machine provisioning future is done without exception, but returned a null agent");
+        }
+        
+        if (!newAgent.isDiscovered()) {
+            
+            UnexpectedShutdownOfNewMachineException unexpectedShutdownException = new UnexpectedShutdownOfNewMachineException(newAgent.getMachine());
+            if (logger.isWarnEnabled()) {
+                logger.warn("Failed to start agent on new machine.", unexpectedShutdownException);
             }
-            else if (!newAgent.isDiscovered()) {
-                if (logger.isWarnEnabled()) {
-                    logger.warn(
-                            "Machine provisioning for " + pu.getName() + " "+
-                            "has provided the machine " + MachinesSlaUtils.machineToString(newAgent.getMachine()) +
-                            " but it seems to shutdown unexpectedly."+
-                            "The machine is ignored");
-                }
-            }
-            else if (usedAgentUidsForPu.contains(newAgent.getUid())) {
-                if (logger.isWarnEnabled()) {
-                    logger.warn(
-                            "Machine provisioning for " + pu.getName() + " "+
-                            "has provided the machine " + MachinesSlaUtils.machineToString(newAgent.getMachine()) +
-                            " which is already in use by this PU."+
-                            "The machine is ignored");
-                }
-           }
-           else if (usedAgentUids.contains(newAgent.getUid())) {
-                    
-                if (logger.isWarnEnabled()) {
-                        logger.warn(
-                            "Machine provisioning for " + pu.getName() + " "+
-                            "has provided the machine " + MachinesSlaUtils.machineToString(newAgent.getMachine()) +
-                            " which is already in use by another PU."+
-                            "This machine is ignored");
-                }
-           }
-           else if (!provisionedAgents.contains(newAgent)) {
+            throw unexpectedShutdownException;
+        }
+        
+        if (usedAgentUidsForPu.contains(newAgent.getUid())) {
+            //some nasty bug in machine provisioning implementation 
+            throw new IllegalStateException(
+                "Machine provisioning for " + pu.getName() + " "+
+                "has provided the machine " + MachinesSlaUtils.machineToString(newAgent.getMachine()) +
+                " which is already in use by this PU."+
+                "The machine is ignored");
+        }
+       
+        if (usedAgentUids.contains(newAgent.getUid())) {
+          //some nasty bug in machine provisioning implementation        
+            throw new IllegalStateException(
+                        "Machine provisioning for " + pu.getName() + " "+
+                        "has provided the machine " + MachinesSlaUtils.machineToString(newAgent.getMachine()) +
+                        " which is already in use by another PU."+
+                        "This machine is ignored");
+        }
+        
+        if (!provisionedAgents.contains(newAgent)) {
    
-               //Handle the case of a new machine that was started with @{link {@link NonBlockingElasticMachineProvisioning#startMachinesAsync(CapacityRequirements, long, TimeUnit)}
-               //but still not in the list returned by {@link NonBlockingElasticMachineProvisioning#getDiscoveredMachinesAsync(long, TimeUnit)}
+           //Handle the case of a new machine that was started with @{link {@link NonBlockingElasticMachineProvisioning#startMachinesAsync(CapacityRequirements, long, TimeUnit)}
+           //but still not in the list returned by {@link NonBlockingElasticMachineProvisioning#getDiscoveredMachinesAsync(long, TimeUnit)}
+           
+           final NonBlockingElasticMachineProvisioning oldMachineProvisioning = futureAgent.getMachineProvisioning();
+           if (
+                // checking for a bug in the implementation of machineProvisioning
+               oldMachineProvisioning != null &&
+               !MachinesSlaUtils.isAgentConformsToMachineProvisioningConfig(newAgent, oldMachineProvisioning.getConfig()) &&
                
-               final NonBlockingElasticMachineProvisioning oldMachineProvisioning = futureAgent.getMachineProvisioning();
-               if (
-                    // checking for a bug in the implementation of machineProvisioning
-                   oldMachineProvisioning != null &&
-                   !MachinesSlaUtils.isAgentConformsToMachineProvisioningConfig(newAgent, oldMachineProvisioning.getConfig()) &&
-                   
-                   // ignore error if machine provisioning was modified
-                   oldMachineProvisioning == machineProvisioning) {
-                   
-                   throw new InconsistentMachineProvisioningException(
-                           MachinesSlaUtils.machineToString(newAgent.getMachine()) + " has been started but with the wrong zone or management settings"); 
-               }
+               // ignore error if machine provisioning was modified
+               oldMachineProvisioning == machineProvisioning) {
                
-               // providing a grace period for provisionedAgents to update.
-               if (!futureAgent.isTimedOut()) {
-                   if (logger.isDebugEnabled()) {
-                       logger.info(
-                           "New machine " + MachinesSlaUtils.machineToString(newAgent.getMachine()) +
-                           " started, but still not confirmed to be provisioned.");
-                   }
-                   throw new NewGridServiceAgentNotProvisionedYetException(newAgent);
-               }
-               
-               // check for machine provisioning changes
-               if (!machineProvisioning.isStartMachineSupported()) {
-                   // someone changed the configuration, and we got a machine that was started by the previous configuration.
-                   logger.error("Cannot stop machine  " + MachinesSlaUtils.machineToString(newAgent.getMachine()) + " shut down the machine or the agent on the machine manually.");
-               }
-               
-               else if (oldMachineProvisioning != machineProvisioning) {
-                   // someone changed the configuration, and we got a machine that was started by the previous configuration.
-                   logger.info("Stopping machine " + MachinesSlaUtils.machineToString(newAgent.getMachine()) + " since it was started by the previous configuration.");
-                   stopMachine(machineProvisioning, newAgent);
-               }
+               throw new IllegalStateException(
+                       MachinesSlaUtils.machineToString(newAgent.getMachine()) + " has been started but with the wrong zone or management settings"); 
            }
-           else {
-               healthyAgents.add(newAgent);
-           }
-
+           
+           // providing a grace period for provisionedAgents to update.
+           throw new InconsistentMachineProvisioningException(newAgent);
         }
-        
-        if (logger.isInfoEnabled()) {
-            logger.info("Agents that were started by " + 
-                    "machineProvisioning class=" + machineProvisioning.getClass() + " " +
-                    "new agents: " + MachinesSlaUtils.machinesToString(healthyAgents) + " " +
-                    "existing provisioned agents:" + MachinesSlaUtils.machinesToString(provisionedAgents));
-        }
-        
-        return healthyAgents;
     }
 
     /**
@@ -1117,87 +1118,12 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         }
         return totalCapacity;
     }
-
-    private abstract static class MachinesSlaEnforcementException  extends Exception {
-
-        private static final long serialVersionUID = 1L;
-
-        public MachinesSlaEnforcementException(String message) {
-            super(message);
-        }
-
-        /**
-         * Override the method to avoid expensive stack build and synchronization,
-         * since no one uses it anyway.
-         */
-        @Override
-        public Throwable fillInStackTrace()
-        {
-            return null;
-        }    
-    }
-    
-    private static class OperationInProgressException extends MachinesSlaEnforcementException  {
-        
-        private static final long serialVersionUID = 1L;
-
-        OperationInProgressException() {
-            super("Machines SLA enforcement is in progress");        
-        }
-        
-    }
-
-    private static class NeedMoreCapacityException extends MachinesSlaEnforcementException {
-        
-        private static final long serialVersionUID = 1L;
-
-        NeedMoreCapacityException(CapacityRequirements capacityShortage) {
-            super("Cannot enforce Machines SLA since there are not enough machines available. "+
-                  "Need more machines with " + capacityShortage);        
-        }
-    }
-    
-    private static class NeedMoreMachinesException extends MachinesSlaEnforcementException {
-        
-        private static final long serialVersionUID = 1L;
-
-        NeedMoreMachinesException(int machineShortage) {
-            super("Cannot enforce Machines SLA since there are not enough machines available. "+
-                  "Need " + machineShortage + " more machines");
-        }
-    }
-    
-    private static class ScaleInObstructedException extends MachinesSlaEnforcementException {
-        
-        private static final long serialVersionUID = 1L;
-
-        ScaleInObstructedException() {
-            super("Cannot enforce Machines SLA since there are agents that need to be scaled in, but they are still running containers");
-        }
-    }
-
-    private static class NewGridServiceAgentNotProvisionedYetException extends MachinesSlaEnforcementException {
-        
-        private static final long serialVersionUID = 1L;
-
-        NewGridServiceAgentNotProvisionedYetException(GridServiceAgent agent) {
-            super("Grid Service Agent " + MachinesSlaUtils.machineToString(agent.getMachine())  + " has been started but not discovered yet by the machine provisioning.");
-        }
-    }
     
     private static int numberOfMachines(CapacityRequirements capacityRequirements) {
         
         return capacityRequirements.getRequirement(new NumberOfMachinesCapacityRequirement().getType()).getNumberOfMachines();
     }
-    
-    private static class InconsistentMachineProvisioningException extends MachinesSlaEnforcementException {
-        
-        private static final long serialVersionUID = 1L;
-
-        InconsistentMachineProvisioningException(String message) {
-            super(message);
-        }
-    }
+   
 }
 
 

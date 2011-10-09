@@ -3,6 +3,7 @@ package org.openspaces.admin.internal.pu;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -14,6 +15,7 @@ import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.application.Application;
+import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.application.InternalApplication;
@@ -416,6 +418,106 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         return backupGridServiceManagers.get(gridServiceManagerUID);
     }
 
+    public boolean undeployAndWait(long timeout, TimeUnit timeUnit) {
+        
+        if (!isManaged()) {
+            throw new AdminException("No managing GSM to undeploy from");
+        }
+
+        long end = System.currentTimeMillis() + timeUnit.toMillis(timeout);
+        
+        // if elastic scale strategy is enforced then also wait for all containers to be undiscovered
+        boolean isElasticScaleStrategyEnforced = 
+                ((InternalGridServiceManager)managingGridServiceManager).isManagedByElasticServiceManager(this);
+        
+        List<GridServiceContainer> containersPendingShutdown = new ArrayList<GridServiceContainer>();
+        if (isElasticScaleStrategyEnforced) {
+            // add all containers that are managed by the elastic pu
+            for (GridServiceContainer container : admin.getGridServiceContainers()) {
+                if (container.getProcessingUnitInstances(getName()).length > 0) {
+                    containersPendingShutdown.add(container);
+                }
+            }
+        }
+        
+        final CountDownLatch latch = new CountDownLatch(1);
+        ProcessingUnitRemovedEventListener listener = new ProcessingUnitRemovedEventListener() {
+            public void processingUnitRemoved(ProcessingUnit processingUnit) {
+                if (getName().equals(processingUnit.getName())) {
+                    latch.countDown();
+                }
+            }
+        };
+        
+        getProcessingUnits().getProcessingUnitRemoved().add(listener);
+        try {
+            ((InternalGridServiceManager) managingGridServiceManager).undeployProcessingUnit(getName());
+            try {
+                long puRemovedTimeout = end - System.currentTimeMillis();
+                if (puRemovedTimeout <= 0) {
+                    //timeout expired
+                    return false;
+                }
+                if (!latch.await(puRemovedTimeout, TimeUnit.MILLISECONDS)) {
+                    //timeout expired
+                    return false;
+                }
+            } catch (InterruptedException e) {
+                throw new AdminException("Failed to undeploy", e);
+            }
+        }finally {
+            getProcessingUnits().getProcessingUnitRemoved().remove(listener);
+        }
+        
+        // use polling to determine elastic pu completed undeploy cleanup of containers (and machines)
+        // and that the admin has been updated with the relevant lookup service remove events.
+        while (true) {
+            
+            // check that all pu instances have been undiscovered
+            if (processingUnitInstances.size() == 0) {
+                
+                if (!isElasticScaleStrategyEnforced) {
+                    // done waiting
+                    break;
+                }
+            
+                // check that all containers have shutdown (elastic pu only)
+                boolean allContainersShutdown = true;    
+                for (GridServiceContainer container : containersPendingShutdown) {
+                    if (container.isDiscovered()) {
+                        allContainersShutdown = false;
+                    }
+                }
+                
+                if (allContainersShutdown) {
+                    // check (undeploy) scale strategy is no longer being enforced (completed)
+                    if (!((InternalGridServiceManager)managingGridServiceManager).isManagedByElasticServiceManager(this)) {
+                        // done waiting
+                        break;
+                    }
+                }
+            }
+            
+            long sleepDuration = end - System.currentTimeMillis();
+            
+            if (sleepDuration <= 0) {
+                //timeout expired
+                return false;
+            }
+            
+            try {
+                Thread.sleep(Math.min(1000, sleepDuration));
+            } catch (InterruptedException e) {
+                throw new AdminException("Failed to undeploy", e);
+            }
+        }
+        return true;
+    }
+    
+    public void undeployAndWait() {
+        undeployAndWait(admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
+    }
+    
     public void undeploy() {
         if (!isManaged()) {
             throw new AdminException("No managing GSM to undeploy from");
@@ -635,14 +737,51 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
 
     public void scale(ScaleStrategyConfig strategyConfig) {
   
-        if (getManagingGridServiceManager() == null) {
+        InternalGridServiceManager gsm = (InternalGridServiceManager)getManagingGridServiceManager();
+        
+        if (gsm == null) {
             throw new AdminException("Processing Unit " + getName() + " does not have an associated managing GSM");
         }
-        ((InternalGridServiceManager)getManagingGridServiceManager()).setProcessingUnitScaleStrategyConfig(
+        
+        if (admin.getElasticServiceManagers().getSize() != 1) {
+            throw new AdminException("ESM server is not running.");
+        }
+        
+        gsm.setProcessingUnitScaleStrategyConfig(
                 this, 
                 strategyConfig);
     }
     
+    public void scaleAndWait(ScaleStrategyConfig strategyConfig) {
+        scaleAndWait(strategyConfig, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
+    }
+    
+    public boolean scaleAndWait(ScaleStrategyConfig strategyConfig, long timeout, TimeUnit timeunit) {
+        long end = System.currentTimeMillis() + timeunit.toMillis(timeout);
+        scale(strategyConfig);
+        
+        while (true) {
+        
+            if (((InternalGridServiceManager)managingGridServiceManager).isManagedByElasticServiceManagerAndScaleNotInProgress(this)) {
+                //done waiting
+                break;
+            }
+            
+            long sleepDuration = end - System.currentTimeMillis();
+            if (sleepDuration <= 0) {
+                //timeout
+                return false;
+            }
+            
+            try {
+                Thread.sleep(Math.min(1000, sleepDuration));
+            } catch (InterruptedException e) {
+                throw new AdminException("scaleAndWait interrupted",e);
+            }
+        }
+        return true;
+    }
+
     public void setElasticProperties(Map<String,String> properties) {
         if (getManagingGridServiceManager() == null) {
             throw new AdminException("Processing Unit " + getName() + " does not have an associated managing GSM");

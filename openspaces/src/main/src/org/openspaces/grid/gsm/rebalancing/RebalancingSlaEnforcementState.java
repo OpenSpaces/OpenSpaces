@@ -228,5 +228,5 @@ class RebalancingSlaEnforcementState {
     public boolean isStatelessProcessingUnitInstanceBeingRemoved(ProcessingUnitInstance instance) {
         return removedStatelessProcessingUnitInstances.contains(instance);
     }
-
+    
 }

@@ -6,7 +6,7 @@ import java.util.Map;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcement;
-import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointAlreadyExistsException;
+import org.openspaces.grid.gsm.sla.exceptions.ServiceLevelAgreementEnforcementEndpointAlreadyExistsException;
 
 /**
  * Starts and shutdowns grid service container based on the requested {@link ContainersSlaPolicy}

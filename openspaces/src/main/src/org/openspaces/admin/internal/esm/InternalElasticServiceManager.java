@@ -22,4 +22,8 @@ public interface InternalElasticServiceManager extends ElasticServiceManager, In
     void setProcessingUnitScaleStrategyConfig(ProcessingUnit pu, ScaleStrategyConfig scaleStrategyConfig);
 
     ScaleStrategyConfig getProcessingUnitScaleStrategyConfig(ProcessingUnit pu);
+
+    boolean isManagingProcessingUnit(ProcessingUnit pu);
+
+    boolean isManagingProcessingUnitAndScaleNotInProgress(ProcessingUnit pu);
 }

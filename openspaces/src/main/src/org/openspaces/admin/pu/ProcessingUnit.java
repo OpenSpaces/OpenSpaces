@@ -218,10 +218,30 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
     GridServiceManager getBackupGridServiceManager(String gridServiceManagerUID);
 
     /**
-     * Undeploys the processing unit.
+     * @see ProcessingUnit#undeployAndWait()
+     * @see ProcessingUnit#undeployAndWait(long, TimeUnit) 
      */
     void undeploy();
 
+    /**
+     * Un-deploys the processing unit and waits until all instances have been undeployed.
+     * In case of an Elastic processing unit, also waits for containers to shutdown.
+     * @see ProcessingUnit#undeployAndWait(long, TimeUnit)
+     * @see ProcessingUnit#undeploy()
+     * @since 8.0.5
+     */
+    void undeployAndWait();
+    
+    /**
+     * Undeploys the processing unit and waits until all instances have been undeployed.
+     * In case of an Elastic processing unit, it waits until all containers have been removed.
+     * @return True if un-deploy completed successfully within the specified timeout. False if undeploy is still in progress.
+     * @see ProcessingUnit#undeployAndWait()
+     * @see ProcessingUnit#undeploy()
+     * @since 8.0.5
+     */
+    boolean undeployAndWait(long timeout, TimeUnit timeunit);
+    
     /**
      * Returns the (first) embedded space within a processing unit. Returns <code>null</code> if
      * no embedded space is defined within the processing unit or if no processing unit instance
@@ -308,19 +328,35 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
      * @param strategyConfig
      * 
      * @since 8.0
+     * @see ProcessingUnit#scaleAndWait(ScaleStrategyConfig)
+     * @see ProcessingUnit#scaleAndWait(ScaleStrategyConfig, long, TimeUnit)
      */
     void scale(ScaleStrategyConfig strategyConfig);
-           
+    
     /**
-     * Modifies the elastic configuration of this processing unit
+     * Modifies the processing unit scalability strategy and waits until scale is complete
      * 
-     * This method is only available if the processing unit deployment is elastic
+     * This method is only available if the processing unit deployment is elastic  
      * 
-     * @param config
+     * @param strategyConfig
      * 
-     * @since 8.0
+     * @since 8.0.5
+     * @see ProcessingUnit#scale(ScaleStrategyConfig)
      */
-    void setElasticProperties(Map<String,String> config);
+    void scaleAndWait(ScaleStrategyConfig strategyConfig);
+
+    /**
+     * Modifies the processing unit scalability strategy and waits until scale is complete
+     * 
+     * This method is only available if the processing unit deployment is elastic  
+     * 
+     * @param strategyConfig
+     * @return 
+     * 
+     * @since 8.0.5
+     * @see ProcessingUnit#scale(ScaleStrategyConfig)
+     */
+    boolean scaleAndWait(ScaleStrategyConfig strategyConfig, long timeout, TimeUnit timeUnit);
     
     /**
      * @return the application that this pu is associated with or null if this processing unit is not part of an application

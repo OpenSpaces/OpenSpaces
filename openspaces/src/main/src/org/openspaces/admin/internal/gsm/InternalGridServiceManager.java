@@ -54,4 +54,9 @@ public interface InternalGridServiceManager extends GridServiceManager, Internal
 
     //TODO: Replace this method with a push notification each time scale strategy config changes.
     ScaleStrategyConfig getProcessingUnitScaleStrategyConfig(ProcessingUnit pu);
+
+    boolean isManagedByElasticServiceManager(ProcessingUnit pu);
+
+    boolean isManagedByElasticServiceManagerAndScaleNotInProgress(ProcessingUnit pu);
+
 }

@@ -34,6 +34,10 @@ import org.openspaces.core.internal.commons.math.fraction.Fraction;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.ClusterCapacityRequirements;
 import org.openspaces.grid.gsm.capacity.CpuCapacityRequirement;
+import org.openspaces.grid.gsm.containers.ContainersSlaUtils;
+import org.openspaces.grid.gsm.rebalancing.exceptions.RemovedContainerProcessingUnitDeploymentException;
+import org.openspaces.grid.gsm.rebalancing.exceptions.SpaceRecoveryAfterRelocationException;
+import org.openspaces.grid.gsm.rebalancing.exceptions.WrongContainerProcessingUnitRelocationException;
 
 import com.gigaspaces.cluster.activeelection.SpaceMode;
 
@@ -129,10 +133,9 @@ public class RebalancingUtils {
                 
                 if (!targetContainer.isDiscovered()) {
                     executionException.set(
-                            new ExecutionException(new ProcessingUnitInstanceDeploymentException(
-                                    "Deployment of processing unit " + pu.getName()+ " on container " + 
-                                    gscToString(targetContainer) + " "+
-                                    "failed since container no longer exists.")));
+                            new ExecutionException(
+                                    new RemovedContainerProcessingUnitDeploymentException(
+                                            pu,targetContainer)));
                 }
                 
                 else if (executionException.get() != null || newInstance != null) {
@@ -309,19 +312,11 @@ private static GridServiceContainer[] getContainers(final ProcessingUnit pu) {
                 }
                 
                 else if (!targetContainer.isDiscovered()) {
-                    executionException = new ExecutionException(new ProcessingUnitInstanceDeploymentException(
-                                    "Relocation of processing unit instance to container " + 
-                                    gscToString(targetContainer) + " "+
-                                    "failed since container no longer exists."));
+                    executionException = new ExecutionException(
+                            new RemovedContainerProcessingUnitDeploymentException(puInstance,targetContainer));
                 } 
                 else if (pu.getNumberOfBackups() > 0 && !isAtLeastOneInstanceValid(puInstancesFromSamePartition)) {
-                        String errorMessage = 
-                            "Relocation of processing unit instance failed. "+
-                            "The following pu instance that were supposed to hold a copy of the data no longer exist :";
-                        for (ProcessingUnitInstance instanceFromSamePartition : puInstancesFromSamePartition) {
-                            errorMessage += " " + puInstanceToString(instanceFromSamePartition);
-                        }
-                        executionException = new ExecutionException(new ProcessingUnitInstanceDeploymentException(errorMessage));
+                        executionException = new ExecutionException(new SpaceRecoveryAfterRelocationException(puInstance, puInstancesFromSamePartition));
                 } 
                 else {
                     
@@ -335,11 +330,9 @@ private static GridServiceContainer[] getContainers(final ProcessingUnit pu) {
                             }
                         }
                         else  { 
-                            executionException = new ExecutionException(new WrongContainerRelocationException(
-                                        "Relocation of processing unit instance to container " +
-                                        gscToString(targetContainer) + " "+
-                                        "failed since the instance was eventually deployed on a different container " + 
-                                        gscToString(puInstance.getGridServiceContainer()))); 
+                            executionException = new ExecutionException(
+                                    new WrongContainerProcessingUnitRelocationException(puInstance,targetContainer));
+                                         
                         }
                     }
                     else {
@@ -917,15 +910,11 @@ private static GridServiceContainer[] getContainers(final ProcessingUnit pu) {
     }
     
     public static String gscToString(GridComponent container) {
-        return "pid["+container.getVirtualMachine().getDetails().getPid()+"] host["+machineToString(container.getMachine())+"]";
+        return ContainersSlaUtils.gscToString(container);
     }
 
     public static String gscsToString(List<GridServiceContainer> containers) {
-        String[] containersToString = new String[containers.size()];
-        for (int i = 0 ; i < containersToString.length ; i++) {
-            containersToString[i] = gscToString(containers.get(i));
-        }
-        return Arrays.toString(containersToString);
+        return ContainersSlaUtils.gscsToString(containers);
     }
 
     public static String processingUnitDeploymentToString(ProcessingUnit pu) {

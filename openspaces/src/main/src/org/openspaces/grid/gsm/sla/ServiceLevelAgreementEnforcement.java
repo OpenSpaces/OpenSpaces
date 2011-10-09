@@ -1,6 +1,7 @@
 package org.openspaces.grid.gsm.sla;
 
 import org.openspaces.admin.pu.ProcessingUnit;
+import org.openspaces.grid.gsm.sla.exceptions.ServiceLevelAgreementEnforcementEndpointAlreadyExistsException;
 
 public interface ServiceLevelAgreementEnforcement
     <POLICY extends ServiceLevelAgreementPolicy,

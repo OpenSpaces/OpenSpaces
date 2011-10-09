@@ -12,7 +12,7 @@ import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcement;
-import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointAlreadyExistsException;
+import org.openspaces.grid.gsm.sla.exceptions.ServiceLevelAgreementEnforcementEndpointAlreadyExistsException;
 
 /**
  * Enforces the MachinesSlaPolicy of all processing units by starting an enforcement endpoint for each PU.

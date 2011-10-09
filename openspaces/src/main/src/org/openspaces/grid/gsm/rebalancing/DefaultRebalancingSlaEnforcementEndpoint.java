@@ -12,13 +12,11 @@ import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.pu.InternalProcessingUnit;
 import org.openspaces.admin.machine.Machine;
-import org.openspaces.admin.pu.DeploymentStatus;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.core.internal.commons.math.fraction.Fraction;
@@ -26,7 +24,13 @@ import org.openspaces.grid.gsm.LogPerProcessingUnit;
 import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.CpuCapacityRequirement;
-import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestroyedException;
+import org.openspaces.grid.gsm.rebalancing.exceptions.MaximumNumberOfConcurrentRelocationsReachedException;
+import org.openspaces.grid.gsm.rebalancing.exceptions.ProcessingUnitIsNotEvenlyDistributedAccrossMachinesException;
+import org.openspaces.grid.gsm.rebalancing.exceptions.ProcessingUnitIsNotEvenlyDistributedAcrossContainersException;
+import org.openspaces.grid.gsm.rebalancing.exceptions.ProcessingUnitIsNotInTactException;
+import org.openspaces.grid.gsm.rebalancing.exceptions.RebalancingSlaEnforcementInProgressException;
+import org.openspaces.grid.gsm.rebalancing.exceptions.WrongContainerProcessingUnitRelocationException;
+import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementEndpointDestroyedException;
 
 import com.gigaspaces.cluster.activeelection.SpaceMode;
 
@@ -65,15 +69,15 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
         return pu;
     }
 
-    public boolean enforceSla(RebalancingSlaPolicy sla)
-            throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
+    public void enforceSla(RebalancingSlaPolicy sla)
+            throws SlaEnforcementEndpointDestroyedException, RebalancingSlaEnforcementInProgressException {
 
         if (sla == null) {
             throw new IllegalArgumentException("sla cannot be null");
         }
    
         if (state.isDestroyedProcessingUnit(pu)) {
-            throw new ServiceLevelAgreementEnforcementEndpointDestroyedException();
+            throw new SlaEnforcementEndpointDestroyedException();
         }
         
         
@@ -112,28 +116,10 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
             }
         }
 
-        try {
-            return enforceSlaInternal(sla);
-        } catch (ConflictingOperationInProgressException e) {
-            logger.debug(
-                    "Cannot enforce Rebalancing SLA since a conflicting operation is in progress. Try again later.",
-                    e);
-            return false;
-        }
+        enforceSlaInternal(sla);
     }
 
-    private boolean isBalanced(RebalancingSlaPolicy sla) {
-
-        return RebalancingUtils.isProcessingUnitIntact(pu, sla.getContainers())
-                &&
-
-                RebalancingUtils.isEvenlyDistributedAcrossContainers(pu, sla.getContainers())
-                &&
-
-                RebalancingUtils.isEvenlyDistributedAcrossMachines(pu, sla.getAllocatedCapacity());
-    }
-
-    private boolean enforceSlaInternal(RebalancingSlaPolicy sla) throws ConflictingOperationInProgressException {
+    private void enforceSlaInternal(RebalancingSlaPolicy sla) throws RebalancingSlaEnforcementInProgressException {
 
         cleanFutureStatefulDeployments();
         cleanFutureStatelessDeployments();
@@ -141,19 +127,9 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
         
         if (sla.getSchemaConfig().isPartitionedSync2BackupSchema()) {
             enfroceSlaStatefulProcessingUnit(sla);
-            boolean balanced = isBalanced(sla);
-            if (logger.isDebugEnabled()) {
-                logger.debug("Number of deployments in progress is " + state.getNumberOfFutureDeployments(pu) + " balanced = " + balanced + " sla capacity="+ sla.getAllocatedCapacity().toDetailedString());
-            }
-            return balanced;
         }
         else if (sla.getSchemaConfig().isDefaultSchema()) {
             enforceSlaStatelessProcessingUnit(sla);
-            boolean deployed = isDeployedOnContainers(sla.getContainers(),pu);
-            if (logger.isDebugEnabled()) {
-                logger.debug("Number of deployments in progress is " + state.getNumberOfFutureDeployments(pu) + " deployed = " + deployed + " sla capacity="+ sla.getAllocatedCapacity().toDetailedString());
-            }
-            return deployed; 
         }
         else {
             throw new IllegalStateException(pu.getName() + " schema " + sla.getSchemaConfig().getSchema() + " is not supported." );
@@ -161,14 +137,14 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
         
     }
 
-    private void enforceSlaStatelessProcessingUnit(RebalancingSlaPolicy sla) throws ConflictingOperationInProgressException {
+    private void enforceSlaStatelessProcessingUnit(RebalancingSlaPolicy sla) throws RebalancingSlaEnforcementInProgressException {
         
         int maximumNumberOfConcurrentRelocationsPerMachine = sla.getMaximumNumberOfConcurrentRelocationsPerMachine();
         
         for (GridServiceContainer container : sla.getContainers()) {
             if (container.getProcessingUnitInstances(pu.getName()).length == 0 &&
                 isConflictingDeploymentInProgress(container, maximumNumberOfConcurrentRelocationsPerMachine)) {
-                throw new ConflictingOperationInProgressException();
+                throw new MaximumNumberOfConcurrentRelocationsReachedException(pu, container);
             }
         }
         
@@ -179,51 +155,55 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
         
         state.addFutureStatelessDeployments(futureInstances);
         
-        if (futureInstances.isEmpty()) {
-            // find all containers with instances that are not in the approved containers
-            Set<GridServiceContainer> approvedContainers = new HashSet<GridServiceContainer>(Arrays.asList(sla.getContainers()));
-            List<ProcessingUnitInstance> instancesToRemove = new ArrayList<ProcessingUnitInstance>();
-           
-            for (GridServiceContainer container : pu.getAdmin().getGridServiceContainers()) {
-                if (!approvedContainers.contains(container)) {
-                    
-                    for (ProcessingUnitInstance instance : container.getProcessingUnitInstances(pu.getName())) {
-                        instancesToRemove.add(instance);
-                    }
-                }
-            }
-            
-            if (instancesToRemove.size() > 0) {
-
-                for (ProcessingUnitInstance instanceToRemove : instancesToRemove) {
-                    logger.info(
-                            "removing pu instance " + RebalancingUtils.puInstanceToString(instanceToRemove) + " "+
-                            "since not deployed on approved container");
-                    removeInstance(instanceToRemove);
-                }
+        if (state.getNumberOfFutureDeployments(pu) > 0) {
+            throw new ProcessingUnitIsNotEvenlyDistributedAcrossContainersException(pu);
+        }
+        
+        // find all containers with instances that are not in the approved containers
+        Set<GridServiceContainer> approvedContainers = new HashSet<GridServiceContainer>(Arrays.asList(sla.getContainers()));
+        List<ProcessingUnitInstance> instancesToRemove = new ArrayList<ProcessingUnitInstance>();
+       
+        for (GridServiceContainer container : pu.getAdmin().getGridServiceContainers()) {
+            if (!approvedContainers.contains(container)) {
                 
-            }
-            
-            else if (sla.getContainers().length < pu.getNumberOfInstances() &&
-                     pu.getInstances().length > 1) {
-                // the number of instances is more than the sla.
-                // there has been an sla changed that leaved us with too many instances.
-                int numberOfInstancesBeforeDecrement = pu.getNumberOfInstances();
-                boolean decremented = ((InternalProcessingUnit)pu).decrementPlannedInstances();
-                if (decremented) {
-                    logger.info(
-                            "Number of instances is " + numberOfInstancesBeforeDecrement + " "+
-                            "instead of " + sla.getContainers().length +". "+
-                            "Removed one pu instance of " + pu.getName());
-                } else {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Number of instances is " + numberOfInstancesBeforeDecrement + " "+
-                                "instead of " + sla.getContainers().length +". "+
-                                "Retry to remove one pu instance of " + pu.getName() + " next time.");
-                    }
+                for (ProcessingUnitInstance instance : container.getProcessingUnitInstances(pu.getName())) {
+                    instancesToRemove.add(instance);
                 }
             }
-        }           
+        }
+        
+        if (instancesToRemove.size() > 0) {
+
+            for (ProcessingUnitInstance instanceToRemove : instancesToRemove) {
+                logger.info(
+                        "removing pu instance " + RebalancingUtils.puInstanceToString(instanceToRemove) + " "+
+                        "since not deployed on approved container");
+                removeInstance(instanceToRemove);
+            }
+            
+            throw new ProcessingUnitIsNotEvenlyDistributedAcrossContainersException(pu);
+        }
+        
+        if (sla.getContainers().length < pu.getNumberOfInstances() &&
+            pu.getInstances().length > 1) {
+            // the number of instances is more than the sla.
+            // there has been an sla changed that leaved us with too many instances.
+            int numberOfInstancesBeforeDecrement = pu.getNumberOfInstances();
+            boolean decremented = ((InternalProcessingUnit)pu).decrementPlannedInstances();
+            if (decremented) {
+                logger.info(
+                        "Number of instances is " + numberOfInstancesBeforeDecrement + " "+
+                        "instead of " + sla.getContainers().length +". "+
+                        "Removed one pu instance of " + pu.getName());
+            } else {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Number of instances is " + numberOfInstancesBeforeDecrement + " "+
+                            "instead of " + sla.getContainers().length +". "+
+                            "Retry to remove one pu instance of " + pu.getName() + " next time.");
+                }
+            }
+            throw new ProcessingUnitIsNotInTactException(pu);
+        }
     }
     
     private void removeInstance(final ProcessingUnitInstance instance) {
@@ -254,7 +234,12 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
     }
     
     private void enfroceSlaStatefulProcessingUnit(RebalancingSlaPolicy sla)
-            throws ConflictingOperationInProgressException {
+            throws RebalancingSlaEnforcementInProgressException {
+        
+        if (!RebalancingUtils.isProcessingUnitIntact(pu)) {
+            throw new ProcessingUnitIsNotInTactException(pu);
+        }
+        
         GridServiceContainer[] containers = sla.getContainers();
         if (pu.getNumberOfBackups() == 1) {
             // stage 1 : relocate backups so number of instances per container is balanced
@@ -262,19 +247,12 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
             rebalanceNumberOfInstancesPerContainer(containers, sla, relocateOnlyBackups);
 
             if (state.getNumberOfFutureDeployments(pu) > 0) {
-                logger.debug("Rebalancing of backup instances is in progress after Stage 1. Try again later.");
-                return;
+                logger.debug(
+                        "Rebalancing of backup instances is in progress after Stage 1. "+
+                        "Number of deployments in progress is " + state.getNumberOfFutureDeployments(pu));
+                throw new ProcessingUnitIsNotEvenlyDistributedAcrossContainersException(pu);
             }
-
-            if (!RebalancingUtils.isProcessingUnitIntact(pu)) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Processing Unit deployment is not intact after Stage 1. Try again later. " +
-                                 RebalancingUtils.processingUnitDeploymentToString(pu) + 
-                                 "Status = " + pu.getStatus());
-                }
-                return;
-            }
-            
+    
             // if not all of pu instances are in the approved containers...
             // then skip directly to stage 3
             if (RebalancingUtils.isProcessingUnitIntact(pu, containers)) {
@@ -283,19 +261,11 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
                 rebalanceNumberOfPrimaryInstancesPerMachine(containers, sla);
 
                 if (state.getNumberOfFutureDeployments(pu) > 0) {
-                    logger.debug("Restarting of primary instances is in progress after Stage 2. Try again later.");
-                    return;
+                    logger.debug(
+                            "Restarting of primary instances is in progress after Stage 2. "+
+                            "Number of deployments in progress is " + state.getNumberOfFutureDeployments(pu));
+                    throw new ProcessingUnitIsNotEvenlyDistributedAccrossMachinesException(pu);
                 }
-                
-                if (!RebalancingUtils.isProcessingUnitIntact(pu)) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Processing Unit deployment is not intact after Stage 2. Try again later. "+ 
-                                     RebalancingUtils.processingUnitDeploymentToString(pu) + 
-                                     "Status = " + pu.getStatus());
-                    }
-                    return;
-                }
-            
             }
         }
 
@@ -303,6 +273,13 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
         // balanced
         boolean relocateOnlyBackups = false;
         rebalanceNumberOfInstancesPerContainer(containers, sla, relocateOnlyBackups);
+        
+        if (state.getNumberOfFutureDeployments(pu) > 0) {
+            logger.debug(
+                    "Rebalancing of primary or backup instances is in progress after Stage 3. "+
+                    "Number of deployments in progress is " + state.getNumberOfFutureDeployments(pu));
+            throw new ProcessingUnitIsNotEvenlyDistributedAcrossContainersException(pu);
+        }
     }
 
     /**
@@ -312,12 +289,12 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
      * @param onlyBackups
      *            - perform only backup relocations.
      * 
-     * @throws ConflictingOperationInProgressException
+     * @throws RebalancingSlaEnforcementInProgressException
      *             - cannot determine what next to relocate since another conflicting operation
      *             is in progress.
      */
     private void rebalanceNumberOfInstancesPerContainer(GridServiceContainer[] containers,
-            RebalancingSlaPolicy sla, boolean relocateOnlyBackups) throws ConflictingOperationInProgressException {
+            RebalancingSlaPolicy sla, boolean relocateOnlyBackups) throws RebalancingSlaEnforcementInProgressException {
 
         while (true) {
             final FutureStatefulProcessingUnitInstance futureInstance = 
@@ -342,13 +319,13 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
      * 
      * @return future if performed relocation. null if no action needs to be performed.
      * 
-     * @throws ConflictingOperationInProgressException
+     * @throws RebalancingSlaEnforcementInProgressException
      *             - cannot determine what to relocate since another conflicting operation is in
      *             progress.
      */
     private FutureStatefulProcessingUnitInstance rebalanceNumberOfInstancesPerContainerStep(
             final GridServiceContainer[] containers, boolean onlyBackups, int maximumNumberOfRelocationsPerMachine)
-            throws ConflictingOperationInProgressException {
+            throws RebalancingSlaEnforcementInProgressException {
 
         // sort all containers (including those not in the specified containers
         // by (numberOfInstancesPerContainer - minNumberOfInstances)
@@ -591,7 +568,7 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
         }
         
         if (conflict) {
-            throw new ConflictingOperationInProgressException();
+            throw new RebalancingSlaEnforcementInProgressException(pu);
         }
 
         
@@ -602,10 +579,10 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
      * Makes sure that across machines the number of primary instances divided by the number of containers is balanced.  
      * @param containers
      * @param sla
-     * @throws ConflictingOperationInProgressException
+     * @throws RebalancingSlaEnforcementInProgressException
      */
     private void rebalanceNumberOfPrimaryInstancesPerMachine(GridServiceContainer[] containers,
-            RebalancingSlaPolicy sla) throws ConflictingOperationInProgressException {
+            RebalancingSlaPolicy sla) throws RebalancingSlaEnforcementInProgressException {
 
         while (true) {
             final FutureStatefulProcessingUnitInstance futureInstance = 
@@ -623,12 +600,12 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
      * Restarts one pu so that the number of primary instances divided by the number of containers is more balanced.  
      * @param containers
      * @param sla
-     * @throws ConflictingOperationInProgressException
+     * @throws RebalancingSlaEnforcementInProgressException
      */
     private FutureStatefulProcessingUnitInstance rebalanceNumberOfPrimaryInstancesPerCpuCoreStep(
             GridServiceContainer[] containers, 
             RebalancingSlaPolicy sla)
-            throws ConflictingOperationInProgressException {
+            throws RebalancingSlaEnforcementInProgressException {
 
         // sort all machines (including those not in the allocated containers)
         // by (numberOfPrimaryInstancesPerMachine - minNumberOfPrimaryInstances)
@@ -814,7 +791,7 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
         }                    
 
         if (conflict) {
-            throw new ConflictingOperationInProgressException();
+            throw new RebalancingSlaEnforcementInProgressException(pu);
         }
 
         return null;
@@ -863,7 +840,7 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
             int passedSeconds = (int) ((System.currentTimeMillis() - future.getTimestamp().getTime()) / 1000);
 
             if (future.getException() != null
-                    && future.getException().getCause() instanceof WrongContainerRelocationException
+                    && future.getException().getCause() instanceof WrongContainerProcessingUnitRelocationException
                     && future.getTargetContainer().isDiscovered()
                     && passedSeconds < DEPLOYMENT_TIMEOUT_FAILURE_FORGET_SECONDS) {
 
@@ -1037,35 +1014,5 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
         }
 
         return false;
-    }
-
-    private boolean isDeployedOnContainers(GridServiceContainer[] containers, ProcessingUnit pu) {
-        
-        boolean deployed = false;
-        
-        if (pu.getStatus() == DeploymentStatus.INTACT) {
-            
-            Set<GridServiceContainer> target = new HashSet<GridServiceContainer>(Arrays.asList(containers));
-            Set<GridServiceContainer> actual = new HashSet<GridServiceContainer>();
-            
-            Admin admin = pu.getAdmin();
-            for (GridServiceContainer container : admin.getGridServiceContainers()) {
-                if (container.getProcessingUnitInstances(pu.getName()).length > 0) {
-                    actual.add(container);
-                }
-            }
-            deployed = 
-                actual.equals(target) && 
-                actual.size() == pu.getNumberOfInstances();
-        }
-        
-        return deployed;
-    }
-    
-
-    @SuppressWarnings("serial")
-    private static class ConflictingOperationInProgressException extends Exception {
-
-        private static final long serialVersionUID = -8765801883846053374L;
     }
 }

@@ -112,6 +112,9 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
     }
 
     public ProcessingUnit deploy(ProcessingUnitDeployment deployment, long timeout, TimeUnit timeUnit) {
+        
+        long end = System.currentTimeMillis() + timeUnit.toMillis(timeout);
+        
         Deploy deploy = new Deploy();
         Deploy.setDisableInfoLogging(true);
         deploy.setGroups(getAdmin().getGroups());
@@ -146,11 +149,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         } 
 
         final AtomicReference<ProcessingUnit> ref = new AtomicReference<ProcessingUnit>();
-        ref.set(getAdmin().getProcessingUnits().getProcessingUnit(operationalString.getName()));
-        if (ref.get() != null) {
-            return ref.get();
-        }
-
+        
         final CountDownLatch latch = new CountDownLatch(1);
         ProcessingUnitAddedEventListener added = new ProcessingUnitAddedEventListener() {
             public void processingUnitAdded(ProcessingUnit processingUnit) {
@@ -174,7 +173,21 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             Deploy.setDisableInfoLogging(false);
             getAdmin().getProcessingUnits().getProcessingUnitAdded().remove(added);
         }
-              
+        
+        if (!deployment.getElasticProperties().isEmpty()) {
+            // wait until elastic scale strategy is being enforced
+            while (System.currentTimeMillis() < end) {
+                InternalGridServiceManager gridServiceManager = (InternalGridServiceManager)pu.getManagingGridServiceManager();
+                if (gridServiceManager != null && gridServiceManager.isManagedByElasticServiceManager(pu)) {
+                    break;
+                }
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    break;
+                }
+            }
+        }
         return pu;
     }
 
@@ -459,5 +472,22 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             return null; //no scale strategy
         }
         return getElasticServiceManager().getProcessingUnitScaleStrategyConfig(pu);
+    }
+
+    @Override
+    public boolean isManagedByElasticServiceManager(ProcessingUnit pu) {
+        if (admin.getElasticServiceManagers().isEmpty()) {
+            return false;
+        }
+        return getElasticServiceManager().isManagingProcessingUnit(pu);
+        
+    }
+
+    @Override
+    public boolean isManagedByElasticServiceManagerAndScaleNotInProgress(ProcessingUnit pu) {
+        if (admin.getElasticServiceManagers().isEmpty()) {
+            return false;
+        }
+        return getElasticServiceManager().isManagingProcessingUnitAndScaleNotInProgress(pu);
     }
 }
