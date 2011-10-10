@@ -280,8 +280,8 @@ public abstract class AbstractScaleStrategyBean implements
             alertFactory.groupUid(groupUid);
             getAdmin().getAlertManager().triggerAlert(alertFactory.toAlert());
             
-            if (getLogger().isDebugEnabled()) {
-                getLogger().debug(alertDescription);
+            if (getLogger().isInfoEnabled()) {
+                getLogger().info(alertDescription);
             }
         }
     }
