@@ -45,13 +45,14 @@ public class RebalancingUtils {
 
    static Collection<FutureStatelessProcessingUnitInstance> incrementNumberOfStatelessInstancesAsync(
        final ProcessingUnit pu, 
+       final GridServiceContainer[] containers,
        final long duration, final TimeUnit timeUnit) {
        
        if (pu.getMaxInstancesPerVM() != 1) {
            throw new IllegalArgumentException("Only one instance per VM is allowed");
        }
        
-       List<GridServiceContainer> unusedContainers = getUnusedContainers(pu);
+       List<GridServiceContainer> unusedContainers = getUnusedContainers(pu,containers);
        
        final Admin admin = pu.getAdmin();
        final Map<GridServiceContainer,FutureStatelessProcessingUnitInstance> futureInstances = new HashMap<GridServiceContainer, FutureStatelessProcessingUnitInstance>();
@@ -155,7 +156,7 @@ public class RebalancingUtils {
             
             private void incrementInstance() {
                 int numberOfInstances = pu.getNumberOfInstances();
-                int maxNumberOfInstances = getContainers(pu).length;
+                int maxNumberOfInstances = containers.length;
                 if (numberOfInstances < maxNumberOfInstances) {
                    if (targetNumberOfInstances.get() != numberOfInstances+1) {
                        targetNumberOfInstances.set(numberOfInstances+1);
@@ -184,23 +185,16 @@ public class RebalancingUtils {
        
    }
 
-private static List<GridServiceContainer> getUnusedContainers(final ProcessingUnit pu) {
+   private static List<GridServiceContainer> getUnusedContainers(final ProcessingUnit pu, final GridServiceContainer[] containers) {
        // look for free containers
        List<GridServiceContainer> unusedContainers = new ArrayList<GridServiceContainer>();
-       for (GridServiceContainer container : getContainers(pu)) {
+       for (GridServiceContainer container : containers) {
            if (container.getProcessingUnitInstances(pu.getName()).length == 0) {
                unusedContainers.add(container);
            }
        }
-    return unusedContainers;
-}
-
-private static GridServiceContainer[] getContainers(final ProcessingUnit pu) {
-    // find all containers with the correct zone
-       Machine[] machines = pu.getAdmin().getMachines().getMachines();
-       GridServiceContainer[] containers = getContainersOnMachines(pu, machines);
-    return containers;
-}
+       return unusedContainers;
+   }
    
    static FutureStatefulProcessingUnitInstance relocateProcessingUnitInstanceAsync(
            final GridServiceContainer targetContainer,
