@@ -104,7 +104,11 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
         markForDeallocationContainersOnUnallocatedMachines(sla);
         markForDeallocationContainersOnMachineWithAllocatedCapacityShortage(sla);
         startContainersOnMachineWithAllocatedCapacitySurplus(sla);
-        
+
+        if (!state.getContainersMarkedForDeallocation(pu).isEmpty()) {
+            throw new ContainersSlaEnforcementPendingProcessingUnitDeallocationException(state.getContainersMarkedForDeallocation(pu)); 
+        }
+
         if (state.getNumberOfContainersMarkedForShutdown(pu) > 0) {
             throw new ContainersSlaEnforcementInProgressException(state.getNumberOfContainersMarkedForShutdown(pu) + " containers are pending shutdown.");
         }
@@ -113,9 +117,6 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
             throw new ContainersSlaEnforcementInProgressException("Containers still being started.");
         }
         
-        if (!state.getContainersMarkedForDeallocation(pu).isEmpty()) {
-            throw new ContainersSlaEnforcementPendingProcessingUnitDeallocationException(state.getContainersMarkedForDeallocation(pu)); 
-        }
         
     }
 
