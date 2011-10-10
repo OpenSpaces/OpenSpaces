@@ -1,6 +1,5 @@
 package org.openspaces.grid.gsm.containers;
 
-import java.rmi.RemoteException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -108,7 +107,7 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
         if (!state.getContainersMarkedForDeallocation(pu).isEmpty()) {
             throw new ContainersSlaEnforcementPendingProcessingUnitDeallocationException(state.getContainersMarkedForDeallocation(pu)); 
         }
-
+        
         if (state.getNumberOfContainersMarkedForShutdown(pu) > 0) {
             throw new ContainersSlaEnforcementInProgressException(state.getNumberOfContainersMarkedForShutdown(pu) + " containers are pending shutdown.");
         }
@@ -116,8 +115,6 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
         if (state.getNumberOfFutureContainers(pu) > 0) {
             throw new ContainersSlaEnforcementInProgressException("Containers still being started.");
         }
-        
-        
     }
 
     private void markForDeallocationContainersOnUnallocatedMachines(final ContainersSlaPolicy sla) {
@@ -305,7 +302,7 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
                         boolean hasProcessingUnitInstances;
                         try {
                             hasProcessingUnitInstances = ((InternalGridServiceContainer)container).hasProcessingUnitInstances();
-                        } catch (RemoteException e) {
+                        } catch (AdminException e) {
                             logger.info("Cannot determine number of processing unit instances running on conatiner " + ContainersSlaUtils.gscToString(container),e);
                             return;
                         }
@@ -315,7 +312,12 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
                         }
                         else {
                             logger.info("Killing container " + ContainersSlaUtils.gscToString(container) + " since it is not running any processing unit instances.");
-                            container.kill();
+                            try {
+                                container.kill();
+                            }
+                            catch (AdminException e) {
+                                logger.info("Cannot kill container " + ContainersSlaUtils.gscToString(container),e);
+                            }
                         }
                     }
                 });

@@ -10,6 +10,8 @@ import com.gigaspaces.lrmi.nio.info.NIOStatistics;
 import com.gigaspaces.log.LogEntryMatcher;
 import com.gigaspaces.log.LogEntries;
 import com.gigaspaces.log.LogProcessType;
+import com.gigaspaces.security.SecurityException;
+
 import net.jini.core.lookup.ServiceID;
 
 import org.jini.rio.core.provision.ServiceRecord;
@@ -220,8 +222,15 @@ public class DefaultGridServiceContainer extends AbstractAgentGridComponent impl
         gsc.runGc();
     }
 
-    public boolean hasProcessingUnitInstances() throws RemoteException {
-        return gsc.getServiceRecords(ServiceRecord.ACTIVE_SERVICE_RECORD | ServiceRecord.INACTIVE_SERVICE_RECORD).length > 0;  
+    public boolean hasProcessingUnitInstances() {
+        try {
+            return gsc.getServiceRecords(ServiceRecord.ACTIVE_SERVICE_RECORD | ServiceRecord.INACTIVE_SERVICE_RECORD).length > 0;
+        } catch (SecurityException se) {
+            throw new AdminException("No privileges to check if container has processing unit instances", se);
+        } catch (RemoteException e) {
+            throw new AdminException("Failed to check if container has processing unit instances", e);
+        }
+          
     }
     
     @Override
