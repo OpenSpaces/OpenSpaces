@@ -267,8 +267,11 @@ public abstract class AbstractScaleStrategyBean implements
         String groupUid = alertGroupUidPrefix + "-" + getProcessingUnit().getName();
         Alert[] alertsByGroupUid = ((InternalAlertManager)admin.getAlertManager()).getAlertRepository().getAlertsByGroupUid(groupUid);
         boolean filterAlert = 
-                (status == AlertStatus.RESOLVED && 
-                (alertsByGroupUid.length == 0 || alertsByGroupUid[0].getStatus().isResolved()));
+                 alertsByGroupUid.length > 0 && 
+                 alertsByGroupUid[0].getSeverity().equals(severity) &&
+                 alertsByGroupUid[0].getStatus().equals(status) &&
+                 alertsByGroupUid[0].getName().equals(alertName) &&
+                 alertsByGroupUid[0].getDescription().equals(alertDescription);
 
         if (!filterAlert) {
             AlertFactory alertFactory = new AlertFactory();

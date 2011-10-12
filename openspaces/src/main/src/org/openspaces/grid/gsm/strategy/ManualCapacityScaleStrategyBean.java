@@ -22,6 +22,7 @@ import org.openspaces.grid.gsm.machines.exceptions.MachinesSlaEnforcementPending
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcementEndpointAware;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaPolicy;
+import org.openspaces.grid.gsm.rebalancing.RebalancingUtils;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementException;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.strategy.ProvisionedMachinesCache.AgentsNotYetDiscoveredException;
@@ -259,8 +260,8 @@ public class ManualCapacityScaleStrategyBean extends AbstractScaleStrategyBean
             
             //TODO: Add alert specific properties
             resolveMachinesAlert(
-                "Total machines memory for " + getProcessingUnit().getName() + " " + 
-                "has reached its target of " + capacityRequirements);
+                    "Machines manual capacity SLA for " + getProcessingUnit().getName() + " " + 
+                    "has been reached: " + machinesEndpoint.getAllocatedCapacity().toDetailedString());
         }
         catch (SlaEnforcementException e) {
             raiseMachinesAlert(e);
@@ -312,7 +313,9 @@ public class ManualCapacityScaleStrategyBean extends AbstractScaleStrategyBean
             rebalancingEndpoint.enforceSla(sla);
             
             //TODO: Add alert specific properties
-            resolveRebalancingAlert("Rebalancing of " + getProcessingUnit().getName() + " is complete.");
+            resolveRebalancingAlert(
+                    "Rebalancing of " + getProcessingUnit().getName() + " is complete: " + 
+                    RebalancingUtils.processingUnitDeploymentToString(getProcessingUnit()));
 
         }
         catch (SlaEnforcementInProgressException e) {

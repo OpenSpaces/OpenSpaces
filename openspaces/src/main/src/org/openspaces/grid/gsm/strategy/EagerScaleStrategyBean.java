@@ -16,6 +16,7 @@ import org.openspaces.grid.gsm.machines.exceptions.MachinesSlaEnforcementPending
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcementEndpointAware;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaPolicy;
+import org.openspaces.grid.gsm.rebalancing.RebalancingUtils;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementEndpointDestroyedException;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementException;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementInProgressException;
@@ -108,9 +109,10 @@ public class EagerScaleStrategyBean extends AbstractScaleStrategyBean
         try {
             machinesEndpoint.enforceSla(sla);
             //TODO: Add alert specific properties
+            
             resolveMachinesAlert(
-                "Machines Eager SLA has been reached. Using " + 
-                machinesEndpoint.getAllocatedCapacity().getAgentUids().size() + " machines");
+                    "Machines eager SLA for " + getProcessingUnit().getName() + " " + 
+                    "has been reached: " + machinesEndpoint.getAllocatedCapacity().toDetailedString());
         }
         catch (SlaEnforcementException e) {
             raiseMachinesAlert(e);
@@ -141,8 +143,8 @@ public class EagerScaleStrategyBean extends AbstractScaleStrategyBean
             containersEndpoint.enforceSla(sla);
             //TODO: Add alert specific properties
             resolveContainersAlert(
-                    "Eager contains capacity for " + getProcessingUnit().getName() + " has been reached");
-            
+                    "Eager containers SLA for " + getProcessingUnit().getName() + " " + 
+                    "has been reached: " + machinesEndpoint.getAllocatedCapacity().toDetailedString());           
         } catch (SlaEnforcementException e) {
             //TODO: Add alert specific properties
             //TODO: Add inner inner exception message
@@ -167,7 +169,8 @@ public class EagerScaleStrategyBean extends AbstractScaleStrategyBean
         try {
             rebalancingEndpoint.enforceSla(sla);
             resolveRebalancingAlert(
-                    "Rebalancing of " + getProcessingUnit().getName() + " is complete.");
+                    "Rebalancing of " + getProcessingUnit().getName() + " is complete: " + 
+                    RebalancingUtils.processingUnitDeploymentToString(getProcessingUnit()));
             
         } catch (SlaEnforcementException e) {
             raiseRebalancingAlert(e);
