@@ -9,6 +9,7 @@
     <url>http://www.gigaspaces.com</url>
     <properties>
         <pluginVersion>REPLACE_VERSION</pluginVersion>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <dependencies>
         <dependency>
