@@ -444,10 +444,16 @@ public class RebalancingUtils {
                 }
             }
             else {
-                for (int instanceId = 1 ; instanceId <= pu.getNumberOfInstances(); instanceId++) {
-                    if (findProcessingUnitInstance(pu, instanceId, 0, containers) == null) {
-                        intact = false;
-                        break;
+                ProcessingUnitInstance[] instances = pu.getInstances();
+                if (instances.length < pu.getNumberOfInstances()) {
+                    intact = false;
+                }
+                else {
+                    for (ProcessingUnitInstance instance : instances) {
+                        if (findProcessingUnitInstance(pu, instance.getInstanceId(), 0, containers) == null) {
+                            intact = false;
+                            break;
+                        }
                     }
                 }
             }
