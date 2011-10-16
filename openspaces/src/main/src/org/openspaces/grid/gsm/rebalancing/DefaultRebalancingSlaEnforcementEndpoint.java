@@ -186,6 +186,10 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
             throw new ProcessingUnitIsNotEvenlyDistributedAcrossContainersException(pu, containers);
         }
         
+        if (state.getRemovedStatelessProcessingUnitInstances(pu).iterator().hasNext()) {
+            throw new ProcessingUnitIsNotEvenlyDistributedAcrossContainersException(pu, containers);
+        }
+        
         if (containers.length < pu.getNumberOfInstances() &&
             pu.getInstances().length > 1) {
             // the number of instances is more than the sla.
@@ -204,6 +208,10 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
                             "Retry to remove one pu instance of " + pu.getName() + " next time.");
                 }
             }
+            throw new ProcessingUnitIsNotInTactException(pu);
+        }
+        
+        if (!RebalancingUtils.isProcessingUnitIntact(pu,containers)) {
             throw new ProcessingUnitIsNotInTactException(pu);
         }
     }
@@ -281,6 +289,10 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
                     "Rebalancing of primary or backup instances is in progress after Stage 3. "+
                     "Number of deployments in progress is " + state.getNumberOfFutureDeployments(pu));
             throw new ProcessingUnitIsNotEvenlyDistributedAcrossContainersException(pu, containers);
+        }
+        
+        if (!RebalancingUtils.isProcessingUnitIntact(pu, containers)) {
+            throw new ProcessingUnitIsNotInTactException(pu);
         }
     }
 
