@@ -31,6 +31,7 @@ import java.rmi.RemoteException;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -155,9 +156,9 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
     private volatile PUDetails puDetails;
 
-    final private List<Callable> serviceMonitors = new ArrayList<Callable>();
+    final private Collection<Callable> serviceMonitors = Collections.synchronizedCollection(new ArrayList<Callable>());
 
-    final private List<InternalDumpProcessor> dumpProcessors = new ArrayList<InternalDumpProcessor>();
+    final private Collection<InternalDumpProcessor> dumpProcessors = Collections.synchronizedCollection(new ArrayList<InternalDumpProcessor>());
 
     final private Map<String, InvocableService> invocableServiceMap = new ConcurrentHashMap<String, InvocableService>();
 
@@ -1057,11 +1058,13 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
     public PUMonitors getPUMonitors() throws RemoteException {
         ArrayList<Object> monitors = new ArrayList<Object>();
-        for (Callable call : serviceMonitors) {
-            try {
-                Collections.addAll(monitors, (Object[]) call.call());
-            } catch (Exception e) {
-                logger.error(logMessage("Failed to get monitor information, ignoring it"), e);
+        synchronized (serviceMonitors) {
+            for (Callable call : serviceMonitors) {
+                try {
+                    Collections.addAll(monitors, (Object[]) call.call());
+                } catch (Exception e) {
+                    logger.error(logMessage("Failed to get monitor information, ignoring it"), e);
+                }
             }
         }
         return new PUMonitors(monitors.toArray(new Object[monitors.size()]));
@@ -1283,11 +1286,13 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                     writer.print(springXML);
                     writer.close();
                 }
-                for (InternalDumpProcessor dumpProcessor : dumpProcessors) {
-                    try {
-                        dumpProcessor.process(dump);
-                    } catch (Exception e) {
-                        logger.warn("Failed to generate dump for [" + dumpProcessor + "]", e);
+                synchronized (dumpProcessors) {
+                    for (InternalDumpProcessor dumpProcessor : dumpProcessors) {
+                        try {
+                            dumpProcessor.process(dump);
+                        } catch (Exception e) {
+                            logger.warn("Failed to generate dump for [" + dumpProcessor + "]", e);
+                        }
                     }
                 }
             } finally {
