@@ -61,8 +61,9 @@ public class ProvisionFailureAlertBean implements AlertBean, ProcessingUnitStatu
     public void processingUnitStatusChanged(ProcessingUnitStatusChangedEvent event) {
         ProcessingUnit processingUnit = event.getProcessingUnit();
 
-        //is being deployed? moving from NA-->Broken
-        if (event.getPreviousStatus().equals(DeploymentStatus.NA) && event.getNewStatus().equals(DeploymentStatus.BROKEN)) {
+        //is being deployed? moving from null/NA-->Broken
+        if ((event.getPreviousStatus() == null || event.getPreviousStatus().equals(DeploymentStatus.NA))
+                && event.getNewStatus().equals(DeploymentStatus.BROKEN)) {
             return;
         }
         
