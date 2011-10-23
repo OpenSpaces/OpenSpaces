@@ -99,8 +99,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
         pendingElasticPropertiesUpdatePerProcessingUnit = new ConcurrentHashMap<String, PendingElasticPropertiesUpdate>();
 
         admin = new InternalAdminFactory().singleThreadedEventListeners().createAdmin();
-        admin.getProcessingUnits().getProcessingUnitAdded().add(this);
-        admin.getProcessingUnits().getProcessingUnitRemoved().add(this);
+        
         final long delay = CHECK_SINGLE_THREAD_EVENT_PUMP_EVERY_SECONDS*1000/2;
         final long delayError = delay; 
         ((InternalAdmin)admin).scheduleWithFixedDelayNonBlockingStateChange(
@@ -123,8 +122,22 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
         machinesSlaEnforcement = new MachinesSlaEnforcement(admin);
         containersSlaEnforcement = new ContainersSlaEnforcement(admin);
         rebalancingSlaEnforcement = new RebalancingSlaEnforcement();
+        
+        //Discovery warm-up period
+        new ESMImplInitializer(admin, new Runnable() {
+
+            @Override
+            public void run() {
+                //triggers initialization of all PU SLA beans
+                ESMImpl eventListener = ESMImpl.this;
+                admin.getProcessingUnits().getProcessingUnitAdded().add(eventListener);
+                admin.getProcessingUnits().getProcessingUnitRemoved().add(eventListener);
+            }
+            
+        });
     }
 
+        
     /**
      * Create an ESM launched from the ServiceStarter framework
      */
@@ -214,7 +227,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
             }
             this.scaleBeanServerPerProcessingUnit.clear();
         }
-
+        admin.close();
         if (lifeCycle != null) {
             lifeCycle.unregister(this);
         }
