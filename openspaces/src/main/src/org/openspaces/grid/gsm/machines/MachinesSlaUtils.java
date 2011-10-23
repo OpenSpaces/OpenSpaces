@@ -207,4 +207,10 @@ public class MachinesSlaUtils {
     public static long getMemoryInMB(CapacityRequirements capacity) {
         return capacity.getRequirement(new MemoryCapacityRequirement().getType()).getMemoryInMB();
     }
+
+
+    public static boolean isAgentAutoShutdownEnabled(GridServiceAgent agent) {
+        String autoShutdownFlag = ContainersSlaUtils.getCommandLineArgumentRemovePrefix(agent, "-Dcom.gs.agent.auto-shutdown-enabled=");
+        return Boolean.valueOf(autoShutdownFlag);
+    }
 }

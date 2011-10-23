@@ -528,17 +528,9 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                     continue;
                 }
                 
-                if (!state.getAgentsStartedByMachineProvisioning().contains(agent)) {
+                if (!MachinesSlaUtils.isAgentAutoShutdownEnabled(agent)) {
                     logger.info("Agent running on machine " + agent.getMachine().getHostAddress()
-                            + " is not stopped since it was not started automatically");
-                    state.deallocateAgentCapacity(pu, agentUid);
-                    continue;
-                }
-                
-                if (!machineProvisioning.isStartMachineSupported()) {
-                    logger.info("Agent running on machine " + agent.getMachine().getHostAddress()
-                            + " is not stopped since machine provisioning " + sla.getMachineProvisioning().getClass()
-                            + "does not support automatic start/stop of machines");
+                            + " is not stopped since it does not have the auto-shutdown flag");
                     state.deallocateAgentCapacity(pu, agentUid);
                     continue;
                 }
@@ -579,13 +571,13 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
     }
 
     private void stopMachine(final NonBlockingElasticMachineProvisioning machineProvisioning, GridServiceAgent agent) {
-           // The machineProvisioning might not be the same one that started this agent,
-           // Nevertheless, we expect it to be able to stop this agent.
-           machineProvisioning.stopMachineAsync(
-                   agent, 
-                   STOP_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-           
-           state.agentGoingDown(pu,agent.getUid(),STOP_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        // The machineProvisioning might not be the same one that started this agent,
+        // Nevertheless, we expect it to be able to stop this agent.
+        machineProvisioning.stopMachineAsync(
+                agent, 
+                STOP_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        
+        state.agentGoingDown(pu,agent.getUid(),STOP_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
     }
 
     /**
@@ -614,12 +606,6 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                 state.markAgentCapacityForDeallocation(pu, agent.getUid());
             }
         }
-        
-        for (GridServiceAgent agent : state.getAgentsStartedByMachineProvisioning()) {
-            if (!agent.isDiscovered()) {
-                state.removeIndicationThatAgentStartedByMachineProvisioning(agent);
-            }
-        }
     }
     
     private void cleanMachinesGoingDown(final NonBlockingElasticMachineProvisioning machineProvisioning) {
@@ -634,7 +620,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                 state.agentShutdownComplete(agentUid);
             }
             
-            else if (state.isAgentUidGoingDownTimedOut(agentUid) && machineProvisioning.isStartMachineSupported()) {
+            else if (state.isAgentUidGoingDownTimedOut(agentUid)) {
                 
                 logger.warn("Failed to shutdown agent " + agentUid + " on machine " + MachinesSlaUtils.machineToString(agent.getMachine()) +" . Retrying one last time.");
                 
@@ -724,15 +710,6 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             
             //update state 2: remove futures from list
             state.removeFutureAgents(pu, doneFutureAgents);
-            if (doneFutureAgents.getMachineProvisioning() != null &&
-                doneFutureAgents.getMachineProvisioning().isStartMachineSupported()) {
-                
-                // this is not a mock future of existing machines. 
-                // we really started this machine.
-                for (GridServiceAgent newAgent : healthyAgents) {
-                    state.addIndicationThatAgentStartedByMachineProvisioning(newAgent);
-                }
-            }
             
             // update state 3:
             // mark for shutdown new machines that are not marked by any processing unit
@@ -1045,26 +1022,26 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         Map<String,Integer> scaleInPriorityPerAgentUid = new HashMap<String,Integer>();
         GridServiceAgents agents = pu.getAdmin().getGridServiceAgents();
         for (String agentUid : state.getAllocatedCapacity(pu).getAgentUids()) {
-            int agentPriority = 0;
+            int agentOrderToDeallocateContainers = 0;
             GridServiceAgent agent = agents.getAgentByUID(agentUid);
             if (agent != null) {
                 if (MachinesSlaUtils.isManagementRunningOnMachine(agent.getMachine())) {
                     // machine has management on it. It will not shutdown anyway, so try to scale in other
                     // machines first.
-                    agentPriority = 3;
+                    agentOrderToDeallocateContainers = 3;
                 }
                 else if (state.isAgentSharedWithOtherProcessingUnits(pu, agentUid)) {
                     // machine has other PUs on it. 
                     // try to scale in other machines first.
-                    agentPriority = 2;
+                    agentOrderToDeallocateContainers = 2;
                 }
-                else if (!state.getAgentsStartedByMachineProvisioning().contains(agent)) {
-                    // machine was not started by ESM, so it cannot be shutdown by ESM
+                else if (!MachinesSlaUtils.isAgentAutoShutdownEnabled(agent)) {
+                    // machine cannot be shutdown by ESM
                     // try scaling in machines that we can shutdown first.
-                    agentPriority = 1;
+                    agentOrderToDeallocateContainers = 1;
                 }
             }
-            scaleInPriorityPerAgentUid.put(agentUid, agentPriority);
+            scaleInPriorityPerAgentUid.put(agentUid, agentOrderToDeallocateContainers);
         }
         solver.setAgentAllocationPriority(scaleInPriorityPerAgentUid);
         

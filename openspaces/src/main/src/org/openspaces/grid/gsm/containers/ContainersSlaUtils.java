@@ -23,6 +23,7 @@ import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.os.OperatingSystemStatistics;
 import org.openspaces.admin.pu.ProcessingUnit;
+import org.openspaces.admin.vm.VirtualMachineAware;
 import org.openspaces.core.util.MemoryUnit;
 
 public class ContainersSlaUtils {
@@ -222,7 +223,7 @@ public class ContainersSlaUtils {
         return MemoryUnit.MEGABYTES.convert(xmxArgument);
     }
     
-    private static String getCommandLineArgumentRemovePrefix(GridServiceContainer container, String prefix) {
+    public static String getCommandLineArgumentRemovePrefix(VirtualMachineAware container, String prefix) {
         String[] commandLineArguments = container.getVirtualMachine().getDetails().getInputArguments();
         String requiredArg = null;
         for (final String arg : commandLineArguments) {

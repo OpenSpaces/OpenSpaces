@@ -88,6 +88,6 @@ public class DiscoveredMachineProvisioningBean implements NonBlockingElasticMach
     }
 
     public void stopMachineAsync(GridServiceAgent agent, long duration, TimeUnit unit) {
-        throw new UnsupportedOperationException();
+        agent.shutdown();
     }
 }

@@ -37,7 +37,6 @@ public class MachinesSlaEnforcementState {
     private final Map<ProcessingUnit,ClusterCapacityRequirements> markedForDeallocationCapacityPerProcessingUnit;
     private final Map<ProcessingUnit, ElasticProcessingUnitMachineIsolation> machineIsolationPerProcessingUnit;
     private final Map<ProcessingUnit,Map<String,Long>> timeoutTimestampPerAgentUidGoingDownPerProcessingUnit;
-    private final Set<GridServiceAgent> agentsStartedByMachineProvisioning;
     
     public MachinesSlaEnforcementState() {
         this.logger = 
@@ -49,7 +48,6 @@ public class MachinesSlaEnforcementState {
         markedForDeallocationCapacityPerProcessingUnit = new HashMap<ProcessingUnit, ClusterCapacityRequirements>();
         machineIsolationPerProcessingUnit = new HashMap<ProcessingUnit, ElasticProcessingUnitMachineIsolation>();
         timeoutTimestampPerAgentUidGoingDownPerProcessingUnit = new HashMap<ProcessingUnit,Map<String,Long>>();
-        agentsStartedByMachineProvisioning = new HashSet<GridServiceAgent>();
     }
 
     public void initProcessingUnit(ProcessingUnit pu, final GridServiceAgent[] agents) {
@@ -412,18 +410,6 @@ public class MachinesSlaEnforcementState {
         CapacityRequirements expectedCapacity = new CapacityRequirements(
                 new NumberOfMachinesCapacityRequirement(agents.length));
         return new GridServiceAgentFutures(futureAgents, expectedCapacity);
-    }
-
-    public void removeIndicationThatAgentStartedByMachineProvisioning(GridServiceAgent agent) {
-        this.agentsStartedByMachineProvisioning.remove(agent);
-    }
-
-    public void addIndicationThatAgentStartedByMachineProvisioning(GridServiceAgent agent) {
-        agentsStartedByMachineProvisioning.add(agent);
-    }
-    
-    public Collection<GridServiceAgent> getAgentsStartedByMachineProvisioning() {
-        return Collections.unmodifiableCollection(new ArrayList<GridServiceAgent>(this.agentsStartedByMachineProvisioning));
     }
     
     public void setMachineIsolation(ProcessingUnit pu, ElasticProcessingUnitMachineIsolation isolation) {
