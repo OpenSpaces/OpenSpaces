@@ -4,28 +4,24 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openspaces.admin.Admin;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsc.GridServiceContainer;
+import org.openspaces.admin.internal.pu.InternalProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.ClusterCapacityRequirements;
-import org.openspaces.grid.gsm.capacity.MachineCapacityRequirements;
-import org.openspaces.grid.gsm.capacity.NumberOfMachinesCapacityRequirement;
 import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIsolation;
-import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
 
 public class MachinesSlaEnforcementState {
     
@@ -37,6 +33,7 @@ public class MachinesSlaEnforcementState {
     private final Map<ProcessingUnit,ClusterCapacityRequirements> markedForDeallocationCapacityPerProcessingUnit;
     private final Map<ProcessingUnit, ElasticProcessingUnitMachineIsolation> machineIsolationPerProcessingUnit;
     private final Map<ProcessingUnit,Map<String,Long>> timeoutTimestampPerAgentUidGoingDownPerProcessingUnit;
+    private final Set<ProcessingUnit> completedStateRecoveryAfterRestartPerProcessingUnit;
     
     public MachinesSlaEnforcementState() {
         this.logger = 
@@ -48,21 +45,15 @@ public class MachinesSlaEnforcementState {
         markedForDeallocationCapacityPerProcessingUnit = new HashMap<ProcessingUnit, ClusterCapacityRequirements>();
         machineIsolationPerProcessingUnit = new HashMap<ProcessingUnit, ElasticProcessingUnitMachineIsolation>();
         timeoutTimestampPerAgentUidGoingDownPerProcessingUnit = new HashMap<ProcessingUnit,Map<String,Long>>();
+        completedStateRecoveryAfterRestartPerProcessingUnit = new HashSet<ProcessingUnit>();
     }
 
-    public void initProcessingUnit(ProcessingUnit pu, final GridServiceAgent[] agents) {
+    public void initProcessingUnit(ProcessingUnit pu) {
         
         allocatedCapacityPerProcessingUnit.put(pu,new ClusterCapacityRequirements());
         markedForDeallocationCapacityPerProcessingUnit.put(pu, new ClusterCapacityRequirements());
         timeoutTimestampPerAgentUidGoingDownPerProcessingUnit.put(pu,new HashMap<String,Long>());
-        
-        List<GridServiceAgentFutures> futures = new ArrayList<GridServiceAgentFutures>();
-        futureAgentsPerProcessingUnit.put(pu, futures);
-        if (agents.length > 0) {
-            // the reason that we convert agents into futures
-            // is to let the sla policy determine how to deal with these agents
-            futures.add(convertToAgentFutures(agents));
-        }
+        futureAgentsPerProcessingUnit.put(pu, new ArrayList<GridServiceAgentFutures>());
     }
 
     public void destroyProcessingUnit(ProcessingUnit pu) {
@@ -370,47 +361,6 @@ public class MachinesSlaEnforcementState {
         return allocatedCapacityPerProcessingUnit.get(pu).add(markedForDeallocationCapacityPerProcessingUnit.get(pu)).getAgentUids();
     }
     
-    public static GridServiceAgentFutures convertToAgentFutures(final GridServiceAgent[] agents) {
-        final Date timestamp = new Date(System.currentTimeMillis());
-        FutureGridServiceAgent[] futureAgents = new FutureGridServiceAgent[agents.length];
-        for (int i = 0 ; i < agents.length ; i++) {
-            final GridServiceAgent agent = agents[i];
-            futureAgents[i] =   
-            new FutureGridServiceAgent() {
-       
-                public GridServiceAgent get() throws ExecutionException, IllegalStateException, TimeoutException {
-                    return agent;
-                }
-       
-                public boolean isDone() {
-                    return true;
-                }
-                
-                public boolean isTimedOut() {
-                    return false;
-                }
-       
-                public ExecutionException getException() {
-                    return null;
-                }
-       
-                public Date getTimestamp() {
-                    return timestamp;
-                }
-       
-                public NonBlockingElasticMachineProvisioning getMachineProvisioning() {
-                    return null;
-                }
-
-                public CapacityRequirements getFutureCapacity() {
-                    return new MachineCapacityRequirements(agent.getMachine());
-                }
-            };
-        }
-        CapacityRequirements expectedCapacity = new CapacityRequirements(
-                new NumberOfMachinesCapacityRequirement(agents.length));
-        return new GridServiceAgentFutures(futureAgents, expectedCapacity);
-    }
     
     public void setMachineIsolation(ProcessingUnit pu, ElasticProcessingUnitMachineIsolation isolation) {
         
@@ -426,5 +376,30 @@ public class MachinesSlaEnforcementState {
             throw new IllegalStateException("PU machine isolation has not been defined");
         }
         return this.machineIsolationPerProcessingUnit.get(pu);
+    }
+
+    public boolean isCompletedStateRecovery(ProcessingUnit pu) {
+        return completedStateRecoveryAfterRestartPerProcessingUnit.contains(pu);
+    }
+
+    public void completedStateRecovery(ProcessingUnit pu) {
+        completedStateRecoveryAfterRestartPerProcessingUnit.add(pu);
+        
+    }
+
+    public List<ProcessingUnit> getAllProcessingUnitsNotCompletedStateRecovery(Admin admin) {
+        
+        List<ProcessingUnit> processingUnits = new ArrayList<ProcessingUnit>();
+                
+        for (ProcessingUnit pu : admin.getProcessingUnits()) {
+            Map<String, String> elasticProperties = ((InternalProcessingUnit)pu).getElasticProperties();
+            if (elasticProperties != null && !elasticProperties.isEmpty() &&
+                !isCompletedStateRecovery(pu)) {
+                
+                // found an elastic PU that has not completed state recovery
+                processingUnits.add(pu);
+            }
+        }
+        return processingUnits;
     }
 }

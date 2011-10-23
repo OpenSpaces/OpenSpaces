@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -12,6 +13,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openspaces.admin.Admin;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsa.GridServiceAgents;
 import org.openspaces.admin.pu.ProcessingUnit;
@@ -22,11 +24,13 @@ import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.ClusterCapacityRequirements;
 import org.openspaces.grid.gsm.capacity.MemoryCapacityRequirement;
 import org.openspaces.grid.gsm.capacity.NumberOfMachinesCapacityRequirement;
+import org.openspaces.grid.gsm.containers.ContainersSlaUtils;
 import org.openspaces.grid.gsm.machines.exceptions.FailedToStartNewMachineException;
 import org.openspaces.grid.gsm.machines.exceptions.InconsistentMachineProvisioningException;
+import org.openspaces.grid.gsm.machines.exceptions.NeedToStartMoreMachinesException;
 import org.openspaces.grid.gsm.machines.exceptions.MachinesSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.machines.exceptions.MachinesSlaEnforcementPendingContainerDeallocationException;
-import org.openspaces.grid.gsm.machines.exceptions.NeedToStartMoreMachinesException;
+import org.openspaces.grid.gsm.machines.exceptions.SomeProcessingUnitsHaveNotCompletedStateRecoveryException;
 import org.openspaces.grid.gsm.machines.exceptions.StartedTooManyMachinesException;
 import org.openspaces.grid.gsm.machines.exceptions.UnexpectedShutdownOfNewMachineException;
 import org.openspaces.grid.gsm.machines.plugins.ElasticMachineProvisioningException;
@@ -78,6 +82,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
     }
 
     public void enforceSla(CapacityMachinesSlaPolicy sla) throws SlaEnforcementEndpointDestroyedException, MachinesSlaEnforcementPendingContainerDeallocationException, MachinesSlaEnforcementInProgressException, NeedToStartMoreMachinesException {
+        
         validateEndpointNotDestroyed(pu);
         
         validateSla(sla);
@@ -100,9 +105,65 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         
         state.setMachineIsolation(pu, sla.getMachineIsolation());
     
+        recoverStateAfterRestart(sla);
+                
         validateProvisionedMachines(sla);
         enforceSlaInternal(sla);
             
+    }
+
+    private void recoverStateAfterRestart(AbstractMachinesSlaPolicy sla) throws MachinesSlaEnforcementInProgressException {
+
+        if (!state.isCompletedStateRecovery(pu)) {
+                
+            // check pu zone matches container zones.
+            if (pu.getRequiredZones().length != 1) {
+                throw new IllegalStateException("PU has to have exactly 1 zone defined");
+            }
+    
+            String zone = pu.getRequiredZones()[0];
+            Admin admin = pu.getAdmin();
+            
+            // Recover the endpoint state based on running containers.
+            for (GridServiceAgent agent: admin.getGridServiceAgents()) {
+    
+                String agentUid = agent.getUid();
+                
+                // state maps [agentUid,PU] into memory capacity
+                // we cannot assume allocatedMemoryOnAgent == 0 since this method
+                // must be idempotent.
+                long allocatedMemoryOnAgentInMB = MachinesSlaUtils.getMemoryInMB(
+                      state.getAllocatedCapacity(pu).getAgentCapacityOrZero(agentUid));
+                
+                int numberOfContainersForPuOnAgent = 
+                        ContainersSlaUtils.getContainersByZoneOnAgentUid(admin,zone,agentUid).size();
+                
+                long memoryToAllocateOnAgentInMB = 
+                        numberOfContainersForPuOnAgent * sla.getContainerMemoryCapacityInMB() - allocatedMemoryOnAgentInMB;
+
+                if (memoryToAllocateOnAgentInMB > 0) {
+                    logger.info("Recovering " + memoryToAllocateOnAgentInMB + "MB allocated for PU" + pu.getName() + " on machine " + MachinesSlaUtils.machineToString(agent.getMachine()));
+                    CapacityRequirements capacityToAllocateOnAgent = 
+                            new CapacityRequirements(new MemoryCapacityRequirement(memoryToAllocateOnAgentInMB));
+                    
+                    allocateManualCapacity(
+                            sla, 
+                            capacityToAllocateOnAgent, 
+                            new ClusterCapacityRequirements().add(
+                                    agentUid, 
+                                    capacityToAllocateOnAgent));
+                }
+            }
+    
+            state.completedStateRecovery(pu);
+        }
+        
+        List<ProcessingUnit> pusNotCompletedStateRecovery = 
+                state.getAllProcessingUnitsNotCompletedStateRecovery(pu.getAdmin());
+        
+        if (!pusNotCompletedStateRecovery.isEmpty()) {
+            throw new SomeProcessingUnitsHaveNotCompletedStateRecoveryException(pusNotCompletedStateRecovery);
+        }
     }
 
     /**
@@ -174,6 +235,8 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
        
         state.setMachineIsolation(pu, sla.getMachineIsolation());
         
+        recoverStateAfterRestart(sla);
+                
         validateProvisionedMachines(sla);
         enforceSlaInternal(sla);
     }
