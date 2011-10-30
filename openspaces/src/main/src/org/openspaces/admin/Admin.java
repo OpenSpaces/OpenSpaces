@@ -243,6 +243,17 @@ public interface Admin extends StatisticsMonitor, DumpProvider {
      */
     void removeEventListener(AdminEventListener eventListener);
 
+    
+    /**
+     * Returns number of registered event listeners. See {@link org.openspaces.admin.AdminEventListener}.
+     * Only for calls issued by either <tt>addEventListener</tt> or <tt>removeEventListener</tt>
+     *
+     * @see #addEventListener(AdminEventListener)
+     * @see #removeEventListener(AdminEventListener)
+     * @since 8.0.5
+     */
+    int getEventListenersCount();
+    
     /**
      * Generates dump for an explicit set of dump providers.
      */

@@ -387,4 +387,9 @@ public class NullMockAdmin implements Admin, InternalAdmin {
         return null;
     }
 
+    @Override
+    public int getEventListenersCount() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
 }

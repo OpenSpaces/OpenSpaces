@@ -217,6 +217,8 @@ public class DefaultAdmin implements InternalAdmin {
     private final AlertManager alertManager;
 
     private boolean useDaemonThreads;
+    
+    private AtomicInteger eventListenersCount = new AtomicInteger();
 
     public DefaultAdmin() {
         this.discoveryService = new DiscoveryService(this);
@@ -539,11 +541,18 @@ public class DefaultAdmin implements InternalAdmin {
     @Override
     public void addEventListener(AdminEventListener eventListener) {
         EventRegistrationHelper.addEventListener(this, eventListener);
+        eventListenersCount.incrementAndGet();
     }
 
     @Override
     public void removeEventListener(AdminEventListener eventListener) {
         EventRegistrationHelper.removeEventListener(this, eventListener);
+        eventListenersCount.decrementAndGet();
+    }
+    
+    @Override
+    public int getEventListenersCount(){
+        return eventListenersCount.get();
     }
 
     @Override
