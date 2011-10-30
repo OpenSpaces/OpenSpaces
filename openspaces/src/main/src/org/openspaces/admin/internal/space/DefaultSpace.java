@@ -59,12 +59,16 @@ import com.gigaspaces.cluster.activeelection.InactiveSpaceException;
 import com.gigaspaces.cluster.activeelection.SpaceMode;
 import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
 import com.gigaspaces.internal.cluster.node.impl.gateway.GatewayPolicy;
+import com.gigaspaces.internal.version.PlatformLogicalVersion;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.ISpaceState;
 import com.j_spaces.core.admin.IRemoteJSpaceAdmin;
 import com.j_spaces.core.admin.RuntimeHolder;
 import com.j_spaces.core.exception.SpaceUnavailableException;
 import com.j_spaces.core.exception.internal.InterruptedSpaceException;
+import com.j_spaces.core.filters.ReplicationStatistics;
+import com.j_spaces.core.filters.ReplicationStatistics.OutgoingChannel;
+import com.j_spaces.core.filters.StatisticsHolder;
 import com.j_spaces.kernel.JSpaceUtilities;
 import com.j_spaces.kernel.SizeConcurrentHashMap;
 
@@ -564,76 +568,136 @@ public class DefaultSpace implements InternalSpace {
         public void run() {
             try {
                 final RuntimeHolder runtimeHolder = spaceInstance.getRuntimeHolder();
+                final StatisticsHolder statisticsHolder = spaceInstance.getStatisticsHolder();
+                final ReplicationStatistics replicationStatistics = (statisticsHolder == null) ? null : statisticsHolder.getReplicationStatistics();
                 if (runtimeHolder.getSpaceState() != null &&
-                    (runtimeHolder.getSpaceState() == ISpaceState.STOPPED ||
-                     runtimeHolder.getSpaceState() == ISpaceState.STARTING)) {
+                        (runtimeHolder.getSpaceState() == ISpaceState.STOPPED ||
+                        runtimeHolder.getSpaceState() == ISpaceState.STARTING)) {
                     // we don't want to update the space mode to until the space state is STARTED
                     // The space instance starts as STOPPED then changes to STARTING and only after recovery is complete it's state STARTED
-                    
+
                     if (logger.isTraceEnabled()) {
                         logger.trace("Ignoring runtimeHolder of space:" + spaceInstance.getSpaceName() + " serviceID:" + spaceInstance.getServiceID() + " state="+runtimeHolder.getSpaceState());
                     }
                     return;
                 }
                 DefaultSpace.this.admin.scheduleNonBlockingStateChange(new Runnable() {
-                    public void run() {
-                spaceInstance.setMode(runtimeHolder.getSpaceMode());
-                if (runtimeHolder.getReplicationStatus() != null) {
-                    Object[] memberNames = (Object[]) runtimeHolder.getReplicationStatus()[0];
-                    int[] replicationStatus = (int[]) runtimeHolder.getReplicationStatus()[1];
-                    ReplicationTarget[] replicationTargets = new ReplicationTarget[memberNames.length];
-                    for (int i = 0; i < memberNames.length; i++) {
-                        if (memberNames[i] == null) {
-                            continue;
-                        }
-                        SpaceInstance targetSpaceInstance = spaceInstancesByMemberName.get(memberNames[i]);
-                        ReplicationTargetType replicationTargetType = ReplicationTargetType.SPACE_INSTANCE;
-                        //Check if target is a gateway, so we cannot locate a target space instance for it
-                        if (((String)memberNames[i]).startsWith(GatewayPolicy.GATEWAY_NAME_PREFIX)){
-                            replicationTargetType = ReplicationTargetType.GATEWAY;                            
-                        }else {
-                            /*
-                             * If mirror-service is one of the replication target names, find its SpaceInstance.
-                             */
-                            if (targetSpaceInstance == null) {                            
-                                //we don't know the name of the mirror-service space (it can be any name that is different from the cluster name)
-                                if (!((String)memberNames[i]).endsWith(":"+name)) {
-                                    String mirrorServiceName = ((String)memberNames[i]).split(":")[1];
-                                    Space mirrorServiceSpace = spaceInstance.getAdmin().getSpaces().getSpaceByName(mirrorServiceName);
-                                    if (mirrorServiceSpace != null) {
-                                        SpaceInstance mirrorInstance = mirrorServiceSpace.getInstances()[0];
-                                        if (mirrorInstance != null && mirrorInstance.getSpaceUrl().getSchema().equals("mirror")) {
-                                            //note: don't cache it in spaceInstanceByMemberName map since we don't get a removal event on this instance
-                                            targetSpaceInstance = mirrorInstance;
-                                            replicationTargetType = ReplicationTargetType.MIRROR_SERVICE;
-                                        }
-                                    } else {
-                                        replicationTargetType = ReplicationTargetType.MIRROR_SERVICE; //we guess this is a mirror (since 8.0.1)
+                    public void run() {                        
+                        spaceInstance.setMode(runtimeHolder.getSpaceMode());
+                        if (spaceInstance.getPlatformLogicalVersion().greaterOrEquals(PlatformLogicalVersion.v8_0_5))
+                        {
+                            if (replicationStatistics != null) {
+                                final List<OutgoingChannel> channels = replicationStatistics.getOutgoingReplication().getChannels();
+                                ReplicationTarget[] replicationTargets = new ReplicationTarget[channels.size()];
+                                int index = 0;
+                                for (OutgoingChannel outgoingChannel : channels) {
+                                    ReplicationTargetType replicationTargetType;
+                                    switch (outgoingChannel.getReplicationMode()) {
+                                    case MIRROR:
+                                        replicationTargetType = ReplicationTargetType.MIRROR_SERVICE;
+                                        break;
+                                    case GATEWAY:
+                                        replicationTargetType = ReplicationTargetType.GATEWAY;
+                                        break;
+                                    case LOCAL_VIEW:
+                                        replicationTargetType = ReplicationTargetType.LOCAL_VIEW;
+                                        break;
+                                    case ACTIVE_SPACE:
+                                    case BACKUP_SPACE:
+                                        replicationTargetType = ReplicationTargetType.SPACE_INSTANCE;
+                                        break;
+                                    default:
+                                        throw new IllegalArgumentException("Unexpected replication mode: " + outgoingChannel.getReplicationMode());
                                     }
+                                    ReplicationStatus replicationStatus;
+                                    switch (outgoingChannel.getChannelState()) {
+                                    case ACTIVE:
+                                        replicationStatus = ReplicationStatus.ACTIVE;
+                                        break;
+                                    case CONNECTED:
+                                    case DISCONNECTED:
+                                        replicationStatus = ReplicationStatus.DISCONNECTED;
+                                        break;
+                                        default:
+                                            throw new IllegalArgumentException("Unexpected channel state: " + outgoingChannel.getChannelState());
+                                    }
+                                    SpaceInstance targetSpaceInstance = spaceInstancesByMemberName.get(outgoingChannel.getTargetMemberName());
+                                    if (targetSpaceInstance == null && replicationTargetType == ReplicationTargetType.MIRROR_SERVICE) {
+                                        String mirrorServiceName = outgoingChannel.getTargetMemberName().split(":")[1];
+                                        Space mirrorServiceSpace = spaceInstance.getAdmin().getSpaces().getSpaceByName(mirrorServiceName);
+                                        if (mirrorServiceSpace != null) {
+                                            SpaceInstance mirrorInstance = mirrorServiceSpace.getInstances()[0];
+                                            if (mirrorInstance != null && mirrorInstance.getSpaceUrl().getSchema().equals("mirror")) {
+                                                //note: don't cache it in spaceInstanceByMemberName map since we don't get a removal event on this instance
+                                                targetSpaceInstance = mirrorInstance;
+                                            }
+                                        }
+                                    }
+                                    replicationTargets[index++] = new ReplicationTarget((InternalSpaceInstance) targetSpaceInstance, replicationStatus, outgoingChannel.getTargetMemberName(), replicationTargetType);
                                 }
-                            }else {
-                                if (targetSpaceInstance != null && targetSpaceInstance.getSpaceUrl().getSchema().equals("mirror")) {
-                                    replicationTargetType = ReplicationTargetType.MIRROR_SERVICE;
-                                }
+                                spaceInstance.setReplicationTargets(replicationTargets);
                             }
                         }
-                        ReplicationStatus replStatus = null;
-                        switch (replicationStatus[i]) {
-                            case IRemoteJSpaceAdmin.REPLICATION_STATUS_ACTIVE:
-                                replStatus = ReplicationStatus.ACTIVE;
-                                break;
-                            case IRemoteJSpaceAdmin.REPLICATION_STATUS_DISCONNECTED:
-                                replStatus = ReplicationStatus.DISCONNECTED;
-                                break;
-                            case IRemoteJSpaceAdmin.REPLICATION_STATUS_DISABLED:
-                                replStatus = ReplicationStatus.DISABLED;
-                                break;
+                        else
+                        {
+                            // Fall back to old path
+                            if (runtimeHolder.getReplicationStatus() != null) {
+                                Object[] memberNames = (Object[]) runtimeHolder.getReplicationStatus()[0];
+                                int[] replicationStatus = (int[]) runtimeHolder.getReplicationStatus()[1];
+                                ReplicationTarget[] replicationTargets = new ReplicationTarget[memberNames.length];
+                                for (int i = 0; i < memberNames.length; i++) {
+                                    if (memberNames[i] == null) {
+                                        continue;
+                                    }
+                                    SpaceInstance targetSpaceInstance = spaceInstancesByMemberName.get(memberNames[i]);
+                                    ReplicationTargetType replicationTargetType = ReplicationTargetType.SPACE_INSTANCE;
+                                    //Check if target is a gateway, so we cannot locate a target space instance for it
+                                    if (((String)memberNames[i]).startsWith(GatewayPolicy.GATEWAY_NAME_PREFIX)){
+                                        replicationTargetType = ReplicationTargetType.GATEWAY;                            
+                                    }else {
+                                        /*
+                                         * If mirror-service is one of the replication target names, find its SpaceInstance.
+                                         */
+                                        if (targetSpaceInstance == null) {                            
+                                            //we don't know the name of the mirror-service space (it can be any name that is different from the cluster name)
+                                            if (!((String)memberNames[i]).endsWith(":"+name)) {
+                                                String mirrorServiceName = ((String)memberNames[i]).split(":")[1];
+                                                Space mirrorServiceSpace = spaceInstance.getAdmin().getSpaces().getSpaceByName(mirrorServiceName);
+                                                if (mirrorServiceSpace != null) {
+                                                    SpaceInstance mirrorInstance = mirrorServiceSpace.getInstances()[0];
+                                                    if (mirrorInstance != null && mirrorInstance.getSpaceUrl().getSchema().equals("mirror")) {
+                                                        //note: don't cache it in spaceInstanceByMemberName map since we don't get a removal event on this instance
+                                                        targetSpaceInstance = mirrorInstance;
+                                                        replicationTargetType = ReplicationTargetType.MIRROR_SERVICE;
+                                                    }
+                                                } else {
+                                                    replicationTargetType = ReplicationTargetType.MIRROR_SERVICE; //we guess this is a mirror (since 8.0.1)
+                                                }
+                                            }
+                                        }else {
+                                            if (targetSpaceInstance != null && targetSpaceInstance.getSpaceUrl().getSchema().equals("mirror")) {
+                                                replicationTargetType = ReplicationTargetType.MIRROR_SERVICE;
+                                            }
+                                        }
+                                    }
+                                    ReplicationStatus replStatus = null;
+                                    switch (replicationStatus[i]) {
+                                    case IRemoteJSpaceAdmin.REPLICATION_STATUS_ACTIVE:
+                                        replStatus = ReplicationStatus.ACTIVE;
+                                        break;
+                                    case IRemoteJSpaceAdmin.REPLICATION_STATUS_DISCONNECTED:
+                                        replStatus = ReplicationStatus.DISCONNECTED;
+                                        break;
+                                    case IRemoteJSpaceAdmin.REPLICATION_STATUS_DISABLED:
+                                        replStatus = ReplicationStatus.DISABLED;
+                                        break;
+                                    }
+                                    replicationTargets[i] = new ReplicationTarget((InternalSpaceInstance) targetSpaceInstance, replStatus, (String)memberNames[i], replicationTargetType);
+                                }
+                                spaceInstance.setReplicationTargets(replicationTargets);
+                            }
                         }
-                        replicationTargets[i] = new ReplicationTarget((InternalSpaceInstance) targetSpaceInstance, replStatus, (String)memberNames[i], replicationTargetType);
-                    }
-                    spaceInstance.setReplicationTargets(replicationTargets);
-                }
-            }});
+                    }});
             } catch (SpaceUnavailableException e) {
                 // space is going shutdown or abort process
             } catch (InactiveSpaceException e) {
@@ -641,7 +705,7 @@ public class DefaultSpace implements InternalSpace {
             } catch (InterruptedSpaceException e) {
                 ProcessingUnit pu = admin.getProcessingUnits().getProcessingUnit(name);
                 if (pu == null ||
-                    pu.getStatus() == DeploymentStatus.UNDEPLOYED) {
+                        pu.getStatus() == DeploymentStatus.UNDEPLOYED) {
                     logger.debug("Failed to get runtime information", e);
                 } else {
                     logger.warn("Failed to get runtime information", e);

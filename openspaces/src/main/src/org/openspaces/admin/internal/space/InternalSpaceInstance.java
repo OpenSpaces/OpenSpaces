@@ -11,9 +11,11 @@ import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.space.SpacePartition;
 
 import com.gigaspaces.cluster.activeelection.SpaceMode;
+import com.gigaspaces.internal.version.PlatformLogicalVersion;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
 import com.j_spaces.core.admin.RuntimeHolder;
+import com.j_spaces.core.filters.StatisticsHolder;
 
 /**
  * @author kimchy
@@ -43,4 +45,8 @@ public interface InternalSpaceInstance extends SpaceInstance, InternalGridCompon
     void setMode(SpaceMode spaceMode);
 
     void setReplicationTargets(ReplicationTarget[] replicationTargets);
+
+    StatisticsHolder getStatisticsHolder() throws RemoteException;
+
+    PlatformLogicalVersion getPlatformLogicalVersion();
 }

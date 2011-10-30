@@ -45,6 +45,8 @@ import com.gigaspaces.internal.jvm.JVMDetails;
 import com.gigaspaces.internal.jvm.JVMStatistics;
 import com.gigaspaces.internal.os.OSDetails;
 import com.gigaspaces.internal.os.OSStatistics;
+import com.gigaspaces.internal.version.PlatformLogicalVersion;
+import com.gigaspaces.lrmi.LRMIUtilities;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOStatistics;
 import com.j_spaces.core.IJSpace;
@@ -540,5 +542,18 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
             break;
         }
         return name;
+    }
+
+    @Override
+    public StatisticsHolder getStatisticsHolder() throws RemoteException {
+        if (spaceAdmin != null) {
+            return ((StatisticsAdmin) spaceAdmin).getHolder();
+        }
+        return puService.getSpaceStatisticsHolder(serviceID);
+    }
+
+    @Override
+    public PlatformLogicalVersion getPlatformLogicalVersion() {
+        return LRMIUtilities.getServicePlatformLogicalVersion(((ISpaceProxy)getIJSpace()).getDirectProxy().getRemoteJSpace());
     }
 }

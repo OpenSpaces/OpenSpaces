@@ -17,6 +17,10 @@ public enum ReplicationTargetType {
     /**
      * The target is a gateway
      */
-    GATEWAY
+    GATEWAY,
+    /**
+     * The target is a local view
+     */
+    LOCAL_VIEW
 
 }
