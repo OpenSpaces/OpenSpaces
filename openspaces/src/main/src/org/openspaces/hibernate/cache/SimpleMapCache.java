@@ -18,8 +18,9 @@ package org.openspaces.hibernate.cache;
 
 import com.j_spaces.core.client.ReadModifiers;
 import com.j_spaces.core.client.cache.map.MapCache;
-import com.j_spaces.map.Envelope;
 import com.j_spaces.map.IMap;
+import com.j_spaces.map.MapEntryFactory;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.cache.Cache;
@@ -179,7 +180,7 @@ public class SimpleMapCache implements Cache {
             logger.trace("Clearing region [" + regionName + "]");
         }
         try {
-            map.getMasterSpace().clear(new Envelope(new CacheKey(regionName, null), null), null);
+            map.getMasterSpace().clear(MapEntryFactory.create(new CacheKey(regionName, null), null), null);
         } catch (Exception e) {
             throw new CacheException("Failed to clear master space with region [" + regionName + "]", e);
         }

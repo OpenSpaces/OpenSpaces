@@ -20,8 +20,9 @@ import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
 import com.j_spaces.core.client.LocalTransactionManager;
 import com.j_spaces.core.client.XAResourceImpl;
 import com.j_spaces.core.client.cache.map.MapCache;
-import com.j_spaces.map.Envelope;
 import com.j_spaces.map.IMap;
+import com.j_spaces.map.MapEntryFactory;
+
 import net.jini.core.transaction.Transaction;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -149,7 +150,7 @@ public class TransactionalMapCache implements Cache {
             logger.trace("Clearing region [" + regionName + "]");
         }
         try {
-            map.getMasterSpace().clear(new Envelope(new CacheKey(regionName, null), null), null);
+            map.getMasterSpace().clear(MapEntryFactory.create(new CacheKey(regionName, null), null), null);
         } catch (Exception e) {
             throw new CacheException("Failed to clear master space with region [" + regionName + "]", e);
         }
