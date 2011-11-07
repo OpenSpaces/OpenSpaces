@@ -1,6 +1,12 @@
 package org.openspaces.grid.esm;
 
 import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -12,6 +18,7 @@ import org.openspaces.admin.internal.gsm.InternalGridServiceManager;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 
+import com.gigaspaces.grid.gsm.GSM;
 import com.gigaspaces.grid.gsm.PUDetails;
 import com.gigaspaces.grid.gsm.PUsDetails;
 /**
@@ -49,11 +56,23 @@ public class ESMImplInitializer {
 
             @Override
             public void run() {
-              ((InternalAdmin)admin).scheduleAdminOperation(new Runnable() {
+              
+                final Map<String,Integer> numberOfInstancesPerProcessingUnit = new HashMap<String,Integer>();
+                for (ProcessingUnit pu : admin.getProcessingUnits()) {
+                    numberOfInstancesPerProcessingUnit.put(pu.getName(), pu.getInstances().length);
+                }
                 
+                final Set<GSM> gridServiceManagers = new HashSet<GSM>();
+                for (GridServiceManager gsm : admin.getGridServiceManagers()) {
+                    gridServiceManagers.add(((InternalGridServiceManager)gsm).getGSM());
+                }
+              
+              ((InternalAdmin)admin).scheduleAdminOperation(new Runnable() {
+                 
                 @Override
                 public void run() {
-                    if (isLookupDiscoverySyncedWithGsm()) {
+                    
+                    if (isLookupDiscoverySyncedWithGsm(gridServiceManagers, numberOfInstancesPerProcessingUnit)) {
                         esmInitializer.run();
                     }
                     else {
@@ -73,49 +92,53 @@ public class ESMImplInitializer {
      * Makes sure that data arriving from Lookup Service into Admin API cache
      * conforms to the data reported from the GSM.
      */
-    private boolean isLookupDiscoverySyncedWithGsm() {
-        
-        admin.getGridServiceManagers().waitForAtLeastOne();
+    private boolean isLookupDiscoverySyncedWithGsm(Set<GSM> gridServiceManagers, Map<String,Integer> numberOfInstancesPerProcessingUnit) {
+
+        Set<String> managedPus = new HashSet<String>();
         
         //for each gsm
-        for (final GridServiceManager gsm : admin.getGridServiceManagers()) {
+        for (final GSM gsm : gridServiceManagers) {
             PUsDetails pusDetails;
             try {
-                pusDetails = ((InternalGridServiceManager) gsm).getGSM().getPUsDetails();
+                pusDetails = gsm.getPUsDetails();
             } catch (final RemoteException e) {
                 logger.log(Level.WARNING, "Failed to get PU details from GSM",e);
                 return false;
             }
-            
+           
             // for each pu
             for (final PUDetails details : pusDetails.getDetails()) {
                 
                 String puName = details.getName();
+                if (details.isManaging()) {
+                    boolean added = managedPus.add(puName);
+                    if (!added) {
+                        logger.log(Level.WARNING,puName + " seems to have more than one managing GSMs. Waiting for a single managing GSM.");
+                        return false;
+                    }
                 
-                // check pu
-                ProcessingUnit pu = admin.getProcessingUnits().getProcessingUnit(puName);
-                if (pu == null) {
-                    logger.log(Level.INFO, "Waiting for PU " + puName + " to be discovered");
-                    return false;
-                }
-                
-                // check pu instances
-                final ProcessingUnitInstance[] instances = pu.getInstances();
-                final int numberOfInstancesAccordingToGsm = details.getNumberOfInstances() * ( details.getNumberOfBackups() + 1);
-                if (instances.length != numberOfInstancesAccordingToGsm) {
-                    logger.log(Level.INFO, "Waiting for PU " + puName + " instances to be discovered. Discovered " + instances.length + " expected " + numberOfInstancesAccordingToGsm);
-                    return false;
-                }
-                
-                // check containers
-                for (ProcessingUnitInstance instance : instances) {
-                    if (instance.getGridServiceContainer() == null) {
-                        logger.log(Level.INFO, "Waiting for container hosting PU instance " + instance.getProcessingUnitInstanceName() + " to be discovered.");
+                    // check pu instances
+                    final int numberOfInstancesAccordingToGsm = details.getActualNumberOfInstances();
+                    final Integer discoveredNumberOfInstances = numberOfInstancesPerProcessingUnit.get(puName);
+                    if (discoveredNumberOfInstances == null) {
+                    	logger.log(Level.INFO, "Waiting for PU " + puName + " to be discovered.");
+                    	return false;
+                    }
+                    if (discoveredNumberOfInstances != numberOfInstancesAccordingToGsm) {
+                        logger.log(Level.INFO, "Waiting for PU " + puName + " instances to be discovered. Discovered " + discoveredNumberOfInstances + " expected " + numberOfInstancesAccordingToGsm);
                         return false;
                     }
                 }
             }
         }
+        
+        Set<String> unmanagedPus = new HashSet<String>(numberOfInstancesPerProcessingUnit.keySet());
+        unmanagedPus.removeAll(managedPus);
+        if (!unmanagedPus.isEmpty()) {
+            logger.log(Level.INFO, "Waiting for a managing GSM for PUs:" + unmanagedPus);
+            return false;
+        }
+     
         return true;
     }
 }
