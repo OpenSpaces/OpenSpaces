@@ -361,7 +361,7 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
         }
     }
 
-    private void terminateOrphanContainersOfAgent(GridServiceAgent agent) {
+    private void terminateOrphanContainersOfAgent(final GridServiceAgent agent) {
         final Set<Integer> agentIds = new HashSet<Integer>();
         // add all agent's containers process ids.
         for (final AgentProcessDetails processDetails : agent.getProcessesDetails()) {
@@ -388,16 +388,21 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
             }
         }
         
-        for (final int agentId : agentIds) {
-            try {
-                agent.killByAgentId(agentId);
-                logger.warn("Terminated orphan container that did not register with lookup service on machine "
-                        + ContainersSlaUtils.machineToString(agent.getMachine()) + " agentId=" + agentId);
-            } catch (final AdminException e) {
-                logger.warn("Error terminating orphan container that did not register with lookup service on machine "
-                        + ContainersSlaUtils.machineToString(agent.getMachine()) + " agentId=" + agentId, e);
+        ((InternalAdmin) pu.getAdmin()).scheduleAdminOperation(new Runnable() {
+            public void run() {
+        
+                for (final int agentId : agentIds) {
+                    try {
+                        agent.killByAgentId(agentId);
+                        logger.warn("Terminated orphan container that did not register with lookup service on machine "
+                                + ContainersSlaUtils.machineToString(agent.getMachine()) + " agentId=" + agentId);
+                    } catch (final AdminException e) {
+                        logger.warn("Error terminating orphan container that did not register with lookup service on machine "
+                                + ContainersSlaUtils.machineToString(agent.getMachine()) + " agentId=" + agentId, e);
+                    }
+                }
             }
-        }
+        });
     }
 
 } 
