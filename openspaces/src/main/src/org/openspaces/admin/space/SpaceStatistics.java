@@ -75,8 +75,10 @@ public interface SpaceStatistics {
 
     double getNotifyRegistrationPerSecond();
 
+    @Deprecated
     long getCleanCount();
 
+    @Deprecated
     double getCleanPerSecond();
 
     long getUpdateCount();
