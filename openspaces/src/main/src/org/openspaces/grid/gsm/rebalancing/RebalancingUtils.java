@@ -28,7 +28,6 @@ import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.pu.DeploymentStatus;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
-import org.openspaces.admin.pu.ProcessingUnitPartition;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.core.internal.commons.math.fraction.Fraction;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
@@ -414,21 +413,19 @@ public class RebalancingUtils {
             return new GridServiceContainer[] {};
         }
         
-        ProcessingUnitPartition partition = instance.getPartition();
-        if (!isProcessingUnitPartitionIntact(partition, containers)) {
+        if (!isProcessingUnitPartitionIntact(instance.getProcessingUnit(), instance.getInstanceId(), containers)) {
             throw new IllegalStateException("Cannot relocate pu instance " + puInstanceToString(instance) +" since partition is not intact." );
         }
         
         for (int backupId = 0 ; backupId <= numberOfBackups ; backupId++) {
             if (backupId != instance.getBackupId()) {
-                repContainers.add(findProcessingUnitInstance(partition, backupId, containers).getGridServiceContainer());
+                repContainers.add(findProcessingUnitInstance(instance.getProcessingUnit(),instance.getInstanceId(), backupId, containers).getGridServiceContainer());
             }
         }
         
         return repContainers.toArray(new GridServiceContainer[repContainers.size()]);
     }
-
-
+    
     public static boolean isProcessingUnitIntact(ProcessingUnit pu, GridServiceContainer[] containers) {
         boolean intact = true;
         if (pu.getStatus() != DeploymentStatus.INTACT) {
@@ -436,8 +433,8 @@ public class RebalancingUtils {
         }
         else {
             if (pu.getNumberOfBackups() > 0) {
-                for (int partitionId = 0 ; intact && partitionId < pu.getNumberOfInstances() ; partitionId ++) {
-                    if (!isProcessingUnitPartitionIntact(pu.getPartition(partitionId),containers)) {
+                for (int instanceId = 1 ; intact && instanceId <= pu.getNumberOfInstances() ; instanceId ++) {
+                    if (!isProcessingUnitPartitionIntact(pu, instanceId, containers)) {
                         intact = false;
                         break;
                     }
@@ -462,18 +459,15 @@ public class RebalancingUtils {
         return intact;
     }
     
+    public static boolean isProcessingUnitPartitionIntact(ProcessingUnitInstance instance) {
+        GridServiceContainer[] containers = instance.getAdmin().getGridServiceContainers().getContainers();
+        return isProcessingUnitPartitionIntact(instance.getProcessingUnit(), instance.getInstanceId(), containers);
+    }
+    
     public static boolean isProcessingUnitIntact(ProcessingUnit pu) {
         return isProcessingUnitIntact(pu, pu.getAdmin().getGridServiceContainers().getContainers());
     }
     
-    private static ProcessingUnitInstance findProcessingUnitInstance(ProcessingUnitPartition partition, int backupId, GridServiceContainer[] containers) {
-        
-        ProcessingUnit pu = partition.getProcessingUnit();
-        int instanceId = partition.getPartitionId() + 1;
-        
-        return findProcessingUnitInstance(pu, instanceId, backupId, containers);
-    }
-
     private static ProcessingUnitInstance findProcessingUnitInstance(ProcessingUnit pu, int instanceId, int backupId, GridServiceContainer[] containers) {
         for (final GridServiceContainer container : containers) {
             for (final ProcessingUnitInstance instance : container.getProcessingUnitInstances(pu.getName())) {
@@ -485,18 +479,16 @@ public class RebalancingUtils {
         }
         return null;
     }
-
-    public static boolean isProcessingUnitPartitionIntact(ProcessingUnitPartition partition, GridServiceContainer[] containers) {
+    
+    public static boolean isProcessingUnitPartitionIntact(ProcessingUnit pu,int instanceId, GridServiceContainer[] containers) {
         
         boolean intact = true;
-        ProcessingUnit pu = partition.getProcessingUnit();
-
     
         int numberOfPrimaryInstances = 0;
         int numberOfBackupInstances = 0;
         
         for (int backupId = 0 ; backupId <= pu.getNumberOfBackups() ; backupId++) {
-            ProcessingUnitInstance instance = findProcessingUnitInstance(partition, backupId, containers);
+            ProcessingUnitInstance instance = findProcessingUnitInstance(pu, instanceId, backupId, containers);
             if (instance != null &&
                 instance.getSpaceInstance() != null) {
                 
@@ -730,12 +722,6 @@ public class RebalancingUtils {
         }
         return machines.toArray(new Machine[machines.size()]);
     }
-
-
-    public static boolean isProcessingUnitPartitionIntact(ProcessingUnitPartition partition) {
-        GridServiceContainer[] containers = partition.getProcessingUnit().getAdmin().getGridServiceContainers().getContainers();
-        return isProcessingUnitPartitionIntact(partition, containers);
-    }
     
     /**
      * 
@@ -930,6 +916,5 @@ public class RebalancingUtils {
         }
         return deployment.toString();
     }
-
     
 }

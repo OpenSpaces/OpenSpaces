@@ -415,7 +415,7 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
                         continue;
                     }
 
-                    if (!RebalancingUtils.isProcessingUnitPartitionIntact(candidateInstance.getPartition())) {
+                    if (!RebalancingUtils.isProcessingUnitPartitionIntact(candidateInstance)) {
                         logger.debug("Cannot relocate " + RebalancingUtils.puInstanceToString(candidateInstance)
                                 + " since instances from the same partition are missing");
                         conflict = true;
@@ -686,7 +686,7 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
                         continue;
                     }
 
-                    if (!RebalancingUtils.isProcessingUnitPartitionIntact(candidateInstance.getPartition())) {
+                    if (!RebalancingUtils.isProcessingUnitPartitionIntact(candidateInstance)) {
                         logger.debug("Cannot restart " + RebalancingUtils.puInstanceToString(candidateInstance)
                                 + " since instances from the same partition are missing");
                         conflict = true;
