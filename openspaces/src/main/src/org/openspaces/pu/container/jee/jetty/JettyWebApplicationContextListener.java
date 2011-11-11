@@ -211,8 +211,8 @@ public class JettyWebApplicationContextListener implements ServletContextListene
             ServletContextHandler jettyContext = (ServletContextHandler) ((ContextHandler.Context) servletContext).getContextHandler();
             SessionHandler sessionHandler = jettyContext.getSessionHandler();
             // automatically set the worker name
-            if (sessionHandler.getSessionManager().getIdManager() instanceof HashSessionIdManager) {
-                HashSessionIdManager sessionIdManager = (HashSessionIdManager) sessionHandler.getSessionManager().getIdManager();
+            if (sessionHandler.getSessionManager().getSessionIdManager() instanceof HashSessionIdManager) {
+                HashSessionIdManager sessionIdManager = (HashSessionIdManager) sessionHandler.getSessionManager().getSessionIdManager();
                 if (sessionIdManager.getWorkerName() == null) {
                     sessionIdManager.setWorkerName(clusterInfo.getUniqueName().replace('.', '_'));
                     if (logger.isDebugEnabled()) {

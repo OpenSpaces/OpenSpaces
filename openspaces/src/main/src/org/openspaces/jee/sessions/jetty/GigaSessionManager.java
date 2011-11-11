@@ -16,6 +16,7 @@
 
 package org.openspaces.jee.sessions.jetty;
 
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -29,6 +30,7 @@ import javax.servlet.http.HttpSessionListener;
 
 import net.jini.core.lease.Lease;
 
+import org.eclipse.jetty.server.session.AbstractSession;
 import org.eclipse.jetty.server.session.AbstractSessionManager;
 import org.eclipse.jetty.util.LazyList;
 import org.eclipse.jetty.util.log.Log;
@@ -245,6 +247,7 @@ public class GigaSessionManager extends AbstractSessionManager {
      */
     @Override
     public Session getSession(String idInCluster) {
+
         // TODO do we really need to synchronize on (this) here? It used to be like that
         try {
             SessionData data = fetch(idInCluster);
@@ -256,7 +259,7 @@ public class GigaSessionManager extends AbstractSessionManager {
                 session = null;
                 if (Log.isDebugEnabled()) Log.debug("No session matching id [" + idInCluster + "]");
             } else {
-                session = new Session(data);
+                session = new Session(this, data);
                 if (Log.isDebugEnabled()) Log.debug("Found matching session [" + idInCluster + "]");
             }
             return session;
@@ -303,9 +306,10 @@ public class GigaSessionManager extends AbstractSessionManager {
         //any other nodes
     }
 
+    
     @Override
-    protected Session newSession(HttpServletRequest request) {
-        return new Session(request);
+    protected AbstractSession newSession(HttpServletRequest request) {
+        return new Session(this, request);
     }
 
     @Override
@@ -320,7 +324,7 @@ public class GigaSessionManager extends AbstractSessionManager {
 
 
     @Override
-    public void removeSession(AbstractSessionManager.Session abstractSession, boolean invalidate) {
+    public void removeSession(AbstractSession abstractSession, boolean invalidate) {
         if (!(abstractSession instanceof GigaSessionManager.Session))
             throw new IllegalStateException("Session is not a GigaspacesSessionManager.Session " + abstractSession);
 
@@ -359,7 +363,7 @@ public class GigaSessionManager extends AbstractSessionManager {
     }
 
     @Override
-    protected void addSession(AbstractSessionManager.Session abstractSession) {
+    protected void addSession(AbstractSession abstractSession) {
         if (abstractSession == null)
             return;
 
@@ -401,7 +405,7 @@ public class GigaSessionManager extends AbstractSessionManager {
                 expiredSessions = findExpiredSessions((now));
                 for (int i = 0; i < expiredSessions.length; i++) {
                     if (Log.isDebugEnabled()) Log.debug("Timing out expired session " + expiredSessions[i]);
-                    GigaSessionManager.Session expiredSession = new GigaSessionManager.Session((SessionData) expiredSessions[i]);
+                    GigaSessionManager.Session expiredSession = new GigaSessionManager.Session(GigaSessionManager.this, (SessionData) expiredSessions[i]);
                     expiredSession.timeout();
                     if (Log.isDebugEnabled()) Log.debug("Expiring old session " + expiredSession._data);
                 }
@@ -450,7 +454,7 @@ public class GigaSessionManager extends AbstractSessionManager {
      *
      * A session in memory of a Context. Adds behavior around SessionData.
      */
-    public class Session extends AbstractSessionManager.Session {
+    public class Session extends AbstractSession {
         private static final long serialVersionUID = -2019532886095399423L;
 
         private final SessionData _data;
@@ -460,24 +464,37 @@ public class GigaSessionManager extends AbstractSessionManager {
         /**
          * Session from a request.
          */
-        protected Session(HttpServletRequest request) {
-            super(request);
-            _data = new SessionData(_clusterId);
+        protected Session(AbstractSessionManager manager, HttpServletRequest request) {
+            super(manager, request);
+            _data = new SessionData(getClusterId());
             _data.setMaxIdleMs(_dftMaxIdleSecs * 1000L);
-            _data.setExpiryTime(_maxIdleMs < 0 ? Long.MAX_VALUE : (System.currentTimeMillis() + _maxIdleMs));
+            _data.setExpiryTime(getMaxInactiveInterval() < 0 ? Long.MAX_VALUE : (System.currentTimeMillis() + getMaxInactiveInterval()));
             _data.setCookieSet(0);
-            _data.setAttributeMap(_attributes);
+            
+            Enumeration<String> attributeNames = getAttributeNames();
+            HashMap<String, Object> attributes = new HashMap<String, Object>();
+            while(attributeNames.hasMoreElements()){
+                String nextAttribute = attributeNames.nextElement();
+                attributes.put(nextAttribute, request.getAttribute(nextAttribute));
+            }
+            _data.setAttributeMap(attributes);
             if (Log.isDebugEnabled()) Log.debug("New Session from request, " + _data.toStringExtended());
         }
 
-        protected Session(SessionData data) {
-            super(data.getCreated(), data.getAccessed() ,data.getId());
-            _lastAccessed = data.getLastAccessed();
+        protected Session(AbstractSessionManager manager, SessionData data) {
+            super(manager, data.getCreated(), data.getAccessed() ,data.getId());
             _data = data;
-            
-            //Merges the two tables and make sure both SessionData and AbstractSessionManager.Session holds the same map 
-            _attributes.putAll(data.getAttributeMap());
-            _data.setAttributeMap(_attributes);
+            for(Map.Entry<String, Object> attribute : data.getAttributeMap().entrySet()){
+                super.setAttribute(attribute.getKey(), attribute.getValue());
+            }
+            //Merges the two tables and make sure both SessionData and AbstractSessionManager.Session holds the same map
+            Enumeration<String> attributeNames = getAttributeNames();
+            HashMap<String, Object> attributes = new HashMap<String, Object>();
+            while(attributeNames.hasMoreElements()){
+                String nextAttribute = attributeNames.nextElement();
+                attributes.put(nextAttribute, super.getAttribute(nextAttribute));
+            }
+            _data.setAttributeMap(attributes);
             
             if (Log.isDebugEnabled()) Log.debug("New Session from existing session data " + _data.toStringExtended());
         }
@@ -509,11 +526,12 @@ public class GigaSessionManager extends AbstractSessionManager {
          * Called by SessionHandler on inbound request and the session already exists in this node's memory.
          */
         @Override
-        protected void access(long time) {
-            super.access(time);
+        protected boolean access(long time) {
+            boolean access = super.access(time);
             _data.setLastAccessed(_data.getAccessed());
             _data.setAccessed(time);
-            _data.setExpiryTime(_maxIdleMs < 0 ? Long.MAX_VALUE : (time + _maxIdleMs));
+            _data.setExpiryTime(getMaxInactiveInterval() < 0 ? Long.MAX_VALUE : (time + getMaxInactiveInterval()));
+            return access;
         }
 
         /**
@@ -522,7 +540,7 @@ public class GigaSessionManager extends AbstractSessionManager {
         @Override
         public void setMaxInactiveInterval(int seconds) {
             super.setMaxInactiveInterval(seconds);
-            _data.setExpiryTime(_maxIdleMs < 0 ? Long.MAX_VALUE : (System.currentTimeMillis() + _maxIdleMs));
+            _data.setExpiryTime(getMaxInactiveInterval() < 0 ? Long.MAX_VALUE : (System.currentTimeMillis() + getMaxInactiveInterval()));
         }
 
         /**
@@ -564,12 +582,12 @@ public class GigaSessionManager extends AbstractSessionManager {
         }
 
         @Override
-        protected void willPassivate() {
+        public void willPassivate() {
             super.willPassivate();
         }
 
         @Override
-        protected void didActivate() {
+        public void didActivate() {
             super.didActivate();
         }
 
