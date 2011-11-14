@@ -27,6 +27,12 @@
             <version>2.8.1</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-orm</artifactId>  
+            <version>${springVersion}</version>
+            <scope>provided</scope>  
+        </dependency>
     </dependencies>
     <build>
         <finalName>${puArtifactId}-processor</finalName>

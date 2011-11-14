@@ -24,7 +24,8 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-orm</artifactId>  
-            <version>${springVersion}</version> 
+            <version>${springVersion}</version>
+            <scope>provided</scope>  
         </dependency>
     </dependencies>
     <build>
