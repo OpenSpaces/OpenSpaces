@@ -16,14 +16,21 @@
 
 package org.openspaces.itest.transaction.manager.distributed;
 
+import junit.framework.Assert;
 import org.openspaces.core.GigaSpace;
+import org.openspaces.core.executor.AutowireTask;
+import org.openspaces.core.executor.Task;
+import org.openspaces.core.executor.TaskGigaSpace;
 import org.openspaces.itest.transaction.manager.local.TestData1;
+import org.openspaces.itest.utils.TestUtils;
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
+
+import java.util.concurrent.Future;
 
 /**
  * @author kimchy
@@ -215,5 +222,92 @@ public class SimpleDistributedTransactionTests extends AbstractDependencyInjecti
         });
         assertNotNull(gigaSpace.read(new Object()));
         assertNull(gigaSpace.read(new TestData1()));
+    }
+
+    public void testPropagationNotSupportedWithRollback() {
+        TransactionTemplate txTemplate = new TransactionTemplate(mahaloTxManager);
+        assertNull(gigaSpace.read(new TestData2()));
+        assertNull(gigaSpace.read(new TestData1()));
+        txTemplate.execute(new TransactionCallbackWithoutResult() {
+            protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
+                assertNull(gigaSpace.read(new TestData2()));
+                assertNull(gigaSpace.read(new TestData1()));
+
+                gigaSpace.write(new TestData2());
+
+                assertNotNull(gigaSpace.read(new TestData2()));
+                assertNull(gigaSpace.read(new TestData1()));
+
+                TransactionTemplate innerTxTemplate = new TransactionTemplate(mahaloTxManager);
+                innerTxTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_NOT_SUPPORTED);
+
+                innerTxTemplate.execute(new TransactionCallbackWithoutResult() {
+                    protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
+                        gigaSpace.write(new TestData1());
+                    }
+                });
+
+                assertNotNull(gigaSpace.read(new TestData1()));
+                transactionStatus.setRollbackOnly();
+            }
+        });
+        assertNull(gigaSpace.read(new TestData2()));
+        assertNotNull(gigaSpace.read(new TestData1()));
+    }
+
+    public void testPropagationNotSupportedWithRollbackTask() {
+        TransactionTemplate txTemplate = new TransactionTemplate(mahaloTxManager);
+        txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+        assertNull(gigaSpace.read(new TestData2()));
+        assertNull(gigaSpace.read(new TestData1()));
+        txTemplate.execute(new TransactionCallbackWithoutResult() {
+            protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
+                assertNull(gigaSpace.read(new TestData2()));
+                assertNull(gigaSpace.read(new TestData1()));
+
+                gigaSpace.write(new TestData2());
+
+                assertNotNull(gigaSpace.read(new TestData2()));
+                assertNull(gigaSpace.read(new TestData1()));
+                Future<Integer> future = gigaSpace.execute(new SimpleTask1());
+                try {
+                    Assert.assertEquals((Integer) 1, future.get());
+                } catch (Exception e) {
+                   e.printStackTrace();
+                }
+
+                TestUtils.repetitive(new Runnable() {
+                    @Override
+                    public void run() {
+                        assertNotNull(gigaSpace.read(new TestData1()));
+                    }
+                }, 1000);
+                transactionStatus.setRollbackOnly();
+            }
+        });
+        assertNull(gigaSpace.read(new TestData2()));
+        assertNotNull(gigaSpace.read(new TestData1()));
+    }
+
+
+    @AutowireTask
+    private class SimpleTask1 implements Task<Integer> {
+        private static final long serialVersionUID = -4297787552872006580L;
+
+        @TaskGigaSpace
+        transient GigaSpace gigaSpace;
+
+        public Integer execute() throws Exception {
+            TransactionTemplate innerTxTemplate = new TransactionTemplate(mahaloTxManager);
+            innerTxTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_NOT_SUPPORTED);
+            innerTxTemplate.execute(new TransactionCallbackWithoutResult() {
+                protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
+                    gigaSpace.write(new TestData1());
+                    assertNotNull(gigaSpace.read(new TestData1()));
+                }
+            });
+
+            return 1;
+        }
     }
 }
