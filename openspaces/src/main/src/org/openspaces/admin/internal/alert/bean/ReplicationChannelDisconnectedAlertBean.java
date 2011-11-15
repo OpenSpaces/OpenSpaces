@@ -95,6 +95,10 @@ public class ReplicationChannelDisconnectedAlertBean implements AlertBean, Repli
         
         switch (replicationStatus) {
             case DISCONNECTED: {
+                if (event.getReplicationTarget().getMemberName().contains("_LocalView_") ||
+                        event.getReplicationTarget().getMemberName().contains("_LocalCache_") ) {
+                    return; //do not fire alert on Local view/cache disconnection - currently we are not able to resolve the alert
+                }
                 final String groupUid = generateGroupUid(source.getUid()+"-"+event.getReplicationTarget().getMemberName());
                 AlertFactory factory = new AlertFactory();
                 factory.name(ALERT_NAME);
