@@ -1,5 +1,7 @@
 package org.openspaces.pu.service;
 
+
+
 /**
  * This class should be used by customers in order to implement their ServiceDetails
  *
@@ -19,10 +21,26 @@ public class CustomServiceDetails extends PlainServiceDetails {
      * @param serviceSubType
      * @param description
      * @param longDescription
+     * @deprecated since 8.0.5. Use {@link #CustomServiceDetails(String, String, String, String)} 
+     * instead - constructor that does not receive service type as parameter since custom 
+     * type is always {@link SERVICE_TYPE}
      */
     public CustomServiceDetails(String id, String serviceType, String serviceSubType,
                                String description, String longDescription) {
         
         super(id, serviceType, serviceSubType, description, longDescription);
+    }     
+    
+    /**
+     * Constructor 
+     * @param id should identify that service, should be same as {@link #CustomServiceMonitors}'s id
+     * @param serviceSubType 
+     * @param description should be same as {@link #CustomServiceMonitors}'s description 
+     * @param longDescription
+     */
+    public CustomServiceDetails( String id, String serviceSubType, String description, 
+                                String longDescription ) {
+        
+        super( id, SERVICE_TYPE, serviceSubType, description, longDescription );
     }    
 }
