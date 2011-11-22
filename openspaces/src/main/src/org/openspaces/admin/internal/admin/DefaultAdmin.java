@@ -24,6 +24,7 @@ import net.jini.core.discovery.LookupLocator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jini.rio.core.OperationalString;
 import org.openspaces.admin.AdminEventListener;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.GridComponent;
@@ -112,6 +113,7 @@ import org.openspaces.admin.os.OperatingSystem;
 import org.openspaces.admin.os.OperatingSystems;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
+import org.openspaces.admin.pu.ProcessingUnitType;
 import org.openspaces.admin.pu.ProcessingUnits;
 import org.openspaces.admin.space.Space;
 import org.openspaces.admin.space.SpaceInstance;
@@ -124,6 +126,7 @@ import org.openspaces.admin.zone.Zone;
 import org.openspaces.admin.zone.ZoneAware;
 import org.openspaces.admin.zone.Zones;
 import org.openspaces.core.space.SpaceServiceDetails;
+import org.openspaces.pu.service.ServiceMonitors;
 
 import com.gigaspaces.grid.gsa.AgentProcessesDetails;
 import com.gigaspaces.grid.gsa.GSA;
@@ -218,7 +221,7 @@ public class DefaultAdmin implements InternalAdmin {
 
     private boolean useDaemonThreads;
     
-    private AtomicInteger eventListenersCount = new AtomicInteger();
+    private final AtomicInteger eventListenersCount = new AtomicInteger();
 
     public DefaultAdmin() {
         this.discoveryService = new DiscoveryService(this);
@@ -1360,7 +1363,7 @@ public class DefaultAdmin implements InternalAdmin {
                     }
                 }
 
-                processingUnit.setStatus(details.getStatus());
+                processingUnit.setStatus( getPuStatusForUSM(processingUnit, details.getStatus()));
             }
 
             // Now, process any orphaned processing unit instances
@@ -1378,6 +1381,34 @@ public class DefaultAdmin implements InternalAdmin {
 
                 flushEvents();
             }
+        }
+        
+        /*
+         * Extract USM service state if processing unit is a USM. Returns SCHEDULED if underlying USM process is not in a running state.
+         * Otherwise, returns the original status as returned by the GSM.
+         */
+        private int getPuStatusForUSM(InternalProcessingUnit processingUnit, int status) {
+
+            final String CloudifyConstants_USM_MONITORS_SERVICE_ID = "USM"; //CloudifyConstants.USM_MONITORS_SERVICE_ID
+            final String CloudifyConstants_USM_MONITORS_STATE_ID = "USM_State"; //CloudifyConstants.USM_MONITORS_STATE_ID
+            final Integer USMState_RUNNING = 2; //USMState.RUNNING ordinal
+            
+            //All USM services have a USM State defined by the USMState enum: (com.gigaspaces.cloudify.dsl.internal.CloudifyConstants.USMState)
+            //show "SCHEDULED" state if USM is not in a running state (USMState.RUNNING)
+            if (OperationalString.INTACT == status && ProcessingUnitType.UNIVERSAL.equals(processingUnit.getType())) {
+                for (ProcessingUnitInstance instance : processingUnit.getProcessingUnitInstances()) {
+                    Map<String, ServiceMonitors> monitors = instance.getStatistics().getMonitors();
+                    ServiceMonitors serviceMonitors = monitors.get(CloudifyConstants_USM_MONITORS_SERVICE_ID); 
+                    if (serviceMonitors != null) {
+                        Integer state = (Integer)serviceMonitors.getMonitors().get(CloudifyConstants_USM_MONITORS_STATE_ID); 
+                        if (USMState_RUNNING.equals(state)) {  
+                            status = OperationalString.SCHEDULED;
+                        }
+                    }
+
+                }
+            }
+            return status;
         }
 
         private class Holder {
