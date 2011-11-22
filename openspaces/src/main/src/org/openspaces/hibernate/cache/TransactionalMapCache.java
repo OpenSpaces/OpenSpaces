@@ -86,16 +86,15 @@ public class TransactionalMapCache implements Cache {
      * Get an item from the cache, nontransactionally
      */
     public Object get(Object key) throws CacheException {
-        Transaction.Created tx = masterSpace.getContextTransaction();
+        Transaction.Created tx = masterSpace.replaceContextTransaction(null);
         try {
-            masterSpace.setContextTansaction(null);
             CacheKey cacheKey = new CacheKey(regionName, key);
             if (logger.isTraceEnabled()) {
                 logger.trace("Get [" + cacheKey + "] under no transaction");
             }
             return map.get(cacheKey);
         } finally {
-            masterSpace.setContextTansaction(tx);
+            masterSpace.replaceContextTransaction(tx);
         }
     }
 
@@ -104,16 +103,15 @@ public class TransactionalMapCache implements Cache {
      * failfast semantics
      */
     public void put(Object key, Object value) throws CacheException {
-        Transaction.Created tx = masterSpace.getContextTransaction();
+        Transaction.Created tx = masterSpace.replaceContextTransaction(null);
         try {
-            masterSpace.setContextTansaction(null);
             CacheKey cacheKey = new CacheKey(regionName, key);
             if (logger.isTraceEnabled()) {
                 logger.trace("Put [" + cacheKey + "] under no transaction");
             }
             map.put(cacheKey, value, timeToLive, waitForResponse);
         } finally {
-            masterSpace.setContextTansaction(tx);
+            masterSpace.replaceContextTransaction(tx);
         }
     }
 
