@@ -38,5 +38,6 @@ public interface InternalProcessingUnitInstance extends ProcessingUnitInstance, 
 
     Future<Object> invoke(String serviceBeanName, Map<String, Object> namedArgs);
 
+    boolean isUndeploying();
 
 }

@@ -7,8 +7,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -22,6 +26,10 @@ import org.jini.rio.monitor.DeployAdmin;
 import org.jini.rio.monitor.ProvisionMonitorAdmin;
 import org.jini.rio.resources.servicecore.ServiceAdmin;
 import org.openspaces.admin.AdminException;
+import org.openspaces.admin.GridComponent;
+import org.openspaces.admin.application.Application;
+import org.openspaces.admin.application.ApplicationAlreadyDeployedException;
+import org.openspaces.admin.application.ApplicationDeployment;
 import org.openspaces.admin.dump.DumpResult;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.admin.InternalAdmin;
@@ -40,6 +48,8 @@ import org.openspaces.admin.pu.elastic.ElasticStatefulProcessingUnitDeployment;
 import org.openspaces.admin.pu.elastic.ElasticStatelessProcessingUnitDeployment;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
 import org.openspaces.admin.pu.events.ProcessingUnitAddedEventListener;
+import org.openspaces.admin.pu.events.ProcessingUnitRemovedEventListener;
+import org.openspaces.admin.pu.topology.ProcessingUnitDeploymentTopology;
 import org.openspaces.admin.space.ElasticSpaceDeployment;
 import org.openspaces.admin.space.SpaceDeployment;
 import org.openspaces.pu.container.servicegrid.deploy.Deploy;
@@ -96,7 +106,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
     }
 
     public ProcessingUnit deploy(SpaceDeployment deployment, long timeout, TimeUnit timeUnit) {
-        return deploy(deployment.toProcessingUnitDeployment(), timeout, timeUnit);
+        return deploy(deployment.toProcessingUnitDeployment(admin), timeout, timeUnit);
     }
 
     public ProcessingUnit deploy(ProcessingUnitDeployment deployment) {
@@ -112,6 +122,11 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
     }
 
     public ProcessingUnit deploy(ProcessingUnitDeployment deployment, long timeout, TimeUnit timeUnit) {
+        String applicationName = null;
+        return deploy(deployment, applicationName, timeout, timeUnit);
+    }
+    
+    private ProcessingUnit deploy(ProcessingUnitDeployment deployment, String applicationName, long timeout, TimeUnit timeUnit) {
         
         long end = System.currentTimeMillis() + timeUnit.toMillis(timeout);
         
@@ -128,7 +143,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             deploy.setSecured(deployment.isSecured());
         }
         deploy.setUserDetails(deployment.getUserDetails());
-
+        deploy.setApplicationName(applicationName);
         final OperationalString operationalString;
         try {
             operationalString = deploy.buildOperationalString(deployment.getDeploymentOptions());
@@ -411,12 +426,12 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
     }
 
     public ProcessingUnit deploy(ElasticSpaceDeployment deployment) throws ProcessingUnitAlreadyDeployedException {
-        return deploy(deployment.toElasticStatefulProcessingUnitDeployment());
+        return deploy(deployment.toProcessingUnitDeployment(admin));
     }
 
     public ProcessingUnit deploy(ElasticSpaceDeployment deployment, long timeout, TimeUnit timeUnit)
             throws ProcessingUnitAlreadyDeployedException {
-        return deploy(deployment.toElasticStatefulProcessingUnitDeployment(),timeout,timeUnit);
+        return deploy(deployment.toProcessingUnitDeployment(admin),timeout,timeUnit);
     }
 
     public ProcessingUnit deploy(ElasticStatefulProcessingUnitDeployment deployment)
@@ -490,4 +505,209 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         }
         return getElasticServiceManager().isManagingProcessingUnitAndScaleNotInProgress(pu);
     }
+
+    @Override
+    public Application deploy(ApplicationDeployment deployment) 
+            throws ApplicationAlreadyDeployedException, ProcessingUnitAlreadyDeployedException {
+        return deploy(deployment, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
+    }
+
+    @Override
+    public Application deploy(ApplicationDeployment applicationDeployment, long timeout, TimeUnit timeUnit)
+            throws ApplicationAlreadyDeployedException, ProcessingUnitAlreadyDeployedException {
+        
+        long end = System.currentTimeMillis()  + timeUnit.toMillis(timeout);
+        String applicationName = applicationDeployment.getDeploymentOptions().getApplicationName();
+        if (applicationName == null) {
+            throw new IllegalArgumentException("Application Name cannot be null");
+        }
+        if (applicationName.length() == 0) {
+            throw new IllegalArgumentException("Application Name cannot be an empty string");
+        }
+        if (admin.getApplications().getApplication(applicationName) != null) {
+            throw new ApplicationAlreadyDeployedException(applicationName);
+        }
+        
+        ProcessingUnitDeployment[] processingUnitDeployments = applicationDeployment.getDeploymentOptions().getProcessingUnitDeployments(admin);
+        if (processingUnitDeployments.length == 0) {
+            throw new IllegalArgumentException("Application deployment must contain at least one processing unit deployment");
+        }
+        
+        // iterate in a deterministic order, so if deployed in parallel by another admin client, only one will succeed
+        boolean timedOut = false;
+        Set<String> deployedPuNames = new HashSet<String>();
+        for (ProcessingUnitDeployment deployment : processingUnitDeployments) {
+            try {
+                long remaining = end - System.currentTimeMillis();
+                if (remaining <= 0) {
+                    timedOut = true;
+                    break;
+                }
+                ProcessingUnit pu = deploy(deployment,applicationName, remaining,TimeUnit.MILLISECONDS);
+                if (pu == null) {
+                    timedOut = true;
+                    break;
+                }
+                deployedPuNames.add(pu.getName());
+            }
+            catch (ProcessingUnitAlreadyDeployedException e) {
+                if (deployedPuNames.contains(e.getProcessingUnitName())) {
+                    throw new IllegalArgumentException("Application deployment contains two Processing Units with the same name " + e.getProcessingUnitName(),e);
+                }
+                ProcessingUnit otherPu = admin.getProcessingUnits().getProcessingUnit(e.getProcessingUnitName());
+                if (otherPu != null && 
+                    otherPu.getApplication() != null &&
+                    otherPu.getApplication().getName().equals(applicationName)) {
+                    throw new ApplicationAlreadyDeployedException(applicationName,e);
+                }
+                // A PU with the same name from another application (or PU not discovered yet).
+                throw e;
+            }
+        }
+        if (timedOut) {
+            return null;
+        }
+        
+        return admin.getApplications().getApplication(applicationName);
+    }
+
+    @Override
+    public boolean undeployProcessingUnitsAndWait(ProcessingUnit[] processingUnits, long timeout, TimeUnit timeUnit) {
+        long end = System.currentTimeMillis() + timeUnit.toMillis(timeout);
+         
+        List<GridServiceContainer> containersPendingRemoval = new ArrayList<GridServiceContainer>();
+        List<ProcessingUnitInstance> instancesPendingRemoval = new ArrayList<ProcessingUnitInstance>();
+        
+        for (ProcessingUnit pu : processingUnits) {
+            for (GridServiceContainer container : admin.getGridServiceContainers()) {
+                ProcessingUnitInstance[] processingUnitInstances = container.getProcessingUnitInstances(pu.getName());
+                if (processingUnitInstances.length > 0) {
+                    instancesPendingRemoval.addAll(Arrays.asList(processingUnitInstances));
+                    if (isManagedByElasticServiceManager(pu)) {
+                        // add all containers that are managed by the elastic pu
+                        containersPendingRemoval .add(container);
+                    }
+                }
+            }    
+        }
+        
+        final Map<String,CountDownLatch> latches = new HashMap<String,CountDownLatch>();
+        for (ProcessingUnit pu : processingUnits) {
+            latches.put(pu.getName(), new CountDownLatch(1));
+        }
+        
+        ProcessingUnitRemovedEventListener listener = new ProcessingUnitRemovedEventListener() {
+            public void processingUnitRemoved(ProcessingUnit removedPu) {
+                CountDownLatch latch = latches.get(removedPu.getName());
+                if (latch != null) {
+                    latch.countDown();
+                }
+            }
+        };
+        admin.getProcessingUnits().getProcessingUnitRemoved().add(listener);
+        try {
+            for (final ProcessingUnit pu : processingUnits) {
+                long gsmTimeout = end - System.currentTimeMillis();
+                if (gsmTimeout < 0) {
+                    //timeout expired
+                    return false;
+                }
+                final InternalGridServiceManager managingGsm = (InternalGridServiceManager)pu.waitForManaged(gsmTimeout,TimeUnit.MILLISECONDS);
+                if (managingGsm == null) {
+                    //timeout expired
+                    return false;
+                }
+                
+                admin.scheduleAdminOperation(new Runnable() {
+                    @Override
+                    public void run() {
+                        managingGsm.undeployProcessingUnit(pu.getName());
+                    }
+                });
+            }
+            for (ProcessingUnit pu : processingUnits) {
+                try {
+                    long puRemovedTimeout = end - System.currentTimeMillis();
+                    if (puRemovedTimeout < 0) {
+                        //timeout expired
+                        return false;
+                    }
+                    if (!latches.get(pu.getName()).await(puRemovedTimeout, TimeUnit.MILLISECONDS)) {
+                        //timeout expired
+                        return false;
+                    }
+                } catch (InterruptedException e) {
+                    throw new AdminException("Failed to undeploy", e);
+                }
+            }
+        }finally {
+            admin.getProcessingUnits().getProcessingUnitRemoved().remove(listener);
+        }
+        
+        // use polling to determine elastic pu completed undeploy cleanup of containers (and machines)
+        // and that the admin has been updated with the relevant lookup service remove events.
+        while (!isUndeployComplete(processingUnits) || 
+               !isAllRemoved(instancesPendingRemoval) ||
+               !isAllRemoved(containersPendingRemoval) ||
+               isUndeploying(instancesPendingRemoval)) {
+            
+            long sleepDuration = end - System.currentTimeMillis();
+            if (sleepDuration < 0) {
+                //timeout expired
+                return false;
+            }
+            
+            try {
+                Thread.sleep(Math.min(1000, sleepDuration));
+            } catch (InterruptedException e) {
+                throw new AdminException("Failed to undeploy", e);
+            }
+        }
+        return true;
+    }
+
+    private boolean isUndeploying(List<ProcessingUnitInstance> instancesPendingRemoval) {
+        boolean undeploying = false;
+        for (ProcessingUnitInstance instance : instancesPendingRemoval) {
+            try {
+                if (((InternalProcessingUnitInstance)instance).isUndeploying()) {
+                    undeploying = true;
+                    break;
+                }
+            }
+            catch (AdminException e) {
+                //assuming pu instance is not responding since it completed undeploy
+            }
+        }
+        return undeploying;
+    }
+
+    private boolean isUndeployComplete(ProcessingUnit[] processingUnits) {
+        boolean complete = true;
+        for (ProcessingUnit pu : processingUnits) {
+            // check that all pu instances have been undiscovered and not managed by ESM
+            if (pu.getInstances().length > 0 || isManagedByElasticServiceManager(pu)) {
+                complete = false;
+                break;
+            }
+        }
+        return complete;
+    }
+    
+    private boolean isAllRemoved(Iterable<? extends GridComponent> componentsPendingShutdown) {
+        boolean allContainersShutdown = true;    
+        for (final GridComponent component : componentsPendingShutdown) {
+            if (component.isDiscovered()) {
+                allContainersShutdown = false;
+            }
+        }
+        return allContainersShutdown;
+    }
+
+    @Override
+    public ProcessingUnit deploy(Application application, ProcessingUnitDeploymentTopology deploymentTopology, long timeout, TimeUnit timeUnit) {
+        ProcessingUnitDeployment deployment = deploymentTopology.toProcessingUnitDeployment(admin);
+        return this.deploy(deployment, application.getName(), timeout, timeUnit);
+    }
+   
 }

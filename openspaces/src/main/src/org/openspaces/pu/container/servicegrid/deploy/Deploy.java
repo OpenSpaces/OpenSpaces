@@ -52,6 +52,7 @@ import org.jini.rio.boot.BootUtil;
 import org.jini.rio.boot.PUZipUtils;
 import org.jini.rio.config.ExporterConfig;
 import org.jini.rio.core.OperationalString;
+import org.jini.rio.core.RequiredDependencies;
 import org.jini.rio.core.ServiceBeanInstance;
 import org.jini.rio.core.ServiceElement;
 import org.jini.rio.core.ServiceLevelAgreements;
@@ -68,6 +69,7 @@ import org.openspaces.core.properties.BeanLevelPropertyPlaceholderConfigurer;
 import org.openspaces.pu.container.support.BeanLevelPropertiesParser;
 import org.openspaces.pu.container.support.ClusterInfoParser;
 import org.openspaces.pu.container.support.CommandLineParser;
+import org.openspaces.pu.container.support.RequiredDependenciesCommandLineParser;
 import org.openspaces.pu.container.support.ResourceApplicationContext;
 import org.openspaces.pu.sla.InstanceSLA;
 import org.openspaces.pu.sla.Policy;
@@ -205,8 +207,10 @@ public class Deploy {
     public void setSecured(boolean secured) {
         this.secured = secured;
     }
-
+    
     private UserDetails userDetails;
+
+    private String applicationName;
 
     public void setUserDetails(UserDetails userDetails) {
         this.userDetails = userDetails;
@@ -220,6 +224,10 @@ public class Deploy {
         this.deployTimeout = deployTimeout;
     }
 
+    public void setApplicationName(String applicationName) {
+        this.applicationName = applicationName;
+    }
+    
     public void deployAndWait(String[] args) throws Exception {
         OperationalString opString = buildOperationalString(args);
         if (deployAdmin.hasDeployed(opString.getName())) {
@@ -287,7 +295,10 @@ public class Deploy {
         }
 
         CommandLineParser.Parameter[] params = CommandLineParser.parse(args, args.length - 1);
-
+        
+        RequiredDependencies instanceDeploymentDependencies = new RequiredDependencies();
+        RequiredDependencies instanceStartDependencies = new RequiredDependencies();
+        
         // check if we have a groups parameter and timeout parameter
         for (CommandLineParser.Parameter param : params) {
             if (param.getName().equalsIgnoreCase("groups")) {
@@ -308,6 +319,15 @@ public class Deploy {
             }
             if (param.getName().equalsIgnoreCase("deploy-timeout")) {
                 setDeployTimeout(Long.valueOf(param.getArguments()[0]));
+            }
+            if (RequiredDependenciesCommandLineParser.isInstanceDeploymentDependencies(param)) {
+                instanceDeploymentDependencies  = RequiredDependenciesCommandLineParser.convertCommandlineParameterToInstanceDeploymentDependencies(param);
+            }
+            if (RequiredDependenciesCommandLineParser.isInstanceStartDependencies(param)) {
+                instanceStartDependencies  = RequiredDependenciesCommandLineParser.convertCommandlineParameterToInstanceStartDependencies(param);
+            }
+            if (param.getName().equalsIgnoreCase("application-name")) {
+                setApplicationName(param.getArguments()[0]);
             }
         }
 
@@ -528,7 +548,7 @@ public class Deploy {
         // init the user detalis
         if (userDetails != null) {
             beanLevelProperties.getContextProperties().setProperty(SpaceURL.SECURED, "true");
-            beanLevelProperties.getContextProperties().put(Constants.Security.USER_DETAILS, new MarshalledObject(userDetails));
+            beanLevelProperties.getContextProperties().put(Constants.Security.USER_DETAILS, new MarshalledObject<UserDetails>(userDetails));
         } else if (secured != null && secured) {
             beanLevelProperties.getContextProperties().setProperty(SpaceURL.SECURED, "true");
         }
@@ -551,7 +571,7 @@ public class Deploy {
         beanLevelProperties.getContextProperties().put("pu.type", puType);
 
         //deploy to sg
-        return loadDeployment(puString, codeserver, sla, puPath, overridePuName, beanLevelProperties, elasticProperties);
+        return loadDeployment(puString, codeserver, sla, puPath, overridePuName, beanLevelProperties, elasticProperties, instanceDeploymentDependencies, instanceStartDependencies, applicationName);
     }
 
     private String guessProcessingUnitType(String puPath, File puFile, URL root, String puString, SLA sla, BeanLevelProperties beanLevelProperties) {
@@ -714,7 +734,14 @@ public class Deploy {
     }
 
     private OperationalString loadDeployment(String puString, String codeserver, SLA sla, String puPath,
-            String puName, BeanLevelProperties beanLevelProperties, Map<String, String> elasticProperties) throws Exception {
+            String puName, 
+            BeanLevelProperties beanLevelProperties, 
+            Map<String, String> elasticProperties, 
+            RequiredDependencies deploymentRequiredDependencies, 
+            RequiredDependencies startRequiredDependencies, 
+            String applicationName) 
+                    throws Exception {
+        
         InputStream opstringURL = Deploy.class.getResourceAsStream("/org/openspaces/pu/container/servicegrid/puservicebean.xml");
         OperationalString opString;
 
@@ -735,7 +762,7 @@ public class Deploy {
 
         if (beanLevelProperties != null) {
             element.getServiceBeanConfig().addInitParameter("pu.type", beanLevelProperties.getContextProperties().remove("pu.type"));
-            element.getServiceBeanConfig().addInitParameter("beanLevelProperties", new MarshalledObject(beanLevelProperties));
+            element.getServiceBeanConfig().addInitParameter("beanLevelProperties", new MarshalledObject<BeanLevelProperties>(beanLevelProperties));
             element.getServiceBeanConfig().addInitParameter("jee.container", beanLevelProperties.getContextProperties().getProperty("jee.container", "jetty"));
         }
 
@@ -789,14 +816,17 @@ public class Deploy {
         element.setMaxPerZone(sla.getMaxInstancesPerZone());
         
         element.setElasticProperties(elasticProperties);
-
+        
+        element.setInstanceDeploymentDependencies(deploymentRequiredDependencies);
+        element.setInstanceStartDependencies(startRequiredDependencies);
+        element.setApplicationName(applicationName);
         element.setTotalNumberOfServices(sla.getNumberOfInstances());
 
         // set for each service to have the operation string name
         element.getServiceBeanConfig().setName(element.getOperationalStringName().replace(' ', '-'));
 
         // pass the SLA as an init parameter so the GSC won't need to parse the XML again
-        element.getServiceBeanConfig().addInitParameter("sla", new MarshalledObject(sla));
+        element.getServiceBeanConfig().addInitParameter("sla", new MarshalledObject<SLA>(sla));
         element.getServiceBeanConfig().addInitParameter("numberOfInstances", numberOfInstances);
         element.getServiceBeanConfig().addInitParameter("numberOfBackups", numberOfBackups);
         // add pu names, path and code server so it can be used on the service bean side

@@ -1054,7 +1054,7 @@ public class DefaultAdmin implements InternalAdmin {
         
         //TODO: [itaif] Discover application through Lookup Service and add orphan PU detection (PU that was discovered before its Application)
         String applicationName = ((InternalProcessingUnit)processingUnit).getApplicationName();
-        if (applicationName == null) {
+        if (applicationName == null || applicationName.length() == 0) {
             return;
         }
         

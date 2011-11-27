@@ -1,5 +1,9 @@
 package org.openspaces.admin.space;
 
+import org.openspaces.admin.Admin;
+import org.openspaces.admin.internal.pu.dependency.ProcessingUnitDetailedDependencies;
+import org.openspaces.admin.pu.ProcessingUnitDeployment;
+import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
 import org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig;
 import org.openspaces.admin.pu.elastic.ElasticStatefulProcessingUnitDeployment;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
@@ -40,147 +44,172 @@ public class ElasticSpaceDeployment
         this.deployment.addContextProperty("dataGridName", spaceName);
     }
 
+    @Override
     public ElasticSpaceDeployment maxMemoryCapacity(int maxMemoryCapacity, MemoryUnit unit) {
         deployment.maxMemoryCapacity(maxMemoryCapacity,unit);
         return this;
     }
 
+    @Override
     public ElasticSpaceDeployment maxMemoryCapacity(String maxMemoryCapacity) {
         deployment.maxMemoryCapacity(maxMemoryCapacity);
         return this;
     }
     
+    @Override
     public ElasticSpaceDeployment memoryCapacityPerContainer(int memoryCapacityPerContainer, MemoryUnit unit) {
         deployment.memoryCapacityPerContainer(memoryCapacityPerContainer,unit);
         return this;
     }
 
+    @Override
     public ElasticSpaceDeployment memoryCapacityPerContainer(String memoryCapacityPerContainer) {
         deployment.memoryCapacityPerContainer(memoryCapacityPerContainer);
         return this;
     }
     
+    @Override
     public ElasticSpaceDeployment maxNumberOfCpuCores(int maxNumberOfCpuCores) {
         deployment.maxNumberOfCpuCores(maxNumberOfCpuCores);
         return this;
     }
        
+    @Override
     public ElasticSpaceDeployment scale(EagerScaleConfig strategy) {
         deployment.scale(strategy);
         return this;
     }
 
+    @Override
     public ElasticSpaceDeployment scale(ManualCapacityScaleConfig strategy) {
         deployment.scale(strategy);
         return this;
     }
     
+    @Override
     public ElasticSpaceDeployment name(String name) {
         deployment.name(name);
         return this;
     }
 
+    @Override
     public ElasticSpaceDeployment addContextProperty(String key, String value) {
         deployment.addContextProperty(key, value);
         return this;
     }
 
+    @Override
     public ElasticSpaceDeployment secured(boolean secured) {
         deployment.secured(secured);
         return this;
     }
 
+    @Override
     public ElasticSpaceDeployment userDetails(UserDetails userDetails) {
         deployment.userDetails(userDetails);
         return this;
     }
 
+    @Override
     public ElasticSpaceDeployment userDetails(String userName, String password) {
         deployment.userDetails(userName, password);
         return this;
     }
-
-    /*UNIMPLEMENTED
-    public ElasticSpaceDeployment isolation(DedicatedIsolation isolation) {
-        deployment.isolation(isolation);
-        return this;
-    }
-
-    public ElasticSpaceDeployment isolation(SharedTenantIsolation isolation) {
-        deployment.isolation(isolation);
-        return this;
-    }
     
-    public ElasticSpaceDeployment isolation(PublicIsolation isolation) {
-        deployment.isolation(isolation);
-        return this;
-    }
-    */
-    
+    @Override
     public ElasticSpaceDeployment useScriptToStartContainer() {
         deployment.useScriptToStartContainer();
         return this;
     }
 
+    @Override
     public ElasticSpaceDeployment overrideCommandLineArguments() {
         deployment.overrideCommandLineArguments();
         return this;
     }
 
+    @Override
     public ElasticSpaceDeployment commandLineArgument(String commandLineArgument) {
         return addCommandLineArgument(commandLineArgument);
     }
     
+    @Override
     public ElasticSpaceDeployment addCommandLineArgument(String commandLineArgument) {
         deployment.commandLineArgument(commandLineArgument);
         return this;
     }
 
+    @Override
     public ElasticSpaceDeployment environmentVariable(String name, String value) {
         return addEnvironmentVariable(name, value);
     }
     
+    @Override
     public ElasticSpaceDeployment addEnvironmentVariable(String name, String value) {
         deployment.environmentVariable(name, value);
         return this;
     }
 
+    @Override
     public ElasticSpaceDeployment highlyAvailable(boolean highlyAvailable) {
         deployment.highlyAvailable(highlyAvailable);
         return this;
     }
     
+    @Override
     public ElasticSpaceDeployment dedicatedMachineProvisioning(ElasticMachineProvisioningConfig config) {
         deployment.dedicatedMachineProvisioning(config);
         return this;
     }
     
+    @Override
     public ElasticSpaceDeployment sharedMachineProvisioning(String sharingId, ElasticMachineProvisioningConfig config) {
         deployment.sharedMachineProvisioning(sharingId, config);
         return this;
     }
 
+    @Override
     public ElasticSpaceDeployment numberOfBackupsPerPartition(int numberOfBackupsPerPartition) {
         deployment.numberOfBackupsPerPartition(numberOfBackupsPerPartition);
         return this;
     }
 
+    @Override
     public ElasticSpaceDeployment numberOfPartitions(int numberOfPartitions) {
         deployment.numberOfPartitions(numberOfPartitions);
         return this;
     }
-
+    
+    /**
+     * @deprecated since 8.0.6
+     * @see ElasticMachineProvisioningConfig#getMinimumNumberOfCpuCoresPerMachine()
+     */
+    @Deprecated
     public ElasticSpaceDeployment minNumberOfCpuCoresPerMachine(double minNumberOfCpuCoresPerMachine) {
         deployment.minNumberOfCpuCoresPerMachine(minNumberOfCpuCoresPerMachine);
         return this;
     }
-
+    
+    @Override
     public ElasticSpaceDeployment singleMachineDeployment() {
         deployment.singleMachineDeployment();
         return this;
     }
-   
-    public ElasticStatefulProcessingUnitDeployment toElasticStatefulProcessingUnitDeployment() {
-       return deployment;
+
+    @Override
+    public ElasticSpaceDeployment addDependency(String requiredProcessingUnitName) {
+       deployment.addDependency(requiredProcessingUnitName);
+       return this;
+    }
+
+    @Override
+    public ElasticSpaceDeployment addDependencies(ProcessingUnitDetailedDependencies<? extends ProcessingUnitDependency> detailedDependencies) {
+        deployment.addDependencies(detailedDependencies);
+        return this;
+    }
+    
+    @Override
+    public ProcessingUnitDeployment toProcessingUnitDeployment(Admin admin) {
+       return deployment.toProcessingUnitDeployment(admin);
     }
 }

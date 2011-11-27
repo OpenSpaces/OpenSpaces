@@ -5,10 +5,13 @@ import java.util.Map;
 
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminException;
+import org.openspaces.admin.internal.pu.dependency.ProcessingUnitDetailedDependencies;
 import org.openspaces.admin.internal.pu.elastic.AbstractElasticProcessingUnitDeployment;
 import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
 import org.openspaces.admin.internal.pu.elastic.ProcessingUnitSchemaConfig;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
+import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
+import org.openspaces.admin.pu.dependency.ProcessingUnitDeploymentDependenciesConfigurer;
 import org.openspaces.admin.pu.elastic.config.DiscoveredMachineProvisioningConfig;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
@@ -68,26 +71,31 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
         this(processingUnit.getAbsolutePath());
     }
 
+    @Override
     public ElasticStatefulProcessingUnitDeployment maxMemoryCapacity(int maxMemoryCapacity, MemoryUnit unit) {
         this.maxMemoryCapacityInMB = unit.toMegaBytes(maxMemoryCapacity);
         return this;
     }
 
+    @Override
     public ElasticStatefulProcessingUnitDeployment maxMemoryCapacity(String maxMemoryCapacity) {
         this.maxMemoryCapacityInMB = MemoryUnit.toMegaBytes(maxMemoryCapacity);
         return this;
     }
-
+    
+    @Override
     public ElasticStatefulProcessingUnitDeployment highlyAvailable(boolean highlyAvailable) {
         numberOfBackupsPerPartition(highlyAvailable ? 1 : 0);
         return this;
     }
     
+    @Override
     public ElasticStatefulProcessingUnitDeployment numberOfBackupsPerPartition(int numberOfBackupsPerPartition) {
         this.numberOfBackupInstancesPerPartition = numberOfBackupsPerPartition;
         return this;
     }
     
+    @Override
     public ElasticStatefulProcessingUnitDeployment numberOfPartitions(int numberOfPartitions) {
         this.numberOfPartitions = numberOfPartitions;
         return this;
@@ -98,6 +106,7 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
         return this;
     }
     
+    @Override
     public ElasticStatefulProcessingUnitDeployment maxNumberOfCpuCores(int maxNumberOfCpuCores) {
         this.maxNumberOfCpuCores = maxNumberOfCpuCores;
         return this;
@@ -124,16 +133,18 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
         return this;
     }
 
-
+    @Override
     public ElasticStatefulProcessingUnitDeployment singleMachineDeployment() {
         this.maxProcessingUnitInstancesFromSamePartitionPerMachine(0);
         return this;
     }
     
+    @Override
     public ElasticStatefulProcessingUnitDeployment scale(EagerScaleConfig strategy) {
         return (ElasticStatefulProcessingUnitDeployment) super.scale(strategy);
     }
 
+    @Override
     public ElasticStatefulProcessingUnitDeployment scale(ManualCapacityScaleConfig strategy) {
         return (ElasticStatefulProcessingUnitDeployment) super.scale(strategy);
     }
@@ -178,6 +189,7 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
         return addCommandLineArgument(vmInputArgument);
     }
     
+    @Override
     public ElasticStatefulProcessingUnitDeployment addCommandLineArgument(String vmInputArgument) {
         return (ElasticStatefulProcessingUnitDeployment) super.commandLineArgument(vmInputArgument);
     }
@@ -187,6 +199,7 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
         return addEnvironmentVariable(name, value);
     }
     
+    @Override
     public ElasticStatefulProcessingUnitDeployment addEnvironmentVariable(String name, String value) {
         return (ElasticStatefulProcessingUnitDeployment) super.environmentVariable(name, value);
     }
@@ -209,10 +222,12 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
         return (ElasticStatefulProcessingUnitDeployment) super.machineProvisioning(config, sharingId);
     }
     
+    @Override
     public ElasticStatefulProcessingUnitDeployment dedicatedMachineProvisioning(ElasticMachineProvisioningConfig config) {
         return machineProvisioning(config, null);
     }
     
+    @Override
     public ElasticStatefulProcessingUnitDeployment sharedMachineProvisioning(String sharingId, ElasticMachineProvisioningConfig config) {
         if (sharingId == null) {
             throw new IllegalArgumentException("sharingId can't be null");
@@ -220,6 +235,17 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
         return machineProvisioning(config, sharingId);
     }
     
+    @Override
+    public ElasticStatefulProcessingUnitDeployment addDependency(String requiredProcessingUnitName) {
+        addDependencies(new ProcessingUnitDeploymentDependenciesConfigurer().dependsOnDeployed(requiredProcessingUnitName).create());
+        return this;
+    }
+ 
+    @Override
+    public ElasticStatefulProcessingUnitDeployment addDependencies(ProcessingUnitDetailedDependencies<? extends ProcessingUnitDependency> detailedDependencies) {
+        return (ElasticStatefulProcessingUnitDeployment) super.addDependencies(detailedDependencies); 
+    }
+    @Override
     public ProcessingUnitDeployment toProcessingUnitDeployment(Admin admin) {
       
         ProcessingUnitDeployment deployment = super.toProcessingUnitDeployment();
@@ -287,5 +313,5 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
         }
         return maximumNumberOfPrimaryInstances; 
     }
-    
+   
 }

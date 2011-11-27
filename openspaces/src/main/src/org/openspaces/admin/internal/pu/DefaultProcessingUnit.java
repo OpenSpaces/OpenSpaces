@@ -11,15 +11,19 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.jini.rio.core.RequiredDependencies;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.application.Application;
-import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.application.InternalApplication;
 import org.openspaces.admin.internal.gsm.InternalGridServiceManager;
+import org.openspaces.admin.internal.gsm.InternalGridServiceManagers;
+import org.openspaces.admin.internal.pu.dependency.DefaultProcessingUnitDependencies;
+import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependencies;
+import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependency;
 import org.openspaces.admin.internal.pu.events.DefaultBackupGridServiceManagerChangedEventManager;
 import org.openspaces.admin.internal.pu.events.DefaultManagingGridServiceManagerChangedEventManager;
 import org.openspaces.admin.internal.pu.events.DefaultProcessingUnitInstanceAddedEventManager;
@@ -40,6 +44,8 @@ import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.ProcessingUnitPartition;
 import org.openspaces.admin.pu.ProcessingUnitType;
 import org.openspaces.admin.pu.ProcessingUnits;
+import org.openspaces.admin.pu.dependency.ProcessingUnitDependencies;
+import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
 import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEvent;
 import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEventManager;
@@ -59,11 +65,13 @@ import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEvent;
 import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEventManager;
 import org.openspaces.admin.space.Space;
 import org.openspaces.core.properties.BeanLevelProperties;
+import org.openspaces.pu.container.support.RequiredDependenciesCommandLineParser;
 import org.openspaces.pu.sla.SLA;
 import org.openspaces.pu.sla.requirement.Requirement;
 import org.openspaces.pu.sla.requirement.ZoneRequirement;
 
 import com.gigaspaces.grid.gsm.PUDetails;
+import com.gigaspaces.internal.utils.StringUtils;
 
 /**
  * @author kimchy
@@ -110,7 +118,6 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
 
     private final InternalProcessingUnitSpaceCorrelatedEventManager spaceCorrelatedEventManager;
 
-
     private final InternalProcessingUnitInstanceStatisticsChangedEventManager processingUnitInstanceStatisticsChangedEventManager;
 
     private volatile long statisticsInterval = StatisticsMonitor.DEFAULT_MONITOR_INTERVAL;
@@ -121,11 +128,21 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
 
     private final ProcessingUnitType processingUnitType;
 
+    /**
+     * @Deprecated since 8.0.6 use app.deploy(puDeployment) or gsm.deploy(new ApplicationDeployment(appName,puDeployment) instead.
+     */
     private static final String APPLICATION_NAME_CONTEXT_PROPERTY = "com.gs.application";
-
+    
+    /**
+     * @Deprecated since 8.0.6 use gsm.deploy(puDeployment.addDependency("otherPU")) instead.
+     */
     private static final String APPLICATION_DEPENDENCIES_CONTEXT_PROPERTY = "com.gs.application.services";
 
+    private final String applicationName;
+
     private volatile InternalApplication application;
+    
+    private final InternalProcessingUnitDependencies<ProcessingUnitDependency,InternalProcessingUnitDependency> dependencies;
     
     public DefaultProcessingUnit(InternalAdmin admin, InternalProcessingUnits processingUnits, PUDetails details) {
         this.admin = admin;
@@ -133,7 +150,6 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         this.name = details.getName();
         this.numberOfInstances = details.getNumberOfInstances();
         this.numberOfBackups = details.getNumberOfBackups();
-        
         ProcessingUnitType type = ProcessingUnitType.UNKNOWN;
         try {
             type = ProcessingUnitType.valueOf(details.getType());
@@ -143,12 +159,34 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         this.processingUnitType = type;
         
         this.elasticProperties = details.getElasticProperties();
+        
+        this.dependencies = new DefaultProcessingUnitDependencies();
+        
+        RequiredDependencies instanceDeploymentDependencies = details.getInstanceDeploymentDependencies();
+        if (instanceDeploymentDependencies != null) {
+            dependencies.addDetailedDependenciesByCommandLineOption(RequiredDependenciesCommandLineParser.INSTANCE_DEPLOYMENT_REQUIRED_DEPENDENCIES_PARAMETER_NAME,instanceDeploymentDependencies);
+        }
+        
+        RequiredDependencies instanceStartDependencies = details.getInstanceStartDependencies();
+        if (instanceStartDependencies != null) {
+            dependencies.addDetailedDependenciesByCommandLineOption(RequiredDependenciesCommandLineParser.INSTANCE_START_REQUIRED_DEPENDENCIES_PARAMETER_NAME,instanceStartDependencies);
+        }
+                
         try {
             this.beanLevelProperties = (BeanLevelProperties) details.getBeanLevelProperties().get();
         } catch (Exception e) {
             throw new AdminException("Failed to get bean level properties", e);
         }
-
+        
+        
+        if (details.getApplicationName() != null) {
+            applicationName = details.getApplicationName();
+        }
+        else {
+            //Deprecated
+            applicationName = getBeanLevelProperties().getContextProperties().getProperty(APPLICATION_NAME_CONTEXT_PROPERTY);
+        }
+    
         try {
             this.sla = (SLA) details.getSla().get();
         } catch (Exception e) {
@@ -173,34 +211,42 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         this.processingUnitInstanceStatisticsChangedEventManager = new DefaultProcessingUnitInstanceStatisticsChangedEventManager(admin);
     }
 
+    @Override
     public ProcessingUnits getProcessingUnits() {
         return this.processingUnits;
     }
 
+    @Override
     public Admin getAdmin() {
         return this.admin;
     }
 
+    @Override
     public String getName() {
         return this.name;
     }
 
+    @Override
     public BeanLevelProperties getBeanLevelProperties() {
         return beanLevelProperties;
     }
     
+    @Override
     public ProcessingUnitType getType() {
         return processingUnitType;
     }
 
+    @Override
     public ManagingGridServiceManagerChangedEventManager getManagingGridServiceManagerChanged() {
         return this.managingGridServiceManagerChangedEventManager;
     }
 
+    @Override
     public BackupGridServiceManagerChangedEventManager getBackupGridServiceManagerChanged() {
         return this.backupGridServiceManagerChangedEventManager;
     }
 
+    @Override
     public Space getSpace() {
         Iterator<Space> it = spaces.values().iterator();
         if (it.hasNext()) {
@@ -209,10 +255,12 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         return null;
     }
 
+    @Override
     public Space[] getSpaces() {
         return this.spaces.values().toArray(new Space[0]);
     }
 
+    @Override
     public void addEmbeddedSpace(Space space) {
         assertStateChangesPermitted();
         Space existingSpace = spaces.putIfAbsent(space.getName(), space);
@@ -221,62 +269,76 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         }
     }
     
+    @Override
     public Map<String, String> getElasticProperties() {
         return this.elasticProperties;
     }
 
+    @Override
     public ProcessingUnitStatusChangedEventManager getProcessingUnitStatusChanged() {
         return this.processingUnitStatusChangedEventManager;
     }
 
+    @Override
     public ProcessingUnitInstanceAddedEventManager getProcessingUnitInstanceAdded() {
         return this.processingUnitInstanceAddedEventManager;
     }
 
+    @Override
     public ProcessingUnitInstanceRemovedEventManager getProcessingUnitInstanceRemoved() {
         return this.processingUnitInstanceRemovedEventManager;
     }
 
+    @Override
     public ProcessingUnitSpaceCorrelatedEventManager getSpaceCorrelated() {
         return this.spaceCorrelatedEventManager;
     }
 
+    @Override
     public void addLifecycleListener(ProcessingUnitInstanceLifecycleEventListener eventListener) {
         getProcessingUnitInstanceAdded().add(eventListener);
         getProcessingUnitInstanceRemoved().add(eventListener);
     }
 
+    @Override
     public void removeLifecycleListener(ProcessingUnitInstanceLifecycleEventListener eventListener) {
         getProcessingUnitInstanceAdded().remove(eventListener);
         getProcessingUnitInstanceRemoved().remove(eventListener);
     }
 
+    @Override
     public int getNumberOfInstances() {
         return this.numberOfInstances;
     }
 
+    @Override
     public void setNumberOfInstances(int numberOfInstances) {
         assertStateChangesPermitted();
         this.numberOfInstances = numberOfInstances;
     }
 
+    @Override
     public int getNumberOfBackups() {
         return this.numberOfBackups;
     }
 
+    @Override
     public void setNumberOfBackups(int numberOfBackups) {
         assertStateChangesPermitted();
         this.numberOfBackups = numberOfBackups;
     }
 
+    @Override
     public int getTotalNumberOfInstances() {
         return getNumberOfInstances() * (getNumberOfBackups() + 1);
     }
 
+    @Override
     public int getMaxInstancesPerVM() {
         return sla.getMaxInstancesPerVM();
     }
 
+    @Override
     public int getMaxInstancesPerMachine() {
         return sla.getMaxInstancesPerMachine();
     }
@@ -286,10 +348,12 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         return sla.getClusterSchema();
     }
     
+    @Override
     public Map<String, Integer> getMaxInstancesPerZone() {
         return Collections.unmodifiableMap(sla.getMaxInstancesPerZone());
     }
 
+    @Override
     public String[] getRequiredZones() {
         ArrayList<String> zones = new ArrayList<String>();
         for (Requirement req : sla.getRequirements()) {
@@ -300,14 +364,17 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         return zones.toArray(new String[zones.size()]);
     }
 
+    @Override
     public DeploymentStatus getStatus() {
         return this.deploymentStatus;
     }
 
+    @Override
     public boolean waitFor(int numberOfProcessingUnitInstances) {
         return waitFor(numberOfProcessingUnitInstances, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
 
+    @Override
     public boolean waitFor(int numberOfProcessingUnitInstances, long timeout, TimeUnit timeUnit) {
         final CountDownLatch latch = new CountDownLatch(numberOfProcessingUnitInstances);
         ProcessingUnitInstanceAddedEventListener added = new ProcessingUnitInstanceAddedEventListener() {
@@ -325,10 +392,12 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         }
     }
 
+    @Override
     public Space waitForSpace() {
         return waitForSpace(admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
 
+    @Override
     public Space waitForSpace(long timeout, TimeUnit timeUnit) {
         final CountDownLatch latch = new CountDownLatch(1);
         final AtomicReference<Space> ref = new AtomicReference<Space>();
@@ -349,10 +418,12 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         }
     }
 
+    @Override
     public GridServiceManager waitForManaged() {
         return waitForManaged(admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
 
+    @Override
     public GridServiceManager waitForManaged(long timeout, TimeUnit timeUnit) {
         if (isManaged()) {
             return managingGridServiceManager;
@@ -380,14 +451,17 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         }
     }
 
+    @Override
     public boolean canIncrementInstance() {
         return getSpaces().length == 0;
     }
 
+    @Override
     public boolean canDecrementInstance() {
         return getSpaces().length == 0;
     }
 
+    @Override
     public void incrementInstance() {
         if (!isManaged()) {
             throw new AdminException("No managing grid service manager for processing unit");
@@ -395,6 +469,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         ((InternalGridServiceManager) managingGridServiceManager).incrementInstance(this);
     }
 
+    @Override
     public void decrementInstance() {
         Iterator<ProcessingUnitInstance> it = iterator();
         if (it.hasNext()) {
@@ -402,122 +477,39 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         }
     }
 
+    @Override
     public GridServiceManager getManagingGridServiceManager() {
         return this.managingGridServiceManager;
     }
 
+    @Override
     public GridServiceManager[] getBackupGridServiceManagers() {
         return this.backupGridServiceManagers.values().toArray(new GridServiceManager[0]);
     }
 
+    @Override
     public boolean isManaged() {
         return managingGridServiceManager != null;
     }
 
+    @Override
     public GridServiceManager getBackupGridServiceManager(String gridServiceManagerUID) {
         return backupGridServiceManagers.get(gridServiceManagerUID);
     }
 
+    @Override
     public boolean undeployAndWait(long timeout, TimeUnit timeUnit) {
-        
-        if (!isManaged()) {
-            throw new AdminException("No managing GSM to undeploy from");
-        }
-
-        long end = System.currentTimeMillis() + timeUnit.toMillis(timeout);
-        
-        // if elastic scale strategy is enforced then also wait for all containers to be undiscovered
-        boolean isElasticScaleStrategyEnforced = 
-                ((InternalGridServiceManager)managingGridServiceManager).isManagedByElasticServiceManager(this);
-        
-        List<GridServiceContainer> containersPendingShutdown = new ArrayList<GridServiceContainer>();
-        if (isElasticScaleStrategyEnforced) {
-            // add all containers that are managed by the elastic pu
-            for (GridServiceContainer container : admin.getGridServiceContainers()) {
-                if (container.getProcessingUnitInstances(getName()).length > 0) {
-                    containersPendingShutdown.add(container);
-                }
-            }
-        }
-        
-        final CountDownLatch latch = new CountDownLatch(1);
-        ProcessingUnitRemovedEventListener listener = new ProcessingUnitRemovedEventListener() {
-            public void processingUnitRemoved(ProcessingUnit processingUnit) {
-                if (getName().equals(processingUnit.getName())) {
-                    latch.countDown();
-                }
-            }
-        };
-        
-        getProcessingUnits().getProcessingUnitRemoved().add(listener);
-        try {
-            ((InternalGridServiceManager) managingGridServiceManager).undeployProcessingUnit(getName());
-            try {
-                long puRemovedTimeout = end - System.currentTimeMillis();
-                if (puRemovedTimeout <= 0) {
-                    //timeout expired
-                    return false;
-                }
-                if (!latch.await(puRemovedTimeout, TimeUnit.MILLISECONDS)) {
-                    //timeout expired
-                    return false;
-                }
-            } catch (InterruptedException e) {
-                throw new AdminException("Failed to undeploy", e);
-            }
-        }finally {
-            getProcessingUnits().getProcessingUnitRemoved().remove(listener);
-        }
-        
-        // use polling to determine elastic pu completed undeploy cleanup of containers (and machines)
-        // and that the admin has been updated with the relevant lookup service remove events.
-        while (true) {
-            
-            // check that all pu instances have been undiscovered
-            if (processingUnitInstances.size() == 0) {
-                
-                if (!isElasticScaleStrategyEnforced) {
-                    // done waiting
-                    break;
-                }
-            
-                // check that all containers have shutdown (elastic pu only)
-                boolean allContainersShutdown = true;    
-                for (GridServiceContainer container : containersPendingShutdown) {
-                    if (container.isDiscovered()) {
-                        allContainersShutdown = false;
-                    }
-                }
-                
-                if (allContainersShutdown) {
-                    // check (undeploy) scale strategy is no longer being enforced (completed)
-                    if (!((InternalGridServiceManager)managingGridServiceManager).isManagedByElasticServiceManager(this)) {
-                        // done waiting
-                        break;
-                    }
-                }
-            }
-            
-            long sleepDuration = end - System.currentTimeMillis();
-            
-            if (sleepDuration <= 0) {
-                //timeout expired
-                return false;
-            }
-            
-            try {
-                Thread.sleep(Math.min(1000, sleepDuration));
-            } catch (InterruptedException e) {
-                throw new AdminException("Failed to undeploy", e);
-            }
-        }
-        return true;
+        return ((InternalGridServiceManagers)admin.getGridServiceManagers()).undeployProcessingUnitsAndWait(
+                new ProcessingUnit[] {this}, 
+                timeout, timeUnit);
     }
     
+    @Override
     public void undeployAndWait() {
         undeployAndWait(admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
     
+    @Override
     public void undeploy() {
         if (!isManaged()) {
             throw new AdminException("No managing GSM to undeploy from");
@@ -545,11 +537,13 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         }
     }
 
+    @Override
     public void setManagingGridServiceManager(GridServiceManager gridServiceManager) {
         assertStateChangesPermitted();
         this.managingGridServiceManager = gridServiceManager;
     }
     
+    @Override
     public void addManagingGridServiceManager(GridServiceManager gridServiceManager) {
         assertStateChangesPermitted();
         final GridServiceManager previousManaging = (gridServiceManager == this.managingGridServiceManager) ? null : this.managingGridServiceManager;
@@ -561,6 +555,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         ((InternalManagingGridServiceManagerChangedEventManager) processingUnits.getManagingGridServiceManagerChanged()).processingUnitManagingGridServiceManagerChanged(event);
     }
 
+    @Override
     public void addBackupGridServiceManager(final GridServiceManager backupGridServiceManager) {
         assertStateChangesPermitted();
         GridServiceManager gridServiceManager = this.backupGridServiceManagers.put(backupGridServiceManager.getUid(), backupGridServiceManager);
@@ -571,6 +566,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         }
     }
 
+    @Override
     public void removeBackupGridServiceManager(String gsmUID) {
         assertStateChangesPermitted();
         final GridServiceManager existingGridServiceManager = backupGridServiceManagers.remove(gsmUID);
@@ -581,6 +577,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         }
     }
 
+    @Override
     public boolean setStatus(int statusCode) {
         assertStateChangesPermitted();
         DeploymentStatus tempStatus;
@@ -617,26 +614,32 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         return false;
     }
 
+    @Override
     public Iterator<ProcessingUnitInstance> iterator() {
         return Collections.unmodifiableCollection(processingUnitInstances.values()).iterator();
     }
 
+    @Override
     public ProcessingUnitInstance[] getInstances() {
         return processingUnitInstances.values().toArray(new ProcessingUnitInstance[0]);
     }
 
+    @Override
     public ProcessingUnitInstance[] getProcessingUnitInstances() {
         return getInstances();
     }
 
+    @Override
     public ProcessingUnitPartition[] getPartitions() {
         return processingUnitPartitions.values().toArray(new ProcessingUnitPartition[0]);
     }
 
+    @Override
     public ProcessingUnitPartition getPartition(int partitionId) {
         return processingUnitPartitions.get(partitionId);
     }
 
+    @Override
     public void addProcessingUnitInstance(final ProcessingUnitInstance processingUnitInstance) {
         assertStateChangesPermitted();
         final ProcessingUnitInstance existingProcessingUnitInstance = processingUnitInstances.put(processingUnitInstance.getUid(), processingUnitInstance);
@@ -657,9 +660,13 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
             }
             processingUnitInstanceAddedEventManager.processingUnitInstanceAdded(processingUnitInstance);
             ((InternalProcessingUnitInstanceAddedEventManager) processingUnits.getProcessingUnitInstanceAdded()).processingUnitInstanceAdded(processingUnitInstance);
+            if (application != null) {
+                ((InternalProcessingUnitInstanceAddedEventManager) application.getProcessingUnits().getProcessingUnitInstanceAdded()).processingUnitInstanceAdded(processingUnitInstance);
+            }
         }
     }
 
+    @Override
     public void removeProcessingUnitInstance(String uid) {
         final ProcessingUnitInstance processingUnitInstance = processingUnitInstances.remove(uid);
         if (processingUnitInstance != null) {
@@ -669,6 +676,10 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
 
             processingUnitInstanceRemovedEventManager.processingUnitInstanceRemoved(processingUnitInstance);
             ((InternalProcessingUnitInstanceRemovedEventManager) processingUnits.getProcessingUnitInstanceRemoved()).processingUnitInstanceRemoved(processingUnitInstance);
+            
+            if (application != null) {
+                ((InternalProcessingUnitInstanceRemovedEventManager) application.getProcessingUnits().getProcessingUnitInstanceRemoved()).processingUnitInstanceRemoved(processingUnitInstance);
+            }
         }
     }
 
@@ -682,10 +693,12 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         return partition;
     }
 
+    @Override
     public ProcessingUnitInstanceStatisticsChangedEventManager getProcessingUnitInstanceStatisticsChanged() {
         return this.processingUnitInstanceStatisticsChangedEventManager;
     }
 
+    @Override
     public synchronized void setStatisticsInterval(long interval, TimeUnit timeUnit) {
         statisticsInterval = timeUnit.toMillis(interval);
         for (ProcessingUnitInstance processingUnitInstance : processingUnitInstances.values()) {
@@ -693,6 +706,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         }
     }
 
+    @Override
     public void setStatisticsHistorySize(int historySize) {
         this.statisticsHistorySize = historySize;
         for (ProcessingUnitInstance processingUnitInstance : processingUnitInstances.values()) {
@@ -700,6 +714,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         }
     }
 
+    @Override
     public synchronized void startStatisticsMonitor() {
         scheduledStatisticsMonitor = true;
         for (ProcessingUnitInstance processingUnitInstance : processingUnitInstances.values()) {
@@ -707,6 +722,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         }
     }
 
+    @Override
     public synchronized void stopStatisticsMonitor() {
         scheduledStatisticsMonitor = false;
         for (ProcessingUnitInstance processingUnitInstance : processingUnitInstances.values()) {
@@ -714,6 +730,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         }
     }
 
+    @Override
     public synchronized boolean isMonitoring() {
         return scheduledStatisticsMonitor;
     }
@@ -735,6 +752,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         admin.assertStateChangesPermitted();
     }
 
+    @Override
     public void scale(ScaleStrategyConfig strategyConfig) {
   
         InternalGridServiceManager gsm = (InternalGridServiceManager)getManagingGridServiceManager();
@@ -752,10 +770,12 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
                 strategyConfig);
     }
     
+    @Override
     public void scaleAndWait(ScaleStrategyConfig strategyConfig) {
         scaleAndWait(strategyConfig, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
     
+    @Override
     public boolean scaleAndWait(ScaleStrategyConfig strategyConfig, long timeout, TimeUnit timeunit) {
         long end = System.currentTimeMillis() + timeunit.toMillis(timeout);
         scale(strategyConfig);
@@ -782,6 +802,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         return true;
     }
 
+    @Deprecated
     public void setElasticProperties(Map<String,String> properties) {
         if (getManagingGridServiceManager() == null) {
             throw new AdminException("Processing Unit " + getName() + " does not have an associated managing GSM");
@@ -790,10 +811,12 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         
     }
 
+    @Override
     public String getApplicationName() {
-        return getBeanLevelProperties().getContextProperties().getProperty(APPLICATION_NAME_CONTEXT_PROPERTY);
+        return applicationName;
     }
 
+    @Override
     public Application getApplication() {
         return application;
     }
@@ -802,8 +825,8 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         assertStateChangesPermitted();
         this.application = (InternalApplication) application;
     }
-
-
+    
+    @Override
     public ScaleStrategyConfig getScaleStrategyConfig() {
         //TODO: Cache the scale config each time a change notification arrives.
         if (getManagingGridServiceManager() == null) {
@@ -812,12 +835,46 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         return ((InternalGridServiceManager)getManagingGridServiceManager()).getProcessingUnitScaleStrategyConfig(this);
     }
     
+    @Override
     public boolean decrementPlannedInstances() {
         return ((InternalGridServiceManager) managingGridServiceManager).decrementPlannedInstances(this);
     }
 
+    /**
+     * This method is used by the webui.
+     * Need to use getDependencies once Cloudify is migrated to use the dependencies API
+     */
+    @Override
     public String getApplicationDependencies() {
-        return getBeanLevelProperties().getContextProperties().getProperty(APPLICATION_DEPENDENCIES_CONTEXT_PROPERTY);
+        List<String> orderedNames = new ArrayList<String>();
+        
+        //deprecated: Current way of configuring pu dependencies in Cloudify is by entering a groovy list of the pu names in the format "[a,b,c]"
+        String deprecatedDependenciesValue = getBeanLevelProperties().getContextProperties().getProperty(APPLICATION_DEPENDENCIES_CONTEXT_PROPERTY);
+        if (deprecatedDependenciesValue != null) {
+            String trimmedDeprecatedDependenciesValue = deprecatedDependenciesValue.replace('[', ' ').replace(']', ' ').trim();
+            String[] deprecatedDependencies = StringUtils.delimitedListToStringArray(trimmedDeprecatedDependenciesValue,",");
+            for (String name : deprecatedDependencies) {
+                if (!orderedNames.contains(name)) {
+                    orderedNames.add(name);
+                }
+            }
+        }
+        
+        // Admin API way for configuring pu dependencies
+        for (String name : dependencies.getDeploymentDependencies().getRequiredProcessingUnitsNames()) {
+            if (!orderedNames.contains(name)) {
+                orderedNames.add(name);
+            }
+        }
+        if (orderedNames.isEmpty()) {
+            //backwards compatibility
+            return "";
+        }
+        return "[" + StringUtils.collectionToCommaDelimitedString(orderedNames) +"]";
     }
-
+    
+    @Override
+    public ProcessingUnitDependencies<ProcessingUnitDependency> getDependencies() {
+        return dependencies;
+    }
 }

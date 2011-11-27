@@ -39,6 +39,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.openspaces.admin.Admin;
+import org.openspaces.admin.internal.pu.dependency.DefaultProcessingUnitDependencies;
+import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependencies;
+import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependency;
+import org.openspaces.admin.internal.pu.dependency.ProcessingUnitDetailedDependencies;
+import org.openspaces.admin.pu.dependency.ProcessingUnitDependencies;
+import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
+import org.openspaces.admin.pu.dependency.ProcessingUnitDeploymentDependenciesConfigurer;
+import org.openspaces.admin.pu.topology.ProcessingUnitDeploymentTopology;
+import org.openspaces.pu.container.support.CommandLineParser.Parameter;
+
 import com.gigaspaces.grid.zone.ZoneHelper;
 import com.gigaspaces.security.directory.User;
 import com.gigaspaces.security.directory.UserDetails;
@@ -50,7 +61,7 @@ import com.gigaspaces.security.directory.UserDetails;
  * @see org.openspaces.admin.gsm.GridServiceManager#deploy(ProcessingUnitDeployment)
  * @see org.openspaces.admin.gsm.GridServiceManagers#deploy(ProcessingUnitDeployment)
  */
-public class ProcessingUnitDeployment {
+public class ProcessingUnitDeployment implements ProcessingUnitDeploymentTopology {
 
     private final String processingUnit;
 
@@ -80,13 +91,16 @@ public class ProcessingUnitDeployment {
 
     private final Map<String,String> elasticProperties;
 
+    private InternalProcessingUnitDependencies<ProcessingUnitDependency,InternalProcessingUnitDependency> dependencies;
+
     /**
      * Constructs a processing unit deployment based on the specified processing unit name (should
      * exists under the <code>[GS ROOT]/deploy</code> directory.
      */
-    public ProcessingUnitDeployment(String processingUnit) {
-        this.processingUnit = processingUnit;
+    public ProcessingUnitDeployment(String processingUnitName) {
+        this.processingUnit = processingUnitName;
         this.elasticProperties = new HashMap<String,String>();
+        this.dependencies = new DefaultProcessingUnitDependencies();
     }
 
     /**
@@ -287,7 +301,33 @@ public class ProcessingUnitDeployment {
     public UserDetails getUserDetails() {
         return this.userDetails;
     }
+    
+    /**
+     * Postpones deployment of processing unit instances until the specified dependencies are met.
+     * 
+     * The following example postpones the deployment of this processing unit until B has completed the deployment and C has at least one instance deployed.
+     * deployment.addDependencies(new ProcessingUnitDeploymentDependenciesConfigurer().dependsOnDeployment("B").dependsOnMinimumNumberOfDeployedInstances("C",1).create())
+     * 
+     * @see ProcessingUnitDeploymentDependenciesConfigurer
+     * @since 8.0.6
+     */
+    public ProcessingUnitDeployment addDependencies(ProcessingUnitDetailedDependencies<? extends ProcessingUnitDependency> detailedDependencies) {
+        dependencies.addDetailedDependencies(detailedDependencies);
+        return this;
+    }
 
+    /**
+     * Postpones deployment of processing unit instances deployment until the specified processing unit deployment is complete.
+     * 
+     * Same as: deployment.addDependencies(new ProcessingUnitDeploymentDependenciesConfigurer().dependsOnDeployment(requiredProcessingUnitName).create())
+     * 
+     * @since 8.0.6
+     */
+    public ProcessingUnitDeployment addDependency(String requiredProcessingUnitName) {
+        addDependencies(new ProcessingUnitDeploymentDependenciesConfigurer().dependsOnDeployed(requiredProcessingUnitName).create());
+        return this;
+    }
+    
     /**
      * Transforms this deployment into a set of deployment options.
      */
@@ -339,11 +379,19 @@ public class ProcessingUnitDeployment {
                 deployOptions.add(elasticProp.getKey() + "=" + elasticProp.getValue());
             }
         }
-        for (Map.Entry entry : contextProperties.entrySet()) {
+        
+        for (Map.Entry<?,?> entry : contextProperties.entrySet()) {
             deployOptions.add("-properties");
             deployOptions.add("embed://" + entry.getKey() + "=" + entry.getValue());
         }
 
+        for (Parameter parameter : dependencies.toCommandLineParameters()) {
+            deployOptions.add("-"+parameter.getName());
+            for (String arg : parameter.getArguments()) {
+                deployOptions.add(arg);
+            }
+        }
+        
         deployOptions.add(getProcessingUnit());
 
         return deployOptions.toArray(new String[deployOptions.size()]);
@@ -353,8 +401,18 @@ public class ProcessingUnitDeployment {
         this.elasticProperties.put(key,value);
         return this;
     }
+
+    public void setDependencies(ProcessingUnitDependencies<ProcessingUnitDependency> dependencies) {
+        this.dependencies = (InternalProcessingUnitDependencies<ProcessingUnitDependency, InternalProcessingUnitDependency>)dependencies;
+    }
     
     public Map<String,String> getElasticProperties() {
         return this.elasticProperties;
     }
+
+    @Override
+    public ProcessingUnitDeployment toProcessingUnitDeployment(Admin admin) {
+        return this;
+    }
+
 }

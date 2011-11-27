@@ -58,6 +58,9 @@ public class DefaultApplications implements InternalApplications {
 
     @Override
     public Application getApplication(String name) {
+        if (name == null) {
+            throw new IllegalArgumentException("name cannot be null");
+        }
         return applicationsByName.get(name);
     }
 

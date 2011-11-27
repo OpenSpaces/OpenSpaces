@@ -13,7 +13,7 @@ import org.openspaces.admin.space.Space;
  * @author kimchy
  */
 public interface InternalProcessingUnit extends ProcessingUnit, InternalProcessingUnitInstancesAware , InternalApplicationAware {
-
+    
     void setNumberOfInstances(int numberOfInstances);
 
     void setNumberOfBackups(int numberOfBackups);
@@ -46,13 +46,6 @@ public interface InternalProcessingUnit extends ProcessingUnit, InternalProcessi
      * @since 8.0.4 
      */
     String getApplicationDependencies();
-    
-    /**
-     * Returns an event manager allowing to register {@link org.openspaces.admin.pu.events.ScaleStrategyConfigEventListener}s.
-     *
-     * @since 8.0.3
-     */
-    //TODO:ScaleStrategyConfigChangedEventManager getScaleStrategyConfigChanged(ScaleStrategyConfigChangedEventListener eventListener);
     
     /**
      * Returns the current scale strategy config

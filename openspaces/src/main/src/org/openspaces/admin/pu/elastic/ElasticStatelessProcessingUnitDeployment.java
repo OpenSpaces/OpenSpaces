@@ -3,8 +3,11 @@ package org.openspaces.admin.pu.elastic;
 import java.io.File;
 
 import org.openspaces.admin.Admin;
+import org.openspaces.admin.internal.pu.dependency.ProcessingUnitDetailedDependencies;
 import org.openspaces.admin.internal.pu.elastic.AbstractElasticProcessingUnitDeployment;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
+import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
+import org.openspaces.admin.pu.dependency.ProcessingUnitDeploymentDependenciesConfigurer;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.topology.ElasticStatelessDeploymentTopology;
@@ -17,8 +20,9 @@ import com.gigaspaces.security.directory.UserDetails;
  * 
  * @author itaif
  */
-public class ElasticStatelessProcessingUnitDeployment extends AbstractElasticProcessingUnitDeployment
-    implements ElasticStatelessDeploymentTopology {
+public class ElasticStatelessProcessingUnitDeployment 
+    extends AbstractElasticProcessingUnitDeployment
+    implements ElasticStatelessDeploymentTopology<ProcessingUnitDependency> {
     
     /**
      * Constructs a stateless processing unit deployment based on the specified processing unit name 
@@ -36,10 +40,12 @@ public class ElasticStatelessProcessingUnitDeployment extends AbstractElasticPro
         this(processingUnit.getAbsolutePath());
     }
 
+    @Override
     public ElasticStatelessProcessingUnitDeployment scale(ManualCapacityScaleConfig strategy) {
         return (ElasticStatelessProcessingUnitDeployment) super.scale(strategy);
     }
 
+    @Override
     public ElasticStatelessProcessingUnitDeployment scale(EagerScaleConfig strategy) {
         return (ElasticStatelessProcessingUnitDeployment) super.scale(strategy);
     }
@@ -49,10 +55,13 @@ public class ElasticStatelessProcessingUnitDeployment extends AbstractElasticPro
         return (ElasticStatelessProcessingUnitDeployment) super.name(name);
     }
 
+    /**
+     * @see #addContextProperty(String,String)
+     */
+    @Deprecated
     public ElasticStatelessProcessingUnitDeployment setContextProperty(String key, String value) {
-        return (ElasticStatelessProcessingUnitDeployment) super.addContextProperty(key, value);
+        return (ElasticStatelessProcessingUnitDeployment) addContextProperty(key, value);
     }
-
 
     @Override
     public ElasticStatelessProcessingUnitDeployment secured(boolean secured) {
@@ -89,10 +98,12 @@ public class ElasticStatelessProcessingUnitDeployment extends AbstractElasticPro
         return addEnvironmentVariable(name, value);
     }
     
+    @Override
     public ElasticStatelessProcessingUnitDeployment addCommandLineArgument(String vmInputArgument) {
         return (ElasticStatelessProcessingUnitDeployment) super.commandLineArgument(vmInputArgument);
     }
 
+    @Override
     public ElasticStatelessProcessingUnitDeployment addEnvironmentVariable(String name, String value) {
         return (ElasticStatelessProcessingUnitDeployment) super.environmentVariable(name, value);
     }
@@ -101,11 +112,13 @@ public class ElasticStatelessProcessingUnitDeployment extends AbstractElasticPro
     public ElasticStatelessProcessingUnitDeployment addContextProperty(String key, String value) {
         return (ElasticStatelessProcessingUnitDeployment) super.addContextProperty(key, value);
     }
-       
+    
+    @Override
     public ElasticStatelessProcessingUnitDeployment dedicatedMachineProvisioning(ElasticMachineProvisioningConfig config) {
         return (ElasticStatelessProcessingUnitDeployment) super.machineProvisioning(config, null);
     }
     
+    @Override
     public ElasticStatelessProcessingUnitDeployment sharedMachineProvisioning(String sharingId, ElasticMachineProvisioningConfig config) {
         if (sharingId == null) {
             throw new IllegalArgumentException("sharingId can't be null");
@@ -125,6 +138,18 @@ public class ElasticStatelessProcessingUnitDeployment extends AbstractElasticPro
         return this;
     }
 
+    @Override
+    public ElasticStatelessProcessingUnitDeployment addDependency(String requiredProcessingUnitName) {
+       addDependencies(new ProcessingUnitDeploymentDependenciesConfigurer().dependsOnDeployed(requiredProcessingUnitName).create());
+       return this;
+    }
+ 
+    @Override
+    public ElasticStatelessProcessingUnitDeployment addDependencies(ProcessingUnitDetailedDependencies<? extends ProcessingUnitDependency> detailedDependencies) {
+        super.addDependencies(detailedDependencies);
+        return this; 
+    }
+    
     public ProcessingUnitDeployment toProcessingUnitDeployment(Admin admin) {
 
         ProcessingUnitDeployment deployment = super.toProcessingUnitDeployment();
@@ -137,5 +162,4 @@ public class ElasticStatelessProcessingUnitDeployment extends AbstractElasticPro
           
         return deployment;
     }
-
 }

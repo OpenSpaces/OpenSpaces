@@ -1,16 +1,19 @@
 package org.openspaces.admin.internal.gsm;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import net.jini.core.lookup.ServiceID;
 
 import org.jini.rio.monitor.ProvisionMonitorAdmin;
+import org.openspaces.admin.application.Application;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.internal.support.InternalAgentGridComponent;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
+import org.openspaces.admin.pu.topology.ProcessingUnitDeploymentTopology;
 
 import com.gigaspaces.grid.gsm.GSM;
 
@@ -59,4 +62,7 @@ public interface InternalGridServiceManager extends GridServiceManager, Internal
 
     boolean isManagedByElasticServiceManagerAndScaleNotInProgress(ProcessingUnit pu);
 
+     boolean undeployProcessingUnitsAndWait(ProcessingUnit[] processingUnits, long timeout, TimeUnit timeUnit);
+
+    ProcessingUnit deploy(Application application, ProcessingUnitDeploymentTopology deploymentTopology, long timeout, TimeUnit timeUnit);
 }

@@ -74,4 +74,6 @@ public interface PUServiceBean extends NIOInfoProvider, OSInfoProvider, JVMInfoP
 
     @AsyncRemoteCall
     Object invoke(String serviceBeanName, Map<String, Object> namedArgs) throws RemoteException;
+    
+    boolean isStopping() throws RemoteException;
 }

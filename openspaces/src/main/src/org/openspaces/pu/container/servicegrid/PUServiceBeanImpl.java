@@ -1313,4 +1313,8 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         }
         return invocableService.invoke(namedArgs);
     }
+    
+    public boolean isStopping() {
+        return stopping;
+    }
 }

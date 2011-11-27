@@ -39,6 +39,8 @@ import org.openspaces.admin.AdminAware;
 import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.application.Application;
 import org.openspaces.admin.gsm.GridServiceManager;
+import org.openspaces.admin.pu.dependency.ProcessingUnitDependencies;
+import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
 import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEventManager;
 import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEventManager;
@@ -226,6 +228,9 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
     /**
      * Un-deploys the processing unit and waits until all instances have been undeployed.
      * In case of an Elastic processing unit, also waits for containers to shutdown.
+     * 
+     * <p>The undeployment process will wait indefinitely and return when all processing units have undeployed.
+     * 
      * @see ProcessingUnit#undeployAndWait(long, TimeUnit)
      * @see ProcessingUnit#undeploy()
      * @since 8.0.5
@@ -235,6 +240,9 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
     /**
      * Undeploys the processing unit and waits until all instances have been undeployed.
      * In case of an Elastic processing unit, it waits until all containers have been removed.
+     * 
+     * <p>The undeployment process will wait for the given timeout and return when all processing units have undeployed or timeout expired.
+     * 
      * @return True if un-deploy completed successfully within the specified timeout. False if undeploy is still in progress.
      * @see ProcessingUnit#undeployAndWait()
      * @see ProcessingUnit#undeploy()
@@ -364,5 +372,10 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
      * @since 8.0.3
      */
     Application getApplication();
-    
+
+    /**
+     * @return the dependencies this processing unit has on other processing units.
+     * @since 8.0.6
+     */
+    ProcessingUnitDependencies<ProcessingUnitDependency> getDependencies();
 }

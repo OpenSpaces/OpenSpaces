@@ -32,10 +32,16 @@
 
 package org.openspaces.admin.space;
 
-import com.gigaspaces.security.directory.UserDetails;
-import org.openspaces.admin.pu.ProcessingUnitDeployment;
-
 import java.io.File;
+
+import org.openspaces.admin.Admin;
+import org.openspaces.admin.internal.pu.dependency.ProcessingUnitDetailedDependencies;
+import org.openspaces.admin.pu.ProcessingUnitDeployment;
+import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
+import org.openspaces.admin.pu.dependency.ProcessingUnitDeploymentDependenciesConfigurer;
+import org.openspaces.admin.pu.topology.ProcessingUnitDeploymentTopology;
+
+import com.gigaspaces.security.directory.UserDetails;
 
 /**
  * A deployment of a pure {@link org.openspaces.admin.space.Space} processing unit (comes built in
@@ -45,7 +51,7 @@ import java.io.File;
  * @see org.openspaces.admin.gsm.GridServiceManager#deploy(SpaceDeployment)
  * @see org.openspaces.admin.gsm.GridServiceManagers#deploy(SpaceDeployment)
  */
-public class SpaceDeployment {
+public class SpaceDeployment implements ProcessingUnitDeploymentTopology {
 
     private final ProcessingUnitDeployment deployment;
 
@@ -237,10 +243,43 @@ public class SpaceDeployment {
     }
 
     /**
+     * Postpones deployment of processing unit instances until the specified dependencies are met.
+     * 
+     * The following example postpones the deployment of this processing unit until B has completed the deployment and C has at least one instance deployed.
+     * deployment.addDependencies(new ProcessingUnitDeploymentDependenciesConfigurer().dependsOnDeployment("B").dependsOnMinimumNumberOfDeployedInstances("C",1).create())
+     * 
+     * @see ProcessingUnitDeploymentDependenciesConfigurer
+     * @since 8.0.6
+     */
+    @Override
+    public SpaceDeployment addDependencies(
+            ProcessingUnitDetailedDependencies<? extends ProcessingUnitDependency> deploymentDependencies) {
+        deployment.addDependencies(deploymentDependencies);
+        return this;
+    }
+    /**
+     * Postpones deployment of processing unit instances deployment until the specified processing unit deployment is complete.
+     * 
+     * Same as: deployment.addDependencies(new ProcessingUnitDeploymentDependenciesConfigurer().dependsOnDeployment(requiredProcessingUnitName).create())
+     * 
+     * @since 8.0.6
+     */
+    public SpaceDeployment addDependency(String requiredProcessingUnitName) {
+        deployment.addDependency(requiredProcessingUnitName);
+        return this;
+    }    
+    
+    /**
      * Transforms the space deployment to a processing unit deployment (it is a processing unit after all,
      * that simply starts an embedded space).
      */
     public ProcessingUnitDeployment toProcessingUnitDeployment() {
         return deployment;
     }
+    
+    @Override
+    public ProcessingUnitDeployment toProcessingUnitDeployment(Admin admin) {
+        return deployment;
+    }
+
 }

@@ -113,6 +113,10 @@ public class PUServiceBeanProxy extends AbstractProxy implements PUServiceBean {
         return ((PUServiceBean) server).getServiceProxy();
     }
 
+    public boolean isStopping() throws RemoteException {
+        return ((PUServiceBean) server).isStopping();
+    }
+
     public Future<Object> invoke(String serviceBeanName, Map<String, Object> namedArgs) throws RemoteException {
         ((PUServiceBean) server).invoke(serviceBeanName, namedArgs);
         return FutureContext.getFutureResult();

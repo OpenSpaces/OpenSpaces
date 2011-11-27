@@ -4,7 +4,7 @@ package org.openspaces.admin.pu.elastic.topology;
 
 
 
-public interface AdvancedStatefulDeploymentTopology extends ElasticStatefulDeploymentTopology {
+public interface AdvancedStatefulDeploymentTopology {
 
     /**
      * Overrides the number of backup processing unit instances per partition.

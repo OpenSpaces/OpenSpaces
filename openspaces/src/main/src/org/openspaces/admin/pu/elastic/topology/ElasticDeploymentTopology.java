@@ -2,40 +2,22 @@ package org.openspaces.admin.pu.elastic.topology;
 
 import org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig;
 import org.openspaces.admin.pu.elastic.config.DiscoveredMachineProvisioningConfig;
+import org.openspaces.admin.pu.topology.ProcessingUnitDeploymentTopology;
 import org.openspaces.core.util.MemoryUnit;
 
-import com.gigaspaces.security.directory.UserDetails;
-
-public interface ElasticDeploymentTopology {
+public interface ElasticDeploymentTopology extends ProcessingUnitDeploymentTopology {
 
     /**
      * Sets the processing unit name that will be deployed. By default it will be based on the
      * parameter passed in the constructor.
      */
-    ElasticDeploymentTopology name(String name);
-
-   /**
-    * Defines a context deploy time property overriding any <code>${...}</code> defined within a processing
-    * unit configuration.
-    */
-    ElasticDeploymentTopology addContextProperty(String key, String value);
-
+    ProcessingUnitDeploymentTopology name(String name);
+    
     /**
-     * Will deploy a secured processing unit. Note, by setting user details the processing unit will be secured automatically.
+     * Defines a context deploy time property overriding any <code>${...}</code> defined within a processing
+     * unit configuration.
      */
-    ElasticDeploymentTopology secured(boolean secured);
-
-    /**
-     * Advanced: Sets the security user details for authentication and authorization of the
-     * processing unit.
-     */
-    ElasticDeploymentTopology userDetails(UserDetails userDetails);
-
-    /**
-     * Advanced: Sets the security user details for authentication and authorization of the
-     * processing unit.
-     */ 
-    ElasticDeploymentTopology userDetails(String userName, String password);
+     ProcessingUnitDeploymentTopology addContextProperty(String key, String value);
 
     /**
      * Will cause the {@link org.openspaces.admin.gsc.GridServiceContainer} to be started using a script
@@ -121,6 +103,5 @@ public interface ElasticDeploymentTopology {
      * commandLineArgument("-Xmx256m").commandLineArgument("-Xms256m")
      */
     ElasticDeploymentTopology memoryCapacityPerContainer(String memoryCapacityPerContainer);
-
 
 }

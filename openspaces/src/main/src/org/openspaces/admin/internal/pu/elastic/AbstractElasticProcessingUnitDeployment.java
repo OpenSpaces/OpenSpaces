@@ -5,8 +5,13 @@ import java.util.Map;
 
 import org.openspaces.admin.bean.BeanConfig;
 import org.openspaces.admin.bean.BeanConfigPropertiesManager;
+import org.openspaces.admin.internal.pu.dependency.DefaultProcessingUnitDependencies;
+import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependencies;
+import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependency;
+import org.openspaces.admin.internal.pu.dependency.ProcessingUnitDetailedDependencies;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
+import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
 import org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig;
 import org.openspaces.admin.pu.elastic.config.DiscoveredMachineProvisioningConfig;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
@@ -35,6 +40,7 @@ public abstract class AbstractElasticProcessingUnitDeployment {
     private final ScaleStrategyBeanPropertiesManager scaleStrategyPropertiesManager;
     private ElasticMachineProvisioningConfig machineProvisioning;
     private ScaleStrategyConfig scaleStrategy;
+    private InternalProcessingUnitDependencies<ProcessingUnitDependency,InternalProcessingUnitDependency> dependencies;
     
     public AbstractElasticProcessingUnitDeployment(String processingUnit) {
         this.processingUnit = processingUnit;
@@ -43,6 +49,7 @@ public abstract class AbstractElasticProcessingUnitDeployment {
         isolationConfig = new ElasticMachineIsolationConfig(elasticProperties);
         machineProvisioningPropertiesManager = new MachineProvisioningBeanPropertiesManager(elasticProperties);
         scaleStrategyPropertiesManager = new ScaleStrategyBeanPropertiesManager(elasticProperties);
+        this.dependencies = new DefaultProcessingUnitDependencies();
     }
         
     protected void addContextPropertyDefault(String key, String defaultValue) {
@@ -165,6 +172,11 @@ public abstract class AbstractElasticProcessingUnitDeployment {
         return this;
     }
     
+    protected AbstractElasticProcessingUnitDeployment addDependencies(ProcessingUnitDetailedDependencies<? extends ProcessingUnitDependency> detailedDependencies) {
+        dependencies.addDetailedDependencies(detailedDependencies);
+        return this;
+    }
+
     private String getDefaultZone() {
         String zone = this.name;
         if (zone == null) {
@@ -269,6 +281,9 @@ public abstract class AbstractElasticProcessingUnitDeployment {
         for (String key : elasticProperties.keySet()) {
             deployment.setElasticProperty(key, elasticProperties.get(key));
         }
+        
+        deployment.setDependencies(dependencies);
+        
         return deployment;
     }
 
@@ -285,5 +300,5 @@ public abstract class AbstractElasticProcessingUnitDeployment {
         propertiesManager.disableAllBeans();
         propertiesManager.setBeanConfig(config.getBeanClassName(), config.getProperties());
         propertiesManager.enableBean(config.getBeanClassName());
-    }   
+    }
 }

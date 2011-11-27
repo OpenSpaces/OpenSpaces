@@ -3,6 +3,7 @@ package org.openspaces.admin.internal.gsm;
 import com.j_spaces.kernel.SizeConcurrentHashMap;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminException;
+import org.openspaces.admin.application.Application;
 import org.openspaces.admin.dump.DumpResult;
 import org.openspaces.admin.dump.CompoundDumpResult;
 import org.openspaces.admin.gsm.GridServiceManager;
@@ -18,6 +19,7 @@ import org.openspaces.admin.pu.ProcessingUnitAlreadyDeployedException;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.pu.elastic.ElasticStatefulProcessingUnitDeployment;
 import org.openspaces.admin.pu.elastic.ElasticStatelessProcessingUnitDeployment;
+import org.openspaces.admin.pu.topology.ProcessingUnitDeploymentTopology;
 import org.openspaces.admin.space.ElasticSpaceDeployment;
 import org.openspaces.admin.space.SpaceDeployment;
 
@@ -190,12 +192,12 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
     }
 
     public ProcessingUnit deploy(ElasticSpaceDeployment deployment) throws ProcessingUnitAlreadyDeployedException {
-        return deploy(deployment.toElasticStatefulProcessingUnitDeployment());
+        return deploy(deployment.toProcessingUnitDeployment(admin));
     }
 
     public ProcessingUnit deploy(ElasticSpaceDeployment deployment, long timeout, TimeUnit timeUnit)
             throws ProcessingUnitAlreadyDeployedException {
-        return deploy(deployment.toElasticStatefulProcessingUnitDeployment(),timeout,timeUnit);
+        return deploy(deployment.toProcessingUnitDeployment(admin),timeout,timeUnit);
     }
 
     public ProcessingUnit deploy(ElasticStatefulProcessingUnitDeployment deployment)
@@ -280,5 +282,29 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
 
     private void assertStateChangePermitted() {
         this.admin.assertStateChangesPermitted();
+    }
+
+    @Override
+    public boolean undeployProcessingUnitsAndWait(ProcessingUnit[] processingUnits, long timeout, TimeUnit timeUnit) {
+        if (processingUnits.length == 0) {
+            return true;
+        }
+
+        long end = System.currentTimeMillis() + timeUnit.toMillis(timeout);
+        InternalGridServiceManager gridServiceManager = (InternalGridServiceManager) waitForAtLeastOne(timeout, timeUnit);
+        if (gridServiceManager == null) {
+            throw new AdminException("No Grid Service Manager found to undeploy [" + processingUnits[0].getName() + "]");
+        }
+        long remaining = Math.max(0, end - System.currentTimeMillis());
+        return gridServiceManager.undeployProcessingUnitsAndWait(processingUnits, remaining, TimeUnit.MILLISECONDS);
+    }
+
+    @Override
+    public ProcessingUnit deploy(Application application, ProcessingUnitDeploymentTopology puDeploymentTopology, long timeout, TimeUnit timeUnit) {
+        InternalGridServiceManager gridServiceManager = (InternalGridServiceManager)getGridServiceManager();
+        if (gridServiceManager == null) {
+            throw new AdminException("No Grid Service Manager found to deploy [" + puDeploymentTopology.toProcessingUnitDeployment(admin).getProcessingUnit() + "] to application [" + application.getName() +"]");
+        }
+        return gridServiceManager.deploy(application, puDeploymentTopology, timeout, timeUnit);
     }
 }

@@ -14,16 +14,7 @@ public class ContextPropertyUtils {
 
     private static final String CONTEXT_PROPERTY_SERVICE_TIER_TYPE = "com.gs.service.type";
     private static final String CONTEXT_PROPERTY_SERVICE_ICON = "com.gs.service.icon";
-    private static final String CONTEXT_PROPERTY_APPLICATION_DEPENDENCIES = "com.gs.application.dependsOn";
     
-    public static String getDependencies(InternalProcessingUnit processingUnit) {
-        String dependencies = getContextPropertyValue(processingUnit, CONTEXT_PROPERTY_APPLICATION_DEPENDENCIES);
-        if (dependencies == null) {
-            return "";
-        }
-        return dependencies;
-    }
-
     public static ServiceTierType getTierType(InternalProcessingUnit processingUnit) {
         String tierTypeStr = getContextPropertyValue(processingUnit, CONTEXT_PROPERTY_SERVICE_TIER_TYPE);
         if (tierTypeStr == null) {

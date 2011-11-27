@@ -625,4 +625,17 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
             throw new AdminException("Failed to invoke processing unit instance", e);
         }
     }
+
+    @Override
+    public boolean isUndeploying() {
+        try {
+            boolean startedUndeploying = !isDiscovered();
+            boolean endedUndeploying = !puServiceBean.isStopping();
+            
+            return startedUndeploying && !endedUndeploying;
+        }
+        catch (RemoteException e) {
+            throw new AdminException("Failed to check if processing unit instance is alive", e);
+        }
+    }
 }
