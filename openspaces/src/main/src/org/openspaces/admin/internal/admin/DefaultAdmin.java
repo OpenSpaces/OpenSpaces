@@ -1401,7 +1401,7 @@ public class DefaultAdmin implements InternalAdmin {
                     ServiceMonitors serviceMonitors = monitors.get(CloudifyConstants_USM_MONITORS_SERVICE_ID); 
                     if (serviceMonitors != null) {
                         Integer state = (Integer)serviceMonitors.getMonitors().get(CloudifyConstants_USM_MONITORS_STATE_ID); 
-                        if (USMState_RUNNING.equals(state)) {  
+                        if (!USMState_RUNNING.equals(state)) {  
                             status = OperationalString.SCHEDULED;
                         }
                     }
