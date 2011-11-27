@@ -40,7 +40,13 @@ public class DefaultGatewaySink implements GatewaySink {
     public void enableIncomingReplication() {
         Map<String, Object> namedArgs = new HashMap<String, Object>();
         namedArgs.put("enableIncomingReplication", "");
-        ((InternalProcessingUnitInstance)gatewayProcessingUnit.getProcessingUnitInstance()).invoke("sink", namedArgs);
+        try {
+            ((InternalProcessingUnitInstance)gatewayProcessingUnit.getProcessingUnitInstance()).invoke("sink", namedArgs).get();
+        } catch (InterruptedException e) {
+            throw new IllegalStateException("Failed to enable incoming replication of sink", e);
+        } catch (ExecutionException e) {
+            throw new IllegalStateException("Failed to enable incoming replication of sink", e);
+        }
     }
 
     @Override
