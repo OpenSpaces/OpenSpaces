@@ -32,12 +32,27 @@
 
 package org.openspaces.admin.pu;
 
-import org.openspaces.admin.AdminAware;
-import org.openspaces.admin.StatisticsMonitor;
-import org.openspaces.admin.pu.events.*;
-
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import org.openspaces.admin.AdminAware;
+import org.openspaces.admin.StatisticsMonitor;
+import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEventManager;
+import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitAddedEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionAttemptEvent;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionAttemptEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionFailureEvent;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionFailureEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionPendingEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionSuccessEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceStatisticsChangedEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitLifecycleEventListener;
+import org.openspaces.admin.pu.events.ProcessingUnitRemovedEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEventManager;
 
 /**
  * Holds one or more {@link org.openspaces.admin.pu.ProcessingUnit}s.
@@ -150,4 +165,30 @@ public interface ProcessingUnits extends Iterable<ProcessingUnit>, AdminAware, S
      * state.
      */
     ProcessingUnitInstanceStatisticsChangedEventManager getProcessingUnitInstanceStatisticsChanged();
+    
+    /**
+     * Returns an event manager allowing to register {@link org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionAttemptEventListener}s
+     * and listen to {@link ProcessingUnitInstanceProvisionAttemptEvent}s.
+     * @since 8.0.6
+     */
+    ProcessingUnitInstanceProvisionAttemptEventManager getProcessingUnitInstanceProvisionAttempt();
+    
+    /**
+     * Returns an event manager allowing to register {@link org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionSuccessEventListener}s.
+     * @since 8.0.6
+     */
+    ProcessingUnitInstanceProvisionSuccessEventManager getProcessingUnitInstanceProvisionSuccess();
+    
+    /**
+     * Returns an event manager allowing to register {@link org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionFailureEventListener}s
+     * and listen to {@link ProcessingUnitInstanceProvisionFailureEvent}.
+     * @since 8.0.6
+     */
+    ProcessingUnitInstanceProvisionFailureEventManager getProcessingUnitInstanceProvisionFailure();
+    
+    /**
+     * Returns an event manager allowing to register {@link org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionPendingEventListener}s.
+     * @since 8.0.6
+     */
+    ProcessingUnitInstanceProvisionPendingEventManager getProcessingUnitInstanceProvisionPending();
 }

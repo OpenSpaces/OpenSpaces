@@ -1,18 +1,60 @@
 package org.openspaces.admin.internal.pu;
 
-import com.j_spaces.kernel.SizeConcurrentHashMap;
-import org.openspaces.admin.Admin;
-import org.openspaces.admin.StatisticsMonitor;
-import org.openspaces.admin.internal.admin.InternalAdmin;
-import org.openspaces.admin.internal.pu.events.*;
-import org.openspaces.admin.pu.ProcessingUnit;
-import org.openspaces.admin.pu.ProcessingUnitInstance;
-import org.openspaces.admin.pu.events.*;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+
+import org.openspaces.admin.Admin;
+import org.openspaces.admin.StatisticsMonitor;
+import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.pu.events.DefaultBackupGridServiceManagerChangedEventManager;
+import org.openspaces.admin.internal.pu.events.DefaultManagingGridServiceManagerChangedEventManager;
+import org.openspaces.admin.internal.pu.events.DefaultProcessingUnitAddedEventManager;
+import org.openspaces.admin.internal.pu.events.DefaultProcessingUnitInstanceAddedEventManager;
+import org.openspaces.admin.internal.pu.events.DefaultProcessingUnitInstanceProvisionAttemptEventManager;
+import org.openspaces.admin.internal.pu.events.DefaultProcessingUnitInstanceProvisionFailureEventManager;
+import org.openspaces.admin.internal.pu.events.DefaultProcessingUnitInstanceProvisionPendingEventManager;
+import org.openspaces.admin.internal.pu.events.DefaultProcessingUnitInstanceProvisionSuccessEventManager;
+import org.openspaces.admin.internal.pu.events.DefaultProcessingUnitInstanceRemovedEventManager;
+import org.openspaces.admin.internal.pu.events.DefaultProcessingUnitInstanceStatisticsChangedEventManager;
+import org.openspaces.admin.internal.pu.events.DefaultProcessingUnitRemovedEventManager;
+import org.openspaces.admin.internal.pu.events.DefaultProcessingUnitStatusChangedEventManager;
+import org.openspaces.admin.internal.pu.events.InternalBackupGridServiceManagerChangedEventManager;
+import org.openspaces.admin.internal.pu.events.InternalManagingGridServiceManagerChangedEventManager;
+import org.openspaces.admin.internal.pu.events.InternalProcessingUnitAddedEventManager;
+import org.openspaces.admin.internal.pu.events.InternalProcessingUnitInstanceAddedEventManager;
+import org.openspaces.admin.internal.pu.events.InternalProcessingUnitInstanceProvisionAttemptEventManager;
+import org.openspaces.admin.internal.pu.events.InternalProcessingUnitInstanceProvisionFailureEventManager;
+import org.openspaces.admin.internal.pu.events.InternalProcessingUnitInstanceProvisionPendingEventManager;
+import org.openspaces.admin.internal.pu.events.InternalProcessingUnitInstanceProvisionSuccessEventManager;
+import org.openspaces.admin.internal.pu.events.InternalProcessingUnitInstanceRemovedEventManager;
+import org.openspaces.admin.internal.pu.events.InternalProcessingUnitInstanceStatisticsChangedEventManager;
+import org.openspaces.admin.internal.pu.events.InternalProcessingUnitRemovedEventManager;
+import org.openspaces.admin.internal.pu.events.InternalProcessingUnitStatusChangedEventManager;
+import org.openspaces.admin.pu.ProcessingUnit;
+import org.openspaces.admin.pu.ProcessingUnitInstance;
+import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEventManager;
+import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitAddedEventListener;
+import org.openspaces.admin.pu.events.ProcessingUnitAddedEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionAttemptEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionFailureEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionPendingEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionSuccessEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceStatisticsChangedEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitLifecycleEventListener;
+import org.openspaces.admin.pu.events.ProcessingUnitRemovedEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEventManager;
+
+import com.j_spaces.kernel.SizeConcurrentHashMap;
 
 /**
  * @author kimchy
@@ -39,6 +81,11 @@ public class DefaultProcessingUnits implements InternalProcessingUnits {
 
     private final InternalProcessingUnitInstanceStatisticsChangedEventManager processingUnitInstanceStatisticsChangedEventManager;
 
+    private final InternalProcessingUnitInstanceProvisionAttemptEventManager processingUnitProvisionAttemptEventManager;
+    private final InternalProcessingUnitInstanceProvisionSuccessEventManager processingUnitProvisionSuccessEventManager;
+    private final InternalProcessingUnitInstanceProvisionFailureEventManager processingUnitProvisionFailureEventManager;
+    private final InternalProcessingUnitInstanceProvisionPendingEventManager processingUnitProvisionPendingEventManager;
+    
     private volatile long statisticsInterval = StatisticsMonitor.DEFAULT_MONITOR_INTERVAL;
 
     private volatile int statisticsHistorySize = StatisticsMonitor.DEFAULT_HISTORY_SIZE;
@@ -58,6 +105,11 @@ public class DefaultProcessingUnits implements InternalProcessingUnits {
         this.processingUnitInstanceRemovedEventManager = new DefaultProcessingUnitInstanceRemovedEventManager(admin);
 
         this.processingUnitInstanceStatisticsChangedEventManager = new DefaultProcessingUnitInstanceStatisticsChangedEventManager(admin);
+        
+        this.processingUnitProvisionAttemptEventManager = new DefaultProcessingUnitInstanceProvisionAttemptEventManager(admin);
+        this.processingUnitProvisionSuccessEventManager = new DefaultProcessingUnitInstanceProvisionSuccessEventManager(admin);
+        this.processingUnitProvisionFailureEventManager = new DefaultProcessingUnitInstanceProvisionFailureEventManager(admin);
+        this.processingUnitProvisionPendingEventManager = new DefaultProcessingUnitInstanceProvisionPendingEventManager(admin);    
     }
 
     public Admin getAdmin() {
@@ -207,6 +259,26 @@ public class DefaultProcessingUnits implements InternalProcessingUnits {
 
     public ProcessingUnitInstanceStatisticsChangedEventManager getProcessingUnitInstanceStatisticsChanged() {
         return this.processingUnitInstanceStatisticsChangedEventManager;
+    }
+    
+    @Override
+    public ProcessingUnitInstanceProvisionAttemptEventManager getProcessingUnitInstanceProvisionAttempt() {
+        return processingUnitProvisionAttemptEventManager;
+    }
+
+    @Override
+    public ProcessingUnitInstanceProvisionSuccessEventManager getProcessingUnitInstanceProvisionSuccess() {
+        return processingUnitProvisionSuccessEventManager;
+    }
+
+    @Override
+    public ProcessingUnitInstanceProvisionFailureEventManager getProcessingUnitInstanceProvisionFailure() {
+        return processingUnitProvisionFailureEventManager;
+    }
+
+    @Override
+    public ProcessingUnitInstanceProvisionPendingEventManager getProcessingUnitInstanceProvisionPending() {
+        return processingUnitProvisionPendingEventManager;
     }
 
     public void setStatisticsInterval(long interval, TimeUnit timeUnit) {

@@ -2,6 +2,7 @@ package org.openspaces.admin.internal.pu;
 
 import java.util.Map;
 
+import org.jini.rio.monitor.ProvisionLifeCycleEvent;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.internal.application.InternalApplicationAware;
 import org.openspaces.admin.pu.ProcessingUnit;
@@ -13,7 +14,7 @@ import org.openspaces.admin.space.Space;
  * @author kimchy
  */
 public interface InternalProcessingUnit extends ProcessingUnit, InternalProcessingUnitInstancesAware , InternalApplicationAware {
-    
+
     void setNumberOfInstances(int numberOfInstances);
 
     void setNumberOfBackups(int numberOfBackups);
@@ -60,4 +61,9 @@ public interface InternalProcessingUnit extends ProcessingUnit, InternalProcessi
      * @since 8.0.4
      */
     boolean decrementPlannedInstances();
+
+    /**
+     * @since 8.0.6
+     */
+    void processProvisionEvents(ProvisionLifeCycleEvent[] provisionLifeCycleEvents);
 }

@@ -22,6 +22,10 @@ import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEventListen
 import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitAddedEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventListener;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionAttemptEventListener;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionFailureEventListener;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionPendingEventListener;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionSuccessEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceStatisticsChangedEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitRemovedEventListener;
@@ -130,14 +134,26 @@ public abstract class EventRegistrationHelper {
         if (eventListener instanceof ProcessingUnitInstanceRemovedEventListener) {
             admin.getProcessingUnits().getProcessingUnitInstanceRemoved().add((ProcessingUnitInstanceRemovedEventListener) eventListener);
         }
+        if( eventListener instanceof ProcessingUnitInstanceStatisticsChangedEventListener ){
+            admin.getProcessingUnits().getProcessingUnitInstanceStatisticsChanged().add((ProcessingUnitInstanceStatisticsChangedEventListener) eventListener);
+        }
+        if (eventListener instanceof ProcessingUnitInstanceProvisionAttemptEventListener) {
+            admin.getProcessingUnits().getProcessingUnitInstanceProvisionAttempt().add((ProcessingUnitInstanceProvisionAttemptEventListener) eventListener);
+        }
+        if (eventListener instanceof ProcessingUnitInstanceProvisionSuccessEventListener) {
+            admin.getProcessingUnits().getProcessingUnitInstanceProvisionSuccess().add((ProcessingUnitInstanceProvisionSuccessEventListener) eventListener);
+        }
+        if (eventListener instanceof ProcessingUnitInstanceProvisionFailureEventListener) {
+            admin.getProcessingUnits().getProcessingUnitInstanceProvisionFailure().add((ProcessingUnitInstanceProvisionFailureEventListener) eventListener);
+        }
+        if (eventListener instanceof ProcessingUnitInstanceProvisionPendingEventListener) {
+            admin.getProcessingUnits().getProcessingUnitInstanceProvisionPending().add((ProcessingUnitInstanceProvisionPendingEventListener) eventListener);
+        }
         if (eventListener instanceof ManagingGridServiceManagerChangedEventListener) {
             admin.getProcessingUnits().getManagingGridServiceManagerChanged().add((ManagingGridServiceManagerChangedEventListener) eventListener);
         }
         if (eventListener instanceof BackupGridServiceManagerChangedEventListener) {
             admin.getProcessingUnits().getBackupGridServiceManagerChanged().add((BackupGridServiceManagerChangedEventListener) eventListener);
-        }
-        if( eventListener instanceof ProcessingUnitInstanceStatisticsChangedEventListener ){
-            admin.getProcessingUnits().getProcessingUnitInstanceStatisticsChanged().add((ProcessingUnitInstanceStatisticsChangedEventListener) eventListener);
         }
         if (eventListener instanceof SpaceAddedEventListener) {
             admin.getSpaces().getSpaceAdded().add((SpaceAddedEventListener) eventListener);
@@ -252,6 +268,18 @@ public abstract class EventRegistrationHelper {
         }
         if (eventListener instanceof ProcessingUnitInstanceRemovedEventListener) {
             admin.getProcessingUnits().getProcessingUnitInstanceRemoved().remove((ProcessingUnitInstanceRemovedEventListener) eventListener);
+        }
+        if (eventListener instanceof ProcessingUnitInstanceProvisionAttemptEventListener) {
+            admin.getProcessingUnits().getProcessingUnitInstanceProvisionAttempt().remove((ProcessingUnitInstanceProvisionAttemptEventListener) eventListener);
+        }
+        if (eventListener instanceof ProcessingUnitInstanceProvisionSuccessEventListener) {
+            admin.getProcessingUnits().getProcessingUnitInstanceProvisionSuccess().remove((ProcessingUnitInstanceProvisionSuccessEventListener) eventListener);
+        }
+        if (eventListener instanceof ProcessingUnitInstanceProvisionFailureEventListener) {
+            admin.getProcessingUnits().getProcessingUnitInstanceProvisionFailure().remove((ProcessingUnitInstanceProvisionFailureEventListener) eventListener);
+        }
+        if (eventListener instanceof ProcessingUnitInstanceProvisionPendingEventListener) {
+            admin.getProcessingUnits().getProcessingUnitInstanceProvisionPending().remove((ProcessingUnitInstanceProvisionPendingEventListener) eventListener);
         }
         if (eventListener instanceof ManagingGridServiceManagerChangedEventListener) {
             admin.getProcessingUnits().getManagingGridServiceManagerChanged().remove((ManagingGridServiceManagerChangedEventListener) eventListener);

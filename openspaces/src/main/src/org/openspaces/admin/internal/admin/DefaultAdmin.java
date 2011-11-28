@@ -1053,6 +1053,7 @@ public class DefaultAdmin implements InternalAdmin {
             logger.debug(processingUnitInstance.getProcessingUnitInstanceName() + " has been added");
         }
     }
+
     private void processZonesOnServiceAddition(String[] zonesNames, String zoneUidProvider,
             InternalTransport transport, VirtualMachine virtualMachine, Machine machine,
             InternalZoneAware... zoneAwares) {
@@ -1097,7 +1098,6 @@ public class DefaultAdmin implements InternalAdmin {
 
     private void processApplicationsOnProcessingUnitRemoval(ProcessingUnit processingUnit) {
         applications.removeProcessingUnit(processingUnit);
-
     }
     
     private InternalMachine processMachineOnServiceAddition(TransportDetails transportDetails,
@@ -1388,6 +1388,7 @@ public class DefaultAdmin implements InternalAdmin {
                 }
 
                 processingUnit.setStatus( getPuStatusForUSM(processingUnit, details.getStatus()));
+                processingUnit.processProvisionEvents(details.getProvisionLifeCycleEvents());
             }
 
             // Now, process any orphaned processing unit instances
