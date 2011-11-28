@@ -1,13 +1,25 @@
 package org.openspaces.admin.internal.gsm;
 
-import com.j_spaces.kernel.SizeConcurrentHashMap;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.application.Application;
-import org.openspaces.admin.dump.DumpResult;
+import org.openspaces.admin.application.ApplicationAlreadyDeployedException;
+import org.openspaces.admin.application.ApplicationDeployment;
 import org.openspaces.admin.dump.CompoundDumpResult;
+import org.openspaces.admin.dump.DumpResult;
 import org.openspaces.admin.gsm.GridServiceManager;
-import org.openspaces.admin.gsm.events.*;
+import org.openspaces.admin.gsm.events.GridServiceManagerAddedEventListener;
+import org.openspaces.admin.gsm.events.GridServiceManagerAddedEventManager;
+import org.openspaces.admin.gsm.events.GridServiceManagerLifecycleEventListener;
+import org.openspaces.admin.gsm.events.GridServiceManagerRemovedEventListener;
+import org.openspaces.admin.gsm.events.GridServiceManagerRemovedEventManager;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.gsm.events.DefaultGridServiceManagerAddedEventManager;
 import org.openspaces.admin.internal.gsm.events.DefaultGridServiceManagerRemovedEventManager;
@@ -23,12 +35,7 @@ import org.openspaces.admin.pu.topology.ProcessingUnitDeploymentTopology;
 import org.openspaces.admin.space.ElasticSpaceDeployment;
 import org.openspaces.admin.space.SpaceDeployment;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
+import com.j_spaces.kernel.SizeConcurrentHashMap;
 
 /**
  * @author kimchy
@@ -49,42 +56,52 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
         this.gridServiceManagerRemovedEventManager = new DefaultGridServiceManagerRemovedEventManager(this);
     }
 
+    @Override
     public Admin getAdmin() {
         return this.admin;
     }
 
+    @Override
     public GridServiceManagerAddedEventManager getGridServiceManagerAdded() {
         return this.gridServiceManagerAddedEventManager;
     }
 
+    @Override
     public GridServiceManagerRemovedEventManager getGridServiceManagerRemoved() {
         return this.gridServiceManagerRemovedEventManager;
     }
 
+    @Override
     public GridServiceManager[] getManagers() {
         return gridServiceManagersByUID.values().toArray(new GridServiceManager[0]);
     }
 
+    @Override
     public GridServiceManager getManagerByUID(String uid) {
         return gridServiceManagersByUID.get(uid);
     }
 
+    @Override
     public Map<String, GridServiceManager> getUids() {
         return Collections.unmodifiableMap(gridServiceManagersByUID);
     }
 
+    @Override
     public int getSize() {
         return gridServiceManagersByUID.size();
     }
 
+    @Override
     public boolean isEmpty() {
         return gridServiceManagersByUID.isEmpty();
     }
 
+    @Override
     public GridServiceManager waitForAtLeastOne() {
         return waitForAtLeastOne(admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
 
+    @Override
     public GridServiceManager waitForAtLeastOne(long timeout, TimeUnit timeUnit) {
         final CountDownLatch latch = new CountDownLatch(1);
         final AtomicReference<GridServiceManager> ref = new AtomicReference<GridServiceManager>();
@@ -105,10 +122,12 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
         }
     }
 
+    @Override
     public boolean waitFor(int numberOfGridServiceManagers) {
         return waitFor(numberOfGridServiceManagers, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
 
+    @Override
     public boolean waitFor(int numberOfGridServiceManagers, long timeout, TimeUnit timeUnit) {
         if (numberOfGridServiceManagers == 0) {
             final CountDownLatch latch = new CountDownLatch(getSize());
@@ -143,6 +162,7 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
         }
     }
 
+    @Override
     public ProcessingUnit deploy(ProcessingUnitDeployment deployment) {
         GridServiceManager gridServiceManager = getGridServiceManager();
         if (gridServiceManager == null) {
@@ -151,6 +171,7 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
         return gridServiceManager.deploy(deployment);
     }
 
+    @Override
     public ProcessingUnit deploy(ProcessingUnitDeployment deployment, long timeout, TimeUnit timeUnit) {
         GridServiceManager gridServiceManager = getGridServiceManager();
         if (gridServiceManager == null) {
@@ -159,6 +180,7 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
         return gridServiceManager.deploy(deployment, timeout, timeUnit);
     }
 
+    @Override
     public ProcessingUnit deploy(SpaceDeployment deployment) {
         GridServiceManager gridServiceManager = getGridServiceManager();
         if (gridServiceManager == null) {
@@ -167,6 +189,7 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
         return gridServiceManager.deploy(deployment);
     }
 
+    @Override
     public ProcessingUnit deploy(SpaceDeployment deployment, long timeout, TimeUnit timeUnit) {
         GridServiceManager gridServiceManager = getGridServiceManager();
         if (gridServiceManager == null) {
@@ -174,7 +197,8 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
         }
         return gridServiceManager.deploy(deployment, timeout, timeUnit);
     }
-    
+
+    @Override
     public ProcessingUnit deploy(MemcachedDeployment deployment, long timeout, TimeUnit timeUnit) {
         GridServiceManager gridServiceManager = getGridServiceManager();
         if (gridServiceManager == null) {
@@ -183,6 +207,7 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
         return gridServiceManager.deploy(deployment, timeout, timeUnit);
     }
 
+    @Override
     public ProcessingUnit deploy(MemcachedDeployment deployment) {
         GridServiceManager gridServiceManager = getGridServiceManager();
         if (gridServiceManager == null) {
@@ -191,38 +216,58 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
         return gridServiceManager.deploy(deployment);
     }
 
+    @Override
     public ProcessingUnit deploy(ElasticSpaceDeployment deployment) throws ProcessingUnitAlreadyDeployedException {
         return deploy(deployment.toProcessingUnitDeployment(admin));
     }
 
+    @Override
     public ProcessingUnit deploy(ElasticSpaceDeployment deployment, long timeout, TimeUnit timeUnit)
             throws ProcessingUnitAlreadyDeployedException {
         return deploy(deployment.toProcessingUnitDeployment(admin),timeout,timeUnit);
     }
 
+    @Override
     public ProcessingUnit deploy(ElasticStatefulProcessingUnitDeployment deployment)
             throws ProcessingUnitAlreadyDeployedException {
         return deploy(deployment,admin.getDefaultTimeout(),admin.getDefaultTimeoutTimeUnit());
     }
 
+    @Override
     public ProcessingUnit deploy(ElasticStatefulProcessingUnitDeployment deployment, long timeout, TimeUnit timeUnit)
             throws ProcessingUnitAlreadyDeployedException {
         
         return deploy(deployment.toProcessingUnitDeployment(admin),timeout,timeUnit);
     }
 
+    @Override
     public ProcessingUnit deploy(ElasticStatelessProcessingUnitDeployment deployment)
         throws ProcessingUnitAlreadyDeployedException {
     
         return deploy(deployment,admin.getDefaultTimeout(),admin.getDefaultTimeoutTimeUnit());
     }
-    
+
+    @Override
     public ProcessingUnit deploy(ElasticStatelessProcessingUnitDeployment deployment, long timeout, TimeUnit timeUnit)
         throws ProcessingUnitAlreadyDeployedException {
 
         return deploy(deployment.toProcessingUnitDeployment(admin),timeout,timeUnit);
     }
 
+    @Override
+    public Application deploy(ApplicationDeployment deployment) throws ApplicationAlreadyDeployedException, ProcessingUnitAlreadyDeployedException {
+        return deploy(deployment, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
+    }
+
+    @Override
+    public Application deploy(ApplicationDeployment deployment, long timeout, TimeUnit timeUnit) throws ApplicationAlreadyDeployedException, ProcessingUnitAlreadyDeployedException {
+        GridServiceManager gridServiceManager = getGridServiceManager();
+        if (gridServiceManager == null) {
+            throw new AdminException("No Grid Service Manager found to deploy [" + deployment.getDeploymentOptions().getApplicationName() + "]");
+        }
+        return gridServiceManager.deploy(deployment, timeout, timeUnit);
+    }
+    
     private GridServiceManager getGridServiceManager() {
         Iterator<GridServiceManager> it = iterator();
         if (it.hasNext()) {
@@ -231,20 +276,24 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
         return null;
     }
 
+    @Override
     public void addLifecycleListener(GridServiceManagerLifecycleEventListener eventListener) {
         getGridServiceManagerAdded().add(eventListener);
         getGridServiceManagerRemoved().add(eventListener);
     }
 
+    @Override
     public void removeLifecycleListener(GridServiceManagerLifecycleEventListener eventListener) {
         getGridServiceManagerAdded().remove(eventListener);
         getGridServiceManagerRemoved().remove(eventListener);
     }
 
+    @Override
     public Iterator<GridServiceManager> iterator() {
         return Collections.unmodifiableCollection(gridServiceManagersByUID.values()).iterator();
     }
 
+    @Override
     public void addGridServiceManager(final InternalGridServiceManager gridServiceManager) {
         assertStateChangePermitted();
         GridServiceManager existingGSM = gridServiceManagersByUID.put(gridServiceManager.getUid(), gridServiceManager);
@@ -253,6 +302,7 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
         }
     }
 
+    @Override
     public InternalGridServiceManager removeGridServiceManager(String uid) {
         assertStateChangePermitted();
         final InternalGridServiceManager existingGSM = (InternalGridServiceManager) gridServiceManagersByUID.remove(uid);
@@ -262,15 +312,18 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
         return existingGSM;
     }
 
+    @Override
     public InternalGridServiceManager replaceGridServiceManager(InternalGridServiceManager gridServiceManager) {
         assertStateChangePermitted();
         return (InternalGridServiceManager) gridServiceManagersByUID.put(gridServiceManager.getUid(), gridServiceManager);
     }
 
+    @Override
     public DumpResult generateDump(String cause, Map<String, Object> context) throws AdminException {
         return generateDump(cause, context, (String[]) null);
     }
 
+    @Override
     public DumpResult generateDump(String cause, Map<String, Object> context, String... processor) throws AdminException {
         CompoundDumpResult dumpResult = new CompoundDumpResult();
         for (GridServiceManager gsm : this) {
