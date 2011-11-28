@@ -660,9 +660,6 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
             }
             processingUnitInstanceAddedEventManager.processingUnitInstanceAdded(processingUnitInstance);
             ((InternalProcessingUnitInstanceAddedEventManager) processingUnits.getProcessingUnitInstanceAdded()).processingUnitInstanceAdded(processingUnitInstance);
-            if (application != null) {
-                ((InternalProcessingUnitInstanceAddedEventManager) application.getProcessingUnits().getProcessingUnitInstanceAdded()).processingUnitInstanceAdded(processingUnitInstance);
-            }
         }
     }
 
@@ -676,10 +673,6 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
 
             processingUnitInstanceRemovedEventManager.processingUnitInstanceRemoved(processingUnitInstance);
             ((InternalProcessingUnitInstanceRemovedEventManager) processingUnits.getProcessingUnitInstanceRemoved()).processingUnitInstanceRemoved(processingUnitInstance);
-            
-            if (application != null) {
-                ((InternalProcessingUnitInstanceRemovedEventManager) application.getProcessingUnits().getProcessingUnitInstanceRemoved()).processingUnitInstanceRemoved(processingUnitInstance);
-            }
         }
     }
 

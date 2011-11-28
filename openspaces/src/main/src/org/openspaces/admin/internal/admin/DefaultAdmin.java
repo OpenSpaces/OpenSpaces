@@ -29,6 +29,7 @@ import org.openspaces.admin.AdminEventListener;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.GridComponent;
 import org.openspaces.admin.alert.AlertManager;
+import org.openspaces.admin.application.Application;
 import org.openspaces.admin.application.Applications;
 import org.openspaces.admin.dump.CompoundDumpResult;
 import org.openspaces.admin.dump.DumpGeneratedListener;
@@ -82,6 +83,8 @@ import org.openspaces.admin.internal.pu.InternalProcessingUnit;
 import org.openspaces.admin.internal.pu.InternalProcessingUnitInstance;
 import org.openspaces.admin.internal.pu.InternalProcessingUnitInstances;
 import org.openspaces.admin.internal.pu.InternalProcessingUnits;
+import org.openspaces.admin.internal.pu.events.InternalProcessingUnitInstanceAddedEventManager;
+import org.openspaces.admin.internal.pu.events.InternalProcessingUnitInstanceRemovedEventManager;
 import org.openspaces.admin.internal.space.DefaultSpace;
 import org.openspaces.admin.internal.space.DefaultSpaces;
 import org.openspaces.admin.internal.space.InternalSpace;
@@ -901,6 +904,10 @@ public class DefaultAdmin implements InternalAdmin {
         if (processingUnitInstance != null) {
             processingUnitInstance.setDiscovered(false);
             ((InternalProcessingUnit) processingUnitInstance.getProcessingUnit()).removeProcessingUnitInstance(uid);
+            Application application = processingUnitInstance.getProcessingUnit().getApplication();
+            if (application != null) {
+                ((InternalProcessingUnitInstanceRemovedEventManager) application.getProcessingUnits().getProcessingUnitInstanceRemoved()).processingUnitInstanceRemoved(processingUnitInstance);
+            }
             ((InternalGridServiceContainer) processingUnitInstance.getGridServiceContainer()).removeProcessingUnitInstance(uid);
             ((InternalVirtualMachine) processingUnitInstance.getVirtualMachine()).removeProcessingUnitInstance(processingUnitInstance.getUid());
             ((InternalMachine) processingUnitInstance.getMachine()).removeProcessingUnitInstance(processingUnitInstance.getUid());
@@ -1006,6 +1013,11 @@ public class DefaultAdmin implements InternalAdmin {
 
         processingUnitInstance.setProcessingUnit(processingUnit);
         processingUnit.addProcessingUnitInstance(processingUnitInstance);
+        Application application = processingUnit.getApplication();
+        if (application != null) {
+            ((InternalProcessingUnitInstanceAddedEventManager) application.getProcessingUnits().getProcessingUnitInstanceAdded()).processingUnitInstanceAdded(processingUnitInstance);
+        }
+        
         InternalGridServiceContainer gridServiceContainer = (InternalGridServiceContainer) gridServiceContainers.getContainerByUID(processingUnitInstance.getGridServiceContainerServiceID().toString());
         if (gridServiceContainer == null) {
             throw new IllegalStateException("Internal error in admin, should not happen");
