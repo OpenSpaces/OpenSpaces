@@ -4,7 +4,7 @@ import org.openspaces.admin.internal.pu.dependency.ProcessingUnitDetailedDepende
 import org.openspaces.pu.container.support.RequiredDependenciesCommandLineParser;
 
 /**
- * Defines a dependency that postpose the instance deployment stage.
+ * Defines a dependency that postpones the processing unit instance deployment.
  * The instance is deployed only after the dependencies described by this interface are met.
  * 
  * @since 8.0.6
