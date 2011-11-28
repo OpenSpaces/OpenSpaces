@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.openspaces.admin.Admin;
+import org.openspaces.admin.AdminEventListener;
 import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.pu.events.DefaultBackupGridServiceManagerChangedEventManager;
@@ -36,6 +37,7 @@ import org.openspaces.admin.internal.pu.events.InternalProcessingUnitInstanceRem
 import org.openspaces.admin.internal.pu.events.InternalProcessingUnitInstanceStatisticsChangedEventManager;
 import org.openspaces.admin.internal.pu.events.InternalProcessingUnitRemovedEventManager;
 import org.openspaces.admin.internal.pu.events.InternalProcessingUnitStatusChangedEventManager;
+import org.openspaces.admin.internal.support.EventRegistrationHelper;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEventManager;
@@ -228,6 +230,16 @@ public class DefaultProcessingUnits implements InternalProcessingUnits {
     public void removeLifecycleListener(ProcessingUnitInstanceLifecycleEventListener eventListener) {
         getProcessingUnitInstanceAdded().remove(eventListener);
         getProcessingUnitInstanceRemoved().remove(eventListener);
+    }
+    
+    @Override
+    public void addEventListener(AdminEventListener eventListener) {
+        EventRegistrationHelper.addEventListener(admin, eventListener);
+    }
+    
+    @Override
+    public void removeEventListener(AdminEventListener eventListener) {
+        EventRegistrationHelper.removeEventListener(admin, eventListener);
     }
 
     public void addProcessingUnit(final ProcessingUnit processingUnit) {

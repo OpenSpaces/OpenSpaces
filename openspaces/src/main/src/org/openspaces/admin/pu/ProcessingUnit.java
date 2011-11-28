@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.openspaces.admin.AdminAware;
+import org.openspaces.admin.AdminEventListener;
 import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.application.Application;
 import org.openspaces.admin.gsm.GridServiceManager;
@@ -305,6 +306,24 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
      */
     void removeLifecycleListener(ProcessingUnitInstanceLifecycleEventListener eventListener);
 
+    /**
+     * Handy event listener addition to {@link ProcessingUnit} event listeners.
+     * Adds any listeners of a {@link ProcessingUnit} that extend the {@link org.openspaces.admin.AdminEventListener} interface.
+     *
+     * @see #removeEventListener(AdminEventListener)
+     * @since 8.0.6
+     */
+    void addEventListener(AdminEventListener eventListener);
+
+    /**
+     * Handy event listener removal to {@link ProcessingUnit} event listeners.
+     * Removes any listeners of a {@link ProcessingUnit} that extend the {@link org.openspaces.admin.AdminEventListener} interface.
+     *
+     * @see #addEventListener(AdminEventListener)
+     * @since 8.0.6
+     */
+    void removeEventListener(AdminEventListener eventListener);
+    
     /**
      * Returns an event manger allowing to listen for {@link org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEvent}s.
      */

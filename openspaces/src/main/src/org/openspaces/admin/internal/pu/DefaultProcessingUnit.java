@@ -14,6 +14,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.jini.rio.core.RequiredDependencies;
 import org.jini.rio.monitor.ProvisionLifeCycleEvent;
 import org.openspaces.admin.Admin;
+import org.openspaces.admin.AdminEventListener;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.application.Application;
@@ -48,6 +49,7 @@ import org.openspaces.admin.internal.pu.events.InternalProcessingUnitInstanceRem
 import org.openspaces.admin.internal.pu.events.InternalProcessingUnitInstanceStatisticsChangedEventManager;
 import org.openspaces.admin.internal.pu.events.InternalProcessingUnitSpaceCorrelatedEventManager;
 import org.openspaces.admin.internal.pu.events.InternalProcessingUnitStatusChangedEventManager;
+import org.openspaces.admin.internal.support.EventRegistrationHelper;
 import org.openspaces.admin.pu.DeploymentStatus;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
@@ -332,6 +334,16 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     public void removeLifecycleListener(ProcessingUnitInstanceLifecycleEventListener eventListener) {
         getProcessingUnitInstanceAdded().remove(eventListener);
         getProcessingUnitInstanceRemoved().remove(eventListener);
+    }
+    
+    @Override
+    public void addEventListener(AdminEventListener eventListener) {
+        EventRegistrationHelper.addEventListener(this, eventListener);
+    }
+    
+    @Override
+    public void removeEventListener(AdminEventListener eventListener) {
+        EventRegistrationHelper.removeEventListener(this, eventListener);
     }
 
     @Override
@@ -688,6 +700,9 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
             }
             processingUnitInstanceAddedEventManager.processingUnitInstanceAdded(processingUnitInstance);
             ((InternalProcessingUnitInstanceAddedEventManager) processingUnits.getProcessingUnitInstanceAdded()).processingUnitInstanceAdded(processingUnitInstance);
+            if (application != null) {
+                ((InternalProcessingUnitInstanceAddedEventManager) application.getProcessingUnits().getProcessingUnitInstanceAdded()).processingUnitInstanceAdded(processingUnitInstance);
+            }
         }
     }
 
@@ -701,6 +716,10 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
 
             processingUnitInstanceRemovedEventManager.processingUnitInstanceRemoved(processingUnitInstance);
             ((InternalProcessingUnitInstanceRemovedEventManager) processingUnits.getProcessingUnitInstanceRemoved()).processingUnitInstanceRemoved(processingUnitInstance);
+            
+            if (application != null) {
+                ((InternalProcessingUnitInstanceRemovedEventManager) application.getProcessingUnits().getProcessingUnitInstanceRemoved()).processingUnitInstanceRemoved(processingUnitInstance);
+            }
         }
     }
 
