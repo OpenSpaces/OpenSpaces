@@ -226,11 +226,6 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
     }
     
     public String getProcessingUnitInstanceName() {
-        SpaceInstance spaceInstance = getSpaceInstance();
-        
-        if (spaceInstance != null) {
-            return spaceInstance.getSpaceInstanceName();
-        }
         
         return NameUtils.getSpaceInstanceName( getName(), getClusterInfo().getInstanceId(), 
                                    getBackupId(), getClusterInfo().getNumberOfBackups() );
