@@ -1,5 +1,13 @@
 package org.openspaces.admin.internal.pu;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.pu.events.DefaultProcessingUnitInstanceAddedEventManager;
 import org.openspaces.admin.internal.pu.events.DefaultProcessingUnitInstanceRemovedEventManager;
@@ -10,16 +18,12 @@ import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventManager;
 
-import java.util.Iterator;
-import java.util.Map;
-import java.util.ArrayList;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.Collections;
-
 /**
  * @author kimchy
  */
 public class DefaultProcessingUnitInstances implements InternalProcessingUnitInstances {
+
+    private static final Log logger = LogFactory.getLog(DefaultProcessingUnitInstances.class);
 
     private final InternalAdmin admin;
 
@@ -61,6 +65,11 @@ public class DefaultProcessingUnitInstances implements InternalProcessingUnitIns
         ProcessingUnitInstance existingPU = processingUnitInstances.put(processingUnitInstance.getUid(), processingUnitInstance);
         if (existingPU == null) {
             processingUnitInstanceAddedEventManager.processingUnitInstanceAdded(processingUnitInstance);
+        }
+        else {
+            if (logger.isDebugEnabled()) {
+                logger.debug(processingUnitInstance.getProcessingUnitInstanceName() + " with id ["+ processingUnitInstance.getUid() + "] has already been added. No event is called.");
+            }
         }
     }
 

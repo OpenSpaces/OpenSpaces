@@ -875,6 +875,9 @@ public class DefaultAdmin implements InternalAdmin {
 
     @Override
     public synchronized void addProcessingUnitInstance(InternalProcessingUnitInstance processingUnitInstance, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Service Added [Processing Unit Instance] " + processingUnitInstance.getProcessingUnitInstanceName() + " with uid [" + processingUnitInstance.getUid() + "]");
+        }
         OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(processingUnitInstance, osDetails);
         VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(processingUnitInstance, jvmDetails, jmxUrl);
         InternalTransport transport = processTransportOnServiceAddition(processingUnitInstance, nioDetails, virtualMachine);
@@ -889,6 +892,9 @@ public class DefaultAdmin implements InternalAdmin {
         InternalGridServiceContainer gridServiceContainer = (InternalGridServiceContainer) gridServiceContainers.getContainerByUID(processingUnitInstance.getGridServiceContainerServiceID().toString());
 
         if (processingUnit == null || gridServiceContainer == null) {
+            if (logger.isDebugEnabled()) {
+                logger.debug(processingUnitInstance.getProcessingUnitInstanceName() + " is orphaned until it's hosting container is discovered");
+            }
             processingUnitInstances.addOrphaned(processingUnitInstance);
         } else {
             processProcessingUnitInstanceAddition(processingUnit, processingUnitInstance);
@@ -1009,6 +1015,9 @@ public class DefaultAdmin implements InternalAdmin {
     }
 
     private synchronized void processProcessingUnitInstanceAddition(InternalProcessingUnit processingUnit, InternalProcessingUnitInstance processingUnitInstance) {
+        if (logger.isDebugEnabled()) {
+            logger.debug(processingUnitInstance.getProcessingUnitInstanceName() + " is being added");
+        }
         processingUnitInstances.removeOrphaned(processingUnitInstance.getUid());
 
         processingUnitInstance.setProcessingUnit(processingUnit);
@@ -1039,8 +1048,11 @@ public class DefaultAdmin implements InternalAdmin {
         }
 
         processingUnitInstances.addInstance(processingUnitInstance);
+        
+        if (logger.isDebugEnabled()) {
+            logger.debug(processingUnitInstance.getProcessingUnitInstanceName() + " has been added");
+        }
     }
-
     private void processZonesOnServiceAddition(String[] zonesNames, String zoneUidProvider,
             InternalTransport transport, VirtualMachine virtualMachine, Machine machine,
             InternalZoneAware... zoneAwares) {
