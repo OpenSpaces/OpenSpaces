@@ -160,7 +160,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     /**
      * @Deprecated since 8.0.6 use gsm.deploy(puDeployment.addDependency("otherPU")) instead.
      */
-    private static final String APPLICATION_DEPENDENCIES_CONTEXT_PROPERTY = "com.gs.application.services";
+    private static final String APPLICATION_DEPENDENCIES_CONTEXT_PROPERTY = "com.gs.application.dependsOn";
 
 	private final String applicationName;
 
