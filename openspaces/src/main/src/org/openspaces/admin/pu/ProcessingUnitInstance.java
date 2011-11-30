@@ -32,6 +32,9 @@
 
 package org.openspaces.admin.pu;
 
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 import org.openspaces.admin.GridComponent;
 import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.gsc.GridServiceContainer;
@@ -48,9 +51,6 @@ import org.openspaces.pu.container.jee.JeeServiceDetails;
 import org.openspaces.pu.service.ServiceDetails;
 import org.openspaces.remoting.RemotingServiceDetails;
 
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
 /**
  * A processing unit instance is an actual running instance of a processing unit. For example, when deploying
  * a processing unit with 4 instance, there will be eventually 4 instances of the processing unit.
@@ -61,10 +61,11 @@ public interface ProcessingUnitInstance extends GridComponent, Iterable<ServiceD
 
     /**
      * Get this processing unit instance String representation.<br>
-     * If this processing unit instance represents a Space instance, this method will return
-     * {@link SpaceInstance#getSpaceInstanceName()}. Otherwise, it will return: {Processing unit
-     * name} [instance id] - the name of this processing unit (see {@link #getName()}) and the
-     * instance id (see {@link #getInstanceId()}); for example, MyPU [3]
+     * If this processing unit instance represents a Space instance, this method will return a
+     * similar result to {@link SpaceInstance#getSpaceInstanceName()}, but with the processing unit
+     * name as the Space name. Otherwise, it will return: {Processing unit name} [instance id] - the
+     * name of this processing unit (see {@link #getName()}) and the instance id (see
+     * {@link #getInstanceId()}); for example, MyPU [3]
      * 
      * @return this processing unit instance String representation.
      * @since 8.0.5
