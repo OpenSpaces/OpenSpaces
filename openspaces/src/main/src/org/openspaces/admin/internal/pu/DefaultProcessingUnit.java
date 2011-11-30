@@ -72,6 +72,7 @@ import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionAttemptEven
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionFailureEvent;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionFailureEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionFailureException;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionPendingEvent;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionPendingEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionSuccessEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventManager;
@@ -989,8 +990,9 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         	}
         	case ProvisionLifeCycleEvent.PENDING_ALLOCATION: {
         	    final String processingUnitInstanceName = provisionEvent.getProcessingUnitInstanceName();
-        	    processingUnitProvisionPendingEventManager.raisePendingEvent(provisionEvent, processingUnitInstanceName);
-                ((InternalProcessingUnitInstanceProvisionPendingEventManager)processingUnits.getProcessingUnitInstanceProvisionPending()).raisePendingEvent(provisionEvent, processingUnitInstanceName);
+        	    ProcessingUnitInstanceProvisionPendingEvent pendingEvent = new ProcessingUnitInstanceProvisionPendingEvent(this, processingUnitInstanceName);
+        	    processingUnitProvisionPendingEventManager.raisePendingEvent(provisionEvent, pendingEvent);
+                ((InternalProcessingUnitInstanceProvisionPendingEventManager)processingUnits.getProcessingUnitInstanceProvisionPending()).raisePendingEvent(provisionEvent, pendingEvent);
         	    break;
         	}
         	}

@@ -6,11 +6,11 @@ import org.openspaces.admin.pu.ProcessingUnitInstance;
 
 /**
  * An event indicating that an attempt to provision a processing unit instance occurred. An instance
- * is provisioned on a {@link GridServiceContainer} resulting in either success or failure. On
- * success, a {@link ProcessingUnitInstance} is created and available (see
- * {@link ProcessingUnitInstanceProvisionSuccessEventListener}). On failure, the failed instance is
- * scheduled to re-provision (see {@link ProcessingUnitInstanceProvisionFailureEventListener} and
- * {@link ProcessingUnitInstanceProvisionPendingEventListener}).
+ * is provisioned on a {@link GridServiceContainer} resulting in either success, failure or a
+ * pending state. On success, a {@link ProcessingUnitInstance} is created and available (see
+ * {@link ProcessingUnitInstanceProvisionSuccessEventListener}). On failure, the
+ * {@link ProcessingUnitInstanceProvisionFailureEventListener} is triggered. On pending state the
+ * {@link ProcessingUnitInstanceProvisionPendingEventListener}) is triggered.
  * 
  * @author moran
  * @since 8.0.6

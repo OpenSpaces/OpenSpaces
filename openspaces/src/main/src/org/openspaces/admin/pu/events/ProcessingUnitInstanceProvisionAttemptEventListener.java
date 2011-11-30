@@ -4,7 +4,7 @@ import org.openspaces.admin.AdminEventListener;
 
 /**
  * An event listener allowing to listen for {@link ProcessingUnitInstanceProvisionAttemptEvent}s.
- * An attempt to provision is either followed by a successful event or a failure event. 
+ * An attempt to provision is either followed by a successful event, a failure event or a pending event.
  *
  * @see org.openspaces.admin.pu.ProcessingUnit#getProcessingUnitInstanceProvisionAttempt()
  * @see org.openspaces.admin.pu.ProcessingUnits#getProcessingUnitInstanceProvisionAttempt()
