@@ -32,7 +32,7 @@ public class DefaultProcessingUnitInstanceProvisionPendingEventManager extends
         List<ProcessingUnitInstanceProvisionPendingEventListener> eventListeners = filterListenersBySequenceId(provisionEvent);
         
         for (final ProcessingUnitInstanceProvisionPendingEventListener listener : eventListeners) {
-            admin.raiseEvent(listener, new Runnable() {
+            admin.pushEvent(listener, new Runnable() {
                 public void run() {
                     listener.pending(processingUnitInstanceProvisionPendingEvent);
                 }

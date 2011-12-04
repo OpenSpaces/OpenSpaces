@@ -31,7 +31,7 @@ public class DefaultProcessingUnitInstanceProvisionAttemptEventManager extends
         List<ProcessingUnitInstanceProvisionAttemptEventListener> eventListeners = filterListenersBySequenceId(provisionEvent);
         
         for (final ProcessingUnitInstanceProvisionAttemptEventListener listener : eventListeners) {
-            admin.raiseEvent(listener, new Runnable() {
+            admin.pushEvent(listener, new Runnable() {
                 public void run() {
                     listener.attempt(processingUnitInstanceProvisionAttemptEvent);
                 }

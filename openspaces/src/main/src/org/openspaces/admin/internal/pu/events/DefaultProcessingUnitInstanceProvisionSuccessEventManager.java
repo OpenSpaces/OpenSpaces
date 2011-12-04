@@ -32,7 +32,7 @@ public class DefaultProcessingUnitInstanceProvisionSuccessEventManager extends
         List<ProcessingUnitInstanceProvisionSuccessEventListener> eventListeners = filterListenersBySequenceId(provisionEvent);
         
         for (final ProcessingUnitInstanceProvisionSuccessEventListener listener : eventListeners) {
-            admin.raiseEvent(listener, new Runnable() {
+            admin.pushEvent(listener, new Runnable() {
                 public void run() {
                     listener.success(processingUnitInstance);
                 }
