@@ -926,10 +926,15 @@ public class DefaultAdmin implements InternalAdmin {
             processVirtualMachineOnServiceRemoval(processingUnitInstance, processingUnitInstance, processingUnitInstance);
             processMachineOnServiceRemoval(processingUnitInstance, processingUnitInstance);
             processZonesOnServiceRemoval(processingUnitInstance.getUid(), processingUnitInstance);
-
+            if (logger.isDebugEnabled()) {
+                logger.debug("removed processing unit instance " + processingUnitInstance.getProcessingUnitInstanceName() +" uid:"+uid);
+            }
             if (removeEmbeddedSpaces) {
                 for (SpaceServiceDetails serviceDetails : processingUnitInstance.getEmbeddedSpacesDetails()) {
                     removeSpaceInstance(serviceDetails.getServiceID().toString());
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("removed space instance " + serviceDetails.getName() +" id:"+serviceDetails.getServiceID());
+                    }
                 }
             }
         }
