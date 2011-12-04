@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jini.rio.monitor.ProvisionLifeCycleEvent;
 import org.openspaces.admin.AdminEventListener;
@@ -20,10 +19,8 @@ public class AbstractProcessingUnitInstanceProvisionEventManager<L extends Admin
     private final Map<L, EventCursor> eventListeners = new ConcurrentHashMap<L, EventCursor>();
 
     private final class EventCursor {
-        //Maps partition-Id/pu-name -> sequence-Id
-        //usage of AtomicInteger for convenience because it has a set method! 
-        //There is no concurrency involved since it is a single threaded call
-        private final Map<String, AtomicInteger> lastSequenceIds = new HashMap<String, AtomicInteger>();
+        //Maps partition-Id/pu-name -> ProvisionLifeCycleEvent
+        private final Map<String, ProvisionLifeCycleEvent> lastProvisionEvents = new HashMap<String, ProvisionLifeCycleEvent>();
     }
     
     public AbstractProcessingUnitInstanceProvisionEventManager(InternalAdmin admin) {
@@ -41,8 +38,8 @@ public class AbstractProcessingUnitInstanceProvisionEventManager<L extends Admin
     /*
      * Extract only the listeners which haven't yet received this event using the event sequenceId. Listeners are updated with last sequence id.
      * 
-     * For each listener we keep a map of <partition-id,sequence-id> where the partition-id is either the [pu-name.instanceId] or just the [pu-name].
-     * The reason we keep this map is because the sequence id we receive from the GSM is per partition (ServiceElement).
+     * For each listener we keep a map of <partition-id,ProvisionLifeCycleEvent> where the partition-id is either the [pu-name.instanceId] or just the [pu-name].
+     * The reason we keep this map is because the ProvisionLifeCycleEvent.sequenceId we receive from the GSM is per partition (ServiceElement).
      */
     protected List<L> filterListenersBySequenceId(ProvisionLifeCycleEvent provisionEvent) {
         List<L> list = new ArrayList<L>();
@@ -51,21 +48,32 @@ public class AbstractProcessingUnitInstanceProvisionEventManager<L extends Admin
             EventCursor eventCursor = entry.getValue();
             
             String partitionId = provisionEvent.getPartitionId() != null ? provisionEvent.getPartitionId() : provisionEvent.getProcessingUnitName();
-            AtomicInteger lastSequenceId = eventCursor.lastSequenceIds.get(partitionId);
-            if (lastSequenceId == null) {
-                lastSequenceId = new AtomicInteger(-1); 
-                eventCursor.lastSequenceIds.put(partitionId, lastSequenceId);
-            }
-            
-            if (provisionEvent.getSequenceId() <= lastSequenceId.get()) {
+            ProvisionLifeCycleEvent lastProvisionEvent = eventCursor.lastProvisionEvents.get(partitionId);
+            if (lastProvisionEvent != null && !isNewEvent(provisionEvent, lastProvisionEvent)) {
                 continue;
             }
             
-            //update with last sequence id for this listener
-            lastSequenceId.set(provisionEvent.getSequenceId());
+            //update with last ProvisionLifeCycleEvent for this listener
+            eventCursor.lastProvisionEvents.put(partitionId, provisionEvent);
             list.add(listener);
         }
         
         return list;
+    }
+
+    /*
+     * Determine if this is a new event by comparing the source GSM service ID and the sequence ID applied by this GSM.
+     */
+    private boolean isNewEvent(ProvisionLifeCycleEvent provisionEvent, ProvisionLifeCycleEvent lastProvisionEvent) {
+        if (provisionEvent == lastProvisionEvent) {
+            return true;
+        }
+        //same managing GSM but smaller sequence id, not a new event
+        if (provisionEvent.getGsmServiceId().equals(lastProvisionEvent.getGsmServiceId()) 
+                && provisionEvent.getSequenceId() <= lastProvisionEvent.getSequenceId()) {
+            return false;
+        }
+        //either bigger sequence id or a managing gsm has changed - thus sequence id's don't match anymore.
+        return true;
     }
 }
