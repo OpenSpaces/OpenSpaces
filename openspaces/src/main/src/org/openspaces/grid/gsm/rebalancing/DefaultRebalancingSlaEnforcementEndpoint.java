@@ -31,6 +31,7 @@ import org.openspaces.grid.gsm.rebalancing.exceptions.ProcessingUnitIsNotInTactE
 import org.openspaces.grid.gsm.rebalancing.exceptions.RebalancingSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.rebalancing.exceptions.WrongContainerProcessingUnitRelocationException;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementEndpointDestroyedException;
+import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementException;
 
 import com.gigaspaces.cluster.activeelection.SpaceMode;
 
@@ -892,8 +893,9 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
                         + RebalancingUtils.puInstanceToString(puInstance));
 
             } catch (ExecutionException e) {
-                if (e.getCause() instanceof AdminException) {
-                    exception = (AdminException) e.getCause();
+                if (e.getCause() instanceof AdminException || 
+                    e.getCause() instanceof SlaEnforcementException) {
+                    exception = (Exception) e.getCause();
                 } else {
                     throw new IllegalStateException("Unexpected runtime exception", e);
                 }
