@@ -11,13 +11,13 @@ public interface ElasticDeploymentTopology extends ProcessingUnitDeploymentTopol
      * Sets the processing unit name that will be deployed. By default it will be based on the
      * parameter passed in the constructor.
      */
-    ProcessingUnitDeploymentTopology name(String name);
+    ElasticDeploymentTopology name(String name);
     
     /**
      * Defines a context deploy time property overriding any <code>${...}</code> defined within a processing
      * unit configuration.
      */
-     ProcessingUnitDeploymentTopology addContextProperty(String key, String value);
+    ElasticDeploymentTopology addContextProperty(String key, String value);
 
     /**
      * Will cause the {@link org.openspaces.admin.gsc.GridServiceContainer} to be started using a script
