@@ -621,6 +621,9 @@ public class DefaultAdmin implements InternalAdmin {
     
     @Override
     public synchronized void addGridServiceAgent(InternalGridServiceAgent gridServiceAgent, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Adding GSA uid=" + gridServiceAgent.getUid());
+        }
         OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(gridServiceAgent, osDetails);
         VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(gridServiceAgent, jvmDetails, jmxUrl);
         InternalTransport transport = processTransportOnServiceAddition(gridServiceAgent, nioDetails, virtualMachine);
@@ -653,6 +656,9 @@ public class DefaultAdmin implements InternalAdmin {
 
     @Override
     public synchronized void removeGridServiceAgent(String uid) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Removing GSA uid=" + uid);
+        }
         InternalGridServiceAgent gridServiceAgent = gridServiceAgents.removeGridServiceAgent(uid);
         if (gridServiceAgent != null) {
             gridServiceAgent.setDiscovered(false);
@@ -684,6 +690,9 @@ public class DefaultAdmin implements InternalAdmin {
     @Override
     public synchronized void addLookupService(InternalLookupService lookupService,
             NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Adding LUS uid=" + lookupService.getUid());
+        }
         OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(lookupService, osDetails);
         VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(lookupService, jvmDetails, jmxUrl );
         InternalTransport transport = processTransportOnServiceAddition(lookupService, nioDetails, virtualMachine);
@@ -709,6 +718,9 @@ public class DefaultAdmin implements InternalAdmin {
 
     @Override
     public synchronized void removeLookupService(String uid) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Removing LUS uid=" + uid);
+        }
         InternalLookupService lookupService = lookupServices.removeLookupService(uid);
         if (lookupService != null) {
             lookupService.setDiscovered(false);
@@ -731,6 +743,9 @@ public class DefaultAdmin implements InternalAdmin {
     @Override
     public synchronized void addGridServiceManager(InternalGridServiceManager gridServiceManager,
             NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Adding GSM uid=" + gridServiceManager.getUid());
+        }
         OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(gridServiceManager, osDetails);
         VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(gridServiceManager, jvmDetails, jmxUrl);
         InternalTransport transport = processTransportOnServiceAddition(gridServiceManager, nioDetails, virtualMachine);
@@ -755,6 +770,9 @@ public class DefaultAdmin implements InternalAdmin {
 
     @Override
     public synchronized void removeGridServiceManager(String uid) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Removing GSM uid=" + uid);
+        }
         InternalGridServiceManager gridServiceManager = gridServiceManagers.removeGridServiceManager(uid);
         if (gridServiceManager != null) {
             gridServiceManager.setDiscovered(false);
@@ -779,6 +797,9 @@ public class DefaultAdmin implements InternalAdmin {
     @Override
     public synchronized void addElasticServiceManager(InternalElasticServiceManager elasticServiceManager,
             NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Adding ESM uid=" + elasticServiceManager.getUid());
+        }
         OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(elasticServiceManager, osDetails);
         VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(elasticServiceManager, jvmDetails, jmxUrl );
         InternalTransport transport = processTransportOnServiceAddition(elasticServiceManager, nioDetails, virtualMachine);
@@ -803,6 +824,9 @@ public class DefaultAdmin implements InternalAdmin {
 
     @Override
     public synchronized void removeElasticServiceManager(String uid) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Removing ESM uid=" + uid);
+        }
         InternalElasticServiceManager elasticServiceManager = elasticServiceManagers.removeElasticServiceManager(uid);
         if (elasticServiceManager != null) {
             elasticServiceManager.setDiscovered(false);
@@ -827,6 +851,9 @@ public class DefaultAdmin implements InternalAdmin {
     @Override
     public synchronized void addGridServiceContainer(InternalGridServiceContainer gridServiceContainer,
             NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones) {
+    	 if (logger.isDebugEnabled()) {
+             logger.debug("Adding GSC uid=" + gridServiceContainer.getUid());
+         }
         OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(gridServiceContainer, osDetails);
         VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(gridServiceContainer, jvmDetails, jmxUrl);
         InternalTransport transport = processTransportOnServiceAddition(gridServiceContainer, nioDetails, virtualMachine);
@@ -852,6 +879,9 @@ public class DefaultAdmin implements InternalAdmin {
 
     @Override
     public synchronized void removeGridServiceContainer(String uid) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Removing GSC uid=" + uid);
+        }
         InternalGridServiceContainer gridServiceContainer = gridServiceContainers.removeGridServiceContainer(uid);
         if (gridServiceContainer != null) {
             gridServiceContainer.setDiscovered(false);
@@ -905,6 +935,9 @@ public class DefaultAdmin implements InternalAdmin {
 
     @Override
     public synchronized void removeProcessingUnitInstance(String uid, boolean removeEmbeddedSpaces) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Removing Processing Unit Instance uid=" + uid);
+        }
         processingUnitInstances.removeOrphaned(uid);
         InternalProcessingUnitInstance processingUnitInstance = (InternalProcessingUnitInstance) processingUnitInstances.removeInstance(uid);
         if (processingUnitInstance != null) {
@@ -944,6 +977,9 @@ public class DefaultAdmin implements InternalAdmin {
 
     @Override
     public synchronized void addSpaceInstance(InternalSpaceInstance spaceInstance, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Adding Space Instance uid=" + spaceInstance.getUid());
+        }
         OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(spaceInstance, osDetails);
         VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(spaceInstance, jvmDetails, jmxUrl);
         InternalTransport transport = processTransportOnServiceAddition(spaceInstance, nioDetails, virtualMachine);
@@ -981,6 +1017,9 @@ public class DefaultAdmin implements InternalAdmin {
 
     @Override
     public synchronized void removeSpaceInstance(String uid) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Removing Space Instance uid=" + uid);
+        }
         InternalSpaceInstance spaceInstance = (InternalSpaceInstance) spaces.removeSpaceInstance(uid);
         if (spaceInstance != null) {
             spaceInstance.setDiscovered(false);
