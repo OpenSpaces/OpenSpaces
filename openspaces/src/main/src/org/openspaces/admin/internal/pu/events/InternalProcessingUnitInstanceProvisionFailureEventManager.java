@@ -6,5 +6,5 @@ import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionFailureEven
 
 public interface InternalProcessingUnitInstanceProvisionFailureEventManager extends ProcessingUnitInstanceProvisionFailureEventManager {
     
-    void raiseFailureEvent(ProvisionLifeCycleEvent provisionEvent, ProcessingUnitInstanceProvisionFailureEvent processingUnitInstanceProvisionFailureEvent);
+    void raiseFailureEvent(ProvisionLifeCycleEvent provisionEvent, ProcessingUnitInstanceProvisionFailureEvent processingUnitInstanceProvisionFailureEvent, DefaultProcessingUnitInstanceProvisionEventsManager processingUnitInstanceProvisionEventsManager);
 }

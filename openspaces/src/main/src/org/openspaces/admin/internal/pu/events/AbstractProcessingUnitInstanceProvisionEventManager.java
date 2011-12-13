@@ -15,20 +15,16 @@ public class AbstractProcessingUnitInstanceProvisionEventManager<L extends Admin
 
     protected final InternalAdmin admin;
 
-    //keep a cursor per-listener with the last provision event sequence id.
-    private final Map<L, EventCursor> eventListeners = new ConcurrentHashMap<L, EventCursor>();
+    //keep a mapping per-listener with the last provision event sequence id indexed by processing unit instance name.
+    //Maps Listener -> Map of processing unit instance name -> ProvisionLifeCycleEvent
+    private final Map<L, Map<String, ProvisionLifeCycleEvent>> eventListeners = new ConcurrentHashMap<L, Map<String, ProvisionLifeCycleEvent>>();
 
-    private final class EventCursor {
-        //Maps partition-Id/pu-name -> ProvisionLifeCycleEvent
-        private final Map<String, ProvisionLifeCycleEvent> lastProvisionEvents = new HashMap<String, ProvisionLifeCycleEvent>();
-    }
-    
     public AbstractProcessingUnitInstanceProvisionEventManager(InternalAdmin admin) {
         this.admin = admin;
     }
     
     public void add(L listener) {
-        eventListeners.put(listener, new EventCursor());
+        eventListeners.put(listener, new HashMap<String, ProvisionLifeCycleEvent>());
     }
 
     public void remove(L listener) {
@@ -41,33 +37,43 @@ public class AbstractProcessingUnitInstanceProvisionEventManager<L extends Admin
      * For each listener we keep a map of <partition-id,ProvisionLifeCycleEvent> where the partition-id is either the [pu-name.instanceId] or just the [pu-name].
      * The reason we keep this map is because the ProvisionLifeCycleEvent.sequenceId we receive from the GSM is per partition (ServiceElement).
      */
-    protected List<L> filterListenersBySequenceId(ProvisionLifeCycleEvent provisionEvent) {
-        List<L> list = new ArrayList<L>();
-        for (Entry<L,EventCursor> entry : eventListeners.entrySet()) {
+    protected List<L> filterListenersBySequenceId(ProvisionLifeCycleEvent provisionEvent, DefaultProcessingUnitInstanceProvisionEventsManager processingUnitInstanceProvisionEventsManager) {
+        List<L> matchingListeners = new ArrayList<L>();
+        for (Entry<L,Map<String, ProvisionLifeCycleEvent>> entry : eventListeners.entrySet()) {
             L listener = entry.getKey();
-            EventCursor eventCursor = entry.getValue();
+            Map<String, ProvisionLifeCycleEvent> indexEventsByProcessingUnitInstanceName = entry.getValue();
             
-            String partitionId = provisionEvent.getPartitionId() != null ? provisionEvent.getPartitionId() : provisionEvent.getProcessingUnitName();
-            ProvisionLifeCycleEvent lastProvisionEvent = eventCursor.lastProvisionEvents.get(partitionId);
-            if (lastProvisionEvent != null && !isNewEvent(provisionEvent, lastProvisionEvent)) {
-                continue;
+            String key = provisionEvent.getProcessingUnitInstanceName();
+            ProvisionLifeCycleEvent lastProvisionEvent = indexEventsByProcessingUnitInstanceName.get(key);
+            
+            if (!isNewEvent(provisionEvent, lastProvisionEvent)) {
+                continue; //not a new event for this listener
             }
             
             //update with last ProvisionLifeCycleEvent for this listener
-            eventCursor.lastProvisionEvents.put(partitionId, provisionEvent);
-            list.add(listener);
+            indexEventsByProcessingUnitInstanceName.put(key, provisionEvent);
+
+            if (!processingUnitInstanceProvisionEventsManager.isListenerAssociatedWithProcessingUnitInstance(listener, key)) {
+                if (!processingUnitInstanceProvisionEventsManager.isLastProvisionEvent(provisionEvent)) {
+                    continue;  //not the last event for this processing unit instance - we need to reflect state.
+                }
+            }
+            
+            matchingListeners.add(listener);
+            processingUnitInstanceProvisionEventsManager.associateProcessingUnitInstanceNameWithListener(listener, key);
         }
         
-        return list;
+        return matchingListeners;
     }
 
     /*
      * Determine if this is a new event by comparing the source GSM service ID and the sequence ID applied by this GSM.
      */
     private boolean isNewEvent(ProvisionLifeCycleEvent provisionEvent, ProvisionLifeCycleEvent lastProvisionEvent) {
-        if (provisionEvent == lastProvisionEvent) {
+        if (lastProvisionEvent == null) {
             return true;
         }
+        
         //same managing GSM but smaller sequence id, not a new event
         if (provisionEvent.getGsmServiceId().equals(lastProvisionEvent.getGsmServiceId()) 
                 && provisionEvent.getSequenceId() <= lastProvisionEvent.getSequenceId()) {

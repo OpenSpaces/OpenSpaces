@@ -6,5 +6,5 @@ import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionPendingEven
 
 public interface InternalProcessingUnitInstanceProvisionPendingEventManager extends ProcessingUnitInstanceProvisionPendingEventManager {
     
-    void raisePendingEvent(ProvisionLifeCycleEvent provisionEvent, ProcessingUnitInstanceProvisionPendingEvent processingUnitInstanceProvisionPendingEvent);
+    void raisePendingEvent(ProvisionLifeCycleEvent provisionEvent, ProcessingUnitInstanceProvisionPendingEvent processingUnitInstanceProvisionPendingEvent, DefaultProcessingUnitInstanceProvisionEventsManager processingUnitInstanceProvisionEventsManager);
 }

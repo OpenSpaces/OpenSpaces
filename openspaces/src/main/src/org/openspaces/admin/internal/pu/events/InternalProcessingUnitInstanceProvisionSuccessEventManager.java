@@ -6,5 +6,5 @@ import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionSuccessEven
 
 public interface InternalProcessingUnitInstanceProvisionSuccessEventManager extends ProcessingUnitInstanceProvisionSuccessEventManager {
     
-    void raiseSuccessEvent(ProvisionLifeCycleEvent provisionEvent, ProcessingUnitInstance processingUnitInstance);
+    void raiseSuccessEvent(ProvisionLifeCycleEvent provisionEvent, ProcessingUnitInstance processingUnitInstance, DefaultProcessingUnitInstanceProvisionEventsManager processingUnitInstanceProvisionEventsManager);
 }

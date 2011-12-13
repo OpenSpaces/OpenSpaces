@@ -6,5 +6,5 @@ import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionAttemptEven
 
 public interface InternalProcessingUnitInstanceProvisionAttemptEventManager extends ProcessingUnitInstanceProvisionAttemptEventManager {
     
-    void raiseAttemptEvent(ProvisionLifeCycleEvent provisionEvent, ProcessingUnitInstanceProvisionAttemptEvent processingUnitInstanceProvisionAttemptEvent);
+    void raiseAttemptEvent(ProvisionLifeCycleEvent provisionEvent, ProcessingUnitInstanceProvisionAttemptEvent processingUnitInstanceProvisionAttemptEvent, DefaultProcessingUnitInstanceProvisionEventsManager processingUnitProvisionEventsManager);
 }

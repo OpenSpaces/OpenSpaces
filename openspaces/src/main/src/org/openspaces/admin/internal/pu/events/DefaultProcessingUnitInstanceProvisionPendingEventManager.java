@@ -27,9 +27,11 @@ public class DefaultProcessingUnitInstanceProvisionPendingEventManager extends
     
 
     @Override
-    public void raisePendingEvent(ProvisionLifeCycleEvent provisionEvent, final ProcessingUnitInstanceProvisionPendingEvent processingUnitInstanceProvisionPendingEvent) {
+    public void raisePendingEvent(ProvisionLifeCycleEvent provisionEvent,
+            final ProcessingUnitInstanceProvisionPendingEvent processingUnitInstanceProvisionPendingEvent,
+            DefaultProcessingUnitInstanceProvisionEventsManager processingUnitInstanceProvisionEventsManager) {
         
-        List<ProcessingUnitInstanceProvisionPendingEventListener> eventListeners = filterListenersBySequenceId(provisionEvent);
+        List<ProcessingUnitInstanceProvisionPendingEventListener> eventListeners = filterListenersBySequenceId(provisionEvent, processingUnitInstanceProvisionEventsManager);
         
         for (final ProcessingUnitInstanceProvisionPendingEventListener listener : eventListeners) {
             admin.pushEvent(listener, new Runnable() {

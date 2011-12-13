@@ -25,11 +25,12 @@ public class DefaultProcessingUnitInstanceProvisionFailureEventManager extends
         super.remove(listener);
     }
     
-    
     @Override
-    public void raiseFailureEvent(ProvisionLifeCycleEvent provisionEvent, final ProcessingUnitInstanceProvisionFailureEvent processingUnitInstanceProvisionFailureEvent) {
+    public void raiseFailureEvent(ProvisionLifeCycleEvent provisionEvent,
+            final ProcessingUnitInstanceProvisionFailureEvent processingUnitInstanceProvisionFailureEvent,
+            DefaultProcessingUnitInstanceProvisionEventsManager processingUnitInstanceProvisionEventsManager) {
         
-        List<ProcessingUnitInstanceProvisionFailureEventListener> eventListeners = filterListenersBySequenceId(provisionEvent);
+        List<ProcessingUnitInstanceProvisionFailureEventListener> eventListeners = filterListenersBySequenceId(provisionEvent, processingUnitInstanceProvisionEventsManager);
         
         for (final ProcessingUnitInstanceProvisionFailureEventListener listener : eventListeners) {
             admin.pushEvent(listener, new Runnable() {
