@@ -318,6 +318,10 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
                             catch (AdminException e) {
                                 logger.info("Cannot kill container " + ContainersSlaUtils.gscToString(container),e);
                             }
+                            catch (IllegalArgumentException e) {
+                                //GsaImpl throws IllegalArgumentException instead of AdminException in case the process no longer exists
+                                logger.info("Cannot kill container " + ContainersSlaUtils.gscToString(container),e);
+                            }
                         }
                     }
                 });
