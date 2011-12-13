@@ -465,7 +465,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
 
         InternalProcessingUnit internalPu = (InternalProcessingUnit) pu;
         Map<String, String> elasticProperties = internalPu.getElasticProperties();
-        if (elasticProperties != null && !elasticProperties.isEmpty())
+        if (!elasticProperties.isEmpty())
         {
             //If we have a pending update elastic properties command due to race condition
             if (pendingElasticPropertiesUpdatePerProcessingUnit.containsKey(pu.getName()))

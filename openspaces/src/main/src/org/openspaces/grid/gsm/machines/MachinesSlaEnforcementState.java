@@ -393,7 +393,7 @@ public class MachinesSlaEnforcementState {
                 
         for (ProcessingUnit pu : admin.getProcessingUnits()) {
             Map<String, String> elasticProperties = ((InternalProcessingUnit)pu).getElasticProperties();
-            if (elasticProperties != null && !elasticProperties.isEmpty() &&
+            if (!elasticProperties.isEmpty() &&
                 !isCompletedStateRecovery(pu)) {
                 
                 // found an elastic PU that has not completed state recovery
