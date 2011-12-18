@@ -2,11 +2,16 @@ package org.openspaces.admin.internal.alert.events;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.alert.Alert;
 import org.openspaces.admin.alert.events.AlertTriggeredEventListener;
+import org.openspaces.admin.internal.admin.DefaultAdmin;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.alert.InternalAlertManager;
+import org.openspaces.admin.internal.support.AlertsListenersRegistrationDelayAware;
 
 public class DefaultAlertEventManager implements InternalAlertTriggeredEventManager {
 
@@ -14,6 +19,8 @@ public class DefaultAlertEventManager implements InternalAlertTriggeredEventMana
     private final InternalAdmin admin;
 
     private final List<AlertTriggeredEventListener> listeners = new CopyOnWriteArrayList<AlertTriggeredEventListener>();
+    
+    private static final Log logger = LogFactory.getLog(DefaultAdmin.class);
 
     public DefaultAlertEventManager(InternalAlertManager alerts) {
         this.alerts = alerts;
@@ -26,7 +33,28 @@ public class DefaultAlertEventManager implements InternalAlertTriggeredEventMana
     }
 
     @Override
-    public void add(final AlertTriggeredEventListener eventListener, boolean includeExisting) {
+    public void add(final AlertTriggeredEventListener eventListener, final boolean includeExisting) {
+        
+        if( eventListener instanceof AlertsListenersRegistrationDelayAware ){
+            long alertsListenerRegistrationDelay = 
+                ( ( AlertsListenersRegistrationDelayAware )eventListener ).getAlertRegistrationDelay();
+            
+            admin.scheduleOneTimeWithDelayNonBlockingStateChange( new Runnable() {
+                
+                @Override
+                public void run() {
+
+                    addListener( eventListener, includeExisting );                    
+                }
+            }, alertsListenerRegistrationDelay, TimeUnit.MILLISECONDS );
+        }
+        else{
+            addListener( eventListener, includeExisting );
+        }
+    }
+
+    private void addListener(final AlertTriggeredEventListener eventListener, boolean includeExisting) {
+
         if (includeExisting) {
             admin.raiseEvent(eventListener, new Runnable() {
                 @Override

@@ -1,5 +1,7 @@
 package org.openspaces.admin.internal.support;
 
+import java.util.concurrent.TimeUnit;
+
 import org.openspaces.admin.AdminEventListener;
 import org.openspaces.admin.application.events.ApplicationAddedEventListener;
 import org.openspaces.admin.application.events.ApplicationRemovedEventListener;
@@ -52,8 +54,8 @@ import org.openspaces.admin.zone.events.ZoneRemovedEventListener;
  * @author kimchy
  */
 public abstract class EventRegistrationHelper {
-
-    public static void addEventListener(InternalAdmin admin, AdminEventListener eventListener) {
+    
+    public static void addEventListener( final InternalAdmin admin, final AdminEventListener eventListener) {
         if (eventListener instanceof ZoneAddedEventListener) {
             admin.getZones().getZoneAdded().add((ZoneAddedEventListener) eventListener);
         }
@@ -71,24 +73,6 @@ public abstract class EventRegistrationHelper {
         }
         if (eventListener instanceof VirtualMachineRemovedEventListener) {
             admin.getVirtualMachines().getVirtualMachineRemoved().add((VirtualMachineRemovedEventListener) eventListener);
-        }
-        if (eventListener instanceof VirtualMachineStatisticsChangedEventListener) {
-            admin.getVirtualMachines().getVirtualMachineStatisticsChanged().add((VirtualMachineStatisticsChangedEventListener) eventListener, true);
-        }
-        if (eventListener instanceof VirtualMachinesStatisticsChangedEventListener) {
-            admin.getVirtualMachines().getStatisticsChanged().add((VirtualMachinesStatisticsChangedEventListener) eventListener, true);
-        }
-        if (eventListener instanceof TransportsStatisticsChangedEventListener) {
-            admin.getTransports().getStatisticsChanged().add((TransportsStatisticsChangedEventListener) eventListener);
-        }
-        if (eventListener instanceof TransportStatisticsChangedEventListener) {
-            admin.getTransports().getTransportStatisticsChanged().add((TransportStatisticsChangedEventListener) eventListener);
-        }
-        if (eventListener instanceof OperatingSystemsStatisticsChangedEventListener) {
-            admin.getOperatingSystems().getStatisticsChanged().add((OperatingSystemsStatisticsChangedEventListener) eventListener);
-        }
-        if (eventListener instanceof OperatingSystemStatisticsChangedEventListener) {
-            admin.getOperatingSystems().getOperatingSystemStatisticsChanged().add((OperatingSystemStatisticsChangedEventListener) eventListener);
         }
         if (eventListener instanceof LookupServiceAddedEventListener) {
             admin.getLookupServices().getLookupServiceAdded().add((LookupServiceAddedEventListener) eventListener);
@@ -135,9 +119,6 @@ public abstract class EventRegistrationHelper {
         if (eventListener instanceof ProcessingUnitInstanceRemovedEventListener) {
             admin.getProcessingUnits().getProcessingUnitInstanceRemoved().add((ProcessingUnitInstanceRemovedEventListener) eventListener);
         }
-        if( eventListener instanceof ProcessingUnitInstanceStatisticsChangedEventListener ){
-            admin.getProcessingUnits().getProcessingUnitInstanceStatisticsChanged().add((ProcessingUnitInstanceStatisticsChangedEventListener) eventListener);
-        }
         if (eventListener instanceof ProcessingUnitInstanceProvisionAttemptEventListener) {
             admin.getProcessingUnits().getProcessingUnitInstanceProvisionAttempt().add((ProcessingUnitInstanceProvisionAttemptEventListener) eventListener);
         }
@@ -174,19 +155,74 @@ public abstract class EventRegistrationHelper {
         if (eventListener instanceof ReplicationStatusChangedEventListener) {
             admin.getSpaces().getReplicationStatusChanged().add((ReplicationStatusChangedEventListener) eventListener);
         }
-        if (eventListener instanceof SpaceStatisticsChangedEventListener) {
-            admin.getSpaces().getSpaceStatisticsChanged().add((SpaceStatisticsChangedEventListener) eventListener);
-        }
-        if (eventListener instanceof SpaceInstanceStatisticsChangedEventListener) {
-            admin.getSpaces().getSpaceInstanceStatisticsChanged().add((SpaceInstanceStatisticsChangedEventListener) eventListener);
-        }
         if (eventListener instanceof ApplicationAddedEventListener ){
             admin.getApplications().getApplicationAdded().add( (ApplicationAddedEventListener ) eventListener);
         }
         if (eventListener instanceof ApplicationRemovedEventListener ){
             admin.getApplications().getApplicationRemoved().add( ( ApplicationRemovedEventListener ) eventListener);
         }
+
+        //add statistics listeners
+        if( eventListener instanceof StatisticsListenersRegistrationDelayAware ){
+            
+            long statisticsListenerRegistrationDelay = 
+                ( ( StatisticsListenersRegistrationDelayAware )eventListener ).getStatisticsRegistrationDelay();
+            
+            admin.scheduleOneTimeWithDelayNonBlockingStateChange( new Runnable() {
+                
+                @Override
+                public void run() {
+                    addStatisticsListeners( admin, eventListener );
+                }
+            }   , statisticsListenerRegistrationDelay, TimeUnit.MILLISECONDS );
+        }
+        else{
+            addStatisticsListeners( admin, eventListener );
+        }
     }
+    
+
+    private static void addStatisticsListeners(InternalAdmin admin, AdminEventListener eventListener) {
+
+        if (eventListener instanceof VirtualMachineStatisticsChangedEventListener) {
+            admin.getVirtualMachines().getVirtualMachineStatisticsChanged().add(
+                    (VirtualMachineStatisticsChangedEventListener) eventListener, true);
+        }
+        if (eventListener instanceof VirtualMachinesStatisticsChangedEventListener) {
+            admin.getVirtualMachines().getStatisticsChanged().add(
+                    (VirtualMachinesStatisticsChangedEventListener) eventListener, true);
+        }
+        if (eventListener instanceof TransportsStatisticsChangedEventListener) {
+            admin.getTransports().getStatisticsChanged().add(
+                    (TransportsStatisticsChangedEventListener) eventListener);
+        }
+        if (eventListener instanceof TransportStatisticsChangedEventListener) {
+            admin.getTransports().getTransportStatisticsChanged().add(
+                    (TransportStatisticsChangedEventListener) eventListener);
+        }
+        if (eventListener instanceof OperatingSystemsStatisticsChangedEventListener) {
+            admin.getOperatingSystems().getStatisticsChanged().add(
+                    (OperatingSystemsStatisticsChangedEventListener) eventListener);
+        }
+        if (eventListener instanceof OperatingSystemStatisticsChangedEventListener) {
+            admin.getOperatingSystems().getOperatingSystemStatisticsChanged().add(
+                    (OperatingSystemStatisticsChangedEventListener) eventListener);
+        }
+        if( eventListener instanceof ProcessingUnitInstanceStatisticsChangedEventListener ){
+            admin.getProcessingUnits().getProcessingUnitInstanceStatisticsChanged().add(
+                    (ProcessingUnitInstanceStatisticsChangedEventListener) eventListener);
+        }
+        if (eventListener instanceof SpaceStatisticsChangedEventListener) {
+            admin.getSpaces().getSpaceStatisticsChanged().add(
+                    (SpaceStatisticsChangedEventListener) eventListener);
+        }
+        if (eventListener instanceof SpaceInstanceStatisticsChangedEventListener) {
+            admin.getSpaces().getSpaceInstanceStatisticsChanged().add(
+                    (SpaceInstanceStatisticsChangedEventListener) eventListener);
+        }
+    }
+
+
 
     public static void removeEventListener(InternalAdmin admin, AdminEventListener eventListener) {
         if (eventListener instanceof ZoneAddedEventListener) {
