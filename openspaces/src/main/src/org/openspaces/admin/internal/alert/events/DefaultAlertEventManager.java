@@ -4,11 +4,8 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.alert.Alert;
 import org.openspaces.admin.alert.events.AlertTriggeredEventListener;
-import org.openspaces.admin.internal.admin.DefaultAdmin;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.alert.InternalAlertManager;
 import org.openspaces.admin.internal.support.AlertsListenersRegistrationDelayAware;
@@ -20,8 +17,6 @@ public class DefaultAlertEventManager implements InternalAlertTriggeredEventMana
 
     private final List<AlertTriggeredEventListener> listeners = new CopyOnWriteArrayList<AlertTriggeredEventListener>();
     
-    private static final Log logger = LogFactory.getLog(DefaultAdmin.class);
-
     public DefaultAlertEventManager(InternalAlertManager alerts) {
         this.alerts = alerts;
         this.admin = (InternalAdmin) alerts.getAdmin();
