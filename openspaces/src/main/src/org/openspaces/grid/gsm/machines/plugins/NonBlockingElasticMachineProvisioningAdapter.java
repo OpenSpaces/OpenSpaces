@@ -76,7 +76,7 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
     					ref.set(new ExecutionException(e));
     				} catch (Exception e) {
     					logger.error("Unexpected exception", e);
-    					ref.set(new ExecutionException(e));
+    					ref.set(new ExecutionException("Unexpected exception when starting machine", e));
     				}
     			}
     
@@ -127,6 +127,10 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
     							"Async operation is not done yet.");
     				}
     
+    			    if (result instanceof ExecutionException) {
+                        throw ((ExecutionException) result);
+                    }
+    			    
     				if (result instanceof Exception) {
     					throw new ExecutionException((Exception) result);
     				}
@@ -205,7 +209,7 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
                     ref.set(new ExecutionException(e));
                 } catch (Exception e) {
                     logger.error("Unexpected exception", e);
-                    ref.set(new ExecutionException(e));
+                    ref.set(new ExecutionException("Unexpected exception",e));
                 }
             }
 
