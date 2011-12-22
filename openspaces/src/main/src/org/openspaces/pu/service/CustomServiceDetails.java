@@ -9,6 +9,7 @@ package org.openspaces.pu.service;
  */
 public class CustomServiceDetails extends PlainServiceDetails {
     public static final String SERVICE_TYPE = "custom-details";
+    private static final long serialVersionUID = -8038713604075604209L;
     
     // Just for externalizable
     public CustomServiceDetails() {
