@@ -7,6 +7,11 @@ import org.openspaces.admin.internal.application.DefaultApplicationDeploymentOpt
 import org.openspaces.admin.internal.application.InternalApplicationDeploymentOptions;
 import org.openspaces.admin.pu.topology.ProcessingUnitDeploymentTopology;
 
+/**
+ * Describes an application deployment that consists of one or more processing unit deployments.
+ * @since 8.0.6
+ * @author itaif
+ */
 public class ApplicationDeployment {
 
     private final String applicationName;
@@ -24,7 +29,19 @@ public class ApplicationDeployment {
         }
     }
 
+    /**
+     * Deprecated Method. Use {@link #addProcessingUnitDeployment(ProcessingUnitDeploymentTopology)} instead
+     */
+    @Deprecated
     public ApplicationDeployment deployProcessingUnit(ProcessingUnitDeploymentTopology puDeployment) {
+        return addProcessingUnitDeployment(puDeployment);
+    }
+
+    /**
+     * Adds a processing unit deployment to this application deployment.
+     * All processing units are deployed in parallel (unless dependencies are defined)
+     */
+    public ApplicationDeployment addProcessingUnitDeployment(ProcessingUnitDeploymentTopology puDeployment) {
         processingUnitDeployments.add(puDeployment);
         return this;
     }
