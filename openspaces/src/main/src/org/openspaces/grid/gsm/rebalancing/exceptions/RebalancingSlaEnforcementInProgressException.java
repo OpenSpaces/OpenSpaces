@@ -13,8 +13,8 @@ public class RebalancingSlaEnforcementInProgressException extends SlaEnforcement
 
     public RebalancingSlaEnforcementInProgressException(ProcessingUnit pu, String message) {
         super(inProgressMessage(pu)+": " + message + 
-                "\nInstances " + RebalancingUtils.processingUnitDeploymentToString(pu) + 
-                "\nStatus = " + pu.getStatus());
+                " Instances " + RebalancingUtils.processingUnitDeploymentToString(pu) + 
+                " Status = " + pu.getStatus());
     }
     
     private static String inProgressMessage(ProcessingUnit pu) {
