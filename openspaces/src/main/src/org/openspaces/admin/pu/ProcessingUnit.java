@@ -106,7 +106,7 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
     int getTotalNumberOfInstances();
 
     /**
-     * Returns the number of instnaces of this processing unit that can run within a VM.
+     * Returns the number of instances of this processing unit that can run within a VM.
      *
      * <p>In case of a partitioned with backup topology, it applies on a per partition level (meaning that a
      * primary and backup will not run on the same VM).
@@ -117,7 +117,7 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
     int getMaxInstancesPerVM();
 
     /**
-     * Returns the number of instnaces of this processing unit that can run within a Machine.
+     * Returns the number of instances of this processing unit that can run within a Machine.
      *
      * <p>In case of a partitioned with backup topology, it applies on a per partition level (meaning that a
      * primary and backup will not run on the same Machine).
@@ -418,7 +418,8 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
     boolean scaleAndWait(ScaleStrategyConfig strategyConfig, long timeout, TimeUnit timeUnit);
     
     /**
-     * @return the application that this pu is associated with or null if this processing unit is not part of an application
+     * @return the application that this processing unit is associated with or null if this
+     *         processing unit is not part of an application
      * 
      * @since 8.0.3
      */
