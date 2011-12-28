@@ -104,6 +104,8 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     private final InternalAdmin admin;
 
     private final String name;
+    
+    private final String simpleName;
 
     private volatile int numberOfInstances;
 
@@ -214,6 +216,22 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
             //Deprecated
             applicationName = getBeanLevelProperties().getContextProperties().getProperty(APPLICATION_NAME_CONTEXT_PROPERTY);
         }
+        
+
+        //initialize simpleName
+        if( applicationName != null && applicationName.trim().length() > 0  ){
+            String applNamePrefix = applicationName + ".";
+            if( name.startsWith( applNamePrefix ) ){
+                simpleName = name.substring( applNamePrefix.length() );
+            }
+            else{
+                simpleName = name;
+            }
+        }
+        else{
+            simpleName = name;
+        }
+        
     
         try {
             this.sla = (SLA) details.getSla().get();
@@ -1030,5 +1048,10 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         }
         
         return gsc;
+    }
+
+    @Override
+    public String getSimpleName() {
+        return simpleName;
     }
 }

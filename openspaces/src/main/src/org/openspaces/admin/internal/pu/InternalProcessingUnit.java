@@ -40,6 +40,14 @@ public interface InternalProcessingUnit extends ProcessingUnit, InternalProcessi
     String getApplicationName();
     
     String getClusterSchema();
+    
+    /**
+     * In the case of application name prefix just processing unit name will be returned.
+     * Otherwise name will be returned.
+     * @return
+     * @since 8.0.6
+     */
+    String getSimpleName();
 
     /**
      * Retrieves a context property containing the order of dependencies within an application.

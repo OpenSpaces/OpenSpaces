@@ -40,4 +40,10 @@ public interface InternalProcessingUnitInstance extends ProcessingUnitInstance, 
 
     boolean isUndeploying();
 
+    /**
+     * Return instance name without prefix of application name ( if exists )
+     * @since 8.0.6
+     * @return
+     */
+    String getProcessingUnitInstanceSimpleName();
 }

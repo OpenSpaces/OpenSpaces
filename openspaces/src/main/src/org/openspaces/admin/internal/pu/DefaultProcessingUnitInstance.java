@@ -227,9 +227,19 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
     
     public String getProcessingUnitInstanceName() {
         
-        return NameUtils.getSpaceInstanceName( getName(), getClusterInfo().getInstanceId(), 
-                                   getBackupId(), getClusterInfo().getNumberOfBackups() );
+        return NameUtils.getSpaceInstanceName( 
+                    getName(), getClusterInfo().getInstanceId(), getBackupId(), 
+                    getClusterInfo().getNumberOfBackups() );
     }
+    
+    @Override
+    public String getProcessingUnitInstanceSimpleName() {
+        return NameUtils.getSpaceInstanceName( 
+                ( ( InternalProcessingUnit )getProcessingUnit() ).getSimpleName(),
+                getClusterInfo().getInstanceId(), 
+                getBackupId(), getClusterInfo().getNumberOfBackups() );
+    }
+    
 
     public void setProcessingUnit(ProcessingUnit processingUnit) {
         assertStateChangesPermitted();
@@ -633,4 +643,5 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
             throw new AdminException("Failed to check if processing unit instance is alive", e);
         }
     }
+
 }
