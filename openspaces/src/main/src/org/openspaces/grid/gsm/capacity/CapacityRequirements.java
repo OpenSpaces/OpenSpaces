@@ -291,6 +291,9 @@ public class CapacityRequirements {
                 return s1.compareTo(s2);
             }
         });
+        if (sortedRequirements.isEmpty()) {
+            sortedRequirements.add(new MemoryCapacityRequirement());
+        }
         return StringUtils.arrayToCommaDelimitedString(
                 sortedRequirements.toArray(new CapacityRequirement[sortedRequirements.size()]));
     }
