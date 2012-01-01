@@ -25,6 +25,7 @@ import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisi
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioningAdapterFactory;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcement;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcementEndpoint;
+import org.openspaces.grid.gsm.strategy.ElasticScaleStrategyEventStorage;
 import org.openspaces.grid.gsm.strategy.ScaleStrategyBean;
 import org.openspaces.grid.gsm.strategy.UndeployScaleStrategyBean;
 /**
@@ -49,7 +50,8 @@ public class ScaleBeanServer {
             ContainersSlaEnforcement containersSlaEnforcement,
             MachinesSlaEnforcement machinesSlaEnforcement,
             NonBlockingElasticMachineProvisioningAdapterFactory nonBlockingAdapterFactory,
-            ElasticMachineIsolationConfig isolationConfig) {
+            ElasticMachineIsolationConfig isolationConfig,
+            ElasticScaleStrategyEventStorage eventStorage) {
 
         if (pu == null) {
             throw new IllegalArgumentException("pu cannot be null");
@@ -65,6 +67,10 @@ public class ScaleBeanServer {
         
         if (machinesSlaEnforcement == null) {
             throw new IllegalArgumentException("machinesSlaEnforcement cannot be null");
+        }
+        
+        if (eventStorage == null) {
+            throw new IllegalArgumentException("eventStorage cannot be null");
         }
         
         this.pu = pu;
@@ -101,7 +107,8 @@ public class ScaleBeanServer {
                         containersSlaEnforcementEndpoint,
                         machinesSlaEnforcementEndpoint,
                         nonBlockingAdapterFactory,
-                        isolationConfig));
+                        isolationConfig,
+                        eventStorage));
         
     }
      

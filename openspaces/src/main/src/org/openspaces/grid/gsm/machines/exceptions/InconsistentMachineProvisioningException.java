@@ -6,7 +6,7 @@ import java.util.Collection;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.grid.gsm.machines.MachinesSlaUtils;
 
-public class InconsistentMachineProvisioningException extends MachinesSlaEnforcementInProgressException{
+public class InconsistentMachineProvisioningException extends GridServiceAgentSlaEnforcementInProgressException{
     
     private static final long serialVersionUID = 1L;
 

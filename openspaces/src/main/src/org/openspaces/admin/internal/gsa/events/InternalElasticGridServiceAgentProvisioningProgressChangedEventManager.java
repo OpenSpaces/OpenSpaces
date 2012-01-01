@@ -1,0 +1,9 @@
+package org.openspaces.admin.internal.gsa.events;
+
+import org.openspaces.admin.gsa.events.ElasticGridServiceAgentProvisioningProgressChangedEventListener;
+import org.openspaces.admin.gsa.events.ElasticGridServiceAgentProvisioningProgressChangedEventManager;
+
+public interface InternalElasticGridServiceAgentProvisioningProgressChangedEventManager 
+    extends ElasticGridServiceAgentProvisioningProgressChangedEventManager,ElasticGridServiceAgentProvisioningProgressChangedEventListener{
+
+}

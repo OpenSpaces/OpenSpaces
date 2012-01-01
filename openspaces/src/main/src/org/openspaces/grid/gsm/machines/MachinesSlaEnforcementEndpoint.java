@@ -1,8 +1,9 @@
 package org.openspaces.grid.gsm.machines;
 
 import org.openspaces.grid.gsm.capacity.ClusterCapacityRequirements;
+import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcementInProgressException;
+import org.openspaces.grid.gsm.machines.exceptions.MachinesSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpoint;
-import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementEndpointDestroyedException;
 
 
 /**
@@ -12,12 +13,15 @@ import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementEndpointDestroyedExc
  *
  * @see CapacityMachinesSlaPolicy
  */
-public interface MachinesSlaEnforcementEndpoint 
-    extends ServiceLevelAgreementEnforcementEndpoint<CapacityMachinesSlaPolicy> {
+public interface MachinesSlaEnforcementEndpoint extends ServiceLevelAgreementEnforcementEndpoint{
+    
+    void enforceSla(EagerMachinesSlaPolicy sla) throws GridServiceAgentSlaEnforcementInProgressException;
+    
+    void enforceSla(CapacityMachinesSlaPolicy sla) throws MachinesSlaEnforcementInProgressException, GridServiceAgentSlaEnforcementInProgressException;
     
     /**
      * @return a list of agents for this pu including memory/cpu for each.
      */
-    ClusterCapacityRequirements getAllocatedCapacity() throws SlaEnforcementEndpointDestroyedException;
+    ClusterCapacityRequirements getAllocatedCapacity();
 
 }

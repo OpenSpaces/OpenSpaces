@@ -10,4 +10,7 @@ public class ContainersSlaEnforcementInProgressException extends SlaEnforcementI
         super(message);
     }
     
+    public ContainersSlaEnforcementInProgressException(String message, Exception reason) {
+        super(message, reason);
+    }
 }

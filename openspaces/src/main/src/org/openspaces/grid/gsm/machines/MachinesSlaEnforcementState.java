@@ -34,6 +34,7 @@ public class MachinesSlaEnforcementState {
     private final Map<ProcessingUnit, ElasticProcessingUnitMachineIsolation> machineIsolationPerProcessingUnit;
     private final Map<ProcessingUnit,Map<String,Long>> timeoutTimestampPerAgentUidGoingDownPerProcessingUnit;
     private final Set<ProcessingUnit> completedStateRecoveryAfterRestartPerProcessingUnit;
+    private final Set<ProcessingUnit> isSlaEnforcementCompletePerProcessingUnit;
     
     public MachinesSlaEnforcementState() {
         this.logger = 
@@ -46,6 +47,7 @@ public class MachinesSlaEnforcementState {
         machineIsolationPerProcessingUnit = new HashMap<ProcessingUnit, ElasticProcessingUnitMachineIsolation>();
         timeoutTimestampPerAgentUidGoingDownPerProcessingUnit = new HashMap<ProcessingUnit,Map<String,Long>>();
         completedStateRecoveryAfterRestartPerProcessingUnit = new HashSet<ProcessingUnit>();
+        isSlaEnforcementCompletePerProcessingUnit = new HashSet<ProcessingUnit>();
     }
 
     public void initProcessingUnit(ProcessingUnit pu) {
@@ -62,6 +64,7 @@ public class MachinesSlaEnforcementState {
         futureAgentsPerProcessingUnit.remove(pu);
         markedForDeallocationCapacityPerProcessingUnit.remove(pu);
         timeoutTimestampPerAgentUidGoingDownPerProcessingUnit.remove(pu);
+        isSlaEnforcementCompletePerProcessingUnit.remove(pu);
     }
 
     public boolean isProcessingUnitDestroyed(ProcessingUnit pu) {
@@ -193,8 +196,8 @@ public class MachinesSlaEnforcementState {
         
         ClusterCapacityRequirements allUsedCapacity = new ClusterCapacityRequirements();
         
-        for (ClusterCapacityRequirements CapacityRequirements : this.allocatedCapacityPerProcessingUnit.values()) {
-            allUsedCapacity = allUsedCapacity.add(CapacityRequirements);
+        for (ClusterCapacityRequirements capacityRequirements : this.allocatedCapacityPerProcessingUnit.values()) {
+            allUsedCapacity = allUsedCapacity.add(capacityRequirements);
         }
         
         for (ClusterCapacityRequirements markedForDeallocationCapacity : this.markedForDeallocationCapacityPerProcessingUnit.values()) {
@@ -340,6 +343,23 @@ public class MachinesSlaEnforcementState {
    }
 
     /**
+     * @return all processing units that have a share of the specified future machine
+     * not implemented yet. See GS-9484
+     */
+    public String[] getProcessingUnitsOfFutureMachine(ProcessingUnit pu, FutureGridServiceAgent futureAgent) {
+        
+        return new String[] {pu.getName()};
+    }
+    
+    public void slaEnforcementComplete(ProcessingUnit pu) {
+        this.isSlaEnforcementCompletePerProcessingUnit.add(pu);
+    }
+    
+    public void slaEnforcementInProgress(ProcessingUnit pu) {
+        this.isSlaEnforcementCompletePerProcessingUnit.remove(pu);
+    }
+    
+    /**
      * @return false only if a disjoints b (a and b have nothing in common) 
      * @param keySet
      * @param restrictedContainerZones
@@ -401,5 +421,9 @@ public class MachinesSlaEnforcementState {
             }
         }
         return processingUnits;
+    }
+
+    public Map<ProcessingUnit,ClusterCapacityRequirements> getAllocatedCapacityPerProcessingUnit() {
+        return allocatedCapacityPerProcessingUnit;
     }
 }

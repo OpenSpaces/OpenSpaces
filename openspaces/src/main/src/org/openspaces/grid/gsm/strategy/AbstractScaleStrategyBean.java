@@ -8,20 +8,24 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.Admin;
-import org.openspaces.admin.AdminException;
-import org.openspaces.admin.alert.Alert;
-import org.openspaces.admin.alert.AlertFactory;
-import org.openspaces.admin.alert.AlertSeverity;
-import org.openspaces.admin.alert.AlertStatus;
 import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.gsa.GridServiceAgent;
+import org.openspaces.admin.gsa.events.ElasticGridServiceAgentProvisioningFailureEvent;
+import org.openspaces.admin.gsa.events.ElasticGridServiceAgentProvisioningProgressChangedEvent;
+import org.openspaces.admin.gsc.GridServiceContainer;
+import org.openspaces.admin.gsc.events.ElasticGridServiceContainerProvisioningFailureEvent;
+import org.openspaces.admin.gsc.events.ElasticGridServiceContainerProvisioningProgressChangedEvent;
 import org.openspaces.admin.internal.admin.InternalAdmin;
-import org.openspaces.admin.internal.alert.InternalAlertManager;
 import org.openspaces.admin.internal.pu.elastic.ElasticMachineIsolationConfig;
 import org.openspaces.admin.internal.pu.elastic.ProcessingUnitSchemaConfig;
 import org.openspaces.admin.internal.pu.elastic.ScaleStrategyConfigUtils;
+import org.openspaces.admin.machine.events.ElasticMachineProvisioningFailureEvent;
+import org.openspaces.admin.machine.events.ElasticMachineProvisioningProgressChangedEvent;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
+import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitInstanceProvisioningFailureEvent;
+import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitInstanceProvisioningProgressChangedEvent;
+import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitScaleProgressChangedEvent;
 import org.openspaces.core.bean.Bean;
 import org.openspaces.core.internal.commons.math.fraction.Fraction;
 import org.openspaces.core.util.StringProperties;
@@ -29,32 +33,27 @@ import org.openspaces.grid.gsm.ElasticMachineProvisioningAware;
 import org.openspaces.grid.gsm.LogPerProcessingUnit;
 import org.openspaces.grid.gsm.ProcessingUnitAware;
 import org.openspaces.grid.gsm.SingleThreadedPollingLog;
+import org.openspaces.grid.gsm.containers.exceptions.ContainersSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.machines.MachinesSlaUtils;
+import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcementInProgressException;
+import org.openspaces.grid.gsm.machines.exceptions.MachinesSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.machines.isolation.DedicatedMachineIsolation;
 import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIsolation;
 import org.openspaces.grid.gsm.machines.isolation.SharedMachineIsolation;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
-import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementEndpointDestroyedException;
-import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementException;
-import org.openspaces.grid.gsm.strategy.ProvisionedMachinesCache.AgentsNotYetDiscoveredException;
+import org.openspaces.grid.gsm.rebalancing.exceptions.RebalancingSlaEnforcementInProgressException;
+import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
+import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementInProgressException;
 
 public abstract class AbstractScaleStrategyBean implements 
     ElasticMachineProvisioningAware ,
     ProcessingUnitAware,
+    ElasticScaleStrategyEventStorageAware,
     ScaleStrategyBean,
     Bean,
     Runnable{
     
     private static final int MAX_NUMBER_OF_MACHINES = 1000; // a very large number representing max number of machines per pu, but that would not overflow when multiplied by container capacity in MB
-    
-    private static final String MACHINES_ALERT_GROUP_UID_PREFIX = "3BA87E89-449A-4abc-A632-4732246A9EE4";
-    private static final String REBALANCING_ALERT_GROUP_UID_PREFIX  = "4499C1ED-1584-4387-90CF-34C5EC236644";
-    private static final String CONTAINERS_ALERT_GROUP_UID_PREFIX  = "47A94111-5665-4214-9F7A-2962D998DD12";
-
-    private static final String MACHINES_ALERT_NAME = "Machine Provisioning Alert";
-    private static final String CONTAINERS_ALERT_NAME = "Container Provisioning Alert";
-    private static final String REBALANCING_ALERT_NAME = "Processing Unit Deployment and Rebalancing Alert";
-    
     
     // injected 
     private InternalAdmin admin;
@@ -69,11 +68,22 @@ public abstract class AbstractScaleStrategyBean implements
     private int minimumNumberOfMachines;    
     private ElasticProcessingUnitMachineIsolation isolation;
     private ScheduledFuture<?> scheduledTask;
-    
+        
     // state
     private ProvisionedMachinesCache provisionedMachines;
-
     private boolean isScaleInProgress;
+
+    // events state 
+    private boolean puProvisioningInProgressEventRaised;
+    private boolean puProvisioningCompletedEventRaised;
+    private boolean containerProvisioningInProgressEventRaised;
+    private boolean containerProvisioningCompletedEventRaised;
+    private boolean machineProvisioningInProgressEventRaised;
+    private boolean machineProvisioningCompletedEventRaised;
+    private boolean agentProvisioningCompletedEventRaised;
+    private boolean agentProvisioningInProgressEventRaised;
+
+    private ElasticScaleStrategyEventStorage eventQueue;
     
     
     protected InternalAdmin getAdmin() {
@@ -87,11 +97,13 @@ public abstract class AbstractScaleStrategyBean implements
     protected int getMinimumNumberOfMachines() {
         return minimumNumberOfMachines;
     }
-    
+
+    @Override
     public Map<String, String> getProperties() {
         return properties.getProperties();
     }
 
+    @Override
     public void setProcessingUnit(ProcessingUnit pu) {
         this.pu = pu;
     }
@@ -100,38 +112,46 @@ public abstract class AbstractScaleStrategyBean implements
     protected ProcessingUnit getProcessingUnit() {
         return pu;
     }
-
-    public long getPollingIntervalSeconds() {
+    
+    protected long getPollingIntervalSeconds() {
         return ScaleStrategyConfigUtils.getPollingIntervalSeconds(properties);
     }
     
+    @Override
     public void setElasticMachineIsolation(ElasticMachineIsolationConfig isolationConfig) {
         this.isolationConfig = isolationConfig;
     }
     
-    public ElasticProcessingUnitMachineIsolation getIsolation() {
+    protected ElasticProcessingUnitMachineIsolation getIsolation() {
         return isolation;
     }
-    
+
+    @Override
     public void setProcessingUnitSchema(ProcessingUnitSchemaConfig schemaConfig) {
         this.schemaConfig = schemaConfig;
     }
-    
 
     protected ProcessingUnitSchemaConfig getSchemaConfig() {
         return schemaConfig;
     }
     
+    @Override
     public void setAdmin(Admin admin) {
         this.admin = (InternalAdmin) admin;
     }
   
+    @Override
     public void setElasticMachineProvisioning(NonBlockingElasticMachineProvisioning machineProvisioning) {
         this.machineProvisioning = machineProvisioning;
     }
     
-    public NonBlockingElasticMachineProvisioning getMachineProvisioning() {
+    protected NonBlockingElasticMachineProvisioning getMachineProvisioning() {
         return machineProvisioning;
+    }
+    
+    @Override
+    public void setElasticScaleStrategyEventStorage(ElasticScaleStrategyEventStorage eventQueue) {
+        this.eventQueue = eventQueue;
     }
     
     public void afterPropertiesSet() {
@@ -262,32 +282,6 @@ public abstract class AbstractScaleStrategyBean implements
         }
     }
     
-    private void triggerAlert(AlertSeverity severity, AlertStatus status, String alertGroupUidPrefix, String alertName, String alertDescription) {
-        
-        String groupUid = alertGroupUidPrefix + "-" + getProcessingUnit().getName();
-        Alert[] alertsByGroupUid = ((InternalAlertManager)admin.getAlertManager()).getAlertRepository().getAlertsByGroupUid(groupUid);
-        boolean filterAlert = 
-                 alertsByGroupUid.length > 0 && 
-                 alertsByGroupUid[0].getSeverity().equals(severity) &&
-                 alertsByGroupUid[0].getStatus().equals(status) &&
-                 alertsByGroupUid[0].getName().equals(alertName) &&
-                 alertsByGroupUid[0].getDescription().equals(alertDescription);
-
-        if (!filterAlert) {
-            AlertFactory alertFactory = new AlertFactory();
-            alertFactory.name(alertName);
-            alertFactory.description(alertDescription);
-            alertFactory.severity(severity);    
-            alertFactory.status(status);
-            alertFactory.componentUid(getProcessingUnit().getName());
-            alertFactory.groupUid(groupUid);
-            getAdmin().getAlertManager().triggerAlert(alertFactory.toAlert());
-            
-            if (getLogger().isInfoEnabled()) {
-                getLogger().info(alertDescription);
-            }
-        }
-    }
 
     @Override
     public void run() {
@@ -306,77 +300,136 @@ public abstract class AbstractScaleStrategyBean implements
             
             isException = false;
         }
-        catch (SlaEnforcementEndpointDestroyedException e) {
-            if (getLogger().isDebugEnabled()) {
-                getLogger().debug("AdminService was destroyed",e);
-            }
-        }
-        catch (AgentsNotYetDiscoveredException e) {
-            if (getLogger().isDebugEnabled()) {
-                getLogger().debug("Existing agents not discovered yet",e);
-            }
-        }
-        catch (SlaEnforcementException e) {
+        catch (SlaEnforcementInProgressException e) {
             if (getLogger().isDebugEnabled()) {
                 getLogger().debug("SLA has not been reached",e);
             }
-        }
-        catch (AdminException e) {
-            getLogger().warn("Unhandled AdminException",e);
         }
         catch (Exception e) {
             getLogger().error("Unhandled Exception",e);
         }
         finally {
             isScaleInProgress = isException;
+            
+            boolean isCompleted = !isScaleInProgress;
+            eventQueue.enqueu(
+                    new ElasticProcessingUnitScaleProgressChangedEvent(isCompleted, isUndeploying(), getProcessingUnit().getName()));
         }
     }
 
-    protected abstract void enforceSla() throws SlaEnforcementException;
+    protected abstract void enforceSla() throws SlaEnforcementInProgressException;
     
-    protected void raiseMachinesAlert(SlaEnforcementException e) {
-        //TODO: Add alert specific properties
-        //TODO: Add inner inner exception type and message
-        triggerMachinesAlert(AlertStatus.RAISED, e.getMessage());
-    }
-    
-    protected void resolveMachinesAlert(String alertDescription) {
-        triggerMachinesAlert(AlertStatus.RESOLVED, alertDescription);
-    }
-    
-    private void triggerMachinesAlert(AlertStatus status, String alertDescription) {
-        triggerAlert(AlertSeverity.WARNING, status, MACHINES_ALERT_GROUP_UID_PREFIX, MACHINES_ALERT_NAME, alertDescription);
-    }
-    
-    protected void raiseContainersAlert(SlaEnforcementException e) {
-        //TODO: Add alert specific properties
-        //TODO: Add inner inner exception type and message
-        triggerContainersAlert(AlertStatus.RAISED, e.getMessage());
-    }
-    
-    protected void resolveContainersAlert(String alertDescription) {
-        triggerContainersAlert(AlertStatus.RESOLVED, alertDescription);
-    }
-    
-    private void triggerContainersAlert(AlertStatus status, String alertDescription) {
-        triggerAlert(AlertSeverity.WARNING, status, CONTAINERS_ALERT_GROUP_UID_PREFIX, CONTAINERS_ALERT_NAME, alertDescription);
-    }
-    
-    protected void raiseRebalancingAlert(SlaEnforcementException e) {
-        //TODO: Add alert specific properties
-        //TODO: Add inner inner exception type and message
-        triggerRebalancingAlert(AlertStatus.RAISED, e.getMessage());
-    }
-    
-    protected void resolveRebalancingAlert(String alertDescription) {
-        triggerRebalancingAlert(AlertStatus.RESOLVED, alertDescription);
-    }
-    
-    private void triggerRebalancingAlert(AlertStatus status, String alertDescription) {
-        triggerAlert(AlertSeverity.WARNING, status, REBALANCING_ALERT_GROUP_UID_PREFIX, REBALANCING_ALERT_NAME, alertDescription);
-    }
-
     public boolean isScaleInProgress() {
         return isScaleInProgress;
+    }
+    
+    protected void agentProvisioningCompletedEvent() {
+        if (!agentProvisioningCompletedEventRaised) {
+            boolean isComplete = true;
+            eventQueue.enqueu(
+                    new ElasticGridServiceAgentProvisioningProgressChangedEvent(isComplete, isUndeploying(), getProcessingUnit().getName()));
+            agentProvisioningCompletedEventRaised = true;
+            agentProvisioningInProgressEventRaised = false;
+        }
+    }
+    
+    protected void machineProvisioningCompletedEvent() {
+        if (!machineProvisioningCompletedEventRaised) {
+            machineProvisioningCompletedEventRaised = true;
+            machineProvisioningInProgressEventRaised = false;
+
+            boolean isComplete = true;
+            eventQueue.enqueu(
+                    new ElasticMachineProvisioningProgressChangedEvent(isComplete, isUndeploying(), getProcessingUnit().getName()));
+        }
+    }
+    
+    protected void agentProvisioningInProgressEvent(GridServiceAgentSlaEnforcementInProgressException e) {
+        if (!agentProvisioningInProgressEventRaised) {
+            boolean isComplete = false;
+            eventQueue.enqueu(
+                    new ElasticGridServiceAgentProvisioningProgressChangedEvent(isComplete, isUndeploying(), getProcessingUnit().getName()));
+            agentProvisioningInProgressEventRaised = true;
+            agentProvisioningCompletedEventRaised = false;
+        }
+        
+        if (e instanceof SlaEnforcementFailure) {
+            eventQueue.enqueu(
+                 new ElasticGridServiceAgentProvisioningFailureEvent(e.getMessage(), ((SlaEnforcementFailure)e).getAffectedProcessingUnits()));
+        }
+    }
+    
+    /**
+     * @return true if this is an undeployment strategy (pu is undeploying)
+     */
+    protected abstract boolean isUndeploying();
+
+    protected void machineProvisioningInProgressEvent(MachinesSlaEnforcementInProgressException e) {
+        if (!machineProvisioningInProgressEventRaised) {
+            machineProvisioningCompletedEventRaised = false;
+            machineProvisioningInProgressEventRaised = true;
+            boolean isComplete = false;
+            eventQueue.enqueu(
+                    new ElasticMachineProvisioningProgressChangedEvent(isComplete, isUndeploying(), getProcessingUnit().getName()));
+        } 
+                    
+        if (e instanceof SlaEnforcementFailure) {
+            eventQueue.enqueu(
+                 new ElasticMachineProvisioningFailureEvent(e.getMessage(), ((SlaEnforcementFailure)e).getAffectedProcessingUnits()));
+        }
+    }
+    
+    protected void containerProvisioningCompletedEvent(GridServiceContainer[] containers) {
+
+        if (!containerProvisioningCompletedEventRaised) {
+            containerProvisioningCompletedEventRaised = true;
+            containerProvisioningInProgressEventRaised = false;
+
+            boolean isComplete = true;
+            eventQueue.enqueu(
+                    new ElasticGridServiceContainerProvisioningProgressChangedEvent(isComplete, isUndeploying(), getProcessingUnit().getName()));
+        }
+    }
+    
+    protected void containerProvisioningInProgressEvent(GridServiceContainer[] containers, ContainersSlaEnforcementInProgressException e) {
+
+        if (!containerProvisioningInProgressEventRaised) {
+            containerProvisioningCompletedEventRaised = false;
+            containerProvisioningInProgressEventRaised = true;
+            boolean isComplete = false;
+            eventQueue.enqueu(
+                    new ElasticGridServiceContainerProvisioningProgressChangedEvent(isComplete, isUndeploying(), getProcessingUnit().getName()));
+        } 
+                    
+        if (e instanceof SlaEnforcementFailure) {
+            eventQueue.enqueu(
+                 new ElasticGridServiceContainerProvisioningFailureEvent(e.getMessage(), ((SlaEnforcementFailure)e).getAffectedProcessingUnits()));
+        }
+    }
+    
+    protected void puInstanceProvisioningCompletedEvent(ProcessingUnit pu) {
+        
+        if (!puProvisioningCompletedEventRaised) {
+            puProvisioningCompletedEventRaised = true;
+            puProvisioningInProgressEventRaised = false;
+
+            boolean isComplete = true;
+            eventQueue.enqueu(
+                    new ElasticProcessingUnitInstanceProvisioningProgressChangedEvent(isComplete, isUndeploying(), getProcessingUnit().getName()));
+        }
+    }
+    
+    protected void puInstanceProvisioningInProgressEvent(ProcessingUnit pu, RebalancingSlaEnforcementInProgressException e) {
+        if (!puProvisioningInProgressEventRaised) {
+            puProvisioningCompletedEventRaised = false;
+            puProvisioningInProgressEventRaised = true;
+            boolean isComplete = false;
+            eventQueue.enqueu(
+                    new ElasticProcessingUnitInstanceProvisioningProgressChangedEvent(isComplete, isUndeploying(), getProcessingUnit().getName()));
+        }
+        if (e instanceof SlaEnforcementFailure) {
+            eventQueue.enqueu(
+                 new ElasticProcessingUnitInstanceProvisioningFailureEvent(e.getMessage(), ((SlaEnforcementFailure)e).getAffectedProcessingUnits()));
+        }
     }
 }

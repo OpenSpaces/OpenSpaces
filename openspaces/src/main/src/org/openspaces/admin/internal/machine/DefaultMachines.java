@@ -1,15 +1,5 @@
 package org.openspaces.admin.internal.machine;
 
-import com.j_spaces.kernel.SizeConcurrentHashMap;
-import org.openspaces.admin.Admin;
-import org.openspaces.admin.internal.admin.InternalAdmin;
-import org.openspaces.admin.internal.machine.events.DefaultMachineAddedEventManager;
-import org.openspaces.admin.internal.machine.events.DefaultMachineRemovedEventManager;
-import org.openspaces.admin.internal.machine.events.InternalMachineAddedEventManager;
-import org.openspaces.admin.internal.machine.events.InternalMachineRemovedEventManager;
-import org.openspaces.admin.machine.Machine;
-import org.openspaces.admin.machine.events.*;
-
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
@@ -17,6 +7,30 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+
+import org.openspaces.admin.Admin;
+import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.machine.events.DefaultElasticMachineProvisioningFailureEventManager;
+import org.openspaces.admin.internal.machine.events.DefaultElasticMachineProvisioningProgressChangedEventManager;
+import org.openspaces.admin.internal.machine.events.DefaultMachineAddedEventManager;
+import org.openspaces.admin.internal.machine.events.DefaultMachineRemovedEventManager;
+import org.openspaces.admin.internal.machine.events.InternalElasticMachineProvisioningFailureEventManager;
+import org.openspaces.admin.internal.machine.events.InternalElasticMachineProvisioningProgressChangedEventManager;
+import org.openspaces.admin.internal.machine.events.InternalMachineAddedEventManager;
+import org.openspaces.admin.internal.machine.events.InternalMachineRemovedEventManager;
+import org.openspaces.admin.machine.Machine;
+import org.openspaces.admin.machine.events.ElasticMachineProvisioningFailureEvent;
+import org.openspaces.admin.machine.events.ElasticMachineProvisioningFailureEventManager;
+import org.openspaces.admin.machine.events.ElasticMachineProvisioningProgressChangedEvent;
+import org.openspaces.admin.machine.events.ElasticMachineProvisioningProgressChangedEventManager;
+import org.openspaces.admin.machine.events.MachineAddedEventListener;
+import org.openspaces.admin.machine.events.MachineAddedEventManager;
+import org.openspaces.admin.machine.events.MachineLifecycleEventListener;
+import org.openspaces.admin.machine.events.MachineRemovedEventListener;
+import org.openspaces.admin.machine.events.MachineRemovedEventManager;
+import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitEvent;
+
+import com.j_spaces.kernel.SizeConcurrentHashMap;
 
 /**
  * @author kimchy
@@ -29,16 +43,24 @@ public class DefaultMachines implements InternalMachines {
 
     private final InternalMachineRemovedEventManager machineRemovedEventManager;
 
+    private final InternalElasticMachineProvisioningProgressChangedEventManager elasticMachineProvisioningProgressChangedEventManager;
+    
+    private final InternalElasticMachineProvisioningFailureEventManager elasticMachineProvisioningFailureEventManager;
+    
     private final Map<String, Machine> machinesById = new SizeConcurrentHashMap<String, Machine>();
 
     private final Map<String, Machine> machinesByHostAddress = new ConcurrentHashMap<String, Machine>();
 
     private final Map<String, Machine> machinesByHostNames = new ConcurrentHashMap<String, Machine>();
 
+    
+
     public DefaultMachines(InternalAdmin admin) {
         this.admin = admin;
         this.machineAddedEventManager = new DefaultMachineAddedEventManager(this);
         this.machineRemovedEventManager = new DefaultMachineRemovedEventManager(this);
+        this.elasticMachineProvisioningProgressChangedEventManager = new DefaultElasticMachineProvisioningProgressChangedEventManager(admin);
+        this.elasticMachineProvisioningFailureEventManager = new DefaultElasticMachineProvisioningFailureEventManager(admin);
     }
 
     @Override
@@ -216,6 +238,26 @@ public class DefaultMachines implements InternalMachines {
     
     private void assertStateChangesPermitted() {
         admin.assertStateChangesPermitted();
+    }
+
+    @Override
+    public ElasticMachineProvisioningFailureEventManager getElasticMachineProvisioningFailure() {
+        return elasticMachineProvisioningFailureEventManager;
+    }
+
+    @Override
+    public ElasticMachineProvisioningProgressChangedEventManager getElasticMachineProvisioningProgressChanged() {
+        return elasticMachineProvisioningProgressChangedEventManager;
+    }
+
+    @Override
+    public void processElasticScaleStrategyEvent(ElasticProcessingUnitEvent event) {
+        if (event instanceof ElasticMachineProvisioningFailureEvent) {
+            elasticMachineProvisioningFailureEventManager.elasticMachineProvisioningFailure((ElasticMachineProvisioningFailureEvent)event);
+        }
+        else if (event instanceof ElasticMachineProvisioningProgressChangedEvent) {
+            elasticMachineProvisioningProgressChangedEventManager.elasticMachineProvisioningProgressChanged((ElasticMachineProvisioningProgressChangedEvent)event);
+        }
     }
 
 }

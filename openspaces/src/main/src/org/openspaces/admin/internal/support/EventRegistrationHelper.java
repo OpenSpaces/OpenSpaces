@@ -8,8 +8,12 @@ import org.openspaces.admin.application.events.ApplicationRemovedEventListener;
 import org.openspaces.admin.esm.events.ElasticServiceManagerAddedEventListener;
 import org.openspaces.admin.esm.events.ElasticServiceManagerRemovedEventListener;
 import org.openspaces.admin.gsa.events.GridServiceAgentAddedEventListener;
+import org.openspaces.admin.gsa.events.ElasticGridServiceAgentProvisioningFailureEventListener;
+import org.openspaces.admin.gsa.events.ElasticGridServiceAgentProvisioningProgressChangedEventListener;
 import org.openspaces.admin.gsa.events.GridServiceAgentRemovedEventListener;
 import org.openspaces.admin.gsc.events.GridServiceContainerAddedEventListener;
+import org.openspaces.admin.gsc.events.ElasticGridServiceContainerProvisioningFailureEventListener;
+import org.openspaces.admin.gsc.events.ElasticGridServiceContainerProvisioningProgressChangedEventListener;
 import org.openspaces.admin.gsc.events.GridServiceContainerRemovedEventListener;
 import org.openspaces.admin.gsm.events.GridServiceManagerAddedEventListener;
 import org.openspaces.admin.gsm.events.GridServiceManagerRemovedEventListener;
@@ -17,6 +21,8 @@ import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.lus.events.LookupServiceAddedEventListener;
 import org.openspaces.admin.lus.events.LookupServiceRemovedEventListener;
 import org.openspaces.admin.machine.events.MachineAddedEventListener;
+import org.openspaces.admin.machine.events.ElasticMachineProvisioningFailureEventListener;
+import org.openspaces.admin.machine.events.ElasticMachineProvisioningProgressChangedEventListener;
 import org.openspaces.admin.machine.events.MachineRemovedEventListener;
 import org.openspaces.admin.os.events.OperatingSystemStatisticsChangedEventListener;
 import org.openspaces.admin.os.events.OperatingSystemsStatisticsChangedEventListener;
@@ -220,6 +226,30 @@ public abstract class EventRegistrationHelper {
             admin.getSpaces().getSpaceInstanceStatisticsChanged().add(
                     (SpaceInstanceStatisticsChangedEventListener) eventListener);
         }
+        if (eventListener instanceof ElasticGridServiceContainerProvisioningFailureEventListener) {
+            admin.getGridServiceContainers().getElasticGridServiceContainerProvisioningFailure().add(
+                    (ElasticGridServiceContainerProvisioningFailureEventListener) eventListener);
+        }
+        if (eventListener instanceof ElasticGridServiceAgentProvisioningFailureEventListener) {
+            admin.getGridServiceAgents().getElasticGridServiceAgentProvisioningFailure().add(
+                    (ElasticGridServiceAgentProvisioningFailureEventListener) eventListener);
+        }
+        if (eventListener instanceof ElasticMachineProvisioningFailureEventListener) {
+            admin.getMachines().getElasticMachineProvisioningFailure().add(
+                    (ElasticMachineProvisioningFailureEventListener) eventListener);
+        }
+        if (eventListener instanceof ElasticGridServiceContainerProvisioningProgressChangedEventListener) {
+            admin.getGridServiceContainers().getElasticGridServiceContainerProvisioningProgressChanged().add(
+                    (ElasticGridServiceContainerProvisioningProgressChangedEventListener) eventListener);
+        }
+        if (eventListener instanceof ElasticGridServiceAgentProvisioningProgressChangedEventListener) {
+            admin.getGridServiceAgents().getElasticGridServiceAgentProvisioningProgressChanged().add(
+                    (ElasticGridServiceAgentProvisioningProgressChangedEventListener) eventListener);
+        }
+        if (eventListener instanceof ElasticMachineProvisioningProgressChangedEventListener) {
+            admin.getMachines().getElasticMachineProvisioningProgressChanged().add(
+                    (ElasticMachineProvisioningProgressChangedEventListener) eventListener);
+        }
     }
 
 
@@ -356,6 +386,30 @@ public abstract class EventRegistrationHelper {
         }
         if (eventListener instanceof ApplicationRemovedEventListener ){
             admin.getApplications().getApplicationRemoved().remove( ( ApplicationRemovedEventListener ) eventListener);
+        }
+        if (eventListener instanceof ElasticGridServiceContainerProvisioningFailureEventListener) {
+            admin.getGridServiceContainers().getElasticGridServiceContainerProvisioningFailure().remove(
+                    (ElasticGridServiceContainerProvisioningFailureEventListener) eventListener);
+        }
+        if (eventListener instanceof ElasticGridServiceAgentProvisioningFailureEventListener) {
+            admin.getGridServiceAgents().getElasticGridServiceAgentProvisioningFailure().remove(
+                    (ElasticGridServiceAgentProvisioningFailureEventListener) eventListener);
+        }
+        if (eventListener instanceof ElasticMachineProvisioningFailureEventListener) {
+            admin.getMachines().getElasticMachineProvisioningFailure().remove(
+                    (ElasticMachineProvisioningFailureEventListener) eventListener);
+        }
+        if (eventListener instanceof ElasticGridServiceContainerProvisioningProgressChangedEventListener) {
+            admin.getGridServiceContainers().getElasticGridServiceContainerProvisioningProgressChanged().remove(
+                    (ElasticGridServiceContainerProvisioningProgressChangedEventListener) eventListener);
+        }
+        if (eventListener instanceof ElasticGridServiceAgentProvisioningProgressChangedEventListener) {
+            admin.getGridServiceAgents().getElasticGridServiceAgentProvisioningProgressChanged().remove(
+                    (ElasticGridServiceAgentProvisioningProgressChangedEventListener) eventListener);
+        }
+        if (eventListener instanceof ElasticMachineProvisioningProgressChangedEventListener) {
+            admin.getMachines().getElasticMachineProvisioningProgressChanged().remove(
+                    (ElasticMachineProvisioningProgressChangedEventListener) eventListener);
         }
     }
 

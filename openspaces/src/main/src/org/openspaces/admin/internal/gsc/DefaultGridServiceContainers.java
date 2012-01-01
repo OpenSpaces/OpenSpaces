@@ -1,22 +1,37 @@
 package org.openspaces.admin.internal.gsc;
 
-import com.j_spaces.kernel.SizeConcurrentHashMap;
-import org.openspaces.admin.*;
-import org.openspaces.admin.dump.CompoundDumpResult;
-import org.openspaces.admin.dump.DumpResult;
-import org.openspaces.admin.gsc.GridServiceContainer;
-import org.openspaces.admin.gsc.events.*;
-import org.openspaces.admin.internal.admin.InternalAdmin;
-import org.openspaces.admin.internal.gsc.events.DefaultGridServiceContainerAddedEventManager;
-import org.openspaces.admin.internal.gsc.events.DefaultGridServiceContainerRemovedEventManager;
-import org.openspaces.admin.internal.gsc.events.InternalGridServiceContainerAddedEventManager;
-import org.openspaces.admin.internal.gsc.events.InternalGridServiceContainerRemovedEventManager;
-
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
+import org.openspaces.admin.Admin;
+import org.openspaces.admin.AdminException;
+import org.openspaces.admin.dump.CompoundDumpResult;
+import org.openspaces.admin.dump.DumpResult;
+import org.openspaces.admin.gsc.GridServiceContainer;
+import org.openspaces.admin.gsc.events.ElasticGridServiceContainerProvisioningFailureEvent;
+import org.openspaces.admin.gsc.events.ElasticGridServiceContainerProvisioningFailureEventManager;
+import org.openspaces.admin.gsc.events.ElasticGridServiceContainerProvisioningProgressChangedEvent;
+import org.openspaces.admin.gsc.events.ElasticGridServiceContainerProvisioningProgressChangedEventManager;
+import org.openspaces.admin.gsc.events.GridServiceContainerAddedEventListener;
+import org.openspaces.admin.gsc.events.GridServiceContainerAddedEventManager;
+import org.openspaces.admin.gsc.events.GridServiceContainerLifecycleEventListener;
+import org.openspaces.admin.gsc.events.GridServiceContainerRemovedEventListener;
+import org.openspaces.admin.gsc.events.GridServiceContainerRemovedEventManager;
+import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.gsa.events.InternalElasticGridServiceContainerProvisioningFailureEventManager;
+import org.openspaces.admin.internal.gsc.events.DefaultElasticGridServiceContainerProvisioningFailureEventManager;
+import org.openspaces.admin.internal.gsc.events.DefaultElasticGridServiceContainerProvisioningProgressChangedEventManager;
+import org.openspaces.admin.internal.gsc.events.DefaultGridServiceContainerAddedEventManager;
+import org.openspaces.admin.internal.gsc.events.DefaultGridServiceContainerRemovedEventManager;
+import org.openspaces.admin.internal.gsc.events.InternalElasticGridServiceContainerProvisioningProgressChangedEventManager;
+import org.openspaces.admin.internal.gsc.events.InternalGridServiceContainerAddedEventManager;
+import org.openspaces.admin.internal.gsc.events.InternalGridServiceContainerRemovedEventManager;
+import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitEvent;
+
+import com.j_spaces.kernel.SizeConcurrentHashMap;
 
 /**
  * @author kimchy
@@ -31,10 +46,16 @@ public class DefaultGridServiceContainers implements InternalGridServiceContaine
 
     private final InternalGridServiceContainerRemovedEventManager gridServiceContainerRemovedEventManager;
 
+    private final InternalElasticGridServiceContainerProvisioningFailureEventManager elasticGridServiceContainerProvisioningFailureEventManager;
+    
+    private final InternalElasticGridServiceContainerProvisioningProgressChangedEventManager elasticGridServiceContainerProvisioningProgressChangedEventManager;
+    
     public DefaultGridServiceContainers(InternalAdmin admin) {
         this.admin = admin;
         this.gridServiceContainerAddedEventManager = new DefaultGridServiceContainerAddedEventManager(this);
         this.gridServiceContainerRemovedEventManager = new DefaultGridServiceContainerRemovedEventManager(this);
+        this.elasticGridServiceContainerProvisioningFailureEventManager = new DefaultElasticGridServiceContainerProvisioningFailureEventManager(admin);
+        this.elasticGridServiceContainerProvisioningProgressChangedEventManager = new DefaultElasticGridServiceContainerProvisioningProgressChangedEventManager(admin);
     }
 
     public Admin getAdmin() {
@@ -152,5 +173,25 @@ public class DefaultGridServiceContainers implements InternalGridServiceContaine
     
     private void assertStateChangesPermitted() {
         admin.assertStateChangesPermitted();
+    }
+
+    @Override
+    public ElasticGridServiceContainerProvisioningFailureEventManager getElasticGridServiceContainerProvisioningFailure() {
+        return elasticGridServiceContainerProvisioningFailureEventManager;
+    }
+
+    @Override
+    public ElasticGridServiceContainerProvisioningProgressChangedEventManager getElasticGridServiceContainerProvisioningProgressChanged() {
+        return elasticGridServiceContainerProvisioningProgressChangedEventManager;
+    }
+
+    @Override
+    public void processElasticScaleStrategyEvent(ElasticProcessingUnitEvent event) {
+        if (event instanceof ElasticGridServiceContainerProvisioningFailureEvent) {
+            elasticGridServiceContainerProvisioningFailureEventManager.elasticGridServiceContainerProvisioningFailure((ElasticGridServiceContainerProvisioningFailureEvent)event);
+        }
+        else if (event instanceof ElasticGridServiceContainerProvisioningProgressChangedEvent) {
+            elasticGridServiceContainerProvisioningProgressChangedEventManager.elasticGridServiceContainerProvisioningProgressChanged((ElasticGridServiceContainerProvisioningProgressChangedEvent)event);
+        }
     }
 }

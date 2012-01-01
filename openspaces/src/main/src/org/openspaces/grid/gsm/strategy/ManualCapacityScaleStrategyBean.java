@@ -14,16 +14,18 @@ import org.openspaces.grid.gsm.capacity.MemoryCapacityRequirement;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpointAware;
 import org.openspaces.grid.gsm.containers.ContainersSlaPolicy;
+import org.openspaces.grid.gsm.containers.exceptions.ContainersSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.containers.exceptions.ContainersSlaEnforcementPendingProcessingUnitDeallocationException;
 import org.openspaces.grid.gsm.machines.CapacityMachinesSlaPolicy;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpointAware;
-import org.openspaces.grid.gsm.machines.exceptions.MachinesSlaEnforcementPendingContainerDeallocationException;
+import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcementInProgressException;
+import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcementPendingContainerDeallocationException;
+import org.openspaces.grid.gsm.machines.exceptions.MachinesSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcementEndpointAware;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaPolicy;
-import org.openspaces.grid.gsm.rebalancing.RebalancingUtils;
-import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementException;
+import org.openspaces.grid.gsm.rebalancing.exceptions.RebalancingSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.strategy.ProvisionedMachinesCache.AgentsNotYetDiscoveredException;
 
@@ -133,14 +135,14 @@ public class ManualCapacityScaleStrategyBean extends AbstractScaleStrategyBean
     }
 
     @Override
-    public void enforceSla() throws SlaEnforcementException {
+    public void enforceSla() throws SlaEnforcementInProgressException {
         
         SlaEnforcementInProgressException pendingException = null;
         
         try {
             enforceMachinesSla();
         }
-        catch (MachinesSlaEnforcementPendingContainerDeallocationException e) {
+        catch (GridServiceAgentSlaEnforcementPendingContainerDeallocationException e) {
             // fall through to containers sla enforcement since need to scale-in containers
             pendingException = e;
         }
@@ -231,7 +233,7 @@ public class ManualCapacityScaleStrategyBean extends AbstractScaleStrategyBean
 
     private void enforceMachinesSla() 
             throws AgentsNotYetDiscoveredException, 
-                   SlaEnforcementException {
+                   MachinesSlaEnforcementInProgressException , GridServiceAgentSlaEnforcementInProgressException{
         
         if (getLogger().isDebugEnabled()) {
             getLogger().debug("Enforcing machines SLA.");
@@ -258,18 +260,23 @@ public class ManualCapacityScaleStrategyBean extends AbstractScaleStrategyBean
             sla.setProvisionedAgents(getDiscoveredAgents());
             machinesEndpoint.enforceSla(sla);
             
-            //TODO: Add alert specific properties
-            resolveMachinesAlert(
-                    "Machines manual capacity SLA for " + getProcessingUnit().getName() + " " + 
-                    "has been reached: " + machinesEndpoint.getAllocatedCapacity().toDetailedString());
+            machineProvisioningCompletedEvent();
+            agentProvisioningCompletedEvent();
         }
-        catch (SlaEnforcementException e) {
-            raiseMachinesAlert(e);
+        catch (MachinesSlaEnforcementInProgressException e) {
+            
+            machineProvisioningInProgressEvent(e);
+            throw e;
+        }
+        catch (GridServiceAgentSlaEnforcementInProgressException e) {
+         
+            machineProvisioningCompletedEvent();
+            agentProvisioningInProgressEvent(e);
             throw e;
         }
     }
     
-    private void enforceContainersSla() throws SlaEnforcementException {
+    private void enforceContainersSla() throws ContainersSlaEnforcementInProgressException {
         
         if (getLogger().isDebugEnabled()) {
             getLogger().debug("Enforcing containers SLA.");
@@ -285,20 +292,15 @@ public class ManualCapacityScaleStrategyBean extends AbstractScaleStrategyBean
         }
         try {
             containersEndpoint.enforceSla(sla);
-            //TODO: Add alert specific properties
-            resolveContainersAlert(
-                "Containers capacity SLA for " + getProcessingUnit().getName() + " " + 
-                "has been reached: " + machinesEndpoint.getAllocatedCapacity().toDetailedString());
+            containerProvisioningCompletedEvent(containersEndpoint.getContainers());
         }
-        catch (SlaEnforcementException e) {
-
-            raiseContainersAlert(e);
+        catch (ContainersSlaEnforcementInProgressException e) {
+            containerProvisioningInProgressEvent(containersEndpoint.getContainers(), e);
             throw e;
         }
     }
     
-    private void enforceRebalancingSla(GridServiceContainer[] containers) 
-        throws SlaEnforcementException 
+    private void enforceRebalancingSla(GridServiceContainer[] containers) throws RebalancingSlaEnforcementInProgressException 
     {
         if (getLogger().isDebugEnabled()) {
             getLogger().debug("Enforcing rebalancing SLA.");
@@ -311,17 +313,11 @@ public class ManualCapacityScaleStrategyBean extends AbstractScaleStrategyBean
         sla.setAllocatedCapacity(machinesEndpoint.getAllocatedCapacity());
         try {
             rebalancingEndpoint.enforceSla(sla);
-            
-            //TODO: Add alert specific properties
-            resolveRebalancingAlert(
-                    "Rebalancing of " + getProcessingUnit().getName() + " is complete: " + 
-                    RebalancingUtils.processingUnitDeploymentToString(getProcessingUnit()));
+            puInstanceProvisioningCompletedEvent(getProcessingUnit());
 
         }
-        catch (SlaEnforcementInProgressException e) {
-            //TODO: Add alert specific properties
-            //TODO: Add inner inner exception type and message
-            raiseRebalancingAlert(e);
+        catch (RebalancingSlaEnforcementInProgressException e) {
+            puInstanceProvisioningInProgressEvent(getProcessingUnit(),e);
             throw e;
         }
     }
@@ -332,5 +328,10 @@ public class ManualCapacityScaleStrategyBean extends AbstractScaleStrategyBean
     
     private int getMaximumNumberOfContainersPerMachine() {
         return slaConfig.isAtMostOneContainersPerMachine()?1:getMaximumNumberOfInstances();
+    }
+
+    @Override
+    protected boolean isUndeploying() {
+        return false;
     }
 }

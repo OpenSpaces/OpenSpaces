@@ -42,6 +42,8 @@ import org.openspaces.grid.gsm.containers.ContainersSlaEnforcement;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcement;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioningAdapterFactory;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcement;
+import org.openspaces.grid.gsm.strategy.ElasticScaleStrategyEventStorage;
+import org.openspaces.grid.gsm.strategy.ElasticScaleStrategyEvents;
 import org.openspaces.grid.gsm.strategy.ScaleStrategyBean;
 import org.openspaces.grid.gsm.strategy.UndeployScaleStrategyBean;
 
@@ -74,6 +76,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
 /*, RemoteSecuredService*//*, ServiceDiscoveryListener*/ {
 
 
+    private static final int MAX_NUMBER_OF_EVENTS = 1000;
     private static final long CHECK_SINGLE_THREAD_EVENT_PUMP_EVERY_SECONDS=60;
     private static final String CONFIG_COMPONENT = "org.openspaces.grid.esm";
     private static final Logger logger = Logger.getLogger(CONFIG_COMPONENT);
@@ -87,6 +90,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
     private LifeCycle lifeCycle;
     private String[] configArgs;
     private final NonBlockingElasticMachineProvisioningAdapterFactory nonBlockingAdapterFactory;
+    private final ElasticScaleStrategyEventStorage eventStorage;
 
     /**
      * Create an ESM
@@ -122,7 +126,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
         machinesSlaEnforcement = new MachinesSlaEnforcement(admin);
         containersSlaEnforcement = new ContainersSlaEnforcement(admin);
         rebalancingSlaEnforcement = new RebalancingSlaEnforcement();
-        
+        eventStorage = new ElasticScaleStrategyEventStorage(MAX_NUMBER_OF_EVENTS);
         //Discovery warm-up period
         new ESMImplInitializer(admin, new Runnable() {
 
@@ -335,7 +339,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
     }
 
     public void setProcessingUnitScaleStrategy(final String puName, final ScaleStrategyConfig scaleStrategyConfig) {
-        logger.fine("Queuing scale strategy for " + puName);
+        logger.fine("setting scale strategy for " + puName);
         submitAndWait(new Callable<Void>() {
 
                 @Override
@@ -359,6 +363,16 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
         );
     }
     
+    public ElasticScaleStrategyEvents getScaleStrategyEvents(final long cursor, final int maxNumberOfEvents) {
+        logger.fine("get scale strategy events cursor=" + cursor + " maxNumberOfEvents=" + maxNumberOfEvents);
+        return submitAndWait(new Callable<ElasticScaleStrategyEvents>() {
+
+            @Override
+            public ElasticScaleStrategyEvents call() throws Exception {
+                return eventStorage.getEventsFromCursor(cursor, maxNumberOfEvents);
+            }
+        });
+    }
     /**
      * Note: Not thread safe. Call only from submitAndWait
      */
@@ -496,7 +510,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
             if (beanServer == null) {
                 ProcessingUnitSchemaConfig schemaConfig = new ProcessingUnitSchemaConfig(elasticProperties);
                 ElasticMachineIsolationConfig isolationConfig = new ElasticMachineIsolationConfig(elasticProperties);
-                beanServer = new ScaleBeanServer(pu,schemaConfig, rebalancingSlaEnforcement,containersSlaEnforcement,machinesSlaEnforcement,nonBlockingAdapterFactory, isolationConfig);
+                beanServer = new ScaleBeanServer(pu,schemaConfig, rebalancingSlaEnforcement,containersSlaEnforcement,machinesSlaEnforcement,nonBlockingAdapterFactory, isolationConfig, eventStorage);
                 scaleBeanServerPerProcessingUnit.put(pu, beanServer);
             }
             //TODO: Move this to a separate thread since bean#afterPropertiesSet() might block. This is very tricky since the PU can deploy/undeploy while we are in that thread, which changes the bean server.

@@ -16,14 +16,16 @@
 
 package org.openspaces.admin.gsc;
 
-import org.openspaces.admin.AdminAware;
-import org.openspaces.admin.dump.DumpProvider;
-import org.openspaces.admin.gsc.events.GridServiceContainerAddedEventManager;
-import org.openspaces.admin.gsc.events.GridServiceContainerLifecycleEventListener;
-import org.openspaces.admin.gsc.events.GridServiceContainerRemovedEventManager;
-
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import org.openspaces.admin.AdminAware;
+import org.openspaces.admin.dump.DumpProvider;
+import org.openspaces.admin.gsc.events.ElasticGridServiceContainerProvisioningFailureEventManager;
+import org.openspaces.admin.gsc.events.GridServiceContainerAddedEventManager;
+import org.openspaces.admin.gsc.events.GridServiceContainerLifecycleEventListener;
+import org.openspaces.admin.gsc.events.ElasticGridServiceContainerProvisioningProgressChangedEventManager;
+import org.openspaces.admin.gsc.events.GridServiceContainerRemovedEventManager;
 
 /**
  * Grid Service Containers hold all the different {@link GridServiceContainer}s that are currently
@@ -103,4 +105,19 @@ public interface GridServiceContainers extends AdminAware, Iterable<GridServiceC
      * Allows to remove a {@link GridServiceContainerLifecycleEventListener}.
      */
     void removeLifecycleListener(GridServiceContainerLifecycleEventListener eventListener);
+ 
+    
+    /**
+     * Returns the elastic grid service container provisioning failure event manager allowing to add and remove
+     * {@link org.openspaces.admin.gsc.events.ElasticGridServiceContainerProvisioningFailureEventListener}s.
+     * @since 8.0.6
+     */
+    ElasticGridServiceContainerProvisioningFailureEventManager getElasticGridServiceContainerProvisioningFailure();
+
+    /**
+     * Returns the elastic grid service container provisioning progress event manager allowing to add and remove
+     * {@link org.openspaces.admin.gsc.events.ElasticGridServiceContainerProvisioningProgressChangedEventListener}s.
+     * @since 8.0.6
+     */
+    ElasticGridServiceContainerProvisioningProgressChangedEventManager getElasticGridServiceContainerProvisioningProgressChanged();
 }

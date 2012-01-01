@@ -1,0 +1,8 @@
+package org.openspaces.admin.internal.gsa.events;
+
+import org.openspaces.admin.gsa.events.ElasticGridServiceAgentProvisioningFailureEventListener;
+import org.openspaces.admin.gsa.events.ElasticGridServiceAgentProvisioningFailureEventManager;
+
+public interface InternalElasticGridServiceAgentProvisioningFailureEventManager extends ElasticGridServiceAgentProvisioningFailureEventManager, ElasticGridServiceAgentProvisioningFailureEventListener{
+
+}

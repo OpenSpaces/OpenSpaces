@@ -16,14 +16,16 @@
 
 package org.openspaces.admin.gsa;
 
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 import org.openspaces.admin.AdminAware;
 import org.openspaces.admin.dump.DumpProvider;
 import org.openspaces.admin.gsa.events.GridServiceAgentAddedEventManager;
 import org.openspaces.admin.gsa.events.GridServiceAgentLifecycleEventListener;
+import org.openspaces.admin.gsa.events.ElasticGridServiceAgentProvisioningFailureEventManager;
+import org.openspaces.admin.gsa.events.ElasticGridServiceAgentProvisioningProgressChangedEventManager;
 import org.openspaces.admin.gsa.events.GridServiceAgentRemovedEventManager;
-
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Grid Service Agents hold all the different {@link GridServiceAgent} that are currently
@@ -120,4 +122,18 @@ public interface GridServiceAgents extends AdminAware, Iterable<GridServiceAgent
      * Allows to remove a {@link GridServiceAgentLifecycleEventListener}.
      */
     void removeLifecycleListener(GridServiceAgentLifecycleEventListener eventListener);
+    
+    /**
+     * Returns the elastic grid service agent provisioning failure event manager allowing to add and remove
+     * {@link org.openspaces.admin.gsa.events.ElasticGridServiceAgentProvisioningFailureEventListener}s.
+     * @since 8.0.6
+     */
+    ElasticGridServiceAgentProvisioningFailureEventManager getElasticGridServiceAgentProvisioningFailure();
+
+    /**
+     * Returns the elastic grid service agent provisioning progress event manager allowing to add and remove
+     * {@link org.openspaces.admin.gsa.events.ElasticGridServiceAgentProvisioningProgressChangedEventListener}s.
+     * @since 8.0.6
+     */
+    ElasticGridServiceAgentProvisioningProgressChangedEventManager getElasticGridServiceAgentProvisioningProgressChanged();
 }

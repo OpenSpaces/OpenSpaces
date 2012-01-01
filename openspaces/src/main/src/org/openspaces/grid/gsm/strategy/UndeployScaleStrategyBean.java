@@ -8,12 +8,15 @@ import org.openspaces.grid.gsm.capacity.ClusterCapacityRequirements;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpointAware;
 import org.openspaces.grid.gsm.containers.ContainersSlaPolicy;
+import org.openspaces.grid.gsm.containers.exceptions.ContainersSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.machines.CapacityMachinesSlaPolicy;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpointAware;
+import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcementInProgressException;
+import org.openspaces.grid.gsm.machines.exceptions.MachinesSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
-import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementEndpointDestroyedException;
-import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementException;
+import org.openspaces.grid.gsm.rebalancing.exceptions.ElasticProcessingUnitInstanceUndeployInProgress;
+import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.strategy.ProvisionedMachinesCache.AgentsNotYetDiscoveredException;
 
 public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
@@ -52,18 +55,26 @@ public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
         }
     }
 
-    public void enforceSla() throws SlaEnforcementException {
+    public void enforceSla() throws SlaEnforcementInProgressException {
         
         if (!isScaleInProgress()) {
             return;
         }
         
+        if (getProcessingUnit().getInstances().length == 0) {
+            puInstanceProvisioningCompletedEvent(getProcessingUnit());
+        }
+        else {
+            puInstanceProvisioningInProgressEvent(getProcessingUnit(), new ElasticProcessingUnitInstanceUndeployInProgress(getProcessingUnit()));
+        }
+        
+        //proceed with container udeployment. It respects the pu instance download procedure.
         enforceContainersSla();
         
         enforceMachinesSla();
     }
 
-    private void enforceMachinesSla() throws AgentsNotYetDiscoveredException, SlaEnforcementException {
+    private void enforceMachinesSla() throws AgentsNotYetDiscoveredException, MachinesSlaEnforcementInProgressException, GridServiceAgentSlaEnforcementInProgressException {
         
         if (getLogger().isDebugEnabled()) {
             getLogger().debug("Undeploying machines for " + getProcessingUnit().getName());
@@ -82,15 +93,21 @@ public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
         
         try {
             machinesEndpoint.enforceSla(sla);
-            resolveMachinesAlert(
-                    "Machines for " + getProcessingUnit().getName() + " have been terminated.");
-        } catch (SlaEnforcementException e) {
-            raiseMachinesAlert(e);
+            
+            machineProvisioningCompletedEvent();
+            agentProvisioningCompletedEvent();
+        } catch (MachinesSlaEnforcementInProgressException e) {
+            machineProvisioningInProgressEvent(e);
+            throw e;
+        }
+        catch (GridServiceAgentSlaEnforcementInProgressException e) {
+            machineProvisioningCompletedEvent();
+            agentProvisioningInProgressEvent(e);
             throw e;
         }
     }
 
-    private void enforceContainersSla() throws SlaEnforcementEndpointDestroyedException {
+    private void enforceContainersSla() throws ContainersSlaEnforcementInProgressException {
         
         if (getLogger().isDebugEnabled()) {
             getLogger().debug("Undeploying containers for " + getProcessingUnit().getName());
@@ -102,16 +119,22 @@ public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
         
         try {
             containersEndpoint.enforceSla(sla);
-            resolveContainersAlert(
-                    "Containers for " + getProcessingUnit().getName() + " have been terminated.");
-        } catch (SlaEnforcementException e) {
-            raiseContainersAlert(e);
+            containerProvisioningCompletedEvent(containersEndpoint.getContainers());
+        }
+        catch (ContainersSlaEnforcementInProgressException e) {
+            containerProvisioningInProgressEvent(containersEndpoint.getContainers(), e);
+            throw e;
         }
     }
   
 
     public ScaleStrategyConfig getConfig() {
         return null;
+    }
+
+    @Override
+    protected boolean isUndeploying() {
+        return true;
     }
 
 }

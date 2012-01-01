@@ -19,7 +19,7 @@ import org.openspaces.grid.gsm.sla.exceptions.ServiceLevelAgreementEnforcementEn
  *
  */
 public class ContainersSlaEnforcement implements
-        ServiceLevelAgreementEnforcement<ContainersSlaPolicy, ContainersSlaEnforcementEndpoint> {
+        ServiceLevelAgreementEnforcement<ContainersSlaEnforcementEndpoint> {
 
     private final ContainersSlaEnforcementState state;
     private final Map<ProcessingUnit, ContainersSlaEnforcementEndpoint> endpoints;

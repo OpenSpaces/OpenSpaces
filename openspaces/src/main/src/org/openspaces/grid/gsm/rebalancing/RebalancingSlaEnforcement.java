@@ -18,7 +18,7 @@ import org.openspaces.grid.gsm.sla.exceptions.ServiceLevelAgreementEnforcementEn
  * 
  */
 public class RebalancingSlaEnforcement implements
-ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, RebalancingSlaEnforcementEndpoint> {
+ServiceLevelAgreementEnforcement<RebalancingSlaEnforcementEndpoint> {
 
     
     public void enableTracing() {

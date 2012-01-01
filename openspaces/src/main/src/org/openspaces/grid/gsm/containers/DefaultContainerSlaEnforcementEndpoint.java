@@ -25,7 +25,7 @@ import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.MemoryCapacityRequirement;
 import org.openspaces.grid.gsm.containers.exceptions.ContainersSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.containers.exceptions.ContainersSlaEnforcementPendingProcessingUnitDeallocationException;
-import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementEndpointDestroyedException;
+import org.openspaces.grid.gsm.containers.exceptions.FailedToStartNewGridServiceContainersException;
 
 import com.gigaspaces.grid.gsa.AgentProcessDetails;
 
@@ -48,7 +48,8 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
         this.state = state;
     }
 
-    public GridServiceContainer[] getContainers() throws SlaEnforcementEndpointDestroyedException {
+    @Override
+    public GridServiceContainer[] getContainers() {
         validateEndpointNotDestroyed(pu);
 
         Collection<GridServiceContainer> approvedContainers = ContainersSlaUtils.getContainersByZone(
@@ -59,14 +60,14 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
         return approvedContainers.toArray(new GridServiceContainer[approvedContainers.size()]);
     }
 
-    public boolean isContainersPendingDeallocation()
-            throws SlaEnforcementEndpointDestroyedException {
+    public boolean isContainersPendingDeallocation() throws ContainersSlaEnforcementInProgressException{
         validateEndpointNotDestroyed(pu);
         return !state.getContainersMarkedForDeallocation(pu).isEmpty();
     }
 
+    @Override
     public void enforceSla(ContainersSlaPolicy sla)
-            throws SlaEnforcementEndpointDestroyedException, ContainersSlaEnforcementInProgressException {
+            throws ContainersSlaEnforcementInProgressException {
         validateEndpointNotDestroyed(pu);
         if (sla == null) {
             throw new IllegalArgumentException("sla cannot be null");
@@ -240,13 +241,12 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
 
     /**
      * removes containers from the futureContainers list if the future is done (container started).
+     * @throws FailedToStartNewGridServiceContainersException 
      */
-    private void cleanFutureContainers() {
+    private void cleanFutureContainers() throws FailedToStartNewGridServiceContainersException {
 
-        List<FutureGridServiceContainer> futureContainers = state.removeAllDoneFutureContainers(pu);
-
-        for (FutureGridServiceContainer future : futureContainers) {
-
+        FutureGridServiceContainer future;
+        while((future = state.removeNextDoneFutureContainer(pu)) != null){
             Exception exception = null;
 
             try {
@@ -256,20 +256,31 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
                 }
 
             } catch (ExecutionException e) {
-                if (e.getCause() instanceof AdminException) {
-                    exception = (AdminException) e.getCause();
-                } else {
-                    throw new IllegalStateException("Unexpected runtime exception", e);
+                // if runtime or error propagate exception "as-is"
+                Throwable cause = e.getCause();
+                if (cause instanceof RuntimeException) {
+                    throw (RuntimeException)cause;
+                }
+                else if (cause instanceof Error) {
+                    throw (Error)cause;
+                }
+                else if (cause instanceof TimeoutException || cause instanceof AdminException || cause instanceof InterruptedException) {
+                    // expected exception
+                    exception = e;
+                }
+                else {
+                    throw new IllegalStateException("Unexpected Exception when starting a new container.",e);
                 }
             } catch (TimeoutException e) {
                 exception = e;
             }
 
             if (exception != null) {
-                final String errorMessage = "Failed to start container on machine "
-                        + ContainersSlaUtils.machineToString(future.getGridServiceAgent().getMachine());
-                logger.warn(errorMessage, exception);
                 state.failedFutureContainer(future);
+                throw new FailedToStartNewGridServiceContainersException(
+                        future.getGridServiceAgent().getMachine(),
+                        new String[] {pu.getName()}, 
+                        exception);
             }
         }
 
@@ -329,8 +340,7 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
         }
     }
 
-    private void validateEndpointNotDestroyed(ProcessingUnit pu)
-            throws SlaEnforcementEndpointDestroyedException {
+    private void validateEndpointNotDestroyed(ProcessingUnit pu) {
 
         if (pu == null) {
             throw new IllegalArgumentException("pu cannot be null");
@@ -338,7 +348,7 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
         
         if (state.isProcessingUnitDestroyed(pu)) {
 
-            throw new SlaEnforcementEndpointDestroyedException();
+            throw new IllegalStateException("endpoint destroyed");
         }
     }
 

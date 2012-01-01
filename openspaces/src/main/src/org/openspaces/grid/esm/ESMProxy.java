@@ -8,6 +8,7 @@ import net.jini.id.Uuid;
 
 import org.jini.rio.resources.servicecore.AbstractProxy;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
+import org.openspaces.grid.gsm.strategy.ElasticScaleStrategyEvents;
 
 import com.gigaspaces.security.SecurityException;
 import com.gigaspaces.security.directory.UserDetails;
@@ -77,6 +78,11 @@ public class ESMProxy extends AbstractProxy implements ESM, Serializable {
     @Override
     public boolean isManagingProcessingUnitAndScaleNotInProgress(String processingUnitName) throws RemoteException {
         return esmServer.isManagingProcessingUnitAndScaleNotInProgress(processingUnitName);
+    }
+
+    @Override
+    public ElasticScaleStrategyEvents getScaleStrategyEvents(long cursor, int maxNumberOfEvents) throws RemoteException {
+        return esmServer.getScaleStrategyEvents(cursor, maxNumberOfEvents);
     }
 
 }

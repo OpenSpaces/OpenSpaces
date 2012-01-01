@@ -15,8 +15,6 @@ import org.openspaces.core.bean.BeanServer;
 import org.openspaces.core.bean.DefaultBeanFactory;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpointAware;
-import org.openspaces.grid.gsm.machines.EagerMachinesSlaEnforcementEndpoint;
-import org.openspaces.grid.gsm.machines.EagerMachinesSlaEnforcementEndpointAware;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpointAware;
 import org.openspaces.grid.gsm.machines.plugins.ElasticMachineProvisioning;
@@ -24,7 +22,8 @@ import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisi
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioningAdapterFactory;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcementEndpointAware;
-import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpoint;
+import org.openspaces.grid.gsm.strategy.ElasticScaleStrategyEventStorage;
+import org.openspaces.grid.gsm.strategy.ElasticScaleStrategyEventStorageAware;
 
 public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
 
@@ -32,20 +31,22 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
     
     private final RebalancingSlaEnforcementEndpoint rebalancingSlaEnforcementEndpoint;
     private final ContainersSlaEnforcementEndpoint containersSlaEnforcementEndpoint;
-    private final ServiceLevelAgreementEnforcementEndpoint<?> machinesSlaEnforcementEndpoint;
+    private final MachinesSlaEnforcementEndpoint machinesSlaEnforcementEndpoint;
     private final ProcessingUnit pu;
     private final ProcessingUnitSchemaConfig schemaConfig;
     private final NonBlockingElasticMachineProvisioningAdapterFactory nonBlockingAdapterFactory;
     private final ElasticMachineIsolationConfig isolationConfig;
+    private final ElasticScaleStrategyEventStorage eventStorage;
     
     ScaleBeanFactory(
             ProcessingUnit pu,
             ProcessingUnitSchemaConfig schemaConfig,
             RebalancingSlaEnforcementEndpoint rebalancingSlaEnforcementEndpoint, 
             ContainersSlaEnforcementEndpoint containersSlaEnforcementEndpoint,
-            ServiceLevelAgreementEnforcementEndpoint<?> machinesSlaEnforcementEndpoint,
+            MachinesSlaEnforcementEndpoint machinesSlaEnforcementEndpoint,
             NonBlockingElasticMachineProvisioningAdapterFactory nonBlockingAdapterFactory,
-            ElasticMachineIsolationConfig isolationConfig) {
+            ElasticMachineIsolationConfig isolationConfig,
+            ElasticScaleStrategyEventStorage eventStorage) {
         
         super(pu.getAdmin());
         this.schemaConfig = schemaConfig;
@@ -55,6 +56,7 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
         this.nonBlockingAdapterFactory = nonBlockingAdapterFactory;
         this.pu = pu;
         this.isolationConfig = isolationConfig;
+        this.eventStorage = eventStorage;
         
     }
     
@@ -67,11 +69,7 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
         
         if (instance instanceof MachinesSlaEnforcementEndpointAware) {
             MachinesSlaEnforcementEndpointAware minstance = (MachinesSlaEnforcementEndpointAware)instance;
-            minstance.setMachinesSlaEnforcementEndpoint((MachinesSlaEnforcementEndpoint)machinesSlaEnforcementEndpoint);
-        }
-        if (instance instanceof EagerMachinesSlaEnforcementEndpointAware) {
-            EagerMachinesSlaEnforcementEndpointAware minstance = (EagerMachinesSlaEnforcementEndpointAware)instance;
-            minstance.setEagerMachinesSlaEnforcementEndpoint((EagerMachinesSlaEnforcementEndpoint)machinesSlaEnforcementEndpoint);
+            minstance.setMachinesSlaEnforcementEndpoint(machinesSlaEnforcementEndpoint);
         }
         
         if (instance instanceof ContainersSlaEnforcementEndpointAware) {
@@ -112,6 +110,10 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
                ((ElasticMachineProvisioningAware)instance).setElasticMachineProvisioning(machineProvisioning);
                ((ElasticMachineProvisioningAware)instance).setElasticMachineIsolation(isolationConfig);
            }
+        }
+        
+        if (instance instanceof ElasticScaleStrategyEventStorageAware) {
+            ((ElasticScaleStrategyEventStorageAware)instance).setElasticScaleStrategyEventStorage(eventStorage);
         }
         
         ElasticConfigBean elasticConfigBean = findElasticConfigBean(beanServer);

@@ -15,7 +15,7 @@ import org.openspaces.grid.gsm.sla.exceptions.ServiceLevelAgreementEnforcementEn
  *
  */
 public class MachinesSlaEnforcement implements
-        ServiceLevelAgreementEnforcement<CapacityMachinesSlaPolicy, MachinesSlaEnforcementEndpoint> {
+        ServiceLevelAgreementEnforcement<MachinesSlaEnforcementEndpoint> {
 
     private final MachinesSlaEnforcementState state;
     private final Map<ProcessingUnit, MachinesSlaEnforcementEndpoint> endpoints;

@@ -59,22 +59,24 @@ class ContainersSlaEnforcementState {
 
         return false;
     }
-
-    public List<FutureGridServiceContainer> removeAllDoneFutureContainers(ProcessingUnit pu) {
-        
-        List<FutureGridServiceContainer> removed = new ArrayList<FutureGridServiceContainer>();
+    
+    /**
+     * Removes one Future Container for the specified PU that is done (either completed or had an exception)
+     * @return the done future container or null, if there isn't any. 
+     */
+    public FutureGridServiceContainer removeNextDoneFutureContainer(ProcessingUnit pu) {
         
         final Iterator<FutureGridServiceContainer> iterator = futureContainersPerProcessingUnit.get(pu).iterator();
         while (iterator.hasNext()) {
             FutureGridServiceContainer future = iterator.next();
 
             if (future.isDone()) {
-                removed.add(future);
                 iterator.remove();
+                return future;
             }
         }
         
-        return removed;
+        return null;
     }
 
 
@@ -130,5 +132,5 @@ class ContainersSlaEnforcementState {
     public void addFutureContainer(ProcessingUnit pu, FutureGridServiceContainer future) {
         futureContainersPerProcessingUnit.get(pu).add(future);        
     }
-    
+   
 }

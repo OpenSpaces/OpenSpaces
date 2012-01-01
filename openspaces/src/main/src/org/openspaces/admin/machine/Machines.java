@@ -16,13 +16,15 @@
 
 package org.openspaces.admin.machine;
 
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 import org.openspaces.admin.AdminAware;
 import org.openspaces.admin.machine.events.MachineAddedEventManager;
 import org.openspaces.admin.machine.events.MachineLifecycleEventListener;
+import org.openspaces.admin.machine.events.ElasticMachineProvisioningFailureEventManager;
+import org.openspaces.admin.machine.events.ElasticMachineProvisioningProgressChangedEventManager;
 import org.openspaces.admin.machine.events.MachineRemovedEventManager;
-
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Machines hold all the different {@link Machine}s that are currently
@@ -135,4 +137,19 @@ public interface Machines extends AdminAware, Iterable<Machine> {
      * Allows to remove a {@link MachineLifecycleEventListener}.
      */
     void removeLifeycleListener(MachineLifecycleEventListener eventListener);
+
+    /**
+     * Returns the elastic machine provisioning failure event manager allowing to add and remove
+     * {@link org.openspaces.admin.machine.events.ElasticMachineProvisioningFailureEventListener}s.
+     * @since 8.0.6
+     */
+    ElasticMachineProvisioningFailureEventManager getElasticMachineProvisioningFailure();
+
+    /**
+     * Returns the elastic machine provisioning failure event manager allowing to add and remove
+     * {@link org.openspaces.admin.machine.events.ElasticMachineProvisioningProgressChangedEventListener}s.
+     * @since 8.0.6
+     */
+    ElasticMachineProvisioningProgressChangedEventManager getElasticMachineProvisioningProgressChanged();
+
 }

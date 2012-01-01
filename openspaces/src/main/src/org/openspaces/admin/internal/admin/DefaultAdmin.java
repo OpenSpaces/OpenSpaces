@@ -118,6 +118,7 @@ import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.ProcessingUnitType;
 import org.openspaces.admin.pu.ProcessingUnits;
+import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitEvent;
 import org.openspaces.admin.space.Space;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.space.Spaces;
@@ -129,6 +130,7 @@ import org.openspaces.admin.zone.Zone;
 import org.openspaces.admin.zone.ZoneAware;
 import org.openspaces.admin.zone.Zones;
 import org.openspaces.core.space.SpaceServiceDetails;
+import org.openspaces.grid.gsm.strategy.ElasticScaleStrategyEvents;
 import org.openspaces.pu.service.ServiceMonitors;
 
 import com.gigaspaces.grid.gsa.AgentProcessesDetails;
@@ -143,7 +145,7 @@ import com.j_spaces.kernel.GSThreadFactory;
 
 /**
  * @author kimchy
- * @author itaif - added Applications
+ * @author itaif - added Applications and ESM event processing
  */
 public class DefaultAdmin implements InternalAdmin {
 
@@ -1329,6 +1331,10 @@ public class DefaultAdmin implements InternalAdmin {
 
     private class ScheduledProcessingUnitMonitor implements Runnable {
 
+        private static final int maxNumberOfEvents = 1000;
+        private Long eventsCursor;
+        private String eventsCursorEsmUid;
+
         @Override
         public void run() {
             final Map<String, Holder> holders = new HashMap<String, Holder>();
@@ -1359,14 +1365,49 @@ public class DefaultAdmin implements InternalAdmin {
                 }
             }
             
+            ElasticScaleStrategyEvents scaleStrategyEvents1 = null;
+            InternalElasticServiceManager esm1 = null;
+            try {
+                
+                if (elasticServiceManagers.getSize() > 0) {
+                    esm1 = ((InternalElasticServiceManager)elasticServiceManagers.getManagers()[0]);
+                    if (eventsCursorEsmUid == null || !esm1.getUid().equals(eventsCursorEsmUid)) {
+                        eventsCursor = 0L;
+                        eventsCursorEsmUid = esm1.getUid();
+                    }
+                    scaleStrategyEvents1 = esm1.getScaleStrategyEvents(eventsCursor, maxNumberOfEvents);
+                    eventsCursor = scaleStrategyEvents1.getNextCursor();
+                }
+            } catch (AdminException e) {
+                if (e.getCause() != null && NetworkExceptionHelper.isConnectOrCloseException(e.getCause())) {
+                    // ESM is down, continue
+                }
+                logger.warn("Failed to get ESM details", e);
+            }
+            
+            final ElasticScaleStrategyEvents scaleStrategyEvents = scaleStrategyEvents1;
+            final InternalElasticServiceManager esm = esm1;
+            
             DefaultAdmin.this.scheduleNonBlockingStateChange(new Runnable(){
                 @Override
                 public void run() {
-                    updateState(holders);
+                    updateState(holders, scaleStrategyEvents, esm);
                 }});
         }
 
-        private void updateState(Map<String, Holder> holders) {
+        private void updateState(Map<String, Holder> holders, ElasticScaleStrategyEvents scaleStrategyEvents, InternalElasticServiceManager esm) {
+
+            //TODO: Move after pu added event below
+            // make sure that admin API events and internal state is updated based on elastic PU scale strategy events
+            if (scaleStrategyEvents !=null && esm != null) {
+                for (ElasticProcessingUnitEvent event : scaleStrategyEvents.getEvents()) {
+                    machines.processElasticScaleStrategyEvent(event);
+                    gridServiceAgents.processElasticScaleStrategyEvent(event);
+                    gridServiceContainers.processElasticScaleStrategyEvent(event);
+                    esm.processElasticScaleStrategyEvent(event);
+                }
+            }
+            
             // first go over all of them and remove the ones needed
             for (ProcessingUnit processingUnit : processingUnits) {
                 if (!holders.containsKey(processingUnit.getName())) {
@@ -1430,7 +1471,6 @@ public class DefaultAdmin implements InternalAdmin {
                         processApplicationsOnProcessingUnitAddition(processingUnit);
                     }
                 }
-
                 processingUnit.setStatus( getPuStatusForUSM(processingUnit, details.getStatus()));
                 processingUnit.processProvisionEvents(details.getProvisionLifeCycleEvents());
             }
@@ -1451,6 +1491,7 @@ public class DefaultAdmin implements InternalAdmin {
                 flushEvents();
             }
         }
+
         
         /*
          * Extract USM service state if processing unit is a USM. Returns SCHEDULED if underlying USM process is not in a running state.

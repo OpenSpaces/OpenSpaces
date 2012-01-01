@@ -25,6 +25,7 @@ import org.openspaces.admin.os.OperatingSystemStatistics;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.vm.VirtualMachineAware;
 import org.openspaces.core.util.MemoryUnit;
+import org.openspaces.grid.gsm.machines.MachinesSlaUtils;
 
 public class ContainersSlaUtils {
 
@@ -272,7 +273,7 @@ public class ContainersSlaUtils {
     }
 
     public static String machineToString(Machine machine) {
-        return machine.getHostName() + "/" + machine.getHostAddress();
+        return MachinesSlaUtils.machineToString(machine);
     }
     
     public static String gscToString(GridComponent container) {

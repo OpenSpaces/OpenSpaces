@@ -30,8 +30,6 @@ import org.openspaces.grid.gsm.rebalancing.exceptions.ProcessingUnitIsNotEvenlyD
 import org.openspaces.grid.gsm.rebalancing.exceptions.ProcessingUnitIsNotInTactException;
 import org.openspaces.grid.gsm.rebalancing.exceptions.RebalancingSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.rebalancing.exceptions.WrongContainerProcessingUnitRelocationException;
-import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementEndpointDestroyedException;
-import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementException;
 
 import com.gigaspaces.cluster.activeelection.SpaceMode;
 
@@ -71,16 +69,15 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
     }
 
     public void enforceSla(RebalancingSlaPolicy sla)
-            throws SlaEnforcementEndpointDestroyedException, RebalancingSlaEnforcementInProgressException {
+            throws RebalancingSlaEnforcementInProgressException {
 
         if (sla == null) {
             throw new IllegalArgumentException("sla cannot be null");
         }
    
         if (state.isDestroyedProcessingUnit(pu)) {
-            throw new SlaEnforcementEndpointDestroyedException();
+            throw new IllegalStateException("endpoint destroyed");
         }
-        
         
         for (GridServiceContainer container : sla.getContainers()) {
             if (container.getGridServiceAgent() == null) {
@@ -894,7 +891,7 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
 
             } catch (ExecutionException e) {
                 if (e.getCause() instanceof AdminException || 
-                    e.getCause() instanceof SlaEnforcementException) {
+                    e.getCause() instanceof RebalancingSlaEnforcementInProgressException) {
                     exception = (Exception) e.getCause();
                 } else {
                     throw new IllegalStateException("Unexpected runtime exception", e);

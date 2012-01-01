@@ -3,6 +3,7 @@ package org.openspaces.admin.internal.esm;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.jini.core.lookup.ServiceID;
 
@@ -13,7 +14,10 @@ import org.openspaces.admin.internal.dump.InternalDumpResult;
 import org.openspaces.admin.internal.support.AbstractAgentGridComponent;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
+import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitEvent;
+import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitScaleProgressChangedEvent;
 import org.openspaces.grid.esm.ESM;
+import org.openspaces.grid.gsm.strategy.ElasticScaleStrategyEvents;
 
 import com.gigaspaces.internal.jvm.JVMDetails;
 import com.gigaspaces.internal.jvm.JVMStatistics;
@@ -35,11 +39,14 @@ public class DefaultElasticServiceManager extends AbstractAgentGridComponent imp
 
     private final ESM esm;
 
+    private final Map<String, Boolean> esmScaleIsInProgressPerProcessingUnit;
+
     public DefaultElasticServiceManager(ServiceID serviceID, ESM esm, InternalAdmin admin, int agentId, String agentUid)
     throws RemoteException {
         super(admin, agentId, agentUid);
         this.serviceID = serviceID;
         this.esm = esm;
+        this.esmScaleIsInProgressPerProcessingUnit = new ConcurrentHashMap<String, Boolean>();
     }
 
     public String getUid() {
@@ -158,8 +165,25 @@ public class DefaultElasticServiceManager extends AbstractAgentGridComponent imp
 
     @Override
     public boolean isManagingProcessingUnit(ProcessingUnit pu) {
+        return esmScaleIsInProgressPerProcessingUnit.containsKey(pu.getName());
+    }
+
+    @Override
+    public boolean isManagingProcessingUnitAndScaleNotInProgress(ProcessingUnit pu) {
+        Boolean esmScaleIsInProgress = esmScaleIsInProgressPerProcessingUnit.get(pu.getName());
+        return esmScaleIsInProgress != null && !esmScaleIsInProgress; 
+    }
+
+    @Override
+    public boolean isManagingProcessingUnitAndScaleInProgress(ProcessingUnit pu) {
+        Boolean esmScaleIsInProgress = esmScaleIsInProgressPerProcessingUnit.get(pu.getName());
+        return esmScaleIsInProgress != null && esmScaleIsInProgress; 
+    }
+    
+    @Override
+    public ElasticScaleStrategyEvents getScaleStrategyEvents(long cursor, int maxNumberOfEvents) {
         try {
-            return esm.isManagingProcessingUnit(pu.getName());
+            return esm.getScaleStrategyEvents(cursor, maxNumberOfEvents);
         }
         catch (RemoteException e) {
             throw new AdminException("Failed to determine if scale strategy is enforced",e);
@@ -167,12 +191,22 @@ public class DefaultElasticServiceManager extends AbstractAgentGridComponent imp
     }
 
     @Override
-    public boolean isManagingProcessingUnitAndScaleNotInProgress(ProcessingUnit pu) {
-        try {
-            return esm.isManagingProcessingUnitAndScaleNotInProgress(pu.getName());
-        }
-        catch (RemoteException e) {
-            throw new AdminException("Failed to determine if scale strategy is enforced",e);
+    public void processElasticScaleStrategyEvent(ElasticProcessingUnitEvent event) {
+        
+        if (event instanceof ElasticProcessingUnitScaleProgressChangedEvent) {
+            ElasticProcessingUnitScaleProgressChangedEvent progressEvent = (ElasticProcessingUnitScaleProgressChangedEvent)event;
+            String puName = progressEvent.getProcessingUnitName();
+            if (progressEvent.isComplete()) {
+                if (progressEvent.isUndeploying()) {
+                    esmScaleIsInProgressPerProcessingUnit.remove(puName);
+                }
+                else {
+                    esmScaleIsInProgressPerProcessingUnit.put(puName,false);
+                }
+            }
+            else {
+                esmScaleIsInProgressPerProcessingUnit.put(puName,true);
+            }
         }
     }
 }

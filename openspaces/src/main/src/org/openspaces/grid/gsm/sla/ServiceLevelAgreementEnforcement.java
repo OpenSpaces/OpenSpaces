@@ -3,9 +3,7 @@ package org.openspaces.grid.gsm.sla;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.sla.exceptions.ServiceLevelAgreementEnforcementEndpointAlreadyExistsException;
 
-public interface ServiceLevelAgreementEnforcement
-    <POLICY extends ServiceLevelAgreementPolicy,
-     ENDPOINT extends ServiceLevelAgreementEnforcementEndpoint<POLICY>> {
+public interface ServiceLevelAgreementEnforcement<ENDPOINT extends ServiceLevelAgreementEnforcementEndpoint> {
 
     /**
      * Creates a new endpoint for the specified pu, if one does not already exist.

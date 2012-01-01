@@ -6,7 +6,7 @@ import java.util.List;
 import org.openspaces.admin.pu.ProcessingUnit;
 
 public class SomeProcessingUnitsHaveNotCompletedStateRecoveryException extends
-        MachinesSlaEnforcementInProgressException {
+        GridServiceAgentSlaEnforcementInProgressException {
 
     private static final long serialVersionUID = 1L;
     
