@@ -23,7 +23,7 @@ public class ContextPropertyUtils {
         return ServiceTierType.valueOf(tierTypeStr);
     }
     
-    public static String getIconUrl(InternalProcessingUnit processingUnit) {
+    public static String getIconPath(InternalProcessingUnit processingUnit) {
         String iconUrlStr = getContextPropertyValue(processingUnit, CONTEXT_PROPERTY_SERVICE_ICON);
         if (iconUrlStr == null) {
             return "";

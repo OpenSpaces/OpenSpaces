@@ -65,4 +65,9 @@ public interface InternalGridServiceManager extends GridServiceManager, Internal
      boolean undeployProcessingUnitsAndWait(ProcessingUnit[] processingUnits, long timeout, TimeUnit timeUnit);
 
     ProcessingUnit deploy(Application application, ProcessingUnitDeploymentTopology deploymentTopology, long timeout, TimeUnit timeUnit);
+
+    /**
+     * @since 8.0.6
+     */
+    String getCodeBaseURL();
 }

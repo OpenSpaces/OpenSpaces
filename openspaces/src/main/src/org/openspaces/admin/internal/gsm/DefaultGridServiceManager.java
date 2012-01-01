@@ -710,4 +710,19 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         return this.deploy(deployment, application.getName(), timeout, timeUnit);
     }
    
+    @Override
+    public String getCodeBaseURL() {
+        
+        String codeBaseURL = null;
+        
+        try {
+            codeBaseURL = getCodebase(gsmAdmin);
+        } catch (MalformedURLException mue) {
+            throw new AdminException("Failed to retrieve codebase URL, URL is malformed.", mue);
+        } catch (RemoteException re) {
+            throw new AdminException("Failed to retrieve codebase URL, A remote problem occurred.", re);
+        }
+
+        return codeBaseURL;
+    }
 }
