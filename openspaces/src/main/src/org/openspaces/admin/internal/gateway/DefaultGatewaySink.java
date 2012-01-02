@@ -8,6 +8,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.openspaces.admin.AdminException;
 import org.openspaces.admin.gateway.BootstrapResult;
 import org.openspaces.admin.gateway.GatewayProcessingUnit;
 import org.openspaces.admin.gateway.GatewaySink;
@@ -43,9 +44,9 @@ public class DefaultGatewaySink implements GatewaySink {
         try {
             ((InternalProcessingUnitInstance)gatewayProcessingUnit.getProcessingUnitInstance()).invoke("sink", namedArgs).get();
         } catch (InterruptedException e) {
-            throw new IllegalStateException("Failed to enable incoming replication of sink", e);
+            throw new AdminException("Failed to enable incoming replication of sink", e);
         } catch (ExecutionException e) {
-            throw new IllegalStateException("Failed to enable incoming replication of sink", e);
+            throw new AdminException("Failed to enable incoming replication of sink", e);
         }
     }
 
