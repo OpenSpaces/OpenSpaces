@@ -9,7 +9,7 @@ import java.rmi.ConnectException;
  */
 public abstract class NetworkExceptionHelper {
 
-    public static boolean isConnectOrCloseException(Throwable e) {
+    public static boolean isConnectOrCloseException(Exception e) {
         if (e instanceof ConnectException) {
             if (e.getCause() instanceof ClosedChannelException || e.getCause() instanceof java.net.ConnectException) {
                 return true;
