@@ -1,4 +1,4 @@
-package org.openspaces.admin.internal.admin.gsc.events;
+package org.openspaces.admin.internal.gsc.events;
 
 import org.openspaces.admin.gsc.events.ElasticGridServiceContainerProvisioningProgressChangedEvent;
 import org.openspaces.admin.internal.pu.elastic.events.AbstractElasticProcessingUnitProgressChangedEvent;
