@@ -1,8 +1,10 @@
-package org.openspaces.admin.pu.elastic.events;
+package org.openspaces.admin.internal.pu.elastic.events;
 
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+
+import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitProgressChangedEvent;
 
 import com.gigaspaces.internal.io.IOUtils;
 
@@ -12,7 +14,7 @@ public abstract class AbstractElasticProcessingUnitProgressChangedEvent implemen
     private boolean isUndeploying;
     
     /**
-     * de-serialization constructor
+     * de-serialization/reflection constructor
      */
     public AbstractElasticProcessingUnitProgressChangedEvent() {
     }
@@ -54,5 +56,17 @@ public abstract class AbstractElasticProcessingUnitProgressChangedEvent implemen
         isComplete = in.readBoolean();
         isUndeploying = in.readBoolean();
         processingUnitName = IOUtils.readString(in);
+    }
+
+    public void setComplete(boolean isComplete) {
+        this.isComplete = isComplete;
+    }
+
+    public void setUndeploying(boolean isUndeploying) {
+        this.isUndeploying = isUndeploying;
+    }
+
+    public void setProcessingUnitName(String processingUnitName) {
+        this.processingUnitName = processingUnitName;
     }
 }

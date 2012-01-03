@@ -62,10 +62,10 @@ public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
         }
         
         if (getProcessingUnit().getInstances().length == 0) {
-            puInstanceProvisioningCompletedEvent(getProcessingUnit());
+            puInstanceProvisioningCompletedEvent();
         }
         else {
-            puInstanceProvisioningInProgressEvent(getProcessingUnit(), new ElasticProcessingUnitInstanceUndeployInProgress(getProcessingUnit()));
+            puInstanceProvisioningInProgressEvent(new ElasticProcessingUnitInstanceUndeployInProgress(getProcessingUnit()));
         }
         
         //proceed with container udeployment. It respects the pu instance download procedure.
@@ -119,10 +119,10 @@ public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
         
         try {
             containersEndpoint.enforceSla(sla);
-            containerProvisioningCompletedEvent(containersEndpoint.getContainers());
+            containerProvisioningCompletedEvent();
         }
         catch (ContainersSlaEnforcementInProgressException e) {
-            containerProvisioningInProgressEvent(containersEndpoint.getContainers(), e);
+            containerProvisioningInProgressEvent(e);
             throw e;
         }
     }

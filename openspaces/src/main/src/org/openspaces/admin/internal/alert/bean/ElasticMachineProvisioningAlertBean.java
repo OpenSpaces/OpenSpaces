@@ -2,6 +2,7 @@ package org.openspaces.admin.internal.alert.bean;
 
 import org.openspaces.admin.alert.Alert;
 import org.openspaces.admin.alert.AlertSeverity;
+import org.openspaces.admin.alert.alerts.ElasticMachineProvisioningAlert;
 import org.openspaces.admin.machine.events.ElasticMachineProvisioningFailureEvent;
 import org.openspaces.admin.machine.events.ElasticMachineProvisioningFailureEventListener;
 import org.openspaces.admin.machine.events.ElasticMachineProvisioningProgressChangedEvent;
@@ -59,7 +60,8 @@ public class ElasticMachineProvisioningAlertBean extends AbstractElasticProcessi
     public void elasticMachineProvisioningProgressChanged(ElasticMachineProvisioningProgressChangedEvent event) {
         String puName = event.getProcessingUnitName();
         if (event.isComplete()) {
-            for (Alert alert : createResolvedAlerts(puName)) {
+            for (Alert baseAlert : createResolvedAlerts(puName)) {
+                ElasticMachineProvisioningAlert alert = new ElasticMachineProvisioningAlert(baseAlert);
                 admin.getAlertManager().triggerAlert(alert);
             }
         }

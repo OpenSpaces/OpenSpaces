@@ -292,10 +292,10 @@ public class ManualCapacityScaleStrategyBean extends AbstractScaleStrategyBean
         }
         try {
             containersEndpoint.enforceSla(sla);
-            containerProvisioningCompletedEvent(containersEndpoint.getContainers());
+            containerProvisioningCompletedEvent();
         }
         catch (ContainersSlaEnforcementInProgressException e) {
-            containerProvisioningInProgressEvent(containersEndpoint.getContainers(), e);
+            containerProvisioningInProgressEvent(e);
             throw e;
         }
     }
@@ -313,11 +313,11 @@ public class ManualCapacityScaleStrategyBean extends AbstractScaleStrategyBean
         sla.setAllocatedCapacity(machinesEndpoint.getAllocatedCapacity());
         try {
             rebalancingEndpoint.enforceSla(sla);
-            puInstanceProvisioningCompletedEvent(getProcessingUnit());
+            puInstanceProvisioningCompletedEvent();
 
         }
         catch (RebalancingSlaEnforcementInProgressException e) {
-            puInstanceProvisioningInProgressEvent(getProcessingUnit(),e);
+            puInstanceProvisioningInProgressEvent(e);
             throw e;
         }
     }

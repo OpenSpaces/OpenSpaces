@@ -2,6 +2,7 @@ package org.openspaces.admin.internal.alert.bean;
 
 import org.openspaces.admin.alert.Alert;
 import org.openspaces.admin.alert.AlertSeverity;
+import org.openspaces.admin.alert.alerts.ElasticGridServiceContainerProvisioningAlert;
 import org.openspaces.admin.gsc.events.ElasticGridServiceContainerProvisioningFailureEvent;
 import org.openspaces.admin.gsc.events.ElasticGridServiceContainerProvisioningFailureEventListener;
 import org.openspaces.admin.gsc.events.ElasticGridServiceContainerProvisioningProgressChangedEvent;
@@ -61,7 +62,8 @@ public class ElasticGridServiceContainerProvisioningAlertBean
     public void elasticGridServiceContainerProvisioningProgressChanged(ElasticGridServiceContainerProvisioningProgressChangedEvent event) {
         String puName = event.getProcessingUnitName();
         if (event.isComplete()) {
-            for (Alert alert : createResolvedAlerts(puName)) {
+            for (Alert baseAlert : createResolvedAlerts(puName)) {
+                ElasticGridServiceContainerProvisioningAlert alert = new ElasticGridServiceContainerProvisioningAlert(baseAlert);
                 admin.getAlertManager().triggerAlert(alert);
             }
         }

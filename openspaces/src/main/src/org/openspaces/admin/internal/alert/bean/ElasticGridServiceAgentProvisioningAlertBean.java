@@ -50,7 +50,7 @@ public class ElasticGridServiceAgentProvisioningAlertBean
         String description = event.getFailureDescription();
         for (String puName : event.getProcessingUnitNames()) {
             ElasticGridServiceAgentProvisioningAlert alert = new ElasticGridServiceAgentProvisioningAlert(createRaisedAlert(puName, description));
-            admin.getAlertManager().triggerAlert(alert);
+            super.raiseAlert(alert);
         }
     }
 

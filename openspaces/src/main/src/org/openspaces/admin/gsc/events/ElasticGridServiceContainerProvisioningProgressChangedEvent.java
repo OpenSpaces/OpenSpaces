@@ -1,19 +1,7 @@
 package org.openspaces.admin.gsc.events;
 
-import org.openspaces.admin.pu.elastic.events.AbstractElasticProcessingUnitProgressChangedEvent;
+import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitProgressChangedEvent;
 
-public class ElasticGridServiceContainerProvisioningProgressChangedEvent extends AbstractElasticProcessingUnitProgressChangedEvent {
+public interface ElasticGridServiceContainerProvisioningProgressChangedEvent extends ElasticProcessingUnitProgressChangedEvent {
 
-    private static final long serialVersionUID = 1L;
-    
-    /**
-     * de-serialization constructor
-     */
-    public ElasticGridServiceContainerProvisioningProgressChangedEvent() {
-    }
-
-    
-    public ElasticGridServiceContainerProvisioningProgressChangedEvent(boolean isComplete, boolean isUndeploying, String processingUnitName) {
-        super(isComplete, isUndeploying, processingUnitName);
-    }
 }

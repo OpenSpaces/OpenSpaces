@@ -1,7 +1,8 @@
 package org.openspaces.grid.gsm.machines.exceptions;
 
-import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
+import java.util.Arrays;
 
+import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
 
 public class FailedToStartNewMachineException extends MachinesSlaEnforcementInProgressException implements SlaEnforcementFailure {
 
@@ -17,5 +18,15 @@ public class FailedToStartNewMachineException extends MachinesSlaEnforcementInPr
     public String[] getAffectedProcessingUnits() {
         return affectedProcessingUnits;
     }
-
+    
+    @Override
+    public boolean equals(Object other) {
+        boolean same = false;
+        if (other instanceof FailedToStartNewMachineException) {
+            FailedToStartNewMachineException otherEx = (FailedToStartNewMachineException)other;
+            same = Arrays.equals(otherEx.affectedProcessingUnits,this.affectedProcessingUnits) && 
+                   otherEx.getCause().getMessage().equals(getCause().getMessage());
+        }
+        return same;  
+    }
 }

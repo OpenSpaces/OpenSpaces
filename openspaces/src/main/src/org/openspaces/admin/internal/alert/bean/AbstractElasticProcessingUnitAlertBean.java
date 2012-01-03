@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.alert.Alert;
 import org.openspaces.admin.alert.AlertFactory;
@@ -13,11 +15,17 @@ import org.openspaces.admin.internal.alert.InternalAlertManager;
 
 public abstract class AbstractElasticProcessingUnitAlertBean implements AlertBean {
 
+    private final Log logger;
+    
     private String beanUid;
     private String alertName;
     private AlertSeverity alertSeverity;
     private String resolvedAlertDescriptionFormat;
 
+    public AbstractElasticProcessingUnitAlertBean() {
+        logger = LogFactory.getLog(this.getClass());
+    }
+    
     public void setBeanUid(String beanUid) {
         this.beanUid = beanUid;
     }
@@ -54,7 +62,9 @@ public abstract class AbstractElasticProcessingUnitAlertBean implements AlertBea
     
     @Override
     public void afterPropertiesSet() throws Exception {
-        
+        if (logger.isDebugEnabled()) {
+            logger.debug(this.getClass()+ " started");
+        }
     }
 
     @Override
@@ -101,6 +111,10 @@ public abstract class AbstractElasticProcessingUnitAlertBean implements AlertBea
             .componentDescription(processingUnitName)
             .groupUid(groupUid)
             .create();
+    }
+
+    public void raiseAlert(Alert alert) {
+        admin.getAlertManager().triggerAlert(alert);
     }
 
 }

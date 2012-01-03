@@ -10,22 +10,21 @@ import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.gsa.GridServiceAgent;
-import org.openspaces.admin.gsa.events.ElasticGridServiceAgentProvisioningFailureEvent;
-import org.openspaces.admin.gsa.events.ElasticGridServiceAgentProvisioningProgressChangedEvent;
-import org.openspaces.admin.gsc.GridServiceContainer;
-import org.openspaces.admin.gsc.events.ElasticGridServiceContainerProvisioningFailureEvent;
-import org.openspaces.admin.gsc.events.ElasticGridServiceContainerProvisioningProgressChangedEvent;
 import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.admin.gsc.events.DefaultElasticGridServiceContainerProvisioningProgressChangedEvent;
+import org.openspaces.admin.internal.gsa.events.DefaultElasticGridServiceAgentProvisioningFailureEvent;
+import org.openspaces.admin.internal.gsa.events.DefaultElasticGridServiceAgentProvisioningProgressChangedEvent;
+import org.openspaces.admin.internal.gsc.events.DefaultElasticGridServiceContainerProvisioningFailureEvent;
+import org.openspaces.admin.internal.machine.events.DefaultElasticMachineProvisioningFailureEvent;
+import org.openspaces.admin.internal.machine.events.DefaultElasticMachineProvisioningProgressChangedEvent;
 import org.openspaces.admin.internal.pu.elastic.ElasticMachineIsolationConfig;
 import org.openspaces.admin.internal.pu.elastic.ProcessingUnitSchemaConfig;
 import org.openspaces.admin.internal.pu.elastic.ScaleStrategyConfigUtils;
-import org.openspaces.admin.machine.events.ElasticMachineProvisioningFailureEvent;
-import org.openspaces.admin.machine.events.ElasticMachineProvisioningProgressChangedEvent;
+import org.openspaces.admin.internal.pu.elastic.events.DefaultElasticProcessingUnitInstanceProvisioningFailureEvent;
+import org.openspaces.admin.internal.pu.elastic.events.DefaultElasticProcessingUnitInstanceProvisioningProgressChangedEvent;
+import org.openspaces.admin.internal.pu.elastic.events.DefaultElasticProcessingUnitScaleProgressChangedEvent;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
-import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitInstanceProvisioningFailureEvent;
-import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitInstanceProvisioningProgressChangedEvent;
-import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitScaleProgressChangedEvent;
 import org.openspaces.core.bean.Bean;
 import org.openspaces.core.internal.commons.math.fraction.Fraction;
 import org.openspaces.core.util.StringProperties;
@@ -42,7 +41,6 @@ import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIs
 import org.openspaces.grid.gsm.machines.isolation.SharedMachineIsolation;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
 import org.openspaces.grid.gsm.rebalancing.exceptions.RebalancingSlaEnforcementInProgressException;
-import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementInProgressException;
 
 public abstract class AbstractScaleStrategyBean implements 
@@ -74,17 +72,12 @@ public abstract class AbstractScaleStrategyBean implements
     private boolean isScaleInProgress;
 
     // events state 
-    private boolean puProvisioningInProgressEventRaised;
-    private boolean puProvisioningCompletedEventRaised;
-    private boolean containerProvisioningInProgressEventRaised;
-    private boolean containerProvisioningCompletedEventRaised;
-    private boolean machineProvisioningInProgressEventRaised;
-    private boolean machineProvisioningCompletedEventRaised;
-    private boolean agentProvisioningCompletedEventRaised;
-    private boolean agentProvisioningInProgressEventRaised;
-
-    private ElasticScaleStrategyEventStorage eventQueue;
+    private ScaleStrategyProgressEventState machineProvisioningEventState;
+    private ScaleStrategyProgressEventState agentProvisioningEventState;
+    private ScaleStrategyProgressEventState containerProvisioningEventState;
+    private ScaleStrategyProgressEventState puProvisioningEventState;
     
+    private ElasticScaleStrategyEventStorage eventStorage;
     
     protected InternalAdmin getAdmin() {
         return this.admin;
@@ -151,7 +144,7 @@ public abstract class AbstractScaleStrategyBean implements
     
     @Override
     public void setElasticScaleStrategyEventStorage(ElasticScaleStrategyEventStorage eventQueue) {
-        this.eventQueue = eventQueue;
+        this.eventStorage = eventQueue;
     }
     
     public void afterPropertiesSet() {
@@ -197,6 +190,11 @@ public abstract class AbstractScaleStrategyBean implements
         
         logger.info("properties: "+properties);
     
+        machineProvisioningEventState = new ScaleStrategyProgressEventState(eventStorage, isUndeploying(), pu.getName(), DefaultElasticMachineProvisioningProgressChangedEvent.class, DefaultElasticMachineProvisioningFailureEvent.class);
+        agentProvisioningEventState = new ScaleStrategyProgressEventState(eventStorage, isUndeploying(), pu.getName(), DefaultElasticGridServiceAgentProvisioningProgressChangedEvent.class, DefaultElasticGridServiceAgentProvisioningFailureEvent.class );
+        containerProvisioningEventState = new ScaleStrategyProgressEventState(eventStorage, isUndeploying(), pu.getName(), DefaultElasticGridServiceContainerProvisioningProgressChangedEvent.class, DefaultElasticGridServiceContainerProvisioningFailureEvent.class );
+        puProvisioningEventState = new ScaleStrategyProgressEventState(eventStorage, isUndeploying(), pu.getName(), DefaultElasticProcessingUnitInstanceProvisioningProgressChangedEvent.class, DefaultElasticProcessingUnitInstanceProvisioningFailureEvent.class );
+        
         minimumNumberOfMachines = calcMinimumNumberOfMachines();
         provisionedMachines = new ProvisionedMachinesCache(pu,machineProvisioning, getPollingIntervalSeconds());
         
@@ -312,124 +310,52 @@ public abstract class AbstractScaleStrategyBean implements
             isScaleInProgress = isException;
             
             boolean isCompleted = !isScaleInProgress;
-            eventQueue.enqueu(
-                    new ElasticProcessingUnitScaleProgressChangedEvent(isCompleted, isUndeploying(), getProcessingUnit().getName()));
+            eventStorage.enqueu(
+                    new DefaultElasticProcessingUnitScaleProgressChangedEvent(isCompleted, isUndeploying(), getProcessingUnit().getName()));
         }
     }
 
     protected abstract void enforceSla() throws SlaEnforcementInProgressException;
-    
-    public boolean isScaleInProgress() {
-        return isScaleInProgress;
-    }
-    
-    protected void agentProvisioningCompletedEvent() {
-        if (!agentProvisioningCompletedEventRaised) {
-            boolean isComplete = true;
-            eventQueue.enqueu(
-                    new ElasticGridServiceAgentProvisioningProgressChangedEvent(isComplete, isUndeploying(), getProcessingUnit().getName()));
-            agentProvisioningCompletedEventRaised = true;
-            agentProvisioningInProgressEventRaised = false;
-        }
-    }
-    
-    protected void machineProvisioningCompletedEvent() {
-        if (!machineProvisioningCompletedEventRaised) {
-            machineProvisioningCompletedEventRaised = true;
-            machineProvisioningInProgressEventRaised = false;
 
-            boolean isComplete = true;
-            eventQueue.enqueu(
-                    new ElasticMachineProvisioningProgressChangedEvent(isComplete, isUndeploying(), getProcessingUnit().getName()));
-        }
-    }
-    
-    protected void agentProvisioningInProgressEvent(GridServiceAgentSlaEnforcementInProgressException e) {
-        if (!agentProvisioningInProgressEventRaised) {
-            boolean isComplete = false;
-            eventQueue.enqueu(
-                    new ElasticGridServiceAgentProvisioningProgressChangedEvent(isComplete, isUndeploying(), getProcessingUnit().getName()));
-            agentProvisioningInProgressEventRaised = true;
-            agentProvisioningCompletedEventRaised = false;
-        }
-        
-        if (e instanceof SlaEnforcementFailure) {
-            eventQueue.enqueu(
-                 new ElasticGridServiceAgentProvisioningFailureEvent(e.getMessage(), ((SlaEnforcementFailure)e).getAffectedProcessingUnits()));
-        }
-    }
-    
     /**
      * @return true if this is an undeployment strategy (pu is undeploying)
      */
     protected abstract boolean isUndeploying();
 
+    
+    public boolean isScaleInProgress() {
+        return isScaleInProgress;
+    }
+
+    protected void agentProvisioningCompletedEvent() {
+        agentProvisioningEventState.enqueuProvisioningCompletedEvent();
+    }
+    
+    protected void agentProvisioningInProgressEvent(GridServiceAgentSlaEnforcementInProgressException e) {
+        agentProvisioningEventState.enqueuProvisioningInProgressEvent(e);
+    }
+
+    protected void machineProvisioningCompletedEvent() {
+        machineProvisioningEventState.enqueuProvisioningCompletedEvent();
+    }
+    
     protected void machineProvisioningInProgressEvent(MachinesSlaEnforcementInProgressException e) {
-        if (!machineProvisioningInProgressEventRaised) {
-            machineProvisioningCompletedEventRaised = false;
-            machineProvisioningInProgressEventRaised = true;
-            boolean isComplete = false;
-            eventQueue.enqueu(
-                    new ElasticMachineProvisioningProgressChangedEvent(isComplete, isUndeploying(), getProcessingUnit().getName()));
-        } 
-                    
-        if (e instanceof SlaEnforcementFailure) {
-            eventQueue.enqueu(
-                 new ElasticMachineProvisioningFailureEvent(e.getMessage(), ((SlaEnforcementFailure)e).getAffectedProcessingUnits()));
-        }
+        machineProvisioningEventState.enqueuProvisioningInProgressEvent(e);
     }
     
-    protected void containerProvisioningCompletedEvent(GridServiceContainer[] containers) {
-
-        if (!containerProvisioningCompletedEventRaised) {
-            containerProvisioningCompletedEventRaised = true;
-            containerProvisioningInProgressEventRaised = false;
-
-            boolean isComplete = true;
-            eventQueue.enqueu(
-                    new ElasticGridServiceContainerProvisioningProgressChangedEvent(isComplete, isUndeploying(), getProcessingUnit().getName()));
-        }
+    protected void containerProvisioningCompletedEvent() {
+        containerProvisioningEventState.enqueuProvisioningCompletedEvent();
     }
     
-    protected void containerProvisioningInProgressEvent(GridServiceContainer[] containers, ContainersSlaEnforcementInProgressException e) {
-
-        if (!containerProvisioningInProgressEventRaised) {
-            containerProvisioningCompletedEventRaised = false;
-            containerProvisioningInProgressEventRaised = true;
-            boolean isComplete = false;
-            eventQueue.enqueu(
-                    new ElasticGridServiceContainerProvisioningProgressChangedEvent(isComplete, isUndeploying(), getProcessingUnit().getName()));
-        } 
-                    
-        if (e instanceof SlaEnforcementFailure) {
-            eventQueue.enqueu(
-                 new ElasticGridServiceContainerProvisioningFailureEvent(e.getMessage(), ((SlaEnforcementFailure)e).getAffectedProcessingUnits()));
-        }
+    protected void containerProvisioningInProgressEvent(ContainersSlaEnforcementInProgressException e) {
+        containerProvisioningEventState.enqueuProvisioningInProgressEvent(e);
     }
     
-    protected void puInstanceProvisioningCompletedEvent(ProcessingUnit pu) {
-        
-        if (!puProvisioningCompletedEventRaised) {
-            puProvisioningCompletedEventRaised = true;
-            puProvisioningInProgressEventRaised = false;
-
-            boolean isComplete = true;
-            eventQueue.enqueu(
-                    new ElasticProcessingUnitInstanceProvisioningProgressChangedEvent(isComplete, isUndeploying(), getProcessingUnit().getName()));
-        }
+    protected void puInstanceProvisioningCompletedEvent() {
+        puProvisioningEventState.enqueuProvisioningCompletedEvent();
     }
-    
-    protected void puInstanceProvisioningInProgressEvent(ProcessingUnit pu, RebalancingSlaEnforcementInProgressException e) {
-        if (!puProvisioningInProgressEventRaised) {
-            puProvisioningCompletedEventRaised = false;
-            puProvisioningInProgressEventRaised = true;
-            boolean isComplete = false;
-            eventQueue.enqueu(
-                    new ElasticProcessingUnitInstanceProvisioningProgressChangedEvent(isComplete, isUndeploying(), getProcessingUnit().getName()));
-        }
-        if (e instanceof SlaEnforcementFailure) {
-            eventQueue.enqueu(
-                 new ElasticProcessingUnitInstanceProvisioningFailureEvent(e.getMessage(), ((SlaEnforcementFailure)e).getAffectedProcessingUnits()));
-        }
+
+    protected void puInstanceProvisioningInProgressEvent(RebalancingSlaEnforcementInProgressException e) {
+        puProvisioningEventState.enqueuProvisioningInProgressEvent(e);
     }
 }

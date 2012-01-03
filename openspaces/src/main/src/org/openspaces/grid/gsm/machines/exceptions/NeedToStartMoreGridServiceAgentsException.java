@@ -1,5 +1,6 @@
 package org.openspaces.grid.gsm.machines.exceptions;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,24 +19,37 @@ public class NeedToStartMoreGridServiceAgentsException extends GridServiceAgentS
     
     private static final long serialVersionUID = 1L;
     private final String[] affectedProcessingUnits;
+    private final CapacityRequirements capacityShortage;
 
     public NeedToStartMoreGridServiceAgentsException(AbstractMachinesSlaPolicy sla, MachinesSlaEnforcementState state, CapacityRequirements capacityShortage, ProcessingUnit pu) {
         super(createMessage(sla, state, capacityShortage, pu));
         this.affectedProcessingUnits  = new String[] {pu.getName()};
+        this.capacityShortage = capacityShortage;
     }
 
     public NeedToStartMoreGridServiceAgentsException(CapacityRequirements capacityShortage, ProcessingUnit pu) {
         super(createBasicMessage(capacityShortage));
         this.affectedProcessingUnits  = new String[] {pu.getName()};
+        this.capacityShortage = capacityShortage;
     }
 
+    @Override
+    public boolean equals(Object other) {
+        boolean same = false;
+        if (other instanceof NeedToStartMoreGridServiceAgentsException) {
+            NeedToStartMoreGridServiceAgentsException otherEx = (NeedToStartMoreGridServiceAgentsException)other;
+            same = Arrays.equals(otherEx.affectedProcessingUnits,this.affectedProcessingUnits) && otherEx.capacityShortage.equals(capacityShortage);
+        }
+        return same;  
+    }
+    
     private static String createBasicMessage(CapacityRequirements capacityShortage) {
         return "Cannot enforce Machines SLA since there are not enough machines available. "+
                 "Need more capacity: " + capacityShortage;
     }
     
     private static String createMessage(AbstractMachinesSlaPolicy sla, MachinesSlaEnforcementState state, CapacityRequirements capacityShortage, ProcessingUnit pu) {
-        return createBasicMessage(capacityShortage) + " " + reportToString(sla, createReportOfAllMachines(state, pu));
+        return createBasicMessage(capacityShortage) + ". " + reportToString(sla, createReportOfAllMachines(state, pu));
     }
 
     private static String reportToString(
