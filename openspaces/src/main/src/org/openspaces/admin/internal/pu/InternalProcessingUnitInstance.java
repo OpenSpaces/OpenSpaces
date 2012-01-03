@@ -1,6 +1,11 @@
 package org.openspaces.admin.internal.pu;
 
+import java.util.Map;
+import java.util.concurrent.Future;
+
 import net.jini.core.lookup.ServiceID;
+
+import org.jini.rio.monitor.ServiceFaultDetectionEvent;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.support.InternalGridComponent;
 import org.openspaces.admin.pu.ProcessingUnit;
@@ -8,9 +13,6 @@ import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.ProcessingUnitPartition;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.pu.container.servicegrid.PUServiceBean;
-
-import java.util.Map;
-import java.util.concurrent.Future;
 
 /**
  * @author kimchy
@@ -41,9 +43,10 @@ public interface InternalProcessingUnitInstance extends ProcessingUnitInstance, 
     boolean isUndeploying();
 
     /**
-     * Return instance name without prefix of application name ( if exists )
+     * @return Return instance name without prefix of application name ( if exists )
      * @since 8.0.6
-     * @return
      */
     String getProcessingUnitInstanceSimpleName();
+    
+    void setMemberAliveIndicatorStatus(ServiceFaultDetectionEvent serviceFaultDetectionEvent);
 }

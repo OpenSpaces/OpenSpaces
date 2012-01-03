@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 import net.jini.core.lookup.ServiceID;
 
 import org.jini.rio.monitor.ProvisionMonitorAdmin;
+import org.jini.rio.monitor.event.Events;
 import org.openspaces.admin.application.Application;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.gsm.GridServiceManager;
@@ -66,8 +67,9 @@ public interface InternalGridServiceManager extends GridServiceManager, Internal
 
     ProcessingUnit deploy(Application application, ProcessingUnitDeploymentTopology deploymentTopology, long timeout, TimeUnit timeUnit);
 
-    /**
-     * @since 8.0.6
-     */
+    /** @since 8.0.6 */
     String getCodeBaseURL();
+    
+    /** @since 8.0.6 */
+    Events getEvents(int maxEvents);
 }

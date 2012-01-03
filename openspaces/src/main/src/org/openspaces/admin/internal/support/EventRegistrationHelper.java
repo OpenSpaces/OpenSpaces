@@ -31,6 +31,7 @@ import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEventListen
 import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitAddedEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventListener;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionAttemptEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionFailureEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionPendingEventListener;
@@ -136,6 +137,9 @@ public abstract class EventRegistrationHelper {
         }
         if (eventListener instanceof ProcessingUnitInstanceProvisionPendingEventListener) {
             admin.getProcessingUnits().getProcessingUnitInstanceProvisionPending().add((ProcessingUnitInstanceProvisionPendingEventListener) eventListener);
+        }
+        if (eventListener instanceof ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventListener) {
+            admin.getProcessingUnits().getProcessingUnitInstanceMemberAliveIndicatorStatusChanged().add((ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventListener) eventListener);
         }
         if (eventListener instanceof ManagingGridServiceManagerChangedEventListener) {
             admin.getProcessingUnits().getManagingGridServiceManagerChanged().add((ManagingGridServiceManagerChangedEventListener) eventListener);
@@ -348,6 +352,9 @@ public abstract class EventRegistrationHelper {
         if (eventListener instanceof ProcessingUnitInstanceProvisionPendingEventListener) {
             admin.getProcessingUnits().getProcessingUnitInstanceProvisionPending().remove((ProcessingUnitInstanceProvisionPendingEventListener) eventListener);
         }
+        if (eventListener instanceof ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventListener) {
+            admin.getProcessingUnits().getProcessingUnitInstanceMemberAliveIndicatorStatusChanged().remove((ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventListener) eventListener);
+        }
         if (eventListener instanceof ManagingGridServiceManagerChangedEventListener) {
             admin.getProcessingUnits().getManagingGridServiceManagerChanged().remove((ManagingGridServiceManagerChangedEventListener) eventListener);
         }
@@ -444,6 +451,10 @@ public abstract class EventRegistrationHelper {
         if (eventListener instanceof BackupGridServiceManagerChangedEventListener) {
             processingUnit.getBackupGridServiceManagerChanged().add((BackupGridServiceManagerChangedEventListener) eventListener);
         }
+        if (eventListener instanceof ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventListener) {
+            processingUnit.getProcessingUnitInstanceMemberAliveIndicatorStatusChanged().add((ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventListener) eventListener);
+        }
+
     }
 
     public static void removeEventListener(ProcessingUnit processingUnit, AdminEventListener eventListener) {
@@ -476,6 +487,9 @@ public abstract class EventRegistrationHelper {
         }
         if( eventListener instanceof ProcessingUnitInstanceStatisticsChangedEventListener ){
             processingUnit.getProcessingUnitInstanceStatisticsChanged().remove((ProcessingUnitInstanceStatisticsChangedEventListener) eventListener);
-        }        
+        }
+        if (eventListener instanceof ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventListener) {
+            processingUnit.getProcessingUnitInstanceMemberAliveIndicatorStatusChanged().remove((ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventListener) eventListener);
+        }
     }
 }

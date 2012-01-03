@@ -15,23 +15,29 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import net.jini.core.lookup.ServiceID;
 
+import org.jini.rio.monitor.ServiceFaultDetectionEvent;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.gsm.InternalGridServiceManager;
+import org.openspaces.admin.internal.pu.events.DefaultProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventManager;
 import org.openspaces.admin.internal.pu.events.DefaultProcessingUnitInstanceStatisticsChangedEventManager;
+import org.openspaces.admin.internal.pu.events.InternalProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventManager;
 import org.openspaces.admin.internal.pu.events.InternalProcessingUnitInstanceStatisticsChangedEventManager;
 import org.openspaces.admin.internal.space.DefaultSpaceInstances;
 import org.openspaces.admin.internal.space.InternalSpaceInstance;
 import org.openspaces.admin.internal.space.InternalSpaceInstances;
 import org.openspaces.admin.internal.support.AbstractGridComponent;
 import org.openspaces.admin.internal.utils.NameUtils;
+import org.openspaces.admin.pu.MemberAliveIndicatorStatus;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.ProcessingUnitInstanceStatistics;
 import org.openspaces.admin.pu.ProcessingUnitPartition;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEvent;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceStatisticsChangedEvent;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.space.events.SpaceInstanceAddedEventListener;
@@ -116,6 +122,9 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
 
     private final InternalProcessingUnitInstanceStatisticsChangedEventManager statisticsChangedEventManager;
 
+    private volatile MemberAliveIndicatorStatus memberAliveIndicatorStatus = MemberAliveIndicatorStatus.ALIVE;
+    private final InternalProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventManager processingUnitInstanceMemberAliveIndicatorStatusChangedEventManager;
+
     public DefaultProcessingUnitInstance(ServiceID serviceID, PUDetails puDetails, PUServiceBean puServiceBean, InternalAdmin admin) {
         super(admin);
         this.serviceID = serviceID;
@@ -196,6 +205,8 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
             servicesDetailsTemp.put(entry.getKey(), entry.getValue().toArray(new ServiceDetails[entry.getValue().size()]));
         }
         servicesDetailsByServiceType = Collections.unmodifiableMap(servicesDetailsTemp);
+        
+        this.processingUnitInstanceMemberAliveIndicatorStatusChangedEventManager = new DefaultProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventManager(admin);
     }
 
     public String getUid() {
@@ -239,7 +250,6 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
                 getClusterInfo().getInstanceId(), 
                 getBackupId(), getClusterInfo().getNumberOfBackups() );
     }
-    
 
     public void setProcessingUnit(ProcessingUnit processingUnit) {
         assertStateChangesPermitted();
@@ -643,5 +653,35 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
             throw new AdminException("Failed to check if processing unit instance is alive", e);
         }
     }
-
+    
+    @Override
+    public ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventManager getProcessingUnitInstanceMemberAliveIndicatorStatusChanged() {
+        return processingUnitInstanceMemberAliveIndicatorStatusChangedEventManager;
+    }
+    
+    @Override
+    public void setMemberAliveIndicatorStatus(ServiceFaultDetectionEvent serviceFaultDetectionEvent) {
+        MemberAliveIndicatorStatus newStatus;
+        if (serviceFaultDetectionEvent.isAlive()) {
+            newStatus = MemberAliveIndicatorStatus.ALIVE;
+        } else if (serviceFaultDetectionEvent.isSuspectedFailure()) {
+            newStatus = MemberAliveIndicatorStatus.SUSPECTING_FAILURE;
+        } else if (serviceFaultDetectionEvent.isDetectedFailure()) {
+            newStatus = MemberAliveIndicatorStatus.DETECTED_FAILURE;
+        } else {
+            throw new IllegalStateException("unknown member alive indicator status");
+        }
+        if (newStatus != memberAliveIndicatorStatus) {
+            ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEvent event = new ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEvent(this, memberAliveIndicatorStatus, newStatus);
+            processingUnitInstanceMemberAliveIndicatorStatusChangedEventManager.processingUnitInstanceMemberAliveIndicatorStatusChanged(event);
+            ((InternalProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventManager) processingUnit.getProcessingUnitInstanceMemberAliveIndicatorStatusChanged()).processingUnitInstanceMemberAliveIndicatorStatusChanged(event);
+            ((InternalProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventManager) processingUnit.getProcessingUnits().getProcessingUnitInstanceMemberAliveIndicatorStatusChanged()).processingUnitInstanceMemberAliveIndicatorStatusChanged(event);
+            memberAliveIndicatorStatus = newStatus;
+        }
+    }
+    
+    @Override
+    public MemberAliveIndicatorStatus getMemberAliveIndicatorStatus() {
+        return memberAliveIndicatorStatus;
+    }
 }

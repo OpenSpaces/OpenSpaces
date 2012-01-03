@@ -1,8 +1,10 @@
 package org.openspaces.admin.internal.admin;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -21,10 +23,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import net.jini.core.discovery.LookupLocator;
+import net.jini.core.lookup.ServiceID;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jini.rio.core.OperationalString;
+import org.jini.rio.monitor.ServiceFaultDetectionEvent;
+import org.jini.rio.monitor.event.Event;
+import org.jini.rio.monitor.event.Events;
 import org.openspaces.admin.AdminEventListener;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.GridComponent;
@@ -145,7 +151,7 @@ import com.j_spaces.kernel.GSThreadFactory;
 
 /**
  * @author kimchy
- * @author itaif - added Applications and ESM event processing
+ * @author itaif - added Applications
  */
 public class DefaultAdmin implements InternalAdmin {
 
@@ -227,7 +233,9 @@ public class DefaultAdmin implements InternalAdmin {
     private boolean useDaemonThreads;
     
     private final AtomicInteger eventListenersCount = new AtomicInteger();
-
+    
+    private final List<ProcessingUnitInstance> removedProcessingUnitInstances = new LinkedList<ProcessingUnitInstance>();
+    
     public DefaultAdmin() {
         this.discoveryService = new DiscoveryService(this);
         this.alertManager = new DefaultAlertManager(this);
@@ -331,6 +339,7 @@ public class DefaultAdmin implements InternalAdmin {
                 new ScheduledProcessingUnitMonitor(), scheduledProcessingUnitMonitorInterval, scheduledProcessingUnitMonitorInterval, TimeUnit.MILLISECONDS);
         scheduledAgentProcessessMonitorFuture = scheduledExecutorService.scheduleWithFixedDelay(new ScheduledAgentProcessessMonitor(),
                 scheduledAgentProcessessMonitorInterval, scheduledAgentProcessessMonitorInterval, TimeUnit.MILLISECONDS);
+        
     }
 
     private ScheduledThreadPoolExecutor createScheduledThreadPoolExecutor(String threadName, int numberOfThreads) {
@@ -943,6 +952,14 @@ public class DefaultAdmin implements InternalAdmin {
         processingUnitInstances.removeOrphaned(uid);
         InternalProcessingUnitInstance processingUnitInstance = (InternalProcessingUnitInstance) processingUnitInstances.removeInstance(uid);
         if (processingUnitInstance != null) {
+            for (int i=0; i<removedProcessingUnitInstances.size(); ++i) {
+                ProcessingUnitInstance alreadyRemovedInstance = removedProcessingUnitInstances.get(i);
+                if (alreadyRemovedInstance.getProcessingUnitInstanceName().equals(processingUnitInstance.getProcessingUnitInstanceName())) {
+                    removedProcessingUnitInstances.remove(i);
+                }
+            }
+            removedProcessingUnitInstances.add(processingUnitInstance);
+            
             processingUnitInstance.setDiscovered(false);
             ((InternalProcessingUnit) processingUnitInstance.getProcessingUnit()).removeProcessingUnitInstance(uid);
             Application application = processingUnitInstance.getProcessingUnit().getApplication();
@@ -1337,6 +1354,7 @@ public class DefaultAdmin implements InternalAdmin {
 
         @Override
         public void run() {
+            final List<Events> eventsFromGSMs = new ArrayList<Events>();
             final Map<String, Holder> holders = new HashMap<String, Holder>();
             for (GridServiceManager gsm : gridServiceManagers) {
                 try {
@@ -1356,6 +1374,10 @@ public class DefaultAdmin implements InternalAdmin {
                             holder.backupGSMs.put(gsm.getUid(), gsm);
                         }
                     }
+                    
+                    Events events = ((InternalGridServiceManager) gsm).getEvents(100);
+                    eventsFromGSMs.add(events);
+                    
                 } catch (Exception e) {
                     if (NetworkExceptionHelper.isConnectOrCloseException(e)) {
                         // GSM is down, continue
@@ -1392,11 +1414,12 @@ public class DefaultAdmin implements InternalAdmin {
             final ElasticScaleStrategyEvents scaleStrategyEvents = scaleStrategyEvents1;
             final InternalElasticServiceManager esm = esm1;
             
-            DefaultAdmin.this.scheduleNonBlockingStateChange(new Runnable(){
+            DefaultAdmin.this.scheduleNonBlockingStateChange(new LoggerRunnable( new Runnable(){
                 @Override
                 public void run() {
                     updateState(holders, scaleStrategyEvents, esm);
-                }});
+                    processEventsFromGsm(eventsFromGSMs);
+                }}));
         }
 
         private void updateState(Map<String, Holder> holders, ElasticScaleStrategyEvents scaleStrategyEvents, InternalElasticServiceManager esm) {
@@ -1475,6 +1498,7 @@ public class DefaultAdmin implements InternalAdmin {
                         processApplicationsOnProcessingUnitAddition(processingUnit);
                     }
                 }
+
                 processingUnit.setStatus( getPuStatusForUSM(processingUnit, details.getStatus()));
                 processingUnit.processProvisionEvents(details.getProvisionLifeCycleEvents());
             }
@@ -1496,6 +1520,36 @@ public class DefaultAdmin implements InternalAdmin {
             }
         }
 
+        private void processEventsFromGsm(List<Events> eventsFromGSMs) {
+            //go over events after orphaned processing unit instances have been added
+            for (Events events : eventsFromGSMs) {
+                for (Event event : events.getEvents()) {
+                    if (event instanceof ServiceFaultDetectionEvent) {
+                        ServiceFaultDetectionEvent serviceFaultDetectionEvent = (ServiceFaultDetectionEvent)event;
+                        ServiceID serviceID = serviceFaultDetectionEvent.getServiceID();
+                        String serviceIdAsString = serviceID.toString();
+                        ProcessingUnitInstance puInstanceByUID = processingUnitInstances.getInstanceByUID(serviceIdAsString);
+                        if (puInstanceByUID != null) {
+                            //will raise a member alive indicator event (no need to flush)
+                            ((InternalProcessingUnitInstance)puInstanceByUID).setMemberAliveIndicatorStatus(serviceFaultDetectionEvent);
+                        } else {
+                            synchronized (DefaultAdmin.this) {
+                                Iterator<ProcessingUnitInstance> iterator = removedProcessingUnitInstances.iterator();
+                                while (iterator.hasNext()) {
+                                    ProcessingUnitInstance removedInstance = iterator.next();
+                                    if (removedInstance.getUid().equals(serviceIdAsString)) {
+                                        ((InternalProcessingUnitInstance)removedInstance).setMemberAliveIndicatorStatus(serviceFaultDetectionEvent);
+                                        if (serviceFaultDetectionEvent.isDetectedFailure()) {
+                                            iterator.remove();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
         
         /*
          * Extract USM service state if processing unit is a USM. Returns SCHEDULED if underlying USM process is not in a running state.

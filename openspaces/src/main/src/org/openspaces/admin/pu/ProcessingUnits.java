@@ -43,6 +43,8 @@ import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEventManage
 import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitAddedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventListener;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionAttemptEvent;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionAttemptEventManager;
@@ -213,4 +215,10 @@ public interface ProcessingUnits extends Iterable<ProcessingUnit>, AdminAware, S
      * @since 8.0.6
      */
     ProcessingUnitInstanceProvisionPendingEventManager getProcessingUnitInstanceProvisionPending();
+    
+    /**
+     * Returns an event manager allowing to register {@link ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventListener}s.
+     * @since 8.0.6
+     */
+    ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventManager getProcessingUnitInstanceMemberAliveIndicatorStatusChanged();
 }

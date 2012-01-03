@@ -38,6 +38,8 @@ import java.util.concurrent.TimeUnit;
 import org.openspaces.admin.GridComponent;
 import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.gsc.GridServiceContainer;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventListener;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventManager;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.properties.BeanLevelProperties;
@@ -297,4 +299,16 @@ public interface ProcessingUnitInstance extends GridComponent, Iterable<ServiceD
      * Returns the processing unit instance statistics.
      */
     ProcessingUnitInstanceStatistics getStatistics();
+    
+    /**
+     * Returns an event manager to register {@link ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventListener}s.
+     * @since 8.0.6
+     */
+    ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventManager getProcessingUnitInstanceMemberAliveIndicatorStatusChanged();
+    
+    /**
+     * @return Returns the current member alive indicator status of this processing unit instance.
+     * @since 8.0.6
+     */
+    MemberAliveIndicatorStatus getMemberAliveIndicatorStatus();
 }

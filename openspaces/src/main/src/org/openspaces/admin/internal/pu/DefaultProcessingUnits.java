@@ -17,6 +17,7 @@ import org.openspaces.admin.internal.pu.events.DefaultBackupGridServiceManagerCh
 import org.openspaces.admin.internal.pu.events.DefaultManagingGridServiceManagerChangedEventManager;
 import org.openspaces.admin.internal.pu.events.DefaultProcessingUnitAddedEventManager;
 import org.openspaces.admin.internal.pu.events.DefaultProcessingUnitInstanceAddedEventManager;
+import org.openspaces.admin.internal.pu.events.DefaultProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventManager;
 import org.openspaces.admin.internal.pu.events.DefaultProcessingUnitInstanceProvisionAttemptEventManager;
 import org.openspaces.admin.internal.pu.events.DefaultProcessingUnitInstanceProvisionFailureEventManager;
 import org.openspaces.admin.internal.pu.events.DefaultProcessingUnitInstanceProvisionPendingEventManager;
@@ -29,6 +30,7 @@ import org.openspaces.admin.internal.pu.events.InternalBackupGridServiceManagerC
 import org.openspaces.admin.internal.pu.events.InternalManagingGridServiceManagerChangedEventManager;
 import org.openspaces.admin.internal.pu.events.InternalProcessingUnitAddedEventManager;
 import org.openspaces.admin.internal.pu.events.InternalProcessingUnitInstanceAddedEventManager;
+import org.openspaces.admin.internal.pu.events.InternalProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventManager;
 import org.openspaces.admin.internal.pu.events.InternalProcessingUnitInstanceProvisionAttemptEventManager;
 import org.openspaces.admin.internal.pu.events.InternalProcessingUnitInstanceProvisionFailureEventManager;
 import org.openspaces.admin.internal.pu.events.InternalProcessingUnitInstanceProvisionPendingEventManager;
@@ -45,6 +47,7 @@ import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEventMana
 import org.openspaces.admin.pu.events.ProcessingUnitAddedEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitAddedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionAttemptEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionFailureEventManager;
@@ -88,6 +91,8 @@ public class DefaultProcessingUnits implements InternalProcessingUnits {
     private final InternalProcessingUnitInstanceProvisionFailureEventManager processingUnitProvisionFailureEventManager;
     private final InternalProcessingUnitInstanceProvisionPendingEventManager processingUnitProvisionPendingEventManager;
     
+    private final InternalProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventManager processingUnitInstanceMemberAliveIndicatorStatusChangedEventManager;
+    
     private volatile long statisticsInterval = StatisticsMonitor.DEFAULT_MONITOR_INTERVAL;
 
     private volatile int statisticsHistorySize = StatisticsMonitor.DEFAULT_HISTORY_SIZE;
@@ -111,7 +116,9 @@ public class DefaultProcessingUnits implements InternalProcessingUnits {
         this.processingUnitProvisionAttemptEventManager = new DefaultProcessingUnitInstanceProvisionAttemptEventManager(admin);
         this.processingUnitProvisionSuccessEventManager = new DefaultProcessingUnitInstanceProvisionSuccessEventManager(admin);
         this.processingUnitProvisionFailureEventManager = new DefaultProcessingUnitInstanceProvisionFailureEventManager(admin);
-        this.processingUnitProvisionPendingEventManager = new DefaultProcessingUnitInstanceProvisionPendingEventManager(admin);    
+        this.processingUnitProvisionPendingEventManager = new DefaultProcessingUnitInstanceProvisionPendingEventManager(admin);
+        
+        this.processingUnitInstanceMemberAliveIndicatorStatusChangedEventManager = new DefaultProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventManager(admin);
     }
 
     public Admin getAdmin() {
@@ -291,6 +298,11 @@ public class DefaultProcessingUnits implements InternalProcessingUnits {
     @Override
     public ProcessingUnitInstanceProvisionPendingEventManager getProcessingUnitInstanceProvisionPending() {
         return processingUnitProvisionPendingEventManager;
+    }
+    
+    @Override
+    public ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventManager getProcessingUnitInstanceMemberAliveIndicatorStatusChanged() {
+        return processingUnitInstanceMemberAliveIndicatorStatusChangedEventManager;
     }
 
     public void setStatisticsInterval(long interval, TimeUnit timeUnit) {

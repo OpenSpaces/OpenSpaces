@@ -24,6 +24,7 @@ import net.jini.core.lookup.ServiceID;
 import org.jini.rio.core.OperationalString;
 import org.jini.rio.monitor.DeployAdmin;
 import org.jini.rio.monitor.ProvisionMonitorAdmin;
+import org.jini.rio.monitor.event.Events;
 import org.jini.rio.resources.servicecore.ServiceAdmin;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.GridComponent;
@@ -76,6 +77,8 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
     private final GSM gsm;
 
     private final ProvisionMonitorAdmin gsmAdmin;
+
+    private int eventsCursor = 0;
 
     public DefaultGridServiceManager(ServiceID serviceID, GSM gsm, InternalAdmin admin, int agentId, String agentUid)
             throws RemoteException {
@@ -724,5 +727,12 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         }
 
         return codeBaseURL;
+    }
+    
+    @Override
+    public Events getEvents(int maxEvents) {
+        Events events = gsm.getEvents(eventsCursor, maxEvents);
+        eventsCursor = events.getNextCursor();
+        return events;
     }
 }

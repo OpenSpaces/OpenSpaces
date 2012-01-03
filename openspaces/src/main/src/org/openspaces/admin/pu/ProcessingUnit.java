@@ -46,6 +46,8 @@ import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
 import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEventManager;
 import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventListener;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionAttemptEvent;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionAttemptEventManager;
@@ -378,6 +380,12 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
      * @since 8.0.6
      */
     ProcessingUnitInstanceProvisionPendingEventManager getProcessingUnitInstanceProvisionPending();
+    
+    /**
+     * Returns an event manager allowing to register {@link ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventListener}s.
+     * @since 8.0.6
+     */
+    ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventManager getProcessingUnitInstanceMemberAliveIndicatorStatusChanged();
             
     /**
      * Modifies the processing unit scalability strategy.
