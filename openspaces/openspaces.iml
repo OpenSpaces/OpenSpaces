@@ -58,23 +58,23 @@
     <libelement value="jar://$MODULE_DIR$/lib/external/backport/backport-util-concurrent.jar!/" />
     <libelement value="jar://$MODULE_DIR$/tools/groovy/embeddable/groovy-all-1.8.0.jar!/" />
     <libelement value="jar://$MODULE_DIR$/lib/required/com.springsource.org.aopalliance-1.0.0.jar!/" />
-    <libelement value="jar://$MODULE_DIR$/lib/required/org.springframework.aop-3.0.5.RELEASE.jar!/" />
-    <libelement value="jar://$MODULE_DIR$/lib/required/org.springframework.asm-3.0.5.RELEASE.jar!/" />
-    <libelement value="jar://$MODULE_DIR$/lib/required/org.springframework.aspects-3.0.5.RELEASE.jar!/" />
-    <libelement value="jar://$MODULE_DIR$/lib/required/org.springframework.beans-3.0.5.RELEASE.jar!/" />
-    <libelement value="jar://$MODULE_DIR$/lib/required/org.springframework.context-3.0.5.RELEASE.jar!/" />
-    <libelement value="jar://$MODULE_DIR$/lib/required/org.springframework.context.support-3.0.5.RELEASE.jar!/" />
-    <libelement value="jar://$MODULE_DIR$/lib/required/org.springframework.core-3.0.5.RELEASE.jar!/" />
-    <libelement value="jar://$MODULE_DIR$/lib/required/org.springframework.expression-3.0.5.RELEASE.jar!/" />
-    <libelement value="jar://$MODULE_DIR$/lib/required/org.springframework.transaction-3.0.5.RELEASE.jar!/" />
-    <libelement value="jar://$MODULE_DIR$/lib/external/spring/org.springframework.test-3.0.5.RELEASE.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/required/org.springframework.aop-3.0.7.RELEASE.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/required/org.springframework.asm-3.0.7.RELEASE.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/required/org.springframework.aspects-3.0.7.RELEASE.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/required/org.springframework.beans-3.0.7.RELEASE.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/required/org.springframework.context-3.0.7.RELEASE.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/required/org.springframework.context.support-3.0.7.RELEASE.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/required/org.springframework.core-3.0.7.RELEASE.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/required/org.springframework.expression-3.0.7.RELEASE.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/required/org.springframework.transaction-3.0.7.RELEASE.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/external/spring/org.springframework.test-3.0.7.RELEASE.jar!/" />
     <libelement value="jar://$MODULE_DIR$/lib/optional/spring/com.springsource.javax.annotation-1.0.0.jar!/" />
     <libelement value="jar://$MODULE_DIR$/lib/optional/spring/com.springsource.net.sf.cglib-2.2.0.jar!/" />
-    <libelement value="jar://$MODULE_DIR$/lib/optional/spring/org.springframework.jdbc-3.0.5.RELEASE.jar!/" />
-    <libelement value="jar://$MODULE_DIR$/lib/optional/spring/org.springframework.jms-3.0.5.RELEASE.jar!/" />
-    <libelement value="jar://$MODULE_DIR$/lib/optional/spring/org.springframework.orm-3.0.5.RELEASE.jar!/" />
-    <libelement value="jar://$MODULE_DIR$/lib/optional/spring/org.springframework.web-3.0.5.RELEASE.jar!/" />
-    <libelement value="jar://$MODULE_DIR$/lib/optional/spring/org.springframework.web.servlet-3.0.5.RELEASE.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/optional/spring/org.springframework.jdbc-3.0.7.RELEASE.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/optional/spring/org.springframework.jms-3.0.7.RELEASE.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/optional/spring/org.springframework.orm-3.0.7.RELEASE.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/optional/spring/org.springframework.web-3.0.7.RELEASE.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/optional/spring/org.springframework.web.servlet-3.0.7.RELEASE.jar!/" />
     <libelement value="jar://$MODULE_DIR$/lib/platform/jetty/jetty-http-7.4.5.v20110725.jar!/" />
     <libelement value="jar://$MODULE_DIR$/lib/platform/jetty/jetty-io-7.4.5.v20110725.jar!/" />
     <libelement value="jar://$MODULE_DIR$/lib/platform/jetty/jetty-jmx-7.4.5.v20110725.jar!/" />
@@ -90,7 +90,7 @@
     <libelement value="jar://$MODULE_DIR$/lib/platform/jetty/jetty-webapp-7.4.5.v20110725.jar!/" />
     <libelement value="jar://$MODULE_DIR$/lib/platform/jetty/jetty-xml-7.4.5.v20110725.jar!/" />
     <libelement value="jar://$MODULE_DIR$/lib/platform/jetty/servlet-api-2.5.jar!/" />
-    <libelement value="jar://$MODULE_DIR$/lib/optional/security/spring-security-core-3.0.5.RELEASE.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/optional/security/spring-security-core-3.0.7.RELEASE.jar!/" />
     <libelement value="jar://$MODULE_DIR$/lib/external/spymemcached/memcached-2.5.jar!/" />
     <libelement value="jar://$MODULE_DIR$/tools/maven/apache-maven-3.0.2/lib/maven-artifact-3.0.2.jar!/" />
     <libelement value="jar://$MODULE_DIR$/tools/maven/apache-maven-3.0.2/lib/maven-core-3.0.2.jar!/" />
@@ -113,6 +113,121 @@
       <src_folder value="file://$MODULE_DIR$/src/sandbox/test" expected_position="3" />
       <src_folder value="file://$MODULE_DIR$/src/main/test" expected_position="4" />
     </src_description>
+  </component>
+  <component name="FacetManager">
+    <facet type="hibernate" name="Hibernate">
+      <configuration>
+        <datasource-map />
+        <deploymentDescriptor name="hibernate.cfg.xml" url="file://$MODULE_DIR$/src/main/test/org/openspaces/itest/persistency/hibernate/col1/hibernate.cfg.xml" />
+        <deploymentDescriptor name="hibernate.cfg.xml" url="file://$MODULE_DIR$/src/main/test/org/openspaces/itest/persistency/hibernate/simple/hibernate.cfg.xml" />
+      </configuration>
+    </facet>
+    <facet type="jpa" name="JPA">
+      <configuration>
+        <setting name="validation-enabled" value="true" />
+        <setting name="provider-name" value="" />
+        <datasource-mapping>
+          <factory-entry name="gigaspaces" />
+        </datasource-mapping>
+        <deploymentDescriptor name="persistence.xml" url="file://$MODULE_DIR$/src/main/test/org/openspaces/itest/jpa/persistence.xml" />
+      </configuration>
+    </facet>
+    <facet type="Spring" name="Spring">
+      <configuration>
+        <fileset id="fileset1" name="My Fileset" removed="false">
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/events/polling/exceptionhandler/polling-exceptionhandler.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/core/space/filter/replication/simple-filter.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/events/polling/sqlqueryrouting/sqlquery-routing.xml</file>
+          <file>file://$MODULE_DIR$/tools/maven/maven-openspaces-plugin/src/main/resources/pu-templates/basic/processor/src/main/resources/META-INF/spring/sla.xml</file>
+          <file>file://$MODULE_DIR$/tools/maven/maven-openspaces-plugin/src/main/resources/pu-templates/basic/processor/src/main/resources/META-INF/spring/pu.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/executor/eventcontainer/context.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/remoting/simple/plain/simple-remoting.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/executor/juc/context.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/remoting/scripting/scripting-remoting.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/core/space/mirror/mirror-dist-tx.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/core/space/mirror/mirror.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/executor/simple/context.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/core/space/filter/security/securityFilter.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/executor/transaction/context.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/remoting/methodannotations/method-annotations-remoting.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/remoting/methodannotations/method-annotations-remoting-remote-space.xml</file>
+          <file>file://$MODULE_DIR$/tools/maven/maven-openspaces-plugin/src/main/resources/pu-templates/basic-xml/feeder/src/main/resources/META-INF/spring/pu.xml</file>
+          <file>file://$MODULE_DIR$/tools/maven/maven-openspaces-plugin/src/main/resources/pu-templates/basic/processor/src/test/java/${puGroupPath}/processor/ProcessorIntegrationTest-context.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/gateway/cluster.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/core/space/filter/security/adapter/adapter-annotation-custom-filter.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/core/space/filter/security/adapter/adapter-method-custom-filter.xml</file>
+          <file>file://$MODULE_DIR$/src/main/src/org/openspaces/pu/container/jee/jetty/jetty.shared.pu.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/events/polling/annotation/exceptionhandler/polling-annotation-exceptionhandler.xml</file>
+          <file>file://$MODULE_DIR$/tools/maven/maven-openspaces-plugin/src/main/resources/pu-templates/basic-async-persistency-xml/feeder/src/main/resources/META-INF/spring/pu.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/events/polling/annotation/simple/polling-annotation.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/core/map/simple/simple-map.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/core/map/simple/local-cache-map.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/core/space/datasource/datasource.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/core/context/single-context.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/core/simple/context.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/events/polling/aspectlistener/aspect-listener.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/core/context/double-context.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/remoting/broadcast/broadcast-remoting.xml</file>
+          <file>file://$MODULE_DIR$/src/main/src/org/openspaces/pu/container/jee/jetty/jetty.plain.pu.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/events/polling/aspectlistener2/aspect-listener.xml</file>
+          <file>file://$MODULE_DIR$/tools/maven/maven-openspaces-plugin/src/main/resources/pu-templates/basic-async-persistency-xml/mirror/src/main/resources/META-INF/spring/pu.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/events/polling/aspectlistener3/aspect-listener.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/core/space/filter/adapter/adapter-annotation-custom-filter.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/utest/core/cluster/info/cluster-info.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/pu/sla/policy/relocation/relocation-policy.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/events/polling/aspectlistener4/aspect-listener.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/pu/sla/requirements/requirements.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/core/space/filter/adapter/adapter-method-filter.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/core/space/filter/adapter/adapter-annotation-filter-remote.xml</file>
+          <file>file://$MODULE_DIR$/tools/maven/maven-openspaces-plugin/src/main/resources/pu-templates/basic-xml/processor/src/test/java/${puGroupPath}/processor/ProcessorIntegrationTest-context.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/core/space/filter/adapter/adapter-annotation-filter.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/utest/core/properties/properties.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/core/space/filter/all-filter.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/pu/sla/memberaliveindicator/memberaliveindicator.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/core/space/filter/simple-filter.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/pu/sla/monitor/monitor.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/events/polling/autostart/polling-autostart.xml</file>
+          <file>file://$MODULE_DIR$/tools/maven/maven-openspaces-plugin/src/main/resources/pu-templates/basic-xml/processor/src/main/resources/META-INF/spring/sla.xml</file>
+          <file>file://$MODULE_DIR$/tools/maven/maven-openspaces-plugin/src/main/resources/pu-templates/basic-xml/processor/src/main/resources/META-INF/spring/pu.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/events/notify/batch/namespace/notify-batch.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/utest/core/bean/abstract-bean-context.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/events/notify/batch/notify-batch.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/events/notify/annotation/notify-annotation.xml</file>
+          <file>file://$MODULE_DIR$/tools/maven/maven-openspaces-plugin/src/main/resources/pu-templates/basic-async-persistency/feeder/src/main/resources/META-INF/spring/pu.xml</file>
+          <file>file://$MODULE_DIR$/tools/maven/maven-openspaces-plugin/src/main/resources/pu-templates/basic-async-persistency-xml/processor/src/main/resources/META-INF/spring/pu.xml</file>
+          <file>file://$MODULE_DIR$/tools/maven/maven-openspaces-plugin/src/main/resources/pu-templates/mule/feeder/src/main/resources/META-INF/spring/pu.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/pu/container/integrated/simple/context1.xml</file>
+          <file>file://$MODULE_DIR$/tools/maven/maven-openspaces-plugin/src/main/resources/pu-templates/basic-async-persistency-xml/processor/src/main/resources/META-INF/spring/sla.xml</file>
+          <file>file://$MODULE_DIR$/tools/maven/maven-openspaces-plugin/src/main/resources/pu-templates/basic/feeder/src/main/resources/META-INF/spring/pu.xml</file>
+          <file>file://$MODULE_DIR$/tools/maven/maven-openspaces-plugin/src/main/resources/pu-templates/basic-async-persistency-xml/processor/src/test/java/${puGroupPath}/processor/ProcessorIntegrationTest-context.xml</file>
+          <file>file://$MODULE_DIR$/tools/maven/maven-openspaces-plugin/src/main/resources/pu-templates/basic-async-persistency/mirror/src/main/resources/META-INF/spring/pu.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/pu/container/integrated/simple/context2.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/jdbc/dbcp/jdbc.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/transaction/manager/local/context.xml</file>
+          <file>file://$MODULE_DIR$/deploy/templates/datagrid/META-INF/spring/pu.xml</file>
+          <file>file://$MODULE_DIR$/tools/maven/maven-openspaces-plugin/src/main/resources/pu-templates/basic-async-persistency/processor/src/main/resources/META-INF/spring/pu.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/core/space/support/context.xml</file>
+          <file>file://$MODULE_DIR$/tools/maven/maven-openspaces-plugin/src/main/resources/pu-templates/basic-async-persistency/processor/src/main/resources/META-INF/spring/sla.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/gateway/sink.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/core/space/mode/listeners/mode-listener.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/transaction/manager/jta/atomikos.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/transaction/manager/jta/jbossts.xml</file>
+          <file>file://$MODULE_DIR$/tools/maven/maven-openspaces-plugin/src/main/resources/pu-templates/mule/processor/src/main/resources/META-INF/spring/pu.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/jpa/jpa-scripting.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/transaction/manager/jta/jotm.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/core/space/mode/annotations/mode-annotations.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/jdbc/simple/jdbc.xml</file>
+          <file>file://$MODULE_DIR$/tools/maven/maven-openspaces-plugin/src/main/resources/pu-templates/mule/processor/src/main/resources/META-INF/spring/sla.xml</file>
+          <file>file://$MODULE_DIR$/deploy/templates/memcached/META-INF/spring/pu.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/transaction/manager/distributed/context.xml</file>
+          <file>file://$MODULE_DIR$/tools/alert-integration/src/main/resources/META-INF/spring/pu.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/events/asyncpolling/annotation/async-polling-annotation.xml</file>
+          <file>file://$MODULE_DIR$/tools/maven/maven-openspaces-plugin/src/main/resources/pu-templates/basic-async-persistency/processor/src/test/java/${puGroupPath}/processor/ProcessorIntegrationTest-context.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/remoting/simple/transactionalservice/transactional-service.xml</file>
+          <file>file://$MODULE_DIR$/src/main/test/org/openspaces/itest/core/space/view/simple-view.xml</file>
+        </fileset>
+      </configuration>
+    </facet>
   </component>
   <component name="NewModuleRootManager" inherit-compiler-output="false">
     <output url="file://$MODULE_DIR$/target/classes" />
@@ -623,7 +738,7 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="module-library">
+    <orderEntry type="module-library" exported="">
       <library name="groovy-all-1.8.0.jar">
         <CLASSES>
           <root url="jar://$MODULE_DIR$/tools/groovy/embeddable/groovy-all-1.8.0.jar!/" />
@@ -642,90 +757,90 @@
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
-      <library name="org.springframework.aop-3.0.5.RELEASE.jar">
+      <library name="org.springframework.aop-3.0.7.RELEASE.jar">
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/required/org.springframework.aop-3.0.5.RELEASE.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/required/org.springframework.aop-3.0.7.RELEASE.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
-      <library name="org.springframework.asm-3.0.5.RELEASE.jar">
+      <library name="org.springframework.asm-3.0.7.RELEASE.jar">
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/required/org.springframework.asm-3.0.5.RELEASE.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/required/org.springframework.asm-3.0.7.RELEASE.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
-      <library name="org.springframework.aspects-3.0.5.RELEASE.jar">
+      <library name="org.springframework.aspects-3.0.7.RELEASE.jar">
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/required/org.springframework.aspects-3.0.5.RELEASE.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/required/org.springframework.aspects-3.0.7.RELEASE.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
-      <library name="org.springframework.beans-3.0.5.RELEASE.jar">
+      <library name="org.springframework.beans-3.0.7.RELEASE.jar">
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/required/org.springframework.beans-3.0.5.RELEASE.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/required/org.springframework.beans-3.0.7.RELEASE.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
-      <library name="org.springframework.context-3.0.5.RELEASE.jar">
+      <library name="org.springframework.context-3.0.7.RELEASE.jar">
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/required/org.springframework.context-3.0.5.RELEASE.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/required/org.springframework.context-3.0.7.RELEASE.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
-      <library name="org.springframework.context.support-3.0.5.RELEASE.jar">
+      <library name="org.springframework.context.support-3.0.7.RELEASE.jar">
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/required/org.springframework.context.support-3.0.5.RELEASE.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/required/org.springframework.context.support-3.0.7.RELEASE.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
-      <library name="org.springframework.core-3.0.5.RELEASE.jar">
+      <library name="org.springframework.core-3.0.7.RELEASE.jar">
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/required/org.springframework.core-3.0.5.RELEASE.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/required/org.springframework.core-3.0.7.RELEASE.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
-      <library name="org.springframework.expression-3.0.5.RELEASE.jar">
+      <library name="org.springframework.expression-3.0.7.RELEASE.jar">
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/required/org.springframework.expression-3.0.5.RELEASE.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/required/org.springframework.expression-3.0.7.RELEASE.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
-      <library name="org.springframework.transaction-3.0.5.RELEASE.jar">
+      <library name="org.springframework.transaction-3.0.7.RELEASE.jar">
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/required/org.springframework.transaction-3.0.5.RELEASE.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/required/org.springframework.transaction-3.0.7.RELEASE.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
-      <library name="org.springframework.test-3.0.5.RELEASE.jar">
+      <library name="org.springframework.test-3.0.7.RELEASE.jar">
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.test-3.0.5.RELEASE.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.test-3.0.7.RELEASE.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -750,189 +865,54 @@
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
-      <library name="org.springframework.jdbc-3.0.5.RELEASE.jar">
+      <library name="org.springframework.jdbc-3.0.7.RELEASE.jar">
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/optional/spring/org.springframework.jdbc-3.0.5.RELEASE.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/optional/spring/org.springframework.jdbc-3.0.7.RELEASE.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
-      <library name="org.springframework.jms-3.0.5.RELEASE.jar">
+      <library name="org.springframework.jms-3.0.7.RELEASE.jar">
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/optional/spring/org.springframework.jms-3.0.5.RELEASE.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/optional/spring/org.springframework.jms-3.0.7.RELEASE.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
-      <library name="org.springframework.orm-3.0.5.RELEASE.jar">
+      <library name="org.springframework.orm-3.0.7.RELEASE.jar">
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/optional/spring/org.springframework.orm-3.0.5.RELEASE.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/optional/spring/org.springframework.orm-3.0.7.RELEASE.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
-      <library name="org.springframework.web-3.0.5.RELEASE.jar">
+      <library name="org.springframework.web-3.0.7.RELEASE.jar">
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/optional/spring/org.springframework.web-3.0.5.RELEASE.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/optional/spring/org.springframework.web-3.0.7.RELEASE.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
-      <library name="org.springframework.web.servlet-3.0.5.RELEASE.jar">
+      <library name="org.springframework.web.servlet-3.0.7.RELEASE.jar">
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/optional/spring/org.springframework.web.servlet-3.0.5.RELEASE.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/optional/spring/org.springframework.web.servlet-3.0.7.RELEASE.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
       </library>
     </orderEntry>
     <orderEntry type="module-library">
-      <library name="jetty-http-7.4.5.v20110725.jar">
+      <library name="spring-security-core-3.0.7.RELEASE.jar">
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/platform/jetty/jetty-http-7.4.5.v20110725.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="jetty-io-7.4.5.v20110725.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/platform/jetty/jetty-io-7.4.5.v20110725.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="jetty-jmx-7.4.5.v20110725.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/platform/jetty/jetty-jmx-7.4.5.v20110725.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="jetty-jndi-7.4.5.v20110725.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/platform/jetty/jetty-jndi-7.4.5.v20110725.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="jetty-plus-7.4.5.v20110725.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/platform/jetty/jetty-plus-7.4.5.v20110725.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="jetty-policy-7.4.5.v20110725.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/platform/jetty/jetty-policy-7.4.5.v20110725.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="jetty-rewrite-7.4.5.v20110725.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/platform/jetty/jetty-rewrite-7.4.5.v20110725.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="jetty-security-7.4.5.v20110725.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/platform/jetty/jetty-security-7.4.5.v20110725.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="jetty-server-7.4.5.v20110725.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/platform/jetty/jetty-server-7.4.5.v20110725.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="jetty-servlet-7.4.5.v20110725.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/platform/jetty/jetty-servlet-7.4.5.v20110725.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="jetty-servlets-7.4.5.v20110725.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/platform/jetty/jetty-servlets-7.4.5.v20110725.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="jetty-util-7.4.5.v20110725.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/platform/jetty/jetty-util-7.4.5.v20110725.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="jetty-webapp-7.4.5.v20110725.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/platform/jetty/jetty-webapp-7.4.5.v20110725.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="jetty-xml-7.4.5.v20110725.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/platform/jetty/jetty-xml-7.4.5.v20110725.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="servlet-api-2.5.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/platform/jetty/servlet-api-2.5.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="spring-security-core-3.0.5.RELEASE.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/optional/security/spring-security-core-3.0.5.RELEASE.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/optional/security/spring-security-core-3.0.7.RELEASE.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -1073,6 +1053,7 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="jetty" level="project" />
   </component>
   <component name="copyright">
     <Base>
