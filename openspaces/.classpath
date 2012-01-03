@@ -64,25 +64,25 @@
 	<classpathentry exported="true" kind="lib" path="lib/external/backport/backport-util-concurrent.jar"/>
 	<classpathentry kind="lib" path="tools/groovy/embeddable/groovy-all-1.8.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/required/com.springsource.org.aopalliance-1.0.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/required/org.springframework.aop-3.0.5.RELEASE.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/required/org.springframework.asm-3.0.5.RELEASE.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/required/org.springframework.aspects-3.0.5.RELEASE.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/required/org.springframework.beans-3.0.5.RELEASE.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/required/org.springframework.context-3.0.5.RELEASE.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/required/org.springframework.context.support-3.0.5.RELEASE.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/required/org.springframework.core-3.0.5.RELEASE.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/required/org.springframework.expression-3.0.5.RELEASE.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/required/org.springframework.transaction-3.0.5.RELEASE.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/external/spring/org.springframework.test-3.0.5.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/required/org.springframework.aop-3.0.7.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/required/org.springframework.asm-3.0.7.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/required/org.springframework.aspects-3.0.7.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/required/org.springframework.beans-3.0.7.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/required/org.springframework.context-3.0.7.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/required/org.springframework.context.support-3.0.7.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/required/org.springframework.core-3.0.7.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/required/org.springframework.expression-3.0.7.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/required/org.springframework.transaction-3.0.7.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/external/spring/org.springframework.test-3.0.7.RELEASE.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/optional/spring/com.springsource.javax.annotation-1.0.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/optional/spring/com.springsource.net.sf.cglib-2.2.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/optional/spring/org.springframework.jdbc-3.0.5.RELEASE.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/optional/spring/org.springframework.jms-3.0.5.RELEASE.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/optional/spring/org.springframework.orm-3.0.5.RELEASE.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/optional/spring/org.springframework.web-3.0.5.RELEASE.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/optional/spring/org.springframework.web.servlet-3.0.5.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/optional/spring/org.springframework.jdbc-3.0.7.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/optional/spring/org.springframework.jms-3.0.7.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/optional/spring/org.springframework.orm-3.0.7.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/optional/spring/org.springframework.web-3.0.7.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/optional/spring/org.springframework.web.servlet-3.0.7.RELEASE.jar"/>
 	<classpathentry kind="lib" path="lib/platform/jetty/servlet-api-2.5.jar"/>
-	<classpathentry kind="lib" path="lib/optional/security/spring-security-core-3.0.5.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/optional/security/spring-security-core-3.0.7.RELEASE.jar"/>
 	<classpathentry kind="lib" path="lib/external/spymemcached/memcached-2.5.jar"/>
 	<classpathentry kind="lib" path="tools/maven/apache-maven-3.0.2/lib/maven-artifact-3.0.2.jar"/>
 	<classpathentry kind="lib" path="tools/maven/apache-maven-3.0.2/lib/maven-core-3.0.2.jar"/>
