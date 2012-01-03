@@ -1,11 +1,11 @@
 package org.openspaces.admin.internal.pu.elastic.events;
 
-import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitInstanceProvissioningProgressChangedEvent;
+import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitInstanceProvisioningProgressChangedEvent;
 
 
 public class DefaultElasticProcessingUnitInstanceProvisioningProgressChangedEvent 
         extends AbstractElasticProcessingUnitProgressChangedEvent 
-        implements ElasticProcessingUnitInstanceProvissioningProgressChangedEvent {
+        implements ElasticProcessingUnitInstanceProvisioningProgressChangedEvent {
 
        private static final long serialVersionUID = 1L;
        

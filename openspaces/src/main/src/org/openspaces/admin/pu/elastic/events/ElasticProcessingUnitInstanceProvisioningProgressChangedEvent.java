@@ -1,6 +1,6 @@
 package org.openspaces.admin.pu.elastic.events;
 
-public interface ElasticProcessingUnitInstanceProvissioningProgressChangedEvent extends
+public interface ElasticProcessingUnitInstanceProvisioningProgressChangedEvent extends
         ElasticProcessingUnitProgressChangedEvent {
 
 }
