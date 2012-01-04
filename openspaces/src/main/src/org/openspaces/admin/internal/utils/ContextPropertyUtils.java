@@ -14,21 +14,30 @@ public class ContextPropertyUtils {
 
     private static final String CONTEXT_PROPERTY_SERVICE_TIER_TYPE = "com.gs.service.type";
     private static final String CONTEXT_PROPERTY_SERVICE_ICON = "com.gs.service.icon";
+    private static final String CONTEXT_PROPERTY_CLOUD_NAME = "com.gs.cloudify.cloud-name";
     
     public static ServiceTierType getTierType(InternalProcessingUnit processingUnit) {
-        String tierTypeStr = getContextPropertyValue(processingUnit, CONTEXT_PROPERTY_SERVICE_TIER_TYPE);
-        if (tierTypeStr == null) {
+        String tierType = getContextPropertyValue(processingUnit, CONTEXT_PROPERTY_SERVICE_TIER_TYPE);
+        if (tierType == null) {
             return ServiceTierType.UNDEFINED;
         }
-        return ServiceTierType.valueOf(tierTypeStr);
+        return ServiceTierType.valueOf(tierType);
     }
     
     public static String getIconPath(InternalProcessingUnit processingUnit) {
-        String iconUrlStr = getContextPropertyValue(processingUnit, CONTEXT_PROPERTY_SERVICE_ICON);
-        if (iconUrlStr == null) {
+        String iconPath = getContextPropertyValue(processingUnit, CONTEXT_PROPERTY_SERVICE_ICON);
+        if (iconPath == null) {
             return "";
         }
-        return iconUrlStr;
+        return iconPath;
+    }
+    
+    public static String getCloudName(InternalProcessingUnit processingUnit) {
+        String cloudName = getContextPropertyValue(processingUnit, CONTEXT_PROPERTY_CLOUD_NAME);
+        if (cloudName == null) {
+            return "";
+        }
+        return cloudName;
     }
 
     private static String getContextPropertyValue(InternalProcessingUnit processingUnit,
