@@ -78,7 +78,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
 
     private final ProvisionMonitorAdmin gsmAdmin;
 
-    private int eventsCursor = 0;
+    private long eventsCursor = 0;
 
     public DefaultGridServiceManager(ServiceID serviceID, GSM gsm, InternalAdmin admin, int agentId, String agentUid)
             throws RemoteException {
