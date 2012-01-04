@@ -16,8 +16,4 @@ public class DefaultElasticMachineProvisioningFailureEvent
     public DefaultElasticMachineProvisioningFailureEvent() {
         super();
     }
-    
-    public DefaultElasticMachineProvisioningFailureEvent(String failureDescription, String[] processingUnitNames) {
-        super(failureDescription, processingUnitNames);
-    }
 }

@@ -1,8 +1,9 @@
 package org.openspaces.grid.gsm.strategy;
 
+import org.jini.rio.monitor.event.EventsStore;
 import org.openspaces.admin.internal.pu.elastic.events.AbstractElasticProcessingUnitFailureEvent;
 import org.openspaces.admin.internal.pu.elastic.events.AbstractElasticProcessingUnitProgressChangedEvent;
-import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitProgressChangedEvent;
+import org.openspaces.admin.internal.pu.elastic.events.DefaultElasticProcessingUnitScaleProgressChangedEvent;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementInProgressException;
 
@@ -16,42 +17,51 @@ public class ScaleStrategyProgressEventState {
     private boolean inProgressEventRaised;
     private boolean completedEventRaised;
     private SlaEnforcementFailure lastFailure;
-    private final ElasticScaleStrategyEventStorage eventStorage;
+    private final EventsStore eventStore;
     private final boolean isUndeploying;
     private final String processingUnitName;
     private Class<? extends AbstractElasticProcessingUnitProgressChangedEvent> progressChangedEventClass;
     private Class<? extends AbstractElasticProcessingUnitFailureEvent> failureEventClass;
     
     public ScaleStrategyProgressEventState(
-            ElasticScaleStrategyEventStorage eventStorage, 
+            EventsStore eventStore, 
             boolean isUndeploying, 
             String processingUnitName, 
             Class<? extends AbstractElasticProcessingUnitProgressChangedEvent> progressChangedEventClass,
             Class<? extends AbstractElasticProcessingUnitFailureEvent> failureEventClass) {
         
-        this.eventStorage = eventStorage;
+        this.eventStore = eventStore;
         this.isUndeploying = isUndeploying;
         this.processingUnitName = processingUnitName;
         this.progressChangedEventClass = progressChangedEventClass;
         this.failureEventClass = failureEventClass;
     }
     
+    public ScaleStrategyProgressEventState(EventsStore eventStore, boolean isUndeploying,
+            String processingUnitName, Class<DefaultElasticProcessingUnitScaleProgressChangedEvent> progressChangedEventClass) {
+        this(eventStore, isUndeploying, processingUnitName, progressChangedEventClass, null);
+    }
+
     public void enqueuProvisioningInProgressEvent(SlaEnforcementInProgressException e) {
+        enqueuProvisioningInProgressEvent();
+        if (e instanceof SlaEnforcementFailure) {
+            if (this.lastFailure == null || !this.lastFailure.equals(e)) {
+                this.lastFailure = (SlaEnforcementFailure)e;
+                
+                AbstractElasticProcessingUnitFailureEvent event = createFailureEvent(e);
+                eventStore.addEvent(event);
+            }
+        }
+    }
+
+    public void enqueuProvisioningInProgressEvent() {
         if (!this.inProgressEventRaised) {
             this.completedEventRaised = false;
             this.inProgressEventRaised = true;
             final boolean isComplete = false;
             
             AbstractElasticProcessingUnitProgressChangedEvent event = createProgressChangedEvent(isComplete);
-            eventStorage.enqueu(event);
-        }
-        if (e instanceof SlaEnforcementFailure) {
-            if (this.lastFailure == null || !this.lastFailure.equals(e)) {
-                this.lastFailure = (SlaEnforcementFailure)e;
-                
-                AbstractElasticProcessingUnitFailureEvent event = createFailureEvent(e);
-                eventStorage.enqueu(event);
-            }
+            eventStore.addEvent(event);
         }
     }
 
@@ -62,8 +72,8 @@ public class ScaleStrategyProgressEventState {
             this.lastFailure = null;
             
             boolean isComplete = true;
-            ElasticProcessingUnitProgressChangedEvent event = createProgressChangedEvent(isComplete);
-            eventStorage.enqueu(event);
+            AbstractElasticProcessingUnitProgressChangedEvent event = createProgressChangedEvent(isComplete);
+            eventStore.addEvent(event);
         }
     }
 

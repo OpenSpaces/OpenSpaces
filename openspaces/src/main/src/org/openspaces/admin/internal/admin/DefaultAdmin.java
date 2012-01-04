@@ -136,7 +136,6 @@ import org.openspaces.admin.zone.Zone;
 import org.openspaces.admin.zone.ZoneAware;
 import org.openspaces.admin.zone.Zones;
 import org.openspaces.core.space.SpaceServiceDetails;
-import org.openspaces.grid.gsm.strategy.ElasticScaleStrategyEvents;
 import org.openspaces.pu.service.ServiceMonitors;
 
 import com.gigaspaces.grid.gsa.AgentProcessesDetails;
@@ -1387,7 +1386,7 @@ public class DefaultAdmin implements InternalAdmin {
                 }
             }
             
-            ElasticScaleStrategyEvents scaleStrategyEvents1 = null;
+            Events scaleStrategyEvents1 = null;
             InternalElasticServiceManager esm1 = null;
             try {
                 
@@ -1411,7 +1410,7 @@ public class DefaultAdmin implements InternalAdmin {
                 logger.warn("Failed to get ESM details", e);
             }
             
-            final ElasticScaleStrategyEvents scaleStrategyEvents = scaleStrategyEvents1;
+            final Events scaleStrategyEvents = scaleStrategyEvents1;
             final InternalElasticServiceManager esm = esm1;
             
             DefaultAdmin.this.scheduleNonBlockingStateChange(new LoggerRunnable( new Runnable(){
@@ -1422,16 +1421,16 @@ public class DefaultAdmin implements InternalAdmin {
                 }}));
         }
 
-        private void updateState(Map<String, Holder> holders, ElasticScaleStrategyEvents scaleStrategyEvents, InternalElasticServiceManager esm) {
+        private void updateState(Map<String, Holder> holders, Events scaleStrategyEvents, InternalElasticServiceManager esm) {
 
             //TODO: Move after pu added event below
             // make sure that admin API events and internal state is updated based on elastic PU scale strategy events
             if (scaleStrategyEvents !=null && esm != null) {
-                for (ElasticProcessingUnitEvent event : scaleStrategyEvents.getEvents()) {
-                    machines.processElasticScaleStrategyEvent(event);
-                    gridServiceAgents.processElasticScaleStrategyEvent(event);
-                    gridServiceContainers.processElasticScaleStrategyEvent(event);
-                    esm.processElasticScaleStrategyEvent(event);
+                for (Event event : scaleStrategyEvents.getEvents()) {
+                    machines.processElasticScaleStrategyEvent((ElasticProcessingUnitEvent)event);
+                    gridServiceAgents.processElasticScaleStrategyEvent((ElasticProcessingUnitEvent)event);
+                    gridServiceContainers.processElasticScaleStrategyEvent((ElasticProcessingUnitEvent)event);
+                    esm.processElasticScaleStrategyEvent((ElasticProcessingUnitEvent)event);
                 }
             }
             

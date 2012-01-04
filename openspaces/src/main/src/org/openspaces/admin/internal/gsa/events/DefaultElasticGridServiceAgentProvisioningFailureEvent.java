@@ -7,17 +7,12 @@ public class DefaultElasticGridServiceAgentProvisioningFailureEvent
     extends AbstractElasticProcessingUnitFailureEvent 
     implements ElasticGridServiceAgentProvisioningFailureEvent {
 
-private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
     
     /**
-     * de-serialization constructor
+     * de-serialization/reflection constructor
      */
     public DefaultElasticGridServiceAgentProvisioningFailureEvent() {
         super();
     }
-    
-    public DefaultElasticGridServiceAgentProvisioningFailureEvent(String failureDescription, String[] processingUnitNames) {
-        super(failureDescription, processingUnitNames);
-    }
-
 }

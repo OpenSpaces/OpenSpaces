@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jini.rio.monitor.event.EventsStore;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.gsa.GridServiceAgent;
@@ -76,8 +77,9 @@ public abstract class AbstractScaleStrategyBean implements
     private ScaleStrategyProgressEventState agentProvisioningEventState;
     private ScaleStrategyProgressEventState containerProvisioningEventState;
     private ScaleStrategyProgressEventState puProvisioningEventState;
+    private ScaleStrategyProgressEventState scaleEventState;
     
-    private ElasticScaleStrategyEventStorage eventStorage;
+    private EventsStore eventStorage;
     
     protected InternalAdmin getAdmin() {
         return this.admin;
@@ -143,7 +145,7 @@ public abstract class AbstractScaleStrategyBean implements
     }
     
     @Override
-    public void setElasticScaleStrategyEventStorage(ElasticScaleStrategyEventStorage eventQueue) {
+    public void setElasticScaleStrategyEventStorage(EventsStore eventQueue) {
         this.eventStorage = eventQueue;
     }
     
@@ -194,6 +196,7 @@ public abstract class AbstractScaleStrategyBean implements
         agentProvisioningEventState = new ScaleStrategyProgressEventState(eventStorage, isUndeploying(), pu.getName(), DefaultElasticGridServiceAgentProvisioningProgressChangedEvent.class, DefaultElasticGridServiceAgentProvisioningFailureEvent.class );
         containerProvisioningEventState = new ScaleStrategyProgressEventState(eventStorage, isUndeploying(), pu.getName(), DefaultElasticGridServiceContainerProvisioningProgressChangedEvent.class, DefaultElasticGridServiceContainerProvisioningFailureEvent.class );
         puProvisioningEventState = new ScaleStrategyProgressEventState(eventStorage, isUndeploying(), pu.getName(), DefaultElasticProcessingUnitInstanceProvisioningProgressChangedEvent.class, DefaultElasticProcessingUnitInstanceProvisioningFailureEvent.class );
+        scaleEventState = new ScaleStrategyProgressEventState(eventStorage, isUndeploying(), pu.getName(), DefaultElasticProcessingUnitScaleProgressChangedEvent.class);
         
         minimumNumberOfMachines = calcMinimumNumberOfMachines();
         provisionedMachines = new ProvisionedMachinesCache(pu,machineProvisioning, getPollingIntervalSeconds());
@@ -284,7 +287,6 @@ public abstract class AbstractScaleStrategyBean implements
     @Override
     public void run() {
 
-        boolean isException = true;
         try {
             if (getLogger().isDebugEnabled()) {
                 getLogger().debug("enforcing SLA.");
@@ -296,22 +298,17 @@ public abstract class AbstractScaleStrategyBean implements
                 getLogger().debug("SLA enforced.");
             }
             
-            isException = false;
+            scaleEventState.enqueuProvisioningCompletedEvent();
         }
         catch (SlaEnforcementInProgressException e) {
             if (getLogger().isDebugEnabled()) {
                 getLogger().debug("SLA has not been reached",e);
             }
+            // we do not pass the exception into the event since there are other fine grained events that report failures.
+            scaleEventState.enqueuProvisioningInProgressEvent();
         }
-        catch (Exception e) {
+        catch (Throwable e) {
             getLogger().error("Unhandled Exception",e);
-        }
-        finally {
-            isScaleInProgress = isException;
-            
-            boolean isCompleted = !isScaleInProgress;
-            eventStorage.enqueu(
-                    new DefaultElasticProcessingUnitScaleProgressChangedEvent(isCompleted, isUndeploying(), getProcessingUnit().getName()));
         }
     }
 

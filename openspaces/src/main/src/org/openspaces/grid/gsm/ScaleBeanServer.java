@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jini.rio.monitor.event.EventsStore;
 import org.openspaces.admin.bean.BeanConfigException;
 import org.openspaces.admin.bean.BeanConfigPropertiesManager;
 import org.openspaces.admin.bean.BeanConfigurationException;
@@ -25,7 +26,6 @@ import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisi
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioningAdapterFactory;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcement;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcementEndpoint;
-import org.openspaces.grid.gsm.strategy.ElasticScaleStrategyEventStorage;
 import org.openspaces.grid.gsm.strategy.ScaleStrategyBean;
 import org.openspaces.grid.gsm.strategy.UndeployScaleStrategyBean;
 /**
@@ -51,7 +51,7 @@ public class ScaleBeanServer {
             MachinesSlaEnforcement machinesSlaEnforcement,
             NonBlockingElasticMachineProvisioningAdapterFactory nonBlockingAdapterFactory,
             ElasticMachineIsolationConfig isolationConfig,
-            ElasticScaleStrategyEventStorage eventStorage) {
+            EventsStore eventStore) {
 
         if (pu == null) {
             throw new IllegalArgumentException("pu cannot be null");
@@ -69,7 +69,7 @@ public class ScaleBeanServer {
             throw new IllegalArgumentException("machinesSlaEnforcement cannot be null");
         }
         
-        if (eventStorage == null) {
+        if (eventStore == null) {
             throw new IllegalArgumentException("eventStorage cannot be null");
         }
         
@@ -108,7 +108,7 @@ public class ScaleBeanServer {
                         machinesSlaEnforcementEndpoint,
                         nonBlockingAdapterFactory,
                         isolationConfig,
-                        eventStorage));
+                        eventStore));
         
     }
      

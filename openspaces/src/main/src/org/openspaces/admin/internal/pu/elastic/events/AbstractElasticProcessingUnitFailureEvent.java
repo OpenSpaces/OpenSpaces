@@ -4,11 +4,12 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
+import org.jini.rio.monitor.event.Event;
 import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitFailureEvent;
 
 import com.gigaspaces.internal.io.IOUtils;
 
-public abstract class AbstractElasticProcessingUnitFailureEvent implements ElasticProcessingUnitFailureEvent {
+public abstract class AbstractElasticProcessingUnitFailureEvent implements ElasticProcessingUnitFailureEvent , Event{
     
     private String failureDescription;
     private String[] processingUnitNames;
@@ -17,11 +18,6 @@ public abstract class AbstractElasticProcessingUnitFailureEvent implements Elast
      * de-serialization constructor
      */
     public AbstractElasticProcessingUnitFailureEvent() {
-    }
-    
-    public AbstractElasticProcessingUnitFailureEvent(String failureDescription, String[] processingUnitNames) {
-        this.failureDescription = failureDescription;
-        this.processingUnitNames = processingUnitNames;
     }
     
     @Override

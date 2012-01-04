@@ -45,10 +45,10 @@ public class ElasticProcessingUnitProgressChangedEventManagerTest {
     @Test
     public void testAddRemoveListener() throws InterruptedException {
         
-        ElasticGridServiceAgentProvisioningProgressChangedEvent[] events = {
-                new DefaultElasticGridServiceAgentProvisioningProgressChangedEvent(false, false, "pu1"),
-                new DefaultElasticGridServiceAgentProvisioningProgressChangedEvent(false, false, "pu2"),
-                new DefaultElasticGridServiceAgentProvisioningProgressChangedEvent(false, false, "pu3")
+        ElasticGridServiceAgentProvisioningProgressChangedEvent[] events = { 
+                createEvent("pu1"),
+                createEvent("pu2"),
+                createEvent("pu3")
         };
         
         final List<String> receivedEvents = new ArrayList<String>();
@@ -75,6 +75,18 @@ public class ElasticProcessingUnitProgressChangedEventManagerTest {
         Thread.sleep(EVENTS_TIMEOUT_SECONDS*1000);
         Assert.assertEquals("pu1,pu2,pu3",StringUtils.collectionToCommaDelimitedString(receivedEvents));
     }
+
+    private DefaultElasticGridServiceAgentProvisioningProgressChangedEvent createEvent(String processingUnitName) {
+        return createEvent(false,false,processingUnitName);
+    }
+    
+    private DefaultElasticGridServiceAgentProvisioningProgressChangedEvent createEvent(boolean isComplete, boolean isUndeploying, String processingUnitName) {
+        DefaultElasticGridServiceAgentProvisioningProgressChangedEvent e1 = new DefaultElasticGridServiceAgentProvisioningProgressChangedEvent();
+        e1.setProcessingUnitName(processingUnitName);
+        e1.setComplete(isComplete);
+        e1.setUndeploying(isUndeploying);
+        return e1;
+    }
     
     /**
      * Register to the events after the are fired, includeExisting = true
@@ -82,10 +94,10 @@ public class ElasticProcessingUnitProgressChangedEventManagerTest {
     @Test
     public void testExistingEvents() throws InterruptedException {
         
-        ElasticGridServiceAgentProvisioningProgressChangedEvent[] events = {
-                new DefaultElasticGridServiceAgentProvisioningProgressChangedEvent(false, false, "pu1"),
-                new DefaultElasticGridServiceAgentProvisioningProgressChangedEvent(false, false, "pu2"),
-                new DefaultElasticGridServiceAgentProvisioningProgressChangedEvent(false, false, "pu3")
+        ElasticGridServiceAgentProvisioningProgressChangedEvent[] events = { 
+                createEvent("pu1"),
+                createEvent("pu2"),
+                createEvent("pu3")
         };
         
         final List<String> receivedEvents = new ArrayList<String>();
@@ -114,10 +126,10 @@ public class ElasticProcessingUnitProgressChangedEventManagerTest {
     @Test
     public void testNotExistingEvents() throws InterruptedException {
         
-        ElasticGridServiceAgentProvisioningProgressChangedEvent[] events = {
-                new DefaultElasticGridServiceAgentProvisioningProgressChangedEvent(false, false, "pu1"),
-                new DefaultElasticGridServiceAgentProvisioningProgressChangedEvent(false, false, "pu2"),
-                new DefaultElasticGridServiceAgentProvisioningProgressChangedEvent(false, false, "pu3")
+        ElasticGridServiceAgentProvisioningProgressChangedEvent[] events = { 
+                createEvent("pu1"),
+                createEvent("pu2"),
+                createEvent("pu3")
         };
         
         final List<String> receivedEvents = new ArrayList<String>();
@@ -151,12 +163,12 @@ public class ElasticProcessingUnitProgressChangedEventManagerTest {
     @Test
     public void testOnlyLastEvents() throws InterruptedException {
         
-        ElasticGridServiceAgentProvisioningProgressChangedEvent[] events = {
-                new DefaultElasticGridServiceAgentProvisioningProgressChangedEvent(false, false, "pu1"),
-                new DefaultElasticGridServiceAgentProvisioningProgressChangedEvent(false, false, "pu2"),
-                new DefaultElasticGridServiceAgentProvisioningProgressChangedEvent(false, false, "pu3"),
-                new DefaultElasticGridServiceAgentProvisioningProgressChangedEvent(false, true, "pu2"),
-                new DefaultElasticGridServiceAgentProvisioningProgressChangedEvent(true, false, "pu1")
+        ElasticGridServiceAgentProvisioningProgressChangedEvent[] events = { 
+                createEvent(false, false, "pu1"), //this event gets overriden by the next pu1 event
+                createEvent(false, false, "pu2"), //this event gets overriden by the next pu2 event
+                createEvent(false, false,"pu3"),
+                createEvent(false, true, "pu2"),
+                createEvent(true , false,"pu1"),
         };
         
         final List<String> receivedEvents = new ArrayList<String>();

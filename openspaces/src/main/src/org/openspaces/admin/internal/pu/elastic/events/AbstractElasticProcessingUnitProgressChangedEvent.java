@@ -4,11 +4,12 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
+import org.jini.rio.monitor.event.Event;
 import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitProgressChangedEvent;
 
 import com.gigaspaces.internal.io.IOUtils;
 
-public abstract class AbstractElasticProcessingUnitProgressChangedEvent implements ElasticProcessingUnitProgressChangedEvent {
+public abstract class AbstractElasticProcessingUnitProgressChangedEvent implements ElasticProcessingUnitProgressChangedEvent , Event{
     private boolean isComplete;
     private String processingUnitName;
     private boolean isUndeploying;
@@ -17,12 +18,6 @@ public abstract class AbstractElasticProcessingUnitProgressChangedEvent implemen
      * de-serialization/reflection constructor
      */
     public AbstractElasticProcessingUnitProgressChangedEvent() {
-    }
-    
-    public AbstractElasticProcessingUnitProgressChangedEvent(boolean isComplete, boolean isUndeploying, String processingUnitName) {
-        this.isComplete = isComplete;
-        this.isUndeploying = isUndeploying;
-        this.processingUnitName = processingUnitName;
     }
     
     @Override

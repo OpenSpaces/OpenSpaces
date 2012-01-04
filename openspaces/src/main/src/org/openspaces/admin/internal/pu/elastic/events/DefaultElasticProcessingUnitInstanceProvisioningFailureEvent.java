@@ -9,13 +9,9 @@ public class DefaultElasticProcessingUnitInstanceProvisioningFailureEvent
     private static final long serialVersionUID = 1L;
     
     /**
-     * de-serialization constructor
+     * de-serialization/reflection constructor
      */
     public DefaultElasticProcessingUnitInstanceProvisioningFailureEvent() {
         super();
-    }
-    
-    public DefaultElasticProcessingUnitInstanceProvisioningFailureEvent(String failureDescription, String[] processingUnitNames) {
-        super(failureDescription, processingUnitNames);
     }
 }

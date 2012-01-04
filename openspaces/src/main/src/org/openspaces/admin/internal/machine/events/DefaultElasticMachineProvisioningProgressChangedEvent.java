@@ -10,12 +10,8 @@ public class DefaultElasticMachineProvisioningProgressChangedEvent
     private static final long serialVersionUID = 1L;
     
     /**
-     * de-serialization constructor
+     * de-serialization/reflection constructor
      */
     public DefaultElasticMachineProvisioningProgressChangedEvent() {
-    }
-    
-    public DefaultElasticMachineProvisioningProgressChangedEvent(boolean isComplete, boolean isUndeploying, String processingUnitName) {
-        super(isComplete, isUndeploying, processingUnitName);
     }
 }

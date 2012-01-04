@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import net.jini.core.lookup.ServiceID;
 
+import org.jini.rio.monitor.event.Events;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.dump.DumpResult;
 import org.openspaces.admin.internal.admin.InternalAdmin;
@@ -17,7 +18,6 @@ import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
 import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitEvent;
 import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitScaleProgressChangedEvent;
 import org.openspaces.grid.esm.ESM;
-import org.openspaces.grid.gsm.strategy.ElasticScaleStrategyEvents;
 
 import com.gigaspaces.internal.jvm.JVMDetails;
 import com.gigaspaces.internal.jvm.JVMStatistics;
@@ -181,7 +181,7 @@ public class DefaultElasticServiceManager extends AbstractAgentGridComponent imp
     }
     
     @Override
-    public ElasticScaleStrategyEvents getScaleStrategyEvents(long cursor, int maxNumberOfEvents) {
+    public Events getScaleStrategyEvents(long cursor, int maxNumberOfEvents) {
         try {
             return esm.getScaleStrategyEvents(cursor, maxNumberOfEvents);
         }

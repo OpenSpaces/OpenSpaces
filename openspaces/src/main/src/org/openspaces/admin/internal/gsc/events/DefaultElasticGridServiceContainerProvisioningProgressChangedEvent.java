@@ -10,13 +10,10 @@ public class DefaultElasticGridServiceContainerProvisioningProgressChangedEvent
     private static final long serialVersionUID = 1L;
     
     /**
-     * de-serialization constructor
+     * de-serialization/reflection constructor
      */
     public DefaultElasticGridServiceContainerProvisioningProgressChangedEvent() {
+        super();
     }
 
-    
-    public DefaultElasticGridServiceContainerProvisioningProgressChangedEvent(boolean isComplete, boolean isUndeploying, String processingUnitName) {
-        super(isComplete, isUndeploying, processingUnitName);
-    }
 }

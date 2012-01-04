@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jini.rio.monitor.event.EventsStore;
 import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.bean.BeanInitializationException;
 import org.openspaces.admin.internal.pu.elastic.ElasticMachineIsolationConfig;
@@ -22,7 +23,6 @@ import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisi
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioningAdapterFactory;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcementEndpointAware;
-import org.openspaces.grid.gsm.strategy.ElasticScaleStrategyEventStorage;
 import org.openspaces.grid.gsm.strategy.ElasticScaleStrategyEventStorageAware;
 
 public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
@@ -36,7 +36,7 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
     private final ProcessingUnitSchemaConfig schemaConfig;
     private final NonBlockingElasticMachineProvisioningAdapterFactory nonBlockingAdapterFactory;
     private final ElasticMachineIsolationConfig isolationConfig;
-    private final ElasticScaleStrategyEventStorage eventStorage;
+    private final EventsStore eventStore;
     
     ScaleBeanFactory(
             ProcessingUnit pu,
@@ -46,7 +46,7 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
             MachinesSlaEnforcementEndpoint machinesSlaEnforcementEndpoint,
             NonBlockingElasticMachineProvisioningAdapterFactory nonBlockingAdapterFactory,
             ElasticMachineIsolationConfig isolationConfig,
-            ElasticScaleStrategyEventStorage eventStorage) {
+            EventsStore eventStore) {
         
         super(pu.getAdmin());
         this.schemaConfig = schemaConfig;
@@ -56,7 +56,7 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
         this.nonBlockingAdapterFactory = nonBlockingAdapterFactory;
         this.pu = pu;
         this.isolationConfig = isolationConfig;
-        this.eventStorage = eventStorage;
+        this.eventStore = eventStore;
         
     }
     
@@ -113,7 +113,7 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
         }
         
         if (instance instanceof ElasticScaleStrategyEventStorageAware) {
-            ((ElasticScaleStrategyEventStorageAware)instance).setElasticScaleStrategyEventStorage(eventStorage);
+            ((ElasticScaleStrategyEventStorageAware)instance).setElasticScaleStrategyEventStorage(eventStore);
         }
         
         ElasticConfigBean elasticConfigBean = findElasticConfigBean(beanServer);

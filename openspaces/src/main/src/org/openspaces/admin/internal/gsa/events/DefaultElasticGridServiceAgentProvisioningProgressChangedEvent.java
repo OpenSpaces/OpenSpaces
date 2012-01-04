@@ -14,9 +14,4 @@ public class DefaultElasticGridServiceAgentProvisioningProgressChangedEvent
      */
     public DefaultElasticGridServiceAgentProvisioningProgressChangedEvent() {
     }
-
-    public DefaultElasticGridServiceAgentProvisioningProgressChangedEvent(boolean isComplete, boolean isUndeploying, String processingUnitName) {
-        super(isComplete, isUndeploying, processingUnitName);
-    }
-
 }

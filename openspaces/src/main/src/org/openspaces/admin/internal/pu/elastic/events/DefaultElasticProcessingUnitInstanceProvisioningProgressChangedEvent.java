@@ -14,9 +14,4 @@ public class DefaultElasticProcessingUnitInstanceProvisioningProgressChangedEven
         */
        public DefaultElasticProcessingUnitInstanceProvisioningProgressChangedEvent() {
        }
-       
-       public DefaultElasticProcessingUnitInstanceProvisioningProgressChangedEvent(boolean isComplete, boolean isUndeploying, String processingUnitName) {
-           super(isComplete, isUndeploying, processingUnitName);
-       }
-
 }

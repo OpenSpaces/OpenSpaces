@@ -10,13 +10,10 @@ public class DefaultElasticGridServiceContainerProvisioningFailureEvent
     private static final long serialVersionUID = 1L;
     
     /**
-     * de-serialization constructor
+     * de-serialization/reflection constructor
      */
     public DefaultElasticGridServiceContainerProvisioningFailureEvent() {
         super();
     }
-    
-    public DefaultElasticGridServiceContainerProvisioningFailureEvent(String failureDescription, String[] processingUnitNames) {
-        super(failureDescription,processingUnitNames);
-    }
+
 }

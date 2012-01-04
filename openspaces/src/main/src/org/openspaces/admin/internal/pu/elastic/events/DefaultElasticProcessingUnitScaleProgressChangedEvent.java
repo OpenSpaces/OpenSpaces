@@ -15,12 +15,8 @@ public class DefaultElasticProcessingUnitScaleProgressChangedEvent
 private static final long serialVersionUID = 1L;
            
     /**
-     * de-serialization constructor
+     * de-serialization/reflection constructor
      */
     public DefaultElasticProcessingUnitScaleProgressChangedEvent() {
-    }
-
-    public DefaultElasticProcessingUnitScaleProgressChangedEvent(boolean isComplete, boolean isUndeploying, String processingUnitName) {
-        super(isComplete, isUndeploying, processingUnitName);
     }
 }
