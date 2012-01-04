@@ -18,7 +18,7 @@ public class ElasticGridServiceContainerProvisioningAlertBean
     implements ElasticGridServiceContainerProvisioningFailureEventListener , ElasticGridServiceContainerProvisioningProgressChangedEventListener  {
     
     private static final AlertSeverity GSC_ALERT_SEVERITY = AlertSeverity.SEVERE;
-    private static final String GSC_ALERT_RESOLVED_DESCRIPTION_POSTFIX= "Grid Service Container provisioning for {0} completed succesfully";
+    private static final String GSC_ALERT_RESOLVED_DESCRIPTION_POSTFIX= "Grid Service Container provisioning for %s completed succesfully";
     private static final String GSC_ALERT_BEAN_UID = "adfd6015-2b91-4878-afef-65b91385a343";
     private static final String GSC_ALERT_NAME = "Grid Service Container Provisioning Alert";
     

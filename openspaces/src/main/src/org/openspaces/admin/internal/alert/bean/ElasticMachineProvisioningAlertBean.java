@@ -19,7 +19,7 @@ public class ElasticMachineProvisioningAlertBean extends AbstractElasticProcessi
     private static final String MACHINES_ALERT_BEAN_UID = "3BA87E89-449A-4abc-A632-4732246A9EE4";
     private static final String MACHINES_ALERT_NAME = "Machine Provisioning Alert";
     private static final AlertSeverity MACHINES_ALERT_SEVERITY = AlertSeverity.SEVERE;
-    private static final String MACHINES_ALERT_RESOLVED_DESCRIPTION_POSTFIX= "Machine Provisioning for {0} completed succesfully";
+    private static final String MACHINES_ALERT_RESOLVED_DESCRIPTION_POSTFIX= "Machine Provisioning for %s completed succesfully";
         
     @Override
     public void afterPropertiesSet() throws Exception {

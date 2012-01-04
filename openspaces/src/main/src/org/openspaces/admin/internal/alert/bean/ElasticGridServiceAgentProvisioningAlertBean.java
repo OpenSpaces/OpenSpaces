@@ -18,7 +18,7 @@ public class ElasticGridServiceAgentProvisioningAlertBean
     implements ElasticGridServiceAgentProvisioningFailureEventListener , ElasticGridServiceAgentProvisioningProgressChangedEventListener  {
     
     private static final AlertSeverity GSA_ALERT_SEVERITY = AlertSeverity.SEVERE;
-    private static final String GSA_ALERT_RESOLVED_DESCRIPTION_POSTFIX= "Grid Service Agent provisioning for {0} completed succesfully";
+    private static final String GSA_ALERT_RESOLVED_DESCRIPTION_POSTFIX= "Grid Service Agent provisioning for %s completed succesfully";
     private static final String GSA_ALERT_BEAN_UID = "5d75d7c8-e895-4490-a1d3-2df753c3893e";
     private static final String GSA_ALERT_NAME = "Grid Service Agent Provisioning Alert";
     
