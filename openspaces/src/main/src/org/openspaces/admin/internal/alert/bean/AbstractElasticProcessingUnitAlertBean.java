@@ -114,6 +114,9 @@ public abstract class AbstractElasticProcessingUnitAlertBean implements AlertBea
     }
 
     public void raiseAlert(Alert alert) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Triggering alert:" + alert.getDescription());
+        }
         admin.getAlertManager().triggerAlert(alert);
     }
 
