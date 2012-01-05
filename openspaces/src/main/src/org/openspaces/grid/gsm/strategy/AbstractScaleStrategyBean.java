@@ -80,6 +80,8 @@ public abstract class AbstractScaleStrategyBean implements
     private ScaleStrategyProgressEventState scaleEventState;
     
     private EventsStore eventStorage;
+
+    private boolean firstInProgressEvent;
     
     protected InternalAdmin getAdmin() {
         return this.admin;
@@ -287,6 +289,11 @@ public abstract class AbstractScaleStrategyBean implements
     @Override
     public void run() {
 
+        if (!firstInProgressEvent) {
+            scaleEventState.enqueuProvisioningInProgressEvent();
+            firstInProgressEvent = true;
+        }
+        
         try {
             if (getLogger().isDebugEnabled()) {
                 getLogger().debug("enforcing SLA.");
