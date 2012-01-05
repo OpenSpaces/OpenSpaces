@@ -156,8 +156,7 @@ public class DefaultGateway implements Gateway {
                     DefaultGatewayProcessingUnit tempPUI = new DefaultGatewayProcessingUnit(admin, DefaultGateway.this, processingUnitInstance);
                     GatewaySink sink = tempPUI.getSink();
                     if (sink != null && sink.containsSource(sourceGatewayName)){
-                        latch.exchange(sink);
-                        latch.countDown();
+                        latch.countDown(sink);
                     }
                 }
             }
@@ -225,8 +224,7 @@ public class DefaultGateway implements Gateway {
                     DefaultGatewayProcessingUnit tempPUI = new DefaultGatewayProcessingUnit(admin, DefaultGateway.this, processingUnitInstance);
                     GatewayDelegator delegator = tempPUI.getDelegator();
                     if (delegator != null && delegator.containsTarget(targetGatewayName)){
-                        latch.exchange(delegator);
-                        latch.countDown();
+                        latch.countDown(delegator);
                     }
                 }
             }
