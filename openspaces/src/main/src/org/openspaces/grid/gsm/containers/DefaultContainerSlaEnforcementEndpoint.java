@@ -99,7 +99,7 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
     private void enforceSlaInternal(final ContainersSlaPolicy sla) throws ContainersSlaEnforcementInProgressException {
 
         cleanContainersMarkedForShutdown(pu);
-        cleanFutureContainers();
+        cleanFutureContainers(sla);
         
         markForDeallocationContainersOnUnallocatedMachines(sla);
         markForDeallocationContainersOnMachineWithAllocatedCapacityShortage(sla);
@@ -241,9 +241,10 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
 
     /**
      * removes containers from the futureContainers list if the future is done (container started).
+     * @param sla 
      * @throws FailedToStartNewGridServiceContainersException 
      */
-    private void cleanFutureContainers() throws FailedToStartNewGridServiceContainersException {
+    private void cleanFutureContainers(ContainersSlaPolicy sla) throws FailedToStartNewGridServiceContainersException {
 
         FutureGridServiceContainer future;
         while((future = state.removeNextDoneFutureContainer(pu)) != null){
@@ -277,10 +278,16 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
 
             if (exception != null) {
                 state.failedFutureContainer(future);
-                throw new FailedToStartNewGridServiceContainersException(
+                FailedToStartNewGridServiceContainersException ex = new FailedToStartNewGridServiceContainersException(
                         future.getGridServiceAgent().getMachine(),
                         new String[] {pu.getName()}, 
                         exception);
+                if (!sla.getClusterCapacityRequirements().equalsZero()) {
+                    throw ex;
+                }
+                else {
+                    logger.info("Forgetting failure to start new container since we are removing all existing containers now.",ex);
+                }
             }
         }
 
