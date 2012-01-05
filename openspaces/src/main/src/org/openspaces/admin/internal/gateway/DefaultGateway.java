@@ -147,7 +147,7 @@ public class DefaultGateway implements Gateway {
 
     @Override
     public GatewaySink waitForSink(final String sourceGatewayName, long timeout, TimeUnit timeUnit) {
-        final ExchangeCountDownLatch<GatewaySink> latch = new ExchangeCountDownLatch<GatewaySink>(1);
+        final ExchangeCountDownLatch<GatewaySink> latch = new ExchangeCountDownLatch<GatewaySink>();
         ProcessingUnitInstanceAddedEventListener added = new ProcessingUnitInstanceAddedEventListener() {
             
             @Override
@@ -216,7 +216,7 @@ public class DefaultGateway implements Gateway {
     
     @Override
     public GatewayDelegator waitForDelegator(final String targetGatewayName, long timeout, TimeUnit timeUnit) {
-        final ExchangeCountDownLatch<GatewayDelegator> latch = new ExchangeCountDownLatch<GatewayDelegator>(1);
+        final ExchangeCountDownLatch<GatewayDelegator> latch = new ExchangeCountDownLatch<GatewayDelegator>();
         ProcessingUnitInstanceAddedEventListener added = new ProcessingUnitInstanceAddedEventListener() {
             
             @Override
