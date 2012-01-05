@@ -64,7 +64,7 @@ public class ElasticGridServiceAgentProvisioningAlertBean
         if (event.isComplete()) {
             for (Alert baseAlert : createResolvedAlerts(puName)) {
                 ElasticGridServiceAgentProvisioningAlert alert = new ElasticGridServiceAgentProvisioningAlert(baseAlert);
-                admin.getAlertManager().triggerAlert(alert);
+                super.raiseAlert(alert);
             }
         }
     }

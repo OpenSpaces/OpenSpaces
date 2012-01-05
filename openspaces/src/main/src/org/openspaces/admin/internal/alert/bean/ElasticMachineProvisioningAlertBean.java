@@ -48,7 +48,8 @@ public class ElasticMachineProvisioningAlertBean extends AbstractElasticProcessi
     public void elasticMachineProvisioningFailure(ElasticMachineProvisioningFailureEvent event) {
         String description = event.getFailureDescription();
         for (String puName : event.getProcessingUnitNames()) {
-            admin.getAlertManager().triggerAlert(createRaisedAlert(puName, description));
+            ElasticMachineProvisioningAlert alert = new ElasticMachineProvisioningAlert(createRaisedAlert(puName, description));
+            super.raiseAlert(alert);
         }
     }
 
@@ -62,7 +63,7 @@ public class ElasticMachineProvisioningAlertBean extends AbstractElasticProcessi
         if (event.isComplete()) {
             for (Alert baseAlert : createResolvedAlerts(puName)) {
                 ElasticMachineProvisioningAlert alert = new ElasticMachineProvisioningAlert(baseAlert);
-                admin.getAlertManager().triggerAlert(alert);
+                super.raiseAlert(alert);
             }
         }
     }

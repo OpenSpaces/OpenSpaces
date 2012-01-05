@@ -50,7 +50,8 @@ public class ElasticGridServiceContainerProvisioningAlertBean
     public void elasticGridServiceContainerProvisioningFailure(ElasticGridServiceContainerProvisioningFailureEvent event) {
         String description = event.getFailureDescription();
         for (String puName : event.getProcessingUnitNames()) {
-            admin.getAlertManager().triggerAlert(createRaisedAlert(puName, description));
+            ElasticGridServiceContainerProvisioningAlert alert = new ElasticGridServiceContainerProvisioningAlert(createRaisedAlert(puName, description));
+            super.raiseAlert(alert);
         }
     }
 
@@ -64,7 +65,7 @@ public class ElasticGridServiceContainerProvisioningAlertBean
         if (event.isComplete()) {
             for (Alert baseAlert : createResolvedAlerts(puName)) {
                 ElasticGridServiceContainerProvisioningAlert alert = new ElasticGridServiceContainerProvisioningAlert(baseAlert);
-                admin.getAlertManager().triggerAlert(alert);
+                super.raiseAlert(alert);
             }
         }
     }
