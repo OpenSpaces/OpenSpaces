@@ -1,5 +1,7 @@
 package org.openspaces.grid.gsm.strategy;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jini.rio.monitor.event.EventsStore;
 import org.openspaces.admin.internal.pu.elastic.events.AbstractElasticProcessingUnitFailureEvent;
 import org.openspaces.admin.internal.pu.elastic.events.AbstractElasticProcessingUnitProgressChangedEvent;
@@ -22,6 +24,8 @@ public class ScaleStrategyProgressEventState {
     private final String processingUnitName;
     private Class<? extends AbstractElasticProcessingUnitProgressChangedEvent> progressChangedEventClass;
     private Class<? extends AbstractElasticProcessingUnitFailureEvent> failureEventClass;
+
+    private final Log logger = LogFactory.getLog(ScaleStrategyProgressEventState.class);
     
     public ScaleStrategyProgressEventState(
             EventsStore eventStore, 
@@ -50,6 +54,14 @@ public class ScaleStrategyProgressEventState {
                 
                 AbstractElasticProcessingUnitFailureEvent event = createFailureEvent(e);
                 eventStore.addEvent(event);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Added event: " + failureEventClass + " " + e.getMessage());
+                }
+            }
+            else {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Ignoring event: " + failureEventClass + " " + e.getMessage());
+                }
             }
         }
     }
@@ -62,6 +74,15 @@ public class ScaleStrategyProgressEventState {
             
             AbstractElasticProcessingUnitProgressChangedEvent event = createProgressChangedEvent(isComplete);
             eventStore.addEvent(event);
+         
+            if (logger.isDebugEnabled()) {
+                logger.debug("Added event: " + progressChangedEventClass + " isComplete=false isUndeploying="+isUndeploying);
+            }
+        }
+        else {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Ignoring event: " + progressChangedEventClass + " isComplete=false isUndeploying="+isUndeploying);
+            }
         }
     }
 
@@ -74,6 +95,14 @@ public class ScaleStrategyProgressEventState {
             boolean isComplete = true;
             AbstractElasticProcessingUnitProgressChangedEvent event = createProgressChangedEvent(isComplete);
             eventStore.addEvent(event);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Added event: " + progressChangedEventClass + " isComplete=true isUndeploying="+isUndeploying);
+            }
+        }
+        else {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Ignoring event: " + progressChangedEventClass + " isComplete=true isUndeploying="+isUndeploying);
+            }
         }
     }
 
