@@ -1399,7 +1399,9 @@ public class DefaultAdmin implements InternalAdmin {
                     scaleStrategyEvents1 = esm1.getScaleStrategyEvents(eventsCursor, maxNumberOfEvents);
                     long newEventsCursor = scaleStrategyEvents1.getNextCursor();
                     if (logger.isDebugEnabled()) {
-                        logger.debug("Retrieved ESM events from " + eventsCursor + " to " + (newEventsCursor-1));
+                        if (newEventsCursor > eventsCursor) {
+                           logger.debug("Retrieved ESM events from " + eventsCursor + " to " + (newEventsCursor-1));
+                        }
                     }
                     eventsCursor = newEventsCursor;
                 }
