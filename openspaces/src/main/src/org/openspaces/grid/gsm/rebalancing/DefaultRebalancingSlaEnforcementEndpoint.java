@@ -152,6 +152,7 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
             RebalancingUtils.incrementNumberOfStatelessInstancesAsync(
                     pu, 
                     sla.getContainers(),
+                    logger, 
                     DEPLOYMENT_TIMEOUT_FAILURE_SECONDS , TimeUnit.SECONDS);
         
         state.addFutureStatelessDeployments(futureInstances);

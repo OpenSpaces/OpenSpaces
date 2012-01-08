@@ -18,6 +18,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.apache.commons.logging.Log;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.GridComponent;
 import org.openspaces.admin.gsa.GridServiceAgent;
@@ -45,6 +46,7 @@ public class RebalancingUtils {
    static Collection<FutureStatelessProcessingUnitInstance> incrementNumberOfStatelessInstancesAsync(
        final ProcessingUnit pu, 
        final GridServiceContainer[] containers,
+       final Log logger,
        final long duration, final TimeUnit timeUnit) {
        
        if (pu.getMaxInstancesPerVM() != 1) {
@@ -157,22 +159,34 @@ public class RebalancingUtils {
                 int numberOfInstances = pu.getNumberOfInstances();
                 int maxNumberOfInstances = containers.length;
                 if (numberOfInstances < maxNumberOfInstances) {
-                   if (targetNumberOfInstances.get() != numberOfInstances+1) {
+                   if (targetNumberOfInstances.get() == numberOfInstances+1) {
+                       if (logger.isDebugEnabled()) {
+                           logger.debug(
+                                  "Waiting for pu.numberOfInstances to increment from "+numberOfInstances + " to " + targetNumberOfInstances.get() + ". "+
+                                  "Number of relevant containers " + maxNumberOfInstances);
+                       }
+                   }
+                   else {
                        targetNumberOfInstances.set(numberOfInstances+1);
-                       
+                       if (logger.isDebugEnabled()) {
+                           logger.debug(
+                                  "Planning to increment pu.numberOfInstances from "+numberOfInstances + " to " + targetNumberOfInstances.get() + ". "+
+                                  "Number of relevant containers " + maxNumberOfInstances);
+                       }
                        ((InternalAdmin) admin).scheduleAdminOperation(new Runnable() {
                            public void run() {
                                try {
                                    // this is an async operation 
                                    // pu.getNumberOfInstances() still shows the old value.
                                    pu.incrementInstance();
+                                   if (logger.isDebugEnabled()) {
+                                       logger.debug("pu.incrementInstance() called");
+                                   }
                                } catch (Throwable e) {
                                    executionException.set(new ExecutionException(e));
                                }
                            }
                        });
-                       
-                       
                    }
                }
             }
