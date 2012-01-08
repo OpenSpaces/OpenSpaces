@@ -83,7 +83,11 @@ public abstract class AbstractMachinesSlaPolicy extends ServiceLevelAgreementPol
     public int getMaximumNumberOfContainersPerMachine() {
         return maxNumberOfContainersPerMachine;
     }
-    
+
+    public boolean isUndeploying() {
+        return false;
+    }
+
     @Override
     public boolean equals(Object other) {
         return other instanceof AbstractMachinesSlaPolicy &&
@@ -100,5 +104,4 @@ public abstract class AbstractMachinesSlaPolicy extends ServiceLevelAgreementPol
     public abstract boolean isStopMachineSupported();
 
     public abstract String getScaleStrategyName();
-
 }

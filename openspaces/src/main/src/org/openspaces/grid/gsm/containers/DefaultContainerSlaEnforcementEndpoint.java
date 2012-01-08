@@ -282,11 +282,12 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
                         future.getGridServiceAgent().getMachine(),
                         new String[] {pu.getName()}, 
                         exception);
-                if (!sla.getClusterCapacityRequirements().equalsZero()) {
-                    throw ex;
+                
+                if (sla.isUndeploying()) {
+                    logger.info("Ignoring failure to start new container since undeploying.",ex);
                 }
                 else {
-                    logger.info("Forgetting failure to start new container since we are removing all existing containers now.",ex);
+                    throw ex;
                 }
             }
         }

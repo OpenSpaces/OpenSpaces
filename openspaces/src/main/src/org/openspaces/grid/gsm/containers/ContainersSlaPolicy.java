@@ -24,7 +24,11 @@ public class ContainersSlaPolicy extends ServiceLevelAgreementPolicy {
     public void setClusterCapacityRequirements(ClusterCapacityRequirements clusterCapacityRequirements) {
         this.clusterCapacityRequirements = clusterCapacityRequirements;
     }
-    
+
+    public boolean isUndeploying() {
+        return false;
+    }
+
     public boolean equals(Object other) {
         return other instanceof ContainersSlaPolicy &&
                ((ContainersSlaPolicy)other).newContainerConfig.equals(this.newContainerConfig) &&

@@ -3,15 +3,15 @@ package org.openspaces.grid.gsm.strategy;
 import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
 import org.openspaces.grid.gsm.GridServiceContainerConfigAware;
-import org.openspaces.grid.gsm.capacity.CapacityRequirements;
-import org.openspaces.grid.gsm.capacity.ClusterCapacityRequirements;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpointAware;
 import org.openspaces.grid.gsm.containers.ContainersSlaPolicy;
+import org.openspaces.grid.gsm.containers.UndeployContainersSlaPolicy;
 import org.openspaces.grid.gsm.containers.exceptions.ContainersSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.machines.CapacityMachinesSlaPolicy;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpointAware;
+import org.openspaces.grid.gsm.machines.UndeployMachinesSlaPolicy;
 import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.machines.exceptions.MachinesSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
@@ -80,11 +80,9 @@ public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
             getLogger().debug("Undeploying machines for " + getProcessingUnit().getName());
         }
         
-        final CapacityMachinesSlaPolicy sla = new CapacityMachinesSlaPolicy();
+        final CapacityMachinesSlaPolicy sla = new UndeployMachinesSlaPolicy();
         NonBlockingElasticMachineProvisioning machineProvisioning = super.getMachineProvisioning();
         sla.setMachineProvisioning(machineProvisioning);
-        sla.setCapacityRequirements(new CapacityRequirements());
-        sla.setMinimumNumberOfMachines(0);
         sla.setMaximumNumberOfMachines(getMaximumNumberOfInstances());
         sla.setMaximumNumberOfContainersPerMachine(getMaximumNumberOfInstances());
         sla.setContainerMemoryCapacityInMB(containersConfig.getMaximumMemoryCapacityInMB());
@@ -113,9 +111,8 @@ public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
             getLogger().debug("Undeploying containers for " + getProcessingUnit().getName());
         }
         
-        final ContainersSlaPolicy sla = new ContainersSlaPolicy();
+        final ContainersSlaPolicy sla = new UndeployContainersSlaPolicy();
         sla.setNewContainerConfig(containersConfig);
-        sla.setClusterCapacityRequirements(new ClusterCapacityRequirements());
         
         try {
             containersEndpoint.enforceSla(sla);
