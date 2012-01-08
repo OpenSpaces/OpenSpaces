@@ -59,8 +59,8 @@ public class ScaleStrategyProgressEventState {
                 }
             }
             else {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Ignoring event: " + failureEventClass + " " + e.getMessage());
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Ignoring event: " + failureEventClass + " " + e.getMessage());
                 }
             }
         }
@@ -76,12 +76,12 @@ public class ScaleStrategyProgressEventState {
             eventStore.addEvent(event);
          
             if (logger.isDebugEnabled()) {
-                logger.debug("Added event: " + progressChangedEventClass + " isComplete=false isUndeploying="+isUndeploying);
+                logger.debug("Added event: " + progressChangedEventClass + " processingUnit=" + processingUnitName + " isComplete=false isUndeploying="+isUndeploying);
             }
         }
         else {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Ignoring event: " + progressChangedEventClass + " isComplete=false isUndeploying="+isUndeploying);
+            if (logger.isTraceEnabled()) {
+                logger.trace("Ignoring event: " + progressChangedEventClass + " processingUnit=" + processingUnitName + " isComplete=false isUndeploying="+isUndeploying);
             }
         }
     }
@@ -96,12 +96,12 @@ public class ScaleStrategyProgressEventState {
             AbstractElasticProcessingUnitProgressChangedEvent event = createProgressChangedEvent(isComplete);
             eventStore.addEvent(event);
             if (logger.isDebugEnabled()) {
-                logger.debug("Added event: " + progressChangedEventClass + " isComplete=true isUndeploying="+isUndeploying);
+                logger.debug("Added event: " + progressChangedEventClass + " processingUnit=" + processingUnitName + " isComplete=true isUndeploying="+isUndeploying);
             }
         }
         else {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Ignoring event: " + progressChangedEventClass + " isComplete=true isUndeploying="+isUndeploying);
+            if (logger.isTraceEnabled()) {
+                logger.trace("Ignoring event: " + progressChangedEventClass + " processingUnit=" + processingUnitName + " isComplete=true isUndeploying="+isUndeploying);
             }
         }
     }
