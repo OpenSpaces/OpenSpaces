@@ -25,7 +25,6 @@ import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.CpuCapacityRequirement;
 import org.openspaces.grid.gsm.rebalancing.exceptions.FutureProcessingUnitInstanceDeploymentException;
-import org.openspaces.grid.gsm.rebalancing.exceptions.MaximumNumberOfConcurrentRelocationsReachedException;
 import org.openspaces.grid.gsm.rebalancing.exceptions.ProcessingUnitIsNotEvenlyDistributedAccrossMachinesException;
 import org.openspaces.grid.gsm.rebalancing.exceptions.ProcessingUnitIsNotEvenlyDistributedAcrossContainersException;
 import org.openspaces.grid.gsm.rebalancing.exceptions.ProcessingUnitIsNotInTactException;
@@ -138,15 +137,7 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
 
     private void enforceSlaStatelessProcessingUnit(RebalancingSlaPolicy sla) throws RebalancingSlaEnforcementInProgressException {
         
-        int maximumNumberOfConcurrentRelocationsPerMachine = sla.getMaximumNumberOfConcurrentRelocationsPerMachine();
-        
         GridServiceContainer[] containers = sla.getContainers();
-        for (GridServiceContainer container : containers) {
-            if (container.getProcessingUnitInstances(pu.getName()).length == 0 &&
-                isConflictingDeploymentInProgress(container, maximumNumberOfConcurrentRelocationsPerMachine)) {
-                throw new MaximumNumberOfConcurrentRelocationsReachedException(pu, container);
-            }
-        }
         
         Collection<FutureStatelessProcessingUnitInstance> futureInstances = 
             RebalancingUtils.incrementNumberOfStatelessInstancesAsync(
