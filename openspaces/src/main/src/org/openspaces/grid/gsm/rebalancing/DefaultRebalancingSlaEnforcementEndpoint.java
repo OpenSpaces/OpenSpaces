@@ -24,6 +24,7 @@ import org.openspaces.grid.gsm.LogPerProcessingUnit;
 import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.CpuCapacityRequirement;
+import org.openspaces.grid.gsm.rebalancing.exceptions.FutureProcessingUnitInstanceDeploymentException;
 import org.openspaces.grid.gsm.rebalancing.exceptions.MaximumNumberOfConcurrentRelocationsReachedException;
 import org.openspaces.grid.gsm.rebalancing.exceptions.ProcessingUnitIsNotEvenlyDistributedAccrossMachinesException;
 import org.openspaces.grid.gsm.rebalancing.exceptions.ProcessingUnitIsNotEvenlyDistributedAcrossContainersException;
@@ -396,7 +397,7 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
                     break;
                 }
 
-                // we have a target and a source container. 
+                  // we have a target and a source container. 
                 // now let's decide which pu instance to relocate from source to target
                 for (ProcessingUnitInstance candidateInstance : source.getProcessingUnitInstances(pu.getName())) {
 
@@ -809,12 +810,18 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
         return null;
     }
 
-    private void cleanFutureStatefulDeployments() {
+    private void cleanFutureStatefulDeployments() throws RebalancingSlaEnforcementInProgressException {
 
-        List<FutureStatefulProcessingUnitInstance> done = state.removeDoneFutureStatefulDeployments(pu);
-        for (FutureStatefulProcessingUnitInstance future : done) {
+        while(true) {
+            
+            FutureStatefulProcessingUnitInstance future = state.removeOneDoneFutureStatefulDeployments(pu);
+            
+            if (future == null) {
+                // no more done futures
+                break;
+            }
                 
-            Exception exception = null;
+            Throwable throwable = null;
 
             try {
                 ProcessingUnitInstance puInstance = future.get();
@@ -822,25 +829,54 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
                         + RebalancingUtils.puInstanceToString(puInstance));
 
             } catch (ExecutionException e) {
-                if (e.getCause() instanceof AdminException) {
-                    exception = (AdminException) e.getCause();
-                } else {
-                    throw new IllegalStateException("Unexpected runtime exception", e);
-                }
+                throwable = e.getCause();
             } catch (TimeoutException e) {
-                exception = e;
+                throwable = e;
             }
 
-            if (exception != null) {
-                logger.info(future.getFailureMessage(), exception);
+            if (throwable != null) {
                 state.addFailedStatefulDeployment(future);
+                throwFutureProcessingUnitInstanceException(throwable);
             }
         
         }
 
         cleanFailedFutureStatefulDeployments();
     }
+
     
+    private void cleanFutureStatelessDeployments() throws RebalancingSlaEnforcementInProgressException {
+
+        while(true) {
+            
+            FutureStatelessProcessingUnitInstance future = state.removeOneDoneFutureStatelessDeployments(pu);
+            
+            if (future == null) {
+                // no more done futures
+                break;
+            }
+                           
+            Throwable throwable = null;
+
+            try {
+                ProcessingUnitInstance puInstance = future.get();
+                logger.info("Processing unit instance deployment completed successfully "
+                        + RebalancingUtils.puInstanceToString(puInstance));
+
+            } catch (ExecutionException e) {
+                throwable = e.getCause();
+            } catch (TimeoutException e) {
+                throwable = e;
+            }
+
+            if (throwable != null) {
+                state.addFailedStatelessDeployment(future);
+                throwFutureProcessingUnitInstanceException(throwable);
+            }
+        }
+         
+        cleanFailedFutureStatelessDeployments();
+    }
     /**
      * This method removes failed relocations from the list allowing a retry attempt to take place.
      * Some failures are removed immediately, while others stay in the list for
@@ -877,36 +913,24 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
             }
         }
     }
-    
-    private void cleanFutureStatelessDeployments() {
 
-        for (FutureStatelessProcessingUnitInstance future : state.removeDoneFutureStatelessDeployments(pu)) {
-                           
-            Exception exception = null;
-
-            try {
-                ProcessingUnitInstance puInstance = future.get();
-                logger.info("Processing unit instance deployment completed successfully "
-                        + RebalancingUtils.puInstanceToString(puInstance));
-
-            } catch (ExecutionException e) {
-                if (e.getCause() instanceof AdminException || 
-                    e.getCause() instanceof RebalancingSlaEnforcementInProgressException) {
-                    exception = (Exception) e.getCause();
-                } else {
-                    throw new IllegalStateException("Unexpected runtime exception", e);
-                }
-            } catch (TimeoutException e) {
-                exception = e;
-            }
-
-            if (exception != null) {
-                logger.info(future.getFailureMessage(), exception);
-                state.addFailedStatelessDeployment(future);
-            }
+    private void throwFutureProcessingUnitInstanceException(Throwable throwable) throws RebalancingSlaEnforcementInProgressException {
+        
+        if (throwable instanceof Error) {
+            throw (Error)throwable;
         }
-
-        cleanFailedFutureStatelessDeployments();
+        else if (throwable instanceof RebalancingSlaEnforcementInProgressException){
+            throw (RebalancingSlaEnforcementInProgressException)throwable;
+        }
+        else if (throwable instanceof AdminException) {
+            throw new FutureProcessingUnitInstanceDeploymentException(pu,(AdminException)throwable);
+        }
+        else if (throwable instanceof TimeoutException){
+            throw new FutureProcessingUnitInstanceDeploymentException(pu,(TimeoutException)throwable);
+        }
+        else {
+            throw new IllegalStateException("Unexpected exception type", throwable);
+        }
     }
     
     /**
@@ -925,6 +949,10 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
 
                 // do not remove future from list until timeout failure forget
                 // since something is very wrong with target container.
+                
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Ignoring failure to relocate stateless pu instance " + future.getProcessingUnit() + " Will try again in " + (DEPLOYMENT_TIMEOUT_FAILURE_FORGET_SECONDS- passedSeconds) + " seconds.",future.getException());
+                }
                 
             } else {
                 logger.info("Forgetting relocation error " + future.getFailureMessage());

@@ -104,8 +104,8 @@ class RebalancingSlaEnforcementState {
         futureStatefulDeploymentPerProcessingUnit.get(pu).add(futureInstance);
     }
 
-    public List<FutureStatefulProcessingUnitInstance> removeDoneFutureStatefulDeployments(ProcessingUnit pu) {
-        List<FutureStatefulProcessingUnitInstance> removed = new ArrayList<FutureStatefulProcessingUnitInstance>();
+    public FutureStatefulProcessingUnitInstance removeOneDoneFutureStatefulDeployments(ProcessingUnit pu) {
+        
         List<FutureStatefulProcessingUnitInstance> list = futureStatefulDeploymentPerProcessingUnit.get(pu);
         
         if (list == null) {
@@ -123,14 +123,13 @@ class RebalancingSlaEnforcementState {
                 }
                 
                 iterator.remove();
-                removed.add(future);
+                return future;
             }
         }
-        return removed;
+        return null;
     }
 
-    public List<FutureStatelessProcessingUnitInstance> removeDoneFutureStatelessDeployments(ProcessingUnit pu) {
-        List<FutureStatelessProcessingUnitInstance> removed = new ArrayList<FutureStatelessProcessingUnitInstance>();
+    public FutureStatelessProcessingUnitInstance removeOneDoneFutureStatelessDeployments(ProcessingUnit pu) {
         List<FutureStatelessProcessingUnitInstance> list = futureStatelessDeploymentPerProcessingUnit.get(pu);
         
         if (list == null) {
@@ -148,10 +147,10 @@ class RebalancingSlaEnforcementState {
                 }
                 
                 iterator.remove();
-                removed.add(future);
+                return future;
             }
         }
-        return removed;
+        return null;
     }
     
     public void addFailedStatefulDeployment(FutureStatefulProcessingUnitInstance future) {

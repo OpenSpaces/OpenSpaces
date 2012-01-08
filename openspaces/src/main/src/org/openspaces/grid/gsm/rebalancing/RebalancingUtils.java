@@ -166,7 +166,7 @@ public class RebalancingUtils {
                                    // this is an async operation 
                                    // pu.getNumberOfInstances() still shows the old value.
                                    pu.incrementInstance();
-                               } catch (Exception e) {
+                               } catch (Throwable e) {
                                    executionException.set(new ExecutionException(e));
                                }
                            }
@@ -228,7 +228,7 @@ public class RebalancingUtils {
             public void run() {
                 try {
                     puInstance.relocate(targetContainer);
-                } catch (Exception e) {
+                } catch (Throwable e) {
                     relocateException.set(new ExecutionException(e));
                 }
                 finally {
