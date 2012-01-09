@@ -14,10 +14,10 @@ import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpointAware;
 import org.openspaces.grid.gsm.machines.UndeployMachinesSlaPolicy;
 import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.machines.exceptions.MachinesSlaEnforcementInProgressException;
+import org.openspaces.grid.gsm.machines.exceptions.WaitingForDiscoveredMachinesException;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
 import org.openspaces.grid.gsm.rebalancing.exceptions.ElasticProcessingUnitInstanceUndeployInProgress;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementInProgressException;
-import org.openspaces.grid.gsm.strategy.ProvisionedMachinesCache.AgentsNotYetDiscoveredException;
 
 public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
 
@@ -74,20 +74,20 @@ public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
         enforceMachinesSla();
     }
 
-    private void enforceMachinesSla() throws AgentsNotYetDiscoveredException, MachinesSlaEnforcementInProgressException, GridServiceAgentSlaEnforcementInProgressException {
+    private void enforceMachinesSla() throws WaitingForDiscoveredMachinesException, MachinesSlaEnforcementInProgressException, GridServiceAgentSlaEnforcementInProgressException {
         
         if (getLogger().isDebugEnabled()) {
             getLogger().debug("Undeploying machines for " + getProcessingUnit().getName());
         }
         
-        final CapacityMachinesSlaPolicy sla = new UndeployMachinesSlaPolicy();
+        final CapacityMachinesSlaPolicy sla = new UndeployMachinesSlaPolicy(getAdmin());
         NonBlockingElasticMachineProvisioning machineProvisioning = super.getMachineProvisioning();
         sla.setMachineProvisioning(machineProvisioning);
         sla.setMaximumNumberOfMachines(getMaximumNumberOfInstances());
         sla.setMaximumNumberOfContainersPerMachine(getMaximumNumberOfInstances());
         sla.setContainerMemoryCapacityInMB(containersConfig.getMaximumMemoryCapacityInMB());
-        sla.setProvisionedAgents(getDiscoveredAgents());
         sla.setMachineIsolation(getIsolation());
+        sla.setDiscoveredMachinesCache(getDiscoveredMachinesCache());
         
         try {
             machinesEndpoint.enforceSla(sla);

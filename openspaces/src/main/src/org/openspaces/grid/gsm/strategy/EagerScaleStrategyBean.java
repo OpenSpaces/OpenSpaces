@@ -13,6 +13,8 @@ import org.openspaces.grid.gsm.containers.exceptions.ContainersSlaEnforcementPen
 import org.openspaces.grid.gsm.machines.EagerMachinesSlaPolicy;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpointAware;
+import org.openspaces.grid.gsm.machines.exceptions.WaitingForDiscoveredMachinesException;
+import org.openspaces.grid.gsm.machines.exceptions.FailedToDiscoverMachinesException;
 import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcementPendingContainerDeallocationException;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcementEndpoint;
@@ -20,7 +22,6 @@ import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcementEndpointAwar
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaPolicy;
 import org.openspaces.grid.gsm.rebalancing.exceptions.RebalancingSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementInProgressException;
-import org.openspaces.grid.gsm.strategy.ProvisionedMachinesCache.AgentsNotYetDiscoveredException;
 
 public class EagerScaleStrategyBean extends AbstractScaleStrategyBean 
 
@@ -100,14 +101,21 @@ public class EagerScaleStrategyBean extends AbstractScaleStrategyBean
         }
     }
 
-    private void enforceMachinesSla() throws AgentsNotYetDiscoveredException, GridServiceAgentSlaEnforcementInProgressException {
+    private void enforceMachinesSla() throws WaitingForDiscoveredMachinesException, GridServiceAgentSlaEnforcementInProgressException, FailedToDiscoverMachinesException {
         if (getLogger().isDebugEnabled()) {
             getLogger().debug("Enforcing machines SLA.");
         }
-        final EagerMachinesSlaPolicy sla = getEagerMachinesSlaPolicy();
+        
+        final EagerMachinesSlaPolicy sla = new EagerMachinesSlaPolicy();      
+        sla.setMaximumNumberOfMachines(getMaximumNumberOfInstances());
+        sla.setMinimumNumberOfMachines(getMinimumNumberOfMachines());
+        sla.setMaximumNumberOfContainersPerMachine(getMaximumNumberOfContainersPerMachine());
+        sla.setContainerMemoryCapacityInMB(containersConfig.getMaximumMemoryCapacityInMB());
+        sla.setMachineIsolation(getIsolation());
+        sla.setMachineProvisioning(super.getMachineProvisioning());
+        sla.setDiscoveredMachinesCache(getDiscoveredMachinesCache());
         
         try {
-            
             machinesEndpoint.enforceSla(sla);
             
             machineProvisioningCompletedEvent();
@@ -173,18 +181,6 @@ public class EagerScaleStrategyBean extends AbstractScaleStrategyBean
         }
     }
     
-    private EagerMachinesSlaPolicy getEagerMachinesSlaPolicy() throws AgentsNotYetDiscoveredException {
-        final EagerMachinesSlaPolicy sla = new EagerMachinesSlaPolicy();      
-        sla.setMaximumNumberOfMachines(getMaximumNumberOfInstances());
-        sla.setMinimumNumberOfMachines(getMinimumNumberOfMachines());
-        sla.setMaximumNumberOfContainersPerMachine(getMaximumNumberOfContainersPerMachine());
-        sla.setContainerMemoryCapacityInMB(containersConfig.getMaximumMemoryCapacityInMB());
-        sla.setProvisionedAgents(getDiscoveredAgents());
-        sla.setMachineIsolation(getIsolation());
-        sla.setMachineProvisioning(super.getMachineProvisioning());
-        return sla;
-    }
-
     public EagerScaleConfig getConfig() {
         return slaConfig;
     }

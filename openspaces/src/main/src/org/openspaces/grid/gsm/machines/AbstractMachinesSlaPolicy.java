@@ -1,12 +1,10 @@
 package org.openspaces.grid.gsm.machines;
 
-import java.util.Collection;
-
-import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIsolation;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementPolicy;
+import org.openspaces.grid.gsm.strategy.DiscoveredMachinesCache;
 
 public abstract class AbstractMachinesSlaPolicy extends ServiceLevelAgreementPolicy{
 
@@ -15,10 +13,17 @@ public abstract class AbstractMachinesSlaPolicy extends ServiceLevelAgreementPol
     private long containerMemoryCapacityInMB;
     private NonBlockingElasticMachineProvisioning machineProvisioning;
     private ElasticProcessingUnitMachineIsolation machineIsolation;
-    
-    private Collection<GridServiceAgent> agents;
     private int maxNumberOfContainersPerMachine;
+    private DiscoveredMachinesCache machinesCache;
     
+    public DiscoveredMachinesCache getDiscoveredMachinesCache() {
+        return this.machinesCache;
+    }
+    
+    public void setDiscoveredMachinesCache(DiscoveredMachinesCache machinesCache) {
+        this.machinesCache = machinesCache;
+    }
+
     public int getMinimumNumberOfMachines() {
         return minimumNumberOfMachines;
     }
@@ -39,14 +44,6 @@ public abstract class AbstractMachinesSlaPolicy extends ServiceLevelAgreementPol
         return this.containerMemoryCapacityInMB;
     }
 
-    public Collection<GridServiceAgent> getProvisionedAgents() {
-        return this.agents;
-    }
-    
-    public void setProvisionedAgents(Collection<GridServiceAgent> agents) {
-        this.agents = agents;
-    }
-    
     public NonBlockingElasticMachineProvisioning getMachineProvisioning() {
         return this.machineProvisioning;
     }
@@ -98,7 +95,7 @@ public abstract class AbstractMachinesSlaPolicy extends ServiceLevelAgreementPol
         ((AbstractMachinesSlaPolicy)other).maxNumberOfMachines == maxNumberOfMachines &&
         ((AbstractMachinesSlaPolicy)other).maxNumberOfContainersPerMachine == this.maxNumberOfContainersPerMachine &&
         ((AbstractMachinesSlaPolicy)other).isStopMachineSupported() == isStopMachineSupported() &&
-        ((AbstractMachinesSlaPolicy)other).agents.equals(agents);
+        ((AbstractMachinesSlaPolicy)other).machinesCache.equals(machinesCache);
     }
 
     public abstract boolean isStopMachineSupported();

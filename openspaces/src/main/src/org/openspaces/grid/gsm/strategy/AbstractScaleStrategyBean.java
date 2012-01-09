@@ -1,6 +1,5 @@
 package org.openspaces.grid.gsm.strategy;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -10,7 +9,6 @@ import org.apache.commons.logging.LogFactory;
 import org.jini.rio.monitor.event.EventsStore;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.bean.BeanConfigurationException;
-import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.gsa.events.DefaultElasticGridServiceAgentProvisioningFailureEvent;
 import org.openspaces.admin.internal.gsa.events.DefaultElasticGridServiceAgentProvisioningProgressChangedEvent;
@@ -42,6 +40,7 @@ import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIs
 import org.openspaces.grid.gsm.machines.isolation.SharedMachineIsolation;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
 import org.openspaces.grid.gsm.rebalancing.exceptions.RebalancingSlaEnforcementInProgressException;
+import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementInProgressException;
 
 public abstract class AbstractScaleStrategyBean implements 
@@ -69,7 +68,7 @@ public abstract class AbstractScaleStrategyBean implements
     private ScheduledFuture<?> scheduledTask;
         
     // state
-    private ProvisionedMachinesCache provisionedMachines;
+    private ElasticMachineProvisioningDiscoveredMachinesCache provisionedMachines;
     private boolean isScaleInProgress;
 
     // events state 
@@ -80,8 +79,6 @@ public abstract class AbstractScaleStrategyBean implements
     private ScaleStrategyProgressEventState scaleEventState;
     
     private EventsStore eventStorage;
-
-    private boolean firstInProgressEvent;
     
     protected InternalAdmin getAdmin() {
         return this.admin;
@@ -201,7 +198,7 @@ public abstract class AbstractScaleStrategyBean implements
         scaleEventState = new ScaleStrategyProgressEventState(eventStorage, isUndeploying(), pu.getName(), DefaultElasticProcessingUnitScaleProgressChangedEvent.class);
         
         minimumNumberOfMachines = calcMinimumNumberOfMachines();
-        provisionedMachines = new ProvisionedMachinesCache(pu,machineProvisioning, getPollingIntervalSeconds());
+        provisionedMachines = new ElasticMachineProvisioningDiscoveredMachinesCache(pu,machineProvisioning, getPollingIntervalSeconds());
         
         isScaleInProgress = true;
         
@@ -230,9 +227,8 @@ public abstract class AbstractScaleStrategyBean implements
         this.properties = new StringProperties(properties);
     }
 
-    protected Collection<GridServiceAgent> getDiscoveredAgents() throws org.openspaces.grid.gsm.strategy.ProvisionedMachinesCache.AgentsNotYetDiscoveredException {
-
-        return provisionedMachines.getDiscoveredAgents();
+    protected DiscoveredMachinesCache getDiscoveredMachinesCache() {
+        return provisionedMachines;
     }
        
     private int calcMinimumNumberOfMachines() {
@@ -289,11 +285,6 @@ public abstract class AbstractScaleStrategyBean implements
     @Override
     public void run() {
 
-        if (!firstInProgressEvent) {
-            scaleEventState.enqueuProvisioningInProgressEvent();
-            firstInProgressEvent = true;
-        }
-        
         try {
             if (getLogger().isDebugEnabled()) {
                 getLogger().debug("enforcing SLA.");
@@ -308,7 +299,10 @@ public abstract class AbstractScaleStrategyBean implements
             scaleEventState.enqueuProvisioningCompletedEvent();
         }
         catch (SlaEnforcementInProgressException e) {
-            if (getLogger().isDebugEnabled()) {
+            if (e instanceof SlaEnforcementFailure) {
+                getLogger().warn("SLA has not been reached",e);
+            }
+            else if (getLogger().isDebugEnabled()) {
                 getLogger().debug("SLA has not been reached",e);
             }
             // we do not pass the exception into the event since there are other fine grained events that report failures.
@@ -316,6 +310,7 @@ public abstract class AbstractScaleStrategyBean implements
         }
         catch (Throwable e) {
             getLogger().error("Unhandled Exception",e);
+            scaleEventState.enqueuProvisioningInProgressEvent();
         }
     }
 

@@ -19,6 +19,7 @@ import org.openspaces.grid.gsm.containers.exceptions.ContainersSlaEnforcementPen
 import org.openspaces.grid.gsm.machines.CapacityMachinesSlaPolicy;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpointAware;
+import org.openspaces.grid.gsm.machines.exceptions.WaitingForDiscoveredMachinesException;
 import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcementPendingContainerDeallocationException;
 import org.openspaces.grid.gsm.machines.exceptions.MachinesSlaEnforcementInProgressException;
@@ -27,7 +28,6 @@ import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcementEndpointAwar
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaPolicy;
 import org.openspaces.grid.gsm.rebalancing.exceptions.RebalancingSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementInProgressException;
-import org.openspaces.grid.gsm.strategy.ProvisionedMachinesCache.AgentsNotYetDiscoveredException;
 
 public class ManualCapacityScaleStrategyBean extends AbstractScaleStrategyBean 
     implements RebalancingSlaEnforcementEndpointAware , 
@@ -232,7 +232,7 @@ public class ManualCapacityScaleStrategyBean extends AbstractScaleStrategyBean
 
 
     private void enforceMachinesSla() 
-            throws AgentsNotYetDiscoveredException, 
+            throws WaitingForDiscoveredMachinesException, 
                    MachinesSlaEnforcementInProgressException , GridServiceAgentSlaEnforcementInProgressException{
         
         if (getLogger().isDebugEnabled()) {
@@ -255,11 +255,10 @@ public class ManualCapacityScaleStrategyBean extends AbstractScaleStrategyBean
         sla.setMaximumNumberOfContainersPerMachine(getMaximumNumberOfContainersPerMachine());
         sla.setContainerMemoryCapacityInMB(containersConfig.getMaximumMemoryCapacityInMB());
         sla.setMachineIsolation(getIsolation());
+        sla.setDiscoveredMachinesCache(getDiscoveredMachinesCache());
         
         try {
-            sla.setProvisionedAgents(getDiscoveredAgents());
             machinesEndpoint.enforceSla(sla);
-            
             machineProvisioningCompletedEvent();
             agentProvisioningCompletedEvent();
         }

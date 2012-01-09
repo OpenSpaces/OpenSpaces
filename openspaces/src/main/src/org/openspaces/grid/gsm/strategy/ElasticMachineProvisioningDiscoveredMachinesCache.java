@@ -11,6 +11,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openspaces.admin.AdminException;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsa.events.GridServiceAgentAddedEventListener;
 import org.openspaces.admin.gsa.events.GridServiceAgentRemovedEventListener;
@@ -20,11 +21,14 @@ import org.openspaces.grid.gsm.LogPerProcessingUnit;
 import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.machines.FutureGridServiceAgents;
 import org.openspaces.grid.gsm.machines.MachinesSlaUtils;
+import org.openspaces.grid.gsm.machines.exceptions.WaitingForDiscoveredMachinesException;
+import org.openspaces.grid.gsm.machines.exceptions.FailedToDiscoverMachinesException;
+import org.openspaces.grid.gsm.machines.plugins.ElasticMachineProvisioningException;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
-import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementInProgressException;
 
 
-public class ProvisionedMachinesCache implements 
+public class ElasticMachineProvisioningDiscoveredMachinesCache implements 
+    DiscoveredMachinesCache,
     GridServiceAgentAddedEventListener, 
     GridServiceAgentRemovedEventListener , 
     Runnable{
@@ -48,7 +52,7 @@ public class ProvisionedMachinesCache implements
     private FutureGridServiceAgents futureAgents;
     
 
-    public ProvisionedMachinesCache(ProcessingUnit pu, NonBlockingElasticMachineProvisioning machineProvisioning,long pollingIntervalSeconds) {
+    public ElasticMachineProvisioningDiscoveredMachinesCache(ProcessingUnit pu, NonBlockingElasticMachineProvisioning machineProvisioning,long pollingIntervalSeconds) {
         
         this.pu = pu;
         
@@ -86,11 +90,12 @@ public class ProvisionedMachinesCache implements
         admin.getGridServiceAgents().getGridServiceAgentRemoved().remove(this);
        
     }
-    protected Collection<GridServiceAgent> getDiscoveredAgents() throws AgentsNotYetDiscoveredException {
+    
+    public Collection<GridServiceAgent> getDiscoveredAgents() throws WaitingForDiscoveredMachinesException, FailedToDiscoverMachinesException {
         
         if (futureAgents == null || !futureAgents.isDone()) {
-            throw new AgentsNotYetDiscoveredException(
-                    "Need to wait until retrieved list of machines from " + machineProvisioning.getClass() );
+            throw new WaitingForDiscoveredMachinesException(
+                    "Need to wait until retrieved list of machines.");
         }
         
         Set<GridServiceAgent> filteredAgents = new HashSet<GridServiceAgent>(); 
@@ -120,9 +125,22 @@ public class ProvisionedMachinesCache implements
             }
             return sortedFilteredAgents;
         } catch (ExecutionException e) {
-            throw new AgentsNotYetDiscoveredException("Failed retrieving list of machines from " + machineProvisioning.getClass() , e);
+            Throwable cause = e.getCause();
+            if (cause instanceof Error) {
+                throw (Error)cause;
+            }
+            
+            if (cause instanceof ElasticMachineProvisioningException) {
+                throw new FailedToDiscoverMachinesException(pu, e);
+            }
+            
+            if (cause instanceof AdminException) {
+                throw new FailedToDiscoverMachinesException(pu, e);
+            }
+            throw new IllegalStateException("Unexpected exception type",e);
+            
         } catch (TimeoutException e) {
-            throw new AgentsNotYetDiscoveredException("Failed retrieving list of machines from " + machineProvisioning.getClass(), e);
+            throw new FailedToDiscoverMachinesException(pu, e);
         }
     }
     
@@ -151,14 +169,18 @@ public class ProvisionedMachinesCache implements
     
         if (syncAgents) {
             syncAgents = false;
-            logger.debug("Retrieving list of provisioned machines");
+            if (logger.isDebugEnabled()) {
+                logger.debug("Retrieving list of provisioned machines");
+            }
             futureAgents = machineProvisioning.getDiscoveredMachinesAsync(GET_DISCOVERED_MACHINES_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         }
         
         if (futureAgents != null &&  futureAgents.getException() != null) {
             
-            logger.error("Failed retrieving list of machines from " + machineProvisioning.getClass() + ". " +
-                         "Retrying in " + GET_DISCOVERED_MACHINES_RETRY_SECONDS + " seconds.", futureAgents.getException());
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed retrieving list of machines. " +
+                             "Retrying in " + GET_DISCOVERED_MACHINES_RETRY_SECONDS + " seconds.", futureAgents.getException());
+            }
             
             admin.scheduleOneTimeWithDelayNonBlockingStateChange(new Runnable() {
     
@@ -167,15 +189,5 @@ public class ProvisionedMachinesCache implements
                 }},
                 GET_DISCOVERED_MACHINES_RETRY_SECONDS, TimeUnit.SECONDS);
         }
-    }
-    
-    static class AgentsNotYetDiscoveredException extends SlaEnforcementInProgressException {
-        private static final long serialVersionUID = 1L; 
-        public AgentsNotYetDiscoveredException(String message, Exception inner) {
-            super(message,inner);
-        }
-        public AgentsNotYetDiscoveredException(String message) {
-            super(message);
-        }   
     }
 }

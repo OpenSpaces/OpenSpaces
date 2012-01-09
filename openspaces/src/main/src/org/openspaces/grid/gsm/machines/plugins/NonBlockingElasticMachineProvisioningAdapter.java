@@ -11,12 +11,14 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.gsa.GridServiceAgent;
+import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig;
 import org.openspaces.grid.gsm.capacity.CapacityRequirement;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.NumberOfMachinesCapacityRequirement;
 import org.openspaces.grid.gsm.machines.FutureGridServiceAgent;
 import org.openspaces.grid.gsm.machines.FutureGridServiceAgents;
+import org.openspaces.grid.gsm.machines.exceptions.NoClassDefFoundElasticMachineProvisioningException;
 
 /**
  * An adapter that wraps an {@link ElasticMachineProvisioning} and exposes a {@link NonBlockingElasticMachineProvisioning}
@@ -28,19 +30,23 @@ import org.openspaces.grid.gsm.machines.FutureGridServiceAgents;
  */
 public class NonBlockingElasticMachineProvisioningAdapter implements NonBlockingElasticMachineProvisioning {
 
-	private ElasticMachineProvisioning machineProvisioning;
+
+    private ElasticMachineProvisioning machineProvisioning;
 
     private final ExecutorService executorService;
 
     private final ScheduledThreadPoolExecutor scheduledExecutorService;
+
+    private final ProcessingUnit pu;
 
 	private static final Log logger = LogFactory
 			.getLog(NonBlockingElasticMachineProvisioningAdapter.class);
 
     private static final int THROTTLING_DELAY_SECONDS = 10;
     
-	public NonBlockingElasticMachineProvisioningAdapter(ElasticMachineProvisioning machineProvisioning, ExecutorService executorService, ScheduledThreadPoolExecutor scheduledExecutorService) {
-		this.machineProvisioning = machineProvisioning;
+	public NonBlockingElasticMachineProvisioningAdapter(ProcessingUnit pu, ElasticMachineProvisioning machineProvisioning, ExecutorService executorService, ScheduledThreadPoolExecutor scheduledExecutorService) {
+		this.pu = pu;
+	    this.machineProvisioning = machineProvisioning;
 		this.executorService = executorService;
 		this.scheduledExecutorService = scheduledExecutorService;
 	}
@@ -66,17 +72,21 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
     		submit(new Runnable() {
     			public void run() {
     				try {
-   			            logger.info("{THID="+Thread.currentThread().getId() + "} Starting a new machine");
+   			            logger.info("Starting a new machine");
     					GridServiceAgent agent = machineProvisioning.startMachine(duration, unit);
     					ref.set(agent);
-    					logger.info("{THID="+Thread.currentThread().getId() + "} New machine started");
+    					logger.info("New machine started");
     				} catch (ElasticMachineProvisioningException e) {
-    					ref.set(new ExecutionException(e));
+    					ref.set(e);
     				} catch (InterruptedException e) {
-    					ref.set(new ExecutionException(e));
-    				} catch (Exception e) {
-    					logger.error("Unexpected exception", e);
-    					ref.set(new ExecutionException("Unexpected exception when starting machine", e));
+    					ref.set(e);
+    				} catch (TimeoutException e) {
+                        ref.set(e);
+    				} catch (NoClassDefFoundError e) {
+                        ref.set((new NoClassDefFoundElasticMachineProvisioningException(pu,e)));
+    				} catch (Throwable e) {
+    					logger.error("Unexpected exception:" + e.getMessage(), e);
+    					ref.set(e);
     				}
     			}
     
@@ -90,8 +100,8 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
     			
     			public ExecutionException getException() {
     				Object result = ref.get();
-    				if (result != null && result instanceof ExecutionException) {
-    					return (ExecutionException) result;
+    				if (result != null && result instanceof Throwable) {
+    					return new ExecutionException((Throwable)result);
     				}
     				return null;
     			}
@@ -99,10 +109,7 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
     			public boolean isTimedOut() {
     				Object result = ref.get();
     				return System.currentTimeMillis() > end || 
-    					   (result != null && 
-    					    result instanceof ExecutionException && 
-    					    ((ExecutionException)result).getCause() != null && 
-    					    ((ExecutionException)result).getCause() instanceof TimeoutException);
+    					   (result != null && result instanceof TimeoutException);
     			}
     
     
@@ -127,17 +134,11 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
     							"Async operation is not done yet.");
     				}
     
-    			    if (result instanceof ExecutionException) {
-                        throw ((ExecutionException) result);
-                    }
-    			    
-    				if (result instanceof Exception) {
-    					throw new ExecutionException((Exception) result);
-    				}
+    			    if (getException() != null) {
+    			        throw getException();
+    			    }
     
-    				GridServiceAgent agent = (GridServiceAgent) result;
-    
-    				return agent;
+    				return (GridServiceAgent) result;
     			}
     			
                 public NonBlockingElasticMachineProvisioning getMachineProvisioning() {
@@ -165,9 +166,9 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
 			public void run() {
 				try {
 				    
-		            logger.info("{THID="+Thread.currentThread().getId() + "} Stopping machine " + hostAddress);
+		            logger.info("Stopping machine " + hostAddress);
 			    	if (NonBlockingElasticMachineProvisioningAdapter.this.machineProvisioning.stopMachine(agent, duration, unit)) {
-					    logger.info("{THID="+Thread.currentThread().getId() + "} machine " + hostAddress + " succesfully stopped.");
+					    logger.info("machine " + hostAddress + " succesfully stopped.");
 					}
 				} catch (ElasticMachineProvisioningException e) {
 					logger.warn("Error while stopping " + hostAddress,e);
@@ -204,12 +205,16 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
                     GridServiceAgent[] agents = machineProvisioning.getDiscoveredMachines(duration, unit);
                     ref.set(agents);
                 } catch (ElasticMachineProvisioningException e) {
-                    ref.set(new ExecutionException(e));
+                    ref.set(e);
                 } catch (InterruptedException e) {
-                    ref.set(new ExecutionException(e));
-                } catch (Exception e) {
+                    ref.set(e);
+                } catch (TimeoutException e) {
+                    ref.set(e);
+                } catch (NoClassDefFoundError e) {
+                    ref.set((new NoClassDefFoundElasticMachineProvisioningException(pu, e)));
+                } catch (Throwable e) {
                     logger.error("Unexpected exception", e);
-                    ref.set(new ExecutionException("Unexpected exception",e));
+                    ref.set(e);
                 }
             }
 
@@ -223,8 +228,8 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
             
             public ExecutionException getException() {
                 Object result = ref.get();
-                if (result != null && result instanceof ExecutionException) {
-                    return (ExecutionException) result;
+                if (result != null && result instanceof Throwable) {
+                    return new ExecutionException((Throwable)result);
                 }
                 return null;
             }
@@ -233,9 +238,7 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
                 Object result = ref.get();
                 return System.currentTimeMillis() > end || 
                        (result != null && 
-                        result instanceof ExecutionException && 
-                        ((ExecutionException)result).getCause() != null && 
-                        ((ExecutionException)result).getCause() instanceof TimeoutException);
+                        result instanceof TimeoutException);
             }
 
 
@@ -260,11 +263,12 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
                             "Async operation is not done yet.");
                 }
 
-                if (result instanceof Exception) {
-                    throw new ExecutionException((Exception) result);
+                if (getException() != null) {
+                    throw getException();
                 }
-
+                
                 return (GridServiceAgent[]) result;
+                
             }
         };
     }

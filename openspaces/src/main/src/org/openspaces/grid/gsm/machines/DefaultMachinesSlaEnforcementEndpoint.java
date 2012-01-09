@@ -26,15 +26,17 @@ import org.openspaces.grid.gsm.capacity.MemoryCapacityRequirement;
 import org.openspaces.grid.gsm.capacity.NumberOfMachinesCapacityRequirement;
 import org.openspaces.grid.gsm.containers.ContainersSlaUtils;
 import org.openspaces.grid.gsm.machines.exceptions.CannotDetermineIfNeedToStartMoreMachinesException;
+import org.openspaces.grid.gsm.machines.exceptions.FailedToDiscoverMachinesException;
 import org.openspaces.grid.gsm.machines.exceptions.FailedToStartNewMachineException;
 import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcementInProgressException;
+import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcementPendingContainerDeallocationException;
 import org.openspaces.grid.gsm.machines.exceptions.InconsistentMachineProvisioningException;
 import org.openspaces.grid.gsm.machines.exceptions.MachinesSlaEnforcementInProgressException;
-import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcementPendingContainerDeallocationException;
 import org.openspaces.grid.gsm.machines.exceptions.NeedToStartMoreGridServiceAgentsException;
 import org.openspaces.grid.gsm.machines.exceptions.SomeProcessingUnitsHaveNotCompletedStateRecoveryException;
 import org.openspaces.grid.gsm.machines.exceptions.StartedTooManyMachinesException;
 import org.openspaces.grid.gsm.machines.exceptions.UnexpectedShutdownOfNewGridServiceAgentException;
+import org.openspaces.grid.gsm.machines.exceptions.WaitingForDiscoveredMachinesException;
 import org.openspaces.grid.gsm.machines.plugins.ElasticMachineProvisioningException;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
 
@@ -107,8 +109,9 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         state.setMachineIsolation(pu, sla.getMachineIsolation());
     
         recoverStateAfterRestart(sla);
-                
+        
         validateProvisionedMachines(sla);
+        
         enforceSlaInternal(sla);
             
     }
@@ -159,11 +162,15 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             state.completedStateRecovery(pu);
         }
         
-        List<ProcessingUnit> pusNotCompletedStateRecovery = 
-                state.getAllProcessingUnitsNotCompletedStateRecovery(pu.getAdmin());
-        
-        if (!pusNotCompletedStateRecovery.isEmpty()) {
-            throw new SomeProcessingUnitsHaveNotCompletedStateRecoveryException(pusNotCompletedStateRecovery);
+        if (!sla.isUndeploying()) {
+            // if we are not undeploying, we need to make sure the other PUs have updated their state, so their won't be race condition
+            // on allocating discovered agents.
+            List<ProcessingUnit> pusNotCompletedStateRecovery = 
+                    state.getAllProcessingUnitsNotCompletedStateRecovery(pu.getAdmin());
+            
+            if (!pusNotCompletedStateRecovery.isEmpty()) {
+                throw new SomeProcessingUnitsHaveNotCompletedStateRecoveryException(pusNotCompletedStateRecovery);
+            }
         }
     }
 
@@ -174,10 +181,13 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
      * We added this method since in such condition the code behaves unexpectedly (all machines are unallocated automatically, and then some other pu tries to allocate them once the cloud is back online).
      * @param sla
      * @throws InconsistentMachineProvisioningException 
+     * @throws FailedToDiscoverMachinesException 
+     * @throws WaitingForDiscoveredMachinesException 
      */
-    private void validateProvisionedMachines(AbstractMachinesSlaPolicy sla) throws InconsistentMachineProvisioningException {
+    private void validateProvisionedMachines(AbstractMachinesSlaPolicy sla) throws GridServiceAgentSlaEnforcementInProgressException, MachinesSlaEnforcementInProgressException  {
 
-        Collection<GridServiceAgent> discoveredAgents =sla.getProvisionedAgents();
+        // if sla is undeploying that we want to continue no matter what. No much harm could be done.
+        Collection<GridServiceAgent> discoveredAgents =sla.getDiscoveredMachinesCache().getDiscoveredAgents();
         Collection<GridServiceAgent> undiscoveredAgents = new HashSet<GridServiceAgent>();
         for(GridServiceAgent agent : MachinesSlaUtils.convertAgentUidsToAgentsIfDiscovered(state.getAllocatedCapacity(pu).getAgentUids(),pu.getAdmin())) {
            
@@ -223,7 +233,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                     sla.getMaximumNumberOfMachines()+")");
         }
         
-        if (sla.getProvisionedAgents() == null) {
+        if (sla.getDiscoveredMachinesCache() == null) {
             throw new IllegalArgumentException("Provisioned agents cannot be null");
         }
     }
@@ -238,8 +248,13 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         state.setMachineIsolation(pu, sla.getMachineIsolation());
         
         recoverStateAfterRestart(sla);
-                
-        validateProvisionedMachines(sla);
+        
+        try {
+            validateProvisionedMachines(sla);
+        } catch (MachinesSlaEnforcementInProgressException e) {
+            logger.warn("Ignoring failure to related to new machines, since now in eager mode", e);
+        }
+        
         enforceSlaInternal(sla);
     }
 
@@ -248,19 +263,19 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         
         try {
             updateFutureAgentsState(sla);
-        } catch (FailedToStartNewMachineException e) {
-            logger.warn("Ignoring failure to start new machine, since now in eager mode", e);
-        } catch (StartedTooManyMachinesException e) {
-            logger.warn("Ignoring failure that caused too many machines to start, since now in eager mode", e);
+
+            updateFailedAndUnprovisionedMachinesState(sla);
+            updateAgentsMarkedForDeallocationState(sla);
+            
+            unmarkAgentsMarkedForDeallocationToSatisfyMinimumNumberOfMachines(sla);
+        
+            //Eager scale out: allocate as many machines and as many CPU as possible
+            allocateEagerCapacity(sla);
+    
+        } catch (MachinesSlaEnforcementInProgressException e) {
+            logger.warn("Ignoring failure to related to new machines, since now in eager mode", e);
         }
-        updateFailedAndUnprovisionedMachinesState(sla);
-        updateAgentsMarkedForDeallocationState(sla);
         
-        unmarkAgentsMarkedForDeallocationToSatisfyMinimumNumberOfMachines(sla);
-        
-        //Eager scale out: allocate as many machines and as many CPU as possible
-        allocateEagerCapacity(sla);
-                
         int machineShortage = getMachineShortageInOrderToReachMinimumNumberOfMachines(sla);
         if (machineShortage > 0) {
             CapacityRequirements capacityRequirements = new CapacityRequirements(
@@ -713,19 +728,22 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
      * @throws UnexpectedShutdownOfNewGridServiceAgentException 
      * @throws FailedToStartNewMachineException 
      * @throws StartedTooManyMachinesException 
+     * @throws FailedToDiscoverMachinesException 
+     * @throws WaitingForDiscoveredMachinesException 
      */
-    private void updateFutureAgentsState(AbstractMachinesSlaPolicy sla) throws InconsistentMachineProvisioningException, FailedToStartNewMachineException, UnexpectedShutdownOfNewGridServiceAgentException, StartedTooManyMachinesException  {
+    private void updateFutureAgentsState(AbstractMachinesSlaPolicy sla) throws GridServiceAgentSlaEnforcementInProgressException, MachinesSlaEnforcementInProgressException  {
        
         // each futureAgents object contains an array of FutureGridServiceAgent
         // only when all future in the array is done, the futureAgents object is done.
         Collection<GridServiceAgentFutures> doneFutureAgentss = state.getAllDoneFutureAgents(pu);
+        Collection<GridServiceAgent> provisionedAgents = sla.getDiscoveredMachinesCache().getDiscoveredAgents();
         
         for (GridServiceAgentFutures doneFutureAgents : doneFutureAgentss) {
             
             for (FutureGridServiceAgent doneFutureAgent : doneFutureAgents.getFutureGridServiceAgents()) {
                 try {
                     validateHealthyAgent(
-                            sla.getProvisionedAgents(), 
+                            provisionedAgents, 
                             sla.getMachineProvisioning(),
                             doneFutureAgent);
                 }
@@ -764,7 +782,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                     logger.info("Agents that were started by " + 
                             "machineProvisioning class=" + sla.getMachineProvisioning().getClass() + " " +
                             "new agents: " + MachinesSlaUtils.machinesToString(healthyAgents) + " " +
-                            "provisioned agents:" + MachinesSlaUtils.machinesToString(sla.getProvisionedAgents()));
+                            "provisioned agents:" + MachinesSlaUtils.machinesToString(provisionedAgents));
                 }
                 ClusterCapacityRequirements unallocatedCapacity = 
                     getUnallocatedCapacityIncludeNewMachines(sla, healthyAgents);
@@ -816,7 +834,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                     StartedTooManyMachinesException tooManyMachinesExceptions = new StartedTooManyMachinesException(pu,unallocatedAgents);
                     logger.warn(
                             "Stopping machines " + MachinesSlaUtils.machinesToString(unallocatedAgents) + " "+
-                            "Agents provisioned by cloud: " + MachinesSlaUtils.machinesToString(sla.getProvisionedAgents()), 
+                            "Agents provisioned by cloud: " + provisionedAgents, 
                             tooManyMachinesExceptions);
                     for (GridServiceAgent unallocatedAgent : unallocatedAgents) {
                         stopMachine(sla.getMachineProvisioning(), unallocatedAgent);
@@ -830,7 +848,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
 
     private ClusterCapacityRequirements getUnallocatedCapacityIncludeNewMachines(
             AbstractMachinesSlaPolicy sla,
-            Collection<GridServiceAgent> newMachines ) {
+            Collection<GridServiceAgent> newMachines ) throws MachinesSlaEnforcementInProgressException {
         // unallocated capacity = unallocated capacity + new machines
         ClusterCapacityRequirements unallocatedCapacity = getUnallocatedCapacity(sla);
         for (GridServiceAgent newAgent : newMachines) {
@@ -868,7 +886,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
     private void validateHealthyAgent(
             Collection<GridServiceAgent> provisionedAgents, 
             NonBlockingElasticMachineProvisioning machineProvisioning,
-            FutureGridServiceAgent futureAgent) throws FailedToStartNewMachineException, UnexpectedShutdownOfNewGridServiceAgentException, InconsistentMachineProvisioningException {
+            FutureGridServiceAgent futureAgent) throws FailedToStartNewMachineException, UnexpectedShutdownOfNewGridServiceAgentException, InconsistentMachineProvisioningException  {
 
         //TODO: raise exception in addition to logging the error !!
         final Collection<String> usedAgentUids = state.getAllUsedAgentUids();
@@ -961,8 +979,10 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
 
     /**
      * Eagerly allocates all unallocated capacity that match the specified SLA
+     * @throws FailedToDiscoverMachinesException 
+     * @throws WaitingForDiscoveredMachinesException 
      */
-    private void allocateEagerCapacity(AbstractMachinesSlaPolicy sla) {
+    private void allocateEagerCapacity(AbstractMachinesSlaPolicy sla) throws MachinesSlaEnforcementInProgressException {
         
         ClusterCapacityRequirements unallocatedCapacity = getUnallocatedCapacity(sla);
         
@@ -1009,8 +1029,9 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
     
     /**
      * Allocates the specified capacity on unallocated capacity that match the specified SLA
+     * @throws MachinesSlaEnforcementInProgressException 
      */
-    private void allocateManualCapacity(CapacityRequirements capacityToAllocate, AbstractMachinesSlaPolicy sla) {
+    private void allocateManualCapacity(CapacityRequirements capacityToAllocate, AbstractMachinesSlaPolicy sla) throws MachinesSlaEnforcementInProgressException {
         ClusterCapacityRequirements unallocatedCapacity = getUnallocatedCapacity(sla);
         allocateManualCapacity(sla, capacityToAllocate, unallocatedCapacity);
     }
@@ -1034,7 +1055,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         markCapacityForDeallocation(solver.getDeallocatedCapacityResult());                    
     }
 
-    private void deallocateManualCapacity(AbstractMachinesSlaPolicy sla, CapacityRequirements capacityToDeallocate) {
+    private void deallocateManualCapacity(AbstractMachinesSlaPolicy sla, CapacityRequirements capacityToDeallocate) throws MachinesSlaEnforcementInProgressException {
         ClusterCapacityRequirements unallocatedCapacity = getUnallocatedCapacity(sla);
         final BinPackingSolver solver = createBinPackingSolver(sla , unallocatedCapacity);
         
@@ -1062,7 +1083,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         }
     }
 
-    private void allocateNumberOfMachines(int numberOfFreeAgents, AbstractMachinesSlaPolicy sla) {
+    private void allocateNumberOfMachines(int numberOfFreeAgents, AbstractMachinesSlaPolicy sla) throws MachinesSlaEnforcementInProgressException {
         ClusterCapacityRequirements unallocatedCapacity = getUnallocatedCapacity(sla);
         allocateNumberOfMachines(numberOfFreeAgents, sla, unallocatedCapacity);
     }
@@ -1128,8 +1149,9 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
     /**
      * Calculates the total unused capacity (memory / CPU) on machines (that some of its capacity is already allocated by some PU). 
      * Returns only machines that match the specified SLA.
+     * @throws MachinesSlaEnforcementInProgressException 
      */
-    private ClusterCapacityRequirements getUnallocatedCapacity(AbstractMachinesSlaPolicy sla) {
+    private ClusterCapacityRequirements getUnallocatedCapacity(AbstractMachinesSlaPolicy sla) throws MachinesSlaEnforcementInProgressException {
         
         ClusterCapacityRequirements physicalCapacity = getPhysicalProvisionedCapacity(sla);
         ClusterCapacityRequirements usedCapacity = state.getAllUsedCapacity();
@@ -1159,10 +1181,11 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
 
     /**
      * Calculates the total maximum capacity (memory/CPU) on all sla.getProvisionedAgents()
+     * @throws MachinesSlaEnforcementInProgressException 
      */
-    private ClusterCapacityRequirements getPhysicalProvisionedCapacity(AbstractMachinesSlaPolicy sla) {
+    private ClusterCapacityRequirements getPhysicalProvisionedCapacity(AbstractMachinesSlaPolicy sla) throws MachinesSlaEnforcementInProgressException {
         ClusterCapacityRequirements totalCapacity = new ClusterCapacityRequirements(); 
-        for (final GridServiceAgent agent: sla.getProvisionedAgents()) {
+        for (final GridServiceAgent agent: sla.getDiscoveredMachinesCache().getDiscoveredAgents()) {
             if (agent.isDiscovered()) {
                 
                 totalCapacity = totalCapacity.add(

@@ -9,5 +9,9 @@ public class GridServiceAgentSlaEnforcementInProgressException extends SlaEnforc
     public GridServiceAgentSlaEnforcementInProgressException(String message) {
         super(message);
     }
+    
+    public GridServiceAgentSlaEnforcementInProgressException(String message, Exception cause) {
+        super(message,cause);
+    }
 
 }
