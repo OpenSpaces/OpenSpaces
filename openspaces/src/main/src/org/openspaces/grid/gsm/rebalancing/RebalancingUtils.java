@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.logging.Log;
 import org.openspaces.admin.Admin;
+import org.openspaces.admin.AdminException;
 import org.openspaces.admin.GridComponent;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsa.GridServiceAgents;
@@ -66,7 +67,7 @@ public class RebalancingUtils {
            final GridServiceContainer targetContainer = container;
            futureInstances.put(container, new FutureStatelessProcessingUnitInstance() {
 
-               AtomicReference<ExecutionException> executionException = new AtomicReference<ExecutionException>();
+               AtomicReference<Throwable> throwable = new AtomicReference<Throwable>();
                ProcessingUnitInstance newInstance;
                
                public boolean isTimedOut() {
@@ -78,7 +79,7 @@ public class RebalancingUtils {
                    end();
                    
                    return isTimedOut() ||
-                          executionException.get() != null || 
+                          throwable.get() != null || 
                           newInstance != null;
                }
                
@@ -86,9 +87,10 @@ public class RebalancingUtils {
 
                    end();
                    
-                   if (executionException.get() != null) {
-                       throw executionException.get();
+                   if (getException() != null) {
+                       throw getException();
                    }
+                   
                    if (newInstance == null) {
                        if (isTimedOut()) {
                            throw new TimeoutException("Relocation timeout");
@@ -106,7 +108,10 @@ public class RebalancingUtils {
                public ExecutionException getException() {
 
                    end();
-                   return executionException.get();
+                   if (throwable.get() != null) {
+                       return new ExecutionException(throwable.get());
+                   }
+                   return null;
                }
 
             
@@ -124,8 +129,8 @@ public class RebalancingUtils {
                             gscToString(targetContainer);
                    }
                    
-                   if (executionException.get() != null && executionException.get().getCause() != null) {
-                       return executionException.get().getCause().getMessage();
+                   if (getException() != null) {
+                       return getException().getMessage();
                    }
                    
                    throw new IllegalStateException("Relocation has not encountered any failure.");
@@ -134,13 +139,12 @@ public class RebalancingUtils {
             private void end() {
                 
                 if (!targetContainer.isDiscovered()) {
-                    executionException.set(
-                            new ExecutionException(
+                    throwable.set(
                                     new RemovedContainerProcessingUnitDeploymentException(
-                                            pu,targetContainer)));
+                                            pu,targetContainer));
                 }
                 
-                else if (executionException.get() != null || newInstance != null) {
+                else if (throwable.get() != null || newInstance != null) {
                     //do nothing. idempotent method
                 }
                 
@@ -182,8 +186,11 @@ public class RebalancingUtils {
                                    if (logger.isDebugEnabled()) {
                                        logger.debug("pu.incrementInstance() called");
                                    }
+                               } catch (AdminException e) {
+                                   throwable.set(e);
                                } catch (Throwable e) {
-                                   executionException.set(new ExecutionException(e));
+                                   logger.error("Unexpected Exception: " + e.getMessage(),e);
+                                   throwable.set(e);
                                }
                            }
                        });
@@ -212,6 +219,7 @@ public class RebalancingUtils {
    static FutureStatefulProcessingUnitInstance relocateProcessingUnitInstanceAsync(
            final GridServiceContainer targetContainer,
            final ProcessingUnitInstance puInstance, 
+           final Log logger,
            final long duration, final TimeUnit timeUnit) {
 
         final ProcessingUnit pu = puInstance.getProcessingUnit();
@@ -219,7 +227,7 @@ public class RebalancingUtils {
         final int instanceId = puInstance.getInstanceId();
         
         final CountDownLatch relocateInProgress = new CountDownLatch(1);
-        final AtomicReference<Exception> relocateException = new AtomicReference<Exception>();
+        final AtomicReference<Throwable> relocateThrowable = new AtomicReference<Throwable>();
 
         final Admin admin = puInstance.getAdmin();
         final int runningNumber = puInstance.getClusterInfo().getRunningNumber();
@@ -242,8 +250,12 @@ public class RebalancingUtils {
             public void run() {
                 try {
                     puInstance.relocate(targetContainer);
+                }
+                catch (AdminException e) {
+                    relocateThrowable.set(e);
                 } catch (Throwable e) {
-                    relocateException.set(new ExecutionException(e));
+                    logger.error("Unexpected exception " + e.getMessage(),e);
+                    relocateThrowable.set(e);
                 }
                 finally {
                     relocateInProgress.countDown();
@@ -253,7 +265,7 @@ public class RebalancingUtils {
 
         FutureStatefulProcessingUnitInstance future = new FutureStatefulProcessingUnitInstance() {
 
-            ExecutionException executionException;
+            Throwable throwable;
             ProcessingUnitInstance newInstance;
             
             public boolean isTimedOut() {
@@ -265,7 +277,7 @@ public class RebalancingUtils {
                 endRelocation();
                 
                 return isTimedOut() ||
-                       executionException != null || 
+                       throwable != null || 
                        newInstance != null;
             }
             
@@ -273,8 +285,8 @@ public class RebalancingUtils {
 
                 endRelocation();
                 
-                if (executionException != null) {
-                    throw executionException;
+                if (getException() != null) {
+                    throw getException();
                 }
                 if (newInstance == null) {
                     if (isTimedOut()) {
@@ -293,7 +305,10 @@ public class RebalancingUtils {
             public ExecutionException getException() {
 
                 endRelocation();
-                return executionException;
+                if (throwable != null) {
+                    return new ExecutionException(throwable);
+                }
+                return null;
             }
 
             /**
@@ -311,19 +326,18 @@ public class RebalancingUtils {
                 if (inProgress) {
                     // do nothing. relocate() method running on another thread has not returned yet.
                 }
-                else if (executionException != null || newInstance != null) {
+                else if (throwable != null || newInstance != null) {
                     //do nothing. idempotent method
                 }
-                else if (relocateException.get() != null) {
-                    executionException = new ExecutionException(relocateException.get());
+                else if (relocateThrowable.get() != null) {
+                    throwable = relocateThrowable.get();
                 }
                 
                 else if (!targetContainer.isDiscovered()) {
-                    executionException = new ExecutionException(
-                            new RemovedContainerProcessingUnitDeploymentException(puInstance,targetContainer));
+                    throwable = new RemovedContainerProcessingUnitDeploymentException(puInstance,targetContainer);
                 } 
                 else if (pu.getNumberOfBackups() > 0 && !isAtLeastOneInstanceValid(puInstancesFromSamePartition)) {
-                        executionException = new ExecutionException(new SpaceRecoveryAfterRelocationException(puInstance, puInstancesFromSamePartition));
+                        throwable = new SpaceRecoveryAfterRelocationException(puInstance, puInstancesFromSamePartition);
                 } 
                 else {
                     
@@ -337,8 +351,7 @@ public class RebalancingUtils {
                             }
                         }
                         else  { 
-                            executionException = new ExecutionException(
-                                    new WrongContainerProcessingUnitRelocationException(puInstance,targetContainer));
+                            throwable = new WrongContainerProcessingUnitRelocationException(puInstance,targetContainer);
                                          
                         }
                     }
@@ -380,8 +393,8 @@ public class RebalancingUtils {
                         gscToString(targetContainer);
                }
                
-               if (executionException != null && executionException.getCause() != null) {
-                   return executionException.getCause().getMessage();
+               if (getException() != null) {
+                   return getException().getMessage();
                }
                
                throw new IllegalStateException("Relocation has not encountered any failure.");
@@ -862,12 +875,13 @@ public class RebalancingUtils {
     }    
 
     public static FutureStatefulProcessingUnitInstance restartProcessingUnitInstanceAsync(
-            ProcessingUnitInstance candidateInstance, int relocationTimeoutFailureSeconds, TimeUnit seconds) {
+            ProcessingUnitInstance candidateInstance, Log logger, int timeout, TimeUnit timeUnit) {
         
         return relocateProcessingUnitInstanceAsync(
                 candidateInstance.getGridServiceContainer(), 
                 candidateInstance,
-                relocationTimeoutFailureSeconds, seconds);
+                logger,
+                timeout, timeUnit);
     }
 
 

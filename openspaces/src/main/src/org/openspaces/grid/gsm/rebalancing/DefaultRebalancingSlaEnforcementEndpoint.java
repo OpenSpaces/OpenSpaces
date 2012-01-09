@@ -469,7 +469,7 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
                             + "from " + RebalancingUtils.gscToString(source) + " " + "to "
                             + RebalancingUtils.gscToString(target));
                     return RebalancingUtils.relocateProcessingUnitInstanceAsync(target, candidateInstance,
-                            DEPLOYMENT_TIMEOUT_FAILURE_SECONDS, TimeUnit.SECONDS);
+                            logger, DEPLOYMENT_TIMEOUT_FAILURE_SECONDS, TimeUnit.SECONDS);
 
                 }// for pu instance
             }// for source container
@@ -559,7 +559,7 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
                             + "from " + RebalancingUtils.gscToString(source)
                             + " " + "to " + RebalancingUtils.gscToString(target));
                     return RebalancingUtils.relocateProcessingUnitInstanceAsync(target, candidateInstance,
-                            DEPLOYMENT_TIMEOUT_FAILURE_SECONDS, TimeUnit.SECONDS);
+                            logger, DEPLOYMENT_TIMEOUT_FAILURE_SECONDS, TimeUnit.SECONDS);
 
                 }
             }
@@ -723,7 +723,7 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
                     }
                     
                     return RebalancingUtils.restartProcessingUnitInstanceAsync(candidateInstance,
-                            DEPLOYMENT_TIMEOUT_FAILURE_SECONDS, TimeUnit.SECONDS);
+                            logger, DEPLOYMENT_TIMEOUT_FAILURE_SECONDS, TimeUnit.SECONDS);
                 }
             }
         }
@@ -784,7 +784,7 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
                         }
                         
                         return RebalancingUtils.restartProcessingUnitInstanceAsync(candidateInstance,
-                                DEPLOYMENT_TIMEOUT_FAILURE_SECONDS, TimeUnit.SECONDS);
+                                logger, DEPLOYMENT_TIMEOUT_FAILURE_SECONDS, TimeUnit.SECONDS);
                     }
                 }
                 // we haven't found any partition to restart, probably the instance that requires restart
