@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.apache.commons.logging.Log;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.GridComponent;
@@ -32,12 +33,13 @@ public class ContainersSlaUtils {
     static FutureGridServiceContainer startGridServiceContainerAsync(
             final InternalAdmin admin,
             final InternalGridServiceAgent gsa,
-            final GridServiceContainerConfig config, 
-            final long timeoutDuration, final TimeUnit timeoutUnit) {
+            final GridServiceContainerConfig config,
+            final Log logger,
+            final long duration, final TimeUnit timeUnit) {
 
         final AtomicReference<Object> ref = new AtomicReference<Object>(null);
         final long startTimestamp = System.currentTimeMillis();
-        final long endTimestamp = startTimestamp + timeoutUnit.toMillis(timeoutDuration);
+        final long end = startTimestamp + timeUnit.toMillis(duration);
         
         admin.scheduleAdminOperation(new Runnable() {
             public void run() {
@@ -64,8 +66,10 @@ public class ContainersSlaUtils {
                     else {
                         ref.set(gsa.internalStartGridService(config));
                     }
-                    
-                } catch (Exception e) {
+                } catch (AdminException e) {
+                    ref.set(e);
+                } catch (Throwable e) {
+                    logger.error("Unexpected Exception " + e.getMessage(),e);
                     ref.set(e);
                 }
             }
@@ -74,14 +78,14 @@ public class ContainersSlaUtils {
         FutureGridServiceContainer future = new FutureGridServiceContainer() {
 
             public boolean isTimedOut() {
-                return System.currentTimeMillis() > endTimestamp;
+                return System.currentTimeMillis() > end;
             }
 
 
             public ExecutionException getException() {
                 Object result = ref.get();
-                if (result instanceof Exception) {
-                    return new ExecutionException((Exception)result);
+                if (result instanceof Throwable) {
+                    return new ExecutionException((Throwable)result);
                 }
                 return null;
             }
@@ -89,33 +93,32 @@ public class ContainersSlaUtils {
             public GridServiceContainer get() throws ExecutionException, IllegalStateException,
                     TimeoutException {
                 
-                ExecutionException exception = getException();
-                if (exception != null) {
-                    throw exception;
+                Object result = ref.get();
+                
+                if (result == null) {
+                    if (System.currentTimeMillis() > end) {
+                        throw new TimeoutException(
+                                "Starting a new container took more than "
+                                        + timeUnit.toSeconds(duration)
+                                        + " seconds to complete.");
+                    }
+                
+                    throw new IllegalStateException(
+                            "Async operation is not done yet.");
                 }
 
-                Object result = ref.get();
-                GridServiceContainer container = null;
-                if (result != null) {
-                    container = getGridServiceContainerInternal((Integer)result);
+                if (getException() != null) {
+                    throw getException();
                 }
                 
-                if (isTimedOut() && container == null) {
-                    throw new TimeoutException("Starting a new container on machine "+ gsa.getMachine().getHostAddress() + " took more than " + timeoutUnit.toSeconds(timeoutDuration) + " seconds to complete.");
-                }
-               
-                if (container == null) {
-                    throw new IllegalStateException("Async operation is not done yet.");
-                }
-                
-                return container;            
+                return (GridServiceContainer) result;            
                 
             }
 
             public boolean isDone() {
                 Object result = ref.get();
                 
-                if (System.currentTimeMillis() > endTimestamp) {
+                if (System.currentTimeMillis() > end) {
                     return true;
                 }
                 
@@ -168,7 +171,7 @@ public class ContainersSlaUtils {
                 }
                 
                 if (isTimedOut() && ref.get() == null) {
-                    throw new TimeoutException("Starting a new container on machine "+ gsa.getMachine().getHostAddress() + " took more than " + timeoutUnit.toSeconds(timeoutDuration) + " seconds to complete.");
+                    throw new TimeoutException("Starting a new container on machine "+ gsa.getMachine().getHostAddress() + " took more than " + timeUnit.toSeconds(duration) + " seconds to complete.");
                 }
                
                 if (ref.get() == null) {

@@ -235,6 +235,7 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
                     (InternalAdmin) pu.getAdmin(),
                     (InternalGridServiceAgent) gsa, 
                     sla.getNewContainerConfig(),
+                    logger,
                     START_CONTAINER_TIMEOUT_FAILURE_SECONDS, TimeUnit.SECONDS));
     }
 
