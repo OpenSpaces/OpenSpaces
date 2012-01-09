@@ -111,7 +111,7 @@ public class ContainersSlaUtils {
                     throw getException();
                 }
                 
-                return (GridServiceContainer) result;            
+                return getGridServiceContainerInternal((Integer)result);            
                 
             }
 
