@@ -88,28 +88,9 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
         }
                 
         if (instance instanceof ElasticMachineProvisioningAware) {
-            List<Bean> injectedInstances = beanServer.getEnabledBeansAssignableTo(
-                    new Class[]{
-                            ElasticMachineProvisioning.class,
-                            NonBlockingElasticMachineProvisioning.class});
-           
-            NonBlockingElasticMachineProvisioning machineProvisioning = null;
-            
-            for (Bean injectedInstance : injectedInstances) {
-                if (injectedInstance instanceof ElasticMachineProvisioning) {
-                    machineProvisioning = nonBlockingAdapterFactory.create((ElasticMachineProvisioning)injectedInstance);
-                    break;
-                }
-                else if (injectedInstance instanceof NonBlockingElasticMachineProvisioning){
-                    machineProvisioning = (NonBlockingElasticMachineProvisioning) injectedInstance;
-                    break;
-                }
-           }
-
-            if (machineProvisioning != null) {
-               ((ElasticMachineProvisioningAware)instance).setElasticMachineProvisioning(machineProvisioning);
-               ((ElasticMachineProvisioningAware)instance).setElasticMachineIsolation(isolationConfig);
-           }
+            NonBlockingElasticMachineProvisioning machineProvisioning = getNonBlockingElasticMachineProvisioningBean(beanServer);
+            ((ElasticMachineProvisioningAware)instance).setElasticMachineProvisioning(machineProvisioning);
+            ((ElasticMachineProvisioningAware)instance).setElasticMachineIsolation(isolationConfig);
         }
         
         if (instance instanceof ElasticScaleStrategyEventStorageAware) {
@@ -132,6 +113,31 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
         }
         
         return instance;
+    }
+
+    private NonBlockingElasticMachineProvisioning getNonBlockingElasticMachineProvisioningBean(BeanServer<Bean> beanServer) {
+        List<Bean> injectedInstances = beanServer.getEnabledBeansAssignableTo(
+                new Class[]{
+                        ElasticMachineProvisioning.class,
+                        NonBlockingElasticMachineProvisioning.class});
+         
+        NonBlockingElasticMachineProvisioning machineProvisioning = null;
+        
+        for (Bean injectedInstance : injectedInstances) {
+            if (injectedInstance instanceof ElasticMachineProvisioning) {
+                machineProvisioning = nonBlockingAdapterFactory.create(pu, (ElasticMachineProvisioning)injectedInstance);
+                break;
+            }
+            else if (injectedInstance instanceof NonBlockingElasticMachineProvisioning){
+                machineProvisioning = (NonBlockingElasticMachineProvisioning) injectedInstance;
+                break;
+            }
+         }
+
+        if (machineProvisioning == null) {
+            throw new IllegalStateException("machineProvisioning bean cannot be found");
+        }
+        return machineProvisioning;
     }
 
     ElasticConfigBean findElasticConfigBean(BeanServer<Bean> beanServer) {
