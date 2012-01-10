@@ -1,9 +1,6 @@
 package org.openspaces.grid.gsm.strategy;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -21,8 +18,8 @@ import org.openspaces.grid.gsm.LogPerProcessingUnit;
 import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.machines.FutureGridServiceAgents;
 import org.openspaces.grid.gsm.machines.MachinesSlaUtils;
-import org.openspaces.grid.gsm.machines.exceptions.WaitingForDiscoveredMachinesException;
 import org.openspaces.grid.gsm.machines.exceptions.FailedToDiscoverMachinesException;
+import org.openspaces.grid.gsm.machines.exceptions.WaitingForDiscoveredMachinesException;
 import org.openspaces.grid.gsm.machines.plugins.ElasticMachineProvisioningException;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
 
@@ -38,10 +35,10 @@ public class ElasticMachineProvisioningDiscoveredMachinesCache implements
     private static final long GET_DISCOVERED_MACHINES_RETRY_SECONDS = 60;
     
     
-    // injected 
-    private ProcessingUnit pu;
-    private InternalAdmin admin;
-    private NonBlockingElasticMachineProvisioning machineProvisioning;
+    private final ProcessingUnit pu;
+    private final InternalAdmin admin;
+    private final NonBlockingElasticMachineProvisioning machineProvisioning;
+    private final boolean quiteMode;
     
     // created by afterPropertiesSet()
     private Log logger;
@@ -51,15 +48,23 @@ public class ElasticMachineProvisioningDiscoveredMachinesCache implements
     private boolean syncAgents;
     private FutureGridServiceAgents futureAgents;
     
-
-    public ElasticMachineProvisioningDiscoveredMachinesCache(ProcessingUnit pu, NonBlockingElasticMachineProvisioning machineProvisioning,long pollingIntervalSeconds) {
+    
+    /**
+     * Quite mode fall backs to the admin API (lookup discovery) in case of exceptions from the machine provisioning
+     */
+    public ElasticMachineProvisioningDiscoveredMachinesCache(
+            ProcessingUnit pu, 
+            NonBlockingElasticMachineProvisioning machineProvisioning,
+            boolean quiteMode,
+            long pollingIntervalSeconds) {
         
         this.pu = pu;
         
         this.admin = (InternalAdmin) pu.getAdmin();
         
         this.machineProvisioning = machineProvisioning;
-       
+        this.quiteMode = quiteMode;
+        
         logger = new LogPerProcessingUnit(
                     new SingleThreadedPollingLog(
                             LogFactory.getLog(this.getClass())),
@@ -98,32 +103,11 @@ public class ElasticMachineProvisioningDiscoveredMachinesCache implements
                     "Need to wait until retrieved list of machines.");
         }
         
-        Set<GridServiceAgent> filteredAgents = new HashSet<GridServiceAgent>(); 
-        
+         
+        GridServiceAgent[] agents = admin.getGridServiceAgents().getAgents(); // default value
         try {
-            GridServiceAgent[] agents = futureAgents.get();
-            for (GridServiceAgent agent : agents) {
-                if (!agent.isDiscovered()) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Agent " + MachinesSlaUtils.machineToString(agent.getMachine()) + " has shutdown.");
-                    }
-                }
-                else if (!MachinesSlaUtils.isAgentConformsToMachineProvisioningConfig(agent, machineProvisioning.getConfig())) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Agent " + MachinesSlaUtils.machineToString(agent.getMachine()) + " does not conform to machine provisioning SLA.");
-                    }
-                }
-                else {
-                    filteredAgents.add(agent);
-                }
-            }
-            //TODO: Move this sort into the bin packing solver. It already has the priority of each machine
-            // so it can sort it by itself.
-            List<GridServiceAgent> sortedFilteredAgents = MachinesSlaUtils.sortManagementFirst(filteredAgents);
-            if (logger.isDebugEnabled()) {
-                logger.debug("Provisioned Agents: " + MachinesSlaUtils.machinesToString(sortedFilteredAgents));
-            }
-            return sortedFilteredAgents;
+            agents = futureAgents.get();
+
         } catch (ExecutionException e) {
             Throwable cause = e.getCause();
             if (cause instanceof Error) {
@@ -131,19 +115,31 @@ public class ElasticMachineProvisioningDiscoveredMachinesCache implements
             }
             
             if (cause instanceof ElasticMachineProvisioningException) {
-                throw new FailedToDiscoverMachinesException(pu, e);
+                if (!quiteMode) {
+                    throw new FailedToDiscoverMachinesException(pu, e);
+                }
+                logger.info("Failed to discover machines",e);
             }
             
-            if (cause instanceof AdminException) {
-                throw new FailedToDiscoverMachinesException(pu, e);
+            else if (cause instanceof AdminException) {
+                if (!quiteMode) {
+                    throw new FailedToDiscoverMachinesException(pu, e);
+                }
+                logger.info("Failed to discover machines",e);
             }
-            throw new IllegalStateException("Unexpected exception type",e);
+            else {
+                throw new IllegalStateException("Unexpected exception type",e);
+            }
             
         } catch (TimeoutException e) {
-            throw new FailedToDiscoverMachinesException(pu, e);
+            if (!quiteMode) {
+                throw new FailedToDiscoverMachinesException(pu, e);
+            }
+            logger.info("Failed to discover machines",e);
         }
+        return MachinesSlaUtils.sortAndFilterAgents(agents, machineProvisioning.getConfig(), logger);
     }
-    
+
     public void gridServiceAgentRemoved(GridServiceAgent gridServiceAgent) {
         syncAgents = true;
     }

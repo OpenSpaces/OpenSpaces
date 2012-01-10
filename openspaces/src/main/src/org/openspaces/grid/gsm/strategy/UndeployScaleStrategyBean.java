@@ -44,6 +44,9 @@ public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
     
     @Override
     public void afterPropertiesSet() {
+        
+        super.setMachineDiscoveryQuiteMode(true); // swallow machine provisioning errors while discovering agents
+        
         super.afterPropertiesSet();
     
         if (machinesEndpoint == null) {

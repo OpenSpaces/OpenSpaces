@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.GridComponent;
 import org.openspaces.admin.gsa.GridServiceAgent;
@@ -212,5 +213,31 @@ public class MachinesSlaUtils {
     public static boolean isAgentAutoShutdownEnabled(GridServiceAgent agent) {
         String autoShutdownFlag = ContainersSlaUtils.getCommandLineArgumentRemovePrefix(agent, "-Dcom.gs.agent.auto-shutdown-enabled=");
         return Boolean.valueOf(autoShutdownFlag);
+    }
+    
+    public static Collection<GridServiceAgent> sortAndFilterAgents(GridServiceAgent[] agents, ElasticMachineProvisioningConfig machineProvisioningConfig, Log logger) {
+        Set<GridServiceAgent> filteredAgents = new HashSet<GridServiceAgent>();
+        for (final GridServiceAgent agent : agents) {
+            if (!agent.isDiscovered()) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Agent " + MachinesSlaUtils.machineToString(agent.getMachine()) + " has shutdown.");
+                }
+            }
+            else if (!MachinesSlaUtils.isAgentConformsToMachineProvisioningConfig(agent, machineProvisioningConfig)) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Agent " + MachinesSlaUtils.machineToString(agent.getMachine()) + " does not conform to machine provisioning SLA.");
+                }
+            }
+            else {
+                filteredAgents.add(agent);
+            }
+        }
+        //TODO: Move this sort into the bin packing solver. It already has the priority of each machine
+        // so it can sort it by itself.
+        final List<GridServiceAgent> sortedFilteredAgents = MachinesSlaUtils.sortManagementFirst(filteredAgents);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Provisioned Agents: " + MachinesSlaUtils.machinesToString(sortedFilteredAgents));
+        }
+        return sortedFilteredAgents;
     }
 }

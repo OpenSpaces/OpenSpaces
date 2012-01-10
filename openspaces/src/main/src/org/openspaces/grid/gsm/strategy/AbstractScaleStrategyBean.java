@@ -79,6 +79,8 @@ public abstract class AbstractScaleStrategyBean implements
     private ScaleStrategyProgressEventState scaleEventState;
     
     private EventsStore eventStorage;
+
+    private boolean discoveryQuiteMode;
     
     protected InternalAdmin getAdmin() {
         return this.admin;
@@ -148,6 +150,10 @@ public abstract class AbstractScaleStrategyBean implements
         this.eventStorage = eventQueue;
     }
     
+    protected void setMachineDiscoveryQuiteMode(boolean discoveryQuiteMode) {
+        this.discoveryQuiteMode = discoveryQuiteMode;
+    }
+    
     public void afterPropertiesSet() {
         
         if (pu == null) {
@@ -198,7 +204,7 @@ public abstract class AbstractScaleStrategyBean implements
         scaleEventState = new ScaleStrategyProgressEventState(eventStorage, isUndeploying(), pu.getName(), DefaultElasticProcessingUnitScaleProgressChangedEvent.class);
         
         minimumNumberOfMachines = calcMinimumNumberOfMachines();
-        provisionedMachines = new ElasticMachineProvisioningDiscoveredMachinesCache(pu,machineProvisioning, getPollingIntervalSeconds());
+        provisionedMachines = new ElasticMachineProvisioningDiscoveredMachinesCache(pu,machineProvisioning, discoveryQuiteMode, getPollingIntervalSeconds());
         
         isScaleInProgress = true;
         
