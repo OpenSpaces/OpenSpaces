@@ -10,6 +10,7 @@ import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.ClusterCapacityRequirements;
+import org.openspaces.grid.gsm.capacity.MachineCapacityRequirements;
 import org.openspaces.grid.gsm.machines.AbstractMachinesSlaPolicy;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementState;
 import org.openspaces.grid.gsm.machines.MachinesSlaUtils;
@@ -56,23 +57,28 @@ public class NeedToStartMoreGridServiceAgentsException extends GridServiceAgentS
             AbstractMachinesSlaPolicy sla, Map<GridServiceAgent, Map<ProcessingUnit, CapacityRequirements>> createReportOfAllMachines) {
         StringBuilder message = new StringBuilder("Capacity Report of all relevant machines:");
         for (Entry<GridServiceAgent, Map<ProcessingUnit, CapacityRequirements>> agentpair : createReportOfAllMachines.entrySet()) {
+            
+            GridServiceAgent agent = agentpair.getKey();
+            MachineCapacityRequirements total = new MachineCapacityRequirements(agent.getMachine());
+            
+            CapacityRequirements free = total;
+            
             // add to the report the amount of reserved capacity per machine
             //"reserved-capacity", sla.getReservedCapacityPerMachine());
-            GridServiceAgent agent = agentpair.getKey();
             String ipAddress = MachinesSlaUtils.machineToString(agent.getMachine());
+            CapacityRequirements reserved = sla.getReservedCapacityPerMachine();
             message
                 .append("\"").append(ipAddress).append("\":{")
-                .append("reserved:").append(sla.getReservedCapacityPerMachine()).append(",");
+                .append("total:{").append(total).append("},")
+                .append("reserved:{").append(reserved).append("},");
+            free = free.subtractOrZero(reserved);
             for (Entry<ProcessingUnit,CapacityRequirements> pupair : agentpair.getValue().entrySet()) {
                 String puName = pupair.getKey().getName();
-                String capacity = pupair.getValue().toString();
-                message.append(puName).append(":").append(capacity).append(",");
+                CapacityRequirements capacity = pupair.getValue();
+                message.append(puName).append(":{").append(capacity.toString()).append("},");
+                free = free.subtractOrZero(capacity);
             }
-            int lastIndex = message.length()-1;
-            if (message.charAt(lastIndex)==',') {
-                message.deleteCharAt(lastIndex);
-            }
-            message.append("},");
+            message.append("free:").append(free).append("},");
         }
         int lastIndex = message.length()-1;
         if (message.charAt(lastIndex)==',') {

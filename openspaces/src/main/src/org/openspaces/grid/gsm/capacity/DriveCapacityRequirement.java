@@ -24,7 +24,7 @@ public class DriveCapacityRequirement extends AbstractCapacityRequirement {
     }
     
     public String toString() {
-        return getDriveCapacityInMB() +"MB on " + drive;
+        return getDriveCapacityInMB() +"MB disk on " + drive;
     }
 
     /**

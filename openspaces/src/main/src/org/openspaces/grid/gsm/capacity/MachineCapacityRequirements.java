@@ -55,9 +55,4 @@ public class MachineCapacityRequirements extends CapacityRequirements {
         return new CpuCapacityRequirement(new Fraction(availableProcessors,1));
         
     }
-    
-    @Override
-    public String toString() {
-        return "Machine " + machine.getHostAddress() + ":" + super.toString();
-    }
 }
