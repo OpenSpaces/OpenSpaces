@@ -140,7 +140,7 @@ public class JettyWebApplicationContextListener implements ServletContextListene
                 gigaSessionManager.setSessionPath(sessionHandler.getSessionManager().getSessionPath());
                 gigaSessionManager.setUsingCookies(sessionHandler.getSessionManager().isUsingCookies());
                 gigaSessionManager.setMaxCookieAge(sessionHandler.getSessionManager().getMaxCookieAge());
-                gigaSessionManager.setSecureCookies(sessionHandler.getSessionManager().getSecureCookies());
+                gigaSessionManager.setSecureCookies(sessionHandler.getSessionManager().isUsingCookies());
                 gigaSessionManager.setMaxInactiveInterval(sessionHandler.getSessionManager().getMaxInactiveInterval());
                 gigaSessionManager.setHttpOnly(sessionHandler.getSessionManager().getHttpOnly());
 
