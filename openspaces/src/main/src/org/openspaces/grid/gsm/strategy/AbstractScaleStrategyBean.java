@@ -303,6 +303,7 @@ public abstract class AbstractScaleStrategyBean implements
             }
             
             scaleEventState.enqueuProvisioningCompletedEvent();
+            isScaleInProgress = false;
         }
         catch (SlaEnforcementInProgressException e) {
             if (e instanceof SlaEnforcementFailure) {
@@ -313,10 +314,12 @@ public abstract class AbstractScaleStrategyBean implements
             }
             // we do not pass the exception into the event since there are other fine grained events that report failures.
             scaleEventState.enqueuProvisioningInProgressEvent();
+            isScaleInProgress = true;
         }
         catch (Throwable e) {
             getLogger().error("Unhandled Exception",e);
             scaleEventState.enqueuProvisioningInProgressEvent();
+            isScaleInProgress = true;
         }
     }
 
