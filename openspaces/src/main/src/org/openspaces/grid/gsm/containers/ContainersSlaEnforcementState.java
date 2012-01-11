@@ -81,6 +81,9 @@ class ContainersSlaEnforcementState {
 
 
     public Collection<GridServiceContainer> getContainersMarkedForDeallocation(ProcessingUnit pu) {
+        if (isProcessingUnitDestroyed(pu)) {
+            throw new IllegalStateException("Already destroyed.");
+        }
         return Collections.unmodifiableCollection(
                     new ArrayList<GridServiceContainer>(containersMarkedForShutdownPerProcessingUnit.get(pu)));
     }
@@ -118,6 +121,9 @@ class ContainersSlaEnforcementState {
     }
 
     public Collection<FutureGridServiceContainer> getFutureContainers(ProcessingUnit pu) {
+        if (isProcessingUnitDestroyed(pu)) {
+            throw new IllegalStateException("Already destroyed.");
+        }
         return Collections.unmodifiableCollection(
                 new ArrayList<FutureGridServiceContainer>(futureContainersPerProcessingUnit.get(pu)));
     }

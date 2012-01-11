@@ -81,10 +81,9 @@ public class ContainersSlaUtils {
                 return System.currentTimeMillis() > end;
             }
 
-
             public ExecutionException getException() {
                 Object result = ref.get();
-                if (result instanceof Throwable) {
+                if (result != null && result instanceof Throwable) {
                     return new ExecutionException((Throwable)result);
                 }
                 return null;
@@ -95,8 +94,19 @@ public class ContainersSlaUtils {
                 
                 Object result = ref.get();
                 
-                if (result == null) {
-                    if (System.currentTimeMillis() > end) {
+                if (getException() != null) {
+                    throw getException();
+                }
+                
+                GridServiceContainer container = null;
+                if (result != null) {
+                    int agentId = (Integer)result;
+                    container = getGridServiceContainerInternal(agentId);
+                    //container could still be null if not discovered
+                }
+                
+                if (container == null) {
+                    if (isTimedOut()) {
                         throw new TimeoutException(
                                 "Starting a new container took more than "
                                         + timeUnit.toSeconds(duration)
@@ -106,12 +116,8 @@ public class ContainersSlaUtils {
                     throw new IllegalStateException(
                             "Async operation is not done yet.");
                 }
-
-                if (getException() != null) {
-                    throw getException();
-                }
                 
-                return getGridServiceContainerInternal((Integer)result);            
+                return container;            
                 
             }
 
@@ -126,7 +132,7 @@ public class ContainersSlaUtils {
                     return false;
                 }
                 
-                if (result instanceof Exception) {
+                if (result instanceof Throwable) {
                     return true;
                 }
                                 
