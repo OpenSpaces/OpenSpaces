@@ -17,12 +17,14 @@ import org.openspaces.admin.pu.DeploymentStatus;
 import org.openspaces.admin.pu.MemberAliveIndicatorStatus;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEvent;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitRemovedEventListener;
 
 public class ProcessingUnitInstanceMemberAliveIndicatorAlertBean implements AlertBean,
-        ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventListener, ProcessingUnitRemovedEventListener {
+        ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventListener, ProcessingUnitRemovedEventListener,
+        ProcessingUnitInstanceAddedEventListener {
 
     public static final String beanUID = "c5a43e4-39eaf476-fd5d-4399-8b7b-a97c3ec4f49a";
     public static final String ALERT_NAME = "Member Alive Indicator";
@@ -39,12 +41,14 @@ public class ProcessingUnitInstanceMemberAliveIndicatorAlertBean implements Aler
     public void afterPropertiesSet() throws Exception {
         validateProperties();
         admin.getProcessingUnits().getProcessingUnitRemoved().add(this);
+        admin.getProcessingUnits().getProcessingUnitInstanceAdded().add(this);
         admin.getProcessingUnits().getProcessingUnitInstanceMemberAliveIndicatorStatusChanged().add(this);
     }
 
     @Override
     public void destroy() throws Exception {
         admin.getProcessingUnits().getProcessingUnitRemoved().remove(this);
+        admin.getProcessingUnits().getProcessingUnitInstanceAdded().remove(this);
         admin.getProcessingUnits().getProcessingUnitInstanceMemberAliveIndicatorStatusChanged().remove(this);
     }
 
@@ -84,15 +88,26 @@ public class ProcessingUnitInstanceMemberAliveIndicatorAlertBean implements Aler
                 if (processingUnit.getStatus().equals(DeploymentStatus.UNDEPLOYED)) {
                     factory.description("Processing Unit " + processingUnitInstance.getProcessingUnit().getName() + " has been undeployed");
                     factory.severity(AlertSeverity.INFO);
+                    factory.status(AlertStatus.RESOLVED);
                 } else {
                     factory.description("Processing Unit " + processingUnitInstance.getProcessingUnit().getName() + " has been removed");
                     factory.severity(AlertSeverity.SEVERE);
+                    factory.status(AlertStatus.NA);
                 }
 
-                factory.status(AlertStatus.NA);
                 factory.componentUid(processingUnitInstance.getUid());
                 factory.componentDescription(processingUnitInstance.getProcessingUnitInstanceName());
                 factory.config(config.getProperties());
+                
+                factory.putProperty(ProcessingUnitInstanceMemberAliveIndicatorAlert.PROCESSING_UNIT_NAME, processingUnitInstance.getProcessingUnit().getName());
+                factory.putProperty(ProcessingUnitInstanceMemberAliveIndicatorAlert.MEMBER_ALIVE_INDICATOR_STATUS, processingUnitInstance.getMemberAliveIndicatorStatus().name());
+                
+                factory.putProperty(ProcessingUnitInstanceMemberAliveIndicatorAlert.HOST_ADDRESS, processingUnitInstance.getMachine().getHostAddress());
+                factory.putProperty(ProcessingUnitInstanceMemberAliveIndicatorAlert.HOST_NAME, processingUnitInstance.getMachine().getHostName());
+                factory.putProperty(ProcessingUnitInstanceMemberAliveIndicatorAlert.VIRTUAL_MACHINE_UID, processingUnitInstance.getVirtualMachine().getUid());
+                factory.putProperty(ProcessingUnitInstanceMemberAliveIndicatorAlert.CPU_UTILIZATION, String.valueOf(processingUnitInstance.getOperatingSystem().getStatistics().getCpuPerc()*100.0));
+                factory.putProperty(ProcessingUnitInstanceMemberAliveIndicatorAlert.HEAP_UTILIZATION, String.valueOf(processingUnitInstance.getVirtualMachine().getStatistics().getMemoryHeapUsedPerc()));
+
 
                 Alert alert = factory.toAlert();
                 admin.getAlertManager().triggerAlert( new ProcessingUnitInstanceMemberAliveIndicatorAlert(alert));
@@ -101,6 +116,54 @@ public class ProcessingUnitInstanceMemberAliveIndicatorAlertBean implements Aler
 
         mapProcessingUnitNameToProcessingUnitInstances.remove(processingUnit.getName());
         
+    }
+    
+    @Override
+    public void processingUnitInstanceAdded(ProcessingUnitInstance processingUnitInstanceAdded) {
+        List<ProcessingUnitInstance> listOfProcessingUnitInstances = mapProcessingUnitNameToProcessingUnitInstances.get(processingUnitInstanceAdded.getProcessingUnit().getName());
+        if (listOfProcessingUnitInstances == null) {
+            return;
+        }
+        for (int i=0; i<listOfProcessingUnitInstances.size(); ++i) {
+            ProcessingUnitInstance processingUnitInstance = listOfProcessingUnitInstances.get(i);
+
+            //find same processing unit ref. and same processing unit instance name (different ref. since loaded elsewhere) 
+            if (!(processingUnitInstanceAdded.getProcessingUnit().equals(processingUnitInstance.getProcessingUnit()) && processingUnitInstanceAdded.getProcessingUnitInstanceName()
+                .equals(processingUnitInstance.getProcessingUnitInstanceName()))) {
+                continue;
+            } else {
+                listOfProcessingUnitInstances.remove(i);
+            }
+            
+            final String prevGroupUid = generateGroupUid(processingUnitInstance.getUid());
+
+            Alert[] alertsByGroupUid = ((InternalAlertManager)admin.getAlertManager()).getAlertRepository().getAlertsByGroupUid(prevGroupUid);
+            if (alertsByGroupUid.length != 0 && !alertsByGroupUid[0].getStatus().isResolved()) {
+                AlertFactory factory = new AlertFactory();
+                factory.name(ALERT_NAME);
+                factory.groupUid(prevGroupUid);
+                
+                factory.description("Re-provisioned " + processingUnitInstanceAdded.getProcessingUnitInstanceName() + " instance");
+                factory.severity(alertsByGroupUid[0].getSeverity());
+
+                factory.status(AlertStatus.RESOLVED);
+                factory.componentUid(processingUnitInstanceAdded.getUid());
+                factory.componentDescription(processingUnitInstanceAdded.getProcessingUnitInstanceName());
+                factory.config(config.getProperties());
+
+                factory.putProperty(ProcessingUnitInstanceMemberAliveIndicatorAlert.PROCESSING_UNIT_NAME, processingUnitInstanceAdded.getProcessingUnit().getName());
+                factory.putProperty(ProcessingUnitInstanceMemberAliveIndicatorAlert.MEMBER_ALIVE_INDICATOR_STATUS, processingUnitInstanceAdded.getMemberAliveIndicatorStatus().name());
+                
+                factory.putProperty(ProcessingUnitInstanceMemberAliveIndicatorAlert.HOST_ADDRESS, processingUnitInstanceAdded.getMachine().getHostAddress());
+                factory.putProperty(ProcessingUnitInstanceMemberAliveIndicatorAlert.HOST_NAME, processingUnitInstanceAdded.getMachine().getHostName());
+                factory.putProperty(ProcessingUnitInstanceMemberAliveIndicatorAlert.VIRTUAL_MACHINE_UID, processingUnitInstanceAdded.getVirtualMachine().getUid());
+                factory.putProperty(ProcessingUnitInstanceMemberAliveIndicatorAlert.CPU_UTILIZATION, String.valueOf(processingUnitInstanceAdded.getOperatingSystem().getStatistics().getCpuPerc()*100.0));
+                factory.putProperty(ProcessingUnitInstanceMemberAliveIndicatorAlert.HEAP_UTILIZATION, String.valueOf(processingUnitInstanceAdded.getVirtualMachine().getStatistics().getMemoryHeapUsedPerc()));
+
+                Alert alert = factory.toAlert();
+                admin.getAlertManager().triggerAlert( new ProcessingUnitInstanceMemberAliveIndicatorAlert(alert));
+            }
+        }
     }
     
     @Override
