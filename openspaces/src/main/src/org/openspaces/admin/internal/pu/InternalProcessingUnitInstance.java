@@ -10,6 +10,7 @@ import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.support.InternalGridComponent;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
+import org.openspaces.admin.pu.ProcessingUnitInstanceStatistics;
 import org.openspaces.admin.pu.ProcessingUnitPartition;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.pu.container.servicegrid.PUServiceBean;
@@ -49,4 +50,11 @@ public interface InternalProcessingUnitInstance extends ProcessingUnitInstance, 
     String getProcessingUnitInstanceSimpleName();
     
     void setMemberAliveIndicatorStatus(ServiceFaultDetectionEvent serviceFaultDetectionEvent);
+    
+    /**
+     * This method is non-blocking and should used in conjunction with {@link #getStatistics()} or {@link #setStatisticsInterval(long, java.util.concurrent.TimeUnit)}
+     * @return the last statistics (regardless of its timestamp), or null if no statistics has been ever collected.
+     * @since 8.0.6
+     */
+    ProcessingUnitInstanceStatistics getLastStatistics();
 }

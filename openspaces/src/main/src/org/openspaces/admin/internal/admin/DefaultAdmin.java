@@ -122,6 +122,7 @@ import org.openspaces.admin.os.OperatingSystem;
 import org.openspaces.admin.os.OperatingSystems;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
+import org.openspaces.admin.pu.ProcessingUnitInstanceStatistics;
 import org.openspaces.admin.pu.ProcessingUnitType;
 import org.openspaces.admin.pu.ProcessingUnits;
 import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitEvent;
@@ -1441,6 +1442,13 @@ public class DefaultAdmin implements InternalAdmin {
                 if (!holders.containsKey(processingUnit.getName())) {
                     processingUnits.removeProcessingUnit(processingUnit.getName());
                     processApplicationsOnProcessingUnitRemoval(processingUnit);
+                    if (isUniversalServiceManagerProcessingUnit(processingUnit)) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Stopping statistics monitor for processing unit " + processingUnit.getName());
+                        }
+                        processingUnit.stopStatisticsMonitor();
+                    }
+                    
                 }
             }
             // now, go over and update what needed to be updated
@@ -1497,10 +1505,24 @@ public class DefaultAdmin implements InternalAdmin {
                         }
 
                         processApplicationsOnProcessingUnitAddition(processingUnit);
+                        
+                        // we need the USM statistics in order to determine if it is running or not
+                        // see #degradeUniversalServiceManagerProcessingUnitStatus() below
+                        if (isUniversalServiceManagerProcessingUnit(processingUnit)) {
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("Starting statistics monitor for processing unit " + processingUnit.getName());
+                            }
+                            processingUnit.startStatisticsMonitor();
+                        }
                     }
                 }
 
-                processingUnit.setStatus( getPuStatusForUSM(processingUnit, details.getStatus()));
+                int status = details.getStatus();
+                if (isUniversalServiceManagerProcessingUnit(processingUnit)) {
+                    status = degradeUniversalServiceManagerProcessingUnitStatus(processingUnit, status);
+                }
+                processingUnit.setStatus(status);
+                
                 processingUnit.processProvisionEvents(details.getProvisionLifeCycleEvents());
             }
 
@@ -1519,6 +1541,10 @@ public class DefaultAdmin implements InternalAdmin {
 
                 flushEvents();
             }
+        }
+
+        private boolean isUniversalServiceManagerProcessingUnit(ProcessingUnit processingUnit) {
+            return ProcessingUnitType.UNIVERSAL.equals(processingUnit.getType());
         }
 
         private void processEventsFromGsm(List<Events> eventsFromGSMs) {
@@ -1556,25 +1582,46 @@ public class DefaultAdmin implements InternalAdmin {
          * Extract USM service state if processing unit is a USM. Returns SCHEDULED if underlying USM process is not in a running state.
          * Otherwise, returns the original status as returned by the GSM.
          */
-        private int getPuStatusForUSM(InternalProcessingUnit processingUnit, int status) {
-
-            final String CloudifyConstants_USM_MONITORS_SERVICE_ID = "USM"; //CloudifyConstants.USM_MONITORS_SERVICE_ID
-            final String CloudifyConstants_USM_MONITORS_STATE_ID = "USM_State"; //CloudifyConstants.USM_MONITORS_STATE_ID
-            final Integer USMState_RUNNING = 2; //USMState.RUNNING ordinal
+        private int degradeUniversalServiceManagerProcessingUnitStatus(InternalProcessingUnit processingUnit, int status) {
+            if (status == OperationalString.INTACT) {
+                final String CloudifyConstants_USM_MONITORS_SERVICE_ID = "USM"; //CloudifyConstants.USM_MONITORS_SERVICE_ID
+                final String CloudifyConstants_USM_MONITORS_STATE_ID = "USM_State"; //CloudifyConstants.USM_MONITORS_STATE_ID
+                final Integer USMState_RUNNING = 2; //USMState.RUNNING ordinal
+                
+                //All USM services have a USM State defined by the USMState enum: (com.gigaspaces.cloudify.dsl.internal.CloudifyConstants.USMState)
+                //show "SCHEDULED" state if USM is not in a running state (USMState.RUNNING)
             
-            //All USM services have a USM State defined by the USMState enum: (com.gigaspaces.cloudify.dsl.internal.CloudifyConstants.USMState)
-            //show "SCHEDULED" state if USM is not in a running state (USMState.RUNNING)
-            if (OperationalString.INTACT == status && ProcessingUnitType.UNIVERSAL.equals(processingUnit.getType())) {
                 for (ProcessingUnitInstance instance : processingUnit.getProcessingUnitInstances()) {
-                    Map<String, ServiceMonitors> monitors = instance.getStatistics().getMonitors();
-                    ServiceMonitors serviceMonitors = monitors.get(CloudifyConstants_USM_MONITORS_SERVICE_ID); 
-                    if (serviceMonitors != null) {
-                        Integer state = (Integer)serviceMonitors.getMonitors().get(CloudifyConstants_USM_MONITORS_STATE_ID); 
-                        if (!USMState_RUNNING.equals(state)) {  
-                            status = OperationalString.SCHEDULED;
+                    
+                    // we are in a non-blocking thread.
+                    // cannot call getStatistics since it may be blocking
+                    ProcessingUnitInstanceStatistics statistics = ((InternalProcessingUnitInstance)instance).getLastStatistics();
+    
+                    if (statistics == null) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("processing unit " + processingUnit.getName() + " state is scheduled because there are no statistics");
                         }
+                        status = OperationalString.SCHEDULED;
+                        break;
                     }
-
+                    
+                    ServiceMonitors serviceMonitors = statistics.getMonitors().get(CloudifyConstants_USM_MONITORS_SERVICE_ID);
+                    if (serviceMonitors == null) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("processing unit " + processingUnit.getName() + " state is scheduled because there is no "+CloudifyConstants_USM_MONITORS_SERVICE_ID + " service monitor");
+                        }
+                        status = OperationalString.SCHEDULED;
+                        break;
+                    }
+                    
+                    Integer state = (Integer)serviceMonitors.getMonitors().get(CloudifyConstants_USM_MONITORS_STATE_ID); 
+                    if (!USMState_RUNNING.equals(state)) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("processing unit " + processingUnit.getName() + " state is scheduled because the USM state is " + state + " instead of " + CloudifyConstants_USM_MONITORS_STATE_ID);
+                        }
+                        status = OperationalString.SCHEDULED;
+                        break;
+                    }
                 }
             }
             return status;

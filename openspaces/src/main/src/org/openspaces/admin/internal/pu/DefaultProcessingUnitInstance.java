@@ -112,7 +112,7 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
 
     private long lastStatisticsTimestamp = 0;
 
-    private ProcessingUnitInstanceStatistics lastStatistics;
+    private volatile ProcessingUnitInstanceStatistics lastStatistics;
 
     private Future scheduledStatisticsMonitor;
     
@@ -522,6 +522,11 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
         ((InternalGridServiceManager) processingUnit.getManagingGridServiceManager()).decrementInstance(this);
     }
 
+    @Override
+    public ProcessingUnitInstanceStatistics getLastStatistics() {
+        return lastStatistics;
+    }
+    
     public synchronized ProcessingUnitInstanceStatistics getStatistics() {
         long currentTime = System.currentTimeMillis();
         if ((currentTime - lastStatisticsTimestamp) < statisticsInterval) {
