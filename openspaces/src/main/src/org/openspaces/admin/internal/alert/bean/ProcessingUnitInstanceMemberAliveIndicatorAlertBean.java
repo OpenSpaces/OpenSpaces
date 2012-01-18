@@ -124,7 +124,7 @@ public class ProcessingUnitInstanceMemberAliveIndicatorAlertBean implements Aler
         if (listOfProcessingUnitInstances == null) {
             return;
         }
-        for (int i=0; i<listOfProcessingUnitInstances.size(); ++i) {
+        for (int i=listOfProcessingUnitInstances.size(); --i>=0; ) {
             ProcessingUnitInstance processingUnitInstance = listOfProcessingUnitInstances.get(i);
 
             //find same processing unit ref. and same processing unit instance name (different ref. since loaded elsewhere) 
