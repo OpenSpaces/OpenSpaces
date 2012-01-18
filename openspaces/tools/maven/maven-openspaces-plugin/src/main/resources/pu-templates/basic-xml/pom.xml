@@ -6,6 +6,12 @@
 	<version>1.0-SNAPSHOT</version>
 	<name>${puArtifactId}</name>
 	<packaging>pom</packaging>
+	<repositories>
+	    <repository>
+	      <id>org.openspaces</id>
+	      <url>http://maven-repository.openspaces.org</url>
+	    </repository>
+	</repositories>
 	<properties>
 		<gsVersion>${pluginVersion}</gsVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
