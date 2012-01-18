@@ -17,6 +17,7 @@
 package org.openspaces.pu.container.servicegrid;
 
 import com.gigaspaces.annotation.lrmi.AsyncRemoteCall;
+import com.gigaspaces.annotation.lrmi.LivenessPriority;
 import com.gigaspaces.cluster.activeelection.SpaceMode;
 import com.gigaspaces.grid.zone.GridZoneProvider;
 import com.gigaspaces.internal.jvm.JVMInfoProvider;
@@ -50,6 +51,7 @@ public interface PUServiceBean extends NIOInfoProvider, OSInfoProvider, JVMInfoP
      * Return <code>true</code> if the member is alive or not. Exception indicates that
      * the member is not alive (and allows for further information).
      */
+    @LivenessPriority
     boolean isAlive() throws RemoteException, Exception;
 
     Object[] listServiceDetails() throws RemoteException;

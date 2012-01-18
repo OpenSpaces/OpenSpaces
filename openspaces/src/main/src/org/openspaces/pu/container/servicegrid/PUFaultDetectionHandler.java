@@ -17,6 +17,7 @@
 package org.openspaces.pu.container.servicegrid;
 
 import com.sun.jini.config.Config;
+import com.gigaspaces.lrmi.LRMIInvocationContext;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.internal.jvm.JVMDetails;
 import com.j_spaces.core.SpaceUnhealthyException;
@@ -161,6 +162,7 @@ public class PUFaultDetectionHandler extends AbstractFaultDetectionHandler {
         public boolean verify() {
             long start = System.nanoTime();
             try {
+                LRMIInvocationContext.enableLivenessPriorityForNextInvocation();
                 final boolean isAlive = ((PUServiceBean) proxy).isAlive();
 
                 if (isAlive) {
