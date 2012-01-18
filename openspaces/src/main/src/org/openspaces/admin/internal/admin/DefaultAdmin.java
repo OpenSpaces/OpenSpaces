@@ -952,10 +952,11 @@ public class DefaultAdmin implements InternalAdmin {
         processingUnitInstances.removeOrphaned(uid);
         InternalProcessingUnitInstance processingUnitInstance = (InternalProcessingUnitInstance) processingUnitInstances.removeInstance(uid);
         if (processingUnitInstance != null) {
-            for (int i=0; i<removedProcessingUnitInstances.size(); ++i) {
-                ProcessingUnitInstance alreadyRemovedInstance = removedProcessingUnitInstances.get(i);
+            Iterator<ProcessingUnitInstance> iterator = removedProcessingUnitInstances.iterator();
+            while (iterator.hasNext()) {
+                ProcessingUnitInstance alreadyRemovedInstance =  iterator.next();
                 if (alreadyRemovedInstance.getProcessingUnitInstanceName().equals(processingUnitInstance.getProcessingUnitInstanceName())) {
-                    removedProcessingUnitInstances.remove(i);
+                    iterator.remove();
                 }
             }
             removedProcessingUnitInstances.add(processingUnitInstance);
