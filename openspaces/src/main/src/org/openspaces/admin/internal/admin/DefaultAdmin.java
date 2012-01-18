@@ -952,14 +952,16 @@ public class DefaultAdmin implements InternalAdmin {
         processingUnitInstances.removeOrphaned(uid);
         InternalProcessingUnitInstance processingUnitInstance = (InternalProcessingUnitInstance) processingUnitInstances.removeInstance(uid);
         if (processingUnitInstance != null) {
-            Iterator<ProcessingUnitInstance> iterator = removedProcessingUnitInstances.iterator();
-            while (iterator.hasNext()) {
-                ProcessingUnitInstance alreadyRemovedInstance =  iterator.next();
-                if (alreadyRemovedInstance.getProcessingUnitInstanceName().equals(processingUnitInstance.getProcessingUnitInstanceName())) {
-                    iterator.remove();
+            synchronized(removedProcessingUnitInstances) {
+                Iterator<ProcessingUnitInstance> iterator = removedProcessingUnitInstances.iterator();
+                while (iterator.hasNext()) {
+                    ProcessingUnitInstance alreadyRemovedInstance =  iterator.next();
+                    if (alreadyRemovedInstance.getProcessingUnitInstanceName().equals(processingUnitInstance.getProcessingUnitInstanceName())) {
+                        iterator.remove();
+                    }
                 }
+                removedProcessingUnitInstances.add(processingUnitInstance);
             }
-            removedProcessingUnitInstances.add(processingUnitInstance);
             
             processingUnitInstance.setDiscovered(false);
             ((InternalProcessingUnit) processingUnitInstance.getProcessingUnit()).removeProcessingUnitInstance(uid);
@@ -1449,6 +1451,15 @@ public class DefaultAdmin implements InternalAdmin {
                         }
                         processingUnit.stopStatisticsMonitor();
                     }
+                    synchronized(removedProcessingUnitInstances) {
+                        Iterator<ProcessingUnitInstance> iterator = removedProcessingUnitInstances.iterator();
+                        while (iterator.hasNext()) {
+                            ProcessingUnitInstance removedInstance = iterator.next();
+                            if (removedInstance.getProcessingUnit().equals(processingUnit)) {
+                                iterator.remove();
+                            }
+                        }
+                    }
                     
                 }
             }
@@ -1561,7 +1572,7 @@ public class DefaultAdmin implements InternalAdmin {
                             //will raise a member alive indicator event (no need to flush)
                             ((InternalProcessingUnitInstance)puInstanceByUID).setMemberAliveIndicatorStatus(serviceFaultDetectionEvent);
                         } else {
-                            synchronized (DefaultAdmin.this) {
+                            synchronized (removedProcessingUnitInstances) {
                                 Iterator<ProcessingUnitInstance> iterator = removedProcessingUnitInstances.iterator();
                                 while (iterator.hasNext()) {
                                     ProcessingUnitInstance removedInstance = iterator.next();
