@@ -25,12 +25,19 @@ public class ContextPropertyUtils {
     }
     
     public static String getIconPath(InternalProcessingUnit processingUnit) {
-        String iconPath = getContextPropertyValue(processingUnit, CONTEXT_PROPERTY_SERVICE_ICON);
-        if (iconPath == null) {
-            return "";
-        }
-        return iconPath;
+        return getContextPropertyValue(processingUnit, CONTEXT_PROPERTY_SERVICE_ICON);
     }
+    
+    public static String getIconName(InternalProcessingUnit processingUnit) {
+        String iconPath = getIconPath( processingUnit );
+        if( iconPath == null ){
+            return null;
+        }
+        //find icon name after last /
+        int startIndex = iconPath.lastIndexOf( "/" ) >= 0 ? 
+                            iconPath.lastIndexOf( "/" ) + 1 : 0;
+        return iconPath.substring( startIndex );
+    }    
     
     public static String getCloudName(InternalProcessingUnit processingUnit) {
         String cloudName = getContextPropertyValue(processingUnit, CONTEXT_PROPERTY_CLOUD_NAME);
