@@ -7,6 +7,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import net.jini.core.lookup.ServiceID;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jini.rio.monitor.event.Events;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.dump.DumpResult;
@@ -35,6 +37,8 @@ import com.gigaspaces.lrmi.nio.info.NIOStatistics;
  */
 public class DefaultElasticServiceManager extends AbstractAgentGridComponent implements InternalElasticServiceManager {
 
+    private static final Log logger = LogFactory.getLog(DefaultElasticServiceManager.class);
+    
     private final ServiceID serviceID;
 
     private final ESM esm;
@@ -198,13 +202,22 @@ public class DefaultElasticServiceManager extends AbstractAgentGridComponent imp
             String puName = progressEvent.getProcessingUnitName();
             if (progressEvent.isComplete()) {
                 if (progressEvent.isUndeploying()) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug(puName + " is not managed by ESM since it has undeployed");
+                    }
                     esmScaleIsInProgressPerProcessingUnit.remove(puName);
                 }
                 else {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug(puName + " is managed by ESM and completed deployment (not in progress)");
+                    }
                     esmScaleIsInProgressPerProcessingUnit.put(puName,false);
                 }
             }
             else {
+                if (logger.isDebugEnabled()) {
+                    logger.debug(puName + " is managed by ESM and deployment is in progress.");
+                }
                 esmScaleIsInProgressPerProcessingUnit.put(puName,true);
             }
         }
