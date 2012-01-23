@@ -48,7 +48,7 @@ public @interface TransactionalEvent {
     Isolation isolation() default org.springframework.transaction.annotation.Isolation.DEFAULT;
 
     /**
-     * The timeout for this transaction.
+     * The timeout for this transaction (in seconds).
      * <p>Defaults to the default timeout of the underlying transaction system.
      */
     int timeout() default TransactionDefinition.TIMEOUT_DEFAULT;
