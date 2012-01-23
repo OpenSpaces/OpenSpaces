@@ -22,7 +22,7 @@ public class CustomServiceDetails extends PlainServiceDetails {
      * @param serviceSubType
      * @param description
      * @param longDescription
-     * @deprecated since 8.0.5. Use {@link #CustomServiceDetails(String, String, String, String)} 
+     * @deprecated since 9.0 Use {@link #CustomServiceDetails(String, String, String, String)} 
      * instead - constructor that does not receive service type as parameter since custom 
      * type is always {@link SERVICE_TYPE}
      */
