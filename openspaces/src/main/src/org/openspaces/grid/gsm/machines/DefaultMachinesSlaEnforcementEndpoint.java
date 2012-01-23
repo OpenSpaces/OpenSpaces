@@ -186,7 +186,6 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
      */
     private void validateProvisionedMachines(AbstractMachinesSlaPolicy sla) throws GridServiceAgentSlaEnforcementInProgressException, MachinesSlaEnforcementInProgressException  {
 
-        // if sla is undeploying that we want to continue no matter what. No much harm could be done.
         Collection<GridServiceAgent> discoveredAgents =sla.getDiscoveredMachinesCache().getDiscoveredAgents();
         Collection<GridServiceAgent> undiscoveredAgents = new HashSet<GridServiceAgent>();
         for(GridServiceAgent agent : MachinesSlaUtils.convertAgentUidsToAgentsIfDiscovered(state.getAllocatedCapacity(pu).getAgentUids(),pu.getAdmin())) {
