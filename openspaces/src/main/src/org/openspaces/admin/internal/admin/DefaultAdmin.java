@@ -28,6 +28,7 @@ import net.jini.core.lookup.ServiceID;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jini.rio.core.OperationalString;
+import org.jini.rio.monitor.ProvisionLifeCycleEvent;
 import org.jini.rio.monitor.ServiceFaultDetectionEvent;
 import org.jini.rio.monitor.event.Event;
 import org.jini.rio.monitor.event.Events;
@@ -239,6 +240,11 @@ public class DefaultAdmin implements InternalAdmin {
     public DefaultAdmin() {
         this.discoveryService = new DiscoveryService(this);
         this.alertManager = new DefaultAlertManager(this);
+    }
+    
+    @Override
+    public Log getAdminLogger() {
+        return logger;
     }
 
     @Override
@@ -1534,8 +1540,6 @@ public class DefaultAdmin implements InternalAdmin {
                     status = degradeUniversalServiceManagerProcessingUnitStatus(processingUnit, status);
                 }
                 processingUnit.setStatus(status);
-                
-                processingUnit.processProvisionEvents(details.getProvisionLifeCycleEvents());
             }
 
             // Now, process any orphaned processing unit instances
@@ -1584,6 +1588,13 @@ public class DefaultAdmin implements InternalAdmin {
                                     }
                                 }
                             }
+                        }
+                    } else if (event instanceof ProvisionLifeCycleEvent) {
+                        ProvisionLifeCycleEvent provEvent = (ProvisionLifeCycleEvent)event;
+                        String processingUnitName = provEvent.getProcessingUnitName();
+                        ProcessingUnit processingUnit = processingUnits.getProcessingUnit(processingUnitName);
+                        if (processingUnit != null) {
+                            ((InternalProcessingUnit)processingUnit).processProvisionEvent(provEvent);
                         }
                     }
                 }

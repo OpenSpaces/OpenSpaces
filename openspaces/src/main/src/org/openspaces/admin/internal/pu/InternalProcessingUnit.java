@@ -73,6 +73,10 @@ public interface InternalProcessingUnit extends ProcessingUnit, InternalProcessi
     /**
      * @since 8.0.6
      */
-    void processProvisionEvents(ProvisionLifeCycleEvent[] provisionLifeCycleEvents);
+    void processProvisionEvent(ProvisionLifeCycleEvent provisionLifeCycleEvent);
     
+    /**
+     * @since 8.0.6
+     */
+    Map<String, InternalProvisionStatusHolder> getProvisionStatusPerInstance();
 }

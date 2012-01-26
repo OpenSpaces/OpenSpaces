@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.pu.InternalProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEvent;
@@ -16,8 +17,15 @@ public class DefaultProcessingUnitInstanceMemberAliveIndicatorStatusChangedEvent
 
     private final List<ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventListener> eventListeners = new CopyOnWriteArrayList<ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventListener>();
 
+    private final InternalProcessingUnit processingUnit;
+
     public DefaultProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventManager(InternalAdmin admin) {
+        this(admin, null);
+    }
+    
+    public DefaultProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventManager(InternalAdmin admin, InternalProcessingUnit processingUnit) {
         this.admin = admin;
+        this.processingUnit = processingUnit;
     }
 
     
@@ -31,11 +39,21 @@ public class DefaultProcessingUnitInstanceMemberAliveIndicatorStatusChangedEvent
         if (includeCurrentStatus) {
             admin.raiseEvent(listener, new Runnable() {
                 public void run() {
-                    for (ProcessingUnit pu : admin.getProcessingUnits()) {
-                        for (ProcessingUnitInstance instance : pu) {
-                            listener.processingUnitInstanceMemberAliveIndicatorStatusChanged(new ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEvent(
-                                    instance, null, instance.getMemberAliveIndicatorStatus()));
+                    if (processingUnit != null) {
+                        notifyListener(listener, processingUnit);
+                    } else {
+                        for (ProcessingUnit pu : admin.getProcessingUnits()) {
+                            notifyListener(listener, pu);
                         }
+                    }
+                }
+
+                private void notifyListener(
+                        final ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventListener listener,
+                        ProcessingUnit pu) {
+                    for (ProcessingUnitInstance instance : pu) {
+                        listener.processingUnitInstanceMemberAliveIndicatorStatusChanged(new ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEvent(
+                                instance, null, instance.getMemberAliveIndicatorStatus()));
                     }
                 }
             });

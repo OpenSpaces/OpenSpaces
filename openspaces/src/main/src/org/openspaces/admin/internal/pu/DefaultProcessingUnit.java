@@ -1,7 +1,9 @@
 package org.openspaces.admin.internal.pu;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -14,11 +16,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.jini.rio.core.RequiredDependencies;
 import org.jini.rio.monitor.ProvisionLifeCycleEvent;
 import org.openspaces.admin.Admin;
-import org.openspaces.admin.AdminEventListener;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.application.Application;
-import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.application.InternalApplication;
@@ -31,11 +31,7 @@ import org.openspaces.admin.internal.pu.events.DefaultBackupGridServiceManagerCh
 import org.openspaces.admin.internal.pu.events.DefaultManagingGridServiceManagerChangedEventManager;
 import org.openspaces.admin.internal.pu.events.DefaultProcessingUnitInstanceAddedEventManager;
 import org.openspaces.admin.internal.pu.events.DefaultProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventManager;
-import org.openspaces.admin.internal.pu.events.DefaultProcessingUnitInstanceProvisionAttemptEventManager;
-import org.openspaces.admin.internal.pu.events.DefaultProcessingUnitInstanceProvisionEventsManager;
-import org.openspaces.admin.internal.pu.events.DefaultProcessingUnitInstanceProvisionFailureEventManager;
-import org.openspaces.admin.internal.pu.events.DefaultProcessingUnitInstanceProvisionPendingEventManager;
-import org.openspaces.admin.internal.pu.events.DefaultProcessingUnitInstanceProvisionSuccessEventManager;
+import org.openspaces.admin.internal.pu.events.DefaultProcessingUnitInstanceProvisionStatusChangedEventManager;
 import org.openspaces.admin.internal.pu.events.DefaultProcessingUnitInstanceRemovedEventManager;
 import org.openspaces.admin.internal.pu.events.DefaultProcessingUnitInstanceStatisticsChangedEventManager;
 import org.openspaces.admin.internal.pu.events.DefaultProcessingUnitSpaceCorrelatedEventManager;
@@ -44,21 +40,18 @@ import org.openspaces.admin.internal.pu.events.InternalBackupGridServiceManagerC
 import org.openspaces.admin.internal.pu.events.InternalManagingGridServiceManagerChangedEventManager;
 import org.openspaces.admin.internal.pu.events.InternalProcessingUnitInstanceAddedEventManager;
 import org.openspaces.admin.internal.pu.events.InternalProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventManager;
-import org.openspaces.admin.internal.pu.events.InternalProcessingUnitInstanceProvisionAttemptEventManager;
-import org.openspaces.admin.internal.pu.events.InternalProcessingUnitInstanceProvisionFailureEventManager;
-import org.openspaces.admin.internal.pu.events.InternalProcessingUnitInstanceProvisionPendingEventManager;
-import org.openspaces.admin.internal.pu.events.InternalProcessingUnitInstanceProvisionSuccessEventManager;
+import org.openspaces.admin.internal.pu.events.InternalProcessingUnitInstanceProvisionStatusChangedEventManager;
 import org.openspaces.admin.internal.pu.events.InternalProcessingUnitInstanceRemovedEventManager;
 import org.openspaces.admin.internal.pu.events.InternalProcessingUnitInstanceStatisticsChangedEventManager;
 import org.openspaces.admin.internal.pu.events.InternalProcessingUnitSpaceCorrelatedEventManager;
 import org.openspaces.admin.internal.pu.events.InternalProcessingUnitStatusChangedEventManager;
-import org.openspaces.admin.internal.support.EventRegistrationHelper;
 import org.openspaces.admin.pu.DeploymentStatus;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.ProcessingUnitPartition;
 import org.openspaces.admin.pu.ProcessingUnitType;
 import org.openspaces.admin.pu.ProcessingUnits;
+import org.openspaces.admin.pu.ProvisionStatus;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependencies;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
@@ -69,16 +62,11 @@ import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEventList
 import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
-import org.openspaces.admin.pu.events.ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
-import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionAttemptEvent;
-import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionAttemptEventManager;
-import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionFailureEvent;
-import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionFailureEventManager;
-import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionFailureException;
-import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionPendingEvent;
-import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionPendingEventManager;
-import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionSuccessEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionFailure;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionStatusChangedEvent;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionStatusChangedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceStatisticsChangedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitRemovedEventListener;
@@ -146,11 +134,9 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
 
     private final InternalProcessingUnitInstanceStatisticsChangedEventManager processingUnitInstanceStatisticsChangedEventManager;
 
-    private final DefaultProcessingUnitInstanceProvisionEventsManager processingUnitInstanceProvisionEventsManager = new DefaultProcessingUnitInstanceProvisionEventsManager();
-    private final InternalProcessingUnitInstanceProvisionAttemptEventManager processingUnitProvisionAttemptEventManager;
-    private final InternalProcessingUnitInstanceProvisionSuccessEventManager processingUnitProvisionSuccessEventManager;
-    private final InternalProcessingUnitInstanceProvisionFailureEventManager processingUnitProvisionFailureEventManager;
-    private final InternalProcessingUnitInstanceProvisionPendingEventManager processingUnitProvisionPendingEventManager;
+    //map processing unit instance name to it's provision status (mapping is kept even if instance is removed)
+    private final Map<String, InternalProvisionStatusHolder> provisionStatus = new HashMap<String, InternalProvisionStatusHolder>();
+    private final InternalProcessingUnitInstanceProvisionStatusChangedEventManager processingUnitInstanceProvisionStatusChangedEventManager;
     
     private final InternalProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventManager processingUnitInstanceMemberAliveIndicatorStatusChangedEventManager;
     
@@ -260,12 +246,8 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         this.spaceCorrelatedEventManager = new DefaultProcessingUnitSpaceCorrelatedEventManager(this);
         this.processingUnitInstanceStatisticsChangedEventManager = new DefaultProcessingUnitInstanceStatisticsChangedEventManager(admin);
         
-        this.processingUnitProvisionAttemptEventManager = new DefaultProcessingUnitInstanceProvisionAttemptEventManager(admin);
-        this.processingUnitProvisionSuccessEventManager = new DefaultProcessingUnitInstanceProvisionSuccessEventManager(admin);
-        this.processingUnitProvisionFailureEventManager = new DefaultProcessingUnitInstanceProvisionFailureEventManager(admin);
-        this.processingUnitProvisionPendingEventManager = new DefaultProcessingUnitInstanceProvisionPendingEventManager(admin);
-        
-        this.processingUnitInstanceMemberAliveIndicatorStatusChangedEventManager = new DefaultProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventManager(admin);
+        this.processingUnitInstanceProvisionStatusChangedEventManager = new DefaultProcessingUnitInstanceProvisionStatusChangedEventManager(admin, this);
+        this.processingUnitInstanceMemberAliveIndicatorStatusChangedEventManager = new DefaultProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventManager(admin, this);
     }
 
     @Override
@@ -361,16 +343,6 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     public void removeLifecycleListener(ProcessingUnitInstanceLifecycleEventListener eventListener) {
         getProcessingUnitInstanceAdded().remove(eventListener);
         getProcessingUnitInstanceRemoved().remove(eventListener);
-    }
-    
-    @Override
-    public void addEventListener(AdminEventListener eventListener) {
-        EventRegistrationHelper.addEventListener(this, eventListener);
-    }
-    
-    @Override
-    public void removeEventListener(AdminEventListener eventListener) {
-        EventRegistrationHelper.removeEventListener(this, eventListener);
     }
 
     @Override
@@ -946,119 +918,69 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     }
     
     @Override
-    public ProcessingUnitInstanceProvisionAttemptEventManager getProcessingUnitInstanceProvisionAttempt() {
-        return processingUnitProvisionAttemptEventManager;
-    }
-
-    @Override
-    public ProcessingUnitInstanceProvisionSuccessEventManager getProcessingUnitInstanceProvisionSuccess() {
-        return processingUnitProvisionSuccessEventManager;
-    }
-
-    @Override
-    public ProcessingUnitInstanceProvisionFailureEventManager getProcessingUnitInstanceProvisionFailure() {
-        return processingUnitProvisionFailureEventManager;
-    }
-
-    @Override
-    public ProcessingUnitInstanceProvisionPendingEventManager getProcessingUnitInstanceProvisionPending() {
-        return processingUnitProvisionPendingEventManager;
-    }
-    
-    @Override
-    public void processProvisionEvents(ProvisionLifeCycleEvent[] provisionLifeCycleEvents) {
-        
-        processingUnitInstanceProvisionEventsManager.indexEventsByProcessingUnitInstanceName(provisionLifeCycleEvents);
-        
-        /*
-         * Events are already filtered and ordered by last provision event per processing unit instance.
-         */
-        for (final ProvisionLifeCycleEvent provisionEvent : provisionLifeCycleEvents) {
+    public void processProvisionEvent(ProvisionLifeCycleEvent provisionLifeCycleEvent) {
+        ProvisionStatus newStatus;
+        switch(provisionLifeCycleEvent.getStatus()) {
+        case ProvisionLifeCycleEvent.ALLOCATION_ATTEMPT: 
+            newStatus = ProvisionStatus.ATTEMPT;
+            break;
+        case ProvisionLifeCycleEvent.ALLOCATION_SUCCESS:
+            newStatus = ProvisionStatus.SUCCESS;
+            break;
+        case ProvisionLifeCycleEvent.ALLOCATION_FAILURE:
+            newStatus = ProvisionStatus.FAILURE;
+            break;
+        case ProvisionLifeCycleEvent.PENDING_ALLOCATION:
+            newStatus = ProvisionStatus.PENDING;
+            break;
+        default:
+            throw new IllegalStateException("unknown provision life-cycle status");
+        }
+        InternalProvisionStatusHolder provisionStatusHolder = provisionStatus.get(provisionLifeCycleEvent.getProcessingUnitInstanceName());
+        if (provisionStatusHolder == null) {
+            provisionStatusHolder = new InternalProvisionStatusHolder();
+        }
+        ProvisionStatus lastProvisionStatus = provisionStatusHolder.getNewProvisionStatus();
+        if (newStatus != lastProvisionStatus) {
+            String processingUnitInstanceName = provisionLifeCycleEvent.getProcessingUnitInstanceName();
             
-        	if (!getName().equals(provisionEvent.getProcessingUnitName())) {
-        		continue;
-        	}
-        	
-        	int type = provisionEvent.getType();
-        	switch(type) {
-        	case ProvisionLifeCycleEvent.ALLOCATION_ATTEMPT: {
-        	    GridServiceContainer gridServiceContainer = getGridServiceContainerById(provisionEvent.getGscServiceId());
-        	    if (gridServiceContainer == null) {
-        	        continue; //either GSC was killed or not yet discovered
-        	    }
-        	    String processingUnitInstanceName = provisionEvent.getProcessingUnitInstanceName();
-        	    ProcessingUnitInstanceProvisionAttemptEvent attemptEvent = new ProcessingUnitInstanceProvisionAttemptEvent(gridServiceContainer, this, processingUnitInstanceName);
-        	    processingUnitProvisionAttemptEventManager.raiseAttemptEvent(provisionEvent, attemptEvent, processingUnitInstanceProvisionEventsManager);
-        	    ((InternalProcessingUnitInstanceProvisionAttemptEventManager)processingUnits.getProcessingUnitInstanceProvisionAttempt()).raiseAttemptEvent(provisionEvent, attemptEvent, processingUnitInstanceProvisionEventsManager);
-        	    break;
-        	}
-        	case ProvisionLifeCycleEvent.ALLOCATION_SUCCESS: {
-        	    final String processingUnitInstanceName = provisionEvent.getProcessingUnitInstanceName();
-        	    for (ProcessingUnitInstance processingUnitInstance : getInstances()) {
-        	        if (processingUnitInstance.getProcessingUnitInstanceName().equals(processingUnitInstanceName)) {
-        	            processingUnitProvisionSuccessEventManager.raiseSuccessEvent(provisionEvent, processingUnitInstance, processingUnitInstanceProvisionEventsManager);
-        	               ((InternalProcessingUnitInstanceProvisionSuccessEventManager)processingUnits.getProcessingUnitInstanceProvisionSuccess()).raiseSuccessEvent(provisionEvent, processingUnitInstance, processingUnitInstanceProvisionEventsManager);
-        	            break;
-        	        }
-        	    }
-        	    break;
-        	}
-        	case ProvisionLifeCycleEvent.ALLOCATION_FAILURE: {
-        	    GridServiceContainer gridServiceContainer = getGridServiceContainerById(provisionEvent.getGscServiceId());
-        	    if (gridServiceContainer == null) {
-                    continue; //either GSC was killed or not yet discovered
+            final String exceptionMessage = provisionLifeCycleEvent.getException();
+            if (exceptionMessage != null) {
+                boolean uninstantiable = provisionLifeCycleEvent.isUninstantiable();
+                ProcessingUnitInstanceProvisionFailure failure = new ProcessingUnitInstanceProvisionFailure(this, provisionLifeCycleEvent.getGscServiceId(), exceptionMessage, uninstantiable);
+                try {
+                    Field field = newStatus.getClass().getDeclaredField("provisionFailure");
+                    field.setAccessible(true);
+                    field.set(newStatus, failure);
+                } catch (Exception e) {
+                    admin.getAdminLogger().warn("failed to set provision failure " + e);
                 }
-        	    final String processingUnitInstanceName = provisionEvent.getProcessingUnitInstanceName();
-        	    final String exceptionMessage = provisionEvent.getException();
-        	    boolean uninstantiable = provisionEvent.isUninstantiable();
-        	    ProcessingUnitInstanceProvisionFailureException exception = new ProcessingUnitInstanceProvisionFailureException(exceptionMessage, uninstantiable);
-        	    ProcessingUnitInstanceProvisionFailureEvent failureEvent = new ProcessingUnitInstanceProvisionFailureEvent(gridServiceContainer, this, processingUnitInstanceName, exception);
-        	    processingUnitProvisionFailureEventManager.raiseFailureEvent(provisionEvent, failureEvent, processingUnitInstanceProvisionEventsManager);
-                ((InternalProcessingUnitInstanceProvisionFailureEventManager)processingUnits.getProcessingUnitInstanceProvisionFailure()).raiseFailureEvent(provisionEvent, failureEvent, processingUnitInstanceProvisionEventsManager);
-        	    break;
-        	}
-        	case ProvisionLifeCycleEvent.PENDING_ALLOCATION: {
-        	    final String processingUnitInstanceName = provisionEvent.getProcessingUnitInstanceName();
-        	    /*
-        	     * Try and extract previous failure event and attach to pending event.
-        	     */
-        	    ProcessingUnitInstanceProvisionFailureEvent failureEvent = null;
-        	    ProvisionLifeCycleEvent provFailureEvent = processingUnitInstanceProvisionEventsManager.getLastProvisionFailureEvent(processingUnitInstanceName);
-        	    if (provFailureEvent != null) {
-        	        GridServiceContainer gridServiceContainer = getGridServiceContainerById(provFailureEvent.getGscServiceId());
-        	        if (gridServiceContainer != null) {
-        	            final String exceptionMessage = provFailureEvent.getException();
-        	            boolean uninstantiable = provFailureEvent.isUninstantiable();
-        	            ProcessingUnitInstanceProvisionFailureException exception = new ProcessingUnitInstanceProvisionFailureException(exceptionMessage, uninstantiable);
-        	            failureEvent = new ProcessingUnitInstanceProvisionFailureEvent(gridServiceContainer, this, processingUnitInstanceName, exception);
-        	        }
-        	    }
-        	    ProcessingUnitInstanceProvisionPendingEvent pendingEvent = new ProcessingUnitInstanceProvisionPendingEvent(this, processingUnitInstanceName, failureEvent);
-        	    processingUnitProvisionPendingEventManager.raisePendingEvent(provisionEvent, pendingEvent, processingUnitInstanceProvisionEventsManager);
-                ((InternalProcessingUnitInstanceProvisionPendingEventManager)processingUnits.getProcessingUnitInstanceProvisionPending()).raisePendingEvent(provisionEvent, pendingEvent, processingUnitInstanceProvisionEventsManager);
-        	    break;
-        	}
-        	}
+            }
+            
+            ProcessingUnitInstanceProvisionStatusChangedEvent event = new ProcessingUnitInstanceProvisionStatusChangedEvent(this, processingUnitInstanceName, lastProvisionStatus, newStatus, provisionLifeCycleEvent.getGscServiceId());
+            
+            provisionStatusHolder.setNewProvisionStatus(newStatus);
+            provisionStatusHolder.setPrevProvisionStatus(lastProvisionStatus);
+            provisionStatus.put(provisionLifeCycleEvent.getProcessingUnitInstanceName(), provisionStatusHolder);
+
+            processingUnitInstanceProvisionStatusChangedEventManager.processingUnitInstanceProvisionStatusChanged(event);
+            ((InternalProcessingUnitInstanceProvisionStatusChangedEventManager)getProcessingUnits().getProcessingUnitInstanceProvisionStatusChanged()).processingUnitInstanceProvisionStatusChanged(event);
         }
     }
 
-    /**
-     * Get the GSC using the provided Service Id.
-     * @param gscServiceId the UID of this GSC.
-     * @return the matching GSC or <code>null</code>.
-     */
-    private GridServiceContainer getGridServiceContainerById(String gscServiceId) {
-        GridServiceContainer gsc = null;
-        if (gscServiceId != null) {
-            gsc = (GridServiceContainer)admin.getGridComponentByUID(gscServiceId);
-        }
-        
-        return gsc;
+    @Override
+    public Map<String, InternalProvisionStatusHolder> getProvisionStatusPerInstance() {
+        return Collections.unmodifiableMap(provisionStatus);
     }
     
     @Override
     public String getSimpleName() {
         return simpleName;
+    }
+    
+    @Override
+    public ProcessingUnitInstanceProvisionStatusChangedEventManager getProcessingUnitInstanceProvisionStatusChanged() {
+        return this.processingUnitInstanceProvisionStatusChangedEventManager;
     }
     
     

@@ -4,6 +4,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.logging.Log;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.internal.esm.InternalElasticServiceManager;
 import org.openspaces.admin.internal.gsa.InternalGridServiceAgent;
@@ -23,6 +24,8 @@ import com.gigaspaces.security.directory.UserDetails;
  */
 public interface InternalAdmin extends Admin {
 
+    Log getAdminLogger();
+    
     ScheduledThreadPoolExecutor getScheduler();
     
     ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit);
@@ -69,7 +72,7 @@ public interface InternalAdmin extends Admin {
     void removeSpaceInstance(String uid);
 
     void assertStateChangesPermitted();
-
+    
     /**
      * Any internal admin objects state change must be scheduled using this method.
      * In case there is a single event loop thread (non blocking event listeners), 

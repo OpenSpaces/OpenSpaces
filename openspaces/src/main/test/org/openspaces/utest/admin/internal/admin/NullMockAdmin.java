@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 import net.jini.core.discovery.LookupLocator;
 
+import org.apache.commons.logging.Log;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminEventListener;
 import org.openspaces.admin.AdminException;
@@ -47,6 +48,11 @@ import com.gigaspaces.security.directory.UserDetails;
 
 public class NullMockAdmin implements Admin, InternalAdmin {
 
+    public Log getAdminLogger() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
     public void addEventListener(AdminEventListener eventListener) {
         // TODO Auto-generated method stub
 

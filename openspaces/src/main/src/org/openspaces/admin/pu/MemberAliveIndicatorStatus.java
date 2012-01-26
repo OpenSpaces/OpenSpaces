@@ -8,6 +8,10 @@ package org.openspaces.admin.pu;
  * <li><tt>SUSPECTING_FAILURE</tt> --> <tt>ALIVE</tt> : instance has yet to reply on monitoring <b>retry</b> attempt</li>
  * <li><tt>SUSPECTING_FAILURE</tt> --> <tt>DETECTED_FAILURE</tt>: instance has failed to respond for all monitoring <b>retry</b> attempts</li>
  * </ul>
+ * 
+ * @see org.openspaces.admin.pu.events.ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEvent
+ * @see org.openspaces.admin.pu.events.ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventListener
+ * 
  * @since 8.0.6
  * @author moran
  */
