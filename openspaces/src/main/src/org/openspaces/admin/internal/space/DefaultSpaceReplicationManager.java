@@ -47,7 +47,19 @@ public class DefaultSpaceReplicationManager implements SpaceReplicationManager {
         } catch (Exception e) {
             throw new AdminException("failed to add a replication gateway target", e);
         }
-
+    }
+    
+    @Override
+    public void removeGatewayTarget(String gatewayTargetName) {
+        GigaSpace gigaSpace = _defaultSpace.getGigaSpace();
+        ISpaceProxy spaceProxy = (ISpaceProxy) gigaSpace.getSpace();
+        try {
+            spaceProxy.removeGatewayTarget(gatewayTargetName);
+        } catch (ExecutionException e) {
+            throw new AdminException("failed to remove a replication gateway target", e.getCause()); 
+        } catch (Exception e) {
+            throw new AdminException("failed to remove a replication gateway target", e);
+        }
     }
 
 }
