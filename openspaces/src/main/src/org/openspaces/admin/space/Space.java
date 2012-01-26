@@ -169,6 +169,12 @@ public interface Space extends Iterable<SpaceInstance>, StatisticsMonitor {
      * Returns an aggregated view of all the Space runtime details of all primary instances.
      */
     SpaceRuntimeDetails getRuntimeDetails();
+    
+    /**
+     * Returns a replication manager for this space.
+     * @since 9.0
+     */
+    SpaceReplicationManager getReplicationManager();
 
     /**
      * Allows to registered {@link org.openspaces.admin.space.events.SpaceInstanceAddedEventListener} to be notified

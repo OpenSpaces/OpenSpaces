@@ -38,6 +38,7 @@ import org.openspaces.admin.space.Space;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.space.SpaceInstanceStatistics;
 import org.openspaces.admin.space.SpacePartition;
+import org.openspaces.admin.space.SpaceReplicationManager;
 import org.openspaces.admin.space.SpaceRuntimeDetails;
 import org.openspaces.admin.space.SpaceStatistics;
 import org.openspaces.admin.space.Spaces;
@@ -128,6 +129,8 @@ public class DefaultSpace implements InternalSpace {
     private SpaceStatistics lastBackupStatistics;
     
     private final SpaceRuntimeDetails spaceRuntimeDetails;
+    
+    private final SpaceReplicationManager spaceReplicationManager;
 
     private Future scheduledStatisticsMonitor;
     
@@ -146,6 +149,7 @@ public class DefaultSpace implements InternalSpace {
         this.statisticsChangedEventManager = new DefaultSpaceStatisticsChangedEventManager(admin);
         this.instanceStatisticsChangedEventManager = new DefaultSpaceInstanceStatisticsChangedEventManager(admin);
         this.spaceRuntimeDetails = new DefaultSpaceRuntimeDetails(this);
+        this.spaceReplicationManager = new DefaultSpaceReplicationManager(this);
     }
 
     public Spaces getSpaces() {
@@ -332,6 +336,11 @@ public class DefaultSpace implements InternalSpace {
     
     public SpaceRuntimeDetails getRuntimeDetails() {
         return spaceRuntimeDetails;
+    }
+    
+    @Override
+    public SpaceReplicationManager getReplicationManager() {
+        return spaceReplicationManager;
     }
 
     public void addInstance(final SpaceInstance spaceInstance) {
