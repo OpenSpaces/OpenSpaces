@@ -40,8 +40,9 @@ public class DefaultSpaceReplicationManager implements SpaceReplicationManager {
         if (gatewaysPolicy == null)
             throw new UnsupportedOperationException("Cannot add replication gateway target to a space with no gateways");
         GatewayPolicy defaultGatewayPolicy = gatewaysPolicy.getDefaultGatewayPolicy();        
-        try {
-            spaceProxy.addReplicationGatewayTarget(gatewayTarget.asGatewayPolicy(defaultGatewayPolicy));
+        try {            
+            GatewayPolicy gatewayPolicy = defaultGatewayPolicy != null? gatewayTarget.asGatewayPolicy(defaultGatewayPolicy) : gatewayTarget.asGatewayPolicy();
+            spaceProxy.addReplicationGatewayTarget(gatewayPolicy);
         } catch (ExecutionException e) {
             throw new AdminException("failed to add a replication gateway target", e.getCause()); 
         } catch (Exception e) {
