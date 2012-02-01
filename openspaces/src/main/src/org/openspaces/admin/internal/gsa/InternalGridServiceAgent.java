@@ -26,7 +26,4 @@ public interface InternalGridServiceAgent extends GridServiceAgent, InternalGrid
     void restart(InternalAgentGridComponent agentGridComponent);
 
     int internalStartGridService(GridServiceContainerConfig config);
-    
-    /** @since 9.0.0 - get the process IDs managed by this Grid Service Agent */
-    int[] getManagedGridServiceIds();
 }

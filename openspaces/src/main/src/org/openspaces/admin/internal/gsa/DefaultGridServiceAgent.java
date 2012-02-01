@@ -37,7 +37,6 @@ import org.openspaces.admin.internal.support.NetworkExceptionHelper;
 import org.openspaces.admin.lus.LookupService;
 import org.openspaces.admin.lus.events.LookupServiceAddedEventListener;
 
-import com.gigaspaces.grid.gsa.AgentProcessDetails;
 import com.gigaspaces.grid.gsa.AgentProcessesDetails;
 import com.gigaspaces.grid.gsa.GSA;
 import com.gigaspaces.internal.jvm.JVMDetails;
@@ -453,22 +452,5 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
 
     public void runGc() throws RemoteException {
         gsa.runGc();
-    }
-
-    @Override
-    public int[] getManagedGridServiceIds() throws AdminException {
-        try {
-            AgentProcessesDetails details = gsa.getDetails();
-            int length = details.getProcessDetails().length;
-            int[] ids = new int[length];
-            int i=0;
-            for (AgentProcessDetails processDetails : details.getProcessDetails()) {
-                long processId = processDetails.getProcessId();
-                ids[i++] = (int)processId;
-            }
-            return ids;
-        } catch (RemoteException e) {
-            throw new AdminException("Failed to get service ids. " + e, e);
-        }
     }
 }
