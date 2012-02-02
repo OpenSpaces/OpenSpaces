@@ -398,4 +398,10 @@ public class NullMockAdmin implements Admin, InternalAdmin {
         // TODO Auto-generated method stub
         return 0;
     }
+
+    @Override
+    public boolean isSingleThreadedEventListeners() {
+        // TODO Auto-generated method stub
+        return false;
+    }
 }

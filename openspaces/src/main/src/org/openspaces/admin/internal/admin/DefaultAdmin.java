@@ -1710,4 +1710,9 @@ public class DefaultAdmin implements InternalAdmin {
             
             delay, unit);
     }
+    
+    @Override
+    public boolean isSingleThreadedEventListeners() {
+        return singleThreadedEventListeners;
+    }
 }

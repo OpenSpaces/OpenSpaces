@@ -126,4 +126,6 @@ public interface InternalAdmin extends Admin {
      */
     void singleThreadedEventListeners();
 
+    boolean isSingleThreadedEventListeners();
+
 }
