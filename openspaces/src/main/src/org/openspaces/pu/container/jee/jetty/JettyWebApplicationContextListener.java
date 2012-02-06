@@ -3,6 +3,7 @@ package org.openspaces.pu.container.jee.jetty;
 import com.j_spaces.core.IJSpace;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.eclipse.jetty.server.SessionManager;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.ScopedHandler;
 import org.eclipse.jetty.server.session.AbstractSessionManager;
@@ -135,15 +136,18 @@ public class JettyWebApplicationContextListener implements ServletContextListene
                 }
 
                 // copy over session settings
-                gigaSessionManager.setSessionCookie(sessionHandler.getSessionManager().getSessionCookie());
-                gigaSessionManager.setSessionDomain(sessionHandler.getSessionManager().getSessionDomain());
-                gigaSessionManager.setSessionPath(sessionHandler.getSessionManager().getSessionPath());
-                gigaSessionManager.setUsingCookies(sessionHandler.getSessionManager().isUsingCookies());
-                gigaSessionManager.setMaxCookieAge(sessionHandler.getSessionManager().getMaxCookieAge());
-                gigaSessionManager.setSecureCookies(sessionHandler.getSessionManager().getSecureCookies());
-                gigaSessionManager.setMaxInactiveInterval(sessionHandler.getSessionManager().getMaxInactiveInterval());
-                gigaSessionManager.setHttpOnly(sessionHandler.getSessionManager().getHttpOnly());
 
+                SessionManager sessionManager = sessionHandler.getSessionManager();
+                gigaSessionManager.getSessionCookieConfig().setName(sessionManager.getSessionCookieConfig().getName());
+                gigaSessionManager.getSessionCookieConfig().setDomain(sessionManager.getSessionCookieConfig().getDomain());
+                gigaSessionManager.getSessionCookieConfig().setPath(sessionManager.getSessionCookieConfig().getPath());
+                gigaSessionManager.setUsingCookies(sessionManager.isUsingCookies());
+                gigaSessionManager.getSessionCookieConfig().setMaxAge(sessionManager.getSessionCookieConfig().getMaxAge());
+                gigaSessionManager.getSessionCookieConfig().setSecure(sessionManager.getSessionCookieConfig().isSecure());
+                gigaSessionManager.setMaxInactiveInterval(sessionManager.getMaxInactiveInterval());                
+                gigaSessionManager.setHttpOnly(sessionManager.getHttpOnly());
+                gigaSessionManager.getSessionCookieConfig().setComment(sessionManager.getSessionCookieConfig().getComment());               
+                
                 String sessionTimeout = beanLevelProperties.getContextProperties().getProperty(JETTY_SESSIONS_TIMEOUT);
                 if (sessionTimeout != null) {
                     gigaSessionManager.setMaxInactiveInterval(Integer.parseInt(sessionTimeout) * 60);
