@@ -213,15 +213,17 @@ public class StoreManagerSQLQuery extends AbstractStoreQuery {
             context.beginStore();
             
             final ISpaceProxy space = (ISpaceProxy) query.getStore().getConfiguration().getSpace();
-            
+
+            // TODO LB: Fix routing 
+            Object routing = null;
             try {
                 SpaceTask<?> spaceTask;
                 if( task instanceof DistributedTask)
                     spaceTask = new InternalDistributedSpaceTaskWrapper((DistributedTask) task);
                 else
-                    spaceTask = new InternalSpaceTaskWrapper(task, null);
+                    spaceTask = new InternalSpaceTaskWrapper(task, routing);
                 
-                AsyncFuture<?> future = space.execute(spaceTask, query.getStore().getCurrentTransaction(), null);
+                AsyncFuture<?> future = space.execute(spaceTask, routing, query.getStore().getCurrentTransaction(), null);
                 Object taskResult = future.get();
                 List resultList = new LinkedList();
                 resultList.add(taskResult);
