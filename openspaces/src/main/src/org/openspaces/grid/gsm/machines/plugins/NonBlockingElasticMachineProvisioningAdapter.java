@@ -42,7 +42,7 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
 	private static final Log logger = LogFactory
 			.getLog(NonBlockingElasticMachineProvisioningAdapter.class);
 
-    private static final int THROTTLING_DELAY_SECONDS = 10;
+    private static final int THROTTLING_DELAY_SECONDS = 0;
     
 	public NonBlockingElasticMachineProvisioningAdapter(ProcessingUnit pu, ElasticMachineProvisioning machineProvisioning, ExecutorService executorService, ScheduledThreadPoolExecutor scheduledExecutorService) {
 		this.pu = pu;
