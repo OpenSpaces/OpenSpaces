@@ -28,6 +28,12 @@ public interface ProcessingUnitAddedEventManager {
      * Adds an event listener.
      */
     void add(ProcessingUnitAddedEventListener eventListener);
+    
+    /**
+     * Adds an event listener. <code>includeExisting</code> controls if events will be raised for existing
+     * processing units as well.
+     */
+    void add(ProcessingUnitAddedEventListener eventListener, boolean includeExisting);
 
     /**
      * Removes an event listener.

@@ -1,13 +1,13 @@
 package org.openspaces.admin.internal.pu.events;
 
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.pu.InternalProcessingUnits;
 import org.openspaces.admin.internal.support.GroovyHelper;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.events.ProcessingUnitAddedEventListener;
-
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @author kimchy
@@ -36,13 +36,19 @@ public class DefaultProcessingUnitAddedEventManager implements InternalProcessin
     }
 
     public void add(final ProcessingUnitAddedEventListener eventListener) {
-        admin.raiseEvent(eventListener, new Runnable() {
-            public void run() {
-                for (ProcessingUnit processingUnit : processingUnits) {
-                    eventListener.processingUnitAdded(processingUnit);
+        add(eventListener, true);
+    }
+    
+    public void add(final ProcessingUnitAddedEventListener eventListener, boolean includeExisting) {
+        if (includeExisting) {
+            admin.raiseEvent(eventListener, new Runnable() {
+                public void run() {
+                    for (ProcessingUnit processingUnit : processingUnits) {
+                        eventListener.processingUnitAdded(processingUnit);
+                    }
                 }
-            }
-        });
+            });
+        }
         listeners.add(eventListener);
     }
 
