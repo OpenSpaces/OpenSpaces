@@ -77,10 +77,8 @@ public abstract class AbstractElasticProcessingUnitAlertBean implements AlertBea
         String groupUid = generateGroupUid(processingUnitName);
         // there could be multiple alerts per PU
         Alert[] alertsByGroupUid = ((InternalAlertManager)admin.getAlertManager()).getAlertRepository().getAlertsByGroupUid(groupUid);
-        for (Alert alert : alertsByGroupUid) {
-            if (alert.getStatus().equals(AlertStatus.RAISED)) {
-                alerts.add(createResolvedAlert(processingUnitName));
-            }
+        if (alertsByGroupUid.length != 0 && !alertsByGroupUid[0].getStatus().isResolved()) {
+            alerts.add(createResolvedAlert(processingUnitName));
         }
         return alerts.toArray(new Alert[alerts.size()]);
     }
