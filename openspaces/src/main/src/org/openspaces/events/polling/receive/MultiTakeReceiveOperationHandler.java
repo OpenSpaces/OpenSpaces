@@ -19,15 +19,17 @@ package org.openspaces.events.polling.receive;
 import org.openspaces.core.GigaSpace;
 import org.springframework.dao.DataAccessException;
 
+import com.j_spaces.core.client.TakeModifiers;
+
 /**
- * First tries and perform a {@link org.openspaces.core.GigaSpace#takeMultiple(Object,int)} using
- * the provided template and configured maxEntries (defaults to <code>50</code>). If no values
- * are returned, will perform a blocking take operation using
- * {@link org.openspaces.core.GigaSpace#take(Object,long)}.
+ * First tries and perform a {@link org.openspaces.core.GigaSpace#takeMultiple(Object,int,int)} using
+ * the provided template, the configured maxEntries (defaults to <code>50</code>) and the configured fifoGroups (default to <code>false</code>). 
+ * <p>If no values are returned, will perform a blocking take operation using
+ * {@link org.openspaces.core.GigaSpace#take(Object,long,int)}.
  * 
  * @author kimchy
  */
-public class MultiTakeReceiveOperationHandler extends AbstractNonBlockingReceiveOperationHandler {
+public class MultiTakeReceiveOperationHandler extends AbstractFifoGroupsReceiveOperationHandler {
 
     private static final int DEFAULT_MAX_ENTRIES = 50;
 
@@ -41,26 +43,34 @@ public class MultiTakeReceiveOperationHandler extends AbstractNonBlockingReceive
     }
 
     /**
-     * First tries and perform a {@link org.openspaces.core.GigaSpace#takeMultiple(Object,int)}
-     * using the provided template and configured maxEntries (defaults to <code>50</code>). If no
-     * values are returned, will perform a blocking take operation using
-     * {@link org.openspaces.core.GigaSpace#take(Object,long)}.
+     * First tries and perform a {@link org.openspaces.core.GigaSpace#takeMultiple(Object,int,int)}
+     * using the provided template, the configured maxEntries (defaults to <code>50</code>) and the configured fifoGroups (default to <code>false</code>). 
+     * If no values are returned, will perform a blocking take operation using
+     * {@link org.openspaces.core.GigaSpace#take(Object,long,int)}.
      */
     @Override
     protected Object doReceiveBlocking(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException {
-        Object[] results = gigaSpace.takeMultiple(template, maxEntries);
+        int modifiers = gigaSpace.getSpace().getReadModifiers();
+        if(fifoGroups)
+            modifiers = TakeModifiers.FIFO_GROUPS_POLL;
+        
+        Object[] results = gigaSpace.takeMultiple(template,maxEntries, modifiers);
         if (results != null && results.length > 0) {
             return results;
         }
-        return gigaSpace.take(template, receiveTimeout);
+        return gigaSpace.take(template, receiveTimeout, modifiers);
     }
 
     /**
-     * Performs a non blocking {@link org.openspaces.core.GigaSpace#takeMultiple(Object, int)}.
+     * Performs a non blocking {@link org.openspaces.core.GigaSpace#takeMultiple(Object,int,int)}
+     * using the provided template, the configured maxEntries (defaults to <code>50</code>) and the configured fifoGroups (default to <code>false</code>). 
      */
     @Override
     protected Object doReceiveNonBlocking(Object template, GigaSpace gigaSpace) throws DataAccessException {
-        Object[] results = gigaSpace.takeMultiple(template, maxEntries);
+        int modifiers = gigaSpace.getSpace().getReadModifiers();
+        if(fifoGroups)
+            modifiers = TakeModifiers.FIFO_GROUPS_POLL;
+        Object[] results = gigaSpace.takeMultiple(template, maxEntries, modifiers);
         if (results != null && results.length > 0) {
             return results;
         }
@@ -69,6 +79,7 @@ public class MultiTakeReceiveOperationHandler extends AbstractNonBlockingReceive
 
     @Override
     public String toString() {
+      //TODO FG : add fifoGroups when name is final
         return "Multi Take, maxEntries[" + maxEntries + "], nonBlocking[" + nonBlocking + "], nonBlockingFactor[" + nonBlockingFactor + "]";
     }
 }

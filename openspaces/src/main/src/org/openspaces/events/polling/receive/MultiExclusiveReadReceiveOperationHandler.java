@@ -22,8 +22,8 @@ import org.springframework.dao.DataAccessException;
 
 /**
  * First tries and perform a {@link org.openspaces.core.GigaSpace#readMultiple(Object,int)} using
- * the provided template and configured maxEntries (defaults to <code>50</code>). If no values
- * are returned, will perform a blocking read operation using
+ * the provided template, configured maxEntries (defaults to <code>50</code>) and the configured fifoGroups (default to <code>false</code>). 
+ * <p>If no values are returned, will perform a blocking read operation using
  * {@link org.openspaces.core.GigaSpace#read(Object,long)}.
  *
  * <p>Read operations are performed under an exclusive read lock which mimics the similar behavior
@@ -31,7 +31,7 @@ import org.springframework.dao.DataAccessException;
  *
  * @author kimchy
  */
-public class MultiExclusiveReadReceiveOperationHandler extends AbstractNonBlockingReceiveOperationHandler {
+public class MultiExclusiveReadReceiveOperationHandler extends AbstractFifoGroupsReceiveOperationHandler {
 
     private static final int DEFAULT_MAX_ENTRIES = 50;
 
@@ -45,9 +45,9 @@ public class MultiExclusiveReadReceiveOperationHandler extends AbstractNonBlocki
     }
 
     /**
-     * First tries and perform a {@link org.openspaces.core.GigaSpace#readMultiple(Object,int)}
-     * using the provided template and configured maxEntries (defaults to <code>50</code>). If no
-     * values are returned, will perform a blocking read operation using
+     * First tries and perform a {@link org.openspaces.core.GigaSpace#readMultiple(Object,int,int)} using
+     * the provided template, configured maxEntries (defaults to <code>50</code>) and the configured fifoGroups (default to <code>false</code>).  
+     * If no values are returned, will perform a blocking read operation using
      * {@link org.openspaces.core.GigaSpace#read(Object,long)}.
      *
      * <p>Read operations are performed under an exclusive read lock which mimics the similar behavior
@@ -55,23 +55,31 @@ public class MultiExclusiveReadReceiveOperationHandler extends AbstractNonBlocki
      */
     @Override
     protected Object doReceiveBlocking(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException {
-        Object[] results = gigaSpace.readMultiple(template, maxEntries, gigaSpace.getModifiersForIsolationLevel() | ReadModifiers.EXCLUSIVE_READ_LOCK);
+        int modifiers = gigaSpace.getModifiersForIsolationLevel() | ReadModifiers.EXCLUSIVE_READ_LOCK;
+        if(fifoGroups)
+            modifiers |= ReadModifiers.FIFO_GROUPS_POLL;
+        
+        Object[] results = gigaSpace.readMultiple(template, maxEntries, modifiers);
         if (results != null && results.length > 0) {
             return results;
         }
-        return gigaSpace.read(template, receiveTimeout, gigaSpace.getModifiersForIsolationLevel() | ReadModifiers.EXCLUSIVE_READ_LOCK);
+        return gigaSpace.read(template, receiveTimeout, modifiers);
     }
 
     /**
-     * Perform a {@link org.openspaces.core.GigaSpace#readMultiple(Object,int)}
-     * using the provided template and configured maxEntries (defaults to <code>50</code>).
+     * Perform a {@link org.openspaces.core.GigaSpace#readMultiple(Object,int,int)}
+     * using the provided template, configured maxEntries (defaults to <code>50</code>) and the configured fifoGroups (default to <code>false</code>).
      *
      * <p>Read operations are performed under an exclusive read lock which mimics the similar behavior
      * as take without actually taking the entry from the space.
      */
     @Override
     protected Object doReceiveNonBlocking(Object template, GigaSpace gigaSpace) throws DataAccessException {
-        Object[] results = gigaSpace.readMultiple(template, maxEntries, gigaSpace.getModifiersForIsolationLevel() | ReadModifiers.EXCLUSIVE_READ_LOCK);
+        int modifiers = gigaSpace.getModifiersForIsolationLevel() | ReadModifiers.EXCLUSIVE_READ_LOCK;
+        if(fifoGroups)
+            modifiers |= ReadModifiers.FIFO_GROUPS_POLL;
+        
+        Object[] results = gigaSpace.readMultiple(template, maxEntries, modifiers);
         if (results != null && results.length > 0) {
             return results;
         }
@@ -80,6 +88,7 @@ public class MultiExclusiveReadReceiveOperationHandler extends AbstractNonBlocki
 
     @Override
     public String toString() {
+        //TODO FG : add fifoGroups when name is final
         return "Multi Exclusive Read, maxEntries[" + maxEntries + "], nonBlocking[" + nonBlocking + "], nonBlockingFactor[" + nonBlockingFactor + "]";
     }
 }

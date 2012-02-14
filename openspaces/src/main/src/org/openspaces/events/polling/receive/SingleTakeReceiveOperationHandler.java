@@ -19,33 +19,42 @@ package org.openspaces.events.polling.receive;
 import org.openspaces.core.GigaSpace;
 import org.springframework.dao.DataAccessException;
 
+import com.j_spaces.core.client.TakeModifiers;
+
 /**
- * Performs single take operation using {@link org.openspaces.core.GigaSpace#take(Object,long)}.
+ * Performs single take operation using {@link org.openspaces.core.GigaSpace#take(Object,long,int)}.
  *
  * @author kimchy
  */
-public class SingleTakeReceiveOperationHandler extends AbstractNonBlockingReceiveOperationHandler {
+public class SingleTakeReceiveOperationHandler extends AbstractFifoGroupsReceiveOperationHandler {
 
     /**
-     * Performs a single take operation using {@link org.openspaces.core.GigaSpace#take(Object, long)} with
+     * Performs a single take operation using {@link org.openspaces.core.GigaSpace#take(Object, long,int)} with
      * the given timeout.
      */
     @Override
     protected Object doReceiveBlocking(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException {
-        return gigaSpace.take(template, receiveTimeout);
+        int modifiers = gigaSpace.getSpace().getReadModifiers();
+        if(fifoGroups)
+            modifiers = TakeModifiers.FIFO_GROUPS_POLL;
+        return gigaSpace.take(template, receiveTimeout, modifiers);
     }
 
     /**
-     * Performs a single take operation using {@link org.openspaces.core.GigaSpace#take(Object, long)} with
+     * Performs a single take operation using {@link org.openspaces.core.GigaSpace#take(Object, long,int)} with
      * no timeout.
      */
     @Override
     protected Object doReceiveNonBlocking(Object template, GigaSpace gigaSpace) throws DataAccessException {
-        return gigaSpace.take(template, 0);
+        int modifiers = gigaSpace.getSpace().getReadModifiers();
+        if(fifoGroups)
+            modifiers = TakeModifiers.FIFO_GROUPS_POLL;
+        return gigaSpace.take(template, 0, modifiers);
     }
 
     @Override
     public String toString() {
+        //TODO FG : add fifoGroups when name is final
         return "Single Take, nonBlocking[" + nonBlocking + "], nonBlockingFactor[" + nonBlockingFactor + "]";
     }
 }

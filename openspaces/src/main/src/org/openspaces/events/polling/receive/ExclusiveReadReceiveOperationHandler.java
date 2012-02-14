@@ -16,24 +16,25 @@
 
 package org.openspaces.events.polling.receive;
 
-import com.j_spaces.core.client.ReadModifiers;
 import org.openspaces.core.GigaSpace;
 import org.springframework.dao.DataAccessException;
 
+import com.j_spaces.core.client.ReadModifiers;
+
 /**
- * Performs single read operation using {@link org.openspaces.core.GigaSpace#read(Object,long)}
+ * Performs single read operation using {@link org.openspaces.core.GigaSpace#read(Object,long,int)}
  * under an exclusive read lock. This receive operation handler allows to lock entries so other
  * receive operations won't be able to obtain it (mimics the take operation) but without actually
  * performing a take from the Space.
- *
+ * 
  * Note, this receive operation handler must be performed under a transaction.
  *
  * @author kimchy
  */
-public class ExclusiveReadReceiveOperationHandler extends AbstractNonBlockingReceiveOperationHandler {
+public class ExclusiveReadReceiveOperationHandler extends AbstractFifoGroupsReceiveOperationHandler {
 
     /**
-     * Performs single read operation using {@link org.openspaces.core.GigaSpace#read(Object,long)}
+     * Performs single read operation using {@link org.openspaces.core.GigaSpace#read(Object,long,int)}
      * under an exclusive read lock. This receive operation handler allows to lock entries so other
      * receive operations won't be able to obtain it (mimics the take operation) but without actually
      * performing a take from the Space.
@@ -42,11 +43,14 @@ public class ExclusiveReadReceiveOperationHandler extends AbstractNonBlockingRec
      */
     @Override
     protected Object doReceiveBlocking(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException {
-        return gigaSpace.read(template, receiveTimeout, gigaSpace.getModifiersForIsolationLevel() | ReadModifiers.EXCLUSIVE_READ_LOCK);
+        int modifiers = gigaSpace.getModifiersForIsolationLevel() | ReadModifiers.EXCLUSIVE_READ_LOCK;
+        if(fifoGroups)
+            modifiers |= ReadModifiers.FIFO_GROUPS_POLL;
+        return gigaSpace.read(template, receiveTimeout, modifiers);
     }
 
     /**
-     * Performs single read operation using {@link org.openspaces.core.GigaSpace#read(Object,long)}
+     * Performs single read operation using {@link org.openspaces.core.GigaSpace#read(Object,long,int)}
      * under an exclusive read lock with no timeout. This receive operation handler allows to lock entries so other
      * receive operations won't be able to obtain it (mimics the take operation) but without actually
      * performing a take from the Space.
@@ -55,11 +59,15 @@ public class ExclusiveReadReceiveOperationHandler extends AbstractNonBlockingRec
      */
     @Override
     protected Object doReceiveNonBlocking(Object template, GigaSpace gigaSpace) throws DataAccessException {
-        return gigaSpace.read(template, 0, gigaSpace.getModifiersForIsolationLevel() | ReadModifiers.EXCLUSIVE_READ_LOCK);
+        int modifiers = gigaSpace.getModifiersForIsolationLevel() | ReadModifiers.EXCLUSIVE_READ_LOCK;
+        if(fifoGroups)
+            modifiers |= ReadModifiers.FIFO_GROUPS_POLL;
+        return gigaSpace.read(template, 0, modifiers);
     }
 
     @Override
     public String toString() {
+    	//TODO FG: add fifoGroups when name is final.
         return "Single Exclusive Read, nonBlocking[" + nonBlocking + "], nonBlockingFactor[" + nonBlockingFactor + "]";
     }
 }
