@@ -36,19 +36,19 @@ public class SingleTakeReceiveOperationHandler extends AbstractFifoGroupsReceive
     protected Object doReceiveBlocking(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException {
         int modifiers = gigaSpace.getSpace().getReadModifiers();
         if(fifoGroups)
-            modifiers = TakeModifiers.FIFO_GROUPS_POLL;
+            modifiers |= TakeModifiers.FIFO_GROUPS_POLL;
         return gigaSpace.take(template, receiveTimeout, modifiers);
     }
 
     /**
-     * Performs a single take operation using {@link org.openspaces.core.GigaSpace#take(Object, long,int)} with
+     * Performs a single take operation using {@link org.openspaces.core.GigaSpace#take(Object,long,int)} with
      * no timeout.
      */
     @Override
     protected Object doReceiveNonBlocking(Object template, GigaSpace gigaSpace) throws DataAccessException {
         int modifiers = gigaSpace.getSpace().getReadModifiers();
         if(fifoGroups)
-            modifiers = TakeModifiers.FIFO_GROUPS_POLL;
+            modifiers |= TakeModifiers.FIFO_GROUPS_POLL;
         return gigaSpace.take(template, 0, modifiers);
     }
 

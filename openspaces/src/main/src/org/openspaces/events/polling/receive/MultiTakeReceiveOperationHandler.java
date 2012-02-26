@@ -52,7 +52,7 @@ public class MultiTakeReceiveOperationHandler extends AbstractFifoGroupsReceiveO
     protected Object doReceiveBlocking(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException {
         int modifiers = gigaSpace.getSpace().getReadModifiers();
         if(fifoGroups)
-            modifiers = TakeModifiers.FIFO_GROUPS_POLL;
+            modifiers |= TakeModifiers.FIFO_GROUPS_POLL;
         
         Object[] results = gigaSpace.takeMultiple(template,maxEntries, modifiers);
         if (results != null && results.length > 0) {
@@ -69,7 +69,7 @@ public class MultiTakeReceiveOperationHandler extends AbstractFifoGroupsReceiveO
     protected Object doReceiveNonBlocking(Object template, GigaSpace gigaSpace) throws DataAccessException {
         int modifiers = gigaSpace.getSpace().getReadModifiers();
         if(fifoGroups)
-            modifiers = TakeModifiers.FIFO_GROUPS_POLL;
+            modifiers |= TakeModifiers.FIFO_GROUPS_POLL;
         Object[] results = gigaSpace.takeMultiple(template, maxEntries, modifiers);
         if (results != null && results.length > 0) {
             return results;
