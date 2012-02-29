@@ -15,8 +15,6 @@ import com.gigaspaces.annotation.pojo.SpaceRouting;
  */
 @SpaceClass
 public class Data implements Serializable {
-    
-    private static final long serialVersionUID = 1L;
 
     private String id;
 
