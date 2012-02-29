@@ -11,7 +11,6 @@ import org.openspaces.admin.internal.pu.InternalProcessingUnit;
 import org.openspaces.admin.internal.pu.InternalProvisionStatusHolder;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
-import org.openspaces.admin.pu.ProvisionStatus;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionStatusChangedEvent;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceProvisionStatusChangedEventListener;
 
@@ -80,23 +79,14 @@ public class DefaultProcessingUnitInstanceProvisionStatusChangedEventManager imp
     @Override
     public void processingUnitInstanceProvisionStatusChanged(final ProcessingUnitInstanceProvisionStatusChangedEvent event) {
         for (final ProcessingUnitInstanceProvisionStatusChangedEventListener listener : eventListeners) {
-            //we should try and provide an ATTEMPT event that holds the grid service container we are attempting to instantiate on.
-            //we should try and provide a SUCCESS event that holds the processing unit instance
-            //if either has not yet been discovered, we delay the event until the next flushEvents is called.
-            if ( (event.getNewStatus().equals(ProvisionStatus.ATTEMPT) && event.getGridServiceContainer() == null)
-                    || (event.getNewStatus().equals(ProvisionStatus.SUCCESS) && event.getProcessingUnitInstance() == null)) {
-                admin.pushEvent(listener, new Runnable() {
-                    public void run() {
-                        listener.processingUnitInstanceProvisionStatusChanged(event);
-                    }
-                });
-            } else {
-                admin.raiseEvent(listener, new Runnable() {
-                    public void run() {
-                        listener.processingUnitInstanceProvisionStatusChanged(event);
-                    }
-                });
-            }
+            // We delay the event until the next 'flushEvents()' is called, since GSCs and processing
+            // unit instances may have not been discovered yet. We make a best effort to return a 
+            // value (instead of null) from the calls to event.getGridServiceContainer() and event.getProcessingUnitInstance()
+            admin.pushEvent(listener, new Runnable() {
+                public void run() {
+                    listener.processingUnitInstanceProvisionStatusChanged(event);
+                }
+            });
         }
     }
     
