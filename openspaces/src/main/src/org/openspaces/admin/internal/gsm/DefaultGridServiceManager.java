@@ -16,11 +16,14 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import net.jini.core.discovery.LookupLocator;
 import net.jini.core.lookup.ServiceID;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jini.rio.core.OperationalString;
 import org.jini.rio.monitor.DeployAdmin;
 import org.jini.rio.monitor.ProvisionMonitorAdmin;
@@ -60,6 +63,7 @@ import com.gigaspaces.internal.jvm.JVMDetails;
 import com.gigaspaces.internal.jvm.JVMStatistics;
 import com.gigaspaces.internal.os.OSDetails;
 import com.gigaspaces.internal.os.OSStatistics;
+import com.gigaspaces.internal.utils.StringUtils;
 import com.gigaspaces.log.LogEntries;
 import com.gigaspaces.log.LogEntryMatcher;
 import com.gigaspaces.log.LogProcessType;
@@ -72,6 +76,8 @@ import com.gigaspaces.security.SecurityException;
  */
 public class DefaultGridServiceManager extends AbstractAgentGridComponent implements InternalGridServiceManager {
 
+    private static final Log logger = LogFactory.getLog(DefaultGridServiceManager.class);
+    
     private final ServiceID serviceID;
 
     private final GSM gsm;
@@ -574,8 +580,31 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         return admin.getApplications().getApplication(applicationName);
     }
 
-    @Override
     public boolean undeployProcessingUnitsAndWait(ProcessingUnit[] processingUnits, long timeout, TimeUnit timeUnit) {
+        try {
+            undeployProcessingUnitsAndWaitInternal(processingUnits, timeout, timeUnit);
+            return true;
+        }
+        catch (TimeoutException e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed undeploying processing units " + processingUnitsToString(processingUnits),e);
+            }
+            return false;
+        }
+        catch (InterruptedException e) {
+            throw new AdminException("Failed undeploying processing units " + processingUnitsToString(processingUnits), e);
+        }
+    }
+    
+    private String processingUnitsToString(ProcessingUnit[] processingUnits) {
+        String[] puNames = new String[processingUnits.length];
+        for (int i = 0 ; i < processingUnits.length ; i++) {
+            puNames[i] = processingUnits[i].getName();
+        }
+        return StringUtils.arrayToCommaDelimitedString(puNames);
+    }
+
+    private void undeployProcessingUnitsAndWaitInternal(ProcessingUnit[] processingUnits, long timeout, TimeUnit timeUnit) throws TimeoutException, InterruptedException {
         long end = System.currentTimeMillis() + timeUnit.toMillis(timeout);
          
         List<GridServiceContainer> containersPendingRemoval = new ArrayList<GridServiceContainer>();
@@ -612,13 +641,11 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             for (final ProcessingUnit pu : processingUnits) {
                 long gsmTimeout = end - System.currentTimeMillis();
                 if (gsmTimeout < 0) {
-                    //timeout expired
-                    return false;
+                    throw new TimeoutException("Timeout expired before udeploying processing unit " + pu);
                 }
                 final InternalGridServiceManager managingGsm = (InternalGridServiceManager)pu.waitForManaged(gsmTimeout,TimeUnit.MILLISECONDS);
                 if (managingGsm == null) {
-                    //timeout expired
-                    return false;
+                    throw new TimeoutException("Timeout expired while waiting for GSM that manages processing unit " + pu);
                 }
                 
                 admin.scheduleAdminOperation(new Runnable() {
@@ -629,18 +656,12 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
                 });
             }
             for (ProcessingUnit pu : processingUnits) {
-                try {
-                    long puRemovedTimeout = end - System.currentTimeMillis();
-                    if (puRemovedTimeout < 0) {
-                        //timeout expired
-                        return false;
-                    }
-                    if (!latches.get(pu.getName()).await(puRemovedTimeout, TimeUnit.MILLISECONDS)) {
-                        //timeout expired
-                        return false;
-                    }
-                } catch (InterruptedException e) {
-                    throw new AdminException("Failed to undeploy", e);
+                long puRemovedTimeout = end - System.currentTimeMillis();
+                if (puRemovedTimeout < 0) {
+                    throw new TimeoutException("Timeout expired before waiting for processing unit " + pu + " to undeploy");
+                }
+                if (!latches.get(pu.getName()).await(puRemovedTimeout, TimeUnit.MILLISECONDS)) {
+                    throw new TimeoutException("Timeout expired while waiting for processing unit " + pu + " to undeploy");
                 }
             }
         }finally {
@@ -649,62 +670,66 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         
         // use polling to determine elastic pu completed undeploy cleanup of containers (and machines)
         // and that the admin has been updated with the relevant lookup service remove events.
-        while (!isUndeployComplete(processingUnits) || 
-               !isAllRemoved(instancesPendingRemoval) ||
-               !isAllRemoved(containersPendingRemoval) ||
-               isUndeploying(instancesPendingRemoval)) {
-            
-            long sleepDuration = end - System.currentTimeMillis();
-            if (sleepDuration < 0) {
-                //timeout expired
-                return false;
-            }
-            
+        while (true) {
             try {
-                Thread.sleep(Math.min(1000, sleepDuration));
-            } catch (InterruptedException e) {
-                throw new AdminException("Failed to undeploy", e);
-            }
-        }
-        return true;
-    }
-
-    private boolean isUndeploying(List<ProcessingUnitInstance> instancesPendingRemoval) {
-        boolean undeploying = false;
-        for (ProcessingUnitInstance instance : instancesPendingRemoval) {
-            try {
-                if (((InternalProcessingUnitInstance)instance).isUndeploying()) {
-                    undeploying = true;
-                    break;
-                }
-            }
-            catch (AdminException e) {
-                //assuming pu instance is not responding since it completed undeploy
-            }
-        }
-        return undeploying;
-    }
-
-    private boolean isUndeployComplete(ProcessingUnit[] processingUnits) {
-        boolean complete = true;
-        for (ProcessingUnit pu : processingUnits) {
-            // check that all pu instances have been undiscovered and not managed by ESM
-            if (pu.getInstances().length > 0 || isManagedByElasticServiceManager(pu)) {
-                complete = false;
+                verifyUndeployComplete(processingUnits); 
+                verifyNotDiscovered(instancesPendingRemoval);
+                verifyNotDiscovered(containersPendingRemoval);
+                verifyInstancesNotUndeploying(instancesPendingRemoval);
                 break;
             }
+            catch (TimeoutException e) {
+                long sleepDuration = end - System.currentTimeMillis();
+                if (sleepDuration < 0) {
+                    throw e;
+                }
+                //suppress and retry
+                Thread.sleep(Math.min(1000, sleepDuration));
+            }             
         }
-        return complete;
     }
-    
-    private boolean isAllRemoved(Iterable<? extends GridComponent> componentsPendingShutdown) {
-        boolean allContainersShutdown = true;    
-        for (final GridComponent component : componentsPendingShutdown) {
-            if (component.isDiscovered()) {
-                allContainersShutdown = false;
+
+    private void verifyInstancesNotUndeploying(List<ProcessingUnitInstance> instancesPendingRemoval) throws TimeoutException {
+        
+        for (ProcessingUnitInstance instance : instancesPendingRemoval) {
+            if (isProcessingUnitInstanceUndeploying(instance)) {
+                throw new TimeoutException("Instance "+ instance.getProcessingUnitInstanceName() + " UID="+instance.getUid() + " is still undeploying.");
             }
         }
-        return allContainersShutdown;
+    }
+
+    private boolean isProcessingUnitInstanceUndeploying(ProcessingUnitInstance instance) {
+        boolean isUndeploying = false;
+        try {
+            isUndeploying = ((InternalProcessingUnitInstance)instance).isUndeploying();
+        }
+        catch (final AdminException e) {
+            //assuming pu instance is not responding since it completed undeploy
+        }
+        return isUndeploying;
+    }
+
+    private void verifyUndeployComplete(ProcessingUnit[] processingUnits) throws TimeoutException {
+        
+        for (ProcessingUnit pu : processingUnits) {
+            // check that all pu instances have been undiscovered and not managed by ESM
+            int numberOfInstances = pu.getInstances().length;
+            if (numberOfInstances > 0) {
+                throw new TimeoutException(pu.getName() + " is still undeploying " + numberOfInstances + " instances");
+            }
+            
+            if (isManagedByElasticServiceManager(pu)) {
+                throw new TimeoutException(pu.getName() + " undeployment is in progress (removing containers and machines if applicable)");
+            }
+        }
+    }
+    
+    private void verifyNotDiscovered(Iterable<? extends GridComponent> componentsPendingShutdown) throws TimeoutException {
+        for (final GridComponent component : componentsPendingShutdown) {
+            if (component.isDiscovered()) {
+                throw new TimeoutException(component.getUid() + " is still discovered");
+            }
+        }
     }
 
     @Override
