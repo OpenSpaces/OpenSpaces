@@ -2,6 +2,9 @@ package org.openspaces.maven.support;
 
 import org.springframework.core.JdkVersion;
 
+import com.j_spaces.kernel.PlatformVersion;
+import com.j_spaces.kernel.XapVersion;
+
 import java.io.*;
 
 /**
@@ -10,23 +13,26 @@ import java.io.*;
 public class POMGenerator {
 
     public static final String GS_GROUP = "com.gigaspaces";
+    public static final String CLOUDIFY_GROUP = "org.cloudifysource";
 
     public static void main(String[] args) throws Exception {
         String templDir = System.getProperty("java.io.tmpdir");
         if (args.length > 0) {
             templDir = args[0];
         }
-        String version = OutputVersion.computeVersion();
-        if (args.length > 1) {
-            version = args[1];
+
+        String xapVersion = OutputVersion.computeXapVersion();
+        String cloudifyVersion = null;
+        boolean isCloudify = PlatformVersion.getEdition().equals(PlatformVersion.EDITION_CLOUDIFY);
+        if (isCloudify) {
+            cloudifyVersion = OutputVersion.computeCloudifyVersion();
         }
+        
         File dir = new File(templDir);
         dir.mkdirs();
 
-        writeSimplePom(dir, version, POMGenerator.GS_GROUP, "gs-openspaces");
-
         PrintWriter writer = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(dir, "gs-runtime-pom.xml")))));
-        printHeader(writer, version, POMGenerator.GS_GROUP, "gs-runtime");
+        printHeader(writer, xapVersion, POMGenerator.GS_GROUP, "gs-runtime");
 
         // jmx
         if (!JdkVersion.isAtLeastJava15()) {
@@ -40,8 +46,8 @@ public class POMGenerator {
         writer.close();
 
         writer = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(dir, "gs-openspaces-pom.xml")))));
-        printHeader(writer, version, POMGenerator.GS_GROUP, "gs-openspaces");
-        printDependency(writer, POMGenerator.GS_GROUP, "gs-runtime");
+        printHeader(writer, xapVersion, POMGenerator.GS_GROUP, "gs-openspaces");
+        printDependency(writer, POMGenerator.GS_GROUP, "gs-runtime", xapVersion);
         printDependency(writer, "org.springframework", "spring-aop", "3.0.7.RELEASE");
         printDependency(writer, "org.springframework", "spring-asm", "3.0.7.RELEASE");
         printDependency(writer, "org.springframework", "spring-aspects", "3.0.7.RELEASE");
@@ -60,18 +66,33 @@ public class POMGenerator {
         writer.close();
 
         writer = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(dir, "mule-os-pom.xml")))));
-        printHeader(writer, version, POMGenerator.GS_GROUP, "mule-os");
+        printHeader(writer, xapVersion, POMGenerator.GS_GROUP, "mule-os");
         printFooter(writer);
         writer.close();
         
         writer = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(dir, "jetty-os-pom.xml")))));
-        printHeader(writer, version, POMGenerator.GS_GROUP, "jetty-os");
+        printHeader(writer, xapVersion, POMGenerator.GS_GROUP, "jetty-os");
         printFooter(writer);
         writer.close();
         
-        if (args.length > 2) {
-            String directory = args[2];
-            replaceVersionInPluginPom(version, directory);
+        if ( isCloudify ) {
+            writer = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(dir, "dsl-pom.xml")))));
+            printHeader(writer, cloudifyVersion, POMGenerator.CLOUDIFY_GROUP, "dsl");
+            printDependency(writer, POMGenerator.GS_GROUP, "gs-openspaces", xapVersion);
+            printFooter(writer);
+            writer.close();
+            
+            writer = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(dir, "usm-pom.xml")))));
+            printHeader(writer, cloudifyVersion, POMGenerator.CLOUDIFY_GROUP, "usm");
+            printDependency(writer, POMGenerator.GS_GROUP, "gs-openspaces", xapVersion);
+            printDependency(writer, POMGenerator.CLOUDIFY_GROUP, "dsl", cloudifyVersion);
+            printFooter(writer);
+            writer.close();
+        }
+        
+        if (args.length > 1) {
+            String directory = args[1];
+            replaceVersionInPluginPom(xapVersion, directory);
         }
     }
 
@@ -127,14 +148,6 @@ public class POMGenerator {
         }
     }
 
-
-    private static void writeSimplePom(File dir, String version, String groupId, String artifactId) throws Exception {
-        PrintWriter writer = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(dir, artifactId + "-pom.xml")))));
-        printHeader(writer, version, groupId, artifactId);
-        printFooter(writer);
-        writer.close();
-    }
-
     public static void printHeader(PrintWriter writer, String version, String groupId, String artifactId) throws Exception {
         writer.println("<project xmlns=\"http://maven.apache.org/POM/4.0.0\"");
         writer.println("  xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"");
@@ -147,10 +160,6 @@ public class POMGenerator {
         writer.println("  <version>" + version + "</version>");
         writer.println("  <url>http://www.gigaspaces.com</url>");
         writer.println("  <dependencies>");
-    }
-
-    public static void printDependency(PrintWriter writer, String groupId, String artifactId) {
-        printDependency(writer, groupId, artifactId, OutputVersion.computeVersion());
     }
 
     public static void printDependency(PrintWriter writer, String groupId, String artifactId, String version) {
