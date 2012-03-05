@@ -19,9 +19,11 @@ import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.application.Application;
+import org.openspaces.admin.esm.ElasticServiceManager;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.application.InternalApplication;
+import org.openspaces.admin.internal.esm.InternalElasticServiceManager;
 import org.openspaces.admin.internal.gsm.InternalGridServiceManager;
 import org.openspaces.admin.internal.gsm.InternalGridServiceManagers;
 import org.openspaces.admin.internal.pu.dependency.DefaultProcessingUnitDependencies;
@@ -821,11 +823,18 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         
         while (true) {
         
-            if (((InternalGridServiceManager)managingGridServiceManager).isManagedByElasticServiceManagerAndScaleNotInProgress(this)) {
-                //done waiting
-                break;
+            ElasticServiceManager[] elasticManagers = admin.getElasticServiceManagers().getManagers();
+            if (elasticManagers.length == 1) {
+                InternalElasticServiceManager esm = (InternalElasticServiceManager) elasticManagers[0];
+                // we use the nocache method since the local cache does not contain the strategyConfig
+                // so the cache may relate to the old startegyConfig
+                // see GS-9999 for more details
+                if (esm.isManagingProcessingUnitAndScaleNotInProgressNoCache(this)) {
+                    //done waiting
+                    break;
+                }
             }
-            
+        
             long sleepDuration = end - System.currentTimeMillis();
             if (sleepDuration <= 0) {
                 //timeout

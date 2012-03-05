@@ -30,6 +30,13 @@ public interface InternalElasticServiceManager extends ElasticServiceManager, In
     boolean isManagingProcessingUnitAndScaleNotInProgress(ProcessingUnit pu);
     
     /**
+     * @since 9.0.0
+     * This is a workaround for GS-9999
+     */
+    @Deprecated
+    boolean isManagingProcessingUnitAndScaleNotInProgressNoCache(ProcessingUnit pu);
+    
+    /**
      * @since 8.0.6
      */
     boolean isManagingProcessingUnitAndScaleInProgress(ProcessingUnit pu);
@@ -45,7 +52,6 @@ public interface InternalElasticServiceManager extends ElasticServiceManager, In
      * reflect the ESM state in the admin API object by analyzing the events
      * @since 8.0.6
      */
-    void processElasticScaleStrategyEvent(ElasticProcessingUnitEvent event);
-    
+    void processElasticScaleStrategyEvent(ElasticProcessingUnitEvent event);   
     
 }

@@ -177,7 +177,18 @@ public class DefaultElasticServiceManager extends AbstractAgentGridComponent imp
         Boolean esmScaleIsInProgress = esmScaleIsInProgressPerProcessingUnit.get(pu.getName());
         return esmScaleIsInProgress != null && !esmScaleIsInProgress; 
     }
-
+    
+    @SuppressWarnings("deprecation")
+    @Override
+    @Deprecated
+    public boolean isManagingProcessingUnitAndScaleNotInProgressNoCache(ProcessingUnit pu) {
+        try {
+            return esm.isManagingProcessingUnitAndScaleNotInProgress(pu.getName());
+        } catch (RemoteException e) {
+            throw new AdminException("Failed to check if ESM has completed managing " + pu.getName(),e);
+        }
+    }
+    
     @Override
     public boolean isManagingProcessingUnitAndScaleInProgress(ProcessingUnit pu) {
         Boolean esmScaleIsInProgress = esmScaleIsInProgressPerProcessingUnit.get(pu.getName());
@@ -222,4 +233,5 @@ public class DefaultElasticServiceManager extends AbstractAgentGridComponent imp
             }
         }
     }
+    
 }
