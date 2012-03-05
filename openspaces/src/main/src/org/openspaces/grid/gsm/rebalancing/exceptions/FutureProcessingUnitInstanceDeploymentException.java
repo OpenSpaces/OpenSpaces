@@ -11,7 +11,7 @@ public class FutureProcessingUnitInstanceDeploymentException extends Rebalancing
     private final String[] affectedProcessingUnits;
     
     public FutureProcessingUnitInstanceDeploymentException(ProcessingUnit pu, Throwable cause) {
-        super(pu);
+        super(pu, cause);
         this.affectedProcessingUnits = new String[] { pu.getName() };
     }
 
@@ -26,6 +26,8 @@ public class FutureProcessingUnitInstanceDeploymentException extends Rebalancing
         if (other instanceof FutureProcessingUnitInstanceDeploymentException) {
             FutureProcessingUnitInstanceDeploymentException otherEx = (FutureProcessingUnitInstanceDeploymentException)other;
             same = Arrays.equals(otherEx.affectedProcessingUnits,this.affectedProcessingUnits) && 
+                   otherEx.getCause().getMessage() != null &&
+                   getCause().getMessage() != null &&
                    otherEx.getCause().getMessage().equals(getCause().getMessage());
         }
         return same;  

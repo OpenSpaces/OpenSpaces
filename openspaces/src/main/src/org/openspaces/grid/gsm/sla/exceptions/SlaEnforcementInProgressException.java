@@ -8,8 +8,8 @@ public class SlaEnforcementInProgressException extends Exception {
         super(message);
     }
 
-    public SlaEnforcementInProgressException(String message, Exception reason) {
-        super(message, reason);
+    public SlaEnforcementInProgressException(String message, Throwable cause) {
+        super(message, cause);
     }
     
     /**

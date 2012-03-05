@@ -10,6 +10,10 @@ public class RebalancingSlaEnforcementInProgressException extends SlaEnforcement
     public RebalancingSlaEnforcementInProgressException(ProcessingUnit pu) {
         super(inProgressMessage(pu));
     }
+    
+    public RebalancingSlaEnforcementInProgressException(ProcessingUnit pu, Throwable cause) {
+        super(inProgressMessage(pu), cause);
+    }
 
     public RebalancingSlaEnforcementInProgressException(ProcessingUnit pu, String message) {
         super(inProgressMessage(pu)+": " + message + 
