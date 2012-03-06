@@ -611,6 +611,9 @@ public class DefaultSpace implements InternalSpace {
                                     case LOCAL_VIEW:
                                         replicationTargetType = ReplicationTargetType.LOCAL_VIEW;
                                         break;
+                                    case DURABLE_NOTIFICATION:
+                                        replicationTargetType = ReplicationTargetType.DURABLE_NOTIFICATION;
+                                        break;
                                     case ACTIVE_SPACE:
                                     case BACKUP_SPACE:
                                         replicationTargetType = ReplicationTargetType.SPACE_INSTANCE;

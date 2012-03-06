@@ -21,6 +21,10 @@ public enum ReplicationTargetType {
     /**
      * The target is a local view
      */
-    LOCAL_VIEW
+    LOCAL_VIEW,
+    /**
+     * The target is a registered durable notification
+     */
+    DURABLE_NOTIFICATION
 
 }
