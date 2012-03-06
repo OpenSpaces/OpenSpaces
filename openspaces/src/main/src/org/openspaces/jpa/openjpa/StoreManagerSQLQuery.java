@@ -20,6 +20,7 @@ import org.apache.openjpa.util.GeneralException;
 import org.apache.openjpa.util.UserException;
 import org.openspaces.core.executor.DistributedTask;
 import org.openspaces.core.executor.Task;
+import org.openspaces.core.executor.internal.ExecutorMetaDataProvider;
 import org.openspaces.core.executor.internal.InternalDistributedSpaceTaskWrapper;
 import org.openspaces.core.executor.internal.InternalSpaceTaskWrapper;
 import org.openspaces.jpa.StoreManager;
@@ -79,6 +80,7 @@ public class StoreManagerSQLQuery extends AbstractStoreQuery {
     protected static class SQLExecutor extends AbstractExecutor {
 
         private final String _executeCommand = "execute ?";
+        private final ExecutorMetaDataProvider _executorMetaDataProvider = new ExecutorMetaDataProvider();
         
         public SQLExecutor() {
         }
@@ -213,9 +215,9 @@ public class StoreManagerSQLQuery extends AbstractStoreQuery {
             context.beginStore();
             
             final ISpaceProxy space = (ISpaceProxy) query.getStore().getConfiguration().getSpace();
-
-            // TODO LB: Fix routing 
-            Object routing = null;
+            
+            // Get routing from annotation
+            final Object routing = _executorMetaDataProvider.findRouting(task);
             try {
                 SpaceTask<?> spaceTask;
                 if( task instanceof DistributedTask)
