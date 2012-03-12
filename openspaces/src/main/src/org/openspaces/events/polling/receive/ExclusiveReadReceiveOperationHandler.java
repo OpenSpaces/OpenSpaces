@@ -31,7 +31,7 @@ import com.j_spaces.core.client.ReadModifiers;
  *
  * @author kimchy
  */
-public class ExclusiveReadReceiveOperationHandler extends AbstractFifoGroupsReceiveOperationHandler {
+public class ExclusiveReadReceiveOperationHandler extends AbstractFifoGroupingReceiveOperationHandler {
 
     /**
      * Performs single read operation using {@link org.openspaces.core.GigaSpace#read(Object,long,int)}
@@ -44,8 +44,8 @@ public class ExclusiveReadReceiveOperationHandler extends AbstractFifoGroupsRece
     @Override
     protected Object doReceiveBlocking(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException {
         int modifiers = gigaSpace.getModifiersForIsolationLevel() | ReadModifiers.EXCLUSIVE_READ_LOCK;
-        if(fifoGroups)
-            modifiers |= ReadModifiers.FIFO_GROUPS_POLL;
+        if(useFifoGrouping)
+            modifiers |= ReadModifiers.FIFO_GROUPING_POLL;
         return gigaSpace.read(template, receiveTimeout, modifiers);
     }
 
@@ -60,8 +60,8 @@ public class ExclusiveReadReceiveOperationHandler extends AbstractFifoGroupsRece
     @Override
     protected Object doReceiveNonBlocking(Object template, GigaSpace gigaSpace) throws DataAccessException {
         int modifiers = gigaSpace.getModifiersForIsolationLevel() | ReadModifiers.EXCLUSIVE_READ_LOCK;
-        if(fifoGroups)
-            modifiers |= ReadModifiers.FIFO_GROUPS_POLL;
+        if(useFifoGrouping)
+            modifiers |= ReadModifiers.FIFO_GROUPING_POLL;
         return gigaSpace.read(template, 0, modifiers);
     }
 

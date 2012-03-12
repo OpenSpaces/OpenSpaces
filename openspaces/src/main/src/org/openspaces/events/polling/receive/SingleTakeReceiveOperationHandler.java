@@ -26,7 +26,7 @@ import com.j_spaces.core.client.TakeModifiers;
  *
  * @author kimchy
  */
-public class SingleTakeReceiveOperationHandler extends AbstractFifoGroupsReceiveOperationHandler {
+public class SingleTakeReceiveOperationHandler extends AbstractFifoGroupingReceiveOperationHandler {
 
     /**
      * Performs a single take operation using {@link org.openspaces.core.GigaSpace#take(Object, long,int)} with
@@ -35,8 +35,8 @@ public class SingleTakeReceiveOperationHandler extends AbstractFifoGroupsReceive
     @Override
     protected Object doReceiveBlocking(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException {
         int modifiers = gigaSpace.getSpace().getReadModifiers();
-        if(fifoGroups)
-            modifiers |= TakeModifiers.FIFO_GROUPS_POLL;
+        if(useFifoGrouping)
+            modifiers |= TakeModifiers.FIFO_GROUPING_POLL;
         return gigaSpace.take(template, receiveTimeout, modifiers);
     }
 
@@ -47,8 +47,8 @@ public class SingleTakeReceiveOperationHandler extends AbstractFifoGroupsReceive
     @Override
     protected Object doReceiveNonBlocking(Object template, GigaSpace gigaSpace) throws DataAccessException {
         int modifiers = gigaSpace.getSpace().getReadModifiers();
-        if(fifoGroups)
-            modifiers |= TakeModifiers.FIFO_GROUPS_POLL;
+        if(useFifoGrouping)
+            modifiers |= TakeModifiers.FIFO_GROUPING_POLL;
         return gigaSpace.take(template, 0, modifiers);
     }
 

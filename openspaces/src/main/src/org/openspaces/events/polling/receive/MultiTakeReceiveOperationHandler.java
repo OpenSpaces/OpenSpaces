@@ -29,7 +29,7 @@ import com.j_spaces.core.client.TakeModifiers;
  * 
  * @author kimchy
  */
-public class MultiTakeReceiveOperationHandler extends AbstractFifoGroupsReceiveOperationHandler {
+public class MultiTakeReceiveOperationHandler extends AbstractFifoGroupingReceiveOperationHandler {
 
     private static final int DEFAULT_MAX_ENTRIES = 50;
 
@@ -51,8 +51,8 @@ public class MultiTakeReceiveOperationHandler extends AbstractFifoGroupsReceiveO
     @Override
     protected Object doReceiveBlocking(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException {
         int modifiers = gigaSpace.getSpace().getReadModifiers();
-        if(fifoGroups)
-            modifiers |= TakeModifiers.FIFO_GROUPS_POLL;
+        if(useFifoGrouping)
+            modifiers |= TakeModifiers.FIFO_GROUPING_POLL;
         
         Object[] results = gigaSpace.takeMultiple(template,maxEntries, modifiers);
         if (results != null && results.length > 0) {
@@ -68,8 +68,8 @@ public class MultiTakeReceiveOperationHandler extends AbstractFifoGroupsReceiveO
     @Override
     protected Object doReceiveNonBlocking(Object template, GigaSpace gigaSpace) throws DataAccessException {
         int modifiers = gigaSpace.getSpace().getReadModifiers();
-        if(fifoGroups)
-            modifiers |= TakeModifiers.FIFO_GROUPS_POLL;
+        if(useFifoGrouping)
+            modifiers |= TakeModifiers.FIFO_GROUPING_POLL;
         Object[] results = gigaSpace.takeMultiple(template, maxEntries, modifiers);
         if (results != null && results.length > 0) {
             return results;

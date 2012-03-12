@@ -31,7 +31,7 @@ import org.springframework.dao.DataAccessException;
  *
  * @author kimchy
  */
-public class MultiExclusiveReadReceiveOperationHandler extends AbstractFifoGroupsReceiveOperationHandler {
+public class MultiExclusiveReadReceiveOperationHandler extends AbstractFifoGroupingReceiveOperationHandler {
 
     private static final int DEFAULT_MAX_ENTRIES = 50;
 
@@ -56,8 +56,8 @@ public class MultiExclusiveReadReceiveOperationHandler extends AbstractFifoGroup
     @Override
     protected Object doReceiveBlocking(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException {
         int modifiers = gigaSpace.getModifiersForIsolationLevel() | ReadModifiers.EXCLUSIVE_READ_LOCK;
-        if(fifoGroups)
-            modifiers |= ReadModifiers.FIFO_GROUPS_POLL;
+        if(useFifoGrouping)
+            modifiers |= ReadModifiers.FIFO_GROUPING_POLL;
         
         Object[] results = gigaSpace.readMultiple(template, maxEntries, modifiers);
         if (results != null && results.length > 0) {
@@ -76,8 +76,8 @@ public class MultiExclusiveReadReceiveOperationHandler extends AbstractFifoGroup
     @Override
     protected Object doReceiveNonBlocking(Object template, GigaSpace gigaSpace) throws DataAccessException {
         int modifiers = gigaSpace.getModifiersForIsolationLevel() | ReadModifiers.EXCLUSIVE_READ_LOCK;
-        if(fifoGroups)
-            modifiers |= ReadModifiers.FIFO_GROUPS_POLL;
+        if(useFifoGrouping)
+            modifiers |= ReadModifiers.FIFO_GROUPING_POLL;
         
         Object[] results = gigaSpace.readMultiple(template, maxEntries, modifiers);
         if (results != null && results.length > 0) {
