@@ -1,5 +1,7 @@
 package org.openspaces.admin.pu;
 
+import java.util.Map;
+
 import org.openspaces.events.EventContainerServiceMonitors;
 import org.openspaces.events.asyncpolling.AsyncPollingEventContainerServiceMonitors;
 import org.openspaces.events.notify.NotifyEventContainerServiceMonitors;
@@ -8,8 +10,6 @@ import org.openspaces.memcached.MemcachedServiceMonitors;
 import org.openspaces.pu.container.jee.stats.WebRequestsServiceMonitors;
 import org.openspaces.pu.service.ServiceMonitors;
 import org.openspaces.remoting.RemotingServiceMonitors;
-
-import java.util.Map;
 
 /**
  * Processing Unit Instance statistics provide statistics on services configured within the processing
@@ -76,4 +76,5 @@ public interface ProcessingUnitInstanceStatistics extends Iterable<ServiceMonito
      * Returns the previous statistics.
      */
     ProcessingUnitInstanceStatistics getPrevious();
+
 }

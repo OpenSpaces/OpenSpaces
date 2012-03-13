@@ -54,6 +54,7 @@ import org.openspaces.pu.container.jee.JeeServiceDetails;
 import org.openspaces.pu.container.servicegrid.PUDetails;
 import org.openspaces.pu.container.servicegrid.PUMonitors;
 import org.openspaces.pu.container.servicegrid.PUServiceBean;
+import org.openspaces.pu.service.CustomServiceMonitors;
 import org.openspaces.pu.service.PlainServiceMonitors;
 import org.openspaces.pu.service.ServiceDetails;
 import org.openspaces.pu.service.ServiceMonitors;
@@ -559,15 +560,31 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
             serviceMonitorsById.put(serviceMonitors.getId(), serviceMonitors);
         }
         
-        
-        this.lastStatistics = new DefaultProcessingUnitInstanceServiceStatistics(
+        DefaultProcessingUnitInstanceServiceStatistics statistics = new DefaultProcessingUnitInstanceServiceStatistics(
                 puMonitors.getTimestamp(), 
                 serviceMonitorsById, 
                 previousStatistics, 
                 statisticsHistorySize,
-                getVirtualMachine().getMachine().getOperatingSystem().getTimeDelta(),
-                timeAggregatorsById);
+                getVirtualMachine().getMachine().getOperatingSystem().getTimeDelta());
+        
+        // add aggregated statistics on top of the processing unit instance statistics
+        for (Map.Entry<String, ProcessingUnitInstanceStatisticsTimeAggregator[]> pair : timeAggregatorsById.entrySet()) {
+            String serviceMonitorsId = pair.getKey();
+            ProcessingUnitInstanceStatisticsTimeAggregator[] aggregators = pair.getValue();
+            
+            PlainServiceMonitors serviceMonitors = 
+                    new CustomServiceMonitors(serviceMonitorsId);
+            
+            for (ProcessingUnitInstanceStatisticsTimeAggregator aggregator : aggregators) {
                 
+                Map<String, Object> aggregated = aggregator.calcMonitors(statistics);
+                serviceMonitors.getMonitors().putAll(aggregated);
+            }
+            
+            statistics.addServiceMonitors(serviceMonitors);
+        }
+        
+        this.lastStatistics = statistics;   
         return this.lastStatistics;
         
     }
