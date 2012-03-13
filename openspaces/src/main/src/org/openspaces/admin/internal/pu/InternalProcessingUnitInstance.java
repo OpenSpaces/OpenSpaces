@@ -11,6 +11,7 @@ import org.openspaces.admin.internal.support.InternalGridComponent;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.ProcessingUnitInstanceStatistics;
+import org.openspaces.admin.pu.ProcessingUnitInstanceStatisticsTimeAggregator;
 import org.openspaces.admin.pu.ProcessingUnitPartition;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.pu.container.servicegrid.PUServiceBean;
@@ -57,4 +58,8 @@ public interface InternalProcessingUnitInstance extends ProcessingUnitInstance, 
      * @since 8.0.6
      */
     ProcessingUnitInstanceStatistics getLastStatistics();
+    
+    void enableTimeAggregatedServiceMonitors(String serviceMonitorsId, ProcessingUnitInstanceStatisticsTimeAggregator[] aggregators);
+    
+    void disableTimeAggregatedServiceMonitors(String serviceMonitorsId);
 }

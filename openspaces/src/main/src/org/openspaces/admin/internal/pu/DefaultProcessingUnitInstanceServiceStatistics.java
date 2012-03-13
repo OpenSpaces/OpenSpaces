@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.openspaces.admin.pu.ProcessingUnitInstanceStatistics;
+import org.openspaces.admin.pu.ProcessingUnitInstanceStatisticsTimeAggregator;
+import org.openspaces.admin.pu.service.TimeAggregatedServiceMonitors;
 import org.openspaces.events.EventContainerServiceMonitors;
 import org.openspaces.events.asyncpolling.AsyncPollingEventContainerServiceMonitors;
 import org.openspaces.events.notify.NotifyEventContainerServiceMonitors;
@@ -29,12 +31,23 @@ public class DefaultProcessingUnitInstanceServiceStatistics implements Processin
     private volatile ProcessingUnitInstanceStatistics previous;
 
     public DefaultProcessingUnitInstanceServiceStatistics(long timestamp, Map<String, ServiceMonitors> serviceMonitorsById, ProcessingUnitInstanceStatistics previous,
-                                                          int historySize, long timeDelta) {
+                                                          int historySize, long timeDelta, Map<String, ProcessingUnitInstanceStatisticsTimeAggregator[]> timeAggregatorsById) {
         this.timestamp = timestamp;
         this.timeDelta = timeDelta;
-        this.serviceMonitorsById = serviceMonitorsById;
         this.previous = previous;
-
+        
+        this.serviceMonitorsById = new HashMap<String,ServiceMonitors>(serviceMonitorsById);
+        
+        for (Map.Entry<String, ProcessingUnitInstanceStatisticsTimeAggregator[]> pair : timeAggregatorsById.entrySet()) {
+            String serviceMonitorsId = pair.getKey();
+            
+            // Passing this to the aggregated monitors allows traversing on historical statistics
+            // using ProcessingUnitInstanceStatistics#getPrevious()
+            TimeAggregatedServiceMonitors timeAggregatedServiceMonitors = 
+                    new TimeAggregatedServiceMonitors(serviceMonitorsId,pair.getValue(),this);
+            this.serviceMonitorsById.put(serviceMonitorsId, timeAggregatedServiceMonitors);
+        }
+        
         ProcessingUnitInstanceStatistics lastStats = previous;
         if (lastStats != null) {
             for (int i = 0; i < historySize; i++) {
@@ -57,7 +70,8 @@ public class DefaultProcessingUnitInstanceServiceStatistics implements Processin
             }
         }
     }
-
+   
+    
     public long getTimestamp() {
         return this.timestamp;
     }

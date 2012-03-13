@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -33,6 +34,7 @@ import org.openspaces.admin.pu.MemberAliveIndicatorStatus;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.ProcessingUnitInstanceStatistics;
+import org.openspaces.admin.pu.ProcessingUnitInstanceStatisticsTimeAggregator;
 import org.openspaces.admin.pu.ProcessingUnitPartition;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEvent;
@@ -105,7 +107,6 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
 
     private final InternalSpaceInstances spaceInstances;
 
-
     private long statisticsInterval = StatisticsMonitor.DEFAULT_MONITOR_INTERVAL;
 
     private int statisticsHistorySize = StatisticsMonitor.DEFAULT_HISTORY_SIZE;
@@ -121,6 +122,8 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
     private final InternalProcessingUnitInstanceStatisticsChangedEventManager statisticsChangedEventManager;
 
     private volatile MemberAliveIndicatorStatus memberAliveIndicatorStatus = MemberAliveIndicatorStatus.ALIVE;
+
+    private final ConcurrentHashMap<String,ProcessingUnitInstanceStatisticsTimeAggregator[]> timeAggregatorsById;
 
     public DefaultProcessingUnitInstance(ServiceID serviceID, PUDetails puDetails, PUServiceBean puServiceBean, InternalAdmin admin) {
         super(admin);
@@ -202,6 +205,8 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
             servicesDetailsTemp.put(entry.getKey(), entry.getValue().toArray(new ServiceDetails[entry.getValue().size()]));
         }
         servicesDetailsByServiceType = Collections.unmodifiableMap(servicesDetailsTemp);
+        
+        timeAggregatorsById = new ConcurrentHashMap<String, ProcessingUnitInstanceStatisticsTimeAggregator[]>();
     }
 
     public String getUid() {
@@ -551,11 +556,28 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
             }
             serviceMonitorsById.put(serviceMonitors.getId(), serviceMonitors);
         }
-        lastStatistics = new DefaultProcessingUnitInstanceServiceStatistics(puMonitors.getTimestamp(), serviceMonitorsById, previousStatistics, statisticsHistorySize,
-                getVirtualMachine().getMachine().getOperatingSystem().getTimeDelta());
-        return lastStatistics;
+        
+        
+        DefaultProcessingUnitInstanceServiceStatistics statistics = new DefaultProcessingUnitInstanceServiceStatistics(
+                puMonitors.getTimestamp(), 
+                serviceMonitorsById, 
+                previousStatistics, 
+                statisticsHistorySize,
+                getVirtualMachine().getMachine().getOperatingSystem().getTimeDelta(),
+                timeAggregatorsById);
+                
+        this.lastStatistics = statistics;
+        return statistics;
     }
 
+    public void enableTimeAggregatedServiceMonitors(String serviceMonitorsId, ProcessingUnitInstanceStatisticsTimeAggregator[] aggregators) {
+        this.timeAggregatorsById.put(serviceMonitorsId, aggregators);
+    }
+    
+    public void disableTimeAggregatedServiceMonitors(String serviceMonitorsId) {
+        this.timeAggregatorsById.remove(serviceMonitorsId);
+    }
+        
     public synchronized void setStatisticsInterval(long interval, TimeUnit timeUnit) {
         this.statisticsInterval = timeUnit.toMillis(interval);
         if (scheduledStatisticsMonitor != null) {
