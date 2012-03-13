@@ -58,8 +58,22 @@ public interface InternalProcessingUnitInstance extends ProcessingUnitInstance, 
      * @since 8.0.6
      */
     ProcessingUnitInstanceStatistics getLastStatistics();
-    
+ 
+    /**
+     * Defines a ServiceMonitor that runs in the Admin API 
+     * which aggregates other ServiceMonitors of the same instance
+     * and performs time window aggregations.
+     * @param serviceMonitorsId
+     * @param aggregators
+     * @since 9.0.0
+     */
     void enableTimeAggregatedServiceMonitors(String serviceMonitorsId, ProcessingUnitInstanceStatisticsTimeAggregator[] aggregators);
     
+    /**
+     * Disables a previously defined time aggregation ServiceMonitor 
+     * @param serviceMonitorsId
+     * @param aggregators
+     * @since 9.0.0
+     */
     void disableTimeAggregatedServiceMonitors(String serviceMonitorsId);
 }
