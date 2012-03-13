@@ -123,6 +123,8 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
 
     private volatile MemberAliveIndicatorStatus memberAliveIndicatorStatus = MemberAliveIndicatorStatus.ALIVE;
 
+    // #enableTimeAggregatedServiceMonitors() #disableTimeAggregatedServiceMonitors() methods modify this
+    // collection and we do not want them to block until #getStatistics completes. Therefore the concurrent hash map
     private final ConcurrentHashMap<String,ProcessingUnitInstanceStatisticsTimeAggregator[]> timeAggregatorsById;
 
     public DefaultProcessingUnitInstance(ServiceID serviceID, PUDetails puDetails, PUServiceBean puServiceBean, InternalAdmin admin) {
