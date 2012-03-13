@@ -558,7 +558,7 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
         }
         
         
-        DefaultProcessingUnitInstanceServiceStatistics statistics = new DefaultProcessingUnitInstanceServiceStatistics(
+        this.lastStatistics = new DefaultProcessingUnitInstanceServiceStatistics(
                 puMonitors.getTimestamp(), 
                 serviceMonitorsById, 
                 previousStatistics, 
@@ -566,8 +566,8 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
                 getVirtualMachine().getMachine().getOperatingSystem().getTimeDelta(),
                 timeAggregatorsById);
                 
-        this.lastStatistics = statistics;
-        return statistics;
+        return this.lastStatistics;
+        
     }
 
     public void enableTimeAggregatedServiceMonitors(String serviceMonitorsId, ProcessingUnitInstanceStatisticsTimeAggregator[] aggregators) {
