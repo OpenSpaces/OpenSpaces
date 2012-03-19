@@ -38,10 +38,10 @@ public enum NotifyComType {
     MULTIPLEX(AbstractNotifyEventListenerContainer.COM_TYPE_MULTIPLEX),
 
     /**
-     * Controls how notification are propagated from the space to the listener. Multicast
-     * propagation uses UDP multicast communication which is usually best for large amount of
-     * registered clients.
+     * Multicast notifications are no longer supported. This enum value will be removed in future versions.
+     * @deprecated Since 9.0.0
      */
+    @Deprecated
     MULTICAST(AbstractNotifyEventListenerContainer.COM_TYPE_MULTICAST);
 
 

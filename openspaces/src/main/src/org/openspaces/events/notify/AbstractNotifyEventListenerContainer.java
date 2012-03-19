@@ -112,10 +112,10 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
     public static final int COM_TYPE_MULTIPLEX = 1;
 
     /**
-     * Controls how notification are propagated from the space to the listener. Multicast
-     * propagation uses UDP multicast communication which is usually best for large amount of
-     * registered clients.
+     * Multicast notifications are no longer supported. This enum value will be removed in future versions.
+     * @deprecated Since 9.0.0
      */
+    @Deprecated
     public static final int COM_TYPE_MULTICAST = 2;
 
     private static final Constants constants = new Constants(AbstractNotifyEventListenerContainer.class);
@@ -165,7 +165,6 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
     /**
      * See {@link #setComTypeName(String)}.
      *
-     * @see #COM_TYPE_MULTICAST
      * @see #COM_TYPE_MULTIPLEX
      * @see #COM_TYPE_UNICAST
      */
@@ -180,7 +179,6 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
     /**
      * Sets the communication protocol for the notification registration.
      *
-     * @see #COM_TYPE_MULTICAST
      * @see #COM_TYPE_MULTIPLEX
      * @see #COM_TYPE_UNICAST
      */
@@ -590,8 +588,7 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
                 eventSessionConfig.setComType(EventSessionConfig.ComType.MULTIPLEX);
                 break;
             case COM_TYPE_MULTICAST:
-                eventSessionConfig.setComType(EventSessionConfig.ComType.MULTICAST);
-                break;
+                throw new IllegalArgumentException("Multicast notifications are no longer supported.");
             default:
                 throw new IllegalArgumentException("Unknown com type [" + comType + "]");
         }
