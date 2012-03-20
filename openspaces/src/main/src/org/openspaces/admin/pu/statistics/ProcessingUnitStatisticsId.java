@@ -58,5 +58,55 @@ public class ProcessingUnitStatisticsId {
      */
     public void setInstancesStatistics(InstancesStatisticsConfig instancesStatistics) {
         this.instancesStatistics = instancesStatistics;
-    }       
+    }
+    
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((instancesStatistics == null) ? 0 : instancesStatistics.hashCode());
+        result = prime * result + ((metric == null) ? 0 : metric.hashCode());
+        result = prime * result + ((monitor == null) ? 0 : monitor.hashCode());
+        result = prime * result + ((timeWindowStatistics == null) ? 0 : timeWindowStatistics.hashCode());
+        return result;
+    }
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ProcessingUnitStatisticsId other = (ProcessingUnitStatisticsId) obj;
+        if (instancesStatistics == null) {
+            if (other.instancesStatistics != null)
+                return false;
+        } else if (!instancesStatistics.equals(other.instancesStatistics))
+            return false;
+        if (metric == null) {
+            if (other.metric != null)
+                return false;
+        } else if (!metric.equals(other.metric))
+            return false;
+        if (monitor == null) {
+            if (other.monitor != null)
+                return false;
+        } else if (!monitor.equals(other.monitor))
+            return false;
+        if (timeWindowStatistics == null) {
+            if (other.timeWindowStatistics != null)
+                return false;
+        } else if (!timeWindowStatistics.equals(other.timeWindowStatistics))
+            return false;
+        return true;
+    }
+    
+
 }
