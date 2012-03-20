@@ -13,6 +13,12 @@ public class ProcessingUnitStatisticsIdConfigurer {
 
     public ProcessingUnitStatisticsIdConfigurer() {
         config = new ProcessingUnitStatisticsId();
+        
+        // do not apply instances aggregation unless specified explicitly
+        instancesStatistics(new EachSingleInstanceStatisticsConfig());
+        
+        // do not apply time window aggregation unless specified explicitly
+        timeWindowStatistics(new LastSampleTimeWindowStatisticsConfig());
     }
     
     /**
