@@ -1,5 +1,5 @@
 package org.openspaces.admin.pu.statistics;
 
-public abstract class InstancesAggregationStatisticsConfig {
+public abstract class InstancesStatisticsConfig {
 
 }
