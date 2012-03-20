@@ -21,7 +21,6 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.openspaces.admin.internal.admin.DefaultAdmin;
 
 /**
  * A List of Objects that supports min,max,percentile operations if the Objects implement Comparable
