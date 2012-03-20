@@ -138,8 +138,6 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
 
     private volatile MemberAliveIndicatorStatus memberAliveIndicatorStatus = MemberAliveIndicatorStatus.ALIVE;
 
-    private volatile ProcessingUnitInstanceStatisticsCalculator[] timeAggregators;
-
     public DefaultProcessingUnitInstance(ServiceID serviceID, PUDetails puDetails, PUServiceBean puServiceBean, InternalAdmin admin) {
         super(admin);
         this.serviceID = serviceID;
@@ -220,8 +218,6 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
             servicesDetailsTemp.put(entry.getKey(), entry.getValue().toArray(new ServiceDetails[entry.getValue().size()]));
         }
         servicesDetailsByServiceType = Collections.unmodifiableMap(servicesDetailsTemp);
-        
-        timeAggregators = new ProcessingUnitInstanceStatisticsCalculator[0];
     }
 
     public String getUid() {
@@ -579,19 +575,9 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
                 statisticsHistorySize,
                 getVirtualMachine().getMachine().getOperatingSystem().getTimeDelta());
         
-        for (ProcessingUnitInstanceStatisticsCalculator timeAggregator : timeAggregators) {
-            ServiceMonitors[] monitors = timeAggregator.aggregate(statistics);
-            statistics.addMonitors(monitors);
-        }
-                
         this.lastStatistics = statistics;   
         return this.lastStatistics;
         
-    }
-
-    @Override
-    public void setTimeAggregatedServiceMonitorsProviders(ProcessingUnitInstanceStatisticsCalculator[] timeAggregators) {
-        this.timeAggregators = timeAggregators;
     }
             
     public synchronized void setStatisticsInterval(long interval, TimeUnit timeUnit) {

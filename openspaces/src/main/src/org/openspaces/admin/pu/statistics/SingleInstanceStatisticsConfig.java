@@ -19,16 +19,12 @@ public class SingleInstanceStatisticsConfig extends AbstractInstancesStatisticsC
         
     }
     
-    /**
-     * @param uid
-     */
     public SingleInstanceStatisticsConfig(String instanceUid) {
         this.instanceUid = instanceUid;
     }
 
     /**
      * @see ProcessingUnitInstance#getUid()
-     * @return
      */
     public String getInstanceUid() {
         return instanceUid;
@@ -38,9 +34,6 @@ public class SingleInstanceStatisticsConfig extends AbstractInstancesStatisticsC
         this.instanceUid = instanceUid;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -49,9 +42,6 @@ public class SingleInstanceStatisticsConfig extends AbstractInstancesStatisticsC
         return result;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -69,19 +59,20 @@ public class SingleInstanceStatisticsConfig extends AbstractInstancesStatisticsC
         return true;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
         return "singleInstanceStatisticsConfig {instanceUid=" + instanceUid + "}";
     }
     
-    /* (non-Javadoc)
-     * @see org.openspaces.admin.internal.admin.InternalProcessingUnitStatisticsCalculatorFactory#createProcessingUnitStatisticsCalculator()
-     */
     @Override
-    public InternalProcessingUnitStatisticsCalculator createProcessingUnitStatisticsCalculator() {
-        return new DoNothingProcessingUnitStatisticsCalculator();
+    public Class<? extends InternalProcessingUnitStatisticsCalculator> getProcessingUnitStatisticsCalculator() {
+        return DoNothingProcessingUnitStatisticsCalculator.class;
+    }
+
+    @Override
+    public void validate() throws IllegalStateException {
+        if (instanceUid == null) {
+            throw new IllegalStateException("instance UID was not specified. Consider using " + EachSingleInstanceStatisticsConfig.class.getName() + " instead");
+        }
     }
 }

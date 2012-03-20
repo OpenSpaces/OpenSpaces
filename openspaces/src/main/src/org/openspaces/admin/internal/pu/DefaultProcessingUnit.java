@@ -41,7 +41,6 @@ import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.application.Application;
 import org.openspaces.admin.esm.ElasticServiceManager;
 import org.openspaces.admin.gsm.GridServiceManager;
-import org.openspaces.admin.internal.admin.DefaultAdmin;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.application.InternalApplication;
 import org.openspaces.admin.internal.esm.InternalElasticServiceManager;
@@ -68,6 +67,7 @@ import org.openspaces.admin.internal.pu.events.InternalProcessingUnitInstanceRem
 import org.openspaces.admin.internal.pu.events.InternalProcessingUnitInstanceStatisticsChangedEventManager;
 import org.openspaces.admin.internal.pu.events.InternalProcessingUnitSpaceCorrelatedEventManager;
 import org.openspaces.admin.internal.pu.events.InternalProcessingUnitStatusChangedEventManager;
+import org.openspaces.admin.internal.pu.statistics.DefaultProcessingUnitStatisticsCalculatorFactory;
 import org.openspaces.admin.internal.pu.statistics.InternalProcessingUnitStatistics;
 import org.openspaces.admin.pu.DeploymentStatus;
 import org.openspaces.admin.pu.ProcessingUnit;
@@ -182,6 +182,8 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
 
     private final ProcessingUnitType processingUnitType;
 
+    private final DefaultProcessingUnitStatisticsCalculatorFactory statisticsCalculatorFactory = new DefaultProcessingUnitStatisticsCalculatorFactory();
+    
     /**
      * @Deprecated since 8.0.6 use app.deploy(puDeployment) or gsm.deploy(new ApplicationDeployment(appName,puDeployment) instead.
      */
@@ -1072,7 +1074,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         lastStatisticsTimestamp = currentTime;
         
         InternalProcessingUnitStatistics statistics = 
-                new DefaultProcessingUnitStatistics(currentTime, lastStatistics, statisticsHistorySize);
+                new DefaultProcessingUnitStatistics(currentTime, lastStatistics, statisticsHistorySize, statisticsCalculatorFactory);
         
         for (ProcessingUnitStatisticsId statisticsId : statisticsIds) {
             injectInstanceStatisticsIfAvailable(statistics, statisticsId);

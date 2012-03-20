@@ -1,5 +1,7 @@
 package org.openspaces.admin.pu.statistics;
 
+import org.openspaces.admin.internal.pu.statistics.AbstractInstancesStatisticsConfig;
+
 /**
  * Picks the Nth percentile of cluster instance values.
  * For example 50th percentile is the median.
@@ -16,9 +18,6 @@ public class PercentileInstancesStatisticsConfig extends AbstractInstancesStatis
     }
 
     public void setPercentile(double percentile) {
-        if (percentile <0 || percentile > 100) {
-            throw new IllegalArgumentException("percentile must between 0 and 100 (inclusive)");
-        }
         this.percentile = percentile;
     }
 
@@ -59,6 +58,16 @@ public class PercentileInstancesStatisticsConfig extends AbstractInstancesStatis
     @Override
     public String toString() {
         return "percentileInstancesStatistics {percentile=" + percentile + "}";
+    }
+
+    /* (non-Javadoc)
+     * @see org.openspaces.admin.internal.pu.statistics.InternalInstancesStatisticsConfig#validate()
+     */
+    @Override
+    public void validate() throws IllegalStateException {
+        if (percentile <0 || percentile > 100) {
+            throw new IllegalArgumentException("percentile ("+percentile+") must between 0 and 100 (inclusive)");
+        }
     }
 
 }

@@ -13,15 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.openspaces.admin.internal.pu.statistics;
+package org.openspaces.admin.pu.statistics;
+
+
 
 /**
+ * Configurations that aggregate statistics from a time window by picking up the sample with the highest value.
  * @author itaif
- *
+ * @since 9.0.0
+ * @see MinimumTimeWindowStatisticsConfig
+ * @see PercentileTimeWindowStatisticsConfig
  */
-public class InternalProcessingUnitStatisticsCalculatorFactory {
+public class MaximumTimeWindowStatisticsConfig  extends AbstractTimeWindowStatisticsConfig {
 
-    public InternalProcessingUnitStatisticsCalculator create (InternalProcessingUnitStatisticsCalculatorClassProvider classProvider) {
-        return null;
+    @Override
+    public String toString() {
+        return "maximumTimeWindowStatistics {timeWindowSeconds="+getTimeWindowSeconds() + ", minimumTimeWindowSeconds="+getMinimumTimeWindowSeconds() + ", maximumTimeWindowSeconds="+ getMaximumTimeWindowSeconds()+"}";
     }
+
 }

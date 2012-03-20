@@ -1,6 +1,5 @@
 package org.openspaces.admin.pu.statistics;
 
-import org.openspaces.admin.internal.pu.statistics.AbstractTimeWindowStatisticsConfig;
 import org.openspaces.admin.internal.pu.statistics.InternalInstancesStatisticsConfig;
 import org.openspaces.admin.internal.pu.statistics.InternalTimeWindowStatisticsConfig;
 

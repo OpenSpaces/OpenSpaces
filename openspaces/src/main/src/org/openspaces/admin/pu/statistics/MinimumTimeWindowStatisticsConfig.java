@@ -15,29 +15,18 @@
  *******************************************************************************/
 package org.openspaces.admin.pu.statistics;
 
-import org.openspaces.admin.internal.pu.statistics.AbstractInstancesStatisticsConfig;
-import org.openspaces.admin.internal.pu.statistics.DoNothingProcessingUnitStatisticsCalculator;
-import org.openspaces.admin.internal.pu.statistics.InternalProcessingUnitStatisticsCalculator;
 
 /**
+ * Configurations that aggregate statistics from a time window by picking up the sample with the smallest value.
  * @author itaif
- *
+ * @since 9.0.0
+ * @see MaximumTimeWindowStatisticsConfig
+ * @see PercentileTimeWindowStatisticsConfig
  */
-public class EachSingleInstanceStatisticsConfig extends AbstractInstancesStatisticsConfig {
+public class MinimumTimeWindowStatisticsConfig  extends AbstractTimeWindowStatisticsConfig {
 
     @Override
     public String toString() {
-        return "eachSingleInstanceStatistics";
+        return "minimumTimeWindowStatistics {timeWindowSeconds="+getTimeWindowSeconds() + ", minimumTimeWindowSeconds="+getMinimumTimeWindowSeconds() + ", maximumTimeWindowSeconds="+ getMaximumTimeWindowSeconds()+"}";
     }
-
-    @Override
-    public Class<? extends InternalProcessingUnitStatisticsCalculator> getProcessingUnitStatisticsCalculator() {
-        return DoNothingProcessingUnitStatisticsCalculator.class;
-    }
-
-    @Override
-    public void validate() throws IllegalStateException {
-        // ok
-    }
-
 }

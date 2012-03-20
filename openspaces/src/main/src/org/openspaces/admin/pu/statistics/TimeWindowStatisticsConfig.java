@@ -19,20 +19,11 @@
 package org.openspaces.admin.pu.statistics;
 
 /**
+ * Marks configurations that aggregate statistics from time samples.
  * @author itaif
- *
+ * @since 9.0.0
+ * @see ProcessingUnitStatisticsId
  */
 public interface TimeWindowStatisticsConfig {
 
-    long getTimeWindowSeconds();
-    
-    void setTimeWindowSeconds(long durationSeconds);
-    
-    long getMinimumTimeWindowSeconds();
-    
-    void setMinimumTimeWindowSeconds(long durationSeconds);
-
-    long getMaximumTimeWindowSeconds();
-    
-    void setMaximumTimeWindowSeconds(long durationSeconds);
 }

@@ -1,52 +1,20 @@
 package org.openspaces.admin.pu.statistics;
 
+
 public class PercentileTimeWindowStatisticsConfig extends AbstractTimeWindowStatisticsConfig {
 
-    private int percentile;
+    private double percentile;
         
-    public int getPercentile() {
+    public double getPercentile() {
         return percentile;
     }
     
-    public void setPercentile(int percentile) {
+    public void setPercentile(double percentile) {
         this.percentile = percentile;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + percentile;
-        return result;
-    }
-
-    /* (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (!super.equals(obj))
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        PercentileTimeWindowStatisticsConfig other = (PercentileTimeWindowStatisticsConfig) obj;
-        if (percentile != other.percentile)
-            return false;
-        return true;
-    }
-
-    /* (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
-        return "percentileTimeWindowStatistics {percentile=" + percentile + "}";
-    }
-
-    
+        return "percentile { percentile="+percentile+" , timeWindowSeconds="+getTimeWindowSeconds() + ", minimumTimeWindowSeconds="+getMinimumTimeWindowSeconds() + ", maximumTimeWindowSeconds="+ getMaximumTimeWindowSeconds()+"}";
+    }    
 }

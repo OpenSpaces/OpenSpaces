@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.openspaces.admin.internal.pu;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,16 +22,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.openspaces.admin.internal.pu.statistics.DefaultProcessingUnitStatisticsCalculatorFactory;
 import org.openspaces.admin.internal.pu.statistics.InternalProcessingUnitStatistics;
 import org.openspaces.admin.internal.pu.statistics.InternalProcessingUnitStatisticsCalculator;
 import org.openspaces.admin.internal.pu.statistics.InternalProcessingUnitStatisticsCalculatorClassProvider;
-import org.openspaces.admin.internal.pu.statistics.InternalProcessingUnitStatisticsCalculatorFactory;
-import org.openspaces.admin.pu.ProcessingUnitInstanceStatistics;
-import org.openspaces.admin.pu.statistics.LastSampleTimeWindowStatisticsConfig;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
-import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsIdConfigurer;
-import org.openspaces.admin.pu.statistics.SingleInstanceStatisticsConfig;
-import org.openspaces.pu.service.ServiceMonitors;
 
 public class DefaultProcessingUnitStatistics implements InternalProcessingUnitStatistics {
 
@@ -42,13 +36,13 @@ public class DefaultProcessingUnitStatistics implements InternalProcessingUnitSt
     
     private final Map<ProcessingUnitStatisticsId, Object> statistics;
 
-    private final InternalProcessingUnitStatisticsCalculatorFactory statisticsCalculatorFactory;
+    private final DefaultProcessingUnitStatisticsCalculatorFactory statisticsCalculatorFactory;
     
     public DefaultProcessingUnitStatistics(
             long adminTimestamp, 
             ProcessingUnitStatistics lastStatistics,
             int historySize,
-            InternalProcessingUnitStatisticsCalculatorFactory statisticsCalculatorFactory) {
+            DefaultProcessingUnitStatisticsCalculatorFactory statisticsCalculatorFactory) {
     
         this.statisticsCalculatorFactory = statisticsCalculatorFactory;
         this.statistics = new HashMap<ProcessingUnitStatisticsId, Object>();
@@ -81,28 +75,6 @@ public class DefaultProcessingUnitStatistics implements InternalProcessingUnitSt
     public Map<ProcessingUnitStatisticsId, Object> getStatistics() {
         return Collections.unmodifiableMap(statistics);
     }
-
-    @Override
-    public void addStatistics(InternalProcessingUnitInstance instance) {
-        ProcessingUnitInstanceStatistics lastInstanceStatistics = instance.getLastStatistics();
-        if (lastInstanceStatistics != null) {
-            Collection<ServiceMonitors> monitors = lastInstanceStatistics.getMonitors().values();
-            for (ServiceMonitors serviceMonitors : monitors) {
-                for (Map.Entry<String, Object> pair: serviceMonitors.getMonitors().entrySet()) {
-                    
-                    ProcessingUnitStatisticsId statisticsId = 
-                            new ProcessingUnitStatisticsIdConfigurer()
-                            .monitor(serviceMonitors.getId())
-                            .metric(pair.getKey())
-                            .instancesStatistics(new SingleInstanceStatisticsConfig(instance.getUid()))
-                            .timeWindowStatistics(new LastSampleTimeWindowStatisticsConfig())
-                            .create();
-                    
-                    statistics.put(statisticsId, pair.getValue());
-                }
-            }
-        }
-   }
 
     @Override
     public void calculateStatistics(ProcessingUnitStatisticsId[] statisticsIds) {
