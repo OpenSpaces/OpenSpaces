@@ -96,6 +96,7 @@ import org.openspaces.admin.pu.events.ProcessingUnitSpaceCorrelatedEventListener
 import org.openspaces.admin.pu.events.ProcessingUnitSpaceCorrelatedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEvent;
 import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEventManager;
+import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
 import org.openspaces.admin.space.Space;
 import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.pu.container.support.RequiredDependenciesCommandLineParser;
@@ -1098,5 +1099,17 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         for (ProcessingUnitInstance instance : processingUnitInstances.values()) {
             ((InternalProcessingUnitInstance)instance).setTimeAggregatedServiceMonitorsProviders(timeAggregators);
         }
+    }
+
+    @Override
+    public void addStatistics(ProcessingUnitStatisticsId selector) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void removeStatistics(ProcessingUnitStatisticsId selector) {
+        // TODO Auto-generated method stub
+        
     }
 }

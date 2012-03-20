@@ -15,21 +15,16 @@
  *******************************************************************************/
 package org.openspaces.admin.internal.pu;
 
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.ProcessingUnitInstanceStatistics;
+import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
 import org.openspaces.pu.service.ServiceMonitors;
 
 public class DefaultProcessingUnitStatistics implements ProcessingUnitStatistics {
 
-    private final Map<String, ServiceMonitors> serviceMonitorsById;
-
     private volatile ProcessingUnitStatistics lastStats;
-
-    private final Map<ProcessingUnitInstance, ProcessingUnitInstanceStatistics> instancesStatistics;
 
     private final long adminTimestamp;
     
@@ -41,7 +36,6 @@ public class DefaultProcessingUnitStatistics implements ProcessingUnitStatistics
             int historySize) {
         
         this.adminTimestamp = adminTimestamp;
-        this.instancesStatistics = instancesStatistics;
         this.lastStats = previous;
        
         if (lastStats != null) {
@@ -54,8 +48,6 @@ public class DefaultProcessingUnitStatistics implements ProcessingUnitStatistics
             ((DefaultProcessingUnitStatistics)lastStats).lastStats = null;
         }
         
-        this.serviceMonitorsById = serviceMonitorsById;
-        
     }
     
     @Override
@@ -64,23 +56,14 @@ public class DefaultProcessingUnitStatistics implements ProcessingUnitStatistics
     }
     
     @Override
-    public Iterator<ServiceMonitors> iterator() {
-        return Collections.unmodifiableCollection(serviceMonitorsById.values()).iterator();
-    }
-
-    @Override
-    public Map<String, ServiceMonitors> getMonitors() {
-        return Collections.unmodifiableMap(this.serviceMonitorsById);
-    }
-
-    @Override
-    public Map<ProcessingUnitInstance, ProcessingUnitInstanceStatistics> getInstanceStatistics() {
-        return Collections.unmodifiableMap(instancesStatistics);
-    }
-
-    @Override
     public ProcessingUnitStatistics getPrevious() {
         return this.lastStats;
+    }
+
+    @Override
+    public Map<ProcessingUnitStatisticsId, Object> getStatistics() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

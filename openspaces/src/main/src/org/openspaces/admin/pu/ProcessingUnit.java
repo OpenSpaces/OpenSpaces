@@ -55,6 +55,7 @@ import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceStatisticsChangedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitSpaceCorrelatedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEventManager;
+import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
 import org.openspaces.admin.space.Space;
 import org.openspaces.core.properties.BeanLevelProperties;
 
@@ -402,4 +403,16 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
      * @return the processing unit (aggregated) statistics.
      */
     ProcessingUnitStatistics getStatistics();
+
+    /**
+     * Adds the specified aggregated statistics calculation
+     */
+    void addStatistics(ProcessingUnitStatisticsId selector);
+    
+    /**
+     * Removes the specified aggregated statistics calculation
+     * @param selector
+     */
+    void removeStatistics(ProcessingUnitStatisticsId selector);
+
 }
