@@ -32,7 +32,7 @@ public class ErasedTimeWindowStatisticsConfig extends AbstractTimeWindowStatisti
      */
     public ErasedTimeWindowStatisticsConfig(AbstractTimeWindowStatisticsConfig timeWindowStatistics) {
         this.setMaximumTimeWindowSeconds(timeWindowStatistics.getMaximumTimeWindowSeconds());
-        this.setMinimumTimeWindowSeconds(this.getMinimumTimeWindowSeconds());
+        this.setMinimumTimeWindowSeconds(timeWindowStatistics.getMinimumTimeWindowSeconds());
         this.setTimeWindowSeconds(timeWindowStatistics.getTimeWindowSeconds());
     }
 
