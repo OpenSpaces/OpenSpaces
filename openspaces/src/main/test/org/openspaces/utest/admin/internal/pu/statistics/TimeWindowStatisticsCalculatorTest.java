@@ -113,83 +113,66 @@ public class TimeWindowStatisticsCalculatorTest extends TestCase {
         Map<ProcessingUnitStatisticsId, Object> pStatistics = lastStatistics.getPrevious().getStatistics();
         Map<ProcessingUnitStatisticsId, Object> statistics = lastStatistics.getStatistics();
         
-        Assert.assertEquals(0,      pppStatistics.get(lastSampleStatisticsId()));
-        Assert.assertEquals(0/1.0,  pppStatistics.get(averageStatisticsId()));
-        Assert.assertEquals(0,      pppStatistics.get(maximumStatisticsId()));
-        Assert.assertEquals(0,      pppStatistics.get(minimumStatisticsId()));
-        Assert.assertEquals(0,      pppStatistics.get(precentileStatisticsId(0)));
-        Assert.assertEquals(0,      pppStatistics.get(precentileStatisticsId(1)));
-        Assert.assertEquals(0,      pppStatistics.get(precentileStatisticsId(49)));
-        Assert.assertEquals(0,      pppStatistics.get(precentileStatisticsId(50)));
-        Assert.assertEquals(0,      pppStatistics.get(precentileStatisticsId(51)));
-        Assert.assertEquals(0,      pppStatistics.get(precentileStatisticsId(99)));
-        Assert.assertEquals(0,      pppStatistics.get(precentileStatisticsId(100)));
-        
-        
-        Assert.assertEquals(1,          ppStatistics.get(lastSampleStatisticsId()));
-        Assert.assertEquals((0+1)/2.0,  ppStatistics.get(averageStatisticsId()));
-        Assert.assertEquals(1,          ppStatistics.get(maximumStatisticsId()));
-        Assert.assertEquals(0,          ppStatistics.get(minimumStatisticsId()));
-        Assert.assertEquals(0,          ppStatistics.get(precentileStatisticsId(0)));
-        Assert.assertEquals(0,          ppStatistics.get(precentileStatisticsId(1)));
-        Assert.assertEquals(0,          ppStatistics.get(precentileStatisticsId(49)));
-        Assert.assertEquals(1,          ppStatistics.get(precentileStatisticsId(50)));
-        Assert.assertEquals(1,          ppStatistics.get(precentileStatisticsId(51)));
-        Assert.assertEquals(1,          ppStatistics.get(precentileStatisticsId(99)));
-        Assert.assertEquals(1,          ppStatistics.get(precentileStatisticsId(100)));
-        
         if (!tooMuchJitter) {
-            //three samples time window
-            Assert.assertEquals(2,          pStatistics.get(lastSampleStatisticsId()));
-            Assert.assertEquals((0+1+2)/3.0,pStatistics.get(averageStatisticsId()));
-            Assert.assertEquals(2,          pStatistics.get(maximumStatisticsId()));
-            Assert.assertEquals(0,          pStatistics.get(minimumStatisticsId()));
-            Assert.assertEquals(0,          pStatistics.get(precentileStatisticsId(0)));
-            Assert.assertEquals(0,          pStatistics.get(precentileStatisticsId(1)));
-            Assert.assertEquals(1,          pStatistics.get(precentileStatisticsId(49)));
-            Assert.assertEquals(1,          pStatistics.get(precentileStatisticsId(50)));
-            Assert.assertEquals(1,          pStatistics.get(precentileStatisticsId(51)));
-            Assert.assertEquals(2,          pStatistics.get(precentileStatisticsId(99)));
-            Assert.assertEquals(2,          pStatistics.get(precentileStatisticsId(100)));
-            Assert.assertEquals(3,          statistics.get(lastSampleStatisticsId()));
-            Assert.assertEquals((1+2+3)/3.0,statistics.get(averageStatisticsId()));
-            Assert.assertEquals(3,          statistics.get(maximumStatisticsId()));
-            Assert.assertEquals(1,          statistics.get(minimumStatisticsId()));
-            Assert.assertEquals(1,          statistics.get(precentileStatisticsId(0)));
-            Assert.assertEquals(1,          statistics.get(precentileStatisticsId(1)));
-            Assert.assertEquals(2,          statistics.get(precentileStatisticsId(49)));
-            Assert.assertEquals(2,          statistics.get(precentileStatisticsId(50)));
-            Assert.assertEquals(2,          statistics.get(precentileStatisticsId(51)));
-            Assert.assertEquals(3,          statistics.get(precentileStatisticsId(99)));
-            Assert.assertEquals(3,          statistics.get(precentileStatisticsId(100)));
+            assertOneSampleStartingWith(0,pppStatistics);
+            assertTwoSamplesStartingWith(0, ppStatistics);
+            assertThreeSamplesStartingWith(0, pStatistics);
+            assertThreeSamplesStartingWith(1, statistics);
         }
         else {
-            //two samples time window
-            Assert.assertEquals(2,          pStatistics.get(lastSampleStatisticsId()));
-            Assert.assertEquals((1+2)/2.0,  pStatistics.get(averageStatisticsId()));
-            Assert.assertEquals(2,          pStatistics.get(maximumStatisticsId()));
-            Assert.assertEquals(1,          pStatistics.get(minimumStatisticsId()));
-            Assert.assertEquals(1,          pStatistics.get(precentileStatisticsId(0)));
-            Assert.assertEquals(1,          pStatistics.get(precentileStatisticsId(1)));
-            Assert.assertEquals(1,          pStatistics.get(precentileStatisticsId(49)));
-            Assert.assertEquals(2,          pStatistics.get(precentileStatisticsId(50)));
-            Assert.assertEquals(2,          pStatistics.get(precentileStatisticsId(51)));
-            Assert.assertEquals(2,          pStatistics.get(precentileStatisticsId(99)));
-            Assert.assertEquals(2,          pStatistics.get(precentileStatisticsId(100)));
-            Assert.assertEquals(3,          statistics.get(lastSampleStatisticsId()));
-            Assert.assertEquals((2+3)/2.0,statistics.get(averageStatisticsId()));
-            Assert.assertEquals(3,          statistics.get(maximumStatisticsId()));
-            Assert.assertEquals(2,          statistics.get(minimumStatisticsId()));
-            Assert.assertEquals(2,          statistics.get(precentileStatisticsId(0)));
-            Assert.assertEquals(2,          statistics.get(precentileStatisticsId(1)));
-            Assert.assertEquals(2,          statistics.get(precentileStatisticsId(49)));
-            Assert.assertEquals(3,          statistics.get(precentileStatisticsId(50)));
-            Assert.assertEquals(3,          statistics.get(precentileStatisticsId(51)));
-            Assert.assertEquals(3,          statistics.get(precentileStatisticsId(99)));
-            Assert.assertEquals(3,          statistics.get(precentileStatisticsId(100)));
+            assertOneSampleStartingWith(0,pppStatistics);
+            assertTwoSamplesStartingWith(0, ppStatistics);
+            assertTwoSamplesStartingWith(1, pStatistics);
+            assertTwoSamplesStartingWith(2, statistics);
         }
         
         
+    }
+
+    private void assertThreeSamplesStartingWith(int firstValue, Map<ProcessingUnitStatisticsId, Object> pStatistics) {
+        int secondValue = firstValue+1;
+        int thirdValue = firstValue+2;
+        Assert.assertEquals(thirdValue,         pStatistics.get(lastSampleStatisticsId()));
+        Assert.assertEquals((firstValue+secondValue+thirdValue)/3.0,pStatistics.get(averageStatisticsId()));
+        Assert.assertEquals(thirdValue,         pStatistics.get(maximumStatisticsId()));
+        Assert.assertEquals(firstValue,         pStatistics.get(minimumStatisticsId()));
+        Assert.assertEquals(firstValue,         pStatistics.get(precentileStatisticsId(0)));
+        Assert.assertEquals(firstValue,         pStatistics.get(precentileStatisticsId(1)));
+        Assert.assertEquals(secondValue,        pStatistics.get(precentileStatisticsId(49)));
+        Assert.assertEquals(secondValue,        pStatistics.get(precentileStatisticsId(50)));
+        Assert.assertEquals(secondValue,        pStatistics.get(precentileStatisticsId(51)));
+        Assert.assertEquals(thirdValue,         pStatistics.get(precentileStatisticsId(99)));
+        Assert.assertEquals(thirdValue,         pStatistics.get(precentileStatisticsId(100)));
+    }
+
+    private void assertTwoSamplesStartingWith(int firstValue, Map<ProcessingUnitStatisticsId, Object> ppStatistics) {
+        int secondValue = firstValue+1;
+        Assert.assertEquals(secondValue,         ppStatistics.get(lastSampleStatisticsId()));
+        Assert.assertEquals((firstValue+secondValue)/2.0,  ppStatistics.get(averageStatisticsId()));
+        Assert.assertEquals(secondValue,         ppStatistics.get(maximumStatisticsId()));
+        Assert.assertEquals(firstValue,          ppStatistics.get(minimumStatisticsId()));
+        Assert.assertEquals(firstValue,          ppStatistics.get(precentileStatisticsId(0)));
+        Assert.assertEquals(firstValue,          ppStatistics.get(precentileStatisticsId(1)));
+        Assert.assertEquals(firstValue,          ppStatistics.get(precentileStatisticsId(49)));
+        Assert.assertEquals(secondValue,         ppStatistics.get(precentileStatisticsId(50)));
+        Assert.assertEquals(secondValue,         ppStatistics.get(precentileStatisticsId(51)));
+        Assert.assertEquals(secondValue,         ppStatistics.get(precentileStatisticsId(99)));
+        Assert.assertEquals(secondValue,         ppStatistics.get(precentileStatisticsId(100)));
+    }
+
+    private void assertOneSampleStartingWith(int firstValue, Map<ProcessingUnitStatisticsId, Object> statistics) {
+        
+        Assert.assertEquals(firstValue,     statistics.get(lastSampleStatisticsId()));
+        Assert.assertEquals(firstValue/1.0, statistics.get(averageStatisticsId()));
+        Assert.assertEquals(firstValue,     statistics.get(maximumStatisticsId()));
+        Assert.assertEquals(firstValue,     statistics.get(minimumStatisticsId()));
+        Assert.assertEquals(firstValue,     statistics.get(precentileStatisticsId(0)));
+        Assert.assertEquals(firstValue,     statistics.get(precentileStatisticsId(1)));
+        Assert.assertEquals(firstValue,     statistics.get(precentileStatisticsId(49)));
+        Assert.assertEquals(firstValue,     statistics.get(precentileStatisticsId(50)));
+        Assert.assertEquals(firstValue,     statistics.get(precentileStatisticsId(51)));
+        Assert.assertEquals(firstValue,     statistics.get(precentileStatisticsId(99)));
+        Assert.assertEquals(firstValue,     statistics.get(precentileStatisticsId(100)));
     }
 
     private ProcessingUnitStatisticsId precentileStatisticsId(int i) {
