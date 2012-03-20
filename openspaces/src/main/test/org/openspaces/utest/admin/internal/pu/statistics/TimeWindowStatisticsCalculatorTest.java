@@ -34,8 +34,9 @@ import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsIdConfigurer;
 import org.openspaces.admin.pu.statistics.SingleInstanceStatisticsConfig;
 
 /**
+ * Tests TimeWindowStatisticsCalculator
  * @author itaif
- *
+ * @since 9.0.0
  */
 public class TimeWindowStatisticsCalculatorTest extends TestCase {
 
