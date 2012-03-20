@@ -506,14 +506,8 @@ public class GigaSessionManager extends AbstractSessionManager {
 
         @Override
         public void setAttribute(String name, Object value) {
-            if (value == null) {
-                // CHM does not allow null values to be set, so remove the key
-                super.removeAttribute(name);
-                _data.getAttributeMap().remove(name);
-            } else {
-                super.setAttribute(name, value);
-                _data.getAttributeMap().put(name, value);
-            }
+            super.setAttribute(name, value);
+            _data.getAttributeMap().put(name, value);
             _dirty = true;
         }
 
