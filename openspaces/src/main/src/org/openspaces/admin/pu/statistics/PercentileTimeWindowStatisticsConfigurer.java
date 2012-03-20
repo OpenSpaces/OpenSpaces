@@ -3,7 +3,11 @@ package org.openspaces.admin.pu.statistics;
 import java.util.concurrent.TimeUnit;
 
 import org.openspaces.admin.internal.pu.statistics.DefaultTimeWindowStatisticsConfigUtils;
-
+/**
+ * Fluent API for creating a new {@link PercentileTimeWindowStatisticsConfig} object
+ * @author itaif
+ * @since 9.0.0
+ */
 public class PercentileTimeWindowStatisticsConfigurer {
     
     private PercentileTimeWindowStatisticsConfig config = new PercentileTimeWindowStatisticsConfig();
