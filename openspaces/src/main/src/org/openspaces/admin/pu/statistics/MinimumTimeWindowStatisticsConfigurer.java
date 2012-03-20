@@ -28,22 +28,22 @@ public class MinimumTimeWindowStatisticsConfigurer {
 
     private MinimumTimeWindowStatisticsConfig config = new MinimumTimeWindowStatisticsConfig();
     
-    MinimumTimeWindowStatisticsConfigurer timeWindow(long timeWindow, TimeUnit timeUnit) {
+    public MinimumTimeWindowStatisticsConfigurer timeWindow(long timeWindow, TimeUnit timeUnit) {
         DefaultTimeWindowStatisticsConfigUtils.timeWindow(config, timeWindow, timeUnit);
         return this;
     }
     
-    MinimumTimeWindowStatisticsConfigurer minimumTimeWindow(long timeWindow, TimeUnit timeUnit) {
+    public MinimumTimeWindowStatisticsConfigurer minimumTimeWindow(long timeWindow, TimeUnit timeUnit) {
         DefaultTimeWindowStatisticsConfigUtils.minimumTimeWindow(config, timeWindow, timeUnit);
         return this;
     }
     
-    MinimumTimeWindowStatisticsConfigurer maximumTimeWindow(long timeWindow, TimeUnit timeUnit) {
+    public MinimumTimeWindowStatisticsConfigurer maximumTimeWindow(long timeWindow, TimeUnit timeUnit) {
         DefaultTimeWindowStatisticsConfigUtils.maximumTimeWindow(config, timeWindow, timeUnit);
         return this;
     }
         
-    MinimumTimeWindowStatisticsConfig create() {
+    public MinimumTimeWindowStatisticsConfig create() {
         DefaultTimeWindowStatisticsConfigUtils.create(config);
         return config;
     }

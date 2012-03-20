@@ -34,6 +34,8 @@ import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsIdConfigurer;
 import org.openspaces.admin.pu.statistics.SingleInstanceStatisticsConfig;
 import org.openspaces.admin.pu.statistics.TimeWindowStatisticsConfig;
 
+import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
+
 /**
  * @author itaif
  *
@@ -61,38 +63,34 @@ public class TimeWindowStatisticsCalculator implements InternalProcessingUnitSta
             StatisticsObjectList values = pair.getValue();
             
             for (TimeWindowStatisticsConfig timeWindowStatistics : statisticsIdsPerErasedStatisticsId.get(erasedStatisticsId)) {
+                
                 ProcessingUnitStatisticsId statisticsId = unerase(erasedStatisticsId,timeWindowStatistics);
             
                 Object value = null;
-                try {
-                    if (timeWindowStatistics instanceof AverageTimeWindowStatisticsConfig) {
-                        value = values.getAverage();
-                    }
-                    else if (timeWindowStatistics instanceof MinimumTimeWindowStatisticsConfig) {
-                        value = values.getMinimum();
-                    }
-                    else if (timeWindowStatistics instanceof MaximumTimeWindowStatisticsConfig) {
-                        value = values.getMaximum();
-                    }
-                    else if (timeWindowStatistics instanceof PercentileTimeWindowStatisticsConfig) {
-                        double precentile =((PercentileTimeWindowStatisticsConfig) timeWindowStatistics).getPercentile();
-                        value = values.getPercentile(precentile);
-                    }
-                    else {
-                        if (logger.isWarnEnabled()) {
-                            logger.warn(timeWindowStatistics.getClass() + " is not supported");
-                            continue;
-                        }   
-                    }
-                    processingUnitStatistics.addStatistics(statisticsId, value);
+               
+                if (timeWindowStatistics instanceof AverageTimeWindowStatisticsConfig) {
+                    value = values.getAverage();
+                }
+                else if (timeWindowStatistics instanceof MinimumTimeWindowStatisticsConfig) {
+                    value = values.getMinimum();
+                }
+                else if (timeWindowStatistics instanceof MaximumTimeWindowStatisticsConfig) {
+                    value = values.getMaximum();
+                }
+                else if (timeWindowStatistics instanceof PercentileTimeWindowStatisticsConfig) {
+                    double precentile =((PercentileTimeWindowStatisticsConfig) timeWindowStatistics).getPercentile();
+                    value = values.getPercentile(precentile);
                 }
                 
-                catch (ClassCastException e) {
-                    if (logger.isInfoEnabled()) {
-                        logger.info(erasedStatisticsId.getMetric() + " value class type is not a Number",e);
-                    }
-                    continue;
+                if (value != null) {
+                    processingUnitStatistics.addStatistics(statisticsId, value);    
                 }
+                else {
+                    if (logger.isWarnEnabled()) {
+                        logger.warn(timeWindowStatistics.getClass() + " is not supported");
+                    }   
+                }
+                
             }
         }
         
@@ -187,9 +185,9 @@ public class TimeWindowStatisticsCalculator implements InternalProcessingUnitSta
                 
                 ErasedTimeWindowStatisticsConfig timeWindowStatistics = (ErasedTimeWindowStatisticsConfig) statisticsId.getTimeWindowStatistics();
                 timeWindowStatistics.validate();
-                final long timeWindowSeconds = timeWindowStatistics.getTimeWindowSeconds();
-                final long minTimeWindowSeconds = timeWindowStatistics.getMinimumTimeWindowSeconds();
-                final long maxTimeWindowSeconds = timeWindowStatistics.getMaximumTimeWindowSeconds();
+                final long timeWindowMilliSeconds = TimeUnit.SECONDS.toMillis(timeWindowStatistics.getTimeWindowSeconds());
+                final long minTimeWindowMilliSeconds = TimeUnit.SECONDS.toMillis(timeWindowStatistics.getMinimumTimeWindowSeconds());
+                final long maxTimeWindowMilliSeconds = TimeUnit.SECONDS.toMillis(timeWindowStatistics.getMaximumTimeWindowSeconds());
                 
                 if (timeDelta == 0) {
                     valuesTimeline.put(statisticsId, new StatisticsObjectList());
@@ -199,13 +197,13 @@ public class TimeWindowStatisticsCalculator implements InternalProcessingUnitSta
                 
                 if (timeline != null) {
                     
-                    if (prevTimeDelta >= minTimeWindowSeconds) {
+                    if (prevTimeDelta >= minTimeWindowMilliSeconds) {
                         // enough samples
                         finalValuesTimeline.put(statisticsId, timeline);
                     }
                     
                     final Object value = getValue(values, statisticsId);
-                    if (timeDelta > maxTimeWindowSeconds || value == null) {
+                    if (timeDelta > maxTimeWindowMilliSeconds || value == null) {
                         
                         // invalid sample
                         valuesTimeline.remove(statisticsId);
@@ -214,7 +212,7 @@ public class TimeWindowStatisticsCalculator implements InternalProcessingUnitSta
                         //valid sample
                         timeline.add(value);
                         
-                        if (timeDelta > timeWindowSeconds) {
+                        if (timeDelta >= timeWindowMilliSeconds) {
                             // collected just the right number of samples
                             valuesTimeline.remove(statisticsId);
                         }

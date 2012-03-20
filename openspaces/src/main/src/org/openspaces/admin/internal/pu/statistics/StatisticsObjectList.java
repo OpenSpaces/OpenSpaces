@@ -102,7 +102,12 @@ public class StatisticsObjectList {
             Collections.sort(values);
             sorted = true;
         }
-        int index = (int) (Math.ceil((values.size()-1)*percentile/100));
+        int index = (int) (Math.round((values.size()-1)*percentile/100));
         return values.get(index);
+    }
+    
+    @Override
+    public String toString() {
+        return values.toString();
     }
 }

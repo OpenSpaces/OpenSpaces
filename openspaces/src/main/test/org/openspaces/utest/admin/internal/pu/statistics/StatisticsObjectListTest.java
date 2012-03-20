@@ -27,14 +27,37 @@ import org.openspaces.admin.internal.pu.statistics.StatisticsObjectList;
  */
 public class StatisticsObjectListTest extends TestCase {
 
-    public void testSimple() {
+    public void testSimpleList2() {
         StatisticsObjectList list = new StatisticsObjectList();
-        list.add(3);
+        list.add(0);
         list.add(1);
+        Assert.assertEquals(0, list.getMinimum());
+        Assert.assertEquals(1, list.getMaximum());
+        Assert.assertEquals(0.5, list.getAverage());
+        Assert.assertEquals(0, list.getPercentile(0));
+        Assert.assertEquals(0, list.getPercentile(1));
+        Assert.assertEquals(0, list.getPercentile(49));
+        Assert.assertEquals(1, list.getPercentile(50));
+        Assert.assertEquals(1, list.getPercentile(51));
+        Assert.assertEquals(1, list.getPercentile(99));
+        Assert.assertEquals(1, list.getPercentile(100));
+    }
+    
+    public void testSimpleList3() {
+        StatisticsObjectList list = new StatisticsObjectList();
         list.add(2);
-        Assert.assertEquals(1, list.getMinimum());
-        Assert.assertEquals(3, list.getMaximum());
-        Assert.assertEquals(2.0, list.getAverage());
+        list.add(0);
+        list.add(1);
+        Assert.assertEquals(0, list.getMinimum());
+        Assert.assertEquals(2, list.getMaximum());
+        Assert.assertEquals(1.0, list.getAverage());
+        Assert.assertEquals(0, list.getPercentile(0));
+        Assert.assertEquals(0, list.getPercentile(1));
+        Assert.assertEquals(1, list.getPercentile(49));
+        Assert.assertEquals(1, list.getPercentile(50));
+        Assert.assertEquals(1, list.getPercentile(51));
+        Assert.assertEquals(2, list.getPercentile(99));
+        Assert.assertEquals(2, list.getPercentile(100));
     }
     
     public void testComparable() {
@@ -52,5 +75,25 @@ public class StatisticsObjectListTest extends TestCase {
         catch (ClassCastException e) {
         }
       
+    }
+    
+    
+    public void testAverageNotComparable() {
+        StatisticsObjectList list = new StatisticsObjectList();
+        list.add(new Object());
+        try {
+            list.getAverage();
+            Assert.fail("Expected ClassCastException");
+        }
+        catch (ClassCastException e) {
+        }
+        
+        try {
+            list.getMinimum();
+            Assert.fail("Expected ClassCastException");
+            
+        }
+        catch (ClassCastException e) {
+        }
     }
 }
