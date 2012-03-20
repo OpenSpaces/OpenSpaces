@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 /*******************************************************************************
  * Copyright (c) 2012 GigaSpaces Technologies Ltd. All rights reserved
  *
@@ -15,13 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
->>>>>>> e0cd19b... GS-9236 Started rewriting of pu statistics based on ProcessingUnitStatisticsId
-package org.openspaces.admin.pu.statistics;
+package org.openspaces.admin.internal.pu.statistics;
+
+import org.openspaces.admin.pu.statistics.TimeWindowStatisticsConfig;
 
 /**
+ * Interface used by Admin API implementation to configure time window statistics. 
  * @author itaif
- *
+ * @since 9.0.0
  */
-public interface InstancesStatisticsConfig {
-    
+public interface InternalTimeWindowStatisticsConfig extends TimeWindowStatisticsConfig, InternalProcessingUnitStatisticsCalculatorClassProvider {
+
+    /**
+     * Checks the content of this config is valid.
+     * @throws IllegalStateException - if state is found to be illegal
+     */
+    void validate() throws IllegalStateException;
+
 }

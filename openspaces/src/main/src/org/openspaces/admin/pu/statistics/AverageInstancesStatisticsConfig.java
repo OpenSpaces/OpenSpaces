@@ -14,7 +14,7 @@ package org.openspaces.admin.pu.statistics;
  * @author itaif
  *
  */
-public class AverageInstancesStatisticsConfig extends InstancesStatisticsConfig {
+public class AverageInstancesStatisticsConfig extends AbstractInstancesStatisticsConfig {
 
     /* (non-Javadoc)
      * @see java.lang.Object#toString()

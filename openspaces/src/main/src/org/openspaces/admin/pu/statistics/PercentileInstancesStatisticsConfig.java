@@ -7,7 +7,7 @@ package org.openspaces.admin.pu.statistics;
  * @author itaif
  *
  */
-public class PercentileInstancesStatisticsConfig extends InstancesStatisticsConfig {
+public class PercentileInstancesStatisticsConfig extends AbstractInstancesStatisticsConfig {
 
     private double percentile;
     

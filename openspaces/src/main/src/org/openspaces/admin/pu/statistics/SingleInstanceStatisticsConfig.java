@@ -1,5 +1,8 @@
 package org.openspaces.admin.pu.statistics;
 
+import org.openspaces.admin.internal.pu.statistics.AbstractInstancesStatisticsConfig;
+import org.openspaces.admin.internal.pu.statistics.DoNothingProcessingUnitStatisticsCalculator;
+import org.openspaces.admin.internal.pu.statistics.InternalProcessingUnitStatisticsCalculator;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 
 /**
@@ -8,9 +11,20 @@ import org.openspaces.admin.pu.ProcessingUnitInstance;
  * @author itaif
  * @since 9.0.0
  */
-public class SingleInstanceStatisticsConfig extends InstancesStatisticsConfig {
+public class SingleInstanceStatisticsConfig extends AbstractInstancesStatisticsConfig {
 
     private String instanceUid;
+
+    public SingleInstanceStatisticsConfig() {
+        
+    }
+    
+    /**
+     * @param uid
+     */
+    public SingleInstanceStatisticsConfig(String instanceUid) {
+        this.instanceUid = instanceUid;
+    }
 
     /**
      * @see ProcessingUnitInstance#getUid()
@@ -61,5 +75,13 @@ public class SingleInstanceStatisticsConfig extends InstancesStatisticsConfig {
     @Override
     public String toString() {
         return "singleInstanceStatisticsConfig {instanceUid=" + instanceUid + "}";
+    }
+    
+    /* (non-Javadoc)
+     * @see org.openspaces.admin.internal.admin.InternalProcessingUnitStatisticsCalculatorFactory#createProcessingUnitStatisticsCalculator()
+     */
+    @Override
+    public InternalProcessingUnitStatisticsCalculator createProcessingUnitStatisticsCalculator() {
+        return new DoNothingProcessingUnitStatisticsCalculator();
     }
 }

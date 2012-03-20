@@ -15,11 +15,15 @@
  *******************************************************************************/
 package org.openspaces.admin.pu.statistics;
 
+import org.openspaces.admin.internal.pu.statistics.AbstractInstancesStatisticsConfig;
+import org.openspaces.admin.internal.pu.statistics.DoNothingProcessingUnitStatisticsCalculator;
+import org.openspaces.admin.internal.pu.statistics.InternalProcessingUnitStatisticsCalculator;
+
 /**
  * @author itaif
  *
  */
-public class EachSingleInstanceStatisticsConfig extends InstancesStatisticsConfig {
+public class EachSingleInstanceStatisticsConfig extends AbstractInstancesStatisticsConfig {
 
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
@@ -27,6 +31,14 @@ public class EachSingleInstanceStatisticsConfig extends InstancesStatisticsConfi
     @Override
     public String toString() {
         return "eachSingleInstanceStatistics";
+    }
+
+    /* (non-Javadoc)
+     * @see org.openspaces.admin.internal.admin.InternalProcessingUnitStatisticsCalculatorFactory#createProcessingUnitStatisticsCalculator()
+     */
+    @Override
+    public InternalProcessingUnitStatisticsCalculator createProcessingUnitStatisticsCalculator() {
+        return new DoNothingProcessingUnitStatisticsCalculator();
     }
 
 }

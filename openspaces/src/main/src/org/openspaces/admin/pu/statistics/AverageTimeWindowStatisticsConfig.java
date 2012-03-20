@@ -1,14 +1,15 @@
 package org.openspaces.admin.pu.statistics;
 
-public class AverageTimeWindowStatisticsConfig extends TimeWindowStatisticsConfig {
+import org.openspaces.admin.internal.pu.statistics.AbstractTimeWindowStatisticsConfig;
+import org.openspaces.admin.internal.pu.statistics.InternalProcessingUnitStatisticsCalculator;
+
+public class AverageTimeWindowStatisticsConfig extends AbstractTimeWindowStatisticsConfig {
 
     /* (non-Javadoc)
-     * @see java.lang.Object#toString()
+     * @see org.openspaces.admin.internal.admin.InternalProcessingUnitStatisticsCalculatorFactory#createProcessingUnitStatisticsCalculator()
      */
     @Override
-    public String toString() {
-        return "averageTimeWindowStatistics";
+    public Class<? extends InternalProcessingUnitStatisticsCalculator> getProcessingUnitStatisticsCalculator() {
+        return TimeWindowStatisticsCalculator.class;
     }
-
-    
 }

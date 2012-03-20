@@ -1,6 +1,6 @@
 package org.openspaces.admin.pu.statistics;
 
-public class PercentileTimeWindowStatisticsConfig extends TimeWindowStatisticsConfig {
+public class PercentileTimeWindowStatisticsConfig extends AbstractTimeWindowStatisticsConfig {
 
     private int percentile;
         

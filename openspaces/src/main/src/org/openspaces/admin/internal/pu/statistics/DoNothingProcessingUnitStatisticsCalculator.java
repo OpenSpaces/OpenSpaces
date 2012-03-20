@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 /*******************************************************************************
  * Copyright (c) 2012 GigaSpaces Technologies Ltd. All rights reserved
  *
@@ -15,24 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
->>>>>>> e0cd19b... GS-9236 Started rewriting of pu statistics based on ProcessingUnitStatisticsId
-package org.openspaces.admin.pu.statistics;
+package org.openspaces.admin.internal.pu.statistics;
+
+import java.util.Set;
+
+import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
 
 /**
+ * Default implementation for {@link InternalProcessingUnitStatisticsCalculator} which does nothing.
  * @author itaif
- *
+ * @since 9.0.0
  */
-public interface TimeWindowStatisticsConfig {
+public class DoNothingProcessingUnitStatisticsCalculator implements InternalProcessingUnitStatisticsCalculator {
+    
+    /* (non-Javadoc)
+     * @see org.openspaces.admin.internal.pu.statistics.InternalProcessingUnitStatisticsCalculator#calculateNewStatistics(org.openspaces.admin.internal.pu.statistics.InternalProcessingUnitStatistics, java.util.Set)
+     */
+    @Override
+    public void calculateNewStatistics(InternalProcessingUnitStatistics processingUnitStatistics,
+            Set<ProcessingUnitStatisticsId> statisticsIds) {
+      //do nothing
+        
+    }
 
-    long getTimeWindowSeconds();
-    
-    void setTimeWindowSeconds(long durationSeconds);
-    
-    long getMinimumTimeWindowSeconds();
-    
-    void setMinimumTimeWindowSeconds(long durationSeconds);
-
-    long getMaximumTimeWindowSeconds();
-    
-    void setMaximumTimeWindowSeconds(long durationSeconds);
 }

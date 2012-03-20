@@ -95,22 +95,5 @@ public interface InternalProcessingUnit extends ProcessingUnit, InternalProcessi
     /**
      * @since 8.0.6
      */
-    Map<String, InternalProvisionStatusHolder> getProvisionStatusPerInstance();
-
-    /**
-     *  Defines calculation of time based statistics for each processing unit instance statistics.
-     * 
-     * @since 9.0.0
-     * @author itaif 
-     */
-    void setTimeAggregatorServiceMonitorsProviders(TimeAggregatorServiceMonitorsProvider[] timeAggregators);
-    
-    /**
-     *  Defines calculation of time based statistics for each processing unit instance statistics.
-     * 
-     * @since 9.0.0
-     * @author itaif 
-     */
-    void setClusterAggregatorServiceMonitorsProviders(ClusterAggregatorServiceMonitorsProvider[] clusterAggregators);
-    
+    Map<String, InternalProvisionStatusHolder> getProvisionStatusPerInstance();   
 }

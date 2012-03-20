@@ -31,6 +31,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jini.rio.core.RequiredDependencies;
 import org.jini.rio.monitor.ProvisionLifeCycleEvent;
 import org.openspaces.admin.Admin;
@@ -39,6 +41,7 @@ import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.application.Application;
 import org.openspaces.admin.esm.ElasticServiceManager;
 import org.openspaces.admin.gsm.GridServiceManager;
+import org.openspaces.admin.internal.admin.DefaultAdmin;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.application.InternalApplication;
 import org.openspaces.admin.internal.esm.InternalElasticServiceManager;
@@ -65,6 +68,7 @@ import org.openspaces.admin.internal.pu.events.InternalProcessingUnitInstanceRem
 import org.openspaces.admin.internal.pu.events.InternalProcessingUnitInstanceStatisticsChangedEventManager;
 import org.openspaces.admin.internal.pu.events.InternalProcessingUnitSpaceCorrelatedEventManager;
 import org.openspaces.admin.internal.pu.events.InternalProcessingUnitStatusChangedEventManager;
+import org.openspaces.admin.internal.pu.statistics.InternalProcessingUnitStatistics;
 import org.openspaces.admin.pu.DeploymentStatus;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
@@ -96,9 +100,14 @@ import org.openspaces.admin.pu.events.ProcessingUnitSpaceCorrelatedEventListener
 import org.openspaces.admin.pu.events.ProcessingUnitSpaceCorrelatedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEvent;
 import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEventManager;
+import org.openspaces.admin.pu.statistics.InstancesStatisticsConfig;
+import org.openspaces.admin.pu.statistics.LastSampleTimeWindowStatisticsConfig;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
+import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsIdConfigurer;
+import org.openspaces.admin.pu.statistics.SingleInstanceStatisticsConfig;
 import org.openspaces.admin.space.Space;
 import org.openspaces.core.properties.BeanLevelProperties;
+import org.openspaces.core.util.ConcurrentHashSet;
 import org.openspaces.pu.container.support.RequiredDependenciesCommandLineParser;
 import org.openspaces.pu.service.ServiceMonitors;
 import org.openspaces.pu.sla.SLA;
@@ -113,6 +122,8 @@ import com.gigaspaces.internal.utils.StringUtils;
  */
 public class DefaultProcessingUnit implements InternalProcessingUnit {
 
+    private static final Log logger = LogFactory.getLog(DefaultProcessingUnit.class);
+    
     private final InternalProcessingUnits processingUnits;
 
     private final InternalAdmin admin;
@@ -187,12 +198,11 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     
     private final InternalProcessingUnitDependencies<ProcessingUnitDependency,InternalProcessingUnitDependency> dependencies;
 
-    private volatile ClusterAggregatorServiceMonitorsProvider[] clusterAggregators;
-    private volatile TimeAggregatorServiceMonitorsProvider[] timeAggregators;
-
     private volatile ProcessingUnitStatistics lastStatistics;
     private long lastStatisticsTimestamp;
     private int scheduledStatisticsRefCount = 0;
+
+    private final ConcurrentHashSet<ProcessingUnitStatisticsId> statisticsIds;
     
     public DefaultProcessingUnit(InternalAdmin admin, InternalProcessingUnits processingUnits, PUDetails details) {
         this.admin = admin;
@@ -279,8 +289,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         this.processingUnitInstanceProvisionStatusChangedEventManager = new DefaultProcessingUnitInstanceProvisionStatusChangedEventManager(admin, this);
         this.processingUnitInstanceMemberAliveIndicatorStatusChangedEventManager = new DefaultProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventManager(admin, this);
         
-        this.clusterAggregators = new ClusterAggregatorServiceMonitorsProvider[0];
-        this.timeAggregators = new TimeAggregatorServiceMonitorsProvider[0];
+        this.statisticsIds = new ConcurrentHashSet<ProcessingUnitStatisticsId>();
     }
 
     @Override
@@ -736,8 +745,6 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
                 ((InternalProcessingUnitInstanceAddedEventManager) application.getProcessingUnits().getProcessingUnitInstanceAdded()).processingUnitInstanceAdded(processingUnitInstance);
             }
         }
-        
-        ((InternalProcessingUnitInstance)processingUnitInstance).setTimeAggregatedServiceMonitorsProviders(timeAggregators);
     }
 
     @Override
@@ -804,6 +811,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         scheduledStatisticsMonitor = admin.scheduleWithFixedDelay(new Runnable() {
             public void run() {
                 ProcessingUnitStatistics stats = DefaultProcessingUnit.this.getStatistics();
+                //TODO: Should we store history of both pu instances and pu statistics? Its redundant
                 //TODO: Raise event
                 //ProcessingUnitStatisticsChangedEvent event = new ProcessingUnitStatisticsChangedEvent(processingUnitInstance, stats);
                 //statisticsChangedEventManager.processingUnitInstanceStatisticsChanged(event);                
@@ -1055,61 +1063,111 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         
         long currentTime = System.currentTimeMillis();
         if ((currentTime - lastStatisticsTimestamp) < statisticsInterval) {
+            if (lastStatistics == null) {
+                throw new IllegalStateException("lastStatistics cannot be null here");
+            }
             return lastStatistics;
         }
         
         lastStatisticsTimestamp = currentTime;
         
-        Map<ProcessingUnitInstance, ProcessingUnitInstanceStatistics> instancesStatistics = new HashMap<ProcessingUnitInstance, ProcessingUnitInstanceStatistics>();
-        for (ProcessingUnitInstance instance : getInstances()) {
-            
-            ProcessingUnitInstanceStatistics instanceStatistics = ((InternalProcessingUnitInstance)instance).getLastStatistics();
-            
-            if (instanceStatistics != null) {
-            
-                instancesStatistics.put(instance, instanceStatistics);
-            }
+        InternalProcessingUnitStatistics statistics = 
+                new DefaultProcessingUnitStatistics(currentTime, lastStatistics, statisticsHistorySize);
+        
+        for (ProcessingUnitStatisticsId statisticsId : statisticsIds) {
+            injectInstanceStatisticsIfAvailable(statistics, statisticsId);
         }
         
-        Map<String,ServiceMonitors> serviceMonitorsById = new HashMap<String,ServiceMonitors>();
-        for (ClusterAggregatorServiceMonitorsProvider clusterAggregator : clusterAggregators) {
-            for (ServiceMonitors serviceMonitors : clusterAggregator.aggregate(instancesStatistics)) {
-                serviceMonitorsById.put(serviceMonitors.getId(), serviceMonitors);
-            }
-        }
-        
-        lastStatistics = new DefaultProcessingUnitStatistics(currentTime, serviceMonitorsById, instancesStatistics, lastStatistics, statisticsHistorySize);
+        statistics.calculateStatistics(getStatisticsCalculations());
+
+        lastStatistics = statistics;
         return lastStatistics;
     }
 
-    @Override
-    public void setClusterAggregatorServiceMonitorsProviders(
-            ClusterAggregatorServiceMonitorsProvider[] aggregators) {
-     
-        this.clusterAggregators = aggregators;   
-    }
-
-    @Override
-    public void setTimeAggregatorServiceMonitorsProviders(TimeAggregatorServiceMonitorsProvider[] timeAggregators) {
+    /**
+     * Extracts the last statistics specified in statisticsId from the specified instance (or if not specified all instances)
+     * and injects it into the puStatistics object
+     */
+    private void injectInstanceStatisticsIfAvailable(
+            InternalProcessingUnitStatistics statistics,
+            ProcessingUnitStatisticsId statisticsId) {
         
-        // update added instances
-        this.timeAggregators = timeAggregators;
-        
-        // update existing instances
-        for (ProcessingUnitInstance instance : processingUnitInstances.values()) {
-            ((InternalProcessingUnitInstance)instance).setTimeAggregatedServiceMonitorsProviders(timeAggregators);
+        InstancesStatisticsConfig instancesStatistics = statisticsId.getInstancesStatistics();
+        if (instancesStatistics instanceof SingleInstanceStatisticsConfig) {
+            String instanceUid = ((SingleInstanceStatisticsConfig)statisticsId.getInstancesStatistics()).getInstanceUid();
+            ProcessingUnitInstance instance = processingUnitInstances.get(instanceUid);
+            if (instance == null) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Failed to find processing unit " + this.getName() + " instance with UID " + instanceUid);
+                }
+            }
+            injectInstanceStatisticsIfAvailable(statistics, statisticsId, instance);
+        }
+        else {
+            for (ProcessingUnitInstance instance : processingUnitInstances.values()) {
+                injectInstanceStatisticsIfAvailable(statistics, statisticsId, instance);    
+            }
         }
     }
 
-    @Override
-    public void addStatistics(ProcessingUnitStatisticsId selector) {
-        // TODO Auto-generated method stub
+    /**
+     * Extracts the last statistics specified in statisticsId from the specified instance and injects it into the puStatistics object
+     */
+    private void injectInstanceStatisticsIfAvailable(
+            InternalProcessingUnitStatistics puStatistics, 
+            ProcessingUnitStatisticsId statisticsId,
+            ProcessingUnitInstance instance) {
         
+       ProcessingUnitInstanceStatistics lastStatistics = ((InternalProcessingUnitInstance)instance).getLastStatistics();
+       if (lastStatistics == null) {
+           if (logger.isDebugEnabled()) {
+               logger.debug("Failed to retrieve last statistics for for processing unit " + this.getName() + " instance " + instance.getUid());
+           }
+       }
+       else {
+           final ServiceMonitors serviceMonitors = lastStatistics.getMonitors().get(statisticsId.getMonitor());
+           if (serviceMonitors == null) {
+               if (logger.isDebugEnabled()) {
+                   logger.debug("Failed to find serviceMonitors " + statisticsId.getMonitor() +" for processing unit " + this.getName());
+               }
+           }
+           else {
+               final Object value = serviceMonitors.getMonitors().get(statisticsId.getMetric());
+               if (value == null) {
+                   if (logger.isDebugEnabled()) {
+                       logger.debug("No statistics is available for metric " + statisticsId.getMetric() + " in serviceMonitors " + statisticsId.getMonitor() +" for processing unit " + this.getName());
+                   }
+               }
+               else {
+                   //the original statisticsId may contain time or instances aggregation 
+                   //we want to inject to the pu statistics the raw metric data
+                   final ProcessingUnitStatisticsId newStatisticsId =
+                           new ProcessingUnitStatisticsIdConfigurer()
+                           .metric(statisticsId.getMetric())
+                           .monitor(statisticsId.getMonitor())
+                           .timeWindowStatistics(new LastSampleTimeWindowStatisticsConfig())
+                           .instancesStatistics(new SingleInstanceStatisticsConfig(instance.getUid()))
+                           .create();
+                   puStatistics.addStatistics(newStatisticsId,value);
+               }
+           }
+       }
+    }
+
+ 
+    @Override
+    public void addStatisticsCalculation(ProcessingUnitStatisticsId statisticsId) {
+        this.statisticsIds.add(statisticsId);
     }
 
     @Override
-    public void removeStatistics(ProcessingUnitStatisticsId selector) {
-        // TODO Auto-generated method stub
-        
+    public void removeStatisticsCalculation(ProcessingUnitStatisticsId statisticsId) {
+        this.statisticsIds.remove(statisticsId);
+    }
+    
+
+    @Override
+    public ProcessingUnitStatisticsId[] getStatisticsCalculations() {
+       return statisticsIds.toArray(new ProcessingUnitStatisticsId[statisticsIds.size()]);
     }
 }

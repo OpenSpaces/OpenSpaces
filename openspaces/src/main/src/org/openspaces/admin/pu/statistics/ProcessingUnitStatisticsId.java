@@ -1,5 +1,9 @@
 package org.openspaces.admin.pu.statistics;
 
+import org.openspaces.admin.internal.pu.statistics.AbstractTimeWindowStatisticsConfig;
+import org.openspaces.admin.internal.pu.statistics.InternalInstancesStatisticsConfig;
+import org.openspaces.admin.internal.pu.statistics.InternalTimeWindowStatisticsConfig;
+
 
 /**
  * Identifies a processing unit statistics value, by specifying the monitoring source and the statistics functions applied to it.
@@ -44,7 +48,7 @@ public class ProcessingUnitStatisticsId {
     }
     
     /**
-     * @see ProcessingUnitStatisticsIdConfigurer#timeWindowStatistics(TimeWindowStatisticsConfig)
+     * @see ProcessingUnitStatisticsIdConfigurer#timeWindowStatistics(AbstractTimeWindowStatisticsConfig)
      */
     public void setTimeWindowStatistics(TimeWindowStatisticsConfig timeWindowStatistics) {
         this.timeWindowStatistics = timeWindowStatistics;
@@ -116,6 +120,24 @@ public class ProcessingUnitStatisticsId {
     public String toString() {
         return "ProcessingUnitStatisticsId [monitor=" + monitor + ", metric=" + metric + ", timeWindowStatistics="
                 + timeWindowStatistics + ", instancesStatistics=" + instancesStatistics + "]";
+    }
+
+
+
+    /**
+     * Checks that the content of this StatisticsId is valid.
+     * @throws IllegalStateException - if state is found to be illegal
+     */
+    public void validate() throws IllegalStateException {
+        ((InternalTimeWindowStatisticsConfig)timeWindowStatistics).validate();
+        ((InternalInstancesStatisticsConfig)instancesStatistics).validate();
+        if (metric == null) {
+            throw new IllegalStateException("metric name cannot be null");
+        }
+        
+        if (monitor == null) {
+            throw new IllegalStateException("monitor name cannot be null");
+        }
     }
 
 }

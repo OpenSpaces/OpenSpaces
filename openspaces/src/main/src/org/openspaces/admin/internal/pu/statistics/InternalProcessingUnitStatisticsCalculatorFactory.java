@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 /*******************************************************************************
  * Copyright (c) 2012 GigaSpaces Technologies Ltd. All rights reserved
  *
@@ -15,13 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
->>>>>>> e0cd19b... GS-9236 Started rewriting of pu statistics based on ProcessingUnitStatisticsId
-package org.openspaces.admin.pu.statistics;
+package org.openspaces.admin.internal.pu.statistics;
 
 /**
  * @author itaif
  *
  */
-public interface InstancesStatisticsConfig {
-    
+public class InternalProcessingUnitStatisticsCalculatorFactory {
+
+    public InternalProcessingUnitStatisticsCalculator create (InternalProcessingUnitStatisticsCalculatorClassProvider classProvider) {
+        return null;
+    }
 }

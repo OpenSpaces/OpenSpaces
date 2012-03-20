@@ -13,12 +13,6 @@ public class ProcessingUnitStatisticsIdConfigurer {
 
     public ProcessingUnitStatisticsIdConfigurer() {
         config = new ProcessingUnitStatisticsId();
-        
-        // do not apply instances aggregation unless specified explicitly
-        instancesStatistics(new EachSingleInstanceStatisticsConfig());
-        
-        // do not apply time window aggregation unless specified explicitly
-        timeWindowStatistics(new LastSampleTimeWindowStatisticsConfig());
     }
     
     /**
@@ -30,7 +24,7 @@ public class ProcessingUnitStatisticsIdConfigurer {
      * "org.openspaces.admin.vm.VirtualMachineStatistics" for the Java Virtual Machine statistics
      * 
      */
-    ProcessingUnitStatisticsIdConfigurer monitor(String monitor) {
+    public ProcessingUnitStatisticsIdConfigurer monitor(String monitor) {
         config.setMonitor(monitor);
         return this;
     }
@@ -38,7 +32,7 @@ public class ProcessingUnitStatisticsIdConfigurer {
     /**
      * The name of the statistics in the source.
      */
-    ProcessingUnitStatisticsIdConfigurer metric(String metric) { 
+    public ProcessingUnitStatisticsIdConfigurer metric(String metric) { 
         config.setMetric(metric);
         return this;
     }
@@ -47,7 +41,7 @@ public class ProcessingUnitStatisticsIdConfigurer {
      * Aggregates values using the specified time window statistics function.
      * If timeWindow is null selects the last sample.
      */
-    ProcessingUnitStatisticsIdConfigurer timeWindowStatistics(TimeWindowStatisticsConfig timeWindowStatistics) {
+    public ProcessingUnitStatisticsIdConfigurer timeWindowStatistics(TimeWindowStatisticsConfig timeWindowStatistics) {
         config.setTimeWindowStatistics(timeWindowStatistics);
         return this;
     }
@@ -57,12 +51,12 @@ public class ProcessingUnitStatisticsIdConfigurer {
      * If cluster is null selects each instance statistics individually
      * Cannot be used together with {@link #instanceUid(String)}
      */
-    ProcessingUnitStatisticsIdConfigurer instancesStatistics(InstancesStatisticsConfig instancesStatistics) {
+    public ProcessingUnitStatisticsIdConfigurer instancesStatistics(InstancesStatisticsConfig instancesStatistics) {
         config.setInstancesStatistics(instancesStatistics);
         return this;
     }
     
-    ProcessingUnitStatisticsId create() {
+    public ProcessingUnitStatisticsId create() {
         return config;
     }
     

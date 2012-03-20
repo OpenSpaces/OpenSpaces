@@ -405,14 +405,24 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
     ProcessingUnitStatistics getStatistics();
 
     /**
-     * Adds the specified aggregated statistics calculation
+     * Adds the specified statistics calculation
+     * @author itaif
+     * @since 9.0.0
      */
-    void addStatistics(ProcessingUnitStatisticsId selector);
+    void addStatisticsCalculation(ProcessingUnitStatisticsId statisticsId);
     
     /**
-     * Removes the specified aggregated statistics calculation
-     * @param selector
+     * Removes the specified statistics calculation
+     * @author itaif
+     * @since 9.0.0
      */
-    void removeStatistics(ProcessingUnitStatisticsId selector);
+    void removeStatisticsCalculation(ProcessingUnitStatisticsId statisticsId);
 
+
+    /**
+     * @return the generated statistics identifiers. 
+     * @author itaif
+     * @since 9.0.0
+     */
+    ProcessingUnitStatisticsId[] getStatisticsCalculations();
 }
