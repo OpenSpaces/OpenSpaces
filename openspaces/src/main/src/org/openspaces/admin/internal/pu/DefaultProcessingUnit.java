@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -98,7 +99,7 @@ import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEventManager;
 import org.openspaces.admin.space.Space;
 import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.pu.container.support.RequiredDependenciesCommandLineParser;
-import org.openspaces.pu.service.ProcessingUnitInstanceStatisticsClusterAggregator;
+import org.openspaces.pu.service.ServiceMonitors;
 import org.openspaces.pu.sla.SLA;
 import org.openspaces.pu.sla.requirement.Requirement;
 import org.openspaces.pu.sla.requirement.ZoneRequirement;
@@ -165,7 +166,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
 
     private volatile int statisticsHistorySize = StatisticsMonitor.DEFAULT_HISTORY_SIZE;
 
-    private volatile boolean scheduledStatisticsMonitor = false;
+    private Future<?> scheduledStatisticsMonitor;
 
     private final ProcessingUnitType processingUnitType;
 
@@ -179,16 +180,19 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
      */
     private static final String APPLICATION_DEPENDENCIES_CONTEXT_PROPERTY = "com.gs.application.dependsOn";
 
-	private final String applicationName;
+    private final String applicationName;
 
     private volatile InternalApplication application;
     
     private final InternalProcessingUnitDependencies<ProcessingUnitDependency,InternalProcessingUnitDependency> dependencies;
 
-    private final ConcurrentHashMap<String,ProcessingUnitInstanceStatisticsClusterAggregator[]> clusterAggregatorsById;
+    private volatile ClusterAggregatorServiceMonitorsProvider[] clusterAggregators;
+    private volatile TimeAggregatorServiceMonitorsProvider[] timeAggregators;
 
     private volatile ProcessingUnitStatistics lastStatistics;
-        
+    private long lastStatisticsTimestamp;
+    private int scheduledStatisticsRefCount = 0;
+    
     public DefaultProcessingUnit(InternalAdmin admin, InternalProcessingUnits processingUnits, PUDetails details) {
         this.admin = admin;
         this.processingUnits = processingUnits;
@@ -274,7 +278,8 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         this.processingUnitInstanceProvisionStatusChangedEventManager = new DefaultProcessingUnitInstanceProvisionStatusChangedEventManager(admin, this);
         this.processingUnitInstanceMemberAliveIndicatorStatusChangedEventManager = new DefaultProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventManager(admin, this);
         
-        this.clusterAggregatorsById = new ConcurrentHashMap<String, ProcessingUnitInstanceStatisticsClusterAggregator[]>();
+        this.clusterAggregators = new ClusterAggregatorServiceMonitorsProvider[0];
+        this.timeAggregators = new TimeAggregatorServiceMonitorsProvider[0];
     }
 
     @Override
@@ -730,6 +735,8 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
                 ((InternalProcessingUnitInstanceAddedEventManager) application.getProcessingUnits().getProcessingUnitInstanceAdded()).processingUnitInstanceAdded(processingUnitInstance);
             }
         }
+        
+        ((InternalProcessingUnitInstance)processingUnitInstance).setTimeAggregatedServiceMonitorsProviders(timeAggregators);
     }
 
     @Override
@@ -782,23 +789,42 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
 
     @Override
     public synchronized void startStatisticsMonitor() {
-        scheduledStatisticsMonitor = true;
+
         for (ProcessingUnitInstance processingUnitInstance : processingUnitInstances.values()) {
             processingUnitInstance.startStatisticsMonitor();
         }
+        
+        if (scheduledStatisticsRefCount++ > 0) return;
+        
+        if (scheduledStatisticsMonitor != null) {
+            scheduledStatisticsMonitor.cancel(false);
+        }
+        
+        scheduledStatisticsMonitor = admin.scheduleWithFixedDelay(new Runnable() {
+            public void run() {
+                ProcessingUnitStatistics stats = DefaultProcessingUnit.this.getStatistics();
+                //TODO: Raise event
+                //ProcessingUnitStatisticsChangedEvent event = new ProcessingUnitStatisticsChangedEvent(processingUnitInstance, stats);
+                //statisticsChangedEventManager.processingUnitInstanceStatisticsChanged(event);                
+                //((InternalProcessingUnitStatisticsChangedEventManager) DefaultProcessingUnit.this.getProcessingUnits().getProcessingUnitStatisticsChanged()).processingUnitStatisticsChanged(event);
+            }
+        }, 0, statisticsInterval, TimeUnit.MILLISECONDS);
     }
 
     @Override
     public synchronized void stopStatisticsMonitor() {
-        scheduledStatisticsMonitor = false;
-        for (ProcessingUnitInstance processingUnitInstance : processingUnitInstances.values()) {
-            processingUnitInstance.stopStatisticsMonitor();
+
+        if (scheduledStatisticsRefCount!=0 && --scheduledStatisticsRefCount > 0) return;
+        
+        if (scheduledStatisticsMonitor != null) {
+            scheduledStatisticsMonitor.cancel(false);
+            scheduledStatisticsMonitor = null;
         }
     }
 
     @Override
     public synchronized boolean isMonitoring() {
-        return scheduledStatisticsMonitor;
+        return scheduledStatisticsMonitor != null;
     }
 
     @Override
@@ -1024,26 +1050,53 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     }
 
     @Override
-    public ProcessingUnitStatistics getStatistics() {
-        Map<ProcessingUnitInstance, ProcessingUnitInstanceStatistics> instanceStatistics = new HashMap<ProcessingUnitInstance, ProcessingUnitInstanceStatistics>();
-        for (ProcessingUnitInstance instance : getInstances()) {
-            instanceStatistics.put(instance, instance.getStatistics());
+    public synchronized ProcessingUnitStatistics getStatistics() {
+        
+        long currentTime = System.currentTimeMillis();
+        if ((currentTime - lastStatisticsTimestamp) < statisticsInterval) {
+            return lastStatistics;
         }
-        lastStatistics = new DefaultProcessingUnitStatistics(instanceStatistics, clusterAggregatorsById, lastStatistics, statisticsHistorySize);
+        
+        lastStatisticsTimestamp = currentTime;
+        
+        Map<ProcessingUnitInstance, ProcessingUnitInstanceStatistics> instancesStatistics = new HashMap<ProcessingUnitInstance, ProcessingUnitInstanceStatistics>();
+        for (ProcessingUnitInstance instance : getInstances()) {
+            
+            ProcessingUnitInstanceStatistics instanceStatistics = ((InternalProcessingUnitInstance)instance).getLastStatistics();
+            
+            if (instanceStatistics != null) {
+            
+                instancesStatistics.put(instance, instanceStatistics);
+            }
+        }
+        
+        Map<String,ServiceMonitors> serviceMonitorsById = new HashMap<String,ServiceMonitors>();
+        for (ClusterAggregatorServiceMonitorsProvider clusterAggregator : clusterAggregators) {
+            for (ServiceMonitors serviceMonitors : clusterAggregator.aggregate(instancesStatistics)) {
+                serviceMonitorsById.put(serviceMonitors.getId(), serviceMonitors);
+            }
+        }
+        
+        lastStatistics = new DefaultProcessingUnitStatistics(currentTime, serviceMonitorsById, instancesStatistics, lastStatistics, statisticsHistorySize);
         return lastStatistics;
     }
 
     @Override
-    public void enableClusterAggregatedServiceMonitors(
-            String serviceMonitorsId,
-            ProcessingUnitInstanceStatisticsClusterAggregator[] aggregators) {
+    public void setClusterAggregatorServiceMonitorsProviders(
+            ClusterAggregatorServiceMonitorsProvider[] aggregators) {
      
-        this.clusterAggregatorsById.put(serviceMonitorsId, aggregators);   
+        this.clusterAggregators = aggregators;   
     }
 
     @Override
-    public void disableClusterAggregatedServiceMonitors(String serviceMonitorsId) {
-        this.clusterAggregatorsById.remove(serviceMonitorsId);
+    public void setTimeAggregatorServiceMonitorsProviders(TimeAggregatorServiceMonitorsProvider[] timeAggregators) {
         
+        // update added instances
+        this.timeAggregators = timeAggregators;
+        
+        // update existing instances
+        for (ProcessingUnitInstance instance : processingUnitInstances.values()) {
+            ((InternalProcessingUnitInstance)instance).setTimeAggregatedServiceMonitorsProviders(timeAggregators);
+        }
     }
 }

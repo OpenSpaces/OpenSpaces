@@ -31,7 +31,6 @@ import org.openspaces.admin.pu.ProcessingUnitInstanceStatistics;
 import org.openspaces.admin.pu.ProcessingUnitPartition;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.pu.container.servicegrid.PUServiceBean;
-import org.openspaces.pu.service.TimeAggregatorServiceMonitorsProvider;
 
 /**
  * @author kimchy
@@ -82,4 +81,11 @@ public interface InternalProcessingUnitInstance extends ProcessingUnitInstance, 
      *  @author itaif
      */
     void setTimeAggregatedServiceMonitorsProviders(TimeAggregatorServiceMonitorsProvider[] timeAggregators);
+    
+
+    /**
+     * @return the statistics interval milliseconds
+     * @since 9.0.0
+     */
+    long getStatisticsIntervalMilliseconds();
 }

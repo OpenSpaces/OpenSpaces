@@ -397,5 +397,9 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
      */
     ProcessingUnitDependencies<ProcessingUnitDependency> getDependencies();
     
+    
+    /**
+     * @return the processing unit (aggregated) statistics.
+     */
     ProcessingUnitStatistics getStatistics();
 }

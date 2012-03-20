@@ -26,7 +26,6 @@ import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
 import org.openspaces.admin.space.Space;
-import org.openspaces.pu.service.ProcessingUnitInstanceStatisticsClusterAggregator;
 
 /**
  * @author kimchy
@@ -97,17 +96,21 @@ public interface InternalProcessingUnit extends ProcessingUnit, InternalProcessi
      * @since 8.0.6
      */
     Map<String, InternalProvisionStatusHolder> getProvisionStatusPerInstance();
-    
+
     /**
-     * Enables aggregation of cluster wide statistics
-     * @param serviceMonitorsId - the ID of the new ServiceMonitors
-     * @param aggregators - the aggregators that generate data for the service monitors.
+     *  Defines calculation of time based statistics for each processing unit instance statistics.
+     * 
      * @since 9.0.0
+     * @author itaif 
      */
-    void enableClusterAggregatedServiceMonitors(String serviceMonitorsId, ProcessingUnitInstanceStatisticsClusterAggregator[] aggregators);
+    void setTimeAggregatorServiceMonitorsProviders(TimeAggregatorServiceMonitorsProvider[] timeAggregators);
     
     /**
-     * Disables aggregation of cluster wide statistics
+     *  Defines calculation of time based statistics for each processing unit instance statistics.
+     * 
+     * @since 9.0.0
+     * @author itaif 
      */
-    void disableClusterAggregatedServiceMonitors(String serviceMonitorsId);
+    void setClusterAggregatorServiceMonitorsProviders(ClusterAggregatorServiceMonitorsProvider[] clusterAggregators);
+    
 }

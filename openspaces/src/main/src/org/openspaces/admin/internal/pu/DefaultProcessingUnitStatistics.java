@@ -16,13 +16,11 @@
 package org.openspaces.admin.internal.pu;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.ProcessingUnitInstanceStatistics;
-import org.openspaces.pu.service.ProcessingUnitInstanceStatisticsClusterAggregator;
 import org.openspaces.pu.service.ServiceMonitors;
 
 public class DefaultProcessingUnitStatistics implements ProcessingUnitStatistics {
@@ -31,15 +29,19 @@ public class DefaultProcessingUnitStatistics implements ProcessingUnitStatistics
 
     private volatile ProcessingUnitStatistics lastStats;
 
-    private final Map<ProcessingUnitInstance, ProcessingUnitInstanceStatistics> processingUnitInstanceStatistics;
+    private final Map<ProcessingUnitInstance, ProcessingUnitInstanceStatistics> instancesStatistics;
+
+    private final long adminTimestamp;
     
     public DefaultProcessingUnitStatistics(
-            Map<ProcessingUnitInstance,ProcessingUnitInstanceStatistics> processingUnitInstanceStatistics,
-            Map<String, ProcessingUnitInstanceStatisticsClusterAggregator[]> clusterAggregatorsById,
+            long adminTimestamp,
+            Map<String, ServiceMonitors> serviceMonitorsById,
+            Map<ProcessingUnitInstance, ProcessingUnitInstanceStatistics> instancesStatistics, 
             ProcessingUnitStatistics previous,
             int historySize) {
         
-        this.processingUnitInstanceStatistics = processingUnitInstanceStatistics;
+        this.adminTimestamp = adminTimestamp;
+        this.instancesStatistics = instancesStatistics;
         this.lastStats = previous;
        
         if (lastStats != null) {
@@ -52,12 +54,13 @@ public class DefaultProcessingUnitStatistics implements ProcessingUnitStatistics
             ((DefaultProcessingUnitStatistics)lastStats).lastStats = null;
         }
         
-        this.serviceMonitorsById = new HashMap<String, ServiceMonitors>();
+        this.serviceMonitorsById = serviceMonitorsById;
+        
     }
     
     @Override
     public long getAdminTimestamp() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return this.adminTimestamp;
     }
     
     @Override
@@ -72,7 +75,7 @@ public class DefaultProcessingUnitStatistics implements ProcessingUnitStatistics
 
     @Override
     public Map<ProcessingUnitInstance, ProcessingUnitInstanceStatistics> getInstanceStatistics() {
-        return Collections.unmodifiableMap(processingUnitInstanceStatistics);
+        return Collections.unmodifiableMap(instancesStatistics);
     }
 
     @Override

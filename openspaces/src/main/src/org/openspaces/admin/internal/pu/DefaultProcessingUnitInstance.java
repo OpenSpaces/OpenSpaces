@@ -72,7 +72,6 @@ import org.openspaces.pu.container.servicegrid.PUServiceBean;
 import org.openspaces.pu.service.PlainServiceMonitors;
 import org.openspaces.pu.service.ServiceDetails;
 import org.openspaces.pu.service.ServiceMonitors;
-import org.openspaces.pu.service.TimeAggregatorServiceMonitorsProvider;
 import org.openspaces.remoting.RemotingServiceDetails;
 
 import com.gigaspaces.internal.jvm.JVMDetails;
@@ -131,7 +130,7 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
 
     private volatile ProcessingUnitInstanceStatistics lastStatistics;
 
-    private Future scheduledStatisticsMonitor;
+    private Future<?> scheduledStatisticsMonitor;
     
     private int scheduledStatisticsRefCount = 0;
 
@@ -603,6 +602,13 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
         }
     }
 
+    /**
+     * @return the statistics interval milliseconds
+     */
+    public synchronized long getStatisticsIntervalMilliseconds() {
+        return statisticsInterval;
+    }
+    
     public void setStatisticsHistorySize(int historySize) {
         this.statisticsHistorySize = historySize;
     }
