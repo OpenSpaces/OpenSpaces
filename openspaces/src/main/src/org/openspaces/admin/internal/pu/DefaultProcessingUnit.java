@@ -67,6 +67,7 @@ import org.openspaces.admin.internal.pu.events.InternalProcessingUnitStatusChang
 import org.openspaces.admin.pu.DeploymentStatus;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
+import org.openspaces.admin.pu.ProcessingUnitInstanceStatistics;
 import org.openspaces.admin.pu.ProcessingUnitPartition;
 import org.openspaces.admin.pu.ProcessingUnitType;
 import org.openspaces.admin.pu.ProcessingUnits;
@@ -97,6 +98,7 @@ import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEventManager;
 import org.openspaces.admin.space.Space;
 import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.pu.container.support.RequiredDependenciesCommandLineParser;
+import org.openspaces.pu.service.ProcessingUnitInstanceStatisticsClusterAggregator;
 import org.openspaces.pu.sla.SLA;
 import org.openspaces.pu.sla.requirement.Requirement;
 import org.openspaces.pu.sla.requirement.ZoneRequirement;
@@ -182,7 +184,11 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     private volatile InternalApplication application;
     
     private final InternalProcessingUnitDependencies<ProcessingUnitDependency,InternalProcessingUnitDependency> dependencies;
-    
+
+    private final ConcurrentHashMap<String,ProcessingUnitInstanceStatisticsClusterAggregator[]> clusterAggregatorsById;
+
+    private volatile ProcessingUnitStatistics lastStatistics;
+        
     public DefaultProcessingUnit(InternalAdmin admin, InternalProcessingUnits processingUnits, PUDetails details) {
         this.admin = admin;
         this.processingUnits = processingUnits;
@@ -267,6 +273,8 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         
         this.processingUnitInstanceProvisionStatusChangedEventManager = new DefaultProcessingUnitInstanceProvisionStatusChangedEventManager(admin, this);
         this.processingUnitInstanceMemberAliveIndicatorStatusChangedEventManager = new DefaultProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventManager(admin, this);
+        
+        this.clusterAggregatorsById = new ConcurrentHashMap<String, ProcessingUnitInstanceStatisticsClusterAggregator[]>();
     }
 
     @Override
@@ -1013,5 +1021,29 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     @Override
     public ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventManager getProcessingUnitInstanceMemberAliveIndicatorStatusChanged() {
         return this.processingUnitInstanceMemberAliveIndicatorStatusChangedEventManager;
+    }
+
+    @Override
+    public ProcessingUnitStatistics getStatistics() {
+        Map<ProcessingUnitInstance, ProcessingUnitInstanceStatistics> instanceStatistics = new HashMap<ProcessingUnitInstance, ProcessingUnitInstanceStatistics>();
+        for (ProcessingUnitInstance instance : getInstances()) {
+            instanceStatistics.put(instance, instance.getStatistics());
+        }
+        lastStatistics = new DefaultProcessingUnitStatistics(instanceStatistics, clusterAggregatorsById, lastStatistics, statisticsHistorySize);
+        return lastStatistics;
+    }
+
+    @Override
+    public void enableClusterAggregatedServiceMonitors(
+            String serviceMonitorsId,
+            ProcessingUnitInstanceStatisticsClusterAggregator[] aggregators) {
+     
+        this.clusterAggregatorsById.put(serviceMonitorsId, aggregators);   
+    }
+
+    @Override
+    public void disableClusterAggregatedServiceMonitors(String serviceMonitorsId) {
+        this.clusterAggregatorsById.remove(serviceMonitorsId);
+        
     }
 }

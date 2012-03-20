@@ -39,6 +39,7 @@ import org.openspaces.admin.AdminAware;
 import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.application.Application;
 import org.openspaces.admin.gsm.GridServiceManager;
+import org.openspaces.admin.internal.pu.ProcessingUnitStatistics;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependencies;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
@@ -395,4 +396,6 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
      * @since 8.0.6
      */
     ProcessingUnitDependencies<ProcessingUnitDependency> getDependencies();
+    
+    ProcessingUnitStatistics getStatistics();
 }

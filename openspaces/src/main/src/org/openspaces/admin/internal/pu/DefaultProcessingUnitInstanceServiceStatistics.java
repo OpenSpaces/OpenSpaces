@@ -94,7 +94,7 @@ public class DefaultProcessingUnitInstanceServiceStatistics implements Processin
     }
 
     public Map<String, ServiceMonitors> getMonitors() {
-        return this.serviceMonitorsById;
+        return Collections.unmodifiableMap(this.serviceMonitorsById);
     }
 
     public Map<String, EventContainerServiceMonitors> getEventContainers() {
