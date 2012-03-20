@@ -45,8 +45,4 @@ public abstract class AbstractInstancesStatisticsConfig implements InternalInsta
     }
     
     public abstract String toString();
-    
-    public Class<? extends InternalProcessingUnitStatisticsCalculator> getProcessingUnitStatisticsCalculator() {
-        throw new UnsupportedOperationException("Not implemented yet");
-    }
 }

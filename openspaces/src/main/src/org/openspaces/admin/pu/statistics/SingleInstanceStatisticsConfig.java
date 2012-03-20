@@ -1,8 +1,7 @@
 package org.openspaces.admin.pu.statistics;
 
 import org.openspaces.admin.internal.pu.statistics.AbstractInstancesStatisticsConfig;
-import org.openspaces.admin.internal.pu.statistics.DoNothingProcessingUnitStatisticsCalculator;
-import org.openspaces.admin.internal.pu.statistics.InternalProcessingUnitStatisticsCalculator;
+import org.openspaces.admin.internal.pu.statistics.StatisticsObjectList;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 
 /**
@@ -63,16 +62,16 @@ public class SingleInstanceStatisticsConfig extends AbstractInstancesStatisticsC
     public String toString() {
         return "singleInstanceStatistics {instanceUid=" + instanceUid + "}";
     }
-    
-    @Override
-    public Class<? extends InternalProcessingUnitStatisticsCalculator> getProcessingUnitStatisticsCalculator() {
-        return DoNothingProcessingUnitStatisticsCalculator.class;
-    }
 
     @Override
     public void validate() throws IllegalStateException {
         if (instanceUid == null) {
             throw new IllegalStateException("instance UID was not specified. Consider using " + EachSingleInstanceStatisticsConfig.class.getName() + " instead");
         }
+    }
+
+    @Override
+    public Object getValue(StatisticsObjectList values) {
+        throw new IllegalStateException("Unreachable Code");
     }
 }

@@ -15,22 +15,28 @@
  *******************************************************************************/
 package org.openspaces.admin.internal.pu.statistics;
 
-import org.openspaces.admin.pu.statistics.InstancesStatisticsConfig;
 
 /**
+ * Used by {@link InstancesStatisticsCalculator} to group statisticsIds that differ only by instancesStatistics
+ * by erasing (ovveriding) the instancesStatistics value by {@link ErasedInstancesStatisticsConfig} 
  * @author itaif
- *
+ * @since 9.0.0
  */
-public interface InternalInstancesStatisticsConfig extends InstancesStatisticsConfig  {
+public class ErasedInstancesStatisticsConfig extends AbstractInstancesStatisticsConfig {
 
-    /**
-     * Checks the content of this config is valid.
-     * @throws IllegalStateException - if state is found to be illegal
-     */
-    void validate() throws IllegalStateException;
-    
-    /**
-     * Applies this statistics function on the specified values 
-     */
-    Object getValue(StatisticsObjectList values);
+    @Override
+    public void validate() throws IllegalStateException {
+        // ok
+    }
+
+    @Override
+    public String toString() {
+        return "erasedInstancesStatistics";
+    }
+
+    @Override
+    public Object getValue(StatisticsObjectList values) {
+        throw new IllegalStateException("Unreachable Code");
+    }
+
 }

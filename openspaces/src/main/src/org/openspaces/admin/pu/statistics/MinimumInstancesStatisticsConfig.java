@@ -4,16 +4,16 @@ import org.openspaces.admin.internal.pu.statistics.AbstractInstancesStatisticsCo
 import org.openspaces.admin.internal.pu.statistics.StatisticsObjectList;
 
 /**
- * Calculates the average of all cluster instances values. 
+ * Picks the minimum of all cluster instances values. 
  * @since 9.0.0
  * @author itaif
  *
  */
-public class AverageInstancesStatisticsConfig extends AbstractInstancesStatisticsConfig {
+public class MinimumInstancesStatisticsConfig extends AbstractInstancesStatisticsConfig {
 
     @Override
     public String toString() {
-        return "averageInstancesStatistics";
+        return "minimumInstancesStatistics";
     }
 
     @Override
@@ -23,7 +23,7 @@ public class AverageInstancesStatisticsConfig extends AbstractInstancesStatistic
 
     @Override
     public Object getValue(StatisticsObjectList values) {
-        return values.getAverage();
+        return values.getMinimum();
     }
     
 }

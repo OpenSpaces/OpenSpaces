@@ -16,12 +16,12 @@
 package org.openspaces.admin.pu.statistics;
 
 import org.openspaces.admin.internal.pu.statistics.AbstractInstancesStatisticsConfig;
-import org.openspaces.admin.internal.pu.statistics.DoNothingProcessingUnitStatisticsCalculator;
-import org.openspaces.admin.internal.pu.statistics.InternalProcessingUnitStatisticsCalculator;
+import org.openspaces.admin.internal.pu.statistics.StatisticsObjectList;
 
 /**
+ * Denotes that a {@link ProcessingUnitStatisticsId} applies to all of the Processing Unit.
  * @author itaif
- *
+ * @since 9.0.0
  */
 public class EachSingleInstanceStatisticsConfig extends AbstractInstancesStatisticsConfig {
 
@@ -31,13 +31,12 @@ public class EachSingleInstanceStatisticsConfig extends AbstractInstancesStatist
     }
 
     @Override
-    public Class<? extends InternalProcessingUnitStatisticsCalculator> getProcessingUnitStatisticsCalculator() {
-        return DoNothingProcessingUnitStatisticsCalculator.class;
-    }
-
-    @Override
     public void validate() throws IllegalStateException {
         // ok
     }
 
+    @Override
+    public Object getValue(StatisticsObjectList values) {
+        throw new IllegalStateException("Unreachable Code");
+    }
 }

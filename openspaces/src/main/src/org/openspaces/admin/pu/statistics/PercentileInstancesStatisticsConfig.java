@@ -1,6 +1,7 @@
 package org.openspaces.admin.pu.statistics;
 
 import org.openspaces.admin.internal.pu.statistics.AbstractInstancesStatisticsConfig;
+import org.openspaces.admin.internal.pu.statistics.StatisticsObjectList;
 
 /**
  * Picks the Nth percentile of cluster instance values.
@@ -11,9 +12,9 @@ import org.openspaces.admin.internal.pu.statistics.AbstractInstancesStatisticsCo
  */
 public class PercentileInstancesStatisticsConfig extends AbstractInstancesStatisticsConfig {
 
-    private double percentile;
+    private Double percentile;
     
-    public double getPercentile() {
+    public Double getPercentile() {
         return percentile;
     }
 
@@ -21,22 +22,14 @@ public class PercentileInstancesStatisticsConfig extends AbstractInstancesStatis
         this.percentile = percentile;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        long temp;
-        temp = Double.doubleToLongBits(percentile);
-        result = prime * result + (int) (temp ^ (temp >>> 32));
+        result = prime * result + ((percentile == null) ? 0 : percentile.hashCode());
         return result;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -46,28 +39,33 @@ public class PercentileInstancesStatisticsConfig extends AbstractInstancesStatis
         if (getClass() != obj.getClass())
             return false;
         PercentileInstancesStatisticsConfig other = (PercentileInstancesStatisticsConfig) obj;
-        if (Double.doubleToLongBits(percentile) != Double.doubleToLongBits(other.percentile))
+        if (percentile == null) {
+            if (other.percentile != null)
+                return false;
+        } else if (!percentile.equals(other.percentile))
             return false;
         return true;
     }
 
-
-    /* (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
         return "percentileInstancesStatistics {percentile=" + percentile + "}";
     }
 
-    /* (non-Javadoc)
-     * @see org.openspaces.admin.internal.pu.statistics.InternalInstancesStatisticsConfig#validate()
-     */
     @Override
     public void validate() throws IllegalStateException {
+        if (percentile == null) {
+            throw new IllegalArgumentException("percentile cannot be null");
+        }
+        
         if (percentile <0 || percentile > 100) {
             throw new IllegalArgumentException("percentile ("+percentile+") must between 0 and 100 (inclusive)");
         }
+    }
+
+    @Override
+    public Object getValue(StatisticsObjectList values) {
+        return values.getPercentile(percentile);
     }
 
 }

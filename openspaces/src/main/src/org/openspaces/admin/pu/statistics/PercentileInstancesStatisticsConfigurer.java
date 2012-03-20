@@ -13,24 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.openspaces.admin.internal.pu.statistics;
-
-import org.openspaces.admin.pu.statistics.InstancesStatisticsConfig;
+package org.openspaces.admin.pu.statistics;
 
 /**
+ * Fluent API for creating a new {@link PercentileInstancesStatisticsConfig} object
  * @author itaif
- *
+ * @since 9.0.0
  */
-public interface InternalInstancesStatisticsConfig extends InstancesStatisticsConfig  {
+public class PercentileInstancesStatisticsConfigurer {
 
-    /**
-     * Checks the content of this config is valid.
-     * @throws IllegalStateException - if state is found to be illegal
-     */
-    void validate() throws IllegalStateException;
+    private PercentileInstancesStatisticsConfig config = new PercentileInstancesStatisticsConfig();
     
-    /**
-     * Applies this statistics function on the specified values 
-     */
-    Object getValue(StatisticsObjectList values);
+    public PercentileInstancesStatisticsConfigurer percentile(double percentile) {
+        config.setPercentile(percentile);
+        return this;
+    }
+    
+    public PercentileInstancesStatisticsConfig create() {
+        config.validate();       
+        return config;
+    }
+    
 }
