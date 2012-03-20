@@ -10,7 +10,7 @@ public abstract class InstancesStatisticsConfig {
     public int hashCode() {
         return this.getClass().hashCode();
     }
-    
+
     /* Default implementation for configs without members
      * (non-Javadoc)
      * @see java.lang.Object#equals(java.lang.Object)

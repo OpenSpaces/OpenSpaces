@@ -21,4 +21,12 @@ package org.openspaces.admin.pu.statistics;
  */
 public class EachSingleInstanceStatisticsConfig extends InstancesStatisticsConfig {
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return "eachSingleInstanceStatistics";
+    }
+
 }

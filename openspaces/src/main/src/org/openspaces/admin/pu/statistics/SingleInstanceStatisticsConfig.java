@@ -10,18 +10,18 @@ import org.openspaces.admin.pu.ProcessingUnitInstance;
  */
 public class SingleInstanceStatisticsConfig extends InstancesStatisticsConfig {
 
-    private String processingUnitInstanceUid;
+    private String instanceUid;
 
     /**
      * @see ProcessingUnitInstance#getUid()
      * @return
      */
-    public String getProcessingUnitInstanceUid() {
-        return processingUnitInstanceUid;
+    public String getInstanceUid() {
+        return instanceUid;
     }
 
-    public void setProcessingUnitInstanceUid(String processingUnitInstanceUid) {
-        this.processingUnitInstanceUid = processingUnitInstanceUid;
+    public void setInstanceUid(String instanceUid) {
+        this.instanceUid = instanceUid;
     }
 
     /* (non-Javadoc)
@@ -31,7 +31,7 @@ public class SingleInstanceStatisticsConfig extends InstancesStatisticsConfig {
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + ((processingUnitInstanceUid == null) ? 0 : processingUnitInstanceUid.hashCode());
+        result = prime * result + ((instanceUid == null) ? 0 : instanceUid.hashCode());
         return result;
     }
 
@@ -47,12 +47,19 @@ public class SingleInstanceStatisticsConfig extends InstancesStatisticsConfig {
         if (getClass() != obj.getClass())
             return false;
         SingleInstanceStatisticsConfig other = (SingleInstanceStatisticsConfig) obj;
-        if (processingUnitInstanceUid == null) {
-            if (other.processingUnitInstanceUid != null)
+        if (instanceUid == null) {
+            if (other.instanceUid != null)
                 return false;
-        } else if (!processingUnitInstanceUid.equals(other.processingUnitInstanceUid))
+        } else if (!instanceUid.equals(other.instanceUid))
             return false;
         return true;
     }
-    
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return "singleInstanceStatisticsConfig {instanceUid=" + instanceUid + "}";
+    }
 }

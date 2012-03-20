@@ -10,7 +10,7 @@ package org.openspaces.admin.pu.statistics;
 public class ProcessingUnitStatisticsId {
 
     private String monitor; 
-    
+
     private String metric;
     
     private TimeWindowStatisticsConfig timeWindowStatistics; 
@@ -20,6 +20,7 @@ public class ProcessingUnitStatisticsId {
     public String getMonitor() {
         return monitor;
     }
+    
     /**
      * @see ProcessingUnitStatisticsIdConfigurer#monitor(String) 
      */
@@ -107,6 +108,14 @@ public class ProcessingUnitStatisticsId {
             return false;
         return true;
     }
-    
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return "ProcessingUnitStatisticsId [monitor=" + monitor + ", metric=" + metric + ", timeWindowStatistics="
+                + timeWindowStatistics + ", instancesStatistics=" + instancesStatistics + "]";
+    }
 
 }

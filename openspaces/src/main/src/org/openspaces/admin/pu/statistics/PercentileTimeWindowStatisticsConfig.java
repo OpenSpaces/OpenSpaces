@@ -40,5 +40,13 @@ public class PercentileTimeWindowStatisticsConfig extends TimeWindowStatisticsCo
         return true;
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return "percentileTimeWindowStatistics {percentile=" + percentile + "}";
+    }
+
     
 }
