@@ -60,6 +60,7 @@ echo ""
 
 call mvn install:install-file -DgroupId=org.cloudifysource -DcreateChecksum=true -DartifactId=dsl -Dversion=%CLOUDIFY_VERSION% -Dpackaging=jar -DpomFile=%TEMP%/dsl-pom.xml -Dfile="%JSHOMEDIR%/lib/required/dsl.jar"
 call mvn install:install-file -DgroupId=org.cloudifysource -DcreateChecksum=true -DartifactId=usm -Dversion=%CLOUDIFY_VERSION% -Dpackaging=jar -DpomFile=%TEMP%/usm-pom.xml -Dfile="%JSHOMEDIR%/lib/platform/usm/usm.jar"
+call mvn install:install-file -DgroupId=org.cloudifysource -DcreateChecksum=true -DartifactId=esc -Dversion=%CLOUDIFY_VERSION% -Dpackaging=jar -DpomFile=%TEMP%/esc-pom.xml -Dfile="%JSHOMEDIR%/lib/platform/esm/esc-%CLOUDIFY_VERSION%.jar"
 )
 
 

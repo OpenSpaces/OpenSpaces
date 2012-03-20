@@ -113,6 +113,12 @@ public class POMGenerator {
             printDependency(writer, POMGenerator.CLOUDIFY_GROUP, "dsl", cloudifyVersion);
             printFooter(writer);
             writer.close();
+            
+            writer = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(dir, "esc-pom.xml")))));
+            printHeader(writer, cloudifyVersion, POMGenerator.CLOUDIFY_GROUP, "esc");
+            printDependency(writer, POMGenerator.GS_GROUP, "gs-openspaces", xapVersion);
+            printFooter(writer);
+            writer.close();
         }
         
         if (args.length > 1) {
