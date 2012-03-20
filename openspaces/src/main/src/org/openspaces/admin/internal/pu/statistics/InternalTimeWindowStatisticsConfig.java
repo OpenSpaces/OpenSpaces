@@ -22,12 +22,17 @@ import org.openspaces.admin.pu.statistics.TimeWindowStatisticsConfig;
  * @author itaif
  * @since 9.0.0
  */
-public interface InternalTimeWindowStatisticsConfig extends TimeWindowStatisticsConfig, InternalProcessingUnitStatisticsCalculatorClassProvider {
+public interface InternalTimeWindowStatisticsConfig extends TimeWindowStatisticsConfig {
 
     /**
      * Checks the content of this config is valid.
      * @throws IllegalStateException - if state is found to be illegal
      */
     void validate() throws IllegalStateException;
+
+    /**
+     * Applies this statistics function on the specified values 
+     */
+    Object getValue(StatisticsObjectList values);
 
 }

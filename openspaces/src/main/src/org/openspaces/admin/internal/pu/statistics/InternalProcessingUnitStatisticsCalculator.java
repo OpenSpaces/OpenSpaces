@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.openspaces.admin.internal.pu.statistics;
 
-import java.util.Set;
-
 import org.openspaces.admin.internal.pu.ProcessingUnitStatistics;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
 
@@ -40,6 +38,6 @@ public interface InternalProcessingUnitStatisticsCalculator {
      *            
      * @param statisticsIds - statistics Ids that require calculation
      */
-    void calculateNewStatistics(InternalProcessingUnitStatistics processingUnitStatistics, Set<ProcessingUnitStatisticsId> statisticsIds);
+    void calculateNewStatistics(InternalProcessingUnitStatistics processingUnitStatistics, ProcessingUnitStatisticsId[] statisticsIds);
 
 }

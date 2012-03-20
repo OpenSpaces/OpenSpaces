@@ -1,11 +1,13 @@
 package org.openspaces.admin.pu.statistics;
 
+import org.openspaces.admin.internal.pu.statistics.StatisticsObjectList;
+
 
 public class PercentileTimeWindowStatisticsConfig extends AbstractTimeWindowStatisticsConfig {
 
-    private double percentile;
+    private Double percentile;
         
-    public double getPercentile() {
+    public Double getPercentile() {
         return percentile;
     }
     
@@ -14,12 +16,28 @@ public class PercentileTimeWindowStatisticsConfig extends AbstractTimeWindowStat
     }
 
     @Override
+    public void validate() throws IllegalStateException {
+        super.validate();
+        if (percentile == null) {
+            throw new IllegalArgumentException("percentile cannot be null");
+        }
+        
+        if (percentile <0 || percentile > 100) {
+            throw new IllegalArgumentException("percentile ("+percentile+") must between 0 and 100 (inclusive)");
+        }
+    }
+
+    @Override
+    public Object getValue(StatisticsObjectList values) {
+        return values.getPercentile(percentile);
+    }
+
+    
+    @Override
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        long temp;
-        temp = Double.doubleToLongBits(percentile);
-        result = prime * result + (int) (temp ^ (temp >>> 32));
+        result = prime * result + ((percentile == null) ? 0 : percentile.hashCode());
         return result;
     }
 
@@ -32,7 +50,10 @@ public class PercentileTimeWindowStatisticsConfig extends AbstractTimeWindowStat
         if (getClass() != obj.getClass())
             return false;
         PercentileTimeWindowStatisticsConfig other = (PercentileTimeWindowStatisticsConfig) obj;
-        if (Double.doubleToLongBits(percentile) != Double.doubleToLongBits(other.percentile))
+        if (percentile == null) {
+            if (other.percentile != null)
+                return false;
+        } else if (!percentile.equals(other.percentile))
             return false;
         return true;
     }

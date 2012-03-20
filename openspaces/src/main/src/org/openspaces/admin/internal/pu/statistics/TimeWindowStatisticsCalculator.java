@@ -21,27 +21,21 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.internal.pu.ProcessingUnitStatistics;
 import org.openspaces.admin.pu.statistics.AbstractTimeWindowStatisticsConfig;
-import org.openspaces.admin.pu.statistics.AverageTimeWindowStatisticsConfig;
 import org.openspaces.admin.pu.statistics.LastSampleTimeWindowStatisticsConfig;
-import org.openspaces.admin.pu.statistics.MaximumTimeWindowStatisticsConfig;
-import org.openspaces.admin.pu.statistics.MinimumTimeWindowStatisticsConfig;
-import org.openspaces.admin.pu.statistics.PercentileTimeWindowStatisticsConfig;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsIdConfigurer;
 import org.openspaces.admin.pu.statistics.SingleInstanceStatisticsConfig;
 import org.openspaces.admin.pu.statistics.TimeWindowStatisticsConfig;
 
 /**
+ * Aggregates samples from a certain time window using different functions defined by {@link TimeWindowStatisticsConfig}
+ * that is stored in {@link ProcessingUnitStatisticsId}s
  * @author itaif
- *
+ * @since 9.0.0
  */
 public class TimeWindowStatisticsCalculator implements InternalProcessingUnitStatisticsCalculator {
-
-    private final Log logger = LogFactory.getLog(this.getClass());
     
     /* (non-Javadoc)
      * @see org.openspaces.admin.internal.pu.statistics.InternalProcessingUnitStatisticsCalculator#calculateNewStatistics(org.openspaces.admin.internal.pu.statistics.InternalProcessingUnitStatistics, java.util.List)
@@ -49,48 +43,22 @@ public class TimeWindowStatisticsCalculator implements InternalProcessingUnitSta
     @Override
     public void calculateNewStatistics(
             final InternalProcessingUnitStatistics processingUnitStatistics,
-            final Set<ProcessingUnitStatisticsId> newStatisticsIds) {
+            final ProcessingUnitStatisticsId[] newStatisticsIds) {
         
-        Map<ProcessingUnitStatisticsId, Set<TimeWindowStatisticsConfig>> statisticsIdsPerErasedStatisticsId = eraseTimeWindowStatistics(newStatisticsIds);
-        Set<ProcessingUnitStatisticsId> erasedStatisticsIds = statisticsIdsPerErasedStatisticsId.keySet();
-        Map<ProcessingUnitStatisticsId, StatisticsObjectList> timeLine = getValues(processingUnitStatistics, erasedStatisticsIds);
+        Map<ProcessingUnitStatisticsId, Set<InternalTimeWindowStatisticsConfig>> timeWindowStatisticsPerErasedStatisticsId = eraseTimeWindowStatistics(newStatisticsIds);
+        Set<ProcessingUnitStatisticsId> erasedStatisticsIds = timeWindowStatisticsPerErasedStatisticsId.keySet();
+        Map<ProcessingUnitStatisticsId, StatisticsObjectList> valuesPerErasedStatisticsId = getValues(processingUnitStatistics, erasedStatisticsIds);
         
-        for (Map.Entry<ProcessingUnitStatisticsId, StatisticsObjectList> pair : timeLine.entrySet()) {
+        for (Map.Entry<ProcessingUnitStatisticsId, StatisticsObjectList> pair : valuesPerErasedStatisticsId.entrySet()) {
             
             ProcessingUnitStatisticsId erasedStatisticsId = pair.getKey();
             StatisticsObjectList values = pair.getValue();
             
-            for (TimeWindowStatisticsConfig timeWindowStatistics : statisticsIdsPerErasedStatisticsId.get(erasedStatisticsId)) {
+            for (InternalTimeWindowStatisticsConfig timeWindowStatistics : timeWindowStatisticsPerErasedStatisticsId.get(erasedStatisticsId)) {
                 
+                Object value = timeWindowStatistics.getValue(values);
                 ProcessingUnitStatisticsId statisticsId = unerase(erasedStatisticsId,timeWindowStatistics);
-            
-                Object value = null;
-        
-                // TODO: Consider visitor pattern to decouple the conversion of statistics config to
-                // a value from both TimeWindowStatisticsCalculator and the various Config objects
-                if (timeWindowStatistics instanceof AverageTimeWindowStatisticsConfig) {
-                    value = values.getAverage();
-                }
-                else if (timeWindowStatistics instanceof MinimumTimeWindowStatisticsConfig) {
-                    value = values.getMinimum();
-                }
-                else if (timeWindowStatistics instanceof MaximumTimeWindowStatisticsConfig) {
-                    value = values.getMaximum();
-                }
-                else if (timeWindowStatistics instanceof PercentileTimeWindowStatisticsConfig) {
-                    double precentile =((PercentileTimeWindowStatisticsConfig) timeWindowStatistics).getPercentile();
-                    value = values.getPercentile(precentile);
-                }
-                
-                if (value != null) {
-                    processingUnitStatistics.addStatistics(statisticsId, value);    
-                }
-                else {
-                    if (logger.isWarnEnabled()) {
-                        logger.warn(timeWindowStatistics.getClass() + " is not supported");
-                    }   
-                }
-                
+                processingUnitStatistics.addStatistics(statisticsId, value);    
             }
         }
         
@@ -99,25 +67,25 @@ public class TimeWindowStatisticsCalculator implements InternalProcessingUnitSta
     /**
      * Groups statisticsIds by replacing their TimeWindowStatistics with {@link ErasedTimeWindowStatisticsConfig}
      */
-    private Map<ProcessingUnitStatisticsId,Set<TimeWindowStatisticsConfig>> eraseTimeWindowStatistics(Set<ProcessingUnitStatisticsId> statisticsIds) {
+    private Map<ProcessingUnitStatisticsId,Set<InternalTimeWindowStatisticsConfig>> eraseTimeWindowStatistics(ProcessingUnitStatisticsId[] newStatisticsIds) {
 
-        Map<ProcessingUnitStatisticsId, Set<TimeWindowStatisticsConfig>> groupBy = new HashMap<ProcessingUnitStatisticsId, Set<TimeWindowStatisticsConfig>>();
-        for (ProcessingUnitStatisticsId statisticsId : statisticsIds) {
+        Map<ProcessingUnitStatisticsId, Set<InternalTimeWindowStatisticsConfig>> groupBy = new HashMap<ProcessingUnitStatisticsId, Set<InternalTimeWindowStatisticsConfig>>();
+        for (ProcessingUnitStatisticsId statisticsId : newStatisticsIds) {
 
             ProcessingUnitStatisticsId key = erase(statisticsId);
 
             if (!groupBy.containsKey(key)) {
-                groupBy.put(key, new HashSet<TimeWindowStatisticsConfig>());
+                groupBy.put(key, new HashSet<InternalTimeWindowStatisticsConfig>());
             }
 
-            groupBy.get(key).add(statisticsId.getTimeWindowStatistics());
+            groupBy.get(key).add((InternalTimeWindowStatisticsConfig)statisticsId.getTimeWindowStatistics());
 
         }
         return groupBy;
     }
 
     /**
-     * @param key
+     * Erases the TimeWindowStatistics from the specified statisticsId
      */
     private ProcessingUnitStatisticsId erase(ProcessingUnitStatisticsId statisticsId) {
         
@@ -136,8 +104,6 @@ public class TimeWindowStatisticsCalculator implements InternalProcessingUnitSta
         erased.setTimeWindowStatistics(
                 new ErasedTimeWindowStatisticsConfig((AbstractTimeWindowStatisticsConfig)erased.getTimeWindowStatistics()));
         return erased;
-    
-        
     }
 
     private ProcessingUnitStatisticsId clone(ProcessingUnitStatisticsId statisticsId) {
@@ -150,9 +116,7 @@ public class TimeWindowStatisticsCalculator implements InternalProcessingUnitSta
     }
     
     /**
-     * @param erasedStatisticsId
-     * @param timeWindowStatistics2
-     * @return
+     * restores the specified timeWindowStatistics to the statisticsId
      */
     private ProcessingUnitStatisticsId unerase(
             ProcessingUnitStatisticsId erasedStatisticsId,

@@ -27,9 +27,6 @@ import org.openspaces.admin.pu.statistics.AbstractTimeWindowStatisticsConfig;
  */
 public class ErasedTimeWindowStatisticsConfig extends AbstractTimeWindowStatisticsConfig {
 
-    /**
-     * @param timeWindowStatistics
-     */
     public ErasedTimeWindowStatisticsConfig(AbstractTimeWindowStatisticsConfig timeWindowStatistics) {
         this.setMaximumTimeWindowSeconds(timeWindowStatistics.getMaximumTimeWindowSeconds());
         this.setMinimumTimeWindowSeconds(timeWindowStatistics.getMinimumTimeWindowSeconds());
@@ -37,13 +34,16 @@ public class ErasedTimeWindowStatisticsConfig extends AbstractTimeWindowStatisti
     }
 
     @Override
-    public Class<? extends InternalProcessingUnitStatisticsCalculator> getProcessingUnitStatisticsCalculator() {
-        return DoNothingProcessingUnitStatisticsCalculator.class;
-    }
-
-    @Override
     public String toString() {
         return "erasedTimeWindowStatistics {timeWindowSeconds="+getTimeWindowSeconds() + ", minimumTimeWindowSeconds="+getMinimumTimeWindowSeconds() + ", maximumTimeWindowSeconds="+ getMaximumTimeWindowSeconds()+"}";
+    }
+
+    /* (non-Javadoc)
+     * @see org.openspaces.admin.internal.pu.statistics.InternalTimeWindowStatisticsConfig#getValue(org.openspaces.admin.internal.pu.statistics.StatisticsObjectList)
+     */
+    @Override
+    public Object getValue(StatisticsObjectList values) {
+        throw new IllegalStateException("Unreachable code");
     }
 
 }

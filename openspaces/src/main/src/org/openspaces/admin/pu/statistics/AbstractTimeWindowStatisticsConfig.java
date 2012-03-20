@@ -17,9 +17,7 @@
  ******************************************************************************/
 package org.openspaces.admin.pu.statistics;
 
-import org.openspaces.admin.internal.pu.statistics.InternalProcessingUnitStatisticsCalculator;
 import org.openspaces.admin.internal.pu.statistics.InternalTimeWindowStatisticsConfig;
-import org.openspaces.admin.internal.pu.statistics.TimeWindowStatisticsCalculator;
 
 /**
  * Base class for statistics configurations that aggregate samples based on a specified time window
@@ -143,11 +141,6 @@ public abstract class AbstractTimeWindowStatisticsConfig implements InternalTime
         if (minimumTimeWindowSeconds > timeWindowSeconds) {
             throw new IllegalStateException("minimumTimeWindowSeconds must be less or equals timeWindowSeconds");
         }
-    }
-    
-    @Override
-    public Class<? extends InternalProcessingUnitStatisticsCalculator> getProcessingUnitStatisticsCalculator() {
-        return TimeWindowStatisticsCalculator.class;
     }
     
     public abstract String toString();

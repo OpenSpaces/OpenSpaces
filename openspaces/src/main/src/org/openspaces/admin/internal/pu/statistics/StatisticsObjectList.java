@@ -37,6 +37,7 @@ public class StatisticsObjectList {
     private Class<?> notComparableClass = null;
     private Class<?> notNumberClass = null;
     private boolean sorted = false;
+    private Object last = null;
     
     /**
      * Adds the specified object to the list
@@ -44,6 +45,7 @@ public class StatisticsObjectList {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public void add(Object value) {
         values.add(value);
+        last = value;
         sorted = false;
         if (notNumberClass == null) {
             if (value instanceof Number) {
@@ -104,6 +106,13 @@ public class StatisticsObjectList {
             throw new ClassCastException(notComparableClass + " cannot be cast to a Comparable");
         }
         return max;
+    }
+    
+    /**
+     * @return the last added sample or null if the list is empty.
+     */
+    public Object getLast() {
+        return last;
     }
     
     /**

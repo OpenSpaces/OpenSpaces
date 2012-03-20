@@ -15,6 +15,8 @@
  *******************************************************************************/
 package org.openspaces.admin.pu.statistics;
 
+import org.openspaces.admin.internal.pu.statistics.StatisticsObjectList;
+
 
 /**
  * Configurations that aggregate statistics from a time window by picking up the sample with the smallest value.
@@ -28,5 +30,10 @@ public class MinimumTimeWindowStatisticsConfig  extends AbstractTimeWindowStatis
     @Override
     public String toString() {
         return "minimumTimeWindowStatistics {timeWindowSeconds="+getTimeWindowSeconds() + ", minimumTimeWindowSeconds="+getMinimumTimeWindowSeconds() + ", maximumTimeWindowSeconds="+ getMaximumTimeWindowSeconds()+"}";
+    }
+
+    @Override
+    public Object getValue(StatisticsObjectList values) {
+        return values.getMinimum();
     }
 }

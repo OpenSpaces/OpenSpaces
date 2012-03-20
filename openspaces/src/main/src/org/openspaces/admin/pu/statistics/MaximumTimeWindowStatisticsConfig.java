@@ -15,6 +15,8 @@
  *******************************************************************************/
 package org.openspaces.admin.pu.statistics;
 
+import org.openspaces.admin.internal.pu.statistics.StatisticsObjectList;
+
 
 
 /**
@@ -29,6 +31,11 @@ public class MaximumTimeWindowStatisticsConfig  extends AbstractTimeWindowStatis
     @Override
     public String toString() {
         return "maximumTimeWindowStatistics {timeWindowSeconds="+getTimeWindowSeconds() + ", minimumTimeWindowSeconds="+getMinimumTimeWindowSeconds() + ", maximumTimeWindowSeconds="+ getMaximumTimeWindowSeconds()+"}";
+    }
+    
+    @Override
+    public Object getValue(StatisticsObjectList values) {
+        return values.getMaximum();
     }
 
 }
