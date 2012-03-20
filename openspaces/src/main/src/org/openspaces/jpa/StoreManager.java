@@ -159,7 +159,7 @@ public class StoreManager extends AbstractStoreManager {
     @Override
     public void commit() {
         try {
-            _transaction.commit(Long.MAX_VALUE);
+            _transaction.commit(5000);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         } finally {
@@ -891,7 +891,7 @@ public class StoreManager extends AbstractStoreManager {
                         pc.pcReplaceStateManager(null);
                         stateManagersToRestore.add(stateManager);
                     }
-                } else if (fmd.getAssociationType() == FieldMetaData.ONE_TO_MANY) {
+                } else if (fmd.getAssociationType() == FieldMetaData.ONE_TO_MANY || isPersistentCollection(fmd)) {
                     Collection<?> collection = (Collection<?>) sm.fetch(fmd.getIndex());
                     if (collection != null) {
                         for (Object item : collection) {
@@ -918,6 +918,15 @@ public class StoreManager extends AbstractStoreManager {
             }
         }
         
+        /**
+         * @return whether the provided field meta data describes a persistent collection which is not a one to many relationship.
+         * usually declared with the PersistentCollection annotation.
+         */
+        private boolean isPersistentCollection(FieldMetaData fmd) {
+            return Collection.class.isAssignableFrom(fmd.getDeclaredType()) && fmd.getElement() != null
+                    && PersistenceCapable.class.isAssignableFrom(fmd.getElement().getDeclaredType());
+        }
+
         /**
          * Sets the provided state manager as the managed object's owner.
          * @param managedObject The managed object to set the owner for.
