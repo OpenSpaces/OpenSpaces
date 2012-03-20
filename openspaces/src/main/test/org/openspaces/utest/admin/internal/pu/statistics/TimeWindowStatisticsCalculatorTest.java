@@ -116,6 +116,49 @@ public class TimeWindowStatisticsCalculatorTest extends TestCase {
         }
     }
 
+    public void testAverageTwoSamples() throws InterruptedException {
+        
+        TimeWindowStatisticsCalculator calculator = new TimeWindowStatisticsCalculator();
+        DefaultProcessingUnitStatisticsCalculatorFactory statisticsCalculatorFactory = new DefaultProcessingUnitStatisticsCalculatorFactory();
+        
+        long now = System.currentTimeMillis();
+        
+        int historySize = 10;
+        
+        // the first sample has one value for the instance0, and no value for instance1 
+        InternalProcessingUnitStatistics pStatistics = 
+                new DefaultProcessingUnitStatistics(now , null, historySize, statisticsCalculatorFactory);
+        pStatistics.addStatistics(
+                lastSampleStatisticsId(INSTANCE_UID), 
+                0);
+        
+        //calculate time average
+        Set<ProcessingUnitStatisticsId> calculatedStatistics = new HashSet<ProcessingUnitStatisticsId>();
+        ProcessingUnitStatisticsId averageStatisticsId = 
+            new ProcessingUnitStatisticsIdConfigurer()
+            .metric(METRIC)
+            .monitor(MONITOR)
+            .instancesStatistics(new SingleInstanceStatisticsConfig(INSTANCE_UID))
+            .timeWindowStatistics(new AverageTimeWindowStatisticsConfigurer().timeWindow(SLEEP_MILLISECONDS, TimeUnit.MILLISECONDS).create())
+            .create();
+        calculatedStatistics.add(averageStatisticsId);
+        
+        
+        calculator.calculateNewStatistics(pStatistics, calculatedStatistics);            
+        
+        // the second sample has one value instance0 and one value for instance1
+        InternalProcessingUnitStatistics statistics = 
+                new DefaultProcessingUnitStatistics(now +SLEEP_MILLISECONDS, pStatistics, historySize, statisticsCalculatorFactory);
+        statistics.addStatistics(
+                lastSampleStatisticsId(INSTANCE_UID), 
+                1);
+        calculator.calculateNewStatistics(statistics, calculatedStatistics);
+        
+        // check the average value of instance0
+        Assert.assertEquals((0+1)/2.0, 
+            statistics.getStatistics().get(averageStatisticsId));
+    }
+
     public void testNoSamples() {
         
         TimeWindowStatisticsCalculator calculator = new TimeWindowStatisticsCalculator();
@@ -144,10 +187,11 @@ public class TimeWindowStatisticsCalculatorTest extends TestCase {
         int value = 0;
         processingUnitStatistics.addStatistics(lastSampleStatisticsId(),value);
         
-        //minimumTimeWindow and maximumTimeWindow defaults to timeWindow
         AverageTimeWindowStatisticsConfig defaultAverageStatisticsId = 
                 new AverageTimeWindowStatisticsConfigurer()
                 .timeWindow(TIMEWINDOW_SECONDS, TimeUnit.SECONDS)
+                .minimumTimeWindow(TIMEWINDOW_SECONDS, TimeUnit.SECONDS)
+                .maximumTimeWindow(TIMEWINDOW_SECONDS, TimeUnit.SECONDS)
                 .create();
         
         //calculate time average
@@ -292,4 +336,14 @@ public class TimeWindowStatisticsCalculatorTest extends TestCase {
                 .timeWindowStatistics(new LastSampleTimeWindowStatisticsConfig())
                 .create();
     }
+    
+    private ProcessingUnitStatisticsId lastSampleStatisticsId(String instanceId) {
+        return new ProcessingUnitStatisticsIdConfigurer()
+                .metric(METRIC)
+                .monitor(MONITOR)
+                .instancesStatistics(new SingleInstanceStatisticsConfig(instanceId))
+                .timeWindowStatistics(new LastSampleTimeWindowStatisticsConfig())
+                .create();
+    }
+
 }

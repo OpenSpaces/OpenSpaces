@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 import org.openspaces.admin.internal.pu.statistics.DefaultTimeWindowStatisticsConfigUtils;
 
 /**
- * Creates a new {@link AverageTimeWindowStatisticsConfig} object
+ * Fluent API for creating a new {@link AverageTimeWindowStatisticsConfig} object
  * @author itaif
  * @since 9.0.0
  */

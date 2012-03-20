@@ -42,12 +42,17 @@ public class DefaultTimeWindowStatisticsConfigUtils {
         
     public static void create(AbstractTimeWindowStatisticsConfig config) {
         
-        if (config.getMinimumTimeWindowSeconds() == 0) {
+        if (config.getMinimumTimeWindowSeconds() == null) {
+            // By default, respect the time window, and wait until enough samples exist.
             config.setMinimumTimeWindowSeconds(config.getTimeWindowSeconds());
         }
         
-        if (config.getMaximumTimeWindowSeconds() == 0) {
-            config.setMaximumTimeWindowSeconds(config.getTimeWindowSeconds());
+        if (config.getMaximumTimeWindowSeconds() == null) {
+            // Assuming that time window is at least one sampling period.
+            // By default, include the second sample in case it has a small jitter.
+            config.setMaximumTimeWindowSeconds((long)(config.getTimeWindowSeconds()*2));
         }
+        
+        config.validate();
     }
 }

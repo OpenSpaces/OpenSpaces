@@ -21,7 +21,7 @@ public class LastSampleTimeWindowStatisticsConfig implements InternalTimeWindowS
      */
     @Override
     public String toString() {
-        return "êastSampleTimeWindowStatisticsConfig";
+        return "lastSampleTimeWindowStatistics";
     }
 
     /* Default implementation for configs without members

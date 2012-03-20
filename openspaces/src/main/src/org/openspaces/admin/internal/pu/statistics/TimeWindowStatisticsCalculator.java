@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,8 +34,6 @@ import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsIdConfigurer;
 import org.openspaces.admin.pu.statistics.SingleInstanceStatisticsConfig;
 import org.openspaces.admin.pu.statistics.TimeWindowStatisticsConfig;
-
-import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
 
 /**
  * @author itaif
@@ -52,7 +51,6 @@ public class TimeWindowStatisticsCalculator implements InternalProcessingUnitSta
             final InternalProcessingUnitStatistics processingUnitStatistics,
             final Set<ProcessingUnitStatisticsId> newStatisticsIds) {
         
-
         Map<ProcessingUnitStatisticsId, Set<TimeWindowStatisticsConfig>> statisticsIdsPerErasedStatisticsId = eraseTimeWindowStatistics(newStatisticsIds);
         Set<ProcessingUnitStatisticsId> erasedStatisticsIds = statisticsIdsPerErasedStatisticsId.keySet();
         Map<ProcessingUnitStatisticsId, StatisticsObjectList> timeLine = getValues(processingUnitStatistics, erasedStatisticsIds);
@@ -67,7 +65,9 @@ public class TimeWindowStatisticsCalculator implements InternalProcessingUnitSta
                 ProcessingUnitStatisticsId statisticsId = unerase(erasedStatisticsId,timeWindowStatistics);
             
                 Object value = null;
-               
+        
+                // TODO: Consider visitor pattern to decouple the conversion of statistics config to
+                // a value from both TimeWindowStatisticsCalculator and the various Config objects
                 if (timeWindowStatistics instanceof AverageTimeWindowStatisticsConfig) {
                     value = values.getAverage();
                 }
@@ -171,57 +171,63 @@ public class TimeWindowStatisticsCalculator implements InternalProcessingUnitSta
             final InternalProcessingUnitStatistics processingUnitStatistics,
             final Set<ProcessingUnitStatisticsId> newStatisticsIds) {
         
+        if (processingUnitStatistics == null) {
+            throw new IllegalArgumentException("processingUnitStatistics cannot be null");
+        }
+        
         ProcessingUnitStatistics statistics = processingUnitStatistics;
         
-        final Map<ProcessingUnitStatisticsId, StatisticsObjectList> valuesTimeline = new HashMap<ProcessingUnitStatisticsId, StatisticsObjectList>();
-        final Map<ProcessingUnitStatisticsId, StatisticsObjectList> finalValuesTimeline = new HashMap<ProcessingUnitStatisticsId, StatisticsObjectList>();
+        final Map<ProcessingUnitStatisticsId, StatisticsObjectList> temporaryValues = new HashMap<ProcessingUnitStatisticsId, StatisticsObjectList>();
+        for (final ProcessingUnitStatisticsId statisticsId : newStatisticsIds) {
+            // initialize
+            temporaryValues.put(statisticsId, new StatisticsObjectList());
+        }
+        
+        final Map<ProcessingUnitStatisticsId, StatisticsObjectList> returnValues = new HashMap<ProcessingUnitStatisticsId, StatisticsObjectList>();
+        
         long timeDelta = 0;
         while (statistics != null) {
-            long prevTimeDelta = timeDelta;
+            
             timeDelta = processingUnitStatistics.getAdminTimestamp() - statistics.getAdminTimestamp();
             
             final Map<ProcessingUnitStatisticsId, Object> values = statistics.getStatistics();
             for (final ProcessingUnitStatisticsId statisticsId : newStatisticsIds) {
+                
+                final StatisticsObjectList timeline = temporaryValues.get(statisticsId);
                 
                 ErasedTimeWindowStatisticsConfig timeWindowStatistics = (ErasedTimeWindowStatisticsConfig) statisticsId.getTimeWindowStatistics();
                 timeWindowStatistics.validate();
                 final long timeWindowMilliSeconds = TimeUnit.SECONDS.toMillis(timeWindowStatistics.getTimeWindowSeconds());
                 final long minTimeWindowMilliSeconds = TimeUnit.SECONDS.toMillis(timeWindowStatistics.getMinimumTimeWindowSeconds());
                 final long maxTimeWindowMilliSeconds = TimeUnit.SECONDS.toMillis(timeWindowStatistics.getMaximumTimeWindowSeconds());
-                
-                if (timeDelta == 0) {
-                    valuesTimeline.put(statisticsId, new StatisticsObjectList());
-                }
-                
-                final StatisticsObjectList timeline = valuesTimeline.get(statisticsId);
-                
+                                
                 if (timeline != null) {
-                    
-                    if (prevTimeDelta >= minTimeWindowMilliSeconds) {
-                        // enough samples
-                        finalValuesTimeline.put(statisticsId, timeline);
-                    }
                     
                     final Object value = getValue(values, statisticsId);
                     if (timeDelta > maxTimeWindowMilliSeconds || value == null) {
                         
-                        // invalid sample
-                        valuesTimeline.remove(statisticsId);
+                        // invalid sample. Don't collect any more values.
+                        temporaryValues.remove(statisticsId);
                     }
                     else {
                         //valid sample
                         timeline.add(value);
                         
+                        if (timeDelta >= minTimeWindowMilliSeconds) {
+                            // valid return value
+                            returnValues.put(statisticsId, timeline);
+                        }
+                        
                         if (timeDelta >= timeWindowMilliSeconds) {
-                            // collected just the right number of samples
-                            valuesTimeline.remove(statisticsId);
+                            // Don't collect any more values.
+                            temporaryValues.remove(statisticsId);
                         }
                     }
                 }
             }
             statistics = statistics.getPrevious();
         }
-        return finalValuesTimeline;
+        return returnValues;
     }
 
     private Object getValue(

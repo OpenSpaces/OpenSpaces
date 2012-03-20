@@ -15,12 +15,33 @@
  *******************************************************************************/
 package org.openspaces.admin.pu.statistics;
 
+import org.openspaces.admin.pu.ProcessingUnitInstance;
+
 /**
- * Marks configurations that aggregate statistics from time samples.
+ * Fluent API for creating a new {@link SingleInstanceStatisticsConfig} object
  * @author itaif
  * @since 9.0.0
- * @see ProcessingUnitStatisticsId
  */
-public interface TimeWindowStatisticsConfig {
-
+public class SingleInstanceStatisticsConfigurer {
+    
+    SingleInstanceStatisticsConfig config;
+    
+    public SingleInstanceStatisticsConfigurer() {
+        config = new SingleInstanceStatisticsConfig();
+    }
+    
+    public SingleInstanceStatisticsConfigurer instanceUid(String instanceUid) {
+        config.setInstanceUid(instanceUid);
+        return this;
+    }
+    
+    public SingleInstanceStatisticsConfigurer instance(ProcessingUnitInstance instance) {
+        instanceUid(instance.getUid());
+        return this;
+    }
+    
+    public SingleInstanceStatisticsConfig create() {
+        config.validate();
+        return config;
+    }
 }

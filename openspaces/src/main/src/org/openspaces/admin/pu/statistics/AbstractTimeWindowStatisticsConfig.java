@@ -28,14 +28,14 @@ import org.openspaces.admin.internal.pu.statistics.TimeWindowStatisticsCalculato
  */
 public abstract class AbstractTimeWindowStatisticsConfig implements InternalTimeWindowStatisticsConfig {
 
-    private long timeWindowSeconds;
-    private long minimumTimeWindowSeconds;
-    private long maximumTimeWindowSeconds;
+    private Long timeWindowSeconds;
+    private Long minimumTimeWindowSeconds;
+    private Long maximumTimeWindowSeconds;
     
     /**
      * @return the timeWindowSeconds
      */
-    public long getTimeWindowSeconds() {
+    public Long getTimeWindowSeconds() {
         return timeWindowSeconds;
     }
     /**
@@ -47,7 +47,7 @@ public abstract class AbstractTimeWindowStatisticsConfig implements InternalTime
     /**
      * @return the minimumTimeWindowSeconds
      */
-    public long getMinimumTimeWindowSeconds() {
+    public Long getMinimumTimeWindowSeconds() {
         return minimumTimeWindowSeconds;
     }
     /**
@@ -59,7 +59,7 @@ public abstract class AbstractTimeWindowStatisticsConfig implements InternalTime
     /**
      * @return the maximumTimeWindowSeconds
      */
-    public long getMaximumTimeWindowSeconds() {
+    public Long getMaximumTimeWindowSeconds() {
         return maximumTimeWindowSeconds;
     }
     /**
@@ -68,6 +68,7 @@ public abstract class AbstractTimeWindowStatisticsConfig implements InternalTime
     public void setMaximumTimeWindowSeconds(long maximumTimeWindowSeconds) {
         this.maximumTimeWindowSeconds = maximumTimeWindowSeconds;
     }
+    
     /* (non-Javadoc)
      * @see java.lang.Object#hashCode()
      */
@@ -75,9 +76,9 @@ public abstract class AbstractTimeWindowStatisticsConfig implements InternalTime
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (int) (maximumTimeWindowSeconds ^ (maximumTimeWindowSeconds >>> 32));
-        result = prime * result + (int) (minimumTimeWindowSeconds ^ (minimumTimeWindowSeconds >>> 32));
-        result = prime * result + (int) (timeWindowSeconds ^ (timeWindowSeconds >>> 32));
+        result = prime * result + ((maximumTimeWindowSeconds == null) ? 0 : maximumTimeWindowSeconds.hashCode());
+        result = prime * result + ((minimumTimeWindowSeconds == null) ? 0 : minimumTimeWindowSeconds.hashCode());
+        result = prime * result + ((timeWindowSeconds == null) ? 0 : timeWindowSeconds.hashCode());
         return result;
     }
     /* (non-Javadoc)
@@ -92,22 +93,43 @@ public abstract class AbstractTimeWindowStatisticsConfig implements InternalTime
         if (getClass() != obj.getClass())
             return false;
         AbstractTimeWindowStatisticsConfig other = (AbstractTimeWindowStatisticsConfig) obj;
-        if (maximumTimeWindowSeconds != other.maximumTimeWindowSeconds)
+        if (maximumTimeWindowSeconds == null) {
+            if (other.maximumTimeWindowSeconds != null)
+                return false;
+        } else if (!maximumTimeWindowSeconds.equals(other.maximumTimeWindowSeconds))
             return false;
-        if (minimumTimeWindowSeconds != other.minimumTimeWindowSeconds)
+        if (minimumTimeWindowSeconds == null) {
+            if (other.minimumTimeWindowSeconds != null)
+                return false;
+        } else if (!minimumTimeWindowSeconds.equals(other.minimumTimeWindowSeconds))
             return false;
-        if (timeWindowSeconds != other.timeWindowSeconds)
+        if (timeWindowSeconds == null) {
+            if (other.timeWindowSeconds != null)
+                return false;
+        } else if (!timeWindowSeconds.equals(other.timeWindowSeconds))
             return false;
         return true;
     }
     
     public void validate() throws IllegalStateException {
+        if (timeWindowSeconds == null) {
+            throw new IllegalStateException("timeWindowSeconds cannot be null");
+        }
+        
         if (timeWindowSeconds<=0) {
             throw new IllegalStateException("timeWindowSeconds must be positive");
         }
         
+        if (minimumTimeWindowSeconds == null) {
+            throw new IllegalStateException("minimumTimeWindowSeconds cannot be null");
+        }
+        
         if (minimumTimeWindowSeconds <0) {
             throw new IllegalStateException("minimumTimeWindowSeconds must not be negative");
+        }
+        
+        if (maximumTimeWindowSeconds == null) {
+            throw new IllegalStateException("maximumTimeWindowSeconds cannot be null");
         }
         
         if (maximumTimeWindowSeconds <=0) {

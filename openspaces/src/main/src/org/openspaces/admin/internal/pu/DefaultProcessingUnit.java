@@ -1075,15 +1075,52 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         
         InternalProcessingUnitStatistics statistics = 
                 new DefaultProcessingUnitStatistics(currentTime, lastStatistics, statisticsHistorySize, statisticsCalculatorFactory);
-        
+        Map<String,ProcessingUnitInstance> instancesSnapshot = new HashMap<String, ProcessingUnitInstance>(processingUnitInstances);
         for (ProcessingUnitStatisticsId statisticsId : statisticsIds) {
-            injectInstanceStatisticsIfAvailable(statistics, statisticsId);
+            injectInstanceStatisticsIfAvailable(instancesSnapshot, statistics, statisticsId);
         }
-        
-        statistics.calculateStatistics(getStatisticsCalculations());
+
+        statistics.calculateStatistics(getSingleInstanceTimeWindowCalculatedStatistics(instancesSnapshot));
 
         lastStatistics = statistics;
         return lastStatistics;
+    }
+
+    /**
+     * @return calculated statistics in which instances aggregation is replaced with specific
+     *         instance uids. time aggregations is left unmodified.
+     */
+    private ProcessingUnitStatisticsId[] getSingleInstanceTimeWindowCalculatedStatistics(
+            Map<String, ProcessingUnitInstance> instancesSnapshot) {
+        
+        List<ProcessingUnitStatisticsId> singleInstanceCalculatedStatistics = new ArrayList<ProcessingUnitStatisticsId>();
+        for (ProcessingUnitStatisticsId statisticsId : statisticsIds) {
+            if (statisticsId.getInstancesStatistics() instanceof SingleInstanceStatisticsConfig) {
+                // instance UID is already specified. Just check that it is still discovered
+                String instanceUid = ((SingleInstanceStatisticsConfig)(statisticsId.getInstancesStatistics())).getInstanceUid();
+                if (instancesSnapshot.containsKey(instanceUid)) {
+                    singleInstanceCalculatedStatistics.add(statisticsId);
+                }
+                else {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Failed to find processing unit " + this.getName() + " instance with UID " + instanceUid);
+                    }
+                }
+            }
+            else {
+                //expand to all instance UIDs
+                for (String instanceUid : instancesSnapshot.keySet()) {
+                    singleInstanceCalculatedStatistics.add(
+                            new ProcessingUnitStatisticsIdConfigurer()
+                            .monitor(statisticsId.getMonitor())
+                            .metric(statisticsId.getMetric())
+                            .timeWindowStatistics(statisticsId.getTimeWindowStatistics())
+                            .instancesStatistics(new SingleInstanceStatisticsConfig(instanceUid))
+                            .create());
+                }
+            }
+        }
+        return singleInstanceCalculatedStatistics.toArray(new ProcessingUnitStatisticsId[singleInstanceCalculatedStatistics.size()]);
     }
 
     /**
@@ -1091,13 +1128,14 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
      * and injects it into the puStatistics object
      */
     private void injectInstanceStatisticsIfAvailable(
+            Map<String,ProcessingUnitInstance> instancesSnapshot,
             InternalProcessingUnitStatistics statistics,
             ProcessingUnitStatisticsId statisticsId) {
         
         InstancesStatisticsConfig instancesStatistics = statisticsId.getInstancesStatistics();
         if (instancesStatistics instanceof SingleInstanceStatisticsConfig) {
             String instanceUid = ((SingleInstanceStatisticsConfig)statisticsId.getInstancesStatistics()).getInstanceUid();
-            ProcessingUnitInstance instance = processingUnitInstances.get(instanceUid);
+            ProcessingUnitInstance instance = instancesSnapshot.get(instanceUid);
             if (instance == null) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Failed to find processing unit " + this.getName() + " instance with UID " + instanceUid);
