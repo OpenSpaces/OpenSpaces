@@ -15,5 +15,38 @@ public class LastSampleTimeWindowStatisticsConfig implements InternalTimeWindowS
     public void validate() throws IllegalStateException {
         // ok
     }
+    
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return "êastSampleTimeWindowStatisticsConfig";
+    }
+
+    /* Default implementation for configs without members
+     * (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        return this.getClass().hashCode();
+    }
+
+    /* Default implementation for configs without members
+     * (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (this == obj)
+            return true;
+        if (getClass() != obj.getClass())
+            return false;
+        return true;
+    }
 
 }

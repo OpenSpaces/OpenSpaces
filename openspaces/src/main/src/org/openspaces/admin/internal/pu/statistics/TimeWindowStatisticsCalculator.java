@@ -160,7 +160,7 @@ public class TimeWindowStatisticsCalculator implements InternalProcessingUnitSta
             ProcessingUnitStatisticsId erasedStatisticsId,
             TimeWindowStatisticsConfig timeWindowStatistics) {
         
-        if (!(timeWindowStatistics instanceof ErasedTimeWindowStatisticsConfig)) {
+        if (!(erasedStatisticsId.getTimeWindowStatistics() instanceof ErasedTimeWindowStatisticsConfig)) {
             return erasedStatisticsId;
         }
         
@@ -186,6 +186,7 @@ public class TimeWindowStatisticsCalculator implements InternalProcessingUnitSta
             for (final ProcessingUnitStatisticsId statisticsId : newStatisticsIds) {
                 
                 ErasedTimeWindowStatisticsConfig timeWindowStatistics = (ErasedTimeWindowStatisticsConfig) statisticsId.getTimeWindowStatistics();
+                timeWindowStatistics.validate();
                 final long timeWindowSeconds = timeWindowStatistics.getTimeWindowSeconds();
                 final long minTimeWindowSeconds = timeWindowStatistics.getMinimumTimeWindowSeconds();
                 final long maxTimeWindowSeconds = timeWindowStatistics.getMaximumTimeWindowSeconds();
@@ -198,26 +199,25 @@ public class TimeWindowStatisticsCalculator implements InternalProcessingUnitSta
                 
                 if (timeline != null) {
                     
+                    if (prevTimeDelta >= minTimeWindowSeconds) {
+                        // enough samples
+                        finalValuesTimeline.put(statisticsId, timeline);
+                    }
+                    
                     final Object value = getValue(values, statisticsId);
                     if (timeDelta > maxTimeWindowSeconds || value == null) {
                         
-                        // sample would cause too much gap or does not exist.
+                        // invalid sample
                         valuesTimeline.remove(statisticsId);
-                        
-                        if (prevTimeDelta > minTimeWindowSeconds) {
-                            finalValuesTimeline.put(statisticsId, timeline);
-                        }
-                        continue;
                     }
-                    
-                    timeline.add(value);
-                    
-                    if (timeDelta > timeWindowSeconds) {
-                        // collected enough samples
-                        valuesTimeline.remove(statisticsId);
+                    else {
+                        //valid sample
+                        timeline.add(value);
                         
-                        finalValuesTimeline.put(statisticsId, timeline);
-                        continue;
+                        if (timeDelta > timeWindowSeconds) {
+                            // collected just the right number of samples
+                            valuesTimeline.remove(statisticsId);
+                        }
                     }
                 }
             }

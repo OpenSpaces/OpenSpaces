@@ -30,7 +30,7 @@ import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
 
 public class DefaultProcessingUnitStatistics implements InternalProcessingUnitStatistics {
 
-    private volatile ProcessingUnitStatistics lastStats;
+    private volatile ProcessingUnitStatistics previous;
 
     private final long adminTimestamp;
     
@@ -47,16 +47,16 @@ public class DefaultProcessingUnitStatistics implements InternalProcessingUnitSt
         this.statisticsCalculatorFactory = statisticsCalculatorFactory;
         this.statistics = new HashMap<ProcessingUnitStatisticsId, Object>();
         this.adminTimestamp = adminTimestamp;
-        this.lastStats = lastStatistics;
+        this.previous = lastStatistics;
        
-        if (lastStats != null) {
+        if (lastStatistics != null) {
             for (int i = 0; i < historySize; i++) {
-                if (lastStats.getPrevious() == null) {
+                if (lastStatistics.getPrevious() == null) {
                     break;
                 }
-                lastStats = lastStats.getPrevious();
+                lastStatistics = lastStatistics.getPrevious();
             }
-            ((DefaultProcessingUnitStatistics)lastStats).lastStats = null;
+            ((DefaultProcessingUnitStatistics)lastStatistics).previous = null;
         }
         
     }
@@ -68,7 +68,7 @@ public class DefaultProcessingUnitStatistics implements InternalProcessingUnitSt
     
     @Override
     public ProcessingUnitStatistics getPrevious() {
-        return this.lastStats;
+        return this.previous;
     }
 
     @Override

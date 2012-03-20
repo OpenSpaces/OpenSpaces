@@ -43,7 +43,7 @@ public class TimeWindowStatisticsCalculatorTest extends TestCase {
     private static final String MONITOR = "monitor";
     private static final String METRIC = "metric";
     private static final long TIMEWINDOW_SECONDS = 60000;
-    private static final long MINIMUM_TIMEWINDOW_NANOSECONDS = 1;
+    private static final long MINIMUM_TIMEWINDOW_SECONDS = 0;
 
     public void testAverage() throws InterruptedException {
         TimeWindowStatisticsCalculator calculator = new TimeWindowStatisticsCalculator();
@@ -59,12 +59,16 @@ public class TimeWindowStatisticsCalculatorTest extends TestCase {
                     i);
             
             Assert.assertEquals(i, processingUnitStatistics.getStatistics().get(lastSampleStatisticsId()));
+            if (i == 0) {
+                Assert.assertNull(processingUnitStatistics.getPrevious());    
+            }
+            else {
+                Assert.assertNotNull(processingUnitStatistics.getPrevious());
+            }
             
             //calculate time average
             Set<ProcessingUnitStatisticsId> newStatisticsIds = new HashSet<ProcessingUnitStatisticsId>();
-            newStatisticsIds.add(
-                    averageStatisticsId()
-                    .create());
+            newStatisticsIds.add(averageStatisticsId());
             calculator.calculateNewStatistics(processingUnitStatistics, newStatisticsIds);
             lastStatistics = processingUnitStatistics;
             
@@ -72,30 +76,33 @@ public class TimeWindowStatisticsCalculatorTest extends TestCase {
             Thread.sleep(100);
         }
         
-        Assert.assertEquals(2, lastStatistics.getStatistics().get(lastSampleStatisticsId()));
-        Assert.assertEquals(1, lastStatistics.getPrevious().getStatistics().get(lastSampleStatisticsId()));
         Assert.assertEquals(0, lastStatistics.getPrevious().getPrevious().getStatistics().get(lastSampleStatisticsId()));
-        
+        Assert.assertEquals(0/1.0, lastStatistics.getPrevious().getPrevious().getStatistics().get(averageStatisticsId()));
+        Assert.assertEquals(1, lastStatistics.getPrevious().getStatistics().get(lastSampleStatisticsId()));
+        Assert.assertEquals((0+1)/2.0, lastStatistics.getPrevious().getStatistics().get(averageStatisticsId()));
+        Assert.assertEquals(2, lastStatistics.getStatistics().get(lastSampleStatisticsId()));
+        Assert.assertEquals((0+1+2)/3.0, lastStatistics.getStatistics().get(averageStatisticsId()));
     }
 
-    private ProcessingUnitStatisticsIdConfigurer averageStatisticsId() {
+    private ProcessingUnitStatisticsId averageStatisticsId() {
         return new ProcessingUnitStatisticsIdConfigurer()
-        .metric(METRIC)
-        .monitor(MONITOR)
-        .instancesStatistics(new SingleInstanceStatisticsConfig(INSTANCE_UID))
-        .timeWindowStatistics(
-                new AverageTimeWindowStatisticsConfigurer()
-                .minimumTimeWindow(MINIMUM_TIMEWINDOW_NANOSECONDS, TimeUnit.NANOSECONDS)
-                .timeWindow(TIMEWINDOW_SECONDS, TimeUnit.SECONDS)
-                .create());
+                .metric(METRIC)
+                .monitor(MONITOR)
+                .instancesStatistics(new SingleInstanceStatisticsConfig(INSTANCE_UID))
+                .timeWindowStatistics(
+                        new AverageTimeWindowStatisticsConfigurer()
+                        .minimumTimeWindow(MINIMUM_TIMEWINDOW_SECONDS, TimeUnit.SECONDS)
+                        .timeWindow(TIMEWINDOW_SECONDS, TimeUnit.SECONDS)
+                        .create())
+                 .create();
     }
 
     private ProcessingUnitStatisticsId lastSampleStatisticsId() {
         return new ProcessingUnitStatisticsIdConfigurer()
-        .metric(METRIC)
-        .monitor(MONITOR)
-        .instancesStatistics(new SingleInstanceStatisticsConfig(INSTANCE_UID))
-        .timeWindowStatistics(new LastSampleTimeWindowStatisticsConfig())
-        .create();
+                .metric(METRIC)
+                .monitor(MONITOR)
+                .instancesStatistics(new SingleInstanceStatisticsConfig(INSTANCE_UID))
+                .timeWindowStatistics(new LastSampleTimeWindowStatisticsConfig())
+                .create();
     }
 }

@@ -61,7 +61,7 @@ public class SingleInstanceStatisticsConfig extends AbstractInstancesStatisticsC
 
     @Override
     public String toString() {
-        return "singleInstanceStatisticsConfig {instanceUid=" + instanceUid + "}";
+        return "singleInstanceStatistics {instanceUid=" + instanceUid + "}";
     }
     
     @Override

@@ -106,8 +106,8 @@ public abstract class AbstractTimeWindowStatisticsConfig implements InternalTime
             throw new IllegalStateException("timeWindowSeconds must be positive");
         }
         
-        if (minimumTimeWindowSeconds <=0) {
-            throw new IllegalStateException("minimumTimeWindowSeconds must be positive");
+        if (minimumTimeWindowSeconds <0) {
+            throw new IllegalStateException("minimumTimeWindowSeconds must not be negative");
         }
         
         if (maximumTimeWindowSeconds <=0) {
