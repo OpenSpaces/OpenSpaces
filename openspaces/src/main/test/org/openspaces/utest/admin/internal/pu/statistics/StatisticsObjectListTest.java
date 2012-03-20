@@ -27,6 +27,14 @@ import org.openspaces.admin.internal.pu.statistics.StatisticsObjectList;
  */
 public class StatisticsObjectListTest extends TestCase {
 
+    public void testEmptyList() {
+        StatisticsObjectList list = new StatisticsObjectList();
+        Assert.assertNull(list.getMinimum());
+        Assert.assertNull(list.getMaximum());
+        Assert.assertNull(list.getAverage());
+        Assert.assertNull(list.getPercentile(0));
+    }
+    
     public void testSimpleList2() {
         StatisticsObjectList list = new StatisticsObjectList();
         list.add(0);
