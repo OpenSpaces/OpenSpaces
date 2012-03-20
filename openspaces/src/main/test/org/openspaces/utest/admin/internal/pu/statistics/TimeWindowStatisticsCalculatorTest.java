@@ -28,6 +28,7 @@ import org.openspaces.admin.internal.pu.ProcessingUnitStatistics;
 import org.openspaces.admin.internal.pu.statistics.DefaultProcessingUnitStatisticsCalculatorFactory;
 import org.openspaces.admin.internal.pu.statistics.InternalProcessingUnitStatistics;
 import org.openspaces.admin.internal.pu.statistics.TimeWindowStatisticsCalculator;
+import org.openspaces.admin.pu.statistics.AverageTimeWindowStatisticsConfig;
 import org.openspaces.admin.pu.statistics.AverageTimeWindowStatisticsConfigurer;
 import org.openspaces.admin.pu.statistics.LastSampleTimeWindowStatisticsConfig;
 import org.openspaces.admin.pu.statistics.MaximumTimeWindowStatisticsConfigurer;
@@ -92,19 +93,7 @@ public class TimeWindowStatisticsCalculatorTest extends TestCase {
                 Assert.assertNotNull(processingUnitStatistics.getPrevious());
             }
             
-            //calculate time average
-            Set<ProcessingUnitStatisticsId> newStatisticsIds = new HashSet<ProcessingUnitStatisticsId>();
-            newStatisticsIds.add(averageStatisticsId());
-            newStatisticsIds.add(minimumStatisticsId());
-            newStatisticsIds.add(maximumStatisticsId());
-            newStatisticsIds.add(precentileStatisticsId(0));
-            newStatisticsIds.add(precentileStatisticsId(1));
-            newStatisticsIds.add(precentileStatisticsId(49));
-            newStatisticsIds.add(precentileStatisticsId(50));
-            newStatisticsIds.add(precentileStatisticsId(51));
-            newStatisticsIds.add(precentileStatisticsId(99));
-            newStatisticsIds.add(precentileStatisticsId(100));
-            calculator.calculateNewStatistics(processingUnitStatistics, newStatisticsIds);
+            calculator.calculateNewStatistics(processingUnitStatistics, getTestStatisticsCalculations());
             lastStatistics = processingUnitStatistics;
         }
         
@@ -125,10 +114,73 @@ public class TimeWindowStatisticsCalculatorTest extends TestCase {
             assertTwoSamplesStartingWith(1, pStatistics);
             assertTwoSamplesStartingWith(2, statistics);
         }
-        
-        
     }
 
+    public void testNoSamples() {
+        
+        TimeWindowStatisticsCalculator calculator = new TimeWindowStatisticsCalculator();
+        int historySize = NUMBER_OF_SAMPLES;
+        DefaultProcessingUnitStatisticsCalculatorFactory statisticsCalculatorFactory = new DefaultProcessingUnitStatisticsCalculatorFactory();
+        ProcessingUnitStatistics lastStatistics = null;
+        long adminTimestamp = System.currentTimeMillis();
+        InternalProcessingUnitStatistics processingUnitStatistics = new DefaultProcessingUnitStatistics(adminTimestamp , lastStatistics , historySize, statisticsCalculatorFactory);
+        Assert.assertNull(processingUnitStatistics.getPrevious());    
+
+        //calculate time average
+        calculator.calculateNewStatistics(processingUnitStatistics, getTestStatisticsCalculations());
+        Map<ProcessingUnitStatisticsId, Object> statistics = processingUnitStatistics.getStatistics();
+        Assert.assertTrue(statistics.isEmpty());
+    }
+
+    public void testOneSampleMinimumTimeWindow() {
+        
+        TimeWindowStatisticsCalculator calculator = new TimeWindowStatisticsCalculator();
+        int historySize = NUMBER_OF_SAMPLES;
+        DefaultProcessingUnitStatisticsCalculatorFactory statisticsCalculatorFactory = new DefaultProcessingUnitStatisticsCalculatorFactory();
+        ProcessingUnitStatistics lastStatistics = null;
+        long adminTimestamp = System.currentTimeMillis();
+        InternalProcessingUnitStatistics processingUnitStatistics = new DefaultProcessingUnitStatistics(adminTimestamp , lastStatistics , historySize, statisticsCalculatorFactory);
+        Assert.assertNull(processingUnitStatistics.getPrevious());    
+        int value = 0;
+        processingUnitStatistics.addStatistics(lastSampleStatisticsId(),value);
+        
+        //minimumTimeWindow and maximumTimeWindow defaults to timeWindow
+        AverageTimeWindowStatisticsConfig defaultAverageStatisticsId = 
+                new AverageTimeWindowStatisticsConfigurer()
+                .timeWindow(TIMEWINDOW_SECONDS, TimeUnit.SECONDS)
+                .create();
+        
+        //calculate time average
+        Set<ProcessingUnitStatisticsId> calculatedStatistics = new HashSet<ProcessingUnitStatisticsId>();
+        calculatedStatistics.add(new ProcessingUnitStatisticsIdConfigurer()
+            .metric(METRIC)
+            .monitor(MONITOR)
+            .instancesStatistics(new SingleInstanceStatisticsConfig(INSTANCE_UID))
+            .timeWindowStatistics(defaultAverageStatisticsId)
+             .create());
+        
+        calculator.calculateNewStatistics(processingUnitStatistics, calculatedStatistics);
+        Map<ProcessingUnitStatisticsId, Object> statistics = processingUnitStatistics.getStatistics();
+        Assert.assertEquals(value,     statistics.get(lastSampleStatisticsId()));
+        // average should be null since there are not enough samples (only one sample)
+        Assert.assertNull(statistics.get(defaultAverageStatisticsId));
+    }
+
+    private Set<ProcessingUnitStatisticsId> getTestStatisticsCalculations() {
+        Set<ProcessingUnitStatisticsId> newStatisticsIds = new HashSet<ProcessingUnitStatisticsId>();
+        newStatisticsIds.add(averageStatisticsId());
+        newStatisticsIds.add(minimumStatisticsId());
+        newStatisticsIds.add(maximumStatisticsId());
+        newStatisticsIds.add(precentileStatisticsId(0));
+        newStatisticsIds.add(precentileStatisticsId(1));
+        newStatisticsIds.add(precentileStatisticsId(49));
+        newStatisticsIds.add(precentileStatisticsId(50));
+        newStatisticsIds.add(precentileStatisticsId(51));
+        newStatisticsIds.add(precentileStatisticsId(99));
+        newStatisticsIds.add(precentileStatisticsId(100));
+        return newStatisticsIds;
+    }
+    
     private void assertThreeSamplesStartingWith(int firstValue, Map<ProcessingUnitStatisticsId, Object> pStatistics) {
         int secondValue = firstValue+1;
         int thirdValue = firstValue+2;
@@ -144,7 +196,7 @@ public class TimeWindowStatisticsCalculatorTest extends TestCase {
         Assert.assertEquals(thirdValue,         pStatistics.get(precentileStatisticsId(99)));
         Assert.assertEquals(thirdValue,         pStatistics.get(precentileStatisticsId(100)));
     }
-
+     
     private void assertTwoSamplesStartingWith(int firstValue, Map<ProcessingUnitStatisticsId, Object> ppStatistics) {
         int secondValue = firstValue+1;
         Assert.assertEquals(secondValue,         ppStatistics.get(lastSampleStatisticsId()));
