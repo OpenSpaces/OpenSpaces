@@ -7,7 +7,7 @@ import org.openspaces.admin.pu.ProcessingUnitInstance;
  * @author itaif
  * @since 9.0.0
  */
-public class SingleInstanceStatisticsConfig extends InstancesAggregationStatisticsConfig {
+public class SingleInstanceStatisticsConfig extends InstancesStatisticsConfig {
 
     private String processingUnitInstanceUid;
 

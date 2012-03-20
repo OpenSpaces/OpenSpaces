@@ -14,7 +14,7 @@ public class ProcessingUnitStatisticsId {
     
     private TimeWindowStatisticsConfig timeWindowStatistics; 
     
-    private InstancesAggregationStatisticsConfig instancesStatistics; 
+    private InstancesStatisticsConfig instancesStatistics; 
    
     public String getMonitor() {
         return monitor;
@@ -45,14 +45,14 @@ public class ProcessingUnitStatisticsId {
         this.timeWindowStatistics = timeWindowStatistics;
     }
 
-    public InstancesAggregationStatisticsConfig getInstancesStatistics() {
+    public InstancesStatisticsConfig getInstancesStatistics() {
         return instancesStatistics;
     }
     
     /**
      * @see ProcessingUnitStatisticsIdConfigurer#instancesStatistics(InstancesAggregationStatisticsConfig)
      */
-    public void setInstancesStatistics(InstancesAggregationStatisticsConfig instancesStatistics) {
+    public void setInstancesStatistics(InstancesStatisticsConfig instancesStatistics) {
         this.instancesStatistics = instancesStatistics;
     }       
 }

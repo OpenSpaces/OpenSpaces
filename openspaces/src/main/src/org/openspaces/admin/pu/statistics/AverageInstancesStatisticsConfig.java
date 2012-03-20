@@ -6,5 +6,5 @@ package org.openspaces.admin.pu.statistics;
  * @author itaif
  *
  */
-public class AverageInstancesStatisticsConfig extends InstancesAggregationStatisticsConfig {
+public class AverageInstancesStatisticsConfig extends InstancesStatisticsConfig {
 }

@@ -44,7 +44,7 @@ public class ProcessingUnitStatisticsIdConfigurer {
      * If cluster is null selects each instance statistics individually
      * Cannot be used together with {@link #instanceUid(String)}
      */
-    ProcessingUnitStatisticsIdConfigurer instancesAggregation(InstancesAggregationStatisticsConfig instancesAggregationStatisticsConfig) {
+    ProcessingUnitStatisticsIdConfigurer instancesAggregation(InstancesStatisticsConfig instancesAggregationStatisticsConfig) {
         throw new UnsupportedOperationException("Not implemented yet");
     }
     
