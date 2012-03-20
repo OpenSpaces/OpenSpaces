@@ -28,10 +28,10 @@ import org.openspaces.admin.internal.support.InternalGridComponent;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.ProcessingUnitInstanceStatistics;
-import org.openspaces.admin.pu.ProcessingUnitInstanceStatisticsTimeAggregator;
 import org.openspaces.admin.pu.ProcessingUnitPartition;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.pu.container.servicegrid.PUServiceBean;
+import org.openspaces.pu.service.TimeAggregatorServiceMonitorsProvider;
 
 /**
  * @author kimchy
@@ -75,22 +75,11 @@ public interface InternalProcessingUnitInstance extends ProcessingUnitInstance, 
      * @since 8.0.6
      */
     ProcessingUnitInstanceStatistics getLastStatistics();
- 
+
     /**
-     * Defines a ServiceMonitor that runs in the Admin API 
-     * which aggregates other ServiceMonitors of the same instance
-     * and performs time window aggregations.
-     * @param serviceMonitorsId
-     * @param aggregators
-     * @since 9.0.0
+     * Sets the time aggregation statistics 
+     *  @since 9.0.0
+     *  @author itaif
      */
-    void enableTimeAggregatedServiceMonitors(String serviceMonitorsId, ProcessingUnitInstanceStatisticsTimeAggregator[] aggregators);
-    
-    /**
-     * Disables a previously defined time aggregation ServiceMonitor 
-     * @param serviceMonitorsId
-     * @param aggregators
-     * @since 9.0.0
-     */
-    void disableTimeAggregatedServiceMonitors(String serviceMonitorsId);
+    void setTimeAggregatedServiceMonitorsProviders(TimeAggregatorServiceMonitorsProvider[] timeAggregators);
 }

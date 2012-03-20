@@ -17,6 +17,8 @@
  ******************************************************************************/
 package org.openspaces.pu.service;
 
+import java.util.Map;
+
 
 /**
  * This class should be used by customers in order to implement their ServiceMonitors
@@ -35,5 +37,13 @@ public class CustomServiceMonitors extends PlainServiceMonitors {
     public CustomServiceMonitors(String id) {
         super(id);
     }
-    
+
+    /**
+     * 
+     * @param id should identify that service
+     * @param exposed monitors
+     */
+    public CustomServiceMonitors(String id, Map<String,Object> monitors) {
+        super(id, monitors);
+    }
 }

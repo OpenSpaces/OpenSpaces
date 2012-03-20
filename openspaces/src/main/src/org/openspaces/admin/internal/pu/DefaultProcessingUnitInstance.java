@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -51,7 +50,6 @@ import org.openspaces.admin.pu.MemberAliveIndicatorStatus;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.ProcessingUnitInstanceStatistics;
-import org.openspaces.admin.pu.ProcessingUnitInstanceStatisticsTimeAggregator;
 import org.openspaces.admin.pu.ProcessingUnitPartition;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEvent;
@@ -71,10 +69,10 @@ import org.openspaces.pu.container.jee.JeeServiceDetails;
 import org.openspaces.pu.container.servicegrid.PUDetails;
 import org.openspaces.pu.container.servicegrid.PUMonitors;
 import org.openspaces.pu.container.servicegrid.PUServiceBean;
-import org.openspaces.pu.service.CustomServiceMonitors;
 import org.openspaces.pu.service.PlainServiceMonitors;
 import org.openspaces.pu.service.ServiceDetails;
 import org.openspaces.pu.service.ServiceMonitors;
+import org.openspaces.pu.service.TimeAggregatorServiceMonitorsProvider;
 import org.openspaces.remoting.RemotingServiceDetails;
 
 import com.gigaspaces.internal.jvm.JVMDetails;
@@ -141,9 +139,7 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
 
     private volatile MemberAliveIndicatorStatus memberAliveIndicatorStatus = MemberAliveIndicatorStatus.ALIVE;
 
-    // #enableTimeAggregatedServiceMonitors() #disableTimeAggregatedServiceMonitors() methods modify this
-    // collection and we do not want them to block until #getStatistics completes. Therefore the concurrent hash map
-    private final ConcurrentHashMap<String,ProcessingUnitInstanceStatisticsTimeAggregator[]> timeAggregatorsById;
+    private volatile TimeAggregatorServiceMonitorsProvider[] timeAggregators;
 
     public DefaultProcessingUnitInstance(ServiceID serviceID, PUDetails puDetails, PUServiceBean puServiceBean, InternalAdmin admin) {
         super(admin);
@@ -226,7 +222,7 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
         }
         servicesDetailsByServiceType = Collections.unmodifiableMap(servicesDetailsTemp);
         
-        timeAggregatorsById = new ConcurrentHashMap<String, ProcessingUnitInstanceStatisticsTimeAggregator[]>();
+        timeAggregators = new TimeAggregatorServiceMonitorsProvider[0];
     }
 
     public String getUid() {
@@ -584,36 +580,21 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
                 statisticsHistorySize,
                 getVirtualMachine().getMachine().getOperatingSystem().getTimeDelta());
         
-        // add aggregated statistics on top of the processing unit instance statistics
-        for (Map.Entry<String, ProcessingUnitInstanceStatisticsTimeAggregator[]> pair : timeAggregatorsById.entrySet()) {
-            String serviceMonitorsId = pair.getKey();
-            ProcessingUnitInstanceStatisticsTimeAggregator[] aggregators = pair.getValue();
-            
-            PlainServiceMonitors serviceMonitors = 
-                    new CustomServiceMonitors(serviceMonitorsId);
-            
-            for (ProcessingUnitInstanceStatisticsTimeAggregator aggregator : aggregators) {
-                
-                Map<String, Object> aggregated = aggregator.calcMonitors(statistics);
-                serviceMonitors.getMonitors().putAll(aggregated);
-            }
-            
-            statistics.addServiceMonitors(serviceMonitors);
+        for (TimeAggregatorServiceMonitorsProvider timeAggregator : timeAggregators) {
+            ServiceMonitors[] monitors = timeAggregator.aggregate(statistics);
+            statistics.addMonitors(monitors);
         }
-        
+                
         this.lastStatistics = statistics;   
         return this.lastStatistics;
         
     }
 
-    public void enableTimeAggregatedServiceMonitors(String serviceMonitorsId, ProcessingUnitInstanceStatisticsTimeAggregator[] aggregators) {
-        this.timeAggregatorsById.put(serviceMonitorsId, aggregators);
+    @Override
+    public void setTimeAggregatedServiceMonitorsProviders(TimeAggregatorServiceMonitorsProvider[] timeAggregators) {
+        this.timeAggregators = timeAggregators;
     }
-    
-    public void disableTimeAggregatedServiceMonitors(String serviceMonitorsId) {
-        this.timeAggregatorsById.remove(serviceMonitorsId);
-    }
-        
+            
     public synchronized void setStatisticsInterval(long interval, TimeUnit timeUnit) {
         this.statisticsInterval = timeUnit.toMillis(interval);
         if (scheduledStatisticsMonitor != null) {

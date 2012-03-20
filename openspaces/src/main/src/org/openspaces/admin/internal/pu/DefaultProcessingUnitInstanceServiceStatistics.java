@@ -29,7 +29,6 @@ import org.openspaces.events.notify.NotifyEventContainerServiceMonitors;
 import org.openspaces.events.polling.PollingEventContainerServiceMonitors;
 import org.openspaces.memcached.MemcachedServiceMonitors;
 import org.openspaces.pu.container.jee.stats.WebRequestsServiceMonitors;
-import org.openspaces.pu.service.PlainServiceMonitors;
 import org.openspaces.pu.service.ServiceMonitors;
 import org.openspaces.remoting.RemotingServiceMonitors;
 
@@ -191,7 +190,9 @@ public class DefaultProcessingUnitInstanceServiceStatistics implements Processin
     }
 
 
-    public void addServiceMonitors(PlainServiceMonitors serviceMonitors) {
-        serviceMonitorsById.put(serviceMonitors.getId(), serviceMonitors);        
+    public void addMonitors(ServiceMonitors[] monitors) {
+        for (ServiceMonitors serviceMonitors : monitors) {
+            serviceMonitorsById.put(serviceMonitors.getId(), serviceMonitors);
+        }
     }
 }

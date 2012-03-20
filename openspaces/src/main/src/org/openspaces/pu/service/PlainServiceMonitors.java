@@ -50,6 +50,11 @@ public class PlainServiceMonitors implements ServiceMonitors, Externalizable {
         this.monitors = new LinkedHashMap<String, Object>();
     }
 
+    public PlainServiceMonitors(String id, Map<String, Object> monitors) {
+        this.id = id;
+        this.monitors = new LinkedHashMap<String, Object>(monitors);
+    }
+
     public String getId() {
         return this.id;
     }
