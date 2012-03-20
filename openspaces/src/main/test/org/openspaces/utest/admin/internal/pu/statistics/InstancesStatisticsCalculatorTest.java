@@ -15,8 +15,8 @@
  *******************************************************************************/
 package org.openspaces.utest.admin.internal.pu.statistics;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
@@ -84,8 +84,8 @@ public class InstancesStatisticsCalculatorTest extends TestCase {
                 .create();
     }
 
-    private ProcessingUnitStatisticsId[] getTestStatisticsCalculations() {
-        Set<ProcessingUnitStatisticsId> newStatisticsIds = new HashSet<ProcessingUnitStatisticsId>();
+    private Iterable<ProcessingUnitStatisticsId> getTestStatisticsCalculations() {
+        List<ProcessingUnitStatisticsId> newStatisticsIds = new ArrayList<ProcessingUnitStatisticsId>();
         newStatisticsIds.add(averageStatisticsId());
         newStatisticsIds.add(minimumStatisticsId());
         newStatisticsIds.add(maximumStatisticsId());
@@ -94,7 +94,7 @@ public class InstancesStatisticsCalculatorTest extends TestCase {
         newStatisticsIds.add(precentileStatisticsId(50));
         newStatisticsIds.add(precentileStatisticsId(51));
         newStatisticsIds.add(precentileStatisticsId(100));
-        return newStatisticsIds.toArray(new ProcessingUnitStatisticsId[newStatisticsIds.size()]);
+        return newStatisticsIds;
     }
 
     private ProcessingUnitStatisticsId precentileStatisticsId(double percentile) {

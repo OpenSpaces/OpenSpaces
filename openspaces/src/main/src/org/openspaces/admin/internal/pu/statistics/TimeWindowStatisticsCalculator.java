@@ -43,9 +43,9 @@ public class TimeWindowStatisticsCalculator implements InternalProcessingUnitSta
     @Override
     public void calculateNewStatistics(
             final InternalProcessingUnitStatistics processingUnitStatistics,
-            final ProcessingUnitStatisticsId[] newStatisticsIds) {
+            final Iterable<ProcessingUnitStatisticsId> statisticsIds) {
         
-        Map<ProcessingUnitStatisticsId, Set<InternalTimeWindowStatisticsConfig>> timeWindowStatisticsPerErasedStatisticsId = eraseTimeWindowStatistics(newStatisticsIds);
+        Map<ProcessingUnitStatisticsId, Set<InternalTimeWindowStatisticsConfig>> timeWindowStatisticsPerErasedStatisticsId = eraseTimeWindowStatistics(statisticsIds);
         Set<ProcessingUnitStatisticsId> erasedStatisticsIds = timeWindowStatisticsPerErasedStatisticsId.keySet();
         Map<ProcessingUnitStatisticsId, StatisticsObjectList> valuesPerErasedStatisticsId = getValues(processingUnitStatistics, erasedStatisticsIds);
         
@@ -70,10 +70,10 @@ public class TimeWindowStatisticsCalculator implements InternalProcessingUnitSta
     /**
      * Groups statisticsIds by replacing their TimeWindowStatistics with {@link ErasedTimeWindowStatisticsConfig}
      */
-    private Map<ProcessingUnitStatisticsId,Set<InternalTimeWindowStatisticsConfig>> eraseTimeWindowStatistics(ProcessingUnitStatisticsId[] newStatisticsIds) {
+    private Map<ProcessingUnitStatisticsId,Set<InternalTimeWindowStatisticsConfig>> eraseTimeWindowStatistics(Iterable<ProcessingUnitStatisticsId> statisticsIds) {
 
         Map<ProcessingUnitStatisticsId, Set<InternalTimeWindowStatisticsConfig>> groupBy = new HashMap<ProcessingUnitStatisticsId, Set<InternalTimeWindowStatisticsConfig>>();
-        for (ProcessingUnitStatisticsId statisticsId : newStatisticsIds) {
+        for (ProcessingUnitStatisticsId statisticsId : statisticsIds) {
 
             ProcessingUnitStatisticsId key = erase(statisticsId);
 

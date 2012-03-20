@@ -39,9 +39,9 @@ public class InstancesStatisticsCalculator implements InternalProcessingUnitStat
     @Override
     public void calculateNewStatistics(
             InternalProcessingUnitStatistics processingUnitStatistics,
-            ProcessingUnitStatisticsId[] newStatisticsIds) {
+            Iterable<ProcessingUnitStatisticsId> statisticsIds) {
         
-        Map<ProcessingUnitStatisticsId, Set<InternalInstancesStatisticsConfig>> instancesStatisticsPerErasedStatisticsId = eraseInstancesStatistics(newStatisticsIds);
+        Map<ProcessingUnitStatisticsId, Set<InternalInstancesStatisticsConfig>> instancesStatisticsPerErasedStatisticsId = eraseInstancesStatistics(statisticsIds);
         Set<ProcessingUnitStatisticsId> erasedStatisticsIds = instancesStatisticsPerErasedStatisticsId.keySet();
         Map<ProcessingUnitStatisticsId, StatisticsObjectList> valuesPerErasedStatisticsId = getValues(processingUnitStatistics, erasedStatisticsIds);
         
@@ -93,10 +93,10 @@ public class InstancesStatisticsCalculator implements InternalProcessingUnitStat
     /**
      * Groups statisticsIds by replacing their InstancesStatistics with {@link ErasedInstancesStatisticsConfig}
      */
-    private Map<ProcessingUnitStatisticsId,Set<InternalInstancesStatisticsConfig>> eraseInstancesStatistics(ProcessingUnitStatisticsId[] newStatisticsIds) {
+    private Map<ProcessingUnitStatisticsId,Set<InternalInstancesStatisticsConfig>> eraseInstancesStatistics(Iterable<ProcessingUnitStatisticsId> statisticsIds) {
 
         Map<ProcessingUnitStatisticsId, Set<InternalInstancesStatisticsConfig>> groupBy = new HashMap<ProcessingUnitStatisticsId, Set<InternalInstancesStatisticsConfig>>();
-        for (ProcessingUnitStatisticsId statisticsId : newStatisticsIds) {
+        for (ProcessingUnitStatisticsId statisticsId : statisticsIds) {
 
             InternalInstancesStatisticsConfig instancesStatistics = (InternalInstancesStatisticsConfig)statisticsId.getInstancesStatistics();
             ProcessingUnitStatisticsId key = erase(statisticsId);

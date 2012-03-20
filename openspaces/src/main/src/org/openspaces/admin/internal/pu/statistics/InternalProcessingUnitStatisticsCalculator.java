@@ -36,8 +36,8 @@ public interface InternalProcessingUnitStatisticsCalculator {
      *            New statistics are added using
      *            {@link InternalProcessingUnitStatistics#addStatistics(ProcessingUnitStatisticsId, Object)}
      *            
-     * @param statisticsIds - statistics Ids that require calculation
+     * @param iterator - statistics Ids that require calculation
      */
-    void calculateNewStatistics(InternalProcessingUnitStatistics processingUnitStatistics, ProcessingUnitStatisticsId[] statisticsIds);
+    void calculateNewStatistics(InternalProcessingUnitStatistics processingUnitStatistics, Iterable<ProcessingUnitStatisticsId> statisitcsIds);
 
 }

@@ -16,15 +16,13 @@
 package org.openspaces.admin.pu.statistics;
 
 import org.openspaces.admin.internal.pu.statistics.AbstractInstancesStatisticsConfig;
-import org.openspaces.admin.internal.pu.statistics.StatisticsObjectListFunction;
-import org.openspaces.admin.internal.pu.statistics.StatisticsObjectList;
 
 /**
  * Denotes that a {@link ProcessingUnitStatisticsId} applies to all of the Processing Unit.
  * @author itaif
  * @since 9.0.0
  */
-public class EachSingleInstanceStatisticsConfig extends AbstractInstancesStatisticsConfig implements StatisticsObjectListFunction{
+public class EachSingleInstanceStatisticsConfig extends AbstractInstancesStatisticsConfig {
 
     @Override
     public String toString() {
@@ -34,10 +32,5 @@ public class EachSingleInstanceStatisticsConfig extends AbstractInstancesStatist
     @Override
     public void validate() throws IllegalStateException {
         // ok
-    }
-
-    @Override
-    public Object calc(StatisticsObjectList values) {
-        throw new IllegalStateException("Unreachable Code");
     }
 }

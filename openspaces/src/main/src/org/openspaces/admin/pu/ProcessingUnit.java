@@ -39,7 +39,6 @@ import org.openspaces.admin.AdminAware;
 import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.application.Application;
 import org.openspaces.admin.gsm.GridServiceManager;
-import org.openspaces.admin.internal.pu.ProcessingUnitStatistics;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependencies;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
@@ -55,7 +54,6 @@ import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceStatisticsChangedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitSpaceCorrelatedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEventManager;
-import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
 import org.openspaces.admin.space.Space;
 import org.openspaces.core.properties.BeanLevelProperties;
 
@@ -397,32 +395,4 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
      * @since 8.0.6
      */
     ProcessingUnitDependencies<ProcessingUnitDependency> getDependencies();
-    
-    
-    /**
-     * @return the processing unit (aggregated) statistics.
-     */
-    ProcessingUnitStatistics getStatistics();
-
-    /**
-     * Adds the specified statistics calculation
-     * @author itaif
-     * @since 9.0.0
-     */
-    void addStatisticsCalculation(ProcessingUnitStatisticsId statisticsId);
-    
-    /**
-     * Removes the specified statistics calculation
-     * @author itaif
-     * @since 9.0.0
-     */
-    void removeStatisticsCalculation(ProcessingUnitStatisticsId statisticsId);
-
-
-    /**
-     * @return the generated statistics identifiers. 
-     * @author itaif
-     * @since 9.0.0
-     */
-    ProcessingUnitStatisticsId[] getStatisticsCalculations();
 }

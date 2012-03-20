@@ -1073,52 +1073,19 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         InternalProcessingUnitStatistics statistics = 
                 new DefaultProcessingUnitStatistics(currentTime, lastStatistics, statisticsHistorySize);
         Map<String,ProcessingUnitInstance> instancesSnapshot = new HashMap<String, ProcessingUnitInstance>(processingUnitInstances);
-        for (ProcessingUnitStatisticsId statisticsId : statisticsIds) {
+        List<ProcessingUnitStatisticsId> statisticsIdsSnapshot = new ArrayList<ProcessingUnitStatisticsId>(statisticsIds);
+        for (ProcessingUnitStatisticsId statisticsId : statisticsIdsSnapshot) {
             injectInstanceStatisticsIfAvailable(instancesSnapshot, statistics, statisticsId);
         }
 
-        statistics.calculateStatistics(getSingleInstanceTimeWindowCalculatedStatistics(instancesSnapshot));
+        //TODO: No need to pass instancesSnapshot since it can be deduced from the injected samples above
+        statistics.calculateStatistics(statisticsIdsSnapshot,instancesSnapshot.keySet());
 
         lastStatistics = statistics;
         return lastStatistics;
     }
 
-    /**
-     * @return calculated statistics in which instances aggregation is replaced with specific
-     *         instance uids. time aggregations is left unmodified.
-     */
-    private ProcessingUnitStatisticsId[] getSingleInstanceTimeWindowCalculatedStatistics(
-            Map<String, ProcessingUnitInstance> instancesSnapshot) {
-        
-        List<ProcessingUnitStatisticsId> singleInstanceCalculatedStatistics = new ArrayList<ProcessingUnitStatisticsId>();
-        for (ProcessingUnitStatisticsId statisticsId : statisticsIds) {
-            if (statisticsId.getInstancesStatistics() instanceof SingleInstanceStatisticsConfig) {
-                // instance UID is already specified. Just check that it is still discovered
-                String instanceUid = ((SingleInstanceStatisticsConfig)(statisticsId.getInstancesStatistics())).getInstanceUid();
-                if (instancesSnapshot.containsKey(instanceUid)) {
-                    singleInstanceCalculatedStatistics.add(statisticsId);
-                }
-                else {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Failed to find processing unit " + this.getName() + " instance with UID " + instanceUid);
-                    }
-                }
-            }
-            else {
-                //expand to all instance UIDs
-                for (String instanceUid : instancesSnapshot.keySet()) {
-                    singleInstanceCalculatedStatistics.add(
-                            new ProcessingUnitStatisticsIdConfigurer()
-                            .monitor(statisticsId.getMonitor())
-                            .metric(statisticsId.getMetric())
-                            .timeWindowStatistics(statisticsId.getTimeWindowStatistics())
-                            .instancesStatistics(new SingleInstanceStatisticsConfig(instanceUid))
-                            .create());
-                }
-            }
-        }
-        return singleInstanceCalculatedStatistics.toArray(new ProcessingUnitStatisticsId[singleInstanceCalculatedStatistics.size()]);
-    }
+    
 
     /**
      * Extracts the last statistics specified in statisticsId from the specified instance (or if not specified all instances)

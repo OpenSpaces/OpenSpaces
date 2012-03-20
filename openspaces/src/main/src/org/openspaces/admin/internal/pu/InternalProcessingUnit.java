@@ -25,6 +25,7 @@ import org.openspaces.admin.internal.application.InternalApplicationAware;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
+import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
 import org.openspaces.admin.space.Space;
 
 /**
@@ -95,5 +96,34 @@ public interface InternalProcessingUnit extends ProcessingUnit, InternalProcessi
     /**
      * @since 8.0.6
      */
-    Map<String, InternalProvisionStatusHolder> getProvisionStatusPerInstance();   
+    Map<String, InternalProvisionStatusHolder> getProvisionStatusPerInstance();
+    
+    /**
+     * @return the processing unit (aggregated) statistics.
+     * @author itaif
+     * @since 9.0.0
+     */
+    ProcessingUnitStatistics getStatistics();
+
+    /**
+     * Adds the specified statistics calculation
+     * @author itaif
+     * @since 9.0.0
+     */
+    void addStatisticsCalculation(ProcessingUnitStatisticsId statisticsId);
+    
+    /**
+     * Removes the specified statistics calculation
+     * @author itaif
+     * @since 9.0.0
+     */
+    void removeStatisticsCalculation(ProcessingUnitStatisticsId statisticsId);
+
+
+    /**
+     * @return the generated statistics identifiers. 
+     * @author itaif
+     * @since 9.0.0
+     */
+    ProcessingUnitStatisticsId[] getStatisticsCalculations();
 }

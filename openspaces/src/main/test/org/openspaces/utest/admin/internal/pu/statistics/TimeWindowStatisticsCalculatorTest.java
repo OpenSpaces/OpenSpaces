@@ -15,9 +15,9 @@
  *******************************************************************************/
 package org.openspaces.utest.admin.internal.pu.statistics;
 
-import java.util.HashSet;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import junit.framework.Assert;
@@ -137,7 +137,7 @@ public class TimeWindowStatisticsCalculatorTest extends TestCase {
         .instancesStatistics(new SingleInstanceStatisticsConfig(INSTANCE_UID))
         .timeWindowStatistics(new AverageTimeWindowStatisticsConfigurer().timeWindow(SLEEP_MILLISECONDS, TimeUnit.MILLISECONDS).create())
         .create();
-        calculator.calculateNewStatistics(pStatistics, new ProcessingUnitStatisticsId[] {averageStatisticsId});            
+        calculator.calculateNewStatistics(pStatistics, toList(averageStatisticsId));            
         
         // the second sample has one value instance0 and one value for instance1
         InternalProcessingUnitStatistics statistics = 
@@ -145,9 +145,8 @@ public class TimeWindowStatisticsCalculatorTest extends TestCase {
         statistics.addStatistics(
                 lastSampleStatisticsId(), 
                 1);
-        calculator.calculateNewStatistics(statistics, new ProcessingUnitStatisticsId[] {
-            averageStatisticsId
-        });
+        calculator.calculateNewStatistics(statistics, 
+                toList(averageStatisticsId));
         
         // check the average value of instance0
         Assert.assertEquals((0+1)/2.0, 
@@ -188,14 +187,13 @@ public class TimeWindowStatisticsCalculatorTest extends TestCase {
                 .create();
         
         //calculate time average
-        ProcessingUnitStatisticsId[] calculatedStatistics = new ProcessingUnitStatisticsId[] {
+        Iterable<ProcessingUnitStatisticsId> calculatedStatistics = toList(
             new ProcessingUnitStatisticsIdConfigurer()
                 .metric(METRIC)
                 .monitor(MONITOR)
                 .instancesStatistics(new SingleInstanceStatisticsConfig(INSTANCE_UID))
                 .timeWindowStatistics(defaultAverageStatisticsId)
-                 .create()
-        };
+                 .create());
             
         calculator.calculateNewStatistics(processingUnitStatistics, calculatedStatistics);
         Map<ProcessingUnitStatisticsId, Object> statistics = processingUnitStatistics.getStatistics();
@@ -204,19 +202,22 @@ public class TimeWindowStatisticsCalculatorTest extends TestCase {
         Assert.assertNull(statistics.get(defaultAverageStatisticsId));
     }
 
-    private ProcessingUnitStatisticsId[] getTestStatisticsCalculations() {
-        Set<ProcessingUnitStatisticsId> newStatisticsIds = new HashSet<ProcessingUnitStatisticsId>();
-        newStatisticsIds.add(averageStatisticsId());
-        newStatisticsIds.add(minimumStatisticsId());
-        newStatisticsIds.add(maximumStatisticsId());
-        newStatisticsIds.add(precentileStatisticsId(0));
-        newStatisticsIds.add(precentileStatisticsId(1));
-        newStatisticsIds.add(precentileStatisticsId(49));
-        newStatisticsIds.add(precentileStatisticsId(50));
-        newStatisticsIds.add(precentileStatisticsId(51));
-        newStatisticsIds.add(precentileStatisticsId(99));
-        newStatisticsIds.add(precentileStatisticsId(100));
-        return newStatisticsIds.toArray(new ProcessingUnitStatisticsId[newStatisticsIds.size()]);
+    List<ProcessingUnitStatisticsId> toList(ProcessingUnitStatisticsId... statisticsIds) {
+        return Arrays.asList(statisticsIds);
+    }
+    
+    private Iterable<ProcessingUnitStatisticsId> getTestStatisticsCalculations() {
+        return toList(
+            averageStatisticsId(),
+            minimumStatisticsId(),
+            maximumStatisticsId(),
+            precentileStatisticsId(0),
+            precentileStatisticsId(1),
+            precentileStatisticsId(49),
+            precentileStatisticsId(50),
+            precentileStatisticsId(51),
+            precentileStatisticsId(99),
+            precentileStatisticsId(100));
     }
     
     private void assertThreeSamplesStartingWith(int firstValue, Map<ProcessingUnitStatisticsId, Object> pStatistics) {
