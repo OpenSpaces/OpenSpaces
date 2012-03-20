@@ -2,9 +2,10 @@ package org.openspaces.admin.pu.statistics;
 
 
 /**
- * 
+ * Identifies a processing unit statistics value, by specifying the monitoring source and the statistics functions applied to it.
  * @author itaif
  * @see ProcessingUnitStatisticsIdConfigurer
+ * @since 9.0.0
  */
 public class ProcessingUnitStatisticsId {
 
@@ -20,7 +21,7 @@ public class ProcessingUnitStatisticsId {
         return monitor;
     }
     /**
-     * @see ProcessingUnitStatisticsIdConfigurer#serviceMonitorsId(String) 
+     * @see ProcessingUnitStatisticsIdConfigurer#monitor(String) 
      */
     public void setMonitor(String monitor) {
         this.monitor = monitor;
@@ -31,7 +32,7 @@ public class ProcessingUnitStatisticsId {
     }
     
     /**
-     * @see ProcessingUnitStatisticsIdConfigurer#name(String)
+     * @see ProcessingUnitStatisticsIdConfigurer#metric(String)
      */
     public void setMetric(String metric) {
         this.metric = metric;
@@ -41,6 +42,9 @@ public class ProcessingUnitStatisticsId {
         return timeWindowStatistics;
     }
     
+    /**
+     * @see ProcessingUnitStatisticsIdConfigurer#timeWindowStatistics(TimeWindowStatisticsConfig)
+     */
     public void setTimeWindowStatistics(TimeWindowStatisticsConfig timeWindowStatistics) {
         this.timeWindowStatistics = timeWindowStatistics;
     }
