@@ -67,7 +67,6 @@ import org.openspaces.admin.internal.pu.events.InternalProcessingUnitInstanceRem
 import org.openspaces.admin.internal.pu.events.InternalProcessingUnitInstanceStatisticsChangedEventManager;
 import org.openspaces.admin.internal.pu.events.InternalProcessingUnitSpaceCorrelatedEventManager;
 import org.openspaces.admin.internal.pu.events.InternalProcessingUnitStatusChangedEventManager;
-import org.openspaces.admin.internal.pu.statistics.DefaultProcessingUnitStatisticsCalculatorFactory;
 import org.openspaces.admin.internal.pu.statistics.InternalProcessingUnitStatistics;
 import org.openspaces.admin.pu.DeploymentStatus;
 import org.openspaces.admin.pu.ProcessingUnit;
@@ -181,8 +180,6 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     private Future<?> scheduledStatisticsMonitor;
 
     private final ProcessingUnitType processingUnitType;
-
-    private final DefaultProcessingUnitStatisticsCalculatorFactory statisticsCalculatorFactory = new DefaultProcessingUnitStatisticsCalculatorFactory();
     
     /**
      * @Deprecated since 8.0.6 use app.deploy(puDeployment) or gsm.deploy(new ApplicationDeployment(appName,puDeployment) instead.
@@ -1074,7 +1071,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         lastStatisticsTimestamp = currentTime;
         
         InternalProcessingUnitStatistics statistics = 
-                new DefaultProcessingUnitStatistics(currentTime, lastStatistics, statisticsHistorySize, statisticsCalculatorFactory);
+                new DefaultProcessingUnitStatistics(currentTime, lastStatistics, statisticsHistorySize);
         Map<String,ProcessingUnitInstance> instancesSnapshot = new HashMap<String, ProcessingUnitInstance>(processingUnitInstances);
         for (ProcessingUnitStatisticsId statisticsId : statisticsIds) {
             injectInstanceStatisticsIfAvailable(instancesSnapshot, statistics, statisticsId);
