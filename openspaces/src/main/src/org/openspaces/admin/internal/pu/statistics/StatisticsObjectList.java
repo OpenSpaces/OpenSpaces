@@ -19,6 +19,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.openspaces.admin.internal.admin.DefaultAdmin;
+
 /**
  * A List of Objects that supports min,max,percentile operations if the Objects implement Comparable
  * and supports average operation if the Objects implement Number
@@ -27,6 +31,8 @@ import java.util.List;
  */
 public class StatisticsObjectList {
 
+    private static final Log logger = LogFactory.getLog(StatisticsObjectList.class);
+    
     @SuppressWarnings("rawtypes")
     private final List values = new ArrayList<Object>();
     private Double sum = 0.0;
@@ -83,7 +89,13 @@ public class StatisticsObjectList {
         if (values.isEmpty()) {
             return null;
         }
-        return sum / values.size();
+        
+        double average = sum / values.size();
+        
+        if (logger.isDebugEnabled()) {
+            logger.debug("average("+toString()+")="+average);
+        }
+        return average;
     }
     
     /**
@@ -93,6 +105,9 @@ public class StatisticsObjectList {
     public Object getMinimum() {
         if (notComparableClass != null) {
             throw new ClassCastException(notComparableClass + " cannot be cast to a Comparable");
+        }
+        if (logger.isDebugEnabled()) {
+            logger.debug("minimum("+toString()+")="+min);
         }
         return min;
     }
@@ -105,6 +120,9 @@ public class StatisticsObjectList {
         if (notComparableClass != null) {
             throw new ClassCastException(notComparableClass + " cannot be cast to a Comparable");
         }
+        if (logger.isDebugEnabled()) {
+            logger.debug("maximum("+toString()+")="+max);
+        }
         return max;
     }
     
@@ -112,6 +130,9 @@ public class StatisticsObjectList {
      * @return the last added sample or null if the list is empty.
      */
     public Object getLast() {
+        if (logger.isDebugEnabled()) {
+            logger.debug("last("+toString()+")="+last);
+        }
         return last;
     }
     
@@ -139,7 +160,11 @@ public class StatisticsObjectList {
             sorted = true;
         }
         int index = (int) (Math.round((values.size()-1)*percentile/100));
-        return values.get(index);
+        Object percentileValue = values.get(index);
+        if (logger.isDebugEnabled()) {
+            logger.debug("percentile("+percentile+","+toString()+")="+percentileValue);
+        }
+        return percentileValue;
     }
     
     @Override
