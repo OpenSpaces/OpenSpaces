@@ -28,9 +28,5 @@ public interface InternalInstancesStatisticsConfig extends InstancesStatisticsCo
      * @throws IllegalStateException - if state is found to be illegal
      */
     void validate() throws IllegalStateException;
-    
-    /**
-     * Applies this statistics function on the specified values 
-     */
-    Object getValue(StatisticsObjectList values);
+
 }

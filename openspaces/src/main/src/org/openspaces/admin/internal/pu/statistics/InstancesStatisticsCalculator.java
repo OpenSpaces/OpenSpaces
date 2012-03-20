@@ -51,10 +51,12 @@ public class InstancesStatisticsCalculator implements InternalProcessingUnitStat
             StatisticsObjectList values = pair.getValue();
             
             for (InternalInstancesStatisticsConfig instancesStatistics : instancesStatisticsPerErasedStatisticsId.get(erasedStatisticsId)) {
-                
-                Object value = instancesStatistics.getValue(values);
-                ProcessingUnitStatisticsId statisticsId = unerase(erasedStatisticsId,instancesStatistics);
-                processingUnitStatistics.addStatistics(statisticsId, value);    
+                if (instancesStatistics instanceof StatisticsObjectListFunction) {
+                    StatisticsObjectListFunction statisticsFunc = (StatisticsObjectListFunction) instancesStatistics;
+                    Object value = statisticsFunc.calc(values);
+                    ProcessingUnitStatisticsId statisticsId = unerase(erasedStatisticsId,instancesStatistics);
+                    processingUnitStatistics.addStatistics(statisticsId, value);    
+                }
             }
         }
     }
@@ -96,14 +98,15 @@ public class InstancesStatisticsCalculator implements InternalProcessingUnitStat
         Map<ProcessingUnitStatisticsId, Set<InternalInstancesStatisticsConfig>> groupBy = new HashMap<ProcessingUnitStatisticsId, Set<InternalInstancesStatisticsConfig>>();
         for (ProcessingUnitStatisticsId statisticsId : newStatisticsIds) {
 
+            InternalInstancesStatisticsConfig instancesStatistics = (InternalInstancesStatisticsConfig)statisticsId.getInstancesStatistics();
             ProcessingUnitStatisticsId key = erase(statisticsId);
 
             if (!groupBy.containsKey(key)) {
                 groupBy.put(key, new HashSet<InternalInstancesStatisticsConfig>());
             }
 
-            groupBy.get(key).add((InternalInstancesStatisticsConfig)statisticsId.getInstancesStatistics());
-
+            
+            groupBy.get(key).add(instancesStatistics);
         }
         return groupBy;
     }

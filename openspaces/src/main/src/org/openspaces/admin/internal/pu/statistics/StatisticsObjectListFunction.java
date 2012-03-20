@@ -13,31 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.openspaces.admin.pu.statistics;
-
-import org.openspaces.admin.internal.pu.statistics.AbstractInstancesStatisticsConfig;
-import org.openspaces.admin.internal.pu.statistics.StatisticsObjectListFunction;
-import org.openspaces.admin.internal.pu.statistics.StatisticsObjectList;
+package org.openspaces.admin.internal.pu.statistics;
 
 /**
- * Denotes that a {@link ProcessingUnitStatisticsId} applies to all of the Processing Unit.
+ * A helper interface for extracting values from {@link StatisticsObjectList} in a polymorphic way
  * @author itaif
  * @since 9.0.0
  */
-public class EachSingleInstanceStatisticsConfig extends AbstractInstancesStatisticsConfig implements StatisticsObjectListFunction{
+public interface StatisticsObjectListFunction {
 
-    @Override
-    public String toString() {
-        return "eachSingleInstanceStatistics";
-    }
-
-    @Override
-    public void validate() throws IllegalStateException {
-        // ok
-    }
-
-    @Override
-    public Object calc(StatisticsObjectList values) {
-        throw new IllegalStateException("Unreachable Code");
-    }
+    /**
+     * Applies this statistics function on the specified values 
+     */
+    Object calc(StatisticsObjectList values);
 }

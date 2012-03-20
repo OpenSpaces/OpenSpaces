@@ -56,9 +56,12 @@ public class TimeWindowStatisticsCalculator implements InternalProcessingUnitSta
             
             for (InternalTimeWindowStatisticsConfig timeWindowStatistics : timeWindowStatisticsPerErasedStatisticsId.get(erasedStatisticsId)) {
                 
-                Object value = timeWindowStatistics.getValue(values);
-                ProcessingUnitStatisticsId statisticsId = unerase(erasedStatisticsId,timeWindowStatistics);
-                processingUnitStatistics.addStatistics(statisticsId, value);    
+                if (timeWindowStatistics instanceof StatisticsObjectListFunction) {
+                    StatisticsObjectListFunction statisticsFunc = (StatisticsObjectListFunction) timeWindowStatistics;
+                    Object value = statisticsFunc.calc(values);
+                    ProcessingUnitStatisticsId statisticsId = unerase(erasedStatisticsId,timeWindowStatistics);
+                    processingUnitStatistics.addStatistics(statisticsId, value);    
+                }
             }
         }
         

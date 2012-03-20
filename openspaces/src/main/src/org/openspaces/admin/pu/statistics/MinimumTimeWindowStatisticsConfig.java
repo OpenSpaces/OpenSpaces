@@ -15,6 +15,7 @@
  *******************************************************************************/
 package org.openspaces.admin.pu.statistics;
 
+import org.openspaces.admin.internal.pu.statistics.StatisticsObjectListFunction;
 import org.openspaces.admin.internal.pu.statistics.StatisticsObjectList;
 
 
@@ -25,7 +26,9 @@ import org.openspaces.admin.internal.pu.statistics.StatisticsObjectList;
  * @see MaximumTimeWindowStatisticsConfig
  * @see PercentileTimeWindowStatisticsConfig
  */
-public class MinimumTimeWindowStatisticsConfig  extends AbstractTimeWindowStatisticsConfig {
+public class MinimumTimeWindowStatisticsConfig  
+            extends AbstractTimeWindowStatisticsConfig
+            implements StatisticsObjectListFunction {
 
     @Override
     public String toString() {
@@ -33,7 +36,7 @@ public class MinimumTimeWindowStatisticsConfig  extends AbstractTimeWindowStatis
     }
 
     @Override
-    public Object getValue(StatisticsObjectList values) {
+    public Object calc(StatisticsObjectList values) {
         return values.getMinimum();
     }
 }

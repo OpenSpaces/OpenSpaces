@@ -1,6 +1,7 @@
 package org.openspaces.admin.pu.statistics;
 
 import org.openspaces.admin.internal.pu.statistics.AbstractInstancesStatisticsConfig;
+import org.openspaces.admin.internal.pu.statistics.StatisticsObjectListFunction;
 import org.openspaces.admin.internal.pu.statistics.StatisticsObjectList;
 
 /**
@@ -10,7 +11,7 @@ import org.openspaces.admin.internal.pu.statistics.StatisticsObjectList;
  * @author itaif
  *
  */
-public class PercentileInstancesStatisticsConfig extends AbstractInstancesStatisticsConfig {
+public class PercentileInstancesStatisticsConfig extends AbstractInstancesStatisticsConfig implements StatisticsObjectListFunction{
 
     private Double percentile;
     
@@ -64,7 +65,7 @@ public class PercentileInstancesStatisticsConfig extends AbstractInstancesStatis
     }
 
     @Override
-    public Object getValue(StatisticsObjectList values) {
+    public Object calc(StatisticsObjectList values) {
         return values.getPercentile(percentile);
     }
 

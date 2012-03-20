@@ -1,9 +1,12 @@
 package org.openspaces.admin.pu.statistics;
 
+import org.openspaces.admin.internal.pu.statistics.StatisticsObjectListFunction;
 import org.openspaces.admin.internal.pu.statistics.StatisticsObjectList;
 
 
-public class PercentileTimeWindowStatisticsConfig extends AbstractTimeWindowStatisticsConfig {
+public class PercentileTimeWindowStatisticsConfig  
+        extends AbstractTimeWindowStatisticsConfig
+        implements StatisticsObjectListFunction {
 
     private Double percentile;
         
@@ -28,7 +31,7 @@ public class PercentileTimeWindowStatisticsConfig extends AbstractTimeWindowStat
     }
 
     @Override
-    public Object getValue(StatisticsObjectList values) {
+    public Object calc(StatisticsObjectList values) {
         return values.getPercentile(percentile);
     }
 

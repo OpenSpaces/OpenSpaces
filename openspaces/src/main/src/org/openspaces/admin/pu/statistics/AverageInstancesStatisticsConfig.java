@@ -1,6 +1,7 @@
 package org.openspaces.admin.pu.statistics;
 
 import org.openspaces.admin.internal.pu.statistics.AbstractInstancesStatisticsConfig;
+import org.openspaces.admin.internal.pu.statistics.StatisticsObjectListFunction;
 import org.openspaces.admin.internal.pu.statistics.StatisticsObjectList;
 
 /**
@@ -9,7 +10,7 @@ import org.openspaces.admin.internal.pu.statistics.StatisticsObjectList;
  * @author itaif
  *
  */
-public class AverageInstancesStatisticsConfig extends AbstractInstancesStatisticsConfig {
+public class AverageInstancesStatisticsConfig extends AbstractInstancesStatisticsConfig implements StatisticsObjectListFunction {
 
     @Override
     public String toString() {
@@ -22,7 +23,7 @@ public class AverageInstancesStatisticsConfig extends AbstractInstancesStatistic
     }
 
     @Override
-    public Object getValue(StatisticsObjectList values) {
+    public Object calc(StatisticsObjectList values) {
         return values.getAverage();
     }
     

@@ -37,13 +37,4 @@ public class ErasedTimeWindowStatisticsConfig extends AbstractTimeWindowStatisti
     public String toString() {
         return "erasedTimeWindowStatistics {timeWindowSeconds="+getTimeWindowSeconds() + ", minimumTimeWindowSeconds="+getMinimumTimeWindowSeconds() + ", maximumTimeWindowSeconds="+ getMaximumTimeWindowSeconds()+"}";
     }
-
-    /* (non-Javadoc)
-     * @see org.openspaces.admin.internal.pu.statistics.InternalTimeWindowStatisticsConfig#getValue(org.openspaces.admin.internal.pu.statistics.StatisticsObjectList)
-     */
-    @Override
-    public Object getValue(StatisticsObjectList values) {
-        throw new IllegalStateException("Unreachable code");
-    }
-
 }

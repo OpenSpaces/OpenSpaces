@@ -33,10 +33,4 @@ public class ErasedInstancesStatisticsConfig extends AbstractInstancesStatistics
     public String toString() {
         return "erasedInstancesStatistics";
     }
-
-    @Override
-    public Object getValue(StatisticsObjectList values) {
-        throw new IllegalStateException("Unreachable Code");
-    }
-
 }

@@ -1,7 +1,6 @@
 package org.openspaces.admin.pu.statistics;
 
 import org.openspaces.admin.internal.pu.statistics.AbstractInstancesStatisticsConfig;
-import org.openspaces.admin.internal.pu.statistics.StatisticsObjectList;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 
 /**
@@ -68,10 +67,5 @@ public class SingleInstanceStatisticsConfig extends AbstractInstancesStatisticsC
         if (instanceUid == null) {
             throw new IllegalStateException("instance UID was not specified. Consider using " + EachSingleInstanceStatisticsConfig.class.getName() + " instead");
         }
-    }
-
-    @Override
-    public Object getValue(StatisticsObjectList values) {
-        throw new IllegalStateException("Unreachable Code");
     }
 }
