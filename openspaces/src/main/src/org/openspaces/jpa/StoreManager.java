@@ -895,13 +895,15 @@ public class StoreManager extends AbstractStoreManager {
                     Collection<?> collection = (Collection<?>) sm.fetch(fmd.getIndex());
                     if (collection != null) {
                         for (Object item : collection) {
-                            // Set relationship owner
-                            setOwnerStateManagerForPersistentInstance(item, sm, fmd);
                             PersistenceCapable pc = (PersistenceCapable) item;
                             OpenJPAStateManager stateManager = (OpenJPAStateManager) pc.pcGetStateManager();
-                            removeOwnedEntitiesStateManagers(stateManagersToRestore, stateManager);
-                            stateManagersToRestore.add(stateManager);
-                            pc.pcReplaceStateManager(null);
+                            if (stateManager != null) {
+                                // Set relationship owner
+                                setOwnerStateManagerForPersistentInstance(item, sm, fmd);
+                                removeOwnedEntitiesStateManagers(stateManagersToRestore, stateManager);
+                                stateManagersToRestore.add(stateManager);
+                                pc.pcReplaceStateManager(null);
+                            }
                         }
                     }
                 } else if (fmd.getAssociationType() == FieldMetaData.ONE_TO_ONE) {
