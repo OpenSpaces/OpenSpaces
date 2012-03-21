@@ -16,8 +16,19 @@
 
 package org.openspaces.pu.container.servicegrid;
 
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+import java.util.Map;
+
+import net.jini.core.lookup.ServiceID;
+
+import org.jini.rio.core.jsb.ServiceState;
+import org.jini.rio.resources.servicecore.Service;
+import org.openspaces.core.cluster.ClusterInfo;
+
 import com.gigaspaces.annotation.lrmi.AsyncRemoteCall;
 import com.gigaspaces.annotation.lrmi.LivenessPriority;
+import com.gigaspaces.annotation.lrmi.MonitoringPriority;
 import com.gigaspaces.cluster.activeelection.SpaceMode;
 import com.gigaspaces.grid.zone.GridZoneProvider;
 import com.gigaspaces.internal.jvm.JVMInfoProvider;
@@ -28,14 +39,6 @@ import com.j_spaces.core.admin.RuntimeHolder;
 import com.j_spaces.core.client.SpaceURL;
 import com.j_spaces.core.filters.StatisticsHolder;
 import com.sun.jini.start.ServiceProxyAccessor;
-import net.jini.core.lookup.ServiceID;
-import org.jini.rio.core.jsb.ServiceState;
-import org.jini.rio.resources.servicecore.Service;
-import org.openspaces.core.cluster.ClusterInfo;
-
-import java.rmi.Remote;
-import java.rmi.RemoteException;
-import java.util.Map;
 
 /**
  * @author kimchy
@@ -45,6 +48,7 @@ public interface PUServiceBean extends NIOInfoProvider, OSInfoProvider, JVMInfoP
     /**
      * Should this member be checked to see if it is alive or not.
      */
+    @MonitoringPriority
     boolean isMemberAliveEnabled() throws RemoteException;
 
     /**
@@ -54,20 +58,26 @@ public interface PUServiceBean extends NIOInfoProvider, OSInfoProvider, JVMInfoP
     @LivenessPriority
     boolean isAlive() throws RemoteException, Exception;
 
+    @MonitoringPriority
     Object[] listServiceDetails() throws RemoteException;
 
     ClusterInfo getClusterInfo() throws RemoteException;
 
+    @MonitoringPriority
     String getPresentationName() throws RemoteException;
 
+    @MonitoringPriority
     PUDetails getPUDetails() throws RemoteException;
 
+    @MonitoringPriority
     PUMonitors getPUMonitors() throws RemoteException;
 
     IJSpace getSpaceDirect(ServiceID serviceID) throws RemoteException;
 
+    @MonitoringPriority
     RuntimeHolder getSpaceRuntimeHolder(ServiceID serviceID) throws RemoteException;
 
+    @MonitoringPriority
     StatisticsHolder getSpaceStatisticsHolder(ServiceID serviceID) throws RemoteException;
 
     SpaceURL[] listSpacesURLs() throws RemoteException;
@@ -77,5 +87,6 @@ public interface PUServiceBean extends NIOInfoProvider, OSInfoProvider, JVMInfoP
     @AsyncRemoteCall
     Object invoke(String serviceBeanName, Map<String, Object> namedArgs) throws RemoteException;
     
+    @MonitoringPriority
     boolean isStopping() throws RemoteException;
 }
