@@ -16,14 +16,13 @@
 
 package org.openspaces.hibernate.cache;
 
-import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
-import com.j_spaces.core.client.LocalTransactionManager;
-import com.j_spaces.core.client.XAResourceImpl;
-import com.j_spaces.core.client.cache.map.MapCache;
-import com.j_spaces.map.IMap;
-import com.j_spaces.map.MapEntryFactory;
+import java.util.Map;
+
+import javax.transaction.TransactionManager;
+import javax.transaction.xa.XAResource;
 
 import net.jini.core.transaction.Transaction;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.TransactionException;
@@ -31,9 +30,11 @@ import org.hibernate.cache.Cache;
 import org.hibernate.cache.CacheException;
 import org.hibernate.cache.Timestamper;
 
-import javax.transaction.TransactionManager;
-import javax.transaction.xa.XAResource;
-import java.util.Map;
+import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
+import com.j_spaces.core.client.XAResourceImpl;
+import com.j_spaces.core.client.cache.map.MapCache;
+import com.j_spaces.map.IMap;
+import com.j_spaces.map.MapEntryFactory;
 
 /**
  * Transaction map cache implements Hibenrate second level cache transactionally by
@@ -55,18 +56,18 @@ public class TransactionalMapCache implements Cache {
 
     private TransactionManager transactionManager;
 
-    private LocalTransactionManager localTransactionManager;
+    private net.jini.core.transaction.server.TransactionManager distributedTransactionManager;
 
     private ISpaceProxy masterSpace;
 
     public TransactionalMapCache(String regionName, IMap map, long timeToLive, long waitForResponse,
-                                 TransactionManager transactionManager, LocalTransactionManager localTransactionManager) {
+                                 TransactionManager transactionManager, net.jini.core.transaction.server.TransactionManager distributedTransactionManager) {
         this.regionName = regionName;
         this.map = map;
         this.timeToLive = timeToLive;
         this.waitForResponse = waitForResponse;
         this.transactionManager = transactionManager;
-        this.localTransactionManager = localTransactionManager;
+        this.distributedTransactionManager = distributedTransactionManager;
         this.masterSpace = (ISpaceProxy) map.getMasterSpace();
     }
 
@@ -239,7 +240,7 @@ public class TransactionalMapCache implements Cache {
 
     private void verifyTransaction() {
         if (masterSpace.getContextTransaction() == null) {
-            XAResource xaResourceSpace = new XAResourceImpl(localTransactionManager, masterSpace);
+            XAResource xaResourceSpace = new XAResourceImpl(distributedTransactionManager, masterSpace);
             try {
                 transactionManager.getTransaction().enlistResource(xaResourceSpace);
             } catch (Exception e) {

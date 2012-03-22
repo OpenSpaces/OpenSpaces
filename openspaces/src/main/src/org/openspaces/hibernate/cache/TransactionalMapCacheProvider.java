@@ -38,7 +38,7 @@ public class TransactionalMapCacheProvider extends AbstractMapCacheProvider {
 
     private TransactionManager transactionManager;
 
-    private LocalTransactionManager localTransactionManager;
+    private net.jini.core.transaction.server.TransactionManager distributedTransactionManager;
 
     /**
      * Finds JTA transaction manager.
@@ -51,7 +51,8 @@ public class TransactionalMapCacheProvider extends AbstractMapCacheProvider {
         transactionManager = transactionManagerLookup.getTransactionManager(properties);
 
         try {
-            localTransactionManager = (LocalTransactionManager) LocalTransactionManager.getInstance(getMap().getMasterSpace());
+            // TODO LTM: change to distributed transaction manager
+            distributedTransactionManager = LocalTransactionManager.getInstance(getMap().getMasterSpace());
         } catch (RemoteException e) {
             throw new CacheException("Failed to create local transaction manager", e);
         }
@@ -62,6 +63,6 @@ public class TransactionalMapCacheProvider extends AbstractMapCacheProvider {
      */
     public Cache buildCache(String regionName, Properties properties) throws CacheException {
         return new TransactionalMapCache(regionName, getMap(), getTimeToLive(), getWaitForResponse(),
-                transactionManager, localTransactionManager);
+                transactionManager, distributedTransactionManager);
     }
 }
