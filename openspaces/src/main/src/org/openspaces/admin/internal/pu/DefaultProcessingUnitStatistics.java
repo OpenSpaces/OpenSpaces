@@ -143,4 +143,12 @@ public class DefaultProcessingUnitStatistics implements InternalProcessingUnitSt
         timeWindowStatisticsCalculator.calculateNewStatistics(this, singleInstanceCalculatedStatistics);
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return "ProcessingUnitStatistics {adminTimestamp=" + adminTimestamp + ", statistics=" + statistics + "}";
+    }
+
 }
