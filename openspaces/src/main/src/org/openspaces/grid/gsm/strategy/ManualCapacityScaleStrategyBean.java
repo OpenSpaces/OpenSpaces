@@ -343,7 +343,7 @@ public class ManualCapacityScaleStrategyBean extends AbstractScaleStrategyBean
     }
     
     private int getMaximumNumberOfContainersPerMachine() {
-        return slaConfig.isAtMostOneContainersPerMachine()?1:getMaximumNumberOfInstances();
+        return slaConfig.isAtMostOneContainerPerMachine()?1:getMaximumNumberOfInstances();
     }
 
     @Override
