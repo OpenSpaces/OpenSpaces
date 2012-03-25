@@ -15,10 +15,15 @@
  *******************************************************************************/
 package org.openspaces.grid.gsm.strategy;
 
+import org.openspaces.admin.pu.elastic.config.AutomaticCapacityScaleConfig;
+
 /**
- * @author itaif
- *
- */
++ * The business logic that scales an elastic processing unit based on the specified
++ * {@link AutomaticCapacityScaleConfig}
++ * 
++ * @author itaif
++ * @since 9.0.0
++ */
 public class AutomaticCapacityScaleStrategyBean {
 
 }

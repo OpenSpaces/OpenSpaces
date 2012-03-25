@@ -46,6 +46,13 @@ import org.openspaces.grid.gsm.rebalancing.RebalancingSlaPolicy;
 import org.openspaces.grid.gsm.rebalancing.exceptions.RebalancingSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementInProgressException;
 
+/**
++ * The business logic that scales an elastic processing unit based on the specified
++ * {@link ManualCapacityScaleConfig}
++ * 
++ * @author itaif
++ * @since 8.0
++ */
 public class ManualCapacityScaleStrategyBean extends AbstractScaleStrategyBean 
     implements RebalancingSlaEnforcementEndpointAware , 
                ContainersSlaEnforcementEndpointAware, 
