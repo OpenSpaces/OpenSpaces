@@ -78,7 +78,6 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
         this.rebalancingEndpoint = relocationService;
     }
 
-
     // created by afterPropertiesSet()
     private ScaleStrategyCapacityRequirementConfig capacityRequirement;
     private ScaleStrategyConfig scaleStrategy;
@@ -104,6 +103,15 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
     private int getMaximumNumberOfContainersPerMachine() {
         return scaleStrategy.isAtMostOneContainerPerMachine()?1:getMaximumNumberOfInstances();
     }
+    
+    @Override
+    public void setGridServiceContainerConfig(GridServiceContainerConfig containersConfig) {
+        this.containersConfig = containersConfig;
+    }
+    
+    public GridServiceContainerConfig getGridServiceContainerConfig() {
+        return this.containersConfig;
+    }
 
     @Override
     public void afterPropertiesSet() {
@@ -123,11 +131,6 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
         super.afterPropertiesSet();
         
         
-    }
-    
-    @Override
-    public void setGridServiceContainerConfig(GridServiceContainerConfig containersConfig) {
-         this.containersConfig = containersConfig;
     }
 
     protected void enforceCapacityRequirement() throws SlaEnforcementInProgressException {
