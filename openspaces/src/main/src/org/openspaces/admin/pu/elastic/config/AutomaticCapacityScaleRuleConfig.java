@@ -21,10 +21,8 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.Map;
 
-import org.openspaces.admin.internal.pu.elastic.ScaleStrategyConfigUtils;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
 import org.openspaces.core.util.StringProperties;
-import org.openspaces.grid.gsm.strategy.AutomaticCapacityScaleStrategyBean;
 
 /**
  * Configures an automatic scaling rule based on a monitred statistics and thresholds.
@@ -34,7 +32,7 @@ import org.openspaces.grid.gsm.strategy.AutomaticCapacityScaleStrategyBean;
  * @see AutomaticCapacityScaleRuleConfigurer
  */
 public class AutomaticCapacityScaleRuleConfig 
-    implements ScaleStrategyConfig , Externalizable {
+    implements Externalizable {
 
     private static final long serialVersionUID = 1L;
 
@@ -92,46 +90,6 @@ public class AutomaticCapacityScaleRuleConfig
     
     public double getHighThreshold() {
         return properties.getDouble(HIGH_THRESHOLD_KEY, HIGH_THRESHOLD_DEFAULT);
-    }
-
-    @Override
-    public void setPollingIntervalSeconds(int seconds) {
-        ScaleStrategyConfigUtils.setPollingIntervalSeconds(properties,seconds);
-    }
-    
-    @Override
-    public int getPollingIntervalSeconds() {
-        return ScaleStrategyConfigUtils.getPollingIntervalSeconds(properties);
-    }
-
-    @Override
-    public int getMaxConcurrentRelocationsPerMachine() {
-        return ScaleStrategyConfigUtils.getMaxConcurrentRelocationsPerMachine(properties);
-    }
-    
-    @Override
-    public void setMaxConcurrentRelocationsPerMachine(int maxNumberOfConcurrentRelocationsPerMachine) {
-        ScaleStrategyConfigUtils.setMaxConcurrentRelocationsPerMachine(properties, maxNumberOfConcurrentRelocationsPerMachine);
-    }
-
-    @Override
-    public boolean isAtMostOneContainerPerMachine() {
-        return ScaleStrategyConfigUtils.isSingleContainerPerMachine(properties);
-    }
-
-    @Override
-    public void setAtMostOneContainerPerMachine(boolean atMostOneContainerPerMachine) {
-        ScaleStrategyConfigUtils.setAtMostOneContainerPerMachine(properties, atMostOneContainerPerMachine);
-    }
-
-    @Override
-    public String getBeanClassName() {
-        return AutomaticCapacityScaleStrategyBean.class.getName();
-    }
-    
-    @Override
-    public void setProperties(Map<String, String> properties) {
-        this.properties = new StringProperties(properties);
     }
     
     public Map<String, String> getProperties() {
