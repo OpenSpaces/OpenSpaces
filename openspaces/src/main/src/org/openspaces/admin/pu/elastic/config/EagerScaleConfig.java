@@ -70,7 +70,7 @@ public class EagerScaleConfig
     }
 
     /*
-     * @see ManualCapacityScaleConfig#isAtMostOneContainerPerMachine()
+     * @see EagerScaleConfig#isAtMostOneContainerPerMachine()
      */
     @Deprecated
     public boolean isAtMostOneContainersPerMachine() {
