@@ -45,7 +45,6 @@ public class AutomaticCapacityScaleRuleConfig
     private static final Double LOW_THRESHOLD_DEFAULT = Double.MIN_VALUE;
     private static final String HIGH_THRESHOLD_KEY = "high-threshold";
     private static final Double HIGH_THRESHOLD_DEFAULT = Double.MAX_VALUE;
-
     
     private StringProperties properties;
 
@@ -174,5 +173,9 @@ public class AutomaticCapacityScaleRuleConfig
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         this.properties = new StringProperties((Map<String,String>)in.readObject());
     }
-    
+
+    @Override
+    public String toString() {
+        return "scaleRule " + properties;
+    }
 }
