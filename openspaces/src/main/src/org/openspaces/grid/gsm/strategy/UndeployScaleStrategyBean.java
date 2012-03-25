@@ -36,6 +36,12 @@ import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisi
 import org.openspaces.grid.gsm.rebalancing.exceptions.ElasticProcessingUnitInstanceUndeployInProgress;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementInProgressException;
 
+/**
+ * The business logic that undeploys an elastic processing unit
+ * 
+ * @author itaif
+ * @since 8.0
+ */
 public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
 
     implements ContainersSlaEnforcementEndpointAware, 
