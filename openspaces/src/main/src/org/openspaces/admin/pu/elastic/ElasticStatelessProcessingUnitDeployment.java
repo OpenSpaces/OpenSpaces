@@ -25,6 +25,7 @@ import org.openspaces.admin.internal.pu.elastic.AbstractElasticProcessingUnitDep
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDeploymentDependenciesConfigurer;
+import org.openspaces.admin.pu.elastic.config.AutomaticCapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.topology.ElasticStatelessDeploymentTopology;
@@ -64,6 +65,11 @@ public class ElasticStatelessProcessingUnitDeployment
 
     @Override
     public ElasticStatelessProcessingUnitDeployment scale(EagerScaleConfig strategy) {
+        return (ElasticStatelessProcessingUnitDeployment) super.scale(strategy);
+    }
+    
+    @Override
+    public ElasticStatelessProcessingUnitDeployment scale(AutomaticCapacityScaleConfig strategy) {
         return (ElasticStatelessProcessingUnitDeployment) super.scale(strategy);
     }
     
