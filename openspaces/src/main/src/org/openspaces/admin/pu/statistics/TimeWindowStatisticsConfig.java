@@ -15,6 +15,8 @@
  *******************************************************************************/
 package org.openspaces.admin.pu.statistics;
 
+import java.util.Map;
+
 /**
  * Marks configurations that aggregate statistics from time samples.
  * @author itaif
@@ -22,5 +24,6 @@ package org.openspaces.admin.pu.statistics;
  * @see ProcessingUnitStatisticsId
  */
 public interface TimeWindowStatisticsConfig {
-
+    
+    Map<String,String> getProperties();
 }

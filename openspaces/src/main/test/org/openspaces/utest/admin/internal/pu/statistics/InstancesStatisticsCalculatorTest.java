@@ -32,7 +32,7 @@ import org.openspaces.admin.pu.statistics.MinimumInstancesStatisticsConfig;
 import org.openspaces.admin.pu.statistics.PercentileInstancesStatisticsConfigurer;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsIdConfigurer;
-import org.openspaces.admin.pu.statistics.SingleInstanceStatisticsConfig;
+import org.openspaces.admin.pu.statistics.SingleInstanceStatisticsConfigurer;
 
 /**
  * Unit Tests for {@link InstancesStatisticsCalculator}
@@ -79,7 +79,7 @@ public class InstancesStatisticsCalculatorTest extends TestCase {
         return new ProcessingUnitStatisticsIdConfigurer()
                 .metric(METRIC)
                 .monitor(MONITOR)
-                .instancesStatistics(new SingleInstanceStatisticsConfig(instanceUid))
+                .instancesStatistics(new SingleInstanceStatisticsConfigurer().instanceUid(instanceUid).create())
                 .timeWindowStatistics(new LastSampleTimeWindowStatisticsConfig())
                 .create();
     }

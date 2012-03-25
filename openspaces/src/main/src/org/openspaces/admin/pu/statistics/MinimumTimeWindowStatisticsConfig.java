@@ -15,8 +15,11 @@
  *******************************************************************************/
 package org.openspaces.admin.pu.statistics;
 
-import org.openspaces.admin.internal.pu.statistics.StatisticsObjectListFunction;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.openspaces.admin.internal.pu.statistics.StatisticsObjectList;
+import org.openspaces.admin.internal.pu.statistics.StatisticsObjectListFunction;
 
 
 /**
@@ -30,10 +33,14 @@ public class MinimumTimeWindowStatisticsConfig
             extends AbstractTimeWindowStatisticsConfig
             implements StatisticsObjectListFunction {
 
-    @Override
-    public String toString() {
-        return "minimumTimeWindowStatistics {timeWindowSeconds="+getTimeWindowSeconds() + ", minimumTimeWindowSeconds="+getMinimumTimeWindowSeconds() + ", maximumTimeWindowSeconds="+ getMaximumTimeWindowSeconds()+"}";
+    public MinimumTimeWindowStatisticsConfig() {
+        this(new HashMap<String, String>());
     }
+    
+    public MinimumTimeWindowStatisticsConfig(Map<String, String> properties) {
+        super(properties);
+    }
+
 
     @Override
     public Object calc(StatisticsObjectList values) {

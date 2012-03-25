@@ -1,6 +1,8 @@
 package org.openspaces.admin.pu.statistics;
 
-import org.openspaces.admin.internal.pu.statistics.AbstractInstancesStatisticsConfig;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 
 /**
@@ -9,62 +11,34 @@ import org.openspaces.admin.pu.ProcessingUnitInstance;
  * @author itaif
  * @since 9.0.0
  */
-public class SingleInstanceStatisticsConfig extends AbstractInstancesStatisticsConfig {
+public class SingleInstanceStatisticsConfig 
+    extends AbstractInstancesStatisticsConfig 
+    implements InstancesStatisticsConfig {
 
-    private String instanceUid;
+    private static final String INSTANCE_UID_KEY = "instance-uid";
 
     public SingleInstanceStatisticsConfig() {
-        
+        this(new HashMap<String,String>());
     }
     
-    public SingleInstanceStatisticsConfig(String instanceUid) {
-        this.instanceUid = instanceUid;
+    public SingleInstanceStatisticsConfig(Map<String,String> properties) {
+        super(properties);
     }
-
+    
     /**
      * @see ProcessingUnitInstance#getUid()
      */
     public String getInstanceUid() {
-        return instanceUid;
+        return super.getStringProperties().get(INSTANCE_UID_KEY, null);
     }
 
     public void setInstanceUid(String instanceUid) {
-        this.instanceUid = instanceUid;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + ((instanceUid == null) ? 0 : instanceUid.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (!super.equals(obj))
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        SingleInstanceStatisticsConfig other = (SingleInstanceStatisticsConfig) obj;
-        if (instanceUid == null) {
-            if (other.instanceUid != null)
-                return false;
-        } else if (!instanceUid.equals(other.instanceUid))
-            return false;
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        return "singleInstanceStatistics {instanceUid=" + instanceUid + "}";
+        super.getStringProperties().put(INSTANCE_UID_KEY, instanceUid);
     }
 
     @Override
     public void validate() throws IllegalStateException {
-        if (instanceUid == null) {
+        if (getInstanceUid() == null) {
             throw new IllegalStateException("instance UID was not specified. Consider using " + EachSingleInstanceStatisticsConfig.class.getName() + " instead");
         }
     }

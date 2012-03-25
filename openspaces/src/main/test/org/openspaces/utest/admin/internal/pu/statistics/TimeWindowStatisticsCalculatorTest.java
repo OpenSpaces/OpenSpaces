@@ -35,7 +35,7 @@ import org.openspaces.admin.pu.statistics.MinimumTimeWindowStatisticsConfigurer;
 import org.openspaces.admin.pu.statistics.PercentileTimeWindowStatisticsConfigurer;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsIdConfigurer;
-import org.openspaces.admin.pu.statistics.SingleInstanceStatisticsConfig;
+import org.openspaces.admin.pu.statistics.SingleInstanceStatisticsConfigurer;
 
 /**
  * Unit Tests for {@link TimeWindowStatisticsCalculator}
@@ -134,7 +134,7 @@ public class TimeWindowStatisticsCalculatorTest extends TestCase {
         ProcessingUnitStatisticsId averageStatisticsId = new ProcessingUnitStatisticsIdConfigurer()
         .metric(METRIC)
         .monitor(MONITOR)
-        .instancesStatistics(new SingleInstanceStatisticsConfig(INSTANCE_UID))
+        .instancesStatistics(new SingleInstanceStatisticsConfigurer().instanceUid(INSTANCE_UID).create())
         .timeWindowStatistics(new AverageTimeWindowStatisticsConfigurer().timeWindow(SLEEP_MILLISECONDS, TimeUnit.MILLISECONDS).create())
         .create();
         calculator.calculateNewStatistics(pStatistics, toList(averageStatisticsId));            
@@ -191,7 +191,7 @@ public class TimeWindowStatisticsCalculatorTest extends TestCase {
             new ProcessingUnitStatisticsIdConfigurer()
                 .metric(METRIC)
                 .monitor(MONITOR)
-                .instancesStatistics(new SingleInstanceStatisticsConfig(INSTANCE_UID))
+                .instancesStatistics(new SingleInstanceStatisticsConfigurer().instanceUid(INSTANCE_UID).create())
                 .timeWindowStatistics(defaultAverageStatisticsId)
                  .create());
             
@@ -270,7 +270,7 @@ public class TimeWindowStatisticsCalculatorTest extends TestCase {
         return new ProcessingUnitStatisticsIdConfigurer()
         .metric(METRIC)
         .monitor(MONITOR)
-        .instancesStatistics(new SingleInstanceStatisticsConfig(INSTANCE_UID))
+        .instancesStatistics(new SingleInstanceStatisticsConfigurer().instanceUid(INSTANCE_UID).create())
         .timeWindowStatistics(
                 new PercentileTimeWindowStatisticsConfigurer()
                 .percentile(i)
@@ -285,7 +285,7 @@ public class TimeWindowStatisticsCalculatorTest extends TestCase {
         return new ProcessingUnitStatisticsIdConfigurer()
                 .metric(METRIC)
                 .monitor(MONITOR)
-                .instancesStatistics(new SingleInstanceStatisticsConfig(INSTANCE_UID))
+                .instancesStatistics(new SingleInstanceStatisticsConfigurer().instanceUid(INSTANCE_UID).create())
                 .timeWindowStatistics(
                         new AverageTimeWindowStatisticsConfigurer()
                         .minimumTimeWindow(MINIMUM_TIMEWINDOW_SECONDS, TimeUnit.SECONDS)
@@ -299,7 +299,7 @@ public class TimeWindowStatisticsCalculatorTest extends TestCase {
         return new ProcessingUnitStatisticsIdConfigurer()
                 .metric(METRIC)
                 .monitor(MONITOR)
-                .instancesStatistics(new SingleInstanceStatisticsConfig(INSTANCE_UID))
+                .instancesStatistics(new SingleInstanceStatisticsConfigurer().instanceUid(INSTANCE_UID).create())
                 .timeWindowStatistics(
                         new MinimumTimeWindowStatisticsConfigurer()
                         .minimumTimeWindow(MINIMUM_TIMEWINDOW_SECONDS, TimeUnit.SECONDS)
@@ -313,7 +313,7 @@ public class TimeWindowStatisticsCalculatorTest extends TestCase {
         return new ProcessingUnitStatisticsIdConfigurer()
                 .metric(METRIC)
                 .monitor(MONITOR)
-                .instancesStatistics(new SingleInstanceStatisticsConfig(INSTANCE_UID))
+                .instancesStatistics(new SingleInstanceStatisticsConfigurer().instanceUid(INSTANCE_UID).create())
                 .timeWindowStatistics(
                         new MaximumTimeWindowStatisticsConfigurer()
                         .minimumTimeWindow(MINIMUM_TIMEWINDOW_SECONDS, TimeUnit.SECONDS)
@@ -327,7 +327,7 @@ public class TimeWindowStatisticsCalculatorTest extends TestCase {
         return new ProcessingUnitStatisticsIdConfigurer()
                 .metric(METRIC)
                 .monitor(MONITOR)
-                .instancesStatistics(new SingleInstanceStatisticsConfig(INSTANCE_UID))
+                .instancesStatistics(new SingleInstanceStatisticsConfigurer().instanceUid(INSTANCE_UID).create())
                 .timeWindowStatistics(new LastSampleTimeWindowStatisticsConfig())
                 .create();
     }

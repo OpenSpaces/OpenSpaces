@@ -15,34 +15,17 @@
  * limitations under the License.
  *  
  ******************************************************************************/
-package org.openspaces.admin.internal.pu.statistics;
+package org.openspaces.admin.pu.statistics;
 
-public abstract class AbstractInstancesStatisticsConfig implements InternalInstancesStatisticsConfig {
+import java.util.Map;
 
-    /* Default implementation for configs without members
-     * (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
-    @Override
-    public int hashCode() {
-        return this.getClass().hashCode();
-    }
+import org.openspaces.admin.pu.elastic.config.AbstractStatisticsConfig;
 
-    /* Default implementation for configs without members
-     * (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (this == obj)
-            return true;
-        if (getClass() != obj.getClass())
-            return false;
-        return true;
+public abstract class AbstractInstancesStatisticsConfig 
+    extends AbstractStatisticsConfig {
+
+    protected AbstractInstancesStatisticsConfig(Map<String,String> properties) {
+        super(properties);
     }
     
-    public abstract String toString();
 }

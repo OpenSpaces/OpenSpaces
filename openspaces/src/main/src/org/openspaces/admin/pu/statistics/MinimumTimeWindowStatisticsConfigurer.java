@@ -17,8 +17,6 @@ package org.openspaces.admin.pu.statistics;
 
 import java.util.concurrent.TimeUnit;
 
-import org.openspaces.admin.internal.pu.statistics.DefaultTimeWindowStatisticsConfigUtils;
-
 /**
  * Creates a new {@link MinimumTimeWindowStatisticsConfig} object
  * @author itaif
@@ -29,22 +27,22 @@ public class MinimumTimeWindowStatisticsConfigurer {
     private MinimumTimeWindowStatisticsConfig config = new MinimumTimeWindowStatisticsConfig();
     
     public MinimumTimeWindowStatisticsConfigurer timeWindow(long timeWindow, TimeUnit timeUnit) {
-        DefaultTimeWindowStatisticsConfigUtils.timeWindow(config, timeWindow, timeUnit);
+        config.setTimeWindowSeconds(timeUnit.toSeconds(timeWindow));
         return this;
     }
     
     public MinimumTimeWindowStatisticsConfigurer minimumTimeWindow(long timeWindow, TimeUnit timeUnit) {
-        DefaultTimeWindowStatisticsConfigUtils.minimumTimeWindow(config, timeWindow, timeUnit);
+        config.setMinimumTimeWindowSeconds(timeUnit.toSeconds(timeWindow));
         return this;
     }
     
     public MinimumTimeWindowStatisticsConfigurer maximumTimeWindow(long timeWindow, TimeUnit timeUnit) {
-        DefaultTimeWindowStatisticsConfigUtils.maximumTimeWindow(config, timeWindow, timeUnit);
+        config.setMaximumTimeWindowSeconds(timeUnit.toSeconds(timeWindow));
         return this;
     }
         
     public MinimumTimeWindowStatisticsConfig create() {
-        DefaultTimeWindowStatisticsConfigUtils.create(config);
+        config.validate();
         return config;
     }
 

@@ -17,131 +17,95 @@
  ******************************************************************************/
 package org.openspaces.admin.pu.statistics;
 
+import java.util.Map;
+
 import org.openspaces.admin.internal.pu.statistics.InternalTimeWindowStatisticsConfig;
+import org.openspaces.admin.pu.elastic.config.AbstractStatisticsConfig;
 
 /**
  * Base class for statistics configurations that aggregate samples based on a specified time window
  * @author itaif
  * @since 9.0.0
  */
-public abstract class AbstractTimeWindowStatisticsConfig implements InternalTimeWindowStatisticsConfig {
+public abstract class AbstractTimeWindowStatisticsConfig 
+    extends AbstractStatisticsConfig
+    implements InternalTimeWindowStatisticsConfig {
 
-    private Long timeWindowSeconds;
-    private Long minimumTimeWindowSeconds;
-    private Long maximumTimeWindowSeconds;
+    protected AbstractTimeWindowStatisticsConfig(Map<String, String> properties) {
+        super(properties);
+    }
+
+    private static final String TIMEWINDOW_SECONDS_KEY = "time-window-seconds";
+    private static final long TIMEWINDOW_SECONDS_DEFAULT = 60;
+    private static final String MINIMUM_TIMEWINDOW_SECONDS_KEY = "minimum-time-window-seconds";
+    private static final String MAXIMUM_TIMEWINDOW_SECONDS_KEY = "maximum-time-window-seconds";
     
     /**
      * @return the timeWindowSeconds
      */
     public Long getTimeWindowSeconds() {
-        return timeWindowSeconds;
+        return getStringProperties().getLong(TIMEWINDOW_SECONDS_KEY, TIMEWINDOW_SECONDS_DEFAULT);
     }
     /**
      * @param timeWindowSeconds the timeWindowSeconds to set
      */
     public void setTimeWindowSeconds(long timeWindowSeconds) {
-        this.timeWindowSeconds = timeWindowSeconds;
+        getStringProperties().putLong(TIMEWINDOW_SECONDS_KEY, timeWindowSeconds);
     }
     /**
      * @return the minimumTimeWindowSeconds
      */
     public Long getMinimumTimeWindowSeconds() {
-        return minimumTimeWindowSeconds;
+        return getStringProperties().getLong(MINIMUM_TIMEWINDOW_SECONDS_KEY, getTimeWindowSeconds());
     }
+    
     /**
      * @param minimumTimeWindowSeconds the minimumTimeWindowSeconds to set
      */
     public void setMinimumTimeWindowSeconds(long minimumTimeWindowSeconds) {
-        this.minimumTimeWindowSeconds = minimumTimeWindowSeconds;
+        getStringProperties().putLong(MINIMUM_TIMEWINDOW_SECONDS_KEY, minimumTimeWindowSeconds);
     }
     /**
      * @return the maximumTimeWindowSeconds
      */
     public Long getMaximumTimeWindowSeconds() {
-        return maximumTimeWindowSeconds;
+        return getStringProperties().getLong(MAXIMUM_TIMEWINDOW_SECONDS_KEY, getDefaultMaximumTimeWindowSeconds());
     }
+
+    private long getDefaultMaximumTimeWindowSeconds() {
+        // allow the last sample to sneak into the time window even if the
+        // timestamp has jitter.
+        return getTimeWindowSeconds()*2;
+    }
+    
     /**
      * @param maximumTimeWindowSeconds the maximumTimeWindowSeconds to set
      */
     public void setMaximumTimeWindowSeconds(long maximumTimeWindowSeconds) {
-        this.maximumTimeWindowSeconds = maximumTimeWindowSeconds;
-    }
-    
-    /* (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((maximumTimeWindowSeconds == null) ? 0 : maximumTimeWindowSeconds.hashCode());
-        result = prime * result + ((minimumTimeWindowSeconds == null) ? 0 : minimumTimeWindowSeconds.hashCode());
-        result = prime * result + ((timeWindowSeconds == null) ? 0 : timeWindowSeconds.hashCode());
-        return result;
-    }
-    /* (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        AbstractTimeWindowStatisticsConfig other = (AbstractTimeWindowStatisticsConfig) obj;
-        if (maximumTimeWindowSeconds == null) {
-            if (other.maximumTimeWindowSeconds != null)
-                return false;
-        } else if (!maximumTimeWindowSeconds.equals(other.maximumTimeWindowSeconds))
-            return false;
-        if (minimumTimeWindowSeconds == null) {
-            if (other.minimumTimeWindowSeconds != null)
-                return false;
-        } else if (!minimumTimeWindowSeconds.equals(other.minimumTimeWindowSeconds))
-            return false;
-        if (timeWindowSeconds == null) {
-            if (other.timeWindowSeconds != null)
-                return false;
-        } else if (!timeWindowSeconds.equals(other.timeWindowSeconds))
-            return false;
-        return true;
+        getStringProperties().putLong(MAXIMUM_TIMEWINDOW_SECONDS_KEY, maximumTimeWindowSeconds);
     }
     
     public void validate() throws IllegalStateException {
-        if (timeWindowSeconds == null) {
-            throw new IllegalStateException("timeWindowSeconds cannot be null");
-        }
         
-        if (timeWindowSeconds<=0) {
+        if (getTimeWindowSeconds()<=0) {
             throw new IllegalStateException("timeWindowSeconds must be positive");
         }
         
-        if (minimumTimeWindowSeconds == null) {
-            throw new IllegalStateException("minimumTimeWindowSeconds cannot be null");
-        }
-        
-        if (minimumTimeWindowSeconds <0) {
+        if (getMinimumTimeWindowSeconds() <0) {
             throw new IllegalStateException("minimumTimeWindowSeconds must not be negative");
         }
         
-        if (maximumTimeWindowSeconds == null) {
-            throw new IllegalStateException("maximumTimeWindowSeconds cannot be null");
-        }
-        
-        if (maximumTimeWindowSeconds <=0) {
+        if (getMaximumTimeWindowSeconds() <=0) {
             throw new IllegalStateException("maximumTimeWindowSeconds must be positive");
         }
         
-        if (maximumTimeWindowSeconds < timeWindowSeconds) {
-            throw new IllegalStateException("maximumTimeWindowSeconds must be bigger or equals timeWindowSeconds");
+        if (getMaximumTimeWindowSeconds() < getTimeWindowSeconds()) {
+            throw new IllegalStateException("maximumTimeWindowSeconds ("+getMaximumTimeWindowSeconds()+") must be bigger or equals timeWindowSeconds ("+ getTimeWindowSeconds()+")");
         }
         
-        if (minimumTimeWindowSeconds > timeWindowSeconds) {
+        if (getMinimumTimeWindowSeconds() > getTimeWindowSeconds()) {
             throw new IllegalStateException("minimumTimeWindowSeconds must be less or equals timeWindowSeconds");
         }
     }
-    
-    public abstract String toString();
+
 }

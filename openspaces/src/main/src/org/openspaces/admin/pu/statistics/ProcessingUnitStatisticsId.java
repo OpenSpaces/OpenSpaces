@@ -1,7 +1,9 @@
 package org.openspaces.admin.pu.statistics;
 
-import org.openspaces.admin.internal.pu.statistics.InternalInstancesStatisticsConfig;
+import java.util.Map;
+
 import org.openspaces.admin.internal.pu.statistics.InternalTimeWindowStatisticsConfig;
+import org.openspaces.core.util.StringProperties;
 
 
 /**
@@ -12,58 +14,71 @@ import org.openspaces.admin.internal.pu.statistics.InternalTimeWindowStatisticsC
  */
 public class ProcessingUnitStatisticsId {
 
-    private String monitor; 
+    private static final String MONITOR_KEY = "monitor";
 
-    private String metric;
+    private static final String METRIC_KEY = "metric";
+
+    private static final String TIMEWINDOW_STATISTICS_KEY = "timewindow-statistics";
+    private static final String INSTANCES_STATISTICS_KEY = "instances-statistics";
+
+    StringProperties properties;
     
-    private TimeWindowStatisticsConfig timeWindowStatistics; 
+    /** 
+     * default constructor
+     */
+    public ProcessingUnitStatisticsId() {
+        this.properties = new StringProperties();
+    }
     
-    private InstancesStatisticsConfig instancesStatistics; 
-   
+    public ProcessingUnitStatisticsId(Map<String, String> properties) {
+        this.properties = new StringProperties(properties);
+    }
+
     public String getMonitor() {
-        return monitor;
+        return properties.get(MONITOR_KEY);
     }
     
     /**
      * @see ProcessingUnitStatisticsIdConfigurer#monitor(String) 
      */
     public void setMonitor(String monitor) {
-        this.monitor = monitor;
+        this.properties.put(MONITOR_KEY, monitor);
     }
     
     public String getMetric() {
-        return metric;
+        return properties.get(METRIC_KEY);
     }
     
     /**
      * @see ProcessingUnitStatisticsIdConfigurer#metric(String)
      */
     public void setMetric(String metric) {
-        this.metric = metric;
+        this.properties.put(METRIC_KEY, metric);
     }
     
     public TimeWindowStatisticsConfig getTimeWindowStatistics() {
-        return timeWindowStatistics;
+        return (TimeWindowStatisticsConfig) properties.getMapWrapperObject(TIMEWINDOW_STATISTICS_KEY, null);
     }
     
     /**
      * @see ProcessingUnitStatisticsIdConfigurer#timeWindowStatistics(AbstractTimeWindowStatisticsConfig)
      */
     public void setTimeWindowStatistics(TimeWindowStatisticsConfig timeWindowStatistics) {
-        this.timeWindowStatistics = timeWindowStatistics;
+        properties.putMapWrapperObject(TIMEWINDOW_STATISTICS_KEY, timeWindowStatistics.getProperties(), timeWindowStatistics.getClass());
     }
 
     public InstancesStatisticsConfig getInstancesStatistics() {
-        return instancesStatistics;
+        return (InstancesStatisticsConfig) properties.getMapWrapperObject(INSTANCES_STATISTICS_KEY, null);
     }
     
     /**
      * @see ProcessingUnitStatisticsIdConfigurer#instancesStatistics(InstancesAggregationStatisticsConfig)
      */
     public void setInstancesStatistics(InstancesStatisticsConfig instancesStatistics) {
-        this.instancesStatistics = instancesStatistics;
+        properties.putMapWrapperObject(INSTANCES_STATISTICS_KEY, instancesStatistics.getProperties(), instancesStatistics.getClass());
     }
     
+
     /* (non-Javadoc)
      * @see java.lang.Object#hashCode()
      */
@@ -71,12 +86,10 @@ public class ProcessingUnitStatisticsId {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((instancesStatistics == null) ? 0 : instancesStatistics.hashCode());
-        result = prime * result + ((metric == null) ? 0 : metric.hashCode());
-        result = prime * result + ((monitor == null) ? 0 : monitor.hashCode());
-        result = prime * result + ((timeWindowStatistics == null) ? 0 : timeWindowStatistics.hashCode());
+        result = prime * result + ((properties == null) ? 0 : properties.hashCode());
         return result;
     }
+
     /* (non-Javadoc)
      * @see java.lang.Object#equals(java.lang.Object)
      */
@@ -89,54 +102,47 @@ public class ProcessingUnitStatisticsId {
         if (getClass() != obj.getClass())
             return false;
         ProcessingUnitStatisticsId other = (ProcessingUnitStatisticsId) obj;
-        if (instancesStatistics == null) {
-            if (other.instancesStatistics != null)
+        if (properties == null) {
+            if (other.properties != null)
                 return false;
-        } else if (!instancesStatistics.equals(other.instancesStatistics))
-            return false;
-        if (metric == null) {
-            if (other.metric != null)
-                return false;
-        } else if (!metric.equals(other.metric))
-            return false;
-        if (monitor == null) {
-            if (other.monitor != null)
-                return false;
-        } else if (!monitor.equals(other.monitor))
-            return false;
-        if (timeWindowStatistics == null) {
-            if (other.timeWindowStatistics != null)
-                return false;
-        } else if (!timeWindowStatistics.equals(other.timeWindowStatistics))
+        } else if (!properties.equals(other.properties))
             return false;
         return true;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
-        return "ProcessingUnitStatisticsId [monitor=" + monitor + ", metric=" + metric + ", timeWindowStatistics="
-                + timeWindowStatistics + ", instancesStatistics=" + instancesStatistics + "]";
+        return "processingUnitStatisticsId " + properties.toString();
     }
-
-
 
     /**
      * Checks that the content of this StatisticsId is valid.
      * @throws IllegalStateException - if state is found to be illegal
      */
     public void validate() throws IllegalStateException {
-        ((InternalTimeWindowStatisticsConfig)timeWindowStatistics).validate();
-        ((InternalInstancesStatisticsConfig)instancesStatistics).validate();
-        if (metric == null) {
-            throw new IllegalStateException("metric name cannot be null");
+        InternalTimeWindowStatisticsConfig timeWindowStatistics = (InternalTimeWindowStatisticsConfig)getTimeWindowStatistics();
+        if (timeWindowStatistics == null) {
+            throw new IllegalStateException("timeWindowStatistics cannot be null");
+        }
+        timeWindowStatistics.validate();
+        
+        InstancesStatisticsConfig instancesStatistics = (InstancesStatisticsConfig)getInstancesStatistics();
+        if (instancesStatistics == null) {
+            throw new IllegalStateException("instancesStatistics cannot be null");
+        }
+        instancesStatistics.validate();
+        
+        if (getMetric() == null || getMonitor().isEmpty()) {
+            throw new IllegalStateException("metric name cannot be null or empty");
         }
         
-        if (monitor == null) {
-            throw new IllegalStateException("monitor name cannot be null");
+        if (getMonitor() == null || getMonitor().isEmpty()) {
+            throw new IllegalStateException("monitor name cannot be null or empty");
         }
+    }
+
+    public Map<String, String> getProperties() {
+        return properties.getProperties();
     }
 
 }

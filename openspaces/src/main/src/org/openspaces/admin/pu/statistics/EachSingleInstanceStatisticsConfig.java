@@ -15,18 +15,19 @@
  *******************************************************************************/
 package org.openspaces.admin.pu.statistics;
 
-import org.openspaces.admin.internal.pu.statistics.AbstractInstancesStatisticsConfig;
+import java.util.Map;
 
 /**
  * Denotes that a {@link ProcessingUnitStatisticsId} applies to all of the Processing Unit.
  * @author itaif
  * @since 9.0.0
  */
-public class EachSingleInstanceStatisticsConfig extends AbstractInstancesStatisticsConfig {
+public class EachSingleInstanceStatisticsConfig 
+    extends AbstractInstancesStatisticsConfig 
+    implements InstancesStatisticsConfig {
 
-    @Override
-    public String toString() {
-        return "eachSingleInstanceStatistics";
+    public EachSingleInstanceStatisticsConfig(Map<String,String> properties) {
+        super(properties);
     }
 
     @Override

@@ -15,6 +15,8 @@
  *******************************************************************************/
 package org.openspaces.admin.internal.pu.statistics;
 
+import java.util.Map;
+
 import org.openspaces.admin.pu.statistics.AbstractTimeWindowStatisticsConfig;
 
 
@@ -27,14 +29,11 @@ import org.openspaces.admin.pu.statistics.AbstractTimeWindowStatisticsConfig;
  */
 public class ErasedTimeWindowStatisticsConfig extends AbstractTimeWindowStatisticsConfig {
 
-    public ErasedTimeWindowStatisticsConfig(AbstractTimeWindowStatisticsConfig timeWindowStatistics) {
-        this.setMaximumTimeWindowSeconds(timeWindowStatistics.getMaximumTimeWindowSeconds());
-        this.setMinimumTimeWindowSeconds(timeWindowStatistics.getMinimumTimeWindowSeconds());
-        this.setTimeWindowSeconds(timeWindowStatistics.getTimeWindowSeconds());
+    public ErasedTimeWindowStatisticsConfig(Map<String,String> properties) {
+        super(properties);
     }
-
-    @Override
-    public String toString() {
-        return "erasedTimeWindowStatistics {timeWindowSeconds="+getTimeWindowSeconds() + ", minimumTimeWindowSeconds="+getMinimumTimeWindowSeconds() + ", maximumTimeWindowSeconds="+ getMaximumTimeWindowSeconds()+"}";
+    
+    public ErasedTimeWindowStatisticsConfig(AbstractTimeWindowStatisticsConfig timeWindowStatistics) {
+        this(timeWindowStatistics.getProperties());
     }
 }

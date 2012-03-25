@@ -41,7 +41,7 @@ public class InstancesStatisticsCalculator implements InternalProcessingUnitStat
             InternalProcessingUnitStatistics processingUnitStatistics,
             Iterable<ProcessingUnitStatisticsId> statisticsIds) {
         
-        Map<ProcessingUnitStatisticsId, Set<InternalInstancesStatisticsConfig>> instancesStatisticsPerErasedStatisticsId = eraseInstancesStatistics(statisticsIds);
+        Map<ProcessingUnitStatisticsId, Set<InstancesStatisticsConfig>> instancesStatisticsPerErasedStatisticsId = eraseInstancesStatistics(statisticsIds);
         Set<ProcessingUnitStatisticsId> erasedStatisticsIds = instancesStatisticsPerErasedStatisticsId.keySet();
         Map<ProcessingUnitStatisticsId, StatisticsObjectList> valuesPerErasedStatisticsId = getValues(processingUnitStatistics, erasedStatisticsIds);
         
@@ -50,7 +50,7 @@ public class InstancesStatisticsCalculator implements InternalProcessingUnitStat
             ProcessingUnitStatisticsId erasedStatisticsId = pair.getKey();
             StatisticsObjectList values = pair.getValue();
             
-            for (InternalInstancesStatisticsConfig instancesStatistics : instancesStatisticsPerErasedStatisticsId.get(erasedStatisticsId)) {
+            for (InstancesStatisticsConfig instancesStatistics : instancesStatisticsPerErasedStatisticsId.get(erasedStatisticsId)) {
                 if (instancesStatistics instanceof StatisticsObjectListFunction) {
                     StatisticsObjectListFunction statisticsFunc = (StatisticsObjectListFunction) instancesStatistics;
                     Object value = statisticsFunc.calc(values);
@@ -93,18 +93,17 @@ public class InstancesStatisticsCalculator implements InternalProcessingUnitStat
     /**
      * Groups statisticsIds by replacing their InstancesStatistics with {@link ErasedInstancesStatisticsConfig}
      */
-    private Map<ProcessingUnitStatisticsId,Set<InternalInstancesStatisticsConfig>> eraseInstancesStatistics(Iterable<ProcessingUnitStatisticsId> statisticsIds) {
+    private Map<ProcessingUnitStatisticsId,Set<InstancesStatisticsConfig>> eraseInstancesStatistics(Iterable<ProcessingUnitStatisticsId> statisticsIds) {
 
-        Map<ProcessingUnitStatisticsId, Set<InternalInstancesStatisticsConfig>> groupBy = new HashMap<ProcessingUnitStatisticsId, Set<InternalInstancesStatisticsConfig>>();
+        Map<ProcessingUnitStatisticsId, Set<InstancesStatisticsConfig>> groupBy = new HashMap<ProcessingUnitStatisticsId, Set<InstancesStatisticsConfig>>();
         for (ProcessingUnitStatisticsId statisticsId : statisticsIds) {
 
-            InternalInstancesStatisticsConfig instancesStatistics = (InternalInstancesStatisticsConfig)statisticsId.getInstancesStatistics();
+            InstancesStatisticsConfig instancesStatistics = statisticsId.getInstancesStatistics();
             ProcessingUnitStatisticsId key = erase(statisticsId);
 
             if (!groupBy.containsKey(key)) {
-                groupBy.put(key, new HashSet<InternalInstancesStatisticsConfig>());
+                groupBy.put(key, new HashSet<InstancesStatisticsConfig>());
             }
-
             
             groupBy.get(key).add(instancesStatistics);
         }

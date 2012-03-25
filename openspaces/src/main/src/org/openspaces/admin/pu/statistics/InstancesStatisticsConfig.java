@@ -15,10 +15,22 @@
  *******************************************************************************/
 package org.openspaces.admin.pu.statistics;
 
+import java.util.Map;
+
 /**
  * @author itaif
  *
  */
 public interface InstancesStatisticsConfig {
+
+    /**
+     * @return the internal key/value string representation
+     */
+    Map<String, String> getProperties();
     
+    /**
+     * Checks the content of this config is valid.
+     * @throws IllegalStateException - if state is found to be illegal
+     */
+    void validate() throws IllegalStateException;
 }

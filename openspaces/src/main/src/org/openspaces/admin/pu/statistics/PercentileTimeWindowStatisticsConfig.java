@@ -1,68 +1,52 @@
 package org.openspaces.admin.pu.statistics;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.openspaces.admin.internal.pu.statistics.StatisticsObjectListFunction;
 import org.openspaces.admin.internal.pu.statistics.StatisticsObjectList;
 
-
+/**
+ * Picks the Nth percentile of time window instance values.
+ * The default percentile value is 50 (median)
+ * @author itaif
+ * @since 9.0.0
+ */
 public class PercentileTimeWindowStatisticsConfig  
         extends AbstractTimeWindowStatisticsConfig
         implements StatisticsObjectListFunction {
 
-    private Double percentile;
-        
-    public Double getPercentile() {
-        return percentile;
+    private static final String PERCENTILE_KEY = "percentile";
+    private static final double PERCENTILE_DEFAULT = 50.0;
+
+    public PercentileTimeWindowStatisticsConfig() {
+        this(new HashMap<String,String>());
     }
     
+    public PercentileTimeWindowStatisticsConfig(Map<String,String> properties) {
+        super(properties);
+    }
+    
+    public double getPercentile() {
+        return super.getStringProperties().getDouble(PERCENTILE_KEY,PERCENTILE_DEFAULT);
+    }
+
     public void setPercentile(double percentile) {
-        this.percentile = percentile;
+        super.getStringProperties().putDouble(PERCENTILE_KEY, percentile);
     }
 
     @Override
     public void validate() throws IllegalStateException {
         super.validate();
-        if (percentile == null) {
-            throw new IllegalArgumentException("percentile cannot be null");
-        }
         
-        if (percentile <0 || percentile > 100) {
-            throw new IllegalArgumentException("percentile ("+percentile+") must between 0 and 100 (inclusive)");
+        if (getPercentile() <0 || getPercentile() > 100) {
+            throw new IllegalArgumentException("percentile ("+getPercentile()+") must between 0 and 100 (inclusive)");
         }
     }
 
     @Override
     public Object calc(StatisticsObjectList values) {
-        return values.getPercentile(percentile);
+        return values.getPercentile(getPercentile());
     }
-
     
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + ((percentile == null) ? 0 : percentile.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (!super.equals(obj))
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        PercentileTimeWindowStatisticsConfig other = (PercentileTimeWindowStatisticsConfig) obj;
-        if (percentile == null) {
-            if (other.percentile != null)
-                return false;
-        } else if (!percentile.equals(other.percentile))
-            return false;
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        return "percentile { percentile="+percentile+" , timeWindowSeconds="+getTimeWindowSeconds() + ", minimumTimeWindowSeconds="+getMinimumTimeWindowSeconds() + ", maximumTimeWindowSeconds="+ getMaximumTimeWindowSeconds()+"}";
-    }    
 }

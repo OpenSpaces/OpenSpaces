@@ -15,6 +15,12 @@
  *******************************************************************************/
 package org.openspaces.admin.internal.pu.statistics;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.openspaces.admin.pu.statistics.AbstractInstancesStatisticsConfig;
+import org.openspaces.admin.pu.statistics.InstancesStatisticsConfig;
+
 
 /**
  * Used by {@link InstancesStatisticsCalculator} to group statisticsIds that differ only by instancesStatistics
@@ -22,15 +28,20 @@ package org.openspaces.admin.internal.pu.statistics;
  * @author itaif
  * @since 9.0.0
  */
-public class ErasedInstancesStatisticsConfig extends AbstractInstancesStatisticsConfig {
+public class ErasedInstancesStatisticsConfig 
+    extends AbstractInstancesStatisticsConfig 
+    implements InstancesStatisticsConfig {
 
+    public ErasedInstancesStatisticsConfig() {
+        this(new HashMap<String,String>());
+    }
+    
+    public ErasedInstancesStatisticsConfig(Map<String,String> properties) {
+        super(properties);
+    }
+    
     @Override
     public void validate() throws IllegalStateException {
         // ok
-    }
-
-    @Override
-    public String toString() {
-        return "erasedInstancesStatistics";
     }
 }
