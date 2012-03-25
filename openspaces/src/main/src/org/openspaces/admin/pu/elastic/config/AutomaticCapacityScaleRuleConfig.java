@@ -68,15 +68,16 @@ public class AutomaticCapacityScaleRuleConfig
 
     /**
      * Defines a low threshold that triggers an increase or decrease of capacity
+     * @param lowThreshold - An Object of a Class that has a constructor accepting a String as a single argument.
      * @see setLowThresholdCapacityDecrease
      * @see setLowThresholdCapacityIncrease
      */
-    public void setLowThreshold(double lowThreshold) {
-        properties.putDouble(LOW_THRESHOLD_KEY, lowThreshold);        
+    public void setLowThreshold(Object lowThreshold) {
+        properties.putStringWrapperObject(LOW_THRESHOLD_KEY, lowThreshold);        
     }
     
-    public double getLowThreshold() {
-        return properties.getDouble(LOW_THRESHOLD_KEY, LOW_THRESHOLD_DEFAULT);
+    public Object getLowThreshold() {
+        return properties.getStringWrapperObject(LOW_THRESHOLD_KEY, LOW_THRESHOLD_DEFAULT);
     }
     
     /**
@@ -84,12 +85,12 @@ public class AutomaticCapacityScaleRuleConfig
      * @see setLowThresholdCapacityDecrease
      * @see setLowThresholdCapacityIncrease
      */
-    public void setHighThreshold(double highThreshold) {
-        properties.putDouble(HIGH_THRESHOLD_KEY, highThreshold);        
+    public void setHighThreshold(Object highThreshold) {
+        properties.putStringWrapperObject(HIGH_THRESHOLD_KEY, highThreshold);        
     }
     
-    public double getHighThreshold() {
-        return properties.getDouble(HIGH_THRESHOLD_KEY, HIGH_THRESHOLD_DEFAULT);
+    public Object getHighThreshold() {
+        return properties.getStringWrapperObject(HIGH_THRESHOLD_KEY, HIGH_THRESHOLD_DEFAULT);
     }
     
     public Map<String, String> getProperties() {
