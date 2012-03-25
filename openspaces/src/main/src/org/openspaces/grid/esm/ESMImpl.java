@@ -57,6 +57,7 @@ import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
 import org.openspaces.admin.pu.events.ProcessingUnitAddedEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitRemovedEventListener;
 import org.openspaces.grid.gsm.ScaleBeanServer;
+import org.openspaces.grid.gsm.autoscaling.AutoScalingSlaEnforcement;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcement;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcement;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioningAdapterFactory;
@@ -100,6 +101,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
     private final MachinesSlaEnforcement machinesSlaEnforcement;
     private final ContainersSlaEnforcement containersSlaEnforcement;
     private final RebalancingSlaEnforcement rebalancingSlaEnforcement;
+    private final AutoScalingSlaEnforcement autoScalingSlaEnforcement;
     private final Map<ProcessingUnit,ScaleBeanServer> scaleBeanServerPerProcessingUnit;
     private final Map<String,Map<String,String>> elasticPropertiesPerProcessingUnit;
     private final Map<String, PendingElasticPropertiesUpdate> pendingElasticPropertiesUpdatePerProcessingUnit;
@@ -142,6 +144,8 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
         machinesSlaEnforcement = new MachinesSlaEnforcement(admin);
         containersSlaEnforcement = new ContainersSlaEnforcement(admin);
         rebalancingSlaEnforcement = new RebalancingSlaEnforcement();
+        autoScalingSlaEnforcement = new AutoScalingSlaEnforcement(admin);
+        
         eventsStore = new EventsStore();
         //Discovery warm-up period
         new ESMImplInitializer(admin, new Runnable() {
@@ -526,7 +530,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
             if (beanServer == null) {
                 ProcessingUnitSchemaConfig schemaConfig = new ProcessingUnitSchemaConfig(elasticProperties);
                 ElasticMachineIsolationConfig isolationConfig = new ElasticMachineIsolationConfig(elasticProperties);
-                beanServer = new ScaleBeanServer(pu,schemaConfig, rebalancingSlaEnforcement,containersSlaEnforcement,machinesSlaEnforcement,nonBlockingAdapterFactory, isolationConfig, eventsStore);
+                beanServer = new ScaleBeanServer(pu,schemaConfig, rebalancingSlaEnforcement,containersSlaEnforcement,machinesSlaEnforcement, autoScalingSlaEnforcement, nonBlockingAdapterFactory, isolationConfig, eventsStore);
                 scaleBeanServerPerProcessingUnit.put(pu, beanServer);
             }
             //TODO: Move this to a separate thread since bean#afterPropertiesSet() might block. This is very tricky since the PU can deploy/undeploy while we are in that thread, which changes the bean server.

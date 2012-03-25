@@ -34,6 +34,8 @@ import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.core.bean.Bean;
 import org.openspaces.core.bean.BeanServer;
 import org.openspaces.core.bean.DefaultBeanServer;
+import org.openspaces.grid.gsm.autoscaling.AutoScalingSlaEnforcement;
+import org.openspaces.grid.gsm.autoscaling.AutoScalingSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcement;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcement;
@@ -59,6 +61,7 @@ public class ScaleBeanServer {
     private final RebalancingSlaEnforcement rebalancingSlaEnforcement;
     private final MachinesSlaEnforcement machinesSlaEnforcement;
     private final ContainersSlaEnforcement containersSlaEnforcement;
+    private final AutoScalingSlaEnforcement autoScalingSlaEnforcement;
     
     public ScaleBeanServer(
             ProcessingUnit pu,
@@ -66,6 +69,7 @@ public class ScaleBeanServer {
             RebalancingSlaEnforcement rebalancingSlaEnforcement, 
             ContainersSlaEnforcement containersSlaEnforcement,
             MachinesSlaEnforcement machinesSlaEnforcement,
+            AutoScalingSlaEnforcement autoScalingSlaEnforcement,
             NonBlockingElasticMachineProvisioningAdapterFactory nonBlockingAdapterFactory,
             ElasticMachineIsolationConfig isolationConfig,
             EventsStore eventStore) {
@@ -86,6 +90,10 @@ public class ScaleBeanServer {
             throw new IllegalArgumentException("machinesSlaEnforcement cannot be null");
         }
         
+        if (autoScalingSlaEnforcement == null) {
+            throw new IllegalArgumentException("autoScalingEnforcement cannot be null");
+        }
+        
         if (eventStore == null) {
             throw new IllegalArgumentException("eventStorage cannot be null");
         }
@@ -94,24 +102,29 @@ public class ScaleBeanServer {
         this.rebalancingSlaEnforcement = rebalancingSlaEnforcement;
         this.containersSlaEnforcement = containersSlaEnforcement;
         this.machinesSlaEnforcement = machinesSlaEnforcement;
+        this.autoScalingSlaEnforcement = autoScalingSlaEnforcement;
         
         MachinesSlaEnforcementEndpoint machinesSlaEnforcementEndpoint = null;
         ContainersSlaEnforcementEndpoint containersSlaEnforcementEndpoint = null;
         RebalancingSlaEnforcementEndpoint rebalancingSlaEnforcementEndpoint = null;
+        AutoScalingSlaEnforcementEndpoint autoScalingSlaEnforcementEndpoint = null;
         try {
             containersSlaEnforcementEndpoint = containersSlaEnforcement.createEndpoint(pu);
             machinesSlaEnforcementEndpoint = machinesSlaEnforcement.createEndpoint(pu);
             rebalancingSlaEnforcementEndpoint = rebalancingSlaEnforcement.createEndpoint(pu);
+            autoScalingSlaEnforcementEndpoint = autoScalingSlaEnforcement.createEndpoint(pu); 
         }
         finally {
             if (containersSlaEnforcementEndpoint == null ||
                 machinesSlaEnforcementEndpoint == null ||
-                rebalancingSlaEnforcementEndpoint == null) {
+                rebalancingSlaEnforcementEndpoint == null || 
+                autoScalingSlaEnforcementEndpoint == null) {
                 
                 // make sure there are no leftovers in case of an exception
                 this.rebalancingSlaEnforcement.destroyEndpoint(pu);
                 this.containersSlaEnforcement.destroyEndpoint(pu);
                 this.machinesSlaEnforcement.destroyEndpoint(pu);
+                this.autoScalingSlaEnforcement.destroyEndpoint(pu);
             }
         }
         
@@ -123,6 +136,7 @@ public class ScaleBeanServer {
                         rebalancingSlaEnforcementEndpoint, 
                         containersSlaEnforcementEndpoint,
                         machinesSlaEnforcementEndpoint,
+                        autoScalingSlaEnforcementEndpoint,
                         nonBlockingAdapterFactory,
                         isolationConfig,
                         eventStore));

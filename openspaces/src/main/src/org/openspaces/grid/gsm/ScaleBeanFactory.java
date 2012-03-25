@@ -31,6 +31,8 @@ import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.core.bean.Bean;
 import org.openspaces.core.bean.BeanServer;
 import org.openspaces.core.bean.DefaultBeanFactory;
+import org.openspaces.grid.gsm.autoscaling.AutoScalingSlaEnforcementEndpoint;
+import org.openspaces.grid.gsm.autoscaling.AutoScalingSlaEnforcementEndpointAware;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpointAware;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpoint;
@@ -49,11 +51,13 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
     private final RebalancingSlaEnforcementEndpoint rebalancingSlaEnforcementEndpoint;
     private final ContainersSlaEnforcementEndpoint containersSlaEnforcementEndpoint;
     private final MachinesSlaEnforcementEndpoint machinesSlaEnforcementEndpoint;
+    private final AutoScalingSlaEnforcementEndpoint autoScalingSlaEnforcementEndpoint;
     private final ProcessingUnit pu;
     private final ProcessingUnitSchemaConfig schemaConfig;
     private final NonBlockingElasticMachineProvisioningAdapterFactory nonBlockingAdapterFactory;
     private final ElasticMachineIsolationConfig isolationConfig;
     private final EventsStore eventStore;
+
     
     ScaleBeanFactory(
             ProcessingUnit pu,
@@ -61,6 +65,7 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
             RebalancingSlaEnforcementEndpoint rebalancingSlaEnforcementEndpoint, 
             ContainersSlaEnforcementEndpoint containersSlaEnforcementEndpoint,
             MachinesSlaEnforcementEndpoint machinesSlaEnforcementEndpoint,
+            AutoScalingSlaEnforcementEndpoint autoScalingSlaEnforcementEndpoint,
             NonBlockingElasticMachineProvisioningAdapterFactory nonBlockingAdapterFactory,
             ElasticMachineIsolationConfig isolationConfig,
             EventsStore eventStore) {
@@ -70,6 +75,7 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
         this.rebalancingSlaEnforcementEndpoint = rebalancingSlaEnforcementEndpoint;
         this.containersSlaEnforcementEndpoint = containersSlaEnforcementEndpoint;
         this.machinesSlaEnforcementEndpoint = machinesSlaEnforcementEndpoint;
+        this.autoScalingSlaEnforcementEndpoint = autoScalingSlaEnforcementEndpoint;
         this.nonBlockingAdapterFactory = nonBlockingAdapterFactory;
         this.pu = pu;
         this.isolationConfig = isolationConfig;
@@ -97,6 +103,11 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
         if (instance instanceof RebalancingSlaEnforcementEndpointAware) {
             RebalancingSlaEnforcementEndpointAware rinstance = (RebalancingSlaEnforcementEndpointAware)instance;
             rinstance.setRebalancingSlaEnforcementEndpoint(rebalancingSlaEnforcementEndpoint);
+        }
+        
+        if (instance instanceof AutoScalingSlaEnforcementEndpointAware) {
+            AutoScalingSlaEnforcementEndpointAware ainstance = (AutoScalingSlaEnforcementEndpointAware) instance;
+            ainstance.setAutoScalingSlaEnforcementEndpoint(autoScalingSlaEnforcementEndpoint);
         }
         
         if (instance instanceof ProcessingUnitAware) {
