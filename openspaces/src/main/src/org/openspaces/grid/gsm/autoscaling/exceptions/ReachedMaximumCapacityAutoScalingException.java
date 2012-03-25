@@ -42,7 +42,8 @@ public class ReachedMaximumCapacityAutoScalingException
             CapacityRequirements newCapacity, 
             CapacityRequirements maxCapacity) {
     
-        super("Cannot increase capacity from " + existingCapacity + " to " + newCapacity + " since it breaches max capacity " + maxCapacity);
+        super("Cannot increase capacity from " + existingCapacity + " to " + newCapacity
+                + " since it breaches maximum capacity " + maxCapacity);
         this.existingCapacity = existingCapacity;
         this.newCapacity = newCapacity;
         this.maxCapacity = maxCapacity;
