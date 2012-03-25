@@ -25,6 +25,6 @@ import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
 * scale limits. The disadvantage is that space data , notifications and tasks are
 * serialized and sent over the network.
 */
-public interface ElasticStatelessDeploymentTopology<T extends ProcessingUnitDependency> extends ElasticDeploymentTopology, EagerScaleTopology, ManualCapacityScaleTopology {
+public interface ElasticStatelessDeploymentTopology<T extends ProcessingUnitDependency> extends ElasticDeploymentTopology, EagerScaleTopology, ManualCapacityScaleTopology , AutomaticCapacityScaleTopology{
 
 }
