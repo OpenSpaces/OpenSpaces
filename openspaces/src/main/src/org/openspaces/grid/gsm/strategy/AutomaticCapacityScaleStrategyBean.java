@@ -16,6 +16,9 @@
 package org.openspaces.grid.gsm.strategy;
 
 import org.openspaces.admin.pu.elastic.config.AutomaticCapacityScaleConfig;
+import org.openspaces.admin.pu.elastic.config.ScaleStrategyCapacityRequirementConfig;
+import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
+import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementInProgressException;
 
 /**
 + * The business logic that scales an elastic processing unit based on the specified
@@ -24,6 +27,31 @@ import org.openspaces.admin.pu.elastic.config.AutomaticCapacityScaleConfig;
 + * @author itaif
 + * @since 9.0.0
 + */
-public class AutomaticCapacityScaleStrategyBean {
+public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStrategyBean{
+    
+    // created by afterPropertiesSet()
+    private AutomaticCapacityScaleConfig automaticCapacityScaleConfig;
+    
+    @Override
+    public void afterPropertiesSet() {
+        
+        super.afterPropertiesSet();
+        
+        this.automaticCapacityScaleConfig = new AutomaticCapacityScaleConfig(super.getProperties());
+        
+        ScaleStrategyCapacityRequirementConfig manualCapacity = automaticCapacityScaleConfig.getMinCapacity();
+        ScaleStrategyConfig scaleStrategy = automaticCapacityScaleConfig;
+        super.setManualCapacityScaleConfig(manualCapacity,scaleStrategy);
+    }
+    
+    @Override
+    public ScaleStrategyConfig getConfig() {
+        return automaticCapacityScaleConfig;
+    }
+
+    @Override
+    protected void enforceSla() throws SlaEnforcementInProgressException {
+        super.enforceManualCapacityScaleConfig();
+    }
 
 }
