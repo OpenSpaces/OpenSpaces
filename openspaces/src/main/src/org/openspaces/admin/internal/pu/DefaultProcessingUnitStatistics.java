@@ -32,6 +32,7 @@ import org.openspaces.admin.internal.pu.statistics.TimeWindowStatisticsCalculato
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsIdConfigurer;
 import org.openspaces.admin.pu.statistics.SingleInstanceStatisticsConfig;
+import org.openspaces.admin.pu.statistics.SingleInstanceStatisticsConfigurer;
 
 public class DefaultProcessingUnitStatistics implements InternalProcessingUnitStatistics {
 
@@ -133,7 +134,7 @@ public class DefaultProcessingUnitStatistics implements InternalProcessingUnitSt
                             .monitor(statisticsId.getMonitor())
                             .metric(statisticsId.getMetric())
                             .timeWindowStatistics(statisticsId.getTimeWindowStatistics())
-                            .instancesStatistics(new SingleInstanceStatisticsConfig(instanceUid))
+                            .instancesStatistics(new SingleInstanceStatisticsConfigurer().instanceUid(instanceUid).create())
                             .create());
                 }
             }

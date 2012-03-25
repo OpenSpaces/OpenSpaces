@@ -104,6 +104,7 @@ import org.openspaces.admin.pu.statistics.LastSampleTimeWindowStatisticsConfig;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsIdConfigurer;
 import org.openspaces.admin.pu.statistics.SingleInstanceStatisticsConfig;
+import org.openspaces.admin.pu.statistics.SingleInstanceStatisticsConfigurer;
 import org.openspaces.admin.space.Space;
 import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.core.util.ConcurrentHashSet;
@@ -1150,7 +1151,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
                            .metric(statisticsId.getMetric())
                            .monitor(statisticsId.getMonitor())
                            .timeWindowStatistics(new LastSampleTimeWindowStatisticsConfig())
-                           .instancesStatistics(new SingleInstanceStatisticsConfig(instance.getUid()))
+                           .instancesStatistics(new SingleInstanceStatisticsConfigurer().instance(instance).create())
                            .create();
                    puStatistics.addStatistics(newStatisticsId,value);
                }
