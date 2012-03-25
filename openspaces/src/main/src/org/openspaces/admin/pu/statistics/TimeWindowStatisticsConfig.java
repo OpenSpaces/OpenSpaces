@@ -16,6 +16,7 @@
 package org.openspaces.admin.pu.statistics;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Marks configurations that aggregate statistics from time samples.
@@ -32,5 +33,10 @@ public interface TimeWindowStatisticsConfig {
      * @throws IllegalStateException - if state is found to be illegal
      */
     void validate() throws IllegalStateException;
+
+    /**
+     * @return the maximum number of samples required given the specified interval between consecutive samples.
+     */
+    int getMaxNumberOfSamples(long statisticsPollingInterval, TimeUnit timeUnit);
 
 }

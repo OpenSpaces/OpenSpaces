@@ -15,12 +15,15 @@
  *******************************************************************************/
 package org.openspaces.admin.internal.pu.statistics;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.pu.statistics.EachSingleInstanceStatisticsConfig;
 import org.openspaces.admin.pu.statistics.InstancesStatisticsConfig;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
@@ -36,10 +39,16 @@ import org.openspaces.admin.pu.statistics.SingleInstanceStatisticsConfig;
  */
 public class InstancesStatisticsCalculator implements InternalProcessingUnitStatisticsCalculator {
 
+    private final Log logger = LogFactory.getLog(this.getClass());
+    
     @Override
     public void calculateNewStatistics(
             InternalProcessingUnitStatistics processingUnitStatistics,
-            Iterable<ProcessingUnitStatisticsId> statisticsIds) {
+            Collection<ProcessingUnitStatisticsId> statisticsIds) {
+        
+        if (logger.isTraceEnabled()) {
+            logger.trace("calculateNewStatistics(processingUnitStatistics="+processingUnitStatistics+" , statisticsIds="+ statisticsIds);
+        }
         
         Map<ProcessingUnitStatisticsId, Set<InstancesStatisticsConfig>> instancesStatisticsPerErasedStatisticsId = eraseInstancesStatistics(statisticsIds);
         Set<ProcessingUnitStatisticsId> erasedStatisticsIds = instancesStatisticsPerErasedStatisticsId.keySet();

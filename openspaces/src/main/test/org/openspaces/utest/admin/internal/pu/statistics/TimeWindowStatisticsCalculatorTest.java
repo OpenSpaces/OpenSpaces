@@ -16,6 +16,7 @@
 package org.openspaces.utest.admin.internal.pu.statistics;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -187,7 +188,7 @@ public class TimeWindowStatisticsCalculatorTest extends TestCase {
                 .create();
         
         //calculate time average
-        Iterable<ProcessingUnitStatisticsId> calculatedStatistics = toList(
+        Collection<ProcessingUnitStatisticsId> calculatedStatistics = toList(
             new ProcessingUnitStatisticsIdConfigurer()
                 .metric(METRIC)
                 .monitor(MONITOR)
@@ -206,7 +207,7 @@ public class TimeWindowStatisticsCalculatorTest extends TestCase {
         return Arrays.asList(statisticsIds);
     }
     
-    private Iterable<ProcessingUnitStatisticsId> getTestStatisticsCalculations() {
+    private Collection<ProcessingUnitStatisticsId> getTestStatisticsCalculations() {
         return toList(
             averageStatisticsId(),
             minimumStatisticsId(),
@@ -330,5 +331,27 @@ public class TimeWindowStatisticsCalculatorTest extends TestCase {
                 .instancesStatistics(new SingleInstanceStatisticsConfigurer().instanceUid(INSTANCE_UID).create())
                 .timeWindowStatistics(new LastSampleTimeWindowStatisticsConfig())
                 .create();
+    }
+    
+    public void testLastSample() {
+        
+        TimeWindowStatisticsCalculator calculator = new TimeWindowStatisticsCalculator();
+        
+        long now = System.currentTimeMillis();
+        
+        int historySize = 10;
+        
+        // the first sample has one value for the instance0, and no value for instance1 
+        InternalProcessingUnitStatistics statistics = 
+                new DefaultProcessingUnitStatistics(now , null, historySize);
+        statistics.addStatistics(
+                lastSampleStatisticsId(), 
+                0);
+        
+        calculator.calculateNewStatistics(statistics, toList(lastSampleStatisticsId()));            
+        
+        // check the last sample
+        Assert.assertEquals(0, 
+            statistics.getStatistics().get(lastSampleStatisticsId()));
     }
 }

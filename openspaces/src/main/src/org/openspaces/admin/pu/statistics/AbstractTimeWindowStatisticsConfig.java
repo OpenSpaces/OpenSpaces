@@ -18,6 +18,7 @@
 package org.openspaces.admin.pu.statistics;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.openspaces.admin.pu.elastic.config.AbstractStatisticsConfig;
 
@@ -105,6 +106,19 @@ public abstract class AbstractTimeWindowStatisticsConfig
         if (getMinimumTimeWindowSeconds() > getTimeWindowSeconds()) {
             throw new IllegalStateException("minimumTimeWindowSeconds must be less or equals timeWindowSeconds");
         }
+    }
+    
+
+    @Override
+    public int getMaxNumberOfSamples(long statisticsPollingInterval, TimeUnit timeUnit) {
+        long intervalSeconds = timeUnit.toSeconds(statisticsPollingInterval);
+        
+        // #intervals = timewindow / interval
+        int numberOfPollingIntervals =
+                (int) Math.ceil(1.0*getMaximumTimeWindowSeconds()/intervalSeconds);
+
+        // number of samples is always one more than number of intervals
+        return 1 + numberOfPollingIntervals;
     }
 
 }

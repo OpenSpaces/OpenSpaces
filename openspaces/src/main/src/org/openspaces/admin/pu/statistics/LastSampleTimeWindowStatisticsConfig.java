@@ -2,6 +2,7 @@ package org.openspaces.admin.pu.statistics;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.openspaces.admin.internal.pu.statistics.StatisticsObjectList;
 import org.openspaces.admin.internal.pu.statistics.StatisticsObjectListFunction;
@@ -27,6 +28,11 @@ public class LastSampleTimeWindowStatisticsConfig
     @Override
     public Object calc(StatisticsObjectList values) {
         return values.getLast();
+    }
+
+    @Override
+    public int getMaxNumberOfSamples(long statisticsPollingInterval, TimeUnit timeUnit) {
+        return 1;
     }
 
 }

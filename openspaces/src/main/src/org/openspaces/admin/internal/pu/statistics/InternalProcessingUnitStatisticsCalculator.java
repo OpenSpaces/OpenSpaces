@@ -15,6 +15,8 @@
  *******************************************************************************/
 package org.openspaces.admin.internal.pu.statistics;
 
+import java.util.Collection;
+
 import org.openspaces.admin.internal.pu.ProcessingUnitStatistics;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
 
@@ -38,6 +40,6 @@ public interface InternalProcessingUnitStatisticsCalculator {
      *            
      * @param iterator - statistics Ids that require calculation
      */
-    void calculateNewStatistics(InternalProcessingUnitStatistics processingUnitStatistics, Iterable<ProcessingUnitStatisticsId> statisitcsIds);
+    void calculateNewStatistics(InternalProcessingUnitStatistics processingUnitStatistics, Collection<ProcessingUnitStatisticsId> statisitcsIds);
 
 }
