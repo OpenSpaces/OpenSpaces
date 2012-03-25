@@ -33,6 +33,7 @@ import org.openspaces.admin.internal.gsc.events.DefaultElasticGridServiceContain
 import org.openspaces.admin.internal.gsc.events.DefaultElasticGridServiceContainerProvisioningProgressChangedEvent;
 import org.openspaces.admin.internal.machine.events.DefaultElasticMachineProvisioningFailureEvent;
 import org.openspaces.admin.internal.machine.events.DefaultElasticMachineProvisioningProgressChangedEvent;
+import org.openspaces.admin.internal.pu.InternalProcessingUnit;
 import org.openspaces.admin.internal.pu.elastic.ElasticMachineIsolationConfig;
 import org.openspaces.admin.internal.pu.elastic.ProcessingUnitSchemaConfig;
 import org.openspaces.admin.internal.pu.elastic.ScaleStrategyConfigUtils;
@@ -72,7 +73,7 @@ public abstract class AbstractScaleStrategyBean implements
     
     // injected 
     private InternalAdmin admin;
-    private ProcessingUnit pu;
+    private InternalProcessingUnit pu;
     private ProcessingUnitSchemaConfig schemaConfig;
     private NonBlockingElasticMachineProvisioning machineProvisioning;
     private StringProperties properties;
@@ -118,11 +119,11 @@ public abstract class AbstractScaleStrategyBean implements
 
     @Override
     public void setProcessingUnit(ProcessingUnit pu) {
-        this.pu = pu;
+        this.pu = (InternalProcessingUnit) pu;
     }
 
 
-    protected ProcessingUnit getProcessingUnit() {
+    protected InternalProcessingUnit getProcessingUnit() {
         return pu;
     }
     
