@@ -115,6 +115,40 @@ public abstract class AbstractMachinesSlaPolicy extends ServiceLevelAgreementPol
         ((AbstractMachinesSlaPolicy)other).machinesCache.equals(machinesCache);
     }
 
+    @Override
+    public void validate() {
+        
+        if (this.containerMemoryCapacityInMB <= 0) {
+            throw new IllegalArgumentException("Container memory capacity must be defined.");
+        }
+        
+        if (this.machineProvisioning == null) {
+            throw new IllegalArgumentException("machine provisioning cannot be null");
+        }
+        
+        if (machineIsolation == null) {
+            throw new IllegalArgumentException("machine isolation cannot be null");
+        }
+        
+        if (this.maxNumberOfMachines < 0) {
+            throw new IllegalArgumentException("maximum number of machines cannot be " + getMaximumNumberOfMachines());
+        }
+        
+        if (minimumNumberOfMachines < 0) {
+            throw new IllegalArgumentException("minimum number of machines cannot be " + getMinimumNumberOfMachines());
+        }
+        
+        if (minimumNumberOfMachines > this.maxNumberOfMachines) {
+            throw new IllegalArgumentException(
+                    "minimum number of machines ("+getMinimumNumberOfMachines()+
+                    ") cannot be bigger than maximum number of machines ("+
+                    getMaximumNumberOfMachines()+")");
+        }
+        
+        if (this.machinesCache == null) {
+            throw new IllegalArgumentException("Provisioned agents cannot be null");
+        }
+    }
     public abstract boolean isStopMachineSupported();
 
     public abstract String getScaleStrategyName();

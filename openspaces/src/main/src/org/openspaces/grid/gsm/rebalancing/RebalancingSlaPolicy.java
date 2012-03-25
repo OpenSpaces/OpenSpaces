@@ -25,7 +25,6 @@ import org.openspaces.grid.gsm.capacity.ClusterCapacityRequirements;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementPolicy;
 
 public class RebalancingSlaPolicy extends ServiceLevelAgreementPolicy {
-
     
     private GridServiceContainer[] containers;
     private int maxNumberOfConcurrentRelocationsPerMachine;
@@ -63,13 +62,67 @@ public class RebalancingSlaPolicy extends ServiceLevelAgreementPolicy {
     public void setAllocatedCapacity(ClusterCapacityRequirements allocatedCapacity) {
         this.allocatedCapacity = allocatedCapacity;
     }
-    
-    public boolean equals(Object other) {
-        return other instanceof RebalancingSlaPolicy &&
-        ((RebalancingSlaPolicy)other).allocatedCapacity.equals(this.allocatedCapacity) &&
-        ((RebalancingSlaPolicy)other).maxNumberOfConcurrentRelocationsPerMachine == maxNumberOfConcurrentRelocationsPerMachine &&
-        ((RebalancingSlaPolicy)other).schema == schema &&
-        Arrays.asList(((RebalancingSlaPolicy)other).containers).equals(Arrays.asList(containers));
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((allocatedCapacity == null) ? 0 : allocatedCapacity.hashCode());
+        result = prime * result + Arrays.hashCode(containers);
+        result = prime * result + maxNumberOfConcurrentRelocationsPerMachine;
+        result = prime * result + ((schema == null) ? 0 : schema.hashCode());
+        return result;
     }
-   
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        RebalancingSlaPolicy other = (RebalancingSlaPolicy) obj;
+        if (allocatedCapacity == null) {
+            if (other.allocatedCapacity != null)
+                return false;
+        } else if (!allocatedCapacity.equals(other.allocatedCapacity))
+            return false;
+        if (!Arrays.equals(containers, other.containers))
+            return false;
+        if (maxNumberOfConcurrentRelocationsPerMachine != other.maxNumberOfConcurrentRelocationsPerMachine)
+            return false;
+        if (schema == null) {
+            if (other.schema != null)
+                return false;
+        } else if (!schema.equals(other.schema))
+            return false;
+        return true;
+    }
+
+    @Override
+    public void validate() throws IllegalArgumentException {
+
+        if (containers == null) {
+            throw new IllegalArgumentException ("containers cannot be null");
+        }
+        
+        if (maxNumberOfConcurrentRelocationsPerMachine <= 0) {
+            throw new IllegalArgumentException("maxNumberOfConcurrentRelocationsPerMachine must be positive");
+        }
+        
+        if (schema == null) {
+            throw new IllegalArgumentException("PU schema cannot be null");
+        }
+        
+        if (allocatedCapacity == null) {
+            throw new IllegalArgumentException("allocatedCapacity cannot be null");
+        }
+    }
 }

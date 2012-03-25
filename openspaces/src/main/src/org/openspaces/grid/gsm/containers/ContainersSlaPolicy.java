@@ -46,10 +46,54 @@ public class ContainersSlaPolicy extends ServiceLevelAgreementPolicy {
         return false;
     }
 
-    public boolean equals(Object other) {
-        return other instanceof ContainersSlaPolicy &&
-               ((ContainersSlaPolicy)other).newContainerConfig.equals(this.newContainerConfig) &&
-               ((ContainersSlaPolicy)other).clusterCapacityRequirements.equals(this.clusterCapacityRequirements);
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((clusterCapacityRequirements == null) ? 0 : clusterCapacityRequirements.hashCode());
+        result = prime * result + ((newContainerConfig == null) ? 0 : newContainerConfig.hashCode());
+        return result;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ContainersSlaPolicy other = (ContainersSlaPolicy) obj;
+        if (clusterCapacityRequirements == null) {
+            if (other.clusterCapacityRequirements != null)
+                return false;
+        } else if (!clusterCapacityRequirements.equals(other.clusterCapacityRequirements))
+            return false;
+        if (newContainerConfig == null) {
+            if (other.newContainerConfig != null)
+                return false;
+        } else if (!newContainerConfig.equals(other.newContainerConfig))
+            return false;
+        return true;
+    }
+
+    @Override
+    public void validate() throws IllegalArgumentException {
+        
+        if (newContainerConfig == null) {
+            throw new IllegalArgumentException("newContainerConfig cannot be null");
+        }
+        
+        if (newContainerConfig.getMaximumMemoryCapacityInMB() <=0) {
+            throw new IllegalArgumentException("newContainerConfig memory capacity cannot be zero.");
+        }
+        
+        if (newContainerConfig.getMaximumJavaHeapSizeInMB() <=0) {
+            throw new IllegalArgumentException("newContainerConfig memory capacity cannot be zero.");
+        }
+        
+        if (clusterCapacityRequirements == null) {
+            throw new IllegalArgumentException("clusterCapacityRequirements cannot be null");
+        }
+    }
 }

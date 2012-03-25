@@ -91,6 +91,8 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
         if (sla == null) {
             throw new IllegalArgumentException("sla cannot be null");
         }
+        
+        sla.validate();
    
         if (state.isDestroyedProcessingUnit(pu)) {
             throw new IllegalStateException("endpoint destroyed");

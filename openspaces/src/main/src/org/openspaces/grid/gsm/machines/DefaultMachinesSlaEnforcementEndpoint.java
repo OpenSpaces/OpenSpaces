@@ -222,36 +222,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             throw new IllegalArgumentException("SLA cannot be null");
         }
         
-        if (sla.getContainerMemoryCapacityInMB() <= 0) {
-            throw new IllegalArgumentException("Container memory capacity must be defined.");
-        }
-        
-        if (sla.getMachineProvisioning() == null) {
-            throw new IllegalArgumentException("machine provisioning cannot be null");
-        }
-        
-        if (sla.getMachineIsolation() == null) {
-            throw new IllegalArgumentException("machine isolation cannot be null");
-        }
-        
-        if (sla.getMaximumNumberOfMachines() < 0) {
-            throw new IllegalArgumentException("maximum number of machines cannot be " + sla.getMaximumNumberOfMachines());
-        }
-        
-        if (sla.getMinimumNumberOfMachines() < 0) {
-            throw new IllegalArgumentException("minimum number of machines cannot be " + sla.getMinimumNumberOfMachines());
-        }
-        
-        if (sla.getMinimumNumberOfMachines() > sla.getMaximumNumberOfMachines()) {
-            throw new IllegalArgumentException(
-                    "minimum number of machines ("+sla.getMinimumNumberOfMachines()+
-                    ") cannot be bigger than maximum number of machines ("+
-                    sla.getMaximumNumberOfMachines()+")");
-        }
-        
-        if (sla.getDiscoveredMachinesCache() == null) {
-            throw new IllegalArgumentException("Provisioned agents cannot be null");
-        }
+        sla.validate();
     }
     
     @Override

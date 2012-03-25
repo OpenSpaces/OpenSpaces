@@ -39,12 +39,40 @@ public class CapacityMachinesSlaPolicy extends AbstractMachinesSlaPolicy {
     public String getScaleStrategyName() {
         return "Manual Capacity Scale Strategy";
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((capacityRequirements == null) ? 0 : capacityRequirements.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        CapacityMachinesSlaPolicy other = (CapacityMachinesSlaPolicy) obj;
+        if (capacityRequirements == null) {
+            if (other.capacityRequirements != null)
+                return false;
+        } else if (!capacityRequirements.equals(other.capacityRequirements))
+            return false;
+        return true;
+    }
     
     @Override
-    public boolean equals(Object other) {
-        return other instanceof CapacityMachinesSlaPolicy &&
-        super.equals(other) &&
-        ((CapacityMachinesSlaPolicy)other).capacityRequirements.equals(capacityRequirements);
+    public void validate() throws IllegalArgumentException {
+        
+        super.validate();
+        
+        if (this.capacityRequirements == null) {
+            throw new IllegalArgumentException ("capacityRequirements cannot be null");
+        }
     }
 
 }

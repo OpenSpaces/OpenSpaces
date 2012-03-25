@@ -85,28 +85,28 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
     @Override
     public void enforceSla(ContainersSlaPolicy sla)
             throws ContainersSlaEnforcementInProgressException {
+        
         validateEndpointNotDestroyed(pu);
+        
+        validateSla(sla, pu);
+
+        enforceSlaInternal(sla);
+    }
+
+    private static void validateSla(ContainersSlaPolicy sla, ProcessingUnit pu) {
         if (sla == null) {
             throw new IllegalArgumentException("sla cannot be null");
         }
-
-        if (sla.getNewContainerConfig().getMaximumMemoryCapacityInMB() <=0) {
-            throw new IllegalStateException("container memory capacity cannot be zero.");
-        }
         
-        if (sla.getNewContainerConfig().getMaximumJavaHeapSizeInMB() <=0) {
-            throw new IllegalStateException("container memory capacity cannot be zero.");
-        }
+        sla.validate();
         
-        String[] zoneInContainerOptions = sla.getNewContainerConfig().getZones();
+        final String[] zoneInContainerOptions = sla.getNewContainerConfig().getZones();
 
-        String zone = ContainersSlaUtils.getContainerZone(pu);
+        final String zone = ContainersSlaUtils.getContainerZone(pu);
         if (zoneInContainerOptions.length != 1 || !zoneInContainerOptions[0].equals(zone)) {
             throw new IllegalArgumentException("sla zone is " + Arrays.toString(zoneInContainerOptions)
                     + " and instead it should be " + zone);
         }
-
-        enforceSlaInternal(sla);
     }
 
     public ProcessingUnit getProcessingUnit() {
