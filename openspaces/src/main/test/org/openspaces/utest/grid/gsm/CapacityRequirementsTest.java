@@ -21,9 +21,11 @@ import junit.framework.Assert;
 import junit.framework.TestCase;
 
 import org.junit.Test;
+import org.openspaces.admin.pu.elastic.config.CapacityRequirementConfig;
 import org.openspaces.core.internal.commons.math.fraction.Fraction;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.CpuCapacityRequirement;
+import org.openspaces.grid.gsm.capacity.DriveCapacityRequirement;
 import org.openspaces.grid.gsm.capacity.MemoryCapacityRequirement;
 
 public class CapacityRequirementsTest extends TestCase {
@@ -136,5 +138,22 @@ public class CapacityRequirementsTest extends TestCase {
     
     public void testSet() {
         Assert.assertEquals(MEMORY2_CPU2.subtract(MEMORY),MEMORY2_CPU2.set(new MemoryCapacityRequirement(1L)));
+    }
+    
+    public void testConfig() {
+        CapacityRequirements expectedCapacity = 
+                new CapacityRequirements(
+                        new MemoryCapacityRequirement(2L),
+                        new CpuCapacityRequirement(Fraction.TWO), 
+                        new DriveCapacityRequirement("c:\\", 1L),
+                        new DriveCapacityRequirement("/", 10L)
+               );
+        CapacityRequirementConfig config = new CapacityRequirementConfig(expectedCapacity);
+        Assert.assertEquals(2, config.getMemoryCapacityInMB());
+        Assert.assertEquals(2.0, config.getNumberOfCpuCores());
+        Assert.assertEquals(1L, (long) config.getDrivesCapacityInMB().get("c:\\"));
+        Assert.assertEquals(10L, (long) config.getDrivesCapacityInMB().get("/"));
+        CapacityRequirements dupCapacity = config.toCapacityRequirements();
+        Assert.assertEquals(expectedCapacity, dupCapacity);
     }
 }

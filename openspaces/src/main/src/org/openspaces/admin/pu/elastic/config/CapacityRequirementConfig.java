@@ -59,6 +59,7 @@ public class CapacityRequirementConfig implements ScaleStrategyCapacityRequireme
      * @param newCapacity
      */
     public CapacityRequirementConfig(CapacityRequirements newCapacity) {
+        this();
         long memoryInMB = 0;
         Map<String, Long> megaBytesPerDrive = new HashMap<String, Long>();
         double cpuCores = 0;
@@ -182,12 +183,14 @@ public class CapacityRequirementConfig implements ScaleStrategyCapacityRequireme
     @Override
     public CapacityRequirements toCapacityRequirements() {
        
-        CapacityRequirements capacityRequirements = new CapacityRequirements();
+        CapacityRequirements capacityRequirements = 
+          new CapacityRequirements()
+          .add(new MemoryCapacityRequirement(this.getMemoryCapacityInMB()))
+          .add(new CpuCapacityRequirement(this.getNumberOfCpuCores()));
         
-        capacityRequirements.add(new MemoryCapacityRequirement(this.getMemoryCapacityInMB()));
-        capacityRequirements.add(new CpuCapacityRequirement(this.getNumberOfCpuCores()));
         for (Entry<String, Long> pair : this.getDrivesCapacityInMB().entrySet()) {
-            capacityRequirements.add(new DriveCapacityRequirement(pair.getKey(), pair.getValue()));
+            capacityRequirements =capacityRequirements.add(
+                    new DriveCapacityRequirement(pair.getKey(), pair.getValue()));
         }
         
         return capacityRequirements;
