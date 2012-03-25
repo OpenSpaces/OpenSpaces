@@ -88,38 +88,51 @@ public class ManualCapacityScaleConfig
         return properties.getDouble(CPU_CAPACITY_CORES_KEY, CPU_CAPACITY_CORES_DEFAULT);
     }
 
+    @Override
     public void setPollingIntervalSeconds(int seconds) {
         ScaleStrategyConfigUtils.setPollingIntervalSeconds(properties,seconds);
     }
     
+    @Override
     public int getPollingIntervalSeconds() {
         return ScaleStrategyConfigUtils.getPollingIntervalSeconds(properties);
     }
 
+    @Override
     public int getMaxConcurrentRelocationsPerMachine() {
         return ScaleStrategyConfigUtils.getMaxConcurrentRelocationsPerMachine(properties);
     }
     
+    @Override
     public void setMaxConcurrentRelocationsPerMachine(int maxNumberOfConcurrentRelocationsPerMachine) {
         ScaleStrategyConfigUtils.setMaxConcurrentRelocationsPerMachine(properties, maxNumberOfConcurrentRelocationsPerMachine);
     }
 
+    
+    /*
+     * @see ManualCapacityScaleConfig#isAtMostOneContainerPerMachine()
+     */
+    @Deprecated
     public boolean isAtMostOneContainersPerMachine() {
+        return isAtMostOneContainerPerMachine();
+    }
+    
+    @Override
+    public boolean isAtMostOneContainerPerMachine() {
         return ScaleStrategyConfigUtils.isSingleContainerPerMachine(properties);
     }
 
-    /**
-     * When set to true, at most one Grid Service Container for this Processing Unit is started per machine.
-     * @since 8.0.3
-     */
+    @Override
     public void setAtMostOneContainerPerMachine(boolean atMostOneContainerPerMachine) {
         ScaleStrategyConfigUtils.setAtMostOneContainerPerMachine(properties, atMostOneContainerPerMachine);
     }
-    
+
+    @Override
     public Map<String,String> getProperties() {
         return properties.getProperties();
     }
 
+    @Override
     public void setProperties(Map<String, String> properties) {
         this.properties = new StringProperties(properties);
     }

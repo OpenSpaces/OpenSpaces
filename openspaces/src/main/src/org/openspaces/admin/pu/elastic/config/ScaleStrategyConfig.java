@@ -50,6 +50,14 @@ public interface ScaleStrategyConfig extends BeanConfig , Externalizable {
      */
     void setMaxConcurrentRelocationsPerMachine(int maxNumberOfConcurrentRelocationsPerMachine);
     
+    /**
+     * When set to true, at most one Grid Service Container for this Processing Unit is started per machine.
+     * @since 8.0.3
+     */
+    void setAtMostOneContainerPerMachine(boolean atMostOneContainerPerMachine);
+    
+    boolean isAtMostOneContainerPerMachine();
+    
     boolean equals(Object other);
     int hashCode();
     String toString();

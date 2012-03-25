@@ -41,7 +41,6 @@ public class EagerScaleConfig
     private static final long serialVersionUID = 1L;
  
     private StringProperties properties;
-    
     public EagerScaleConfig(Map<String, String> properties) {
         this.properties = new StringProperties(properties);
     }
@@ -49,48 +48,61 @@ public class EagerScaleConfig
     public EagerScaleConfig() {
         this(new HashMap<String,String>());
     }
-   
+    
+    @Override
     public int getPollingIntervalSeconds() {
         return ScaleStrategyConfigUtils.getPollingIntervalSeconds(properties);
     }
     
+    @Override
     public void setPollingIntervalSeconds(int pollingIntervalSeconds) {
         ScaleStrategyConfigUtils.setPollingIntervalSeconds(properties, pollingIntervalSeconds);
     }
-        
+    
+    @Override    
     public int getMaxConcurrentRelocationsPerMachine() {
         return ScaleStrategyConfigUtils.getMaxConcurrentRelocationsPerMachine(properties);
     }
     
+    @Override
     public void setMaxConcurrentRelocationsPerMachine(int maxNumberOfConcurrentRelocationsPerMachine) {
         ScaleStrategyConfigUtils.setMaxConcurrentRelocationsPerMachine(properties, maxNumberOfConcurrentRelocationsPerMachine);
     }
 
+    /*
+     * @see ManualCapacityScaleConfig#isAtMostOneContainerPerMachine()
+     */
+    @Deprecated
     public boolean isAtMostOneContainersPerMachine() {
+        return isAtMostOneContainerPerMachine();
+    }
+    
+    @Override
+    public boolean isAtMostOneContainerPerMachine() {
         return ScaleStrategyConfigUtils.isSingleContainerPerMachine(properties);
     }
 
-    /**
-     * When set to true, at most one Grid Service Container for this Processing Unit is started per machine.
-     * @since 8.0.3
-     */
+    @Override
     public void setAtMostOneContainerPerMachine(boolean atMostOneContainerPerMachine) {
         ScaleStrategyConfigUtils.setAtMostOneContainerPerMachine(properties, atMostOneContainerPerMachine);
     }
     
-    
+    @Override
     public void setProperties(Map<String, String> properties) {
         this.properties = new StringProperties(properties);
     }
 
+    @Override
     public Map<String,String> getProperties() {
         return properties.getProperties();
     }
 
+    @Override
     public String getBeanClassName() {
         return EagerScaleStrategyBean.class.getName();
     }
     
+    @Override
     public String toString() {
         return this.properties.toString();
     }
@@ -106,12 +118,13 @@ public class EagerScaleConfig
         return this.properties.hashCode();
     }
     
-
+    @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeObject(this.properties.getProperties());
     }
 
     @SuppressWarnings("unchecked")
+    @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         this.properties = new StringProperties((Map<String,String>)in.readObject());
     }
