@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.openspaces.admin.pu.elastic.config;
 
-import org.openspaces.admin.AdminException;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
 
 /**
@@ -42,16 +41,7 @@ public class AutomaticCapacityScaleRuleConfigurer {
     /**
      * @see AutomaticCapacityScaleRuleConfig#setLowThreshold(Object)
      */
-    public AutomaticCapacityScaleRuleConfigurer lowThreshold(Object lowThreshold) {
-        try {
-            if (lowThreshold.getClass().getConstructor(String.class) == null) {
-                throw new IllegalArgumentException("lowThreshold type (" + lowThreshold.getClass() +") does not have a constructor that accepts a String");
-            }
-        } catch (SecurityException e) {
-            throw new AdminException("Failed to verify low threshold class type",e);
-        } catch (NoSuchMethodException e) {
-            throw new AdminException("Failed to verify low threshold class type",e);
-        }
+    public AutomaticCapacityScaleRuleConfigurer lowThreshold(Comparable<?> lowThreshold) {
         config.setLowThreshold(lowThreshold);
         return this;
     }
@@ -59,16 +49,7 @@ public class AutomaticCapacityScaleRuleConfigurer {
     /**
      * @see AutomaticCapacityScaleRuleConfig#setHighThreshold(double)
      */
-    public AutomaticCapacityScaleRuleConfigurer highThreshold(Object highThreshold) {
-        try {
-            if (highThreshold.getClass().getConstructor(String.class) == null) {
-                throw new IllegalArgumentException("highThreshold type (" + highThreshold.getClass() +") does not have a constructor that accepts a String");
-            }
-        } catch (SecurityException e) {
-            throw new AdminException("Failed to verify low threshold class type",e);
-        } catch (NoSuchMethodException e) {
-            throw new AdminException("Failed to verify low threshold class type",e);
-        }
+    public AutomaticCapacityScaleRuleConfigurer highThreshold(Comparable<?> highThreshold) {
         config.setHighThreshold(highThreshold);
         return this;
     }

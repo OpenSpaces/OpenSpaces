@@ -68,29 +68,30 @@ public class AutomaticCapacityScaleRuleConfig
 
     /**
      * Defines a low threshold that triggers an increase or decrease of capacity
-     * @param lowThreshold - An Object of a Class that has a constructor accepting a String as a single argument.
+     * @param lowThreshold - An Object of a Class that implements Comparable and has a constructor accepting a String as a single argument.
      * @see setLowThresholdCapacityDecrease
      * @see setLowThresholdCapacityIncrease
      */
-    public void setLowThreshold(Object lowThreshold) {
+    public void setLowThreshold(Comparable<?> lowThreshold) {
         properties.putStringWrapperObject(LOW_THRESHOLD_KEY, lowThreshold);        
     }
     
-    public Object getLowThreshold() {
-        return properties.getStringWrapperObject(LOW_THRESHOLD_KEY, LOW_THRESHOLD_DEFAULT);
+    public Comparable<?> getLowThreshold() {
+        return (Comparable<?>) properties.getStringWrapperObject(LOW_THRESHOLD_KEY, LOW_THRESHOLD_DEFAULT);
     }
     
     /**
      * Defines a high threshold that triggers an increase or decrease of capacity
+     * @param highThreshold - An Object of a Class that implements Comparable and has a constructor accepting a String as a single argument.
      * @see setLowThresholdCapacityDecrease
      * @see setLowThresholdCapacityIncrease
      */
-    public void setHighThreshold(Object highThreshold) {
+    public void setHighThreshold(Comparable<?> highThreshold) {
         properties.putStringWrapperObject(HIGH_THRESHOLD_KEY, highThreshold);        
     }
     
-    public Object getHighThreshold() {
-        return properties.getStringWrapperObject(HIGH_THRESHOLD_KEY, HIGH_THRESHOLD_DEFAULT);
+    public Comparable<?> getHighThreshold() {
+        return (Comparable<?>) properties.getStringWrapperObject(HIGH_THRESHOLD_KEY, HIGH_THRESHOLD_DEFAULT);
     }
     
     public Map<String, String> getProperties() {
