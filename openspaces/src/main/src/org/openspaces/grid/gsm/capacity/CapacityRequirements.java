@@ -194,11 +194,6 @@ public class CapacityRequirements {
         
         return new CapacityRequirements(newRequirements.toArray(new CapacityRequirement[newRequirements.size()]));
     }
-    
-
-    public CapacityRequirements add(MemoryCapacityRequirement memoryCapacityRequirement) {
-        return add(new CapacityRequirements(memoryCapacityRequirement));
-    }
 
     public CapacityRequirements min(CapacityRequirements otherRequirements) {
 
