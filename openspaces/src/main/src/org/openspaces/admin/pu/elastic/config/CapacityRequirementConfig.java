@@ -55,6 +55,44 @@ public class CapacityRequirementConfig implements ScaleStrategyCapacityRequireme
         this.properties = new StringProperties(properties);
     }
     
+    /**
+     * @param newCapacity
+     */
+    public CapacityRequirementConfig(CapacityRequirements newCapacity) {
+        long memoryInMB = 0;
+        Map<String, Long> megaBytesPerDrive = new HashMap<String, Long>();
+        double cpuCores = 0;
+        for (CapacityRequirement capacityRequirement : newCapacity.getRequirements()) {
+            if (capacityRequirement instanceof MemoryCapacityRequirement) {
+                MemoryCapacityRequirement memoryCapacityRequirement = (MemoryCapacityRequirement) capacityRequirement;
+                memoryInMB +=memoryCapacityRequirement.getMemoryInMB(); 
+            }
+            else if (capacityRequirement instanceof DriveCapacityRequirement) {
+                DriveCapacityRequirement driveCapacityRequirement = (DriveCapacityRequirement) capacityRequirement;
+                megaBytesPerDrive.put(driveCapacityRequirement.getDrive(), driveCapacityRequirement.getDriveCapacityInMB());
+            }
+            else if (capacityRequirement instanceof CpuCapacityRequirement) {
+                CpuCapacityRequirement cpuCapacityRequirement = (CpuCapacityRequirement) capacityRequirement;
+                cpuCores += cpuCapacityRequirement.getCpu().doubleValue();
+            }
+            else {
+                throw new IllegalArgumentException("Cannot convert " + capacityRequirement.getClass() + "(" + capacityRequirement + ") into " + this.getClass());
+            }
+        }
+        
+        if (memoryInMB > 0) {
+            setMemoryCapacityInMB(memoryInMB);
+        }
+        
+        if (!megaBytesPerDrive.isEmpty()) {
+            setDrivesCapacityInMB(megaBytesPerDrive);
+        }
+        
+        if (cpuCores > 0) {
+            setNumberOfCpuCores(cpuCores);
+        }
+    }
+
     @Override
     public void setMemoryCapacityInMB(long memory) {
         properties.putLong(MEMORY_CAPACITY_MEGABYTES_KEY, memory);
@@ -139,10 +177,6 @@ public class CapacityRequirementConfig implements ScaleStrategyCapacityRequireme
         } else if (!properties.equals(other.properties))
             return false;
         return true;
-    }
-
-    public CapacityRequirement toCapacityRequirement() {
-     throw new UnsupportedOperationException("Not implemented");   
     }
 
     @Override
