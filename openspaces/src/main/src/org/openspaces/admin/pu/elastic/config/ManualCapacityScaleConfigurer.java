@@ -18,6 +18,7 @@
 package org.openspaces.admin.pu.elastic.config;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.openspaces.core.util.MemoryUnit;
 
@@ -104,8 +105,8 @@ public class ManualCapacityScaleConfigurer implements ScaleStrategyConfigurer<Ma
     }
 
     @Override
-    public ManualCapacityScaleConfigurer pollingIntervalSeconds(int pollingIntervalSeconds) {
-        config.setPollingIntervalSeconds(pollingIntervalSeconds);
+    public ManualCapacityScaleConfigurer pollingInterval(long pollingInterval, TimeUnit timeUnit) {
+        config.setPollingIntervalSeconds((int)timeUnit.toSeconds(pollingInterval));
         return this;
     }
     public ManualCapacityScaleConfig create() {

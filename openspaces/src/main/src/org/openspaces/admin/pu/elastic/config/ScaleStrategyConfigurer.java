@@ -17,6 +17,8 @@
  ******************************************************************************/
 package org.openspaces.admin.pu.elastic.config;
 
+import java.util.concurrent.TimeUnit;
+
 import org.openspaces.admin.bean.BeanConfigurer;
 
 public interface ScaleStrategyConfigurer<T extends ScaleStrategyConfig> extends BeanConfigurer<T> {
@@ -29,8 +31,8 @@ public interface ScaleStrategyConfigurer<T extends ScaleStrategyConfig> extends 
     /**
      * @see ScaleStrategyConfig#setPollingIntervalSeconds(int)
      */
-    ScaleStrategyConfigurer<T> pollingIntervalSeconds(int pollingIntervalSeconds);
-
+    ScaleStrategyConfigurer<T> pollingInterval(long pollingInterval, TimeUnit timeUnit);
+    
     /**
      * @see ScaleStrategyConfig#setAtMostOneContainerPerMachine(boolean)
      */

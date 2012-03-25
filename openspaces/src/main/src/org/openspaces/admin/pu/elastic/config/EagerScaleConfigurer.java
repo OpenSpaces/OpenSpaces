@@ -17,6 +17,8 @@
  ******************************************************************************/
 package org.openspaces.admin.pu.elastic.config;
 
+import java.util.concurrent.TimeUnit;
+
 
 
 /**
@@ -57,8 +59,8 @@ public class EagerScaleConfigurer implements ScaleStrategyConfigurer<EagerScaleC
     }
 
     @Override
-    public EagerScaleConfigurer pollingIntervalSeconds(int pollingIntervalSeconds) {
-        config.setPollingIntervalSeconds(pollingIntervalSeconds);
+    public EagerScaleConfigurer pollingInterval(long pollingInterval, TimeUnit timeUnit) {
+        config.setPollingIntervalSeconds((int) timeUnit.toSeconds(pollingInterval));
         return this;
     }
     
