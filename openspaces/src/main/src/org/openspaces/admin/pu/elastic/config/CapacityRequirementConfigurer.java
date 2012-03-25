@@ -67,4 +67,7 @@ public class CapacityRequirementConfigurer implements ScaleStrategyCapacityRequi
         config.setDrivesCapacityInMB(drivesCapacityInMB);
     }
 
+    public CapacityRequirementConfig create() {
+        return this.config;
+    }
 }
