@@ -225,6 +225,13 @@ public abstract class AbstractScaleStrategyBean implements
         provisionedMachines = new ElasticMachineProvisioningDiscoveredMachinesCache(pu,machineProvisioning, discoveryQuiteMode, getPollingIntervalSeconds());
         
         isScaleInProgress = true;
+
+        // Notice that we start the thread before derived implementation of #afterPropertiesSet
+        // complete.
+        // This is ok as long as #afterPropertiesSet is called on the same thread
+        // as #run() would be called (which is the single thread admin)
+        // InternalAdmin#assertStateChangesPermitted() validates just that
+        ((InternalAdmin)admin).assertStateChangesPermitted();
         
         scheduledTask = 
             admin.scheduleWithFixedDelayNonBlockingStateChange(
@@ -236,6 +243,7 @@ public abstract class AbstractScaleStrategyBean implements
         logger.debug(pu.getName() + " is being monitored for SLA violations every " + getPollingIntervalSeconds() + " seconds");
     }
 
+    @Override
     public void destroy() {
         
         if (scheduledTask != null) {
