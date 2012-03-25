@@ -32,12 +32,13 @@ public class ManualCapacityScaleStrategyBean extends AbstractCapacityScaleStrate
     @Override
     public void afterPropertiesSet() {
         
+        super.afterPropertiesSet();
+        
         ManualCapacityScaleConfig manualCapacityScaleConfig = getConfig();
         
         setCapacityRequirementConfig(manualCapacityScaleConfig);
         setScaleStrategyConfig(manualCapacityScaleConfig);
         
-        super.afterPropertiesSet();
     }
     
     @Override
