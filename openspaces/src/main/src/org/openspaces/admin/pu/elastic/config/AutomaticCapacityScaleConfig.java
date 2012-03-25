@@ -166,12 +166,12 @@ public class AutomaticCapacityScaleConfig
      * The result of a scaling rule result that decreases capacity will never
      * breach the minimum scale capacity.  
      */
-    public void setMinCapacity(CapacityRequirementConfig minCapacity) {
+    public void setMinCapacity(CapacityRequirementsConfig minCapacity) {
        properties.putMap(MIN_CAPACITY_KEY_PREFIX, minCapacity.getProperties());
     }
 
-    public CapacityRequirementConfig getMinCapacity() {
-        return new CapacityRequirementConfig(properties.getMap(MIN_CAPACITY_KEY_PREFIX, EMPTY_CAPACITY));
+    public CapacityRequirementsConfig getMinCapacity() {
+        return new CapacityRequirementsConfig(properties.getMap(MIN_CAPACITY_KEY_PREFIX, EMPTY_CAPACITY));
     }
 
     /**
@@ -181,7 +181,7 @@ public class AutomaticCapacityScaleConfig
      * The result of a scaling rule result that increases capacity will never
      * breach the maximum scale capacity.  
      */
-    public void setMaxCapacity(CapacityRequirementConfig maxCapacity) {
+    public void setMaxCapacity(CapacityRequirementsConfig maxCapacity) {
         properties.putMap(MAX_CAPACITY_KEY_PREFIX, maxCapacity.getProperties());
     }
 
@@ -211,8 +211,8 @@ public class AutomaticCapacityScaleConfig
         return RULE_KEY + i +".";
     }
 
-    public CapacityRequirementConfig getMaxCapacity() {
-        return new CapacityRequirementConfig(properties.getMap(MAX_CAPACITY_KEY_PREFIX, EMPTY_CAPACITY));
+    public CapacityRequirementsConfig getMaxCapacity() {
+        return new CapacityRequirementsConfig(properties.getMap(MAX_CAPACITY_KEY_PREFIX, EMPTY_CAPACITY));
     }
     
     @Override

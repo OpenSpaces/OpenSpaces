@@ -21,7 +21,7 @@ import junit.framework.Assert;
 import junit.framework.TestCase;
 
 import org.junit.Test;
-import org.openspaces.admin.pu.elastic.config.CapacityRequirementConfig;
+import org.openspaces.admin.pu.elastic.config.CapacityRequirementsConfig;
 import org.openspaces.core.internal.commons.math.fraction.Fraction;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.CpuCapacityRequirement;
@@ -148,7 +148,7 @@ public class CapacityRequirementsTest extends TestCase {
                         new DriveCapacityRequirement("c:\\", 1L),
                         new DriveCapacityRequirement("/", 10L)
                );
-        CapacityRequirementConfig config = new CapacityRequirementConfig(expectedCapacity);
+        CapacityRequirementsConfig config = new CapacityRequirementsConfig(expectedCapacity);
         Assert.assertEquals(2, config.getMemoryCapacityInMB());
         Assert.assertEquals(2.0, config.getNumberOfCpuCores());
         Assert.assertEquals(1L, (long) config.getDrivesCapacityInMB().get("c:\\"));

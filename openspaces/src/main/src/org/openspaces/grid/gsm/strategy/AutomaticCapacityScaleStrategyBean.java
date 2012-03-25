@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.pu.elastic.config.AutomaticCapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.config.AutomaticCapacityScaleRuleConfig;
-import org.openspaces.admin.pu.elastic.config.CapacityRequirementConfig;
+import org.openspaces.admin.pu.elastic.config.CapacityRequirementsConfig;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
 import org.openspaces.admin.pu.statistics.TimeWindowStatisticsConfig;
 import org.openspaces.grid.gsm.autoscaling.AutoScalingSlaEnforcementEndpoint;
@@ -87,7 +87,7 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
         final CapacityRequirements capacityRequirements = super.getCapacityRequirementConfig().toCapacityRequirements();
         final CapacityRequirements newCapacityRequirements = enforceAutoScalingSla(capacityRequirements);
         if (!newCapacityRequirements.equals(capacityRequirements)) {
-            super.setCapacityRequirementConfig(new CapacityRequirementConfig(newCapacityRequirements));
+            super.setCapacityRequirementConfig(new CapacityRequirementsConfig(newCapacityRequirements));
             super.enforceCapacityRequirement();
         }
         

@@ -24,8 +24,8 @@ import org.openspaces.admin.pu.elastic.config.AutomaticCapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.config.AutomaticCapacityScaleConfigurer;
 import org.openspaces.admin.pu.elastic.config.AutomaticCapacityScaleRuleConfig;
 import org.openspaces.admin.pu.elastic.config.AutomaticCapacityScaleRuleConfigurer;
-import org.openspaces.admin.pu.elastic.config.CapacityRequirementConfig;
-import org.openspaces.admin.pu.elastic.config.CapacityRequirementConfigurer;
+import org.openspaces.admin.pu.elastic.config.CapacityRequirementsConfig;
+import org.openspaces.admin.pu.elastic.config.CapacityRequirementsConfigurer;
 import org.openspaces.admin.pu.statistics.AverageInstancesStatisticsConfig;
 import org.openspaces.admin.pu.statistics.AverageTimeWindowStatisticsConfigurer;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
@@ -80,7 +80,7 @@ public class AutomaticCapacityScaleConfigurerTest extends TestCase {
         Assert.assertEquals(1.0,dupRule.getLowThreshold());
         Assert.assertEquals(10.0,dupRule.getHighThreshold());
                 
-         CapacityRequirementConfig capacity = new CapacityRequirementConfigurer()
+         CapacityRequirementsConfig capacity = new CapacityRequirementsConfigurer()
         .memoryCapacity(1,MemoryUnit.GIGABYTES)
         .create();
         AutomaticCapacityScaleConfig config = new AutomaticCapacityScaleConfigurer()

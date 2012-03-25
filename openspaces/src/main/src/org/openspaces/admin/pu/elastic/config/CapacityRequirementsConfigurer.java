@@ -24,39 +24,39 @@ import org.openspaces.core.util.MemoryUnit;
  * @author itaif
  * @since 9.0.0
  */
-public class CapacityRequirementConfigurer implements ScaleStrategyCapacityRequirementConfigurer {
+public class CapacityRequirementsConfigurer implements ScaleStrategyCapacityRequirementConfigurer {
 
-    private CapacityRequirementConfig config;
+    private CapacityRequirementsConfig config;
 
-    public CapacityRequirementConfigurer() {
-        this.config = new CapacityRequirementConfig();
+    public CapacityRequirementsConfigurer() {
+        this.config = new CapacityRequirementsConfig();
     }
     @Override
-    public CapacityRequirementConfigurer memoryCapacity(String memory) {
+    public CapacityRequirementsConfigurer memoryCapacity(String memory) {
         config.setMemoryCapacityInMB(MemoryUnit.toMegaBytes(memory));
         return this;
     }
 
     @Override
-    public CapacityRequirementConfigurer memoryCapacity(int memory, MemoryUnit unit) {
+    public CapacityRequirementsConfigurer memoryCapacity(int memory, MemoryUnit unit) {
         config.setMemoryCapacityInMB(unit.toMegaBytes(memory));
         return this;
     }
    
     @Override
-    public CapacityRequirementConfigurer numberOfCpuCores(double cpuCores) {
+    public CapacityRequirementsConfigurer numberOfCpuCores(double cpuCores) {
         config.setNumberOfCpuCores(cpuCores);
         return this;
     }
     
     @Override
-    public CapacityRequirementConfigurer driveCapacity(String drive, int size, MemoryUnit unit) {
+    public CapacityRequirementsConfigurer driveCapacity(String drive, int size, MemoryUnit unit) {
         setDriveCapacity(drive, unit.toMegaBytes(size));
         return this;
     }
     
     @Override
-    public CapacityRequirementConfigurer driveCapacity(String drive, String size) {
+    public CapacityRequirementsConfigurer driveCapacity(String drive, String size) {
         setDriveCapacity(drive, MemoryUnit.toMegaBytes(size));
         return this;
     }
@@ -67,7 +67,7 @@ public class CapacityRequirementConfigurer implements ScaleStrategyCapacityRequi
         config.setDrivesCapacityInMB(drivesCapacityInMB);
     }
 
-    public CapacityRequirementConfig create() {
+    public CapacityRequirementsConfig create() {
         return this.config;
     }
 }

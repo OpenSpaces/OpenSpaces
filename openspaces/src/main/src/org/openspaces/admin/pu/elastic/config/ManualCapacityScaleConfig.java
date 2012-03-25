@@ -45,7 +45,7 @@ public class ManualCapacityScaleConfig
 
     private static final long serialVersionUID = 1L;
 
-    private CapacityRequirementConfig capacityRequirementConfig;
+    private CapacityRequirementsConfig capacityRequirementConfig;
     
     private StringProperties properties;
     
@@ -126,7 +126,7 @@ public class ManualCapacityScaleConfig
     @Override
     public void setProperties(Map<String, String> properties) {
         this.properties = new StringProperties(properties);
-        this.capacityRequirementConfig = new CapacityRequirementConfig(properties);
+        this.capacityRequirementConfig = new CapacityRequirementsConfig(properties);
     }
 
     @Override

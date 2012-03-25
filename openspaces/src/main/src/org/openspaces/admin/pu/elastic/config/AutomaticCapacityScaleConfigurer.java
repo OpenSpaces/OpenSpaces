@@ -74,12 +74,12 @@ public class AutomaticCapacityScaleConfigurer implements ScaleStrategyConfigurer
         return this;
     }
     
-    public AutomaticCapacityScaleConfigurer minCapacity(CapacityRequirementConfig minCapacity) {
+    public AutomaticCapacityScaleConfigurer minCapacity(CapacityRequirementsConfig minCapacity) {
         config.setMinCapacity(minCapacity);
         return this;
     }
     
-    public AutomaticCapacityScaleConfigurer maxCapacity(CapacityRequirementConfig maxCapacity) {
+    public AutomaticCapacityScaleConfigurer maxCapacity(CapacityRequirementsConfig maxCapacity) {
         config.setMaxCapacity(maxCapacity);
         return this;
     }

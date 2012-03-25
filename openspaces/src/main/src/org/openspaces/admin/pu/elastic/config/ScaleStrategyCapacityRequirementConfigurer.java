@@ -23,8 +23,8 @@ import org.openspaces.grid.gsm.capacity.CapacityRequirement;
  * @author itaif
  * @since 9.0.0
  * @see CapacityRequirement
- * @see CapacityRequirementConfig
- * @see CapacityRequirementConfigurer
+ * @see CapacityRequirementsConfig
+ * @see CapacityRequirementsConfigurer
  */
 public interface ScaleStrategyCapacityRequirementConfigurer {
 

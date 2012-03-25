@@ -31,7 +31,7 @@ import org.openspaces.grid.gsm.capacity.MemoryCapacityRequirement;
  * @author itaif
  * @since 9.0.0
  */
-public class CapacityRequirementConfig implements ScaleStrategyCapacityRequirementConfig {
+public class CapacityRequirementsConfig implements ScaleStrategyCapacityRequirementConfig {
 
     private static final String MEMORY_CAPACITY_MEGABYTES_KEY = "memory-capacity-megabytes";
     private static final int MEMORY_CAPACITY_MEGABYTES_DEFAULT = 0;
@@ -47,18 +47,18 @@ public class CapacityRequirementConfig implements ScaleStrategyCapacityRequireme
     /**
      * Default constructor
      */
-    public CapacityRequirementConfig() {
+    public CapacityRequirementsConfig() {
         this.properties = new StringProperties();
     }
     
-    public CapacityRequirementConfig(Map<String,String> properties) {
+    public CapacityRequirementsConfig(Map<String,String> properties) {
         this.properties = new StringProperties(properties);
     }
     
     /**
      * @param newCapacity
      */
-    public CapacityRequirementConfig(CapacityRequirements newCapacity) {
+    public CapacityRequirementsConfig(CapacityRequirements newCapacity) {
         this();
         long memoryInMB = 0;
         Map<String, Long> megaBytesPerDrive = new HashMap<String, Long>();
@@ -171,7 +171,7 @@ public class CapacityRequirementConfig implements ScaleStrategyCapacityRequireme
             return false;
         if (getClass() != obj.getClass())
             return false;
-        CapacityRequirementConfig other = (CapacityRequirementConfig) obj;
+        CapacityRequirementsConfig other = (CapacityRequirementsConfig) obj;
         if (properties == null) {
             if (other.properties != null)
                 return false;
