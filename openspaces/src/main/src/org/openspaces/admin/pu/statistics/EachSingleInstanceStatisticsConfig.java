@@ -15,6 +15,7 @@
  *******************************************************************************/
 package org.openspaces.admin.pu.statistics;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -26,6 +27,10 @@ public class EachSingleInstanceStatisticsConfig
     extends AbstractInstancesStatisticsConfig 
     implements InstancesStatisticsConfig {
 
+    public EachSingleInstanceStatisticsConfig() {
+        this(new HashMap<String,String>());
+    }
+    
     public EachSingleInstanceStatisticsConfig(Map<String,String> properties) {
         super(properties);
     }
