@@ -2,7 +2,6 @@ package org.openspaces.admin.pu.statistics;
 
 import java.util.Map;
 
-import org.openspaces.admin.internal.pu.statistics.InternalTimeWindowStatisticsConfig;
 import org.openspaces.core.util.StringProperties;
 
 
@@ -120,11 +119,10 @@ public class ProcessingUnitStatisticsId {
      * @throws IllegalStateException - if state is found to be illegal
      */
     public void validate() throws IllegalStateException {
-        InternalTimeWindowStatisticsConfig timeWindowStatistics = (InternalTimeWindowStatisticsConfig)getTimeWindowStatistics();
-        if (timeWindowStatistics == null) {
+        if (getTimeWindowStatistics() == null) {
             throw new IllegalStateException("timeWindowStatistics cannot be null");
         }
-        timeWindowStatistics.validate();
+        getTimeWindowStatistics().validate();
         
         InstancesStatisticsConfig instancesStatistics = (InstancesStatisticsConfig)getInstancesStatistics();
         if (instancesStatistics == null) {

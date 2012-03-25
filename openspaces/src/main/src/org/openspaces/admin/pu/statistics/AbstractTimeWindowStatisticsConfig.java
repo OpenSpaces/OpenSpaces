@@ -19,7 +19,6 @@ package org.openspaces.admin.pu.statistics;
 
 import java.util.Map;
 
-import org.openspaces.admin.internal.pu.statistics.InternalTimeWindowStatisticsConfig;
 import org.openspaces.admin.pu.elastic.config.AbstractStatisticsConfig;
 
 /**
@@ -29,7 +28,7 @@ import org.openspaces.admin.pu.elastic.config.AbstractStatisticsConfig;
  */
 public abstract class AbstractTimeWindowStatisticsConfig 
     extends AbstractStatisticsConfig
-    implements InternalTimeWindowStatisticsConfig {
+    implements TimeWindowStatisticsConfig {
 
     protected AbstractTimeWindowStatisticsConfig(Map<String, String> properties) {
         super(properties);

@@ -3,14 +3,13 @@ package org.openspaces.admin.pu.statistics;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.openspaces.admin.internal.pu.statistics.InternalTimeWindowStatisticsConfig;
 import org.openspaces.admin.internal.pu.statistics.StatisticsObjectList;
 import org.openspaces.admin.internal.pu.statistics.StatisticsObjectListFunction;
 import org.openspaces.admin.pu.elastic.config.AbstractStatisticsConfig;
 
 public class LastSampleTimeWindowStatisticsConfig
         extends AbstractStatisticsConfig
-        implements InternalTimeWindowStatisticsConfig , StatisticsObjectListFunction {
+        implements TimeWindowStatisticsConfig , StatisticsObjectListFunction {
    
     public LastSampleTimeWindowStatisticsConfig() {
         this(new HashMap<String,String>());

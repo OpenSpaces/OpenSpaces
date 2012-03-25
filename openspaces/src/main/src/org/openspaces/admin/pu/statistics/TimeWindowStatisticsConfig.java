@@ -26,4 +26,11 @@ import java.util.Map;
 public interface TimeWindowStatisticsConfig {
     
     Map<String,String> getProperties();
+
+    /**
+     * Checks the content of this config is valid.
+     * @throws IllegalStateException - if state is found to be illegal
+     */
+    void validate() throws IllegalStateException;
+
 }

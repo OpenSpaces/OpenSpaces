@@ -45,7 +45,7 @@ public class TimeWindowStatisticsCalculator implements InternalProcessingUnitSta
             final InternalProcessingUnitStatistics processingUnitStatistics,
             final Iterable<ProcessingUnitStatisticsId> statisticsIds) {
         
-        Map<ProcessingUnitStatisticsId, Set<InternalTimeWindowStatisticsConfig>> timeWindowStatisticsPerErasedStatisticsId = eraseTimeWindowStatistics(statisticsIds);
+        Map<ProcessingUnitStatisticsId, Set<TimeWindowStatisticsConfig>> timeWindowStatisticsPerErasedStatisticsId = eraseTimeWindowStatistics(statisticsIds);
         Set<ProcessingUnitStatisticsId> erasedStatisticsIds = timeWindowStatisticsPerErasedStatisticsId.keySet();
         Map<ProcessingUnitStatisticsId, StatisticsObjectList> valuesPerErasedStatisticsId = getValues(processingUnitStatistics, erasedStatisticsIds);
         
@@ -54,7 +54,7 @@ public class TimeWindowStatisticsCalculator implements InternalProcessingUnitSta
             ProcessingUnitStatisticsId erasedStatisticsId = pair.getKey();
             StatisticsObjectList values = pair.getValue();
             
-            for (InternalTimeWindowStatisticsConfig timeWindowStatistics : timeWindowStatisticsPerErasedStatisticsId.get(erasedStatisticsId)) {
+            for (TimeWindowStatisticsConfig timeWindowStatistics : timeWindowStatisticsPerErasedStatisticsId.get(erasedStatisticsId)) {
                 
                 if (timeWindowStatistics instanceof StatisticsObjectListFunction) {
                     StatisticsObjectListFunction statisticsFunc = (StatisticsObjectListFunction) timeWindowStatistics;
@@ -70,18 +70,18 @@ public class TimeWindowStatisticsCalculator implements InternalProcessingUnitSta
     /**
      * Groups statisticsIds by replacing their TimeWindowStatistics with {@link ErasedTimeWindowStatisticsConfig}
      */
-    private Map<ProcessingUnitStatisticsId,Set<InternalTimeWindowStatisticsConfig>> eraseTimeWindowStatistics(Iterable<ProcessingUnitStatisticsId> statisticsIds) {
+    private Map<ProcessingUnitStatisticsId,Set<TimeWindowStatisticsConfig>> eraseTimeWindowStatistics(Iterable<ProcessingUnitStatisticsId> statisticsIds) {
 
-        Map<ProcessingUnitStatisticsId, Set<InternalTimeWindowStatisticsConfig>> groupBy = new HashMap<ProcessingUnitStatisticsId, Set<InternalTimeWindowStatisticsConfig>>();
+        Map<ProcessingUnitStatisticsId, Set<TimeWindowStatisticsConfig>> groupBy = new HashMap<ProcessingUnitStatisticsId, Set<TimeWindowStatisticsConfig>>();
         for (ProcessingUnitStatisticsId statisticsId : statisticsIds) {
 
             ProcessingUnitStatisticsId key = erase(statisticsId);
 
             if (!groupBy.containsKey(key)) {
-                groupBy.put(key, new HashSet<InternalTimeWindowStatisticsConfig>());
+                groupBy.put(key, new HashSet<TimeWindowStatisticsConfig>());
             }
 
-            groupBy.get(key).add((InternalTimeWindowStatisticsConfig)statisticsId.getTimeWindowStatistics());
+            groupBy.get(key).add(statisticsId.getTimeWindowStatistics());
 
         }
         return groupBy;
