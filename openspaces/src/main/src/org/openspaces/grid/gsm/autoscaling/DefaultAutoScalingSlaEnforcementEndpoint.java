@@ -29,6 +29,7 @@ import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.autoscaling.exceptions.AutoScalingSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.autoscaling.exceptions.AutoScalingStatisticsException;
 import org.openspaces.grid.gsm.autoscaling.exceptions.ReachedMaximumCapacityAutoScalingException;
+import org.openspaces.grid.gsm.autoscaling.exceptions.ReachedMinimumCapacityAutoScalingException;
 import org.openspaces.grid.gsm.autoscaling.exceptions.RulesConflictAutoScalingException;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 
@@ -74,11 +75,11 @@ public class DefaultAutoScalingSlaEnforcementEndpoint implements AutoScalingSlaE
                 
         Map<AutomaticCapacityScaleRuleConfig,Object> valuesBelowLowThresholdPerRule = new HashMap<AutomaticCapacityScaleRuleConfig, Object>();
         Map<AutomaticCapacityScaleRuleConfig,Object> valuesAboveHighThresholdPerRule = new HashMap<AutomaticCapacityScaleRuleConfig, Object>();
-        
-        
+         
         for (AutomaticCapacityScaleRuleConfig rule: sla.getRules()) {
 
             ProcessingUnitStatisticsId statisticsId = rule.getStatistics();
+            //Object value = statistics.get(statisticsId);
             Object value = AutoScalingSlaUtils.getStatisticsValue(pu, statistics, statisticsId);
                         
             boolean belowLowThreshold = isBelowLowThreshold(rule, value);
@@ -104,6 +105,8 @@ public class DefaultAutoScalingSlaEnforcementEndpoint implements AutoScalingSlaE
                 }
             }
         }
+
+        CapacityRequirements existingCapacity = sla.getCapacityRequirements();
         
         //TODO: Perform forward looking (linear extrapolation of samples) to prevent case of rules resonance
         //      one rule scaling out another scaling down
@@ -111,7 +114,6 @@ public class DefaultAutoScalingSlaEnforcementEndpoint implements AutoScalingSlaE
             throw new RulesConflictAutoScalingException(pu, valuesBelowLowThresholdPerRule, valuesAboveHighThresholdPerRule);
         }
         else if (!valuesAboveHighThresholdPerRule.isEmpty()) {
-            CapacityRequirements existingCapacity = sla.getCapacityRequirements();
             CapacityRequirements newCapacity = existingCapacity.add(sla.getHighThresholdBreachedIncrease());
             CapacityRequirements maxCapacity = sla.getMaxCapacity();
             
@@ -129,10 +131,26 @@ public class DefaultAutoScalingSlaEnforcementEndpoint implements AutoScalingSlaE
             }
             return newCapacity;
         }
-        //TODO: Monitor statistics against lowThreshold.
-        
-        return sla.getCapacityRequirements();
+        else if (!valuesBelowLowThresholdPerRule.isEmpty()) {
+            CapacityRequirements newCapacity = existingCapacity.subtractOrZero(sla.getLowThresholdBreachedDecrease());
+            CapacityRequirements minCapacity = sla.getMinCapacity();
+            
+            if (minCapacity.greaterThan(newCapacity)) {
+                //apply min capacity restriction
+                CapacityRequirements correctedNewCapacity = newCapacity.max(minCapacity);
+                if (existingCapacity.equals(correctedNewCapacity)) {
+                    //TODO: Use specific exception types
+                    throw new ReachedMinimumCapacityAutoScalingException(pu, existingCapacity, newCapacity, minCapacity );
+                }
+                newCapacity = correctedNewCapacity;
+            }
+            if (logger.isInfoEnabled()) {
+                logger.info("Decreasung capacity from " + existingCapacity + " to " + newCapacity);
+            }
+            return newCapacity;
+        }
 
+        return existingCapacity;
     }
     
     public boolean isBelowLowThreshold(AutomaticCapacityScaleRuleConfig rule, Object value) 
@@ -145,7 +163,6 @@ public class DefaultAutoScalingSlaEnforcementEndpoint implements AutoScalingSlaE
         }
     }
     
-    @SuppressWarnings("unchecked")
     public boolean isAboveHighThreshold(AutomaticCapacityScaleRuleConfig rule, Object value) 
             throws AutoScalingSlaEnforcementInProgressException {
         

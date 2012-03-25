@@ -81,7 +81,7 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
     @Override
     protected void enforceSla() throws SlaEnforcementInProgressException {
         
-        super.enforceCapacityRequirement();
+        super.enforceCapacityRequirement(); //enforces the last call to #setCapacityRequirementConfig
         // no exception means that manual scale is complete. enforce auto-scaling SLA
         
         final CapacityRequirements capacityRequirements = super.getCapacityRequirementConfig().toCapacityRequirements();
@@ -101,8 +101,10 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
             throws AutoScalingSlaEnforcementInProgressException {
         final AutoScalingSlaPolicy sla = new AutoScalingSlaPolicy();
         sla.setCapacityRequirements(capacityRequirements);
-        sla.setHighThresholdBreachedIncrease(getCapacityIncrease());
+        sla.setHighThresholdBreachedIncrease(getCapacityChangeOnBreach());
+        sla.setLowThresholdBreachedDecrease(getCapacityChangeOnBreach());
         sla.setMaxCapacity(automaticCapacity.getMaxCapacity().toCapacityRequirements());
+        sla.setMinCapacity(automaticCapacity.getMinCapacity().toCapacityRequirements());
         sla.setRules(automaticCapacity.getRules());
         if (getLogger().isTraceEnabled()) {
             getLogger().trace("AutoScalingSlaPolicy=" + sla);
@@ -113,7 +115,7 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
         return newCapacityRequirements;
     }
 
-    private CapacityRequirements getCapacityIncrease() {
+    private CapacityRequirements getCapacityChangeOnBreach() {
         long containerMemory = getGridServiceContainerConfig().getMaximumMemoryCapacityInMB();
         return new CapacityRequirements(new MemoryCapacityRequirement(containerMemory));
     }
