@@ -88,6 +88,9 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
      * Call once in order to modify the behavior of {@link #enforceCapacityRequirement()}
      */
     protected void setCapacityRequirementConfig(ScaleStrategyCapacityRequirementConfig capacityRequirement) {
+        if (capacityRequirement == null) {
+            throw new IllegalArgumentException("capacityRequirement cannot be null");
+        }
         this.capacityRequirement = capacityRequirement;
         this.memoryInMB = calcMemoryInMB();
     }
