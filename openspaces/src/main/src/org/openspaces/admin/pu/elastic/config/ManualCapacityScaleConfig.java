@@ -40,7 +40,7 @@ import org.openspaces.grid.gsm.strategy.ManualCapacityScaleStrategyBean;
  * @author itaif
  */
 public class ManualCapacityScaleConfig 
-    implements ScaleStrategyConfig , Externalizable {
+    implements ScaleStrategyConfig , ScaleStrategyCapacityRequirementConfig, Externalizable {
 
     private static final long serialVersionUID = 1L;
 
@@ -66,24 +66,22 @@ public class ManualCapacityScaleConfig
         this.properties = new StringProperties(properties);
     }
 
-    /**
-     * Specifies the total memory capacity of the processing unit.
-     */
+    @Override
     public void setMemoryCapacityInMB(long memory) {
         properties.putLong(MEMORY_CAPACITY_MEGABYTES_KEY, memory);
     }
 
+    @Override
     public long getMemoryCapacityInMB() throws NumberFormatException {
         return properties.getLong(MEMORY_CAPACITY_MEGABYTES_KEY, MEMORY_CAPACITY_MEGABYTES_DEFAULT);
     }
     
-    /**
-     * Specifies the total CPU cores for the processing unit.
-     */
+    @Override
     public void setNumberOfCpuCores(double cpuCores) {
         properties.putDouble(CPU_CAPACITY_CORES_KEY, cpuCores);
     }
 
+    @Override
     public double getNumberOfCpuCores() {
         return properties.getDouble(CPU_CAPACITY_CORES_KEY, CPU_CAPACITY_CORES_DEFAULT);
     }
@@ -108,7 +106,6 @@ public class ManualCapacityScaleConfig
         ScaleStrategyConfigUtils.setMaxConcurrentRelocationsPerMachine(properties, maxNumberOfConcurrentRelocationsPerMachine);
     }
 
-    
     /*
      * @see ManualCapacityScaleConfig#isAtMostOneContainerPerMachine()
      */
@@ -137,23 +134,17 @@ public class ManualCapacityScaleConfig
         this.properties = new StringProperties(properties);
     }
 
+    @Override
     public String getBeanClassName() {
         return ManualCapacityScaleStrategyBean.class.getName();
     }
    
+    @Override
     public String toString() {
         return this.properties.toString();
     }
 
-    /**
-     * Specifies the disk and network drive capacity needed by the processing unit.
-     * @param megaBytesPerDrive - a mapping between the file system directory representing the drive and its capacity (in mega-bytes) needed by the pu .
-     * 
-     * For example the drive "/" (on linux) has the size of 50*1024MBs
-     * or the drive "c:\" (on windows)  has the size of 50*1024MBs
-     * 
-     * @since 8.0.3
-     */
+    @Override
     public void setDrivesCapacityInMB(Map<String,Long> megaBytesPerDrive) {
         Map<String,String> capacityPerDrive = new HashMap<String,String>();
         for (String drive : megaBytesPerDrive.keySet()) {
@@ -166,6 +157,7 @@ public class ManualCapacityScaleConfig
                 DRIVE_CAPACITY_MEGABYTES_KEYVALUE_SEPERATOR);
     }
     
+    @Override
     public Map<String,Long> getDrivesCapacityInMB() throws NumberFormatException{
         Map<String, String> capacityPerDrive = properties.getKeyValuePairs(
                 DRIVE_CAPACITY_MEGABYTES_KEY, 
@@ -191,12 +183,14 @@ public class ManualCapacityScaleConfig
         return this.properties.hashCode();
     }
 
+    @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeObject(this.properties.getProperties());
         
     }
 
     @SuppressWarnings("unchecked")
+    @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         this.properties = new StringProperties((Map<String,String>)in.readObject());
         

@@ -31,7 +31,7 @@ import org.openspaces.core.util.MemoryUnit;
  * @since 8.0
  * @see ManualCapacityScaleConfig
  */
-public class ManualCapacityScaleConfigurer implements ScaleStrategyConfigurer<ManualCapacityScaleConfig>{
+public class ManualCapacityScaleConfigurer implements ScaleStrategyConfigurer<ManualCapacityScaleConfig> , ScaleStrategyCapacityRequirementConfigurer {
 
     private final ManualCapacityScaleConfig config;
     
@@ -44,43 +44,31 @@ public class ManualCapacityScaleConfigurer implements ScaleStrategyConfigurer<Ma
         this.config = new ManualCapacityScaleConfig();
     }
     
-    /**
-     * @see ManualCapacityScaleConfig#setMemoryCapacityInMB(int)
-     */
+    @Override
     public ManualCapacityScaleConfigurer memoryCapacity(String memory) {
         config.setMemoryCapacityInMB(MemoryUnit.toMegaBytes(memory));
         return this;
     }
 
-    /**
-     * @see ManualCapacityScaleConfig#setMemoryCapacityInMB(int)
-     */
+    @Override
     public ManualCapacityScaleConfigurer memoryCapacity(int memory, MemoryUnit unit) {
         config.setMemoryCapacityInMB(unit.toMegaBytes(memory));
         return this;
     }
    
-    /**
-     * @see ManualCapacityScaleConfig#setNumberOfCpuCores(double) 
-     */
+    @Override
     public ManualCapacityScaleConfigurer numberOfCpuCores(double cpuCores) {
         config.setNumberOfCpuCores(cpuCores);
         return this;
     }
     
-    /**
-     * @see ManualCapacityScaleConfig#setDrivesCapacityInMB(String,long) 
-     * @since 8.0.2
-     */
+    @Override
     public ManualCapacityScaleConfigurer driveCapacity(String drive, int size, MemoryUnit unit) {
         setDriveCapacity(drive, unit.toMegaBytes(size));
         return this;
     }
     
-    /**
-     * @see ManualCapacityScaleConfig#setDrivesCapacityInMB(String,long)
-     * @since 8.0.2
-     */
+    @Override
     public ManualCapacityScaleConfigurer driveCapacity(String drive, String size) {
         setDriveCapacity(drive, MemoryUnit.toMegaBytes(size));
         return this;
