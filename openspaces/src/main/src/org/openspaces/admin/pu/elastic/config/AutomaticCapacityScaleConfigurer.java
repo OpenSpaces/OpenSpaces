@@ -17,6 +17,8 @@
  ******************************************************************************/
 package org.openspaces.admin.pu.elastic.config;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 
@@ -30,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 public class AutomaticCapacityScaleConfigurer implements ScaleStrategyConfigurer<AutomaticCapacityScaleConfig>{
 
     private final AutomaticCapacityScaleConfig config;
+    private final List<AutomaticCapacityScaleRuleConfig> rules = new ArrayList<AutomaticCapacityScaleRuleConfig>();
     
     /**
      * Provides fluent API for creating a new {@link AutomaticCapacityScaleConfig} object.
@@ -81,7 +84,13 @@ public class AutomaticCapacityScaleConfigurer implements ScaleStrategyConfigurer
         return this;
     }
     
+    public AutomaticCapacityScaleConfigurer addRule(AutomaticCapacityScaleRuleConfig rule) {
+        rules.add(rule);
+        return this;
+    }
+    
     public AutomaticCapacityScaleConfig create() {
+        config.setRules(rules.toArray(new AutomaticCapacityScaleRuleConfig[rules.size()]));
         return config;
     }
 }

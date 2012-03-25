@@ -19,7 +19,9 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.openspaces.admin.internal.pu.elastic.ScaleStrategyConfigUtils;
@@ -27,7 +29,7 @@ import org.openspaces.admin.pu.DeploymentStatus;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.core.util.StringProperties;
-import org.openspaces.grid.gsm.strategy.ManualCapacityScaleStrategyBean;
+import org.openspaces.grid.gsm.strategy.AutomaticCapacityScaleStrategyBean;
 
 /**
  * Defines an automatic scaling strategy that increases and decreases capacity.
@@ -54,6 +56,8 @@ public class AutomaticCapacityScaleConfig
     private static final String MIN_CAPACITY_KEY_PREFIX = "min-capacity.";
     private static final String MAX_CAPACITY_KEY_PREFIX = "max-capacity.";
     private static final HashMap<String, String> EMPTY_CAPACITY = new HashMap<String, String>();
+
+    private static final String RULE_KEY = "rule";
     
     private StringProperties properties;
     
@@ -80,7 +84,7 @@ public class AutomaticCapacityScaleConfig
     
     @Override
     public String getBeanClassName() {
-        return ManualCapacityScaleStrategyBean.class.getName();
+        return AutomaticCapacityScaleStrategyBean.class.getName();
     }
     
     @Override    
@@ -180,7 +184,33 @@ public class AutomaticCapacityScaleConfig
     public void setMaxCapacity(CapacityRequirementConfig maxCapacity) {
         properties.putMap(MAX_CAPACITY_KEY_PREFIX, maxCapacity.getProperties());
     }
+
+    public void setRules(AutomaticCapacityScaleRuleConfig[] rules) {
+        for (int i = 0 ; i < rules.length ; i++) {
+            properties.putMap(getRulesKeyPrefix(i), rules[i].getProperties());
+        }
+    }
     
+    public AutomaticCapacityScaleRuleConfig[] getRules() {
+        
+        List<AutomaticCapacityScaleRuleConfig> rules = new ArrayList<AutomaticCapacityScaleRuleConfig>();
+        
+        for (int i = 0;; i++) {
+            Map<String, String> ruleProperties = properties.getMap(getRulesKeyPrefix(i), null);
+            if (ruleProperties == null) {
+                // no more rules
+                break;
+            }
+            rules.add(new AutomaticCapacityScaleRuleConfig(ruleProperties));
+        }
+        
+        return rules.toArray(new AutomaticCapacityScaleRuleConfig[rules.size()]);
+    }
+
+    private String getRulesKeyPrefix(int i) {
+        return RULE_KEY + i +".";
+    }
+
     public CapacityRequirementConfig getMaxCapacity() {
         return new CapacityRequirementConfig(properties.getMap(MAX_CAPACITY_KEY_PREFIX, EMPTY_CAPACITY));
     }
@@ -210,5 +240,4 @@ public class AutomaticCapacityScaleConfig
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         this.properties = new StringProperties((Map<String,String>)in.readObject());
     }
-
 }

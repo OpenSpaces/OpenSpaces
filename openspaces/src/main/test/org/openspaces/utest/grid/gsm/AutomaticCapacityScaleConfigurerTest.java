@@ -89,7 +89,7 @@ public class AutomaticCapacityScaleConfigurerTest extends TestCase {
                         .maxCapacity(capacity)
                         .cooldownAfterInstanceAdded(3, TimeUnit.MINUTES)
                         .cooldownAfterInstanceRemoved(1, TimeUnit.MINUTES)
-                        //.addRule(rule)
+                        .addRule(rule)
                         .create();
 
         AutomaticCapacityScaleConfig dupConfig = new AutomaticCapacityScaleConfig(config.getProperties());
@@ -98,5 +98,8 @@ public class AutomaticCapacityScaleConfigurerTest extends TestCase {
         Assert.assertEquals(dupConfig.getMinCapacity(),capacity);
         Assert.assertEquals(dupConfig.getCooldownAfterInstanceAddedSeconds(),3*60);
         Assert.assertEquals(dupConfig.getCooldownAfterInstanceRemovedSeconds(),1*60);
+        Assert.assertEquals(dupConfig.getRules().length,1);
+        Assert.assertNotSame(dupConfig.getRules()[0],rule);
+        Assert.assertEquals(dupConfig.getRules()[0],rule);
     }
 }
