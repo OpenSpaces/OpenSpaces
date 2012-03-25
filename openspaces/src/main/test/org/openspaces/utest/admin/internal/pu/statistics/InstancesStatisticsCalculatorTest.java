@@ -16,6 +16,7 @@
 package org.openspaces.utest.admin.internal.pu.statistics;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import junit.framework.Assert;
@@ -84,7 +85,7 @@ public class InstancesStatisticsCalculatorTest extends TestCase {
                 .create();
     }
 
-    private Iterable<ProcessingUnitStatisticsId> getTestStatisticsCalculations() {
+    private Collection<ProcessingUnitStatisticsId> getTestStatisticsCalculations() {
         List<ProcessingUnitStatisticsId> newStatisticsIds = new ArrayList<ProcessingUnitStatisticsId>();
         newStatisticsIds.add(averageStatisticsId());
         newStatisticsIds.add(minimumStatisticsId());
