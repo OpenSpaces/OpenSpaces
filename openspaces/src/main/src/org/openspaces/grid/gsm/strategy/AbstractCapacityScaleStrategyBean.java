@@ -112,8 +112,6 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
     @Override
     public void afterPropertiesSet() {
         
-        super.afterPropertiesSet();
-        
         if (machinesEndpoint == null) {
             throw new IllegalStateException("machines endpoint cannot be null.");
         }
@@ -125,6 +123,10 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
         if (rebalancingEndpoint == null) {
             throw new IllegalStateException("rebalancing endpoint cannot be null.");
         }
+        
+        super.afterPropertiesSet();
+        
+        
     }
     
     @Override
