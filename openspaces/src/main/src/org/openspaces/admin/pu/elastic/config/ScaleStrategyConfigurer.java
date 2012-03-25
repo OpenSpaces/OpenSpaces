@@ -26,4 +26,13 @@ public interface ScaleStrategyConfigurer<T extends ScaleStrategyConfig> extends 
      */
     ScaleStrategyConfigurer<T> maxConcurrentRelocationsPerMachine(int maxNumberOfConcurrentRelocationsPerMachine);
     
+    /**
+     * @see ScaleStrategyConfig#setPollingIntervalSeconds(int)
+     */
+    ScaleStrategyConfigurer<T> pollingIntervalSeconds(int pollingIntervalSeconds);
+
+    /**
+     * @see ScaleStrategyConfig#setAtMostOneContainerPerMachine(boolean)
+     */
+    ScaleStrategyConfigurer<T> atMostOneContainerPerMachine();
 }

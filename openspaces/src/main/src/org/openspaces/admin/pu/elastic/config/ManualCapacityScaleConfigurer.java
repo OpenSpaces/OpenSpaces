@@ -91,22 +91,23 @@ public class ManualCapacityScaleConfigurer implements ScaleStrategyConfigurer<Ma
         config.setDrivesCapacityInMB(drivesCapacityInMB);
     }
 
-    /**
-     * @see ManualCapacityScaleConfig#setMaxConcurrentRelocationsPerMachine(int)
-     */
+    @Override
     public ManualCapacityScaleConfigurer maxConcurrentRelocationsPerMachine(int maxNumberOfConcurrentRelocationsPerMachine) {
         config.setMaxConcurrentRelocationsPerMachine(maxNumberOfConcurrentRelocationsPerMachine);
         return this;
     }
 
-    /**
-     * @see ManualCapacityScaleConfig#setAtMostOneContainerPerMachine(boolean)
-     */
+    @Override
     public ManualCapacityScaleConfigurer atMostOneContainerPerMachine() {
         config.setAtMostOneContainerPerMachine(true);
         return this;
     }
-    
+
+    @Override
+    public ManualCapacityScaleConfigurer pollingIntervalSeconds(int pollingIntervalSeconds) {
+        config.setPollingIntervalSeconds(pollingIntervalSeconds);
+        return this;
+    }
     public ManualCapacityScaleConfig create() {
         return config;
     }

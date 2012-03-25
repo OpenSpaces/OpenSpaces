@@ -44,22 +44,26 @@ public class EagerScaleConfigurer implements ScaleStrategyConfigurer<EagerScaleC
         this.config = new EagerScaleConfig();
     }
     
+    @Override
     public EagerScaleConfigurer maxConcurrentRelocationsPerMachine(int maxNumberOfConcurrentRelocationsPerMachine) {
         config.setMaxConcurrentRelocationsPerMachine(maxNumberOfConcurrentRelocationsPerMachine);
         return this;
     }
     
-    /**
-     * @see EagerScaleConfig#setAtMostOneContainerPerMachine(boolean)
-     */
+    @Override
     public EagerScaleConfigurer atMostOneContainerPerMachine() {
         config.setAtMostOneContainerPerMachine(true);
         return this;
     }
 
+    @Override
+    public EagerScaleConfigurer pollingIntervalSeconds(int pollingIntervalSeconds) {
+        config.setPollingIntervalSeconds(pollingIntervalSeconds);
+        return this;
+    }
+    
+    @Override
     public EagerScaleConfig create() {
         return config;
     }
-    
-    
 }
