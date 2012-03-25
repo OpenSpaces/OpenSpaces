@@ -17,9 +17,14 @@ package org.openspaces.admin.pu.elastic.config;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.openspaces.core.util.StringProperties;
 import org.openspaces.grid.gsm.capacity.CapacityRequirement;
+import org.openspaces.grid.gsm.capacity.CapacityRequirements;
+import org.openspaces.grid.gsm.capacity.CpuCapacityRequirement;
+import org.openspaces.grid.gsm.capacity.DriveCapacityRequirement;
+import org.openspaces.grid.gsm.capacity.MemoryCapacityRequirement;
 
 /**
  * A config object for configuring capacity requirements
@@ -138,5 +143,19 @@ public class CapacityRequirementConfig implements ScaleStrategyCapacityRequireme
 
     public CapacityRequirement toCapacityRequirement() {
      throw new UnsupportedOperationException("Not implemented");   
+    }
+
+    @Override
+    public CapacityRequirements toCapacityRequirements() {
+       
+        CapacityRequirements capacityRequirements = new CapacityRequirements();
+        
+        capacityRequirements.add(new MemoryCapacityRequirement(this.getMemoryCapacityInMB()));
+        capacityRequirements.add(new CpuCapacityRequirement(this.getNumberOfCpuCores()));
+        for (Entry<String, Long> pair : this.getDrivesCapacityInMB().entrySet()) {
+            capacityRequirements.add(new DriveCapacityRequirement(pair.getKey(), pair.getValue()));
+        }
+        
+        return capacityRequirements;
     }
 }

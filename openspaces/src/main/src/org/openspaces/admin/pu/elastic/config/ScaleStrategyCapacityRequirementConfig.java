@@ -17,9 +17,13 @@ package org.openspaces.admin.pu.elastic.config;
 
 import java.util.Map;
 
+import org.openspaces.grid.gsm.capacity.CapacityRequirements;
+
 /**
+ * Defines a POJO that describes memory,cpu cores,drive capacity
+ * Can be converted into a {@link CapacityRequirements} with {#toCapacityRequirements()}.
  * @author itaif
- *
+ * @since 9.0.0
  */
 public interface ScaleStrategyCapacityRequirementConfig {
 
@@ -49,4 +53,6 @@ public interface ScaleStrategyCapacityRequirementConfig {
     void setDrivesCapacityInMB(Map<String,Long> megaBytesPerDrive);
     
     Map<String,Long> getDrivesCapacityInMB() throws NumberFormatException;
+    
+    CapacityRequirements toCapacityRequirements();
 }

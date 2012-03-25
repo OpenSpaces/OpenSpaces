@@ -26,6 +26,7 @@ import java.util.Map;
 
 import org.openspaces.admin.internal.pu.elastic.ScaleStrategyConfigUtils;
 import org.openspaces.core.util.StringProperties;
+import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.strategy.ManualCapacityScaleStrategyBean;
 
 /**
@@ -182,5 +183,10 @@ public class ManualCapacityScaleConfig
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         this.properties = new StringProperties((Map<String,String>)in.readObject());
+    }
+
+    @Override
+    public CapacityRequirements toCapacityRequirements() {
+        return capacityRequirementConfig.toCapacityRequirements();
     }
 }
