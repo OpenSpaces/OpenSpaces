@@ -20,7 +20,6 @@ import java.util.Map;
 import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
-import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyCapacityRequirementConfig;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
 import org.openspaces.grid.gsm.GridServiceContainerConfigAware;
@@ -81,28 +80,25 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
 
 
     // created by afterPropertiesSet()
-    private ScaleStrategyCapacityRequirementConfig manualCapacity;
+    private ScaleStrategyCapacityRequirementConfig capacityRequirement;
     private ScaleStrategyConfig scaleStrategy;
     
     private long memoryInMB;
-
-    /**
-     * Call once in order to modify the behavior of {@link #enforceManualCapacityScaleConfig()}
-     */
-    protected void setManualCapacityScaleConfig(ManualCapacityScaleConfig manualCapacityScaleConfig) {
-        setManualCapacityScaleConfig(manualCapacityScaleConfig,manualCapacityScaleConfig);
-    }
     
     /**
-     * Call once in order to modify the behavior of {@link #enforceManualCapacityScaleConfig()}
+     * Call once in order to modify the behavior of {@link #enforceCapacityRequirement()}
      */
-    protected void setManualCapacityScaleConfig(
-            ScaleStrategyCapacityRequirementConfig manualCapacity,
-            ScaleStrategyConfig scaleStrategy) {
-        
-        this.manualCapacity = manualCapacity;
-        this.scaleStrategy = scaleStrategy;
+    protected void setCapacityRequirementConfig(ScaleStrategyCapacityRequirementConfig capacityRequirement) {
+        this.capacityRequirement = capacityRequirement;
         this.memoryInMB = calcMemoryInMB();
+    }
+    
+    protected ScaleStrategyCapacityRequirementConfig getCapacityRequirementConfig() {
+        return capacityRequirement;
+    }
+    
+    protected void setScaleStrategyConfig(ScaleStrategyConfig scaleStrategy) {
+        this.scaleStrategy = scaleStrategy;
     }
     
     private int getMaximumNumberOfContainersPerMachine() {
@@ -134,7 +130,7 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
          this.containersConfig = containersConfig;
     }
 
-    protected void enforceManualCapacityScaleConfig() throws SlaEnforcementInProgressException {
+    protected void enforceCapacityRequirement() throws SlaEnforcementInProgressException {
         SlaEnforcementInProgressException pendingException = null;
         
         try {
@@ -172,9 +168,9 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
         final CapacityMachinesSlaPolicy sla = new CapacityMachinesSlaPolicy();
         sla.setMachineProvisioning(super.getMachineProvisioning());
         CapacityRequirements capacityRequirements = new CapacityRequirements(
-                new CpuCapacityRequirement(manualCapacity.getNumberOfCpuCores()),
+                new CpuCapacityRequirement(capacityRequirement.getNumberOfCpuCores()),
                 new MemoryCapacityRequirement(memoryInMB));
-        Map<String, Long> drivesCapacityInMB = manualCapacity.getDrivesCapacityInMB();
+        Map<String, Long> drivesCapacityInMB = capacityRequirement.getDrivesCapacityInMB();
         for (String drive : drivesCapacityInMB.keySet()) {
             capacityRequirements = capacityRequirements.add(
                     new DriveCapacityRequirement(drive,drivesCapacityInMB.get(drive)));
@@ -258,7 +254,7 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
     
     private int calcTargetNumberOfContainers() {
         
-        if (manualCapacity.getMemoryCapacityInMB() > 0) {
+        if (capacityRequirement.getMemoryCapacityInMB() > 0) {
             if (getSchemaConfig().isPartitionedSync2BackupSchema()) {
                 return calcTargetNumberOfContainersForPartitionedSchema();
             } else {
@@ -270,7 +266,7 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
     }
 
     private int calcTargetNumberOfContainersForStateless() {
-        int requiredNumberOfContainers = (int)Math.ceil(1.0 * manualCapacity.getMemoryCapacityInMB() / containersConfig.getMaximumMemoryCapacityInMB());
+        int requiredNumberOfContainers = (int)Math.ceil(1.0 * capacityRequirement.getMemoryCapacityInMB() / containersConfig.getMaximumMemoryCapacityInMB());
         int targetNumberOfContainers = Math.max(
                 getMinimumNumberOfMachines(),
                 requiredNumberOfContainers);
@@ -281,7 +277,7 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
                 "max("+ 
                     getMinimumNumberOfMachines() + "," +
                     "ceil("+
-                        manualCapacity.getMemoryCapacityInMB() + "/" +
+                        capacityRequirement.getMemoryCapacityInMB() + "/" +
                         containersConfig.getMaximumMemoryCapacityInMB() + ")= " +
                 "max("+ 
                     getMinimumNumberOfMachines() + "," + 
@@ -308,18 +304,18 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
     private int calcTargetNumberOfContainersForPartitionedSchema() {
         
         double totalNumberOfInstances = getProcessingUnit().getTotalNumberOfInstances();
-        double avgInstanceCapacityInMB = manualCapacity.getMemoryCapacityInMB()/totalNumberOfInstances;
+        double avgInstanceCapacityInMB = capacityRequirement.getMemoryCapacityInMB()/totalNumberOfInstances;
         getLogger().info(
                 "instanceCapacityInMB= "+
                 "memoryCapacityInMB/(numberOfInstances*(1+numberOfBackups))= "+
-                manualCapacity.getMemoryCapacityInMB()+"/"+totalNumberOfInstances+"= " +
+                capacityRequirement.getMemoryCapacityInMB()+"/"+totalNumberOfInstances+"= " +
                 avgInstanceCapacityInMB);
         
         double containerCapacityInMB = containersConfig.getMaximumMemoryCapacityInMB();
         
         if (containerCapacityInMB < avgInstanceCapacityInMB) {
             throw new BeanConfigurationException(
-                    "Reduce total capacity from " + manualCapacity.getMemoryCapacityInMB() +"MB to " + containerCapacityInMB*totalNumberOfInstances+"MB. " +
+                    "Reduce total capacity from " + capacityRequirement.getMemoryCapacityInMB() +"MB to " + containerCapacityInMB*totalNumberOfInstances+"MB. " +
                     "Container capacity is " + containerCapacityInMB+"MB , "+
                     "given " + totalNumberOfInstances + " instances, the total capacity =" 
                     +containerCapacityInMB+"MB *"+totalNumberOfInstances + "= " + 
@@ -348,11 +344,11 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
                 "The total memory of all containers equals or bigger than the requested memory");
           */
         
-        int targetNumberOfContainers = (int)Math.ceil(1.0 *manualCapacity.getMemoryCapacityInMB() / containerCapacityInMB);
+        int targetNumberOfContainers = (int)Math.ceil(1.0 *capacityRequirement.getMemoryCapacityInMB() / containerCapacityInMB);
         getLogger().info(
                 "targetNumberOfContainers= "+
                 "ceil(memoryCapacity/containerCapacityInMB)= "+
-                "ceil("+manualCapacity.getMemoryCapacityInMB() +"/"+ containerCapacityInMB+") =" +
+                "ceil("+capacityRequirement.getMemoryCapacityInMB() +"/"+ containerCapacityInMB+") =" +
                 targetNumberOfContainers);
         
         int numberOfBackups = getProcessingUnit().getNumberOfBackups();
@@ -360,7 +356,7 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
          // raise exception if min number of containers conflicts with the specified memory capacity.
             int recommendedMemoryCapacityInMB = (int)((numberOfBackups +1) * containerCapacityInMB);
             throw new BeanConfigurationException(
-                    targetNumberOfContainers + " containers are needed in order to scale to " + manualCapacity.getMemoryCapacityInMB() + "m , "+
+                    targetNumberOfContainers + " containers are needed in order to scale to " + capacityRequirement.getMemoryCapacityInMB() + "m , "+
                     "which cannot support " + (numberOfBackups==1?"one backup":numberOfBackups+" backups") + " per partition. "+
                     "Increase the memory capacity to " + recommendedMemoryCapacityInMB +"m");
         }
