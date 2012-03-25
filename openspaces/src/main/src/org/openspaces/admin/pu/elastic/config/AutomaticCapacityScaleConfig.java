@@ -221,16 +221,30 @@ public class AutomaticCapacityScaleConfig
     }
     
     @Override
-    public boolean equals(Object other) {
-        return (other instanceof AutomaticCapacityScaleConfig) &&
-                this.properties.equals(((AutomaticCapacityScaleConfig)other).properties);
-    }
-    
-    @Override
     public int hashCode() {
-        return this.properties.hashCode();
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((properties == null) ? 0 : properties.hashCode());
+        return result;
     }
-    
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        AutomaticCapacityScaleConfig other = (AutomaticCapacityScaleConfig) obj;
+        if (properties == null) {
+            if (other.properties != null)
+                return false;
+        } else if (!properties.equals(other.properties))
+            return false;
+        return true;
+    }
+
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeObject(this.properties.getProperties());
