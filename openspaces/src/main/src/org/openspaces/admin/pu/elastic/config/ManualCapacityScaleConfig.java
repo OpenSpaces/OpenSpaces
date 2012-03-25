@@ -44,14 +44,7 @@ public class ManualCapacityScaleConfig
 
     private static final long serialVersionUID = 1L;
 
-    private static final String MEMORY_CAPACITY_MEGABYTES_KEY = "memory-capacity-megabytes";
-    private static final int MEMORY_CAPACITY_MEGABYTES_DEFAULT = 0;
-    private static final String CPU_CAPACITY_CORES_KEY = "cpu-capacity-cores";
-    private static final double CPU_CAPACITY_CORES_DEFAULT = 0.0;
-    private static final String DRIVE_CAPACITY_MEGABYTES_KEY = "drive-capacity-megabytes";
-    private static final String DRIVE_CAPACITY_MEGABYTES_PAIR_SEPERATOR = ",";
-    private static final String DRIVE_CAPACITY_MEGABYTES_KEYVALUE_SEPERATOR = "=";
-    private static final Map<String,String> DRIVE_CAPACITY_MEGABYTES_DEFAULT = new HashMap<String,String>();
+    private CapacityRequirementConfig capacityRequirementConfig;
     
     private StringProperties properties;
     
@@ -59,31 +52,31 @@ public class ManualCapacityScaleConfig
      * Default constructor
      */
     public ManualCapacityScaleConfig() {
-        this.properties = new StringProperties();
+        this(new HashMap<String,String>());
     }
     
     public ManualCapacityScaleConfig(Map<String,String> properties) {
-        this.properties = new StringProperties(properties);
+        setProperties(properties);
     }
 
     @Override
     public void setMemoryCapacityInMB(long memory) {
-        properties.putLong(MEMORY_CAPACITY_MEGABYTES_KEY, memory);
+        capacityRequirementConfig.setMemoryCapacityInMB(memory);
     }
 
     @Override
     public long getMemoryCapacityInMB() throws NumberFormatException {
-        return properties.getLong(MEMORY_CAPACITY_MEGABYTES_KEY, MEMORY_CAPACITY_MEGABYTES_DEFAULT);
+        return capacityRequirementConfig.getMemoryCapacityInMB();
     }
     
     @Override
     public void setNumberOfCpuCores(double cpuCores) {
-        properties.putDouble(CPU_CAPACITY_CORES_KEY, cpuCores);
+        capacityRequirementConfig.setNumberOfCpuCores(cpuCores);
     }
 
     @Override
     public double getNumberOfCpuCores() {
-        return properties.getDouble(CPU_CAPACITY_CORES_KEY, CPU_CAPACITY_CORES_DEFAULT);
+        return capacityRequirementConfig.getNumberOfCpuCores();
     }
 
     @Override
@@ -132,6 +125,7 @@ public class ManualCapacityScaleConfig
     @Override
     public void setProperties(Map<String, String> properties) {
         this.properties = new StringProperties(properties);
+        this.capacityRequirementConfig = new CapacityRequirementConfig(properties);
     }
 
     @Override
@@ -146,47 +140,42 @@ public class ManualCapacityScaleConfig
 
     @Override
     public void setDrivesCapacityInMB(Map<String,Long> megaBytesPerDrive) {
-        Map<String,String> capacityPerDrive = new HashMap<String,String>();
-        for (String drive : megaBytesPerDrive.keySet()) {
-            capacityPerDrive.put(drive, megaBytesPerDrive.get(drive).toString());
-        }
-        properties.putKeyValuePairs(
-                DRIVE_CAPACITY_MEGABYTES_KEY, 
-                capacityPerDrive, 
-                DRIVE_CAPACITY_MEGABYTES_PAIR_SEPERATOR, 
-                DRIVE_CAPACITY_MEGABYTES_KEYVALUE_SEPERATOR);
+        capacityRequirementConfig.setDrivesCapacityInMB(megaBytesPerDrive);
     }
     
     @Override
     public Map<String,Long> getDrivesCapacityInMB() throws NumberFormatException{
-        Map<String, String> capacityPerDrive = properties.getKeyValuePairs(
-                DRIVE_CAPACITY_MEGABYTES_KEY, 
-                DRIVE_CAPACITY_MEGABYTES_PAIR_SEPERATOR, 
-                DRIVE_CAPACITY_MEGABYTES_KEYVALUE_SEPERATOR, 
-                DRIVE_CAPACITY_MEGABYTES_DEFAULT);
-        
-        Map<String,Long> megaBytesPerDrive = new HashMap<String,Long>();
-        for (String drive : capacityPerDrive.keySet()) {
-            megaBytesPerDrive.put(drive, Long.valueOf(capacityPerDrive.get(drive)));
-        }
-        return megaBytesPerDrive;
-    }
-    
-    @Override
-    public boolean equals(Object other) {
-        return (other instanceof ManualCapacityScaleConfig) &&
-                this.properties.equals(((ManualCapacityScaleConfig)other).properties);
+        return capacityRequirementConfig.getDrivesCapacityInMB();
     }
     
     @Override
     public int hashCode() {
-        return this.properties.hashCode();
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((properties == null) ? 0 : properties.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ManualCapacityScaleConfig other = (ManualCapacityScaleConfig) obj;
+        if (properties == null) {
+            if (other.properties != null)
+                return false;
+        } else if (!properties.equals(other.properties))
+            return false;
+        return true;
     }
 
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeObject(this.properties.getProperties());
-        
     }
 
     @SuppressWarnings("unchecked")
