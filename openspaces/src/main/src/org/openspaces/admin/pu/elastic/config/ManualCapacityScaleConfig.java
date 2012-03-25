@@ -182,6 +182,5 @@ public class ManualCapacityScaleConfig
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         this.properties = new StringProperties((Map<String,String>)in.readObject());
-        
     }
 }

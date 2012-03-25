@@ -51,8 +51,8 @@ public class AutomaticCapacityScaleConfig
     private static final String COOLDOWN_AFTER_INSTANCE_REMOVED_SECONDS_KEY = "cooldown-after-instance-removed-seconds";
     private static final long COOLDOWN_AFTER_INSTANCE_REMOVED_SECONDS_DEFAULT = 60;
     
-    private static final String MIN_CAPACITY_KEY_PREFIX = "min-capacity";
-    private static final String MAX_CAPACITY_KEY_PREFIX = "max-capacity";
+    private static final String MIN_CAPACITY_KEY_PREFIX = "min-capacity.";
+    private static final String MAX_CAPACITY_KEY_PREFIX = "max-capacity.";
     private static final HashMap<String, String> EMPTY_CAPACITY = new HashMap<String, String>();
     
     private StringProperties properties;
@@ -151,7 +151,7 @@ public class AutomaticCapacityScaleConfig
         properties.putLong(COOLDOWN_AFTER_INSTANCE_REMOVED_SECONDS_KEY, cooldownAfterInstanceRemovedSeconds);
     }
     
-    public long getCooldownAfterInstanceRemoved() {
+    public long getCooldownAfterInstanceRemovedSeconds() {
         return properties.getLong(COOLDOWN_AFTER_INSTANCE_REMOVED_SECONDS_KEY, COOLDOWN_AFTER_INSTANCE_REMOVED_SECONDS_DEFAULT);
     }
     
