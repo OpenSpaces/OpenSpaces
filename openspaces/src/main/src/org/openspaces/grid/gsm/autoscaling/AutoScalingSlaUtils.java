@@ -36,18 +36,14 @@ public class AutoScalingSlaUtils {
     @SuppressWarnings("unchecked")
     public static int compare(Comparable<?> threshold, Object value) throws NumberFormatException {
         
-        if (threshold.getClass().isAssignableFrom(value.getClass())) {
+        if (threshold.getClass().equals(value.getClass())) {
             return ((Comparable<Object>)threshold).compareTo(value);
         }
 
-        double comparison = toDouble(threshold) - toDouble(value);
-        if (comparison == 0) { return 0; }
-        if (comparison < 0) { return -1; }
-        return 1;
-        
+        return toDouble(threshold).compareTo(toDouble(value));       
     }
 
-    private static double toDouble(Object x) throws NumberFormatException{
+    private static Double toDouble(Object x) throws NumberFormatException{
         if (x instanceof Number) {
             return ((Number)x).doubleValue();
         }
