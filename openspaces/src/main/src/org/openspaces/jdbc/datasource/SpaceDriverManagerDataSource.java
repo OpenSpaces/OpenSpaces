@@ -25,6 +25,8 @@ import org.springframework.util.Assert;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.util.logging.Logger;
 
 /**
  * A simple Jdbc {@link javax.sql.DataSource} based on a {@link com.j_spaces.core.IJSpace space}.
@@ -63,5 +65,10 @@ public class SpaceDriverManagerDataSource extends AbstractDataSource implements 
 
     public Connection getConnection(String username, String password) throws SQLException {
         return GConnection.getInstance(space, username, password);
+    }
+
+    @Override
+    public Logger getParentLogger() throws SQLFeatureNotSupportedException {
+        return null;
     }
 }
