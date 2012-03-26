@@ -25,7 +25,7 @@ public class PercentileTimeWindowStatisticsConfigurer {
         return this;
     }
     
-    public PercentileTimeWindowStatisticsConfigurer percentile(int percentile) {
+    public PercentileTimeWindowStatisticsConfigurer percentile(double percentile) {
         config.setPercentile(percentile);
         return this;
     }
@@ -34,5 +34,4 @@ public class PercentileTimeWindowStatisticsConfigurer {
         config.validate();       
         return config;
     }
-    
 }
