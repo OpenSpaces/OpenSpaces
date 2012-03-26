@@ -121,10 +121,7 @@ public class ScaleBeanServer {
                 autoScalingSlaEnforcementEndpoint == null) {
                 
                 // make sure there are no leftovers in case of an exception
-                this.rebalancingSlaEnforcement.destroyEndpoint(pu);
-                this.containersSlaEnforcement.destroyEndpoint(pu);
-                this.machinesSlaEnforcement.destroyEndpoint(pu);
-                this.autoScalingSlaEnforcement.destroyEndpoint(pu);
+                destroyAllEndpointsForPu(pu);
             }
         }
         
@@ -141,6 +138,13 @@ public class ScaleBeanServer {
                         isolationConfig,
                         eventStore));
         
+    }
+
+    private void destroyAllEndpointsForPu(ProcessingUnit pu) {
+        this.rebalancingSlaEnforcement.destroyEndpoint(pu);
+        this.containersSlaEnforcement.destroyEndpoint(pu);
+        this.machinesSlaEnforcement.destroyEndpoint(pu);
+        this.autoScalingSlaEnforcement.destroyEndpoint(pu);
     }
      
     /**
@@ -167,9 +171,7 @@ public class ScaleBeanServer {
     
     public void destroy() {
         this.beanServer.destroy();
-        this.rebalancingSlaEnforcement.destroyEndpoint(pu);
-        this.containersSlaEnforcement.destroyEndpoint(pu);
-        this.machinesSlaEnforcement.destroyEndpoint(pu);
+        destroyAllEndpointsForPu(pu);
     }
     
     public void setElasticProperties(Map<String,String> elasticProperties) throws BeanConfigException {
