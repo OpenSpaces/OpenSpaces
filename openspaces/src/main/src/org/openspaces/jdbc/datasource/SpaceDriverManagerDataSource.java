@@ -67,7 +67,6 @@ public class SpaceDriverManagerDataSource extends AbstractDataSource implements 
         return GConnection.getInstance(space, username, password);
     }
 
-    @Override
     public Logger getParentLogger() throws SQLFeatureNotSupportedException {
         return null;
     }

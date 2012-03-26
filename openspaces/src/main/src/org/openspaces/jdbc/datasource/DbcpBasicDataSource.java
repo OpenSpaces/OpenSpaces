@@ -824,7 +824,6 @@ public class DbcpBasicDataSource implements DataSource, InitializingBean, Dispos
         throw new UnsupportedOperationException();
     }
 
-    @Override
     public Logger getParentLogger() throws SQLFeatureNotSupportedException {
         return null;
     }
