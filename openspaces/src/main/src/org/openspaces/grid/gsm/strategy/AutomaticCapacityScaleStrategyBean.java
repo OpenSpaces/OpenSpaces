@@ -59,11 +59,51 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
                 
         this.automaticCapacity = new AutomaticCapacityScaleConfig(super.getProperties());
 
+        validateConfig();
+        
+        CapacityRequirementsConfig initialCapacity = automaticCapacity.getInitialCapacity();
+        if (initialCapacity == null) {   
+            initialCapacity = automaticCapacity.getMinCapacity();
+        }
+        
         //inject initial manual scale capacity
-        super.setCapacityRequirementConfig(automaticCapacity.getMinCapacity());
+        super.setCapacityRequirementConfig(initialCapacity);
         super.setScaleStrategyConfig(automaticCapacity);
         
         enablePuStatistics();
+    }
+
+    private void validateConfig() {
+        
+        CapacityRequirements minCapacityRequirements = automaticCapacity.getMinCapacity().toCapacityRequirements();
+        if (minCapacityRequirements == null) {
+            throw new BeanConfigurationException("Minimum capacity requirements is undefined");
+        }
+        
+        CapacityRequirements maxCapacityRequirements = automaticCapacity.getMaxCapacity().toCapacityRequirements();
+        if (maxCapacityRequirements == null) {
+            throw new BeanConfigurationException("Maximum capacity requirements is undefined");
+        }
+        
+        if (minCapacityRequirements.greaterThan(maxCapacityRequirements)) {
+            throw new BeanConfigurationException("Maximum capacity (" + maxCapacityRequirements
+                    + ") is less than minimum capacity (" + minCapacityRequirements + ")");
+        }
+        
+        CapacityRequirementsConfig initialCapacity = automaticCapacity.getInitialCapacity();
+        if (initialCapacity != null) {
+            CapacityRequirements initialCapacityRequirements = initialCapacity.toCapacityRequirements();
+            
+            if (minCapacityRequirements.greaterThan(initialCapacityRequirements)) {
+                throw new BeanConfigurationException("Initial capacity (" + initialCapacityRequirements
+                        + ") is less than minimum capacity (" + minCapacityRequirements + ")");
+            }
+            
+            if (initialCapacityRequirements.greaterThan(maxCapacityRequirements)) {
+                throw new BeanConfigurationException("Initial capacity (" + initialCapacityRequirements
+                        + ") is greater than maximum capacity (" + minCapacityRequirements + ")");
+            }
+        }
     }
     
     @Override

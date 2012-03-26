@@ -54,10 +54,13 @@ public class AutomaticCapacityScaleConfig
     private static final long COOLDOWN_AFTER_INSTANCE_REMOVED_SECONDS_DEFAULT = 60;
     
     private static final String MIN_CAPACITY_KEY_PREFIX = "min-capacity.";
+    private static final String INITIAL_CAPACITY_KEY_PREFIX = "initial-capacity";
     private static final String MAX_CAPACITY_KEY_PREFIX = "max-capacity.";
     private static final HashMap<String, String> EMPTY_CAPACITY = new HashMap<String, String>();
 
     private static final String RULE_KEY = "rule";
+
+    
     
     private StringProperties properties;
     
@@ -215,6 +218,14 @@ public class AutomaticCapacityScaleConfig
         return new CapacityRequirementsConfig(properties.getMap(MAX_CAPACITY_KEY_PREFIX, EMPTY_CAPACITY));
     }
     
+    public void setInitialCapacity(CapacityRequirementsConfig initialCapacity) {
+        properties.putMap(INITIAL_CAPACITY_KEY_PREFIX, initialCapacity.getProperties());
+    }
+    
+    public CapacityRequirementsConfig getInitialCapacity() {
+        return new CapacityRequirementsConfig(properties.getMap(INITIAL_CAPACITY_KEY_PREFIX, EMPTY_CAPACITY));
+    }
+    
     @Override
     public String toString() {
         return this.properties.toString();
@@ -254,4 +265,5 @@ public class AutomaticCapacityScaleConfig
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         this.properties = new StringProperties((Map<String,String>)in.readObject());
     }
+
 }
