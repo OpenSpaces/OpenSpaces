@@ -262,7 +262,7 @@
 	 		<classpath refid="all-libs"/>
             <classpath location="${target.classes.dir}"/>
 	 	</java>	
-		<replaceregexp file="${maven.tmp.dir}/gs-openspaces-pom.xml" 
+		<replaceregexp byline="true" file="${maven.tmp.dir}/gs-openspaces-pom.xml" 
              match="&lt;version&gt;${productversion}-(.*)&lt;/version&gt;"
              replace="&lt;version&gt;${productversion}&lt;/version&gt;"/>
 		<echo message="${productversion}" />
