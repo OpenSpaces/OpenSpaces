@@ -87,16 +87,16 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
 
     public void enforceSla(RebalancingSlaPolicy sla)
             throws RebalancingSlaEnforcementInProgressException {
+        
+        if (state.isDestroyedProcessingUnit(pu)) {
+            throw new IllegalStateException("endpoint destroyed");
+        }
 
         if (sla == null) {
             throw new IllegalArgumentException("sla cannot be null");
         }
         
         sla.validate();
-   
-        if (state.isDestroyedProcessingUnit(pu)) {
-            throw new IllegalStateException("endpoint destroyed");
-        }
         
         for (GridServiceContainer container : sla.getContainers()) {
             if (container.getGridServiceAgent() == null) {
