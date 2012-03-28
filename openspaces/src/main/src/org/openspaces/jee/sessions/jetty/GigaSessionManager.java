@@ -104,7 +104,7 @@ public class GigaSessionManager extends AbstractSessionManager {
 
             if (spaceUrl.startsWith("bean://")) {
                 throw new IllegalArgumentException("bean:// is only supported when deploying into the service grid");
-            } 
+            }
             urlSpaceConfigurer = new UrlSpaceConfigurer(spaceUrl).clusterInfo(clusterInfo);
             space = (ISpaceProxy) urlSpaceConfigurer.space();
         }
@@ -306,7 +306,7 @@ public class GigaSessionManager extends AbstractSessionManager {
         //any other nodes
     }
 
-    
+
     @Override
     protected AbstractSession newSession(HttpServletRequest request) {
         return new Session(this, request);
@@ -346,7 +346,7 @@ public class GigaSessionManager extends AbstractSessionManager {
 
         if (invalidate && _sessionListeners != null) {
             HttpSessionEvent event = new HttpSessionEvent(session);
-            for (int i = LazyList.size(_sessionListeners); i-- > 0;)
+            for (int i = LazyList.size(_sessionListeners); i-- > 0; )
                 ((HttpSessionListener) LazyList.get(_sessionListeners, i)).sessionDestroyed(event);
         }
         if (!invalidate) {
@@ -470,10 +470,10 @@ public class GigaSessionManager extends AbstractSessionManager {
             _data.setMaxIdleMs(_dftMaxIdleSecs * 1000L);
             _data.setExpiryTime(getMaxInactiveInterval() < 0 ? Long.MAX_VALUE : (System.currentTimeMillis() + getMaxInactiveInterval()));
             _data.setCookieSet(0);
-            
+
             Enumeration<String> attributeNames = getAttributeNames();
             HashMap<String, Object> attributes = new HashMap<String, Object>();
-            while(attributeNames.hasMoreElements()){
+            while (attributeNames.hasMoreElements()) {
                 String nextAttribute = attributeNames.nextElement();
                 attributes.put(nextAttribute, request.getAttribute(nextAttribute));
             }
@@ -482,20 +482,20 @@ public class GigaSessionManager extends AbstractSessionManager {
         }
 
         protected Session(AbstractSessionManager manager, SessionData data) {
-            super(manager, data.getCreated(), data.getAccessed() ,data.getId());
+            super(manager, data.getCreated(), data.getAccessed(), data.getId());
             _data = data;
-            for(Map.Entry<String, Object> attribute : data.getAttributeMap().entrySet()){
+            for (Map.Entry<String, Object> attribute : data.getAttributeMap().entrySet()) {
                 super.setAttribute(attribute.getKey(), attribute.getValue());
             }
             //Merges the two tables and make sure both SessionData and AbstractSessionManager.Session holds the same map
             Enumeration<String> attributeNames = getAttributeNames();
             HashMap<String, Object> attributes = new HashMap<String, Object>();
-            while(attributeNames.hasMoreElements()){
+            while (attributeNames.hasMoreElements()) {
                 String nextAttribute = attributeNames.nextElement();
                 attributes.put(nextAttribute, super.getAttribute(nextAttribute));
             }
             _data.setAttributeMap(attributes);
-            
+
             if (Log.isDebugEnabled()) Log.debug("New Session from existing session data " + _data.toStringExtended());
         }
 
@@ -507,7 +507,11 @@ public class GigaSessionManager extends AbstractSessionManager {
         @Override
         public void setAttribute(String name, Object value) {
             super.setAttribute(name, value);
-            _data.getAttributeMap().put(name, value);
+            if (value == null) {
+                _data.getAttributeMap().remove(name);
+            } else {
+                _data.getAttributeMap().put(name, value);
+            }
             _dirty = true;
         }
 
@@ -566,8 +570,7 @@ public class GigaSessionManager extends AbstractSessionManager {
                 }
             } catch (Exception e) {
                 Log.warn("Problem persisting changed session data id=" + getId(), e);
-            }
-            finally {
+            } finally {
                 _dirty = false;
             }
         }
