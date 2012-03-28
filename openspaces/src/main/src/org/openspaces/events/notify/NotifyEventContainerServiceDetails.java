@@ -49,6 +49,7 @@ public class NotifyEventContainerServiceDetails extends EventContainerServiceDet
         public static final String PERFORM_TAKE_ON_NOTIFY = "perform-take-on-notify";
         public static final String PASS_ARRAY_AS_IS = "pass-array-as-is";
         public static final String GUARANTEED = "guaranteed";
+        public static final String DURABLE = "durable";
     }
 
     public NotifyEventContainerServiceDetails() {
@@ -60,7 +61,7 @@ public class NotifyEventContainerServiceDetails extends EventContainerServiceDet
                                               boolean fifo, Integer batchSize, Integer batchTime, boolean autoRenew,
                                               Boolean notifyAll, Boolean notifyWrite, Boolean notifyUpdate, Boolean notifyTake, Boolean notifyLeaseExpire, Boolean notifyUnmatched,
                                               Boolean triggerNotifyTemplate, Boolean replicateNotifyTemplate,
-                                              boolean performTakeOnNotify, boolean passArrayAsIs, boolean guaranteed) {
+                                              boolean performTakeOnNotify, boolean passArrayAsIs, boolean guaranteed, boolean durable) {
         super(id, SERVICE_SUB_TYPE, gigaSpace, "Notify event container", "Notify event container, template [" + template + "]", template, performSnapshot, transactionManager);
         switch (commType) {
             case 0:
@@ -95,6 +96,7 @@ public class NotifyEventContainerServiceDetails extends EventContainerServiceDet
         getAttributes().put(Attributes.PERFORM_TAKE_ON_NOTIFY, performTakeOnNotify);
         getAttributes().put(Attributes.PASS_ARRAY_AS_IS, passArrayAsIs);
         getAttributes().put(Attributes.GUARANTEED, guaranteed);
+        getAttributes().put(Attributes.DURABLE, durable);
     }
 
     public String getCommType() {
@@ -157,6 +159,11 @@ public class NotifyEventContainerServiceDetails extends EventContainerServiceDet
         return (Boolean) getAttributes().get(Attributes.GUARANTEED);
     }
 
+    public boolean isDurable() {
+        Boolean durable = (Boolean) getAttributes().get(Attributes.DURABLE);
+        return durable == null ? false : durable.booleanValue();
+    }
+    
     @Override
     public AggregatedServiceDetails aggregateById(ServiceDetails[] servicesDetails) {
         return new AggregatedNotifyEventContainerServiceDetails(serviceType, servicesDetails);

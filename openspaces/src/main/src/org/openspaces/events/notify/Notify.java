@@ -82,6 +82,11 @@ public @interface Notify {
     boolean guaranteed() default false;
 
     /**
+     * @see SimpleNotifyEventListenerContainer#setDurable(Boolean)
+     */
+    boolean durable() default false;
+    
+    /**
      * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setComType(int)
      */
     NotifyComType commType() default org.openspaces.events.notify.NotifyComType.UNICAST;

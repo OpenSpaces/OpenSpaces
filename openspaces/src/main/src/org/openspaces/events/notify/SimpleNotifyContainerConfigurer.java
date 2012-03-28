@@ -249,6 +249,14 @@ public class SimpleNotifyContainerConfigurer {
     }
 
     /**
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setDurable(Boolean)
+     */
+    public SimpleNotifyContainerConfigurer durable(boolean durable) {
+        notifyEventListenerContainer.setDurable(durable);
+        return this;
+    }
+
+    /**
      * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setTriggerNotifyTemplate(boolean)
      */
     public SimpleNotifyContainerConfigurer triggerNotifyTemplate(boolean triggerNotifyTemplate) {

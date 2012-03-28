@@ -38,6 +38,8 @@ public class NotifyContainerBeanDefinitionParser extends AbstractTxEventContaine
 
     private static final String GUARANTEED = "guaranteed";
 
+    private static final String DURABLE = "durable";
+    
     private static final String TRIGGER_NOTIFY_TEMPLATE = "trigger-notify-template";
 
     private static final String REPLICATE_NOTIFY_TEMPLATE = "replicate-notify-template";
@@ -158,6 +160,11 @@ public class NotifyContainerBeanDefinitionParser extends AbstractTxEventContaine
             builder.addPropertyValue("guaranteed", guaranteed);
         }
 
+        String durable = element.getAttribute(DURABLE);
+        if (StringUtils.hasLength(durable)) {
+            builder.addPropertyValue("durable", durable);
+        }
+        
         String triggerNotifyTemplate = element.getAttribute(TRIGGER_NOTIFY_TEMPLATE);
         if (StringUtils.hasLength(triggerNotifyTemplate)) {
             builder.addPropertyValue("triggerNotifyTemplate", triggerNotifyTemplate);

@@ -257,9 +257,11 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
         Boolean replicateNotifyTemplate = props.get("replicate-notify-template") == null? null : Boolean.parseBoolean(props.get("replicate-notify-template"));
         boolean performTakeOnNotify = Boolean.parseBoolean(props.get("perform-take-on-notify"));
         boolean guaranteed = Boolean.parseBoolean(props.get("guaranteed"));
+        // TODO durable notifications : handle this
+        boolean durable = false;
         return new NotifyEventContainerServiceDetails(id, space, template, performSnapshot, txManager, commType, fifo, batchSize, 
                     batchTime, autoRenew, null, notifyWrite, notifyUpdate, notifyTake, notifyLease, false, triggerNotifyTemplate, 
-                    replicateNotifyTemplate, performTakeOnNotify, batchProcessing, guaranteed);
+                    replicateNotifyTemplate, performTakeOnNotify, batchProcessing, guaranteed, durable);
     }
 
     private PollingEventContainerServiceDetails buildPollingContainerServiceDetails(String id, Map<String, String> props) {

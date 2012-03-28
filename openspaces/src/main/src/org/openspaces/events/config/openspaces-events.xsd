@@ -556,6 +556,13 @@
                             </xsd:documentation>
                         </xsd:annotation>
                     </xsd:attribute>
+                    <xsd:attribute name="durable" type="xsd:boolean">
+                        <xsd:annotation>
+                            <xsd:documentation>
+                                Controls if the notifications will be durable and will sustain disconnections and failover.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:attribute>
                     <xsd:attribute name="trigger-notify-template" type="xsd:boolean">
                         <xsd:annotation>
                             <xsd:documentation>

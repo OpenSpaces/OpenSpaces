@@ -162,6 +162,8 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
 
     private boolean passArrayAsIs = false;
 
+    private Boolean durable;
+    
     /**
      * See {@link #setComTypeName(String)}.
      *
@@ -461,7 +463,20 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
         return guaranteed;
     }
 
-
+    /**
+     * Controls if notifications will sustain disconnections and failover.
+     */
+    public void setDurable(Boolean durable) {
+        this.durable = durable;
+    }
+    
+    protected Boolean isDurable() {
+        if (durable == null) {
+            return Boolean.FALSE;
+        }
+        return durable;
+    }
+    
     /**
      * When batching is turned on, should the batch of events be passed as an <code>Object[]</code> to
      * the listener. Default to <code>false</code> which means it will be passed one event at a time.
@@ -498,7 +513,9 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
      * Returns <code>true</code> when batching is enabled.
      */
     protected boolean isBatchEnabled() {
-        return batchSize != null && batchTime != null;
+        return (batchSize != null && batchTime != null) || 
+               (durable != null && durable);
+        //||(!EventSessionConfig.USE_OLD_GUARANTEED_NOTIFICATIONS && guaranteed != null && guaranteed);
     }
 
     @Override
@@ -611,6 +628,9 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
         }
         if (guaranteed != null) {
             eventSessionConfig.setGuaranteedNotifications(guaranteed);
+        }
+        if (durable != null) {
+            eventSessionConfig.setDurable(durable);
         }
         return eventSessionConfig;
     }
