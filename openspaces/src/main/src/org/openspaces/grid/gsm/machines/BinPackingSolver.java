@@ -711,7 +711,7 @@ public class BinPackingSolver {
                          //can start a container on a new machine
                          startExtraContainersToSatisfyNonMemoryShortage &&
                             
-                         //pu not stretched out to max number of containers
+                         //pu not stretched out to max number of machines
                          allocatedCapacityForPu.getAgentUids().size() < maxMemoryCapacityInMB/containerMemoryCapacityInMB) {
                         
                         // allocate memory (start a new container for the non-memory allocation)
@@ -720,9 +720,37 @@ public class BinPackingSolver {
                     }
                     
                     if (allocatedMemoryForPuOnMachine > 0) {
+                        
                         allocateOnMachine = allocateOnMachine.add(capacityToAllocateOnMachine);
                     }
                 }
+            }
+            
+            validateNotBreachedMaxMemoryCapacityInMB();
+            
+            String agentUidToDeallocateOneContainer = null;
+            if (getMemoryInMB(allocatedCapacityForPu) + getMemoryInMB(allocateOnMachine) > maxMemoryCapacityInMB) {
+                
+                if (getMemoryInMB(allocatedCapacityForPu.getAgentCapacityOrZero(agentUid)) != 0) {
+                    throw new IllegalStateException("We should not allocated a new container on a machine that already has allocated containers.");
+                }
+                
+                if (getMemoryInMB(allocateOnMachine) != containerMemoryCapacityInMB) {
+                    throw new IllegalStateException("We should not add memory of more than one container to a machine that does not have any containers.");
+                }
+                
+                //must deallocate container from another machine that has more than one container before adding a container on an empty machine
+                //otherwise we would start more containers than maximum number of containers
+                
+                for (String candidateAgentUidToDeallocate : allocatedCapacityForPu.getAgentUids()) {
+                    if (getMemoryInMB(allocatedCapacityForPu.getAgentCapacity(candidateAgentUidToDeallocate)) >= containerMemoryCapacityInMB*2) {
+                        agentUidToDeallocateOneContainer = candidateAgentUidToDeallocate;
+                    }
+                }
+            }
+
+            if (agentUidToDeallocateOneContainer != null) {
+                deallocateCapacityOnMachine(agentUidToDeallocateOneContainer, new MemoryCapacityRequirement(containerMemoryCapacityInMB));
             }
             allocateCapacityOnMachine(agentUid, allocateOnMachine);
         }
@@ -1067,6 +1095,14 @@ public class BinPackingSolver {
             allocatedCapacityResult = allocatedCapacityResult.add(agentUid, capacityToAllocateOnAgent);
             unallocatedCapacity = unallocatedCapacity.subtract(agentUid, capacityToAllocateOnAgent);
             allocatedCapacityForPu = allocatedCapacityForPu.add(agentUid, capacityToAllocateOnAgent);
+        }
+        
+        validateNotBreachedMaxMemoryCapacityInMB();
+    }
+
+    private void validateNotBreachedMaxMemoryCapacityInMB() {
+        if (getMemoryInMB(allocatedCapacityForPu) > maxMemoryCapacityInMB) {
+            throw new IllegalStateException("Allocated memory above allowed maximum");
         }
     }
     
