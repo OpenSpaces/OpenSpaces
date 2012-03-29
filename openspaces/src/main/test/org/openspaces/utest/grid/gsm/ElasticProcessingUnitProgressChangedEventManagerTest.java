@@ -23,6 +23,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import junit.framework.Assert;
+import junit.framework.TestCase;
 
 import org.junit.After;
 import org.junit.Before;
@@ -36,20 +37,22 @@ import org.openspaces.admin.internal.gsa.events.DefaultElasticGridServiceAgentPr
 import org.openspaces.admin.internal.gsa.events.InternalElasticGridServiceAgentProvisioningProgressChangedEventManager;
 import org.springframework.util.StringUtils;
 
-public class ElasticProcessingUnitProgressChangedEventManagerTest {
+public class ElasticProcessingUnitProgressChangedEventManagerTest extends TestCase {
 
     private static final int EVENTS_TIMEOUT_SECONDS = 2; //TODO: Increase timeout if sporadic failures occur
     private InternalAdmin admin = null;
     private InternalElasticGridServiceAgentProvisioningProgressChangedEventManager eventManager;
 
     @Before
-    public void beforeMethod() {
+    @Override
+    protected void setUp() {
         InternalAdmin admin = (InternalAdmin)(new AdminFactory().useDaemonThreads(true).createAdmin());
         eventManager = new DefaultElasticGridServiceAgentProvisioningProgressChangedEventManager(admin);
     }
     
     @After
-    public void afterMethod() {
+    @Override
+    protected void tearDown() {
         if (admin != null) {
             admin.close();
         }
