@@ -53,6 +53,7 @@ public class DedicatedManualXenCPUMixedTest extends TestCase {
         solver.setLogger(logger);
         solver.setContainerMemoryCapacityInMB(_256_MB_);
         solver.setMaxAllocatedMemoryCapacityOfPuInMB(_6144_MB_);
+        solver.setMaxAllocatedMemoryCapacityOfPuPerMachineInMB(_6144_MB_); //dummy
         solver.setMinimumNumberOfMachines(2);
         
         solver.setAllocatedCapacityForPu(new ClusterCapacityRequirements());

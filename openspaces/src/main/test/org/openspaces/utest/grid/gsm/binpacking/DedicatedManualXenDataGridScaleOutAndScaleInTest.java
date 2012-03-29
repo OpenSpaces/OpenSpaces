@@ -52,6 +52,7 @@ public class DedicatedManualXenDataGridScaleOutAndScaleInTest extends TestCase {
         solver.setLogger(logger);
         solver.setContainerMemoryCapacityInMB(_192_MB_);
         solver.setMaxAllocatedMemoryCapacityOfPuInMB(_3072_MB_);
+        solver.setMaxAllocatedMemoryCapacityOfPuPerMachineInMB(_3072_MB_); // dummy
         solver.setMinimumNumberOfMachines(2);
         
         solver.setAllocatedCapacityForPu(new ClusterCapacityRequirements());
