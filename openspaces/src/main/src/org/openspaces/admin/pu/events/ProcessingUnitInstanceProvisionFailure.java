@@ -54,8 +54,7 @@ public class ProcessingUnitInstanceProvisionFailure {
     }
     
     /**
-     * The exception stack trace indicating that a failure has occurred while trying to instantiate a processing unit instance.
-     * @return
+     * @return The exception stack trace indicating that a failure has occurred while trying to instantiate a processing unit instance.
      */
     public String getFailureReason() {
         return failureReason;

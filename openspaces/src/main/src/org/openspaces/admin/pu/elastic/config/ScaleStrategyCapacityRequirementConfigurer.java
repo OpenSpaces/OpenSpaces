@@ -30,9 +30,9 @@ public interface ScaleStrategyCapacityRequirementConfigurer {
 
     /**
      * Specifies the memory capacity (RAM).
-     * @param size
+     * @param memory
      *            - the RAM size as a string (For example :50m" or "50g" or "50t")
-     *            See also {@link MemoryUnit#getPostfix())
+     *            See also {@link MemoryUnit#getPostfix()}
      */
     ScaleStrategyCapacityRequirementConfigurer memoryCapacity(String memory);
 
@@ -70,7 +70,7 @@ public interface ScaleStrategyCapacityRequirementConfigurer {
      *            - the file system directory representing the drive
      * @param size
      *            - the drive size as a string (For example :50m" or "50g" or "50t")
-     *            See also {@link MemoryUnit#getPostfix())
+     *            See also {@link MemoryUnit#getPostfix()}
      * 
      *            For example: 
      *            driveCapacity("/","50m") - the drive "/" (on linux) has the size of 50*1024MBs 
