@@ -27,6 +27,8 @@ import org.openspaces.admin.internal.pu.statistics.StatisticsObjectList;
  */
 public class StatisticsObjectListTest extends TestCase {
 
+    private long dummyTimeStamp = 0;
+    
     public void testEmptyList() {
         StatisticsObjectList list = new StatisticsObjectList();
         Assert.assertNull(list.getMinimum());
@@ -37,8 +39,8 @@ public class StatisticsObjectListTest extends TestCase {
     
     public void testSimpleList2() {
         StatisticsObjectList list = new StatisticsObjectList();
-        list.add(0);
-        list.add(1);
+        list.add(0 ,dummyTimeStamp);
+        list.add(1, dummyTimeStamp);
         Assert.assertEquals(0, list.getMinimum());
         Assert.assertEquals(1, list.getMaximum());
         Assert.assertEquals(0.5, list.getAverage());
@@ -53,9 +55,9 @@ public class StatisticsObjectListTest extends TestCase {
     
     public void testSimpleList3() {
         StatisticsObjectList list = new StatisticsObjectList();
-        list.add(2);
-        list.add(0);
-        list.add(1);
+        list.add(2, dummyTimeStamp);
+        list.add(0, dummyTimeStamp);
+        list.add(1, dummyTimeStamp);
         Assert.assertEquals(0, list.getMinimum());
         Assert.assertEquals(2, list.getMaximum());
         Assert.assertEquals(1.0, list.getAverage());
@@ -70,9 +72,9 @@ public class StatisticsObjectListTest extends TestCase {
     
     public void testComparable() {
         StatisticsObjectList list = new StatisticsObjectList();
-        list.add("c");
-        list.add("a");
-        list.add("b");
+        list.add("c", dummyTimeStamp);
+        list.add("a", dummyTimeStamp);
+        list.add("b", dummyTimeStamp);
         Assert.assertEquals("a", list.getMinimum());
         Assert.assertEquals("c", list.getMaximum());
         try {
@@ -82,13 +84,40 @@ public class StatisticsObjectListTest extends TestCase {
         }
         catch (ClassCastException e) {
         }
-      
     }
+    
+    public void testDeltaPerTimeunit() {
+        StatisticsObjectList list = new StatisticsObjectList();
+        
+        list.add(0, 0);
+        list.add(1, 1*1000);
+        list.add(2, 2*1000);
+        list.add(3, 3*1000);
+        list.add(4, 4*1000);
+        
+        Assert.assertEquals(1.0, list.getDeltaValuePerSecond());
+        Assert.assertEquals(0.001, list.getDeltaValuePerMilliSecond());
+        Assert.assertEquals(Math.pow(10, -9), list.getDeltaValuePerNanoSecond());
+    }
+    
+    public void testThroughput2() {
+        StatisticsObjectList list = new StatisticsObjectList();
+        int value=0;
+ 
+        for(int i=10 ; i<110 ; i++)
+            list.add(value++, i*1000);
+        
+        Assert.assertEquals(1.0, list.getDeltaValuePerSecond());
+        Assert.assertEquals(0.001, list.getDeltaValuePerMilliSecond());
+        Assert.assertEquals(Math.pow(10, -9), list.getDeltaValuePerNanoSecond());
+    }
+    
+   
     
     
     public void testAverageNotComparable() {
         StatisticsObjectList list = new StatisticsObjectList();
-        list.add(new Object());
+        list.add(new Object(), dummyTimeStamp);
         try {
             list.getAverage();
             Assert.fail("Expected ClassCastException");
