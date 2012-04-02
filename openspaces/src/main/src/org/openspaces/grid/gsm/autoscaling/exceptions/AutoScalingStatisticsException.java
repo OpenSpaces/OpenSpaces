@@ -80,6 +80,10 @@ public class AutoScalingStatisticsException extends AutoScalingSlaEnforcementInP
         } else if (!puName.equals(other.puName))
             return false;
         
+        if (getMessage() != null && !getMessage().endsWith(other.getMessage())) {
+            return false;
+        }
+        
         if (getCause() != null && getCause().getMessage() != null && 
             !getCause().getMessage().equals(other.getCause().getMessage())) {
             return false;
