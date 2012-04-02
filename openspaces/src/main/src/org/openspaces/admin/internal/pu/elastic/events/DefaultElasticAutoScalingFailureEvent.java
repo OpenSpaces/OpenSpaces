@@ -17,11 +17,11 @@
  ******************************************************************************/
 package org.openspaces.admin.internal.pu.elastic.events;
 
-import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitInstanceProvisioningFailureEvent;
+import org.openspaces.admin.pu.elastic.events.ElasticAutoScalingFailureEvent;
 
 public class DefaultElasticAutoScalingFailureEvent 
         extends AbstractElasticProcessingUnitFailureEvent
-        implements ElasticProcessingUnitInstanceProvisioningFailureEvent {
+        implements ElasticAutoScalingFailureEvent {
 
     private static final long serialVersionUID = 1L;
     
