@@ -16,25 +16,40 @@
 package org.openspaces.grid.gsm.autoscaling.exceptions;
 
 import org.openspaces.admin.pu.ProcessingUnit;
-import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
+import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
 
 /**
  * @author itaif
  * @since 9.0.0
  */
-public class AutoScalingStatisticsException extends AutoScalingSlaEnforcementInProgressException 
-    implements SlaEnforcementFailure{
+public class AutoScalingStatisticsException extends AutoScalingSlaEnforcementInProgressException {
 
     private final String puName;
 
-    public AutoScalingStatisticsException(ProcessingUnit pu, String message, Exception reason) {
+    protected AutoScalingStatisticsException(ProcessingUnit pu, String message) {
+        super(message);
+        this.puName = pu.getName();
+    }
+    
+    protected AutoScalingStatisticsException(ProcessingUnit pu, String message, Throwable reason) {
         super(message, reason);
         this.puName = pu.getName();
+    }
+    
+    public AutoScalingStatisticsException(ProcessingUnit pu, ProcessingUnitStatisticsId statisticsId) {
+        this(pu,message(statisticsId,pu));
+    }
+
+    /**
+     * Generates the default message
+     * @param pu 
+     */
+    private static String message(ProcessingUnitStatisticsId statisticsId, ProcessingUnit pu) {
+        return "No " + pu.getName() + " statistics for " + statisticsId;
     }
 
     private static final long serialVersionUID = 1L;
 
-    @Override
     public String[] getAffectedProcessingUnits() {
         return new String[] { puName};
     }

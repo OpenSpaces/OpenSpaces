@@ -27,9 +27,8 @@ import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
 import org.openspaces.grid.gsm.LogPerProcessingUnit;
 import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.autoscaling.exceptions.AutoScalingSlaEnforcementInProgressException;
-import org.openspaces.grid.gsm.autoscaling.exceptions.AutoScalingStatisticsException;
+import org.openspaces.grid.gsm.autoscaling.exceptions.AutoScalingStatisticsFormatException;
 import org.openspaces.grid.gsm.autoscaling.exceptions.ReachedMaximumCapacityAutoScalingException;
-import org.openspaces.grid.gsm.autoscaling.exceptions.ReachedMinimumCapacityAutoScalingException;
 import org.openspaces.grid.gsm.autoscaling.exceptions.RulesConflictAutoScalingException;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 
@@ -79,7 +78,6 @@ public class DefaultAutoScalingSlaEnforcementEndpoint implements AutoScalingSlaE
         for (AutomaticCapacityScaleRuleConfig rule: sla.getRules()) {
 
             ProcessingUnitStatisticsId statisticsId = rule.getStatistics();
-            //Object value = statistics.get(statisticsId);
             Object value = AutoScalingSlaUtils.getStatisticsValue(pu, statistics, statisticsId);
                         
             boolean belowLowThreshold = isBelowLowThreshold(rule, value);
@@ -121,7 +119,6 @@ public class DefaultAutoScalingSlaEnforcementEndpoint implements AutoScalingSlaE
                 //apply max capacity restriction
                 CapacityRequirements correctedNewCapacity = newCapacity.min(maxCapacity);
                 if (existingCapacity.equals(correctedNewCapacity)) {
-                    //TODO: Use specific exception types
                     throw new ReachedMaximumCapacityAutoScalingException(pu, existingCapacity, newCapacity, maxCapacity );
                 }
                 newCapacity = correctedNewCapacity;
@@ -136,18 +133,23 @@ public class DefaultAutoScalingSlaEnforcementEndpoint implements AutoScalingSlaE
             CapacityRequirements minCapacity = sla.getMinCapacity();
             
             if (minCapacity.greaterThan(newCapacity)) {
-                //apply min capacity restriction
+                // apply min capacity restriction
+                // do not throw exception
                 CapacityRequirements correctedNewCapacity = newCapacity.max(minCapacity);
-                if (existingCapacity.equals(correctedNewCapacity)) {
-                    //TODO: Use specific exception types
-                    throw new ReachedMinimumCapacityAutoScalingException(pu, existingCapacity, newCapacity, minCapacity );
+                if (existingCapacity.equals(newCapacity)) {
+                    // do not throw exception since this is a common use case.
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Cannot decrease capacity below minimum of " + minCapacity +". Otherwise would have decreased capacity to " + newCapacity);
+                    }
                 }
                 newCapacity = correctedNewCapacity;
             }
-            if (logger.isInfoEnabled()) {
-                logger.info("Decreasung capacity from " + existingCapacity + " to " + newCapacity);
+            if (!existingCapacity.equals(newCapacity)) {
+                if (logger.isInfoEnabled()) {
+                    logger.info("Decreasing capacity from " + existingCapacity + " to " + newCapacity);
+                }
+                return newCapacity;
             }
-            return newCapacity;
         }
 
         return existingCapacity;
@@ -159,7 +161,7 @@ public class DefaultAutoScalingSlaEnforcementEndpoint implements AutoScalingSlaE
             return AutoScalingSlaUtils.compare(rule.getLowThreshold(), value) > 0;
         }
         catch (final NumberFormatException e) {
-            throw new AutoScalingStatisticsException(pu, "Failed to compare value (" + value + ") with low threshold (" + rule.getLowThreshold() +")",e);
+            throw new AutoScalingStatisticsFormatException(pu, value ,rule.getLowThreshold() ,e);
         }
     }
     
@@ -170,7 +172,7 @@ public class DefaultAutoScalingSlaEnforcementEndpoint implements AutoScalingSlaE
             return AutoScalingSlaUtils.compare(rule.getHighThreshold(), value) < 0;
         }
         catch (final NumberFormatException e) {
-            throw new AutoScalingStatisticsException(pu, "Failed to compare value (" + value + ") with high threshold (" + rule.getHighThreshold() +")",e);
+            throw new AutoScalingStatisticsFormatException(pu, value ,rule.getHighThreshold() ,e);
         }
     }
 }

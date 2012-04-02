@@ -24,6 +24,7 @@ import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsIdConfigurer;
 import org.openspaces.admin.pu.statistics.SingleInstanceStatisticsConfig;
 import org.openspaces.admin.pu.statistics.SingleInstanceStatisticsConfigurer;
+import org.openspaces.grid.gsm.autoscaling.exceptions.AutoScalingInstanceStatisticsException;
 import org.openspaces.grid.gsm.autoscaling.exceptions.AutoScalingSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.autoscaling.exceptions.AutoScalingStatisticsException;
 
@@ -76,8 +77,7 @@ public class AutoScalingSlaUtils {
                 .create();
             
             if (!statistics.containsKey(singleInstanceLastSampleStatisticsId)) {
-                //TODO: Replace with specific exception
-                throw new AutoScalingStatisticsException(pu, "No statistics for " + singleInstanceLastSampleStatisticsId, null);    
+                throw new AutoScalingInstanceStatisticsException(instance, singleInstanceLastSampleStatisticsId.getMetric());    
             }
             
             final ProcessingUnitStatisticsId singleInstanceStatisticsId = 
@@ -89,15 +89,13 @@ public class AutoScalingSlaUtils {
                 .create();
             
             if (!statistics.containsKey(singleInstanceStatisticsId)) {
-                //TODO: Replace with specific exception
-                throw new AutoScalingStatisticsException(pu, "No statistics for " + singleInstanceStatisticsId, null);
+                throw new AutoScalingStatisticsException(pu, singleInstanceStatisticsId);
             }
         }
         
         Object value = statistics.get(ruleStatisticsId);
         if (value == null) {
-          //TODO: Replace with specific exception
-            throw new AutoScalingStatisticsException(pu, "No statistics for " + ruleStatisticsId, null);
+            throw new AutoScalingStatisticsException(pu, ruleStatisticsId);
         }
         
         return value;
