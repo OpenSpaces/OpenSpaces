@@ -96,7 +96,7 @@ public abstract class AbstractScaleStrategyBean implements
     private ScaleStrategyProgressEventState puProvisioningEventState;
     private ScaleStrategyProgressEventState scaleEventState;
     
-    private EventsStore eventStorage;
+    private EventsStore eventsStore;
 
     private boolean discoveryQuiteMode;
     
@@ -165,7 +165,7 @@ public abstract class AbstractScaleStrategyBean implements
     
     @Override
     public void setElasticScaleStrategyEventStorage(EventsStore eventQueue) {
-        this.eventStorage = eventQueue;
+        this.eventsStore = eventQueue;
     }
     
     protected void setMachineDiscoveryQuiteMode(boolean discoveryQuiteMode) {
@@ -215,11 +215,12 @@ public abstract class AbstractScaleStrategyBean implements
         
         logger.info("properties: "+properties);
     
-        machineProvisioningEventState = new ScaleStrategyProgressEventState(eventStorage, isUndeploying(), pu.getName(), DefaultElasticMachineProvisioningProgressChangedEvent.class, DefaultElasticMachineProvisioningFailureEvent.class);
-        agentProvisioningEventState = new ScaleStrategyProgressEventState(eventStorage, isUndeploying(), pu.getName(), DefaultElasticGridServiceAgentProvisioningProgressChangedEvent.class, DefaultElasticGridServiceAgentProvisioningFailureEvent.class );
-        containerProvisioningEventState = new ScaleStrategyProgressEventState(eventStorage, isUndeploying(), pu.getName(), DefaultElasticGridServiceContainerProvisioningProgressChangedEvent.class, DefaultElasticGridServiceContainerProvisioningFailureEvent.class );
-        puProvisioningEventState = new ScaleStrategyProgressEventState(eventStorage, isUndeploying(), pu.getName(), DefaultElasticProcessingUnitInstanceProvisioningProgressChangedEvent.class, DefaultElasticProcessingUnitInstanceProvisioningFailureEvent.class );
-        scaleEventState = new ScaleStrategyProgressEventState(eventStorage, isUndeploying(), pu.getName(), DefaultElasticProcessingUnitScaleProgressChangedEvent.class);
+        machineProvisioningEventState = new ScaleStrategyProgressEventState(eventsStore, isUndeploying(), pu.getName(), DefaultElasticMachineProvisioningProgressChangedEvent.class, DefaultElasticMachineProvisioningFailureEvent.class);
+        agentProvisioningEventState = new ScaleStrategyProgressEventState(eventsStore, isUndeploying(), pu.getName(), DefaultElasticGridServiceAgentProvisioningProgressChangedEvent.class, DefaultElasticGridServiceAgentProvisioningFailureEvent.class );
+        containerProvisioningEventState = new ScaleStrategyProgressEventState(eventsStore, isUndeploying(), pu.getName(), DefaultElasticGridServiceContainerProvisioningProgressChangedEvent.class, DefaultElasticGridServiceContainerProvisioningFailureEvent.class );
+        puProvisioningEventState = new ScaleStrategyProgressEventState(eventsStore, isUndeploying(), pu.getName(), DefaultElasticProcessingUnitInstanceProvisioningProgressChangedEvent.class, DefaultElasticProcessingUnitInstanceProvisioningFailureEvent.class );
+        scaleEventState = new ScaleStrategyProgressEventState(eventsStore, isUndeploying(), pu.getName(), DefaultElasticProcessingUnitScaleProgressChangedEvent.class);
+        
         
         minimumNumberOfMachines = calcMinimumNumberOfMachines();
         provisionedMachines = new ElasticMachineProvisioningDiscoveredMachinesCache(pu,machineProvisioning, discoveryQuiteMode, getPollingIntervalSeconds());
@@ -391,5 +392,9 @@ public abstract class AbstractScaleStrategyBean implements
 
     protected void puInstanceProvisioningInProgressEvent(RebalancingSlaEnforcementInProgressException e) {
         puProvisioningEventState.enqueuProvisioningInProgressEvent(e);
+    }
+    
+    protected EventsStore getEventsStore() {
+        return this.eventsStore;
     }
 }
