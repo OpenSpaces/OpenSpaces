@@ -92,7 +92,8 @@ public class InstancesStatisticsCalculator implements InternalProcessingUnitStat
                         values.put(erasedStatisticsId, new StatisticsObjectList());
                     }
                     Object value = pair.getValue();
-                    values.get(erasedStatisticsId).add(value);
+                    long timeStamp = processingUnitStatistics.getAdminTimestamp();
+                    values.get(erasedStatisticsId).add(value, timeStamp);
                 }
             }
         }

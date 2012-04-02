@@ -180,7 +180,8 @@ public class TimeWindowStatisticsCalculator implements InternalProcessingUnitSta
                     }
                     else {
                         //valid sample
-                        timeline.add(value);
+                        long timeStamp = statistics.getAdminTimestamp();
+                        timeline.add(value, timeStamp);
                         
                         if (timeDelta >= minTimeWindowMilliSeconds) {
                             // valid return value
