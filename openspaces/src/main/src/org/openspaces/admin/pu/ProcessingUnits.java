@@ -37,6 +37,10 @@ import java.util.concurrent.TimeUnit;
 
 import org.openspaces.admin.AdminAware;
 import org.openspaces.admin.StatisticsMonitor;
+import org.openspaces.admin.pu.elastic.events.ElasticAutoScalingFailureEventListener;
+import org.openspaces.admin.pu.elastic.events.ElasticAutoScalingFailureEventManager;
+import org.openspaces.admin.pu.elastic.events.ElasticAutoScalingProgressChangedEventListener;
+import org.openspaces.admin.pu.elastic.events.ElasticAutoScalingProgressChangedEventManager;
 import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEventManager;
 import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitAddedEventManager;
@@ -175,4 +179,16 @@ public interface ProcessingUnits extends Iterable<ProcessingUnit>, AdminAware, S
      * @since 8.0.6
      */
     ProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventManager getProcessingUnitInstanceMemberAliveIndicatorStatusChanged();
+
+    /**
+     * @return an event manager allowing to register {@link ElasticAutoScalingProgressChangedEventListener}s
+     * @since 9.0.0
+     */
+    ElasticAutoScalingProgressChangedEventManager getElasticAutoScalingProgressChanged();
+
+    /**
+     * @return an event manager allowing to register {@link ElasticAutoScalingFailureEventListener}s
+     * @since 9.0.0
+     */
+    ElasticAutoScalingFailureEventManager getElasticAutoScalingFailure();
 }

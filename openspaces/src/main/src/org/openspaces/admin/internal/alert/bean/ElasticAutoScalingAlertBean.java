@@ -20,10 +20,10 @@ package org.openspaces.admin.internal.alert.bean;
 import org.openspaces.admin.alert.Alert;
 import org.openspaces.admin.alert.AlertSeverity;
 import org.openspaces.admin.alert.alerts.ElasticAutoScalingAlert;
-import org.openspaces.admin.machine.events.ElasticAutoScalingFailureEvent;
-import org.openspaces.admin.machine.events.ElasticAutoScalingFailureEventListener;
-import org.openspaces.admin.machine.events.ElasticAutoScalingProgressChangedEvent;
-import org.openspaces.admin.machine.events.ElasticAutoScalingProgressChangedEventListener;
+import org.openspaces.admin.pu.elastic.events.ElasticAutoScalingFailureEvent;
+import org.openspaces.admin.pu.elastic.events.ElasticAutoScalingFailureEventListener;
+import org.openspaces.admin.pu.elastic.events.ElasticAutoScalingProgressChangedEvent;
+import org.openspaces.admin.pu.elastic.events.ElasticAutoScalingProgressChangedEventListener;
 
 /**
  * Raises an alert if an elastic processing unit deployment or scale has been affected by a failure to start a (cloud) virtual machine.
@@ -33,17 +33,17 @@ import org.openspaces.admin.machine.events.ElasticAutoScalingProgressChangedEven
 public class ElasticAutoScalingAlertBean extends AbstractElasticProcessingUnitAlertBean implements 
     ElasticAutoScalingFailureEventListener, ElasticAutoScalingProgressChangedEventListener {
     
-    private static final String MACHINES_ALERT_BEAN_UID = "3BA87E89-449A-4abc-A632-4732246A9EE4";
-    private static final String MACHINES_ALERT_NAME = "Machine Provisioning Alert";
-    private static final AlertSeverity MACHINES_ALERT_SEVERITY = AlertSeverity.SEVERE;
-    private static final String MACHINES_ALERT_RESOLVED_DESCRIPTION_POSTFIX= "Machine Provisioning for %s completed succesfully";
+    private static final String AUTO_SCALING_ALERT_BEAN_UID = "AF5874F0-78E1-11E1-8DA5-1FC84724019B";
+    private static final String AUTO_SCALING_ALERT_NAME = "Automatic Scaling Alert";
+    private static final AlertSeverity AUTO_SCALING_ALERT_SEVERITY = AlertSeverity.SEVERE;
+    private static final String AUTO_SCALING_ALERT_RESOLVED_DESCRIPTION_POSTFIX= "Automatic Scaling for %s completed succesfully";
         
     @Override
     public void afterPropertiesSet() throws Exception {
-        super.setBeanUid(MACHINES_ALERT_BEAN_UID);
-        super.setAlertName(MACHINES_ALERT_NAME);
-        super.setAlertSeverity(MACHINES_ALERT_SEVERITY);
-        super.setResolvedAlertDescriptionFormat(MACHINES_ALERT_RESOLVED_DESCRIPTION_POSTFIX);
+        super.setBeanUid(AUTO_SCALING_ALERT_BEAN_UID);
+        super.setAlertName(AUTO_SCALING_ALERT_NAME);
+        super.setAlertSeverity(AUTO_SCALING_ALERT_SEVERITY);
+        super.setResolvedAlertDescriptionFormat(AUTO_SCALING_ALERT_RESOLVED_DESCRIPTION_POSTFIX);
         super.afterPropertiesSet();
      
         admin.getProcessingUnits().getElasticAutoScalingProgressChanged().add(this, true);

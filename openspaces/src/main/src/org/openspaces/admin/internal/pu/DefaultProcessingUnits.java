@@ -29,6 +29,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.pu.elastic.events.DefaultElasticAutoScalingFailureEventManager;
+import org.openspaces.admin.internal.pu.elastic.events.DefaultElasticAutoScalingProgressChangedEventManager;
+import org.openspaces.admin.internal.pu.elastic.events.InternalElasticAutoScalingFailureEventManager;
+import org.openspaces.admin.internal.pu.elastic.events.InternalElasticAutoScalingProgressChangedEventManager;
 import org.openspaces.admin.internal.pu.events.DefaultBackupGridServiceManagerChangedEventManager;
 import org.openspaces.admin.internal.pu.events.DefaultManagingGridServiceManagerChangedEventManager;
 import org.openspaces.admin.internal.pu.events.DefaultProcessingUnitAddedEventManager;
@@ -51,6 +55,8 @@ import org.openspaces.admin.internal.pu.events.InternalProcessingUnitRemovedEven
 import org.openspaces.admin.internal.pu.events.InternalProcessingUnitStatusChangedEventManager;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
+import org.openspaces.admin.pu.elastic.events.ElasticAutoScalingFailureEventManager;
+import org.openspaces.admin.pu.elastic.events.ElasticAutoScalingProgressChangedEventManager;
 import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEventManager;
 import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitAddedEventListener;
@@ -95,6 +101,10 @@ public class DefaultProcessingUnits implements InternalProcessingUnits {
     private final InternalProcessingUnitInstanceProvisionStatusChangedEventManager processingUnitInstanceProvisionStatusChangedEventManager;
     private final InternalProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventManager processingUnitInstanceMemberAliveIndicatorStatusChangedEventManager;
     
+    private final InternalElasticAutoScalingProgressChangedEventManager elasticAutoScalingProgressChangedEventManager;
+    private final InternalElasticAutoScalingFailureEventManager elasticAutoScalingFailureEventManager;
+
+    
     private volatile long statisticsInterval = StatisticsMonitor.DEFAULT_MONITOR_INTERVAL;
 
     private volatile int statisticsHistorySize = StatisticsMonitor.DEFAULT_HISTORY_SIZE;
@@ -117,6 +127,9 @@ public class DefaultProcessingUnits implements InternalProcessingUnits {
         
         this.processingUnitInstanceProvisionStatusChangedEventManager = new DefaultProcessingUnitInstanceProvisionStatusChangedEventManager(admin);
         this.processingUnitInstanceMemberAliveIndicatorStatusChangedEventManager = new DefaultProcessingUnitInstanceMemberAliveIndicatorStatusChangedEventManager(admin);
+        
+        this.elasticAutoScalingProgressChangedEventManager = new DefaultElasticAutoScalingProgressChangedEventManager(admin);
+        this.elasticAutoScalingFailureEventManager = new DefaultElasticAutoScalingFailureEventManager(admin);
     }
 
     public Admin getAdmin() {
@@ -312,5 +325,15 @@ public class DefaultProcessingUnits implements InternalProcessingUnits {
     
     private void assertStateChangesPermitted() {
         admin.assertStateChangesPermitted();
+    }
+
+    @Override
+    public ElasticAutoScalingProgressChangedEventManager getElasticAutoScalingProgressChanged() {
+        return elasticAutoScalingProgressChangedEventManager;
+    }
+
+    @Override
+    public ElasticAutoScalingFailureEventManager getElasticAutoScalingFailure() {
+        return elasticAutoScalingFailureEventManager;
     }
 }

@@ -18,6 +18,8 @@ package org.openspaces.grid.gsm.strategy;
 import java.util.concurrent.TimeUnit;
 
 import org.openspaces.admin.bean.BeanConfigurationException;
+import org.openspaces.admin.internal.pu.elastic.events.DefaultElasticAutoScalingFailureEvent;
+import org.openspaces.admin.internal.pu.elastic.events.DefaultElasticAutoScalingProgressChangedEvent;
 import org.openspaces.admin.pu.elastic.config.AutomaticCapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.config.AutomaticCapacityScaleRuleConfig;
 import org.openspaces.admin.pu.elastic.config.CapacityRequirementsConfig;
@@ -52,6 +54,9 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
     // created by afterPropertiesSet()
     private AutomaticCapacityScaleConfig automaticCapacity;
     
+    // events state
+    private ScaleStrategyProgressEventState autoScalingEventState;
+    
     @Override
     public void afterPropertiesSet() {
         
@@ -66,6 +71,14 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
             initialCapacity = automaticCapacity.getMinCapacity();
         }
         
+        autoScalingEventState = 
+            new ScaleStrategyProgressEventState(
+                getEventsStore(), 
+                isUndeploying(),
+                getProcessingUnit().getName(), 
+                DefaultElasticAutoScalingProgressChangedEvent.class,
+                DefaultElasticAutoScalingFailureEvent.class);
+
         //inject initial manual scale capacity
         super.setCapacityRequirementConfig(initialCapacity);
         super.setScaleStrategyConfig(automaticCapacity);
@@ -133,12 +146,15 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
         
         //TODO: Implement cooldown based on pu not intact.
         //TODO: Implement cooldown based on configuration.
-        
-        //TODO: Fire automatic completed event?? Is it needed?
     }
 
     private CapacityRequirements enforceAutoScalingSla(final CapacityRequirements capacityRequirements)
             throws AutoScalingSlaEnforcementInProgressException {
+        
+        if (getLogger().isDebugEnabled()) {
+            getLogger().debug("Enforcing automatic scaling SLA.");
+        }
+        
         final AutoScalingSlaPolicy sla = new AutoScalingSlaPolicy();
         sla.setCapacityRequirements(capacityRequirements);
         sla.setHighThresholdBreachedIncrease(getCapacityChangeOnBreach());
@@ -146,11 +162,18 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
         sla.setMaxCapacity(automaticCapacity.getMaxCapacity().toCapacityRequirements());
         sla.setMinCapacity(automaticCapacity.getMinCapacity().toCapacityRequirements());
         sla.setRules(automaticCapacity.getRules());
-        if (getLogger().isTraceEnabled()) {
-            getLogger().trace("AutoScalingSlaPolicy=" + sla);
+        if (getLogger().isDebugEnabled()) {
+            getLogger().debug("Automatic Scaling SLA Policy: " + sla);
         }
-        autoScalingEndpoint.enforceSla(sla);
-        
+                
+        try {
+            autoScalingEndpoint.enforceSla(sla);
+            autoScalingCompletedEvent();
+        }
+        catch (AutoScalingSlaEnforcementInProgressException e) {
+            autoScalingInProgressEvent(e);
+            throw e;
+        }
         final CapacityRequirements newCapacityRequirements = autoScalingEndpoint.getNewCapacityRequirements();
         return newCapacityRequirements;
     }
@@ -193,4 +216,11 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
         getProcessingUnit().stopStatisticsMonitor();
     }
     
+    private void autoScalingCompletedEvent() {
+        autoScalingEventState.enqueuProvisioningCompletedEvent();
+    }
+
+    private void autoScalingInProgressEvent(AutoScalingSlaEnforcementInProgressException e) {
+        autoScalingEventState.enqueuProvisioningInProgressEvent(e);
+    }
 }
