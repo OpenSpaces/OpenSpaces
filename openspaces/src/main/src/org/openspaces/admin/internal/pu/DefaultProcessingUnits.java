@@ -55,8 +55,11 @@ import org.openspaces.admin.internal.pu.events.InternalProcessingUnitRemovedEven
 import org.openspaces.admin.internal.pu.events.InternalProcessingUnitStatusChangedEventManager;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
+import org.openspaces.admin.pu.elastic.events.ElasticAutoScalingFailureEvent;
 import org.openspaces.admin.pu.elastic.events.ElasticAutoScalingFailureEventManager;
+import org.openspaces.admin.pu.elastic.events.ElasticAutoScalingProgressChangedEvent;
 import org.openspaces.admin.pu.elastic.events.ElasticAutoScalingProgressChangedEventManager;
+import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitEvent;
 import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEventManager;
 import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitAddedEventListener;
@@ -335,5 +338,15 @@ public class DefaultProcessingUnits implements InternalProcessingUnits {
     @Override
     public ElasticAutoScalingFailureEventManager getElasticAutoScalingFailure() {
         return elasticAutoScalingFailureEventManager;
+    }
+    
+    @Override
+    public void processElasticScaleStrategyEvent(ElasticProcessingUnitEvent event) {
+        if (event instanceof ElasticAutoScalingFailureEvent) {
+            elasticAutoScalingFailureEventManager.elasticAutoScalingFailure((ElasticAutoScalingFailureEvent)event);
+        }
+        else if (event instanceof ElasticAutoScalingProgressChangedEvent) {
+            elasticAutoScalingProgressChangedEventManager.elasticAutoScalingProgressChanged((ElasticAutoScalingProgressChangedEvent)event);
+        }
     }
 }

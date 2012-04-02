@@ -19,6 +19,7 @@ package org.openspaces.admin.internal.pu;
 
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnits;
+import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitEvent;
 
 /**
  * @author kimchy
@@ -28,4 +29,11 @@ public interface InternalProcessingUnits extends ProcessingUnits, InternalProces
     void addProcessingUnit(ProcessingUnit processingUnit);
 
     void removeProcessingUnit(String name);
+    
+    /**
+     * If relevant raises events to relevant subscribers
+     * @since 9.0.0
+     * @author itaif
+     */
+    void processElasticScaleStrategyEvent(ElasticProcessingUnitEvent event);
 }

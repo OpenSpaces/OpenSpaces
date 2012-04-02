@@ -1459,6 +1459,7 @@ public class DefaultAdmin implements InternalAdmin {
                     machines.processElasticScaleStrategyEvent((ElasticProcessingUnitEvent)event);
                     gridServiceAgents.processElasticScaleStrategyEvent((ElasticProcessingUnitEvent)event);
                     gridServiceContainers.processElasticScaleStrategyEvent((ElasticProcessingUnitEvent)event);
+                    processingUnits.processElasticScaleStrategyEvent((ElasticProcessingUnitEvent)event);
                     esm.processElasticScaleStrategyEvent((ElasticProcessingUnitEvent)event);
                 }
             }
