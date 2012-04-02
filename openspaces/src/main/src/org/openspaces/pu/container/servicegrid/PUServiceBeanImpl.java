@@ -217,9 +217,16 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         ClassLoader origClassLoader = Thread.currentThread().getContextClassLoader();
         try {
             Thread.currentThread().setContextClassLoader(contextClassLoader);
+            if (logger.isDebugEnabled()) {
+                logger.debug(logMessage("contextClassLoader="+contextClassLoader+" origClassLoader="+origClassLoader));
+            }
             startPU(springXML);
         } catch (Exception e) {
-            logger.debug(logMessage("Failed to start PU with xml [" + springXML + "]"), e);
+            if (logger.isDebugEnabled()) {
+                logger.debug(logMessage(
+                   "Failed to start PU with xml [" + springXML + "] " + 
+                   "Thread.currentThread().getContextClassLoader()="+Thread.currentThread().getContextClassLoader()), e);
+            }
             try {
                 stopPU();
             } catch (Exception e1) {

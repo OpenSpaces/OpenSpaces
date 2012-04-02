@@ -37,6 +37,9 @@ public class AnnotationEventListenerAdapter extends AbstractReflectionEventListe
      */
     protected Method[] doGetListenerMethods() {
         final List<Method> methods = new ArrayList<Method>();
+        if (logger.isDebugEnabled()) {
+            logger.debug("Thread.currentThread().getContextClassLoader()="+Thread.currentThread().getContextClassLoader());
+        }
         ReflectionUtils.doWithMethods(AopUtils.getTargetClass(getDelegate()), new ReflectionUtils.MethodCallback() {
             public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
                 if (AopUtils.getTargetClass(getDelegate()) != getDelegate().getClass()) {
