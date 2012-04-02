@@ -77,8 +77,8 @@ public class AutomaticCapacityScaleConfigurerTest extends TestCase {
       
         AutomaticCapacityScaleRuleConfig dupRule = new AutomaticCapacityScaleRuleConfig(rule.getProperties());
         Assert.assertEquals(statisticsId,dupRule.getStatistics());
-        Assert.assertEquals(1.0,dupRule.getLowThreshold());
-        Assert.assertEquals(10.0,dupRule.getHighThreshold());
+        Assert.assertEquals(1,dupRule.getLowThreshold());
+        Assert.assertEquals(10,dupRule.getHighThreshold());
                 
          CapacityRequirementsConfig capacity = new CapacityRequirementsConfigurer()
         .memoryCapacity(1,MemoryUnit.GIGABYTES)
