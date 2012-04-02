@@ -18,6 +18,7 @@ package org.openspaces.admin.internal.pu.statistics;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,20 +38,28 @@ public class StatisticsObjectList {
     private Double sum = 0.0;
     @SuppressWarnings("rawtypes")
     private Comparable min = null;
+    private Long firstTimeStampMillis = null;
+    private Long lastTimeStampMillis = null;
     @SuppressWarnings("rawtypes")
     private Comparable max = null;
     private Class<?> notComparableClass = null;
     private Class<?> notNumberClass = null;
     private boolean sorted = false;
     private Object last = null;
+    private Object first = null;
     
     /**
      * Adds the specified object to the list
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public void add(Object value) {
+    public void add(Object value, long timeStampMillis) {
         values.add(value);
+        if(first == null)
+            first = value;
+        if(firstTimeStampMillis == null)
+            firstTimeStampMillis = timeStampMillis;
         last = value;
+        lastTimeStampMillis = timeStampMillis;
         sorted = false;
         if (notNumberClass == null) {
             if (value instanceof Number) {
@@ -165,6 +174,66 @@ public class StatisticsObjectList {
         }
         return percentileValue;
     }
+
+    /**
+     * @param timeWindowSeconds 
+     * @return the (last-first)/deltaTimeInNanos (cast to double) of the object in the list or null if the are less then 2 values
+     * @throws ClassCastException if any object in the list is not a Number 
+     */
+    public Double getDeltaValuePerNanoSecond() {
+        return getDeltaPerTimeunit(TimeUnit.NANOSECONDS);
+    }
+    
+    /**
+     * @param timeWindowSeconds 
+     * @return the (last-first)/deltaTimeInMillis (cast to double) of the object in the list or null if the are less then 2 values
+     * @throws ClassCastException if any object in the list is not a Number 
+     */
+    public Double getDeltaValuePerMilliSecond() {
+        return getDeltaPerTimeunit(TimeUnit.MILLISECONDS);
+    }
+    
+    /**
+     * @param timeWindowSeconds 
+     * @return the (last-first)/deltaTimeInSeconds (cast to double) of the object in the list or null if the are less then 2 values
+     * @throws ClassCastException if any object in the list is not a Number 
+     */
+    public Double getDeltaValuePerSecond() {
+        return getDeltaPerTimeunit(TimeUnit.SECONDS);
+    }
+
+    private Double getDeltaPerTimeunit(TimeUnit timeUnit) {
+        if (notNumberClass != null) {
+            throw new ClassCastException(notNumberClass + " cannot be cast to a Number");
+        }
+        if (values.size() < 2) {
+            return null;
+        }
+        double lastValue = ((Number)last).doubleValue();
+        double firstValue = ((Number)first).doubleValue();
+        Long timeWindowInTimeunit = null;
+        switch(timeUnit){
+            case SECONDS: {
+                timeWindowInTimeunit = TimeUnit.MILLISECONDS.toSeconds(lastTimeStampMillis - firstTimeStampMillis);
+                break;
+            }
+            case MILLISECONDS:{
+                timeWindowInTimeunit = lastTimeStampMillis - firstTimeStampMillis;
+                break;
+            }
+            case NANOSECONDS:{
+                timeWindowInTimeunit = TimeUnit.MILLISECONDS.toNanos(lastTimeStampMillis - firstTimeStampMillis);
+                break;
+            }
+        }
+        double deltaValuePerTimeunit = (lastValue-firstValue)/timeWindowInTimeunit;
+        
+        if (logger.isDebugEnabled()) {
+            logger.debug("deltaValuePer" + timeUnit.toString() +"("+toString()+")="+deltaValuePerTimeunit);
+        }
+        return deltaValuePerTimeunit;
+    }
+    
     
     @Override
     public String toString() {
