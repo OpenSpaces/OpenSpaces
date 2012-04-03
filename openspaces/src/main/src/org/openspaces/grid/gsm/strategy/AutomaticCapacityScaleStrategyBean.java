@@ -56,7 +56,7 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
     }
     
     // created by afterPropertiesSet()
-    private AutomaticCapacityScaleConfig automaticCapacity;
+    private AutomaticCapacityScaleConfig config;
     private AutomaticCapacityCooldownValidator cooldownValidator;
     
     // events state
@@ -67,18 +67,18 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
         
         super.afterPropertiesSet();
                 
-        this.automaticCapacity = new AutomaticCapacityScaleConfig(super.getProperties());
+        this.config = new AutomaticCapacityScaleConfig(super.getProperties());
         
         validateConfig();
         
         
         this.cooldownValidator = new AutomaticCapacityCooldownValidator();
-        this.cooldownValidator.setCooldownAfterInstanceAdded(automaticCapacity.getCooldownAfterInstanceAddedSeconds(), TimeUnit.SECONDS);
-        this.cooldownValidator.setCooldownAfterInstanceRemoved(automaticCapacity.getCooldownAfterInstanceRemovedSeconds(), TimeUnit.SECONDS);
+        this.cooldownValidator.setCooldownAfterInstanceAdded(config.getCooldownAfterInstanceAddedSeconds(), TimeUnit.SECONDS);
+        this.cooldownValidator.setCooldownAfterInstanceRemoved(config.getCooldownAfterInstanceRemovedSeconds(), TimeUnit.SECONDS);
         
-        CapacityRequirementsConfig initialCapacity = automaticCapacity.getInitialCapacity();
+        CapacityRequirementsConfig initialCapacity = config.getInitialCapacity();
         if (initialCapacity == null) {   
-            initialCapacity = automaticCapacity.getMinCapacity();
+            initialCapacity = config.getMinCapacity();
         }
         
         autoScalingEventState = 
@@ -91,19 +91,19 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
 
         //inject initial manual scale capacity
         super.setCapacityRequirementConfig(initialCapacity);
-        super.setScaleStrategyConfig(automaticCapacity);
+        super.setScaleStrategyConfig(config);
         
         enablePuStatistics();
     }
 
     private void validateConfig() {
         
-        CapacityRequirements minCapacityRequirements = automaticCapacity.getMinCapacity().toCapacityRequirements();
+        CapacityRequirements minCapacityRequirements = config.getMinCapacity().toCapacityRequirements();
         if (minCapacityRequirements == null) {
             throw new BeanConfigurationException("Minimum capacity requirements is undefined");
         }
         
-        CapacityRequirements maxCapacityRequirements = automaticCapacity.getMaxCapacity().toCapacityRequirements();
+        CapacityRequirements maxCapacityRequirements = config.getMaxCapacity().toCapacityRequirements();
         if (maxCapacityRequirements == null) {
             throw new BeanConfigurationException("Maximum capacity requirements is undefined");
         }
@@ -113,7 +113,7 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
                     + ") is less than minimum capacity (" + minCapacityRequirements + ")");
         }
         
-        CapacityRequirementsConfig initialCapacity = automaticCapacity.getInitialCapacity();
+        CapacityRequirementsConfig initialCapacity = config.getInitialCapacity();
         if (initialCapacity != null) {
             CapacityRequirements initialCapacityRequirements = initialCapacity.toCapacityRequirements();
             
@@ -137,7 +137,7 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
     
     @Override
     public ScaleStrategyConfig getConfig() {
-        return automaticCapacity;
+        return config;
     }
 
     
@@ -179,9 +179,9 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
         sla.setCapacityRequirements(capacityRequirements);
         sla.setHighThresholdBreachedIncrease(getCapacityChangeOnBreach());
         sla.setLowThresholdBreachedDecrease(getCapacityChangeOnBreach());
-        sla.setMaxCapacity(automaticCapacity.getMaxCapacity().toCapacityRequirements());
-        sla.setMinCapacity(automaticCapacity.getMinCapacity().toCapacityRequirements());
-        sla.setRules(automaticCapacity.getRules());
+        sla.setMaxCapacity(config.getMaxCapacity().toCapacityRequirements());
+        sla.setMinCapacity(config.getMinCapacity().toCapacityRequirements());
+        sla.setRules(config.getRules());
         if (getLogger().isDebugEnabled()) {
             getLogger().debug("Automatic Scaling SLA Policy: " + sla);
         }
@@ -205,7 +205,7 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
 
     private void enablePuStatistics() {
         int maxNumberOfSamples = 1;
-        for (AutomaticCapacityScaleRuleConfig rule : automaticCapacity.getRules()) {
+        for (AutomaticCapacityScaleRuleConfig rule : config.getRules()) {
             try {
                 if (AutoScalingSlaUtils.compare(rule.getLowThreshold(),rule.getHighThreshold()) > 0) {
                     throw new BeanConfigurationException("Low threshold (" + rule.getLowThreshold() + ") cannot be higher than high threshold (" + rule.getHighThreshold() +")");
@@ -220,15 +220,15 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
                     Math.max(
                        maxNumberOfSamples,
                        timeWindowStatistics.getMaxNumberOfSamples(
-                               automaticCapacity.getStatisticsPollingIntervalSeconds(), 
+                               config.getStatisticsPollingIntervalSeconds(), 
                                TimeUnit.SECONDS));
             
             getProcessingUnit().addStatisticsCalculation(rule.getStatistics());
                                
         }
-        getLogger().info("Start statistics polling for " + getProcessingUnit().getName() + " to " + automaticCapacity.getStatisticsPollingIntervalSeconds() + " seconds, history size is " + maxNumberOfSamples + " samples.");
+        getLogger().info("Start statistics polling for " + getProcessingUnit().getName() + " to " + config.getStatisticsPollingIntervalSeconds() + " seconds, history size is " + maxNumberOfSamples + " samples.");
         getProcessingUnit().setStatisticsHistorySize(maxNumberOfSamples);
-        getProcessingUnit().setStatisticsInterval(automaticCapacity.getStatisticsPollingIntervalSeconds(), TimeUnit.SECONDS);
+        getProcessingUnit().setStatisticsInterval(config.getStatisticsPollingIntervalSeconds(), TimeUnit.SECONDS);
         getProcessingUnit().startStatisticsMonitor();
     }
     
