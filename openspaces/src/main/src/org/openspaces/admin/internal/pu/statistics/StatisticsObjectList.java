@@ -209,27 +209,17 @@ public class StatisticsObjectList {
         if (values.size() < 2) {
             return null;
         }
+
+        Long timeWindowInTimeunit = timeUnit.convert(lastTimeStampMillis - firstTimeStampMillis, TimeUnit.MILLISECONDS);
         double lastValue = ((Number)last).doubleValue();
         double firstValue = ((Number)first).doubleValue();
-        Long timeWindowInTimeunit = null;
-        switch(timeUnit){
-            case SECONDS: {
-                timeWindowInTimeunit = TimeUnit.MILLISECONDS.toSeconds(lastTimeStampMillis - firstTimeStampMillis);
-                break;
-            }
-            case MILLISECONDS:{
-                timeWindowInTimeunit = lastTimeStampMillis - firstTimeStampMillis;
-                break;
-            }
-            case NANOSECONDS:{
-                timeWindowInTimeunit = TimeUnit.MILLISECONDS.toNanos(lastTimeStampMillis - firstTimeStampMillis);
-                break;
-            }
-        }
+        
         double deltaValuePerTimeunit = (lastValue-firstValue)/timeWindowInTimeunit;
         
         if (logger.isDebugEnabled()) {
-            logger.debug("deltaValuePer" + timeUnit.toString() +"("+toString()+")="+deltaValuePerTimeunit);
+            logger.debug(
+                    "deltaValuePer" + timeUnit.toString() +"("+toString()+")="+
+                    "("+lastValue+"-"+firstValue+")/"+timeWindowInTimeunit+"="+deltaValuePerTimeunit);
         }
         return deltaValuePerTimeunit;
     }
