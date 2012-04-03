@@ -106,6 +106,7 @@
     <libelement value="jar://$MODULE_DIR$/deploy/templates/memcached/lib/netty-3.2.4.Final.jar!/" />
     <libelement value="jar://$MODULE_DIR$/lib/external/common/commons-cli-1.2.jar!/" />
     <libelement value="jar://$MODULE_DIR$/lib/external/common/commons-io-2.0.1.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/optional/security/spring-security-core-3.1.0.RELEASE.jar!/" />
     <src_description expected_position="0">
       <src_folder value="file://$MODULE_DIR$/src/main/src" expected_position="0" />
       <src_folder value="file://$MODULE_DIR$/tools/maven/maven-openspaces-plugin/src/main/java" expected_position="1" />
