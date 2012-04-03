@@ -137,6 +137,15 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
     }
 
     protected void enforceCapacityRequirement() throws SlaEnforcementInProgressException {
+        
+        if (this.capacityRequirement == null) {
+            throw new IllegalStateException("capacityRequirements cannot be null");
+        }
+        
+        if (this.scaleStrategy == null) {
+            throw new IllegalStateException("scaleStrategy cannot be null");
+        }
+        
         SlaEnforcementInProgressException pendingException = null;
         
         try {
