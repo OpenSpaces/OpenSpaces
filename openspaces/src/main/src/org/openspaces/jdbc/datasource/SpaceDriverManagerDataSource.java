@@ -16,17 +16,18 @@
 
 package org.openspaces.jdbc.datasource;
 
-import com.j_spaces.core.IJSpace;
-import com.j_spaces.jdbc.driver.GConnection;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.util.logging.Logger;
+
 import org.openspaces.core.GigaSpace;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jdbc.datasource.AbstractDataSource;
 import org.springframework.util.Assert;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
-import java.util.logging.Logger;
+import com.j_spaces.core.IJSpace;
+import com.j_spaces.jdbc.driver.GConnection;
 
 /**
  * A simple Jdbc {@link javax.sql.DataSource} based on a {@link com.j_spaces.core.IJSpace space}.
@@ -53,7 +54,6 @@ public class SpaceDriverManagerDataSource extends AbstractDataSource implements 
     public void setGigaSpace(GigaSpace gigaSpace) {
         this.space = gigaSpace.getSpace();
     }
-
 
     public void afterPropertiesSet() throws Exception {
         Assert.notNull(space, "space property must be set");
