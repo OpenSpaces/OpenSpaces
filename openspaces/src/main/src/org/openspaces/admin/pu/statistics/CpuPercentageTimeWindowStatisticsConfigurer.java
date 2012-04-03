@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class CpuPercentageTimeWindowStatisticsConfigurer {
 
-    private CpuPercentageInstancesStatisticsConfig config = new CpuPercentageInstancesStatisticsConfig();
+    private CpuPercentageTimeWindowStatisticsConfig config = new CpuPercentageTimeWindowStatisticsConfig();
     
     public CpuPercentageTimeWindowStatisticsConfigurer timeWindow(long timeWindow, TimeUnit timeUnit) {
         config.setTimeWindowSeconds(timeUnit.toSeconds(timeWindow));
@@ -40,7 +40,7 @@ public class CpuPercentageTimeWindowStatisticsConfigurer {
         return this;
     }
         
-    public CpuPercentageInstancesStatisticsConfig create() {
+    public CpuPercentageTimeWindowStatisticsConfig create() {
         config.validate();
         return config;
     }

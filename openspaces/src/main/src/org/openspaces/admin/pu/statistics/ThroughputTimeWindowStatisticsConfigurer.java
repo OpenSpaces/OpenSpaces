@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class ThroughputTimeWindowStatisticsConfigurer {
 
-    private ThroughputInstancesStatisticsConfig config = new ThroughputInstancesStatisticsConfig();
+    private ThroughputTimeWindowStatisticsConfig config = new ThroughputTimeWindowStatisticsConfig();
     
     public ThroughputTimeWindowStatisticsConfigurer timeWindow(long timeWindow, TimeUnit timeUnit) {
         config.setTimeWindowSeconds(timeUnit.toSeconds(timeWindow));
@@ -40,7 +40,7 @@ public class ThroughputTimeWindowStatisticsConfigurer {
         return this;
     }
         
-    public ThroughputInstancesStatisticsConfig create() {
+    public ThroughputTimeWindowStatisticsConfig create() {
         config.validate();
         return config;
     }

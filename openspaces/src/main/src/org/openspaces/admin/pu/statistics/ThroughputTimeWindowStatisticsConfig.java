@@ -7,22 +7,21 @@ import org.openspaces.admin.internal.pu.statistics.StatisticsObjectList;
 import org.openspaces.admin.internal.pu.statistics.StatisticsObjectListFunction;
 
 /**
- * Calculates the throughput of all cluster instances values, 
- * by taking total request count and dividing by time
+ * Calculates the throughput (requests per second)by taking total request count and dividing by time
  * 
  * @since 9.0.0
- * @author itaif, gal
+ * @author gal
  * 
  */
-public class ThroughputInstancesStatisticsConfig 
+public class ThroughputTimeWindowStatisticsConfig 
     extends AbstractTimeWindowStatisticsConfig 
     implements StatisticsObjectListFunction, InstancesStatisticsConfig {
 
-    public ThroughputInstancesStatisticsConfig() {
+    public ThroughputTimeWindowStatisticsConfig() {
         this(new HashMap<String, String>());
     }
 
-    public ThroughputInstancesStatisticsConfig(Map<String, String> properties) {
+    public ThroughputTimeWindowStatisticsConfig(Map<String, String> properties) {
         super(properties);
     }
 

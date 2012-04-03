@@ -7,21 +7,21 @@ import org.openspaces.admin.internal.pu.statistics.StatisticsObjectList;
 import org.openspaces.admin.internal.pu.statistics.StatisticsObjectListFunction;
 
 /**
- * Calculates the cpu percentage of all cluster instances values.
+ * Calculates the cpu percentage by dividing the total CPU values by delta time passed in milliseconds.
  * 
  * @since 9.0.0
- * @author itaif, gal
+ * @author gal
  * 
  */
-public class CpuPercentageInstancesStatisticsConfig 
+public class CpuPercentageTimeWindowStatisticsConfig 
     extends AbstractTimeWindowStatisticsConfig 
     implements StatisticsObjectListFunction, InstancesStatisticsConfig {
 
-    public CpuPercentageInstancesStatisticsConfig() {
+    public CpuPercentageTimeWindowStatisticsConfig() {
         this(new HashMap<String, String>());
     }
 
-    public CpuPercentageInstancesStatisticsConfig(Map<String, String> properties) {
+    public CpuPercentageTimeWindowStatisticsConfig(Map<String, String> properties) {
         super(properties);
     }
 
