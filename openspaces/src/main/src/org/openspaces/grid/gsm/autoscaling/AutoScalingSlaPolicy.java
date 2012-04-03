@@ -199,7 +199,8 @@ public class AutoScalingSlaPolicy extends ServiceLevelAgreementPolicy {
     public String toString() {
         return "AutoScalingSlaPolicy [capacityRequirements=" + capacityRequirements + ", rules="
                 + Arrays.toString(rules) + ", highThresholdBreachedIncrease=" + highThresholdBreachedIncrease
-                + ", maxCapacity=" + maxCapacity + "]";
+                + ", lowThresholdBreachedDecrease=" + lowThresholdBreachedDecrease
+                + ", maxCapacity=" + maxCapacity + ", minCapacity=" + minCapacity + "]";
     }
 
 
