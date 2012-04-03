@@ -630,7 +630,7 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
             eventSessionConfig.setGuaranteedNotifications(guaranteed);
         }
         if (durable != null) {
-            eventSessionConfig.setDurable(durable);
+            eventSessionConfig.setDurableNotifications(durable);
         }
         return eventSessionConfig;
     }
