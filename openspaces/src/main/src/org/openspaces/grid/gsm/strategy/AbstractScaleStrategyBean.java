@@ -174,6 +174,8 @@ public abstract class AbstractScaleStrategyBean implements
     
     public void afterPropertiesSet() {
         
+        ((InternalAdmin)admin).assertStateChangesPermitted();
+        
         if (pu == null) {
             throw new IllegalStateException("pu cannot be null");
         }
@@ -322,6 +324,8 @@ public abstract class AbstractScaleStrategyBean implements
             if (getLogger().isDebugEnabled()) {
                 getLogger().debug("enforcing SLA.");
             }
+            
+            ((InternalAdmin)admin).assertStateChangesPermitted();
             
             enforceSla();
             
