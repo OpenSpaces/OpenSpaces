@@ -36,6 +36,8 @@ import org.openspaces.grid.gsm.autoscaling.AutomaticCapacityCooldownValidator;
 import org.openspaces.grid.gsm.autoscaling.exceptions.AutoScalingSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.MemoryCapacityRequirement;
+import org.openspaces.grid.gsm.containers.exceptions.ContainersSlaEnforcementInProgressException;
+import org.openspaces.grid.gsm.rebalancing.exceptions.RebalancingSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementInProgressException;
 
 /**
@@ -143,19 +145,61 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
     
     @Override
     protected void enforceSla() throws SlaEnforcementInProgressException {
-
-        super.enforceCapacityRequirement(); //enforces the last call to #setCapacityRequirementConfig
-        // no exception means that manual scale is complete. 
         
-        //make sure that we are not in the cooldown period
-        cooldownValidator.validate(getInstancesUids());
-
-        //enforce auto-scaling SLA
+        SlaEnforcementInProgressException pendingException=null;
+        
+        try {
+            super.enforceCapacityRequirement(); //enforces the last call to #setCapacityRequirementConfig
+            // no exception means that manual scale is complete.
+        }
+        catch (RebalancingSlaEnforcementInProgressException e) {
+            // do not run autoscaling algorithm if instances are changing
+            throw e;
+        }
+        catch (ContainersSlaEnforcementInProgressException e) {
+            // do not run autoscaling algorithm since GSM may already start deploying new instances
+            throw e;
+        }
+        catch (SlaEnforcementInProgressException e) {
+            // no effect on instances yet... proceed with auto scaling rules
+            // The reasoning is that it may take a long time for machines to start
+            // and during that time the capacity requirements may need to change
+            pendingException = e;
+        }
+         
+        CapacityRequirements newCapacityRequirements;
         final CapacityRequirements capacityRequirements = super.getCapacityRequirementConfig().toCapacityRequirements();
-        final CapacityRequirements newCapacityRequirements = enforceAutoScalingSla(capacityRequirements);
+        
+        try {
+            //make sure that we are not in the cooldown period
+            cooldownValidator.validate(getInstancesUids());
+        
+            //enforce auto-scaling SLA
+            newCapacityRequirements = enforceAutoScalingSla(capacityRequirements);
+        }
+        catch (SlaEnforcementInProgressException e) {
+            if (pendingException != null) {
+                // throw pending exception of previous manual scale capacity.
+                // otherwise it could be lost when calling it again.
+                throw pendingException;
+            }
+            throw e;
+        }
+        
         if (!newCapacityRequirements.equals(capacityRequirements)) {
             super.setCapacityRequirementConfig(new CapacityRequirementsConfig(newCapacityRequirements));
+            if (pendingException != null) {
+                // throw pending exception of previous manual scale capacity.
+                // otherwise it could be lost when calling it again.
+                throw pendingException;
+            }
+            // enforce new capacity requirements as soon as possible.
             super.enforceCapacityRequirement();
+        }
+        
+        if (pendingException != null) {
+            // throw pending exception of previous manual scale capacity, so it won't be lost.
+            throw pendingException;
         }
     }
 
