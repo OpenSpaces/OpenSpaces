@@ -98,19 +98,20 @@
 	<classpathentry kind="lib" path="deploy/templates/memcached/lib/netty-3.2.4.Final.jar"/>
 	<classpathentry kind="lib" path="lib/external/common/commons-cli-1.2.jar"/>
 	<classpathentry kind="lib" path="lib/external/common/commons-io-2.0.1.jar"/>
-	<classpathentry kind="lib" path="lib/platform/jetty/jetty-http-8.0.4.v20111024.jar"/>
-	<classpathentry kind="lib" path="lib/platform/jetty/jetty-io-8.0.4.v20111024.jar"/>
-	<classpathentry kind="lib" path="lib/platform/jetty/jetty-jmx-8.0.4.v20111024.jar"/>
-	<classpathentry kind="lib" path="lib/platform/jetty/jetty-jndi-8.0.4.v20111024.jar"/>
-	<classpathentry kind="lib" path="lib/platform/jetty/jetty-plus-8.0.4.v20111024.jar"/>
-	<classpathentry kind="lib" path="lib/platform/jetty/jetty-policy-8.0.4.v20111024.jar"/>
-	<classpathentry kind="lib" path="lib/platform/jetty/jetty-rewrite-8.0.4.v20111024.jar"/>
-	<classpathentry kind="lib" path="lib/platform/jetty/jetty-security-8.0.4.v20111024.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/platform/jetty/jetty-server-8.0.4.v20111024.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/platform/jetty/jetty-servlet-8.0.4.v20111024.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/platform/jetty/jetty-servlets-8.0.4.v20111024.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/platform/jetty/jetty-util-8.0.4.v20111024.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/platform/jetty/jetty-webapp-8.0.4.v20111024.jar"/>
-	<classpathentry kind="lib" path="lib/platform/jetty/jetty-xml-8.0.4.v20111024.jar"/>	
+	<classpathentry kind="lib" path="lib/platform/jetty/jetty-http-8.1.2.v20120308.jar"/>
+	<classpathentry kind="lib" path="lib/platform/jetty/jetty-io-8.1.2.v20120308.jar"/>
+	<classpathentry kind="lib" path="lib/platform/jetty/jetty-jmx-8.1.2.v20120308.jar"/>
+	<classpathentry kind="lib" path="lib/platform/jetty/jetty-jndi-8.1.2.v20120308.jar"/>
+	<classpathentry kind="lib" path="lib/platform/jetty/jetty-plus-8.1.2.v20120308.jar"/>
+	<classpathentry kind="lib" path="lib/platform/jetty/jetty-policy-8.1.2.v20120308.jar"/>
+	<classpathentry kind="lib" path="lib/platform/jetty/jetty-rewrite-8.1.2.v20120308.jar"/>
+	<classpathentry kind="lib" path="lib/platform/jetty/jetty-security-8.1.2.v20120308.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/platform/jetty/jetty-server-8.1.2.v20120308.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/platform/jetty/jetty-servlet-8.1.2.v20120308.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/platform/jetty/jetty-servlets-8.1.2.v20120308.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/platform/jetty/jetty-util-8.1.2.v20120308.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/platform/jetty/jetty-webapp-8.1.2.v20120308.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/platform/jetty/org.eclipse.jdt.core-3.7.1.jar"/>
+	<classpathentry kind="lib" path="lib/platform/jetty/jetty-xml-8.1.2.v20120308.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
