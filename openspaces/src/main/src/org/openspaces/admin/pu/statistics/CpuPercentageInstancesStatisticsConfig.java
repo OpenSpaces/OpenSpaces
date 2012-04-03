@@ -32,6 +32,6 @@ public class CpuPercentageInstancesStatisticsConfig
 
     @Override
     public Object calc(StatisticsObjectList values) {
-        return values.getDeltaValuePerNanoSecond();
+        return values.getDeltaValuePerMilliSecond();
     }
 }
