@@ -119,7 +119,7 @@ public class SpringSecurityManager implements SecurityManager {
 				throw new AuthenticationException("Authentication failed for user ["+userDetails.getUsername()+"]");
 			}
 
-			Collection<GrantedAuthority> grantedAuthorities = authenticate.getAuthorities();
+			Collection<? extends GrantedAuthority> grantedAuthorities = authenticate.getAuthorities();
 			ArrayList<Authority> authoritiesList = new ArrayList<Authority>(grantedAuthorities.size());
 			for (GrantedAuthority grantedAuthority : grantedAuthorities) {
 			    Authority gsAuthority = AuthorityFactory.create(grantedAuthority.getAuthority().trim());
