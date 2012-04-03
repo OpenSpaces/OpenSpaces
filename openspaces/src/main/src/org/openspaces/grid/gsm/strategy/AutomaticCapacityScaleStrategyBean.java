@@ -67,9 +67,10 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
         
         super.afterPropertiesSet();
                 
+        this.automaticCapacity = new AutomaticCapacityScaleConfig(super.getProperties());
+        
         validateConfig();
         
-        this.automaticCapacity = new AutomaticCapacityScaleConfig(super.getProperties());
         
         this.cooldownValidator = new AutomaticCapacityCooldownValidator();
         this.cooldownValidator.setCooldownAfterInstanceAdded(automaticCapacity.getCooldownAfterInstanceAddedSeconds(), TimeUnit.SECONDS);
@@ -142,7 +143,7 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
     
     @Override
     protected void enforceSla() throws SlaEnforcementInProgressException {
-        
+
         super.enforceCapacityRequirement(); //enforces the last call to #setCapacityRequirementConfig
         // no exception means that manual scale is complete. 
         
