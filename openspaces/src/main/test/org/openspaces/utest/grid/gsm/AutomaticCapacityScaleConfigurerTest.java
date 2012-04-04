@@ -85,8 +85,8 @@ public class AutomaticCapacityScaleConfigurerTest extends TestCase {
                         .statisticsPollingInterval(1, TimeUnit.MINUTES)
                         .minCapacity(capacity)
                         .maxCapacity(capacity)
-                        .cooldownAfterInstanceAdded(3, TimeUnit.MINUTES)
-                        .cooldownAfterInstanceRemoved(1, TimeUnit.MINUTES)
+                        .cooldownAfterScaleOut(3, TimeUnit.MINUTES)
+                        .cooldownAfterScaleIn(1, TimeUnit.MINUTES)
                         .addRule(rule)
                         .create();
 
@@ -94,8 +94,8 @@ public class AutomaticCapacityScaleConfigurerTest extends TestCase {
         Assert.assertEquals(config, dupConfig);
         Assert.assertEquals(dupConfig.getStatisticsPollingIntervalSeconds(),1*60);
         Assert.assertEquals(dupConfig.getMinCapacity(),capacity);
-        Assert.assertEquals(dupConfig.getCooldownAfterInstanceAddedSeconds(),3*60);
-        Assert.assertEquals(dupConfig.getCooldownAfterInstanceRemovedSeconds(),1*60);
+        Assert.assertEquals(dupConfig.getCooldownAfterScaleOutSeconds(),3*60);
+        Assert.assertEquals(dupConfig.getCooldownAfterScaleSeconds(),1*60);
         Assert.assertEquals(dupConfig.getRules().length,1);
         Assert.assertNotSame(dupConfig.getRules()[0],rule);
         Assert.assertEquals(dupConfig.getRules()[0],rule);

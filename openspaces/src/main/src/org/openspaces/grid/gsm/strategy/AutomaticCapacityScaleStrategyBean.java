@@ -75,8 +75,8 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
         
         
         this.cooldownValidator = new AutomaticCapacityCooldownValidator();
-        this.cooldownValidator.setCooldownAfterInstanceAdded(config.getCooldownAfterInstanceAddedSeconds(), TimeUnit.SECONDS);
-        this.cooldownValidator.setCooldownAfterInstanceRemoved(config.getCooldownAfterInstanceRemovedSeconds(), TimeUnit.SECONDS);
+        this.cooldownValidator.setCooldownAfterInstanceAdded(config.getCooldownAfterScaleOutSeconds(), TimeUnit.SECONDS);
+        this.cooldownValidator.setCooldownAfterInstanceRemoved(config.getCooldownAfterScaleSeconds(), TimeUnit.SECONDS);
         
         CapacityRequirementsConfig initialCapacity = config.getInitialCapacity();
         if (initialCapacity == null) {   

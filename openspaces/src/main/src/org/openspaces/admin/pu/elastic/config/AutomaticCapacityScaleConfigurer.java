@@ -59,13 +59,13 @@ public class AutomaticCapacityScaleConfigurer implements ScaleStrategyConfigurer
         return this;
     }
     
-    public AutomaticCapacityScaleConfigurer cooldownAfterInstanceAdded(long cooldown, TimeUnit timeUnit) {
-        config.setCooldownAfterInstanceAddedSeconds(timeUnit.toSeconds(cooldown));
+    public AutomaticCapacityScaleConfigurer cooldownAfterScaleOut(long cooldown, TimeUnit timeUnit) {
+        config.setCooldownAfterScaleOutSeconds(timeUnit.toSeconds(cooldown));
         return this;
     }
     
-    public AutomaticCapacityScaleConfigurer cooldownAfterInstanceRemoved(long cooldown, TimeUnit timeUnit) {
-        config.setCooldownAfterInstanceRemovedSeconds(timeUnit.toSeconds(cooldown));
+    public AutomaticCapacityScaleConfigurer cooldownAfterScaleIn(long cooldown, TimeUnit timeUnit) {
+        config.setCooldownAfterScaleSeconds(timeUnit.toSeconds(cooldown));
         return this;
     }
     

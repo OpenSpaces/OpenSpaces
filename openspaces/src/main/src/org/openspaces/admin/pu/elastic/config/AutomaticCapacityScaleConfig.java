@@ -47,11 +47,11 @@ public class AutomaticCapacityScaleConfig
     private static final String STATISTICS_POLLING_INTERVAL_SECONDS_KEY = "statistics-polling-interval-seconds";
     private static final long STATISTICS_POLLING_INTERVAL_SECONDS_DEFAULT = 60;
 
-    private static final String COOLDOWN_AFTER_INSTANCE_ADDED_SECONDS_KEY = "cooldown-after-instance-added-seconds";
-    private static final long COOLDOWN_AFTER_INSTANCE_ADDED_SECONDS_DEFAULT = 60;
+    private static final String COOLDOWN_AFTER_SCALEOUT_SECONDS_KEY = "cooldown-after-scaleout-seconds";
+    private static final long COOLDOWN_AFTER_SCALEOUT_SECONDS_DEFAULT = 60;
 
-    private static final String COOLDOWN_AFTER_INSTANCE_REMOVED_SECONDS_KEY = "cooldown-after-instance-removed-seconds";
-    private static final long COOLDOWN_AFTER_INSTANCE_REMOVED_SECONDS_DEFAULT = 60;
+    private static final String COOLDOWN_AFTER_SCALEIN_SECONDS_KEY = "cooldown-after-scalein-seconds";
+    private static final long COOLDOWN_AFTER_SCALEIN_SECONDS_DEFAULT = 60;
     
     private static final String MIN_CAPACITY_KEY_PREFIX = "min-capacity.";
     private static final String INITIAL_CAPACITY_KEY_PREFIX = "initial-capacity";
@@ -139,12 +139,12 @@ public class AutomaticCapacityScaleConfig
      * 
      * Must be equal or bigger than {@link #setStatisticsPollingIntervalSeconds(long)}
      */
-    public void setCooldownAfterInstanceAddedSeconds(long cooldownAfterInstanceAddedSeconds) {
-        properties.putLong(COOLDOWN_AFTER_INSTANCE_ADDED_SECONDS_KEY, cooldownAfterInstanceAddedSeconds);
+    public void setCooldownAfterScaleOutSeconds(long cooldownAfterInstanceAddedSeconds) {
+        properties.putLong(COOLDOWN_AFTER_SCALEOUT_SECONDS_KEY, cooldownAfterInstanceAddedSeconds);
     }
     
-    public long getCooldownAfterInstanceAddedSeconds() {
-        return properties.getLong(COOLDOWN_AFTER_INSTANCE_ADDED_SECONDS_KEY, COOLDOWN_AFTER_INSTANCE_ADDED_SECONDS_DEFAULT);
+    public long getCooldownAfterScaleOutSeconds() {
+        return properties.getLong(COOLDOWN_AFTER_SCALEOUT_SECONDS_KEY, COOLDOWN_AFTER_SCALEOUT_SECONDS_DEFAULT);
     }
 
     /**
@@ -154,12 +154,12 @@ public class AutomaticCapacityScaleConfig
      * 
      * Must be equal or bigger than {@link #setStatisticsPollingIntervalSeconds(long)}
      */
-    public void setCooldownAfterInstanceRemovedSeconds(long cooldownAfterInstanceRemovedSeconds) {
-        properties.putLong(COOLDOWN_AFTER_INSTANCE_REMOVED_SECONDS_KEY, cooldownAfterInstanceRemovedSeconds);
+    public void setCooldownAfterScaleSeconds(long cooldownAfterInstanceRemovedSeconds) {
+        properties.putLong(COOLDOWN_AFTER_SCALEIN_SECONDS_KEY, cooldownAfterInstanceRemovedSeconds);
     }
     
-    public long getCooldownAfterInstanceRemovedSeconds() {
-        return properties.getLong(COOLDOWN_AFTER_INSTANCE_REMOVED_SECONDS_KEY, COOLDOWN_AFTER_INSTANCE_REMOVED_SECONDS_DEFAULT);
+    public long getCooldownAfterScaleSeconds() {
+        return properties.getLong(COOLDOWN_AFTER_SCALEIN_SECONDS_KEY, COOLDOWN_AFTER_SCALEIN_SECONDS_DEFAULT);
     }
     
     /**
