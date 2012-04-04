@@ -25,7 +25,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/platform/jee/jta.jar"/>
 	<classpathentry kind="lib" path="lib/platform/jee/mail.jar"/>
 	<classpathentry kind="lib" path="lib/platform/jee/rowset.jar"/>
-	<classpathentry kind="lib" path="lib/platform/jee/servlet-api.jar"/>
 	<classpathentry kind="lib" path="lib/platform/jmx/jmxri.jar"/>
 	<classpathentry kind="lib" path="lib/platform/jruby/jruby.jar"/>
 	<classpathentry kind="lib" path="lib/platform/velocity/velocity-dep-1.5.jar"/>
