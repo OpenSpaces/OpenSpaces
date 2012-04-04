@@ -12,6 +12,7 @@ http\://www.openspaces.org/schema/8.0/jdbc/openspaces-jdbc.xsd=org/openspaces/jd
 http\://www.openspaces.org/schema/8.0/jms/openspaces-jms.xsd=org/openspaces/jms/config/openspaces-jms.xsd
 http\://www.openspaces.org/schema/8.0/sla/openspaces-sla.xsd=org/openspaces/pu/sla/config/openspaces-sla.xsd
 
+http\://www.openspaces.org/schema/9.0/events/openspaces-events.xsd=org/openspaces/events/config/openspaces-events.xsd
 
 
         
