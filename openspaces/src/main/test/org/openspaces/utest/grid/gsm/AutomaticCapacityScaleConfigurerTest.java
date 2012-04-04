@@ -62,17 +62,15 @@ public class AutomaticCapacityScaleConfigurerTest extends TestCase {
         .statistics(statisticsId)
         .lowThreshold(1)
         .highThreshold(10)
-        
-//        .lowThresholdCapacityDecrease( // or increase
-//                new CapacityRequirementConfigurer()
-//                .memoryCapacity(1,MemoryUnit.GIGABYTES)
-//                .create())
-//                
-//        .highThresholdCapacityIncrease(
-//                new CapacityRequirementConfigurer()
-//                .memoryCapacity(1,MemoryUnit.GIGABYTES)
-//                .create())
-//              
+        .lowThresholdBreachedDecrease( 
+                new CapacityRequirementsConfigurer()
+                .memoryCapacity(1,MemoryUnit.GIGABYTES)
+                .create())      
+        .highThresholdBreachedIncrease(
+                new CapacityRequirementsConfigurer()
+                .memoryCapacity(1,MemoryUnit.GIGABYTES)
+                .create())
+              
         .create();
       
         AutomaticCapacityScaleRuleConfig dupRule = new AutomaticCapacityScaleRuleConfig(rule.getProperties());
@@ -101,5 +99,11 @@ public class AutomaticCapacityScaleConfigurerTest extends TestCase {
         Assert.assertEquals(dupConfig.getRules().length,1);
         Assert.assertNotSame(dupConfig.getRules()[0],rule);
         Assert.assertEquals(dupConfig.getRules()[0],rule);
+        
+        CapacityRequirementsConfig highThresholdBreachedIncrease = dupConfig.getRules()[0].getHighThresholdBreachedIncrease();
+        CapacityRequirementsConfig lowThresholdBreachedDecrease = dupConfig.getRules()[0].getLowThresholdBreachedDecrease();
+        
+        Assert.assertEquals(highThresholdBreachedIncrease.getMemoryCapacityInMB(), MemoryUnit.GIGABYTES.toMegaBytes(1));
+        Assert.assertEquals(lowThresholdBreachedDecrease.getMemoryCapacityInMB(), MemoryUnit.GIGABYTES.toMegaBytes(1));
     }
 }
