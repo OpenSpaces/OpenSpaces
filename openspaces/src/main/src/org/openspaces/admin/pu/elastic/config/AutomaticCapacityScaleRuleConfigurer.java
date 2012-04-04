@@ -39,7 +39,7 @@ public class AutomaticCapacityScaleRuleConfigurer {
     }
 
     /**
-     * @see AutomaticCapacityScaleRuleConfig#setLowThreshold(Object)
+     * @see AutomaticCapacityScaleRuleConfig#setLowThreshold(Comparable)
      */
     public AutomaticCapacityScaleRuleConfigurer lowThreshold(Comparable<?> lowThreshold) {
         config.setLowThreshold(lowThreshold);
@@ -47,10 +47,26 @@ public class AutomaticCapacityScaleRuleConfigurer {
     }
     
     /**
-     * @see AutomaticCapacityScaleRuleConfig#setHighThreshold(double)
+     * @see AutomaticCapacityScaleRuleConfig#setHighThreshold(Comparable)
      */
     public AutomaticCapacityScaleRuleConfigurer highThreshold(Comparable<?> highThreshold) {
         config.setHighThreshold(highThreshold);
+        return this;
+    }
+    
+    /**
+     * @see AutomaticCapacityScaleRuleConfig#sethighThresholdBreachedIncrease(CapacityRequirementsConfig)
+     */
+    public AutomaticCapacityScaleRuleConfigurer highThresholdBreachedIncrease(CapacityRequirementsConfig capacityRequirementsConfig) {
+        config.setHighThresholdBreachedIncrease(capacityRequirementsConfig);
+        return this;
+    }
+    
+    /**
+     * @see AutomaticCapacityScaleRuleConfig#setLowThresholdBreachedDecrease(CapacityRequirementsConfig)
+     */
+    public AutomaticCapacityScaleRuleConfigurer lowThresholdBreachedDecrease(CapacityRequirementsConfig capacityRequirementsConfig) {
+        config.setLowThresholdBreachedDecrease(capacityRequirementsConfig);
         return this;
     }
     

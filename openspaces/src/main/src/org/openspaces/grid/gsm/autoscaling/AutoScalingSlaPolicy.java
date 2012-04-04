@@ -34,8 +34,6 @@ public class AutoScalingSlaPolicy extends ServiceLevelAgreementPolicy {
 
     private CapacityRequirements capacityRequirements;
     private AutomaticCapacityScaleRuleConfig[] rules;
-    private CapacityRequirements lowThresholdBreachedDecrease;
-    private CapacityRequirements highThresholdBreachedIncrease;
     private CapacityRequirements maxCapacity;
     private CapacityRequirements minCapacity;
     
@@ -54,14 +52,6 @@ public class AutoScalingSlaPolicy extends ServiceLevelAgreementPolicy {
     public void setRules(AutomaticCapacityScaleRuleConfig[] rules) {
         this.rules = rules;
     }
-    
-    public void setHighThresholdBreachedIncrease(CapacityRequirements highThresholdBreachedIncrease) {
-        this.highThresholdBreachedIncrease = highThresholdBreachedIncrease;
-    }
-
-    public CapacityRequirements getHighThresholdBreachedIncrease() {
-        return highThresholdBreachedIncrease;
-    }
 
     public CapacityRequirements getMaxCapacity() {
         return maxCapacity;
@@ -78,14 +68,6 @@ public class AutoScalingSlaPolicy extends ServiceLevelAgreementPolicy {
     public void setMinCapacity(CapacityRequirements minCapacity) {
         this.minCapacity = minCapacity;
     }
-    
-    public CapacityRequirements getLowThresholdBreachedDecrease() {
-        return lowThresholdBreachedDecrease;
-    }
-    
-    public void setLowThresholdBreachedDecrease(CapacityRequirements lowThresholdBreachedDecrease) {
-        this.lowThresholdBreachedDecrease = lowThresholdBreachedDecrease;
-    }
 
     /* (non-Javadoc)
      * @see java.lang.Object#hashCode()
@@ -95,10 +77,6 @@ public class AutoScalingSlaPolicy extends ServiceLevelAgreementPolicy {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((capacityRequirements == null) ? 0 : capacityRequirements.hashCode());
-        result = prime * result
-                + ((highThresholdBreachedIncrease == null) ? 0 : highThresholdBreachedIncrease.hashCode());
-        result = prime * result
-                + ((lowThresholdBreachedDecrease == null) ? 0 : lowThresholdBreachedDecrease.hashCode());
         result = prime * result + ((maxCapacity == null) ? 0 : maxCapacity.hashCode());
         result = prime * result + ((minCapacity == null) ? 0 : minCapacity.hashCode());
         result = prime * result + Arrays.hashCode(rules);
@@ -121,16 +99,6 @@ public class AutoScalingSlaPolicy extends ServiceLevelAgreementPolicy {
             if (other.capacityRequirements != null)
                 return false;
         } else if (!capacityRequirements.equals(other.capacityRequirements))
-            return false;
-        if (highThresholdBreachedIncrease == null) {
-            if (other.highThresholdBreachedIncrease != null)
-                return false;
-        } else if (!highThresholdBreachedIncrease.equals(other.highThresholdBreachedIncrease))
-            return false;
-        if (lowThresholdBreachedDecrease == null) {
-            if (other.lowThresholdBreachedDecrease != null)
-                return false;
-        } else if (!lowThresholdBreachedDecrease.equals(other.lowThresholdBreachedDecrease))
             return false;
         if (maxCapacity == null) {
             if (other.maxCapacity != null)
@@ -162,22 +130,6 @@ public class AutoScalingSlaPolicy extends ServiceLevelAgreementPolicy {
             throw new IllegalArgumentException("rules cannot be empty");
         }
         
-        if (highThresholdBreachedIncrease == null) {
-            throw new IllegalArgumentException("highThresholdBreachedIncrease cannot be null");
-        }
-        
-        if (highThresholdBreachedIncrease.equalsZero()) {
-            throw new IllegalArgumentException("highThresholdBreachedIncrease cannot be zero");
-        }
-        
-        if (lowThresholdBreachedDecrease == null) {
-            throw new IllegalArgumentException("lowThresholdBreachedDecrease cannot be null");
-        }
-        
-        if (lowThresholdBreachedDecrease.equalsZero()) {
-            throw new IllegalArgumentException("lowThresholdBreachedDecrease cannot be zero");
-        }
-        
         if (maxCapacity == null) {
             throw new IllegalArgumentException("maxCapacity cannot be null");
         }
@@ -198,9 +150,7 @@ public class AutoScalingSlaPolicy extends ServiceLevelAgreementPolicy {
     @Override
     public String toString() {
         return "AutoScalingSlaPolicy [capacityRequirements=" + capacityRequirements + ", rules="
-                + Arrays.toString(rules) + ", highThresholdBreachedIncrease=" + highThresholdBreachedIncrease
-                + ", lowThresholdBreachedDecrease=" + lowThresholdBreachedDecrease
-                + ", maxCapacity=" + maxCapacity + ", minCapacity=" + minCapacity + "]";
+                + Arrays.toString(rules) + ", maxCapacity=" + maxCapacity + ", minCapacity=" + minCapacity + "]";
     }
 
 

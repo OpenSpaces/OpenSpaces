@@ -16,7 +16,9 @@
 package org.openspaces.grid.gsm.autoscaling;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -112,7 +114,15 @@ public class DefaultAutoScalingSlaEnforcementEndpoint implements AutoScalingSlaE
             throw new RulesConflictAutoScalingException(pu, valuesBelowLowThresholdPerRule, valuesAboveHighThresholdPerRule);
         }
         else if (!valuesAboveHighThresholdPerRule.isEmpty()) {
-            CapacityRequirements newCapacity = existingCapacity.add(sla.getHighThresholdBreachedIncrease());
+            
+            Set<AutomaticCapacityScaleRuleConfig> automaticCapacityScaleRuleConfigs = valuesAboveHighThresholdPerRule.keySet();
+            Iterator<AutomaticCapacityScaleRuleConfig> automaticCapcityScaleRuleConfigIterator = automaticCapacityScaleRuleConfigs.iterator();
+            CapacityRequirements minimunCapcityHighThresholdIncreaseRequirements =  automaticCapcityScaleRuleConfigIterator.next().getHighThresholdBreachedIncrease().toCapacityRequirements();
+            while (automaticCapcityScaleRuleConfigIterator.hasNext()) {
+                minimunCapcityHighThresholdIncreaseRequirements = minimunCapcityHighThresholdIncreaseRequirements.min(automaticCapcityScaleRuleConfigIterator.next().getHighThresholdBreachedIncrease().toCapacityRequirements());
+            }
+            
+            CapacityRequirements newCapacity = existingCapacity.add(minimunCapcityHighThresholdIncreaseRequirements);
             CapacityRequirements maxCapacity = sla.getMaxCapacity();
             
             if (newCapacity.greaterThan(maxCapacity)) {
@@ -129,7 +139,15 @@ public class DefaultAutoScalingSlaEnforcementEndpoint implements AutoScalingSlaE
             return newCapacity;
         }
         else if (!valuesBelowLowThresholdPerRule.isEmpty()) {
-            CapacityRequirements newCapacity = existingCapacity.subtractOrZero(sla.getLowThresholdBreachedDecrease());
+            
+            Set<AutomaticCapacityScaleRuleConfig> automaticCapacityScaleRuleConfigs = valuesBelowLowThresholdPerRule.keySet();
+            Iterator<AutomaticCapacityScaleRuleConfig> automaticCapcityScaleRuleConfigIterator = automaticCapacityScaleRuleConfigs.iterator();
+            CapacityRequirements minimunCapcityLowThresholdDecreaseRequirements =  automaticCapcityScaleRuleConfigIterator.next().getLowThresholdBreachedDecrease().toCapacityRequirements();
+            while (automaticCapcityScaleRuleConfigIterator.hasNext()) {
+                minimunCapcityLowThresholdDecreaseRequirements = minimunCapcityLowThresholdDecreaseRequirements.min(automaticCapcityScaleRuleConfigIterator.next().getLowThresholdBreachedDecrease().toCapacityRequirements());
+            }
+            
+            CapacityRequirements newCapacity = existingCapacity.subtractOrZero(minimunCapcityLowThresholdDecreaseRequirements);
             CapacityRequirements minCapacity = sla.getMinCapacity();
             
             if (minCapacity.greaterThan(newCapacity)) {

@@ -221,8 +221,6 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
         
         final AutoScalingSlaPolicy sla = new AutoScalingSlaPolicy();
         sla.setCapacityRequirements(capacityRequirements);
-        sla.setHighThresholdBreachedIncrease(getCapacityChangeOnBreach());
-        sla.setLowThresholdBreachedDecrease(getCapacityChangeOnBreach());
         sla.setMaxCapacity(config.getMaxCapacity().toCapacityRequirements());
         sla.setMinCapacity(config.getMinCapacity().toCapacityRequirements());
         sla.setRules(config.getRules());

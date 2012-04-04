@@ -37,8 +37,11 @@ public class AutomaticCapacityScaleRuleConfig
     private static final long serialVersionUID = 1L;
 
     private static final Map<String,String> STATISTICS_DEFAULT = new ProcessingUnitStatisticsId().getProperties();
+    private static final Map<String,String> CAPACITY_REQUIERMENTS_DEFAULT = new AutomaticCapacityScaleRuleConfig().getProperties();
 
     private static final String STATISTICS_KEY_PREFIX = "statistics.";
+    private static final String CAPACITY_HIGH_REQUIERMENTS_KEY_PREFIX = "capacity-high-req.";
+    private static final String CAPACITY_LOW_REQUIERMENTS_KEY_PREFIX = "capacity-low-req.";
     private static final String LOW_THRESHOLD_KEY = "low-threshold";
     private static final Double LOW_THRESHOLD_DEFAULT = Double.MIN_VALUE;
     private static final String HIGH_THRESHOLD_KEY = "high-threshold";
@@ -94,9 +97,38 @@ public class AutomaticCapacityScaleRuleConfig
         return (Comparable<?>) properties.getStringWrapperObject(HIGH_THRESHOLD_KEY, HIGH_THRESHOLD_DEFAULT);
     }
     
+    /**
+     * Defined Capacity Requirements that will be added once the high threshold is breached
+     * @param capacityRequirementsConfig - An Object of a CapacityRequirementsConfig that defines capacity properties 
+     */
+    public void setHighThresholdBreachedIncrease(CapacityRequirementsConfig capacityRequirementsConfig) {
+        properties.putMap(CAPACITY_HIGH_REQUIERMENTS_KEY_PREFIX, capacityRequirementsConfig.getProperties());
+    }
+    
+    
+    public CapacityRequirementsConfig getHighThresholdBreachedIncrease() {
+        return new CapacityRequirementsConfig(
+                properties.getMap(CAPACITY_HIGH_REQUIERMENTS_KEY_PREFIX, CAPACITY_REQUIERMENTS_DEFAULT));
+    }
+    
+    /**
+     * Defined Capacity Requirements that will be decreases once the low threshold is breached
+     * @param capacityRequirementsConfig - An Object of a CapacityRequirementsConfig that defines capacity properties 
+     */
+    public void setLowThresholdBreachedDecrease(CapacityRequirementsConfig capacityRequirementsConfig) {
+        properties.putMap(CAPACITY_LOW_REQUIERMENTS_KEY_PREFIX, capacityRequirementsConfig.getProperties());
+    }
+    
+    
+    public CapacityRequirementsConfig getLowThresholdBreachedDecrease() {
+        return new CapacityRequirementsConfig(
+                properties.getMap(CAPACITY_LOW_REQUIERMENTS_KEY_PREFIX, CAPACITY_REQUIERMENTS_DEFAULT));
+    }
+    
     public Map<String, String> getProperties() {
         return properties.getProperties();
     }
+    
 
     @Override
     public int hashCode() {
