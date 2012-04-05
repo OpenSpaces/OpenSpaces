@@ -117,22 +117,38 @@ public class DefaultAutoScalingSlaEnforcementEndpoint implements AutoScalingSlaE
             
             Set<AutomaticCapacityScaleRuleConfig> automaticCapacityScaleRuleConfigs = valuesAboveHighThresholdPerRule.keySet();
             Iterator<AutomaticCapacityScaleRuleConfig> automaticCapcityScaleRuleConfigIterator = automaticCapacityScaleRuleConfigs.iterator();
-            CapacityRequirements minimunCapcityHighThresholdIncreaseRequirements =  automaticCapcityScaleRuleConfigIterator.next().getHighThresholdBreachedIncrease().toCapacityRequirements();
-            while (automaticCapcityScaleRuleConfigIterator.hasNext()) {
-                minimunCapcityHighThresholdIncreaseRequirements = minimunCapcityHighThresholdIncreaseRequirements.min(automaticCapcityScaleRuleConfigIterator.next().getHighThresholdBreachedIncrease().toCapacityRequirements());
-            }
             
+            CapacityRequirements minimunCapcityHighThresholdIncreaseRequirements = automaticCapcityScaleRuleConfigIterator.next().getHighThresholdBreachedIncrease().toCapacityRequirements();
+            while (automaticCapcityScaleRuleConfigIterator.hasNext()) {
+                AutomaticCapacityScaleRuleConfig ruleConfig = automaticCapcityScaleRuleConfigIterator.next();
+                CapacityRequirements highThresholdIncrease = ruleConfig.getHighThresholdBreachedIncrease().toCapacityRequirements();
+                if (minimunCapcityHighThresholdIncreaseRequirements.equalsZero()) {
+                    throw new IllegalStateException("highThresholdIncrease cannot be zero in scale rule " + ruleConfig);
+                }
+                minimunCapcityHighThresholdIncreaseRequirements = minimunCapcityHighThresholdIncreaseRequirements.min(highThresholdIncrease);
+            }
+            if (minimunCapcityHighThresholdIncreaseRequirements.equalsZero()) {
+                throw new IllegalStateException("minimunCapcityHighThresholdIncreaseRequirements cannot be zero");
+            }
             CapacityRequirements newCapacity = existingCapacity.add(minimunCapcityHighThresholdIncreaseRequirements);
             CapacityRequirements maxCapacity = sla.getMaxCapacity();
             
             if (newCapacity.greaterThan(maxCapacity)) {
                 //apply max capacity restriction
                 CapacityRequirements correctedNewCapacity = newCapacity.min(maxCapacity);
-                if (existingCapacity.equals(correctedNewCapacity)) {
+                if (correctedNewCapacity.equals(existingCapacity)) {
                     throw new ReachedMaximumCapacityAutoScalingException(pu, existingCapacity, newCapacity, maxCapacity );
+                }
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Cannot increase capacity from " + existingCapacity + " to " + newCapacity + " since it breaches maximum of " + maxCapacity +".");
                 }
                 newCapacity = correctedNewCapacity;
             }
+            
+            if (!newCapacity.greaterThan(existingCapacity)) {
+                throw new IllegalStateException("Expected " + newCapacity + " to be bigger than " + existingCapacity +  " due to the increase by " + minimunCapcityHighThresholdIncreaseRequirements);
+            }
+            
             if (logger.isInfoEnabled()) {
                 logger.info("Increasing capacity from " + existingCapacity + " to " + newCapacity);
             }
