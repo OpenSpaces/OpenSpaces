@@ -16,21 +16,25 @@
 
 package org.openspaces.jee.sessions.jetty;
 
-import java.util.Map;
-
 import com.gigaspaces.annotation.pojo.SpaceClass;
 import com.gigaspaces.annotation.pojo.SpaceId;
 import com.gigaspaces.annotation.pojo.SpaceProperty;
 import com.gigaspaces.annotation.pojo.SpaceRouting;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * The entry that is stored in the Space representing a Jetty session.
  */
 @SpaceClass
-public class SessionData {
+public class SessionData implements Externalizable {
 
-    static final long serialVersionUID = 3104738310898353395L;
-    
     private String _id;
     private long _accessed = -1;
     private volatile long _lastAccessed = -1;
@@ -51,6 +55,52 @@ public class SessionData {
         _accessed = _created;
         _lastAccessed = 0;
         _lastSaved = 0;
+    }
+
+    public void writeExternal(ObjectOutput out) throws IOException {
+        if (_id == null) {
+            out.writeBoolean(false);
+        } else {
+            out.writeBoolean(true);
+            out.writeUTF(_id);
+        }
+        out.writeLong(_accessed);
+        out.writeLong(_lastAccessed);
+        out.writeLong(_lastSaved);
+        out.writeLong(_maxIdleMs);
+        out.writeLong(_cookieSet);
+        out.writeLong(_created);
+        out.writeLong(_expiryTime);
+        if (_attributes == null) {
+            out.writeInt(-1);
+        } else {
+            out.writeInt(_attributes.size());
+            for (Iterator<Map.Entry<String,Object>> it = _attributes.entrySet().iterator(); it.hasNext();) {
+                Map.Entry<String,Object> entry = it.next();
+                out.writeObject(entry.getKey());
+                out.writeObject(entry.getValue());
+            }
+        }
+    }
+
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        if (in.readBoolean()) {
+            _id = in.readUTF();
+        }
+        _accessed = in.readLong();
+        _lastAccessed = in.readLong();
+        _lastSaved = in.readLong();
+        _maxIdleMs = in.readLong();
+        _cookieSet = in.readLong();
+        _created = in.readLong();
+        _expiryTime = in.readLong();
+        int size = in.readInt();
+        if (size > -1) {
+            _attributes = new ConcurrentHashMap<String,Object>();
+            for (int i = 0; i < size; i++) {
+                _attributes.put((String)in.readObject(), in.readObject());
+            }
+        }
     }
 
     @SpaceId(autoGenerate = false)
