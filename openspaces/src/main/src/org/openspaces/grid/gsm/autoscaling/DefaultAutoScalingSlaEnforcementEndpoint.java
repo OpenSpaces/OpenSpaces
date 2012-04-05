@@ -116,13 +116,15 @@ public class DefaultAutoScalingSlaEnforcementEndpoint implements AutoScalingSlaE
         else if (!valuesAboveHighThresholdPerRule.isEmpty()) {
             
             Set<AutomaticCapacityScaleRuleConfig> automaticCapacityScaleRuleConfigs = valuesAboveHighThresholdPerRule.keySet();
+            if (automaticCapacityScaleRuleConfigs.isEmpty()) {
+                throw new IllegalStateException("automaticCapacityScaleRuleConfigs cannot be empty");
+            }
             Iterator<AutomaticCapacityScaleRuleConfig> automaticCapcityScaleRuleConfigIterator = automaticCapacityScaleRuleConfigs.iterator();
-            
-            CapacityRequirements minimunCapcityHighThresholdIncreaseRequirements = automaticCapcityScaleRuleConfigIterator.next().getHighThresholdBreachedIncrease().toCapacityRequirements();
+            CapacityRequirements minimunCapcityHighThresholdIncreaseRequirements = new CapacityRequirements();
             while (automaticCapcityScaleRuleConfigIterator.hasNext()) {
                 AutomaticCapacityScaleRuleConfig ruleConfig = automaticCapcityScaleRuleConfigIterator.next();
                 CapacityRequirements highThresholdIncrease = ruleConfig.getHighThresholdBreachedIncrease().toCapacityRequirements();
-                if (minimunCapcityHighThresholdIncreaseRequirements.equalsZero()) {
+                if (highThresholdIncrease.equalsZero()) {
                     throw new IllegalStateException("highThresholdIncrease cannot be zero in scale rule " + ruleConfig);
                 }
                 minimunCapcityHighThresholdIncreaseRequirements = minimunCapcityHighThresholdIncreaseRequirements.min(highThresholdIncrease);
