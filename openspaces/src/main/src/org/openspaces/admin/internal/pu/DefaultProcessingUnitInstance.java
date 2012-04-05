@@ -78,6 +78,7 @@ import com.gigaspaces.internal.jvm.JVMDetails;
 import com.gigaspaces.internal.jvm.JVMStatistics;
 import com.gigaspaces.internal.os.OSDetails;
 import com.gigaspaces.internal.os.OSStatistics;
+import com.gigaspaces.lrmi.nio.async.FutureContext;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOStatistics;
 
@@ -669,6 +670,8 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
             return (Future<Object>) puServiceBean.invoke(serviceBeanName, namedArgs);
         } catch (RemoteException e) {
             throw new AdminException("Failed to invoke processing unit instance", e);
+        } finally {
+            FutureContext.clear();
         }
     }
 
