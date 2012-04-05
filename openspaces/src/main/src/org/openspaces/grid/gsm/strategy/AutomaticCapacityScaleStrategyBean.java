@@ -35,7 +35,6 @@ import org.openspaces.grid.gsm.autoscaling.AutoScalingSlaUtils;
 import org.openspaces.grid.gsm.autoscaling.AutomaticCapacityCooldownValidator;
 import org.openspaces.grid.gsm.autoscaling.exceptions.AutoScalingSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
-import org.openspaces.grid.gsm.capacity.MemoryCapacityRequirement;
 import org.openspaces.grid.gsm.containers.exceptions.ContainersSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.rebalancing.exceptions.RebalancingSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementInProgressException;
@@ -99,6 +98,8 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
     }
 
     private void validateConfig() {
+        
+        validateRulesConfig();
         
         CapacityRequirements minCapacityRequirements = config.getMinCapacity().toCapacityRequirements();
         if (minCapacityRequirements == null) {
@@ -240,21 +241,24 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
         return newCapacityRequirements;
     }
 
-    private CapacityRequirements getCapacityChangeOnBreach() {
-        long containerMemory = getGridServiceContainerConfig().getMaximumMemoryCapacityInMB();
-        return new CapacityRequirements(new MemoryCapacityRequirement(containerMemory));
+    private void validateRulesConfig() {
+        for (AutomaticCapacityScaleRuleConfig rule : config.getRules()) {
+            if (!rule.getLowThresholdBreachedDecrease().toCapacityRequirements().equalsZero() && 
+                !rule.getHighThresholdBreachedIncrease().toCapacityRequirements().equalsZero()) {
+                try {
+                    if (AutoScalingSlaUtils.compare(rule.getLowThreshold(),rule.getHighThreshold()) > 0) {
+                        throw new BeanConfigurationException("Low threshold (" + rule.getLowThreshold() + ") cannot be higher than high threshold (" + rule.getHighThreshold() +")");
+                    }
+                } catch (NumberFormatException e) {
+                    throw new BeanConfigurationException("Failed to compare low threshold (" + rule.getLowThreshold() + ") and high threshold (" + rule.getHighThreshold() +")",e);
+                }
+            }
+        }
     }
-
+    
     private void enablePuStatistics() {
         int maxNumberOfSamples = 1;
         for (AutomaticCapacityScaleRuleConfig rule : config.getRules()) {
-            try {
-                if (AutoScalingSlaUtils.compare(rule.getLowThreshold(),rule.getHighThreshold()) > 0) {
-                    throw new BeanConfigurationException("Low threshold (" + rule.getLowThreshold() + ") cannot be higher than high threshold (" + rule.getHighThreshold() +")");
-                }
-            } catch (NumberFormatException e) {
-                throw new BeanConfigurationException("Failed to compare low threshold (" + rule.getLowThreshold() + ") and high threshold (" + rule.getHighThreshold() +")",e);
-            }
             
             TimeWindowStatisticsConfig timeWindowStatistics = rule.getStatistics().getTimeWindowStatistics();
 

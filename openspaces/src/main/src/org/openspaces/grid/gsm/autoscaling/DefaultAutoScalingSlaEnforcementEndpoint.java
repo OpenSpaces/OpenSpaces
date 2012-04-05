@@ -194,7 +194,8 @@ public class DefaultAutoScalingSlaEnforcementEndpoint implements AutoScalingSlaE
     public boolean isBelowLowThreshold(AutomaticCapacityScaleRuleConfig rule, Object value) 
             throws AutoScalingSlaEnforcementInProgressException {
         try {
-            return AutoScalingSlaUtils.compare(rule.getLowThreshold(), value) > 0;
+            return !rule.getLowThresholdBreachedDecrease().toCapacityRequirements().equalsZero() &&
+                   AutoScalingSlaUtils.compare(rule.getLowThreshold(), value) > 0;
         }
         catch (final NumberFormatException e) {
             throw new AutoScalingStatisticsFormatException(pu, value ,rule.getLowThreshold() ,e);
@@ -205,7 +206,8 @@ public class DefaultAutoScalingSlaEnforcementEndpoint implements AutoScalingSlaE
             throws AutoScalingSlaEnforcementInProgressException {
         
         try {
-            return AutoScalingSlaUtils.compare(rule.getHighThreshold(), value) < 0;
+            return !rule.getHighThresholdBreachedIncrease().toCapacityRequirements().equalsZero() &&
+                   AutoScalingSlaUtils.compare(rule.getHighThreshold(), value) < 0;
         }
         catch (final NumberFormatException e) {
             throw new AutoScalingStatisticsFormatException(pu, value ,rule.getHighThreshold() ,e);
