@@ -115,24 +115,8 @@ public class DefaultAutoScalingSlaEnforcementEndpoint implements AutoScalingSlaE
         }
         else if (!valuesAboveHighThresholdPerRule.isEmpty()) {
             
-            Set<AutomaticCapacityScaleRuleConfig> automaticCapacityScaleRuleConfigs = valuesAboveHighThresholdPerRule.keySet();
-            if (automaticCapacityScaleRuleConfigs.isEmpty()) {
-                throw new IllegalStateException("automaticCapacityScaleRuleConfigs cannot be empty");
-            }
-            Iterator<AutomaticCapacityScaleRuleConfig> automaticCapcityScaleRuleConfigIterator = automaticCapacityScaleRuleConfigs.iterator();
-            CapacityRequirements minimunCapcityHighThresholdIncreaseRequirements = new CapacityRequirements();
-            while (automaticCapcityScaleRuleConfigIterator.hasNext()) {
-                AutomaticCapacityScaleRuleConfig ruleConfig = automaticCapcityScaleRuleConfigIterator.next();
-                CapacityRequirements highThresholdIncrease = ruleConfig.getHighThresholdBreachedIncrease().toCapacityRequirements();
-                if (highThresholdIncrease.equalsZero()) {
-                    throw new IllegalStateException("highThresholdIncrease cannot be zero in scale rule " + ruleConfig);
-                }
-                minimunCapcityHighThresholdIncreaseRequirements = minimunCapcityHighThresholdIncreaseRequirements.min(highThresholdIncrease);
-            }
-            if (minimunCapcityHighThresholdIncreaseRequirements.equalsZero()) {
-                throw new IllegalStateException("minimunCapcityHighThresholdIncreaseRequirements cannot be zero");
-            }
-            CapacityRequirements newCapacity = existingCapacity.add(minimunCapcityHighThresholdIncreaseRequirements);
+            CapacityRequirements minimunHighThresholdBreachedIncrease = getMinimumRuleChange(valuesAboveHighThresholdPerRule, true);
+            CapacityRequirements newCapacity = existingCapacity.add(minimunHighThresholdBreachedIncrease);
             CapacityRequirements maxCapacity = sla.getMaxCapacity();
             
             if (newCapacity.greaterThan(maxCapacity)) {
@@ -148,7 +132,7 @@ public class DefaultAutoScalingSlaEnforcementEndpoint implements AutoScalingSlaE
             }
             
             if (!newCapacity.greaterThan(existingCapacity)) {
-                throw new IllegalStateException("Expected " + newCapacity + " to be bigger than " + existingCapacity +  " due to the increase by " + minimunCapcityHighThresholdIncreaseRequirements);
+                throw new IllegalStateException("Expected " + newCapacity + " to be bigger than " + existingCapacity +  " due to the increase by " + minimunHighThresholdBreachedIncrease);
             }
             
             if (logger.isInfoEnabled()) {
@@ -158,14 +142,8 @@ public class DefaultAutoScalingSlaEnforcementEndpoint implements AutoScalingSlaE
         }
         else if (!valuesBelowLowThresholdPerRule.isEmpty()) {
             
-            Set<AutomaticCapacityScaleRuleConfig> automaticCapacityScaleRuleConfigs = valuesBelowLowThresholdPerRule.keySet();
-            Iterator<AutomaticCapacityScaleRuleConfig> automaticCapcityScaleRuleConfigIterator = automaticCapacityScaleRuleConfigs.iterator();
-            CapacityRequirements minimunCapcityLowThresholdDecreaseRequirements =  automaticCapcityScaleRuleConfigIterator.next().getLowThresholdBreachedDecrease().toCapacityRequirements();
-            while (automaticCapcityScaleRuleConfigIterator.hasNext()) {
-                minimunCapcityLowThresholdDecreaseRequirements = minimunCapcityLowThresholdDecreaseRequirements.min(automaticCapcityScaleRuleConfigIterator.next().getLowThresholdBreachedDecrease().toCapacityRequirements());
-            }
-            
-            CapacityRequirements newCapacity = existingCapacity.subtractOrZero(minimunCapcityLowThresholdDecreaseRequirements);
+            CapacityRequirements minimunLowThresholdBreachedDecrease = getMinimumRuleChange(valuesBelowLowThresholdPerRule, false);
+            CapacityRequirements newCapacity = existingCapacity.subtractOrZero(minimunLowThresholdBreachedDecrease);
             CapacityRequirements minCapacity = sla.getMinCapacity();
             
             if (minCapacity.greaterThan(newCapacity)) {
@@ -189,6 +167,44 @@ public class DefaultAutoScalingSlaEnforcementEndpoint implements AutoScalingSlaE
         }
 
         return existingCapacity;
+    }
+
+    private CapacityRequirements getMinimumRuleChange(
+            Map<AutomaticCapacityScaleRuleConfig, Object> valuesAboveHighThresholdPerRule, boolean increase) {
+        
+        final Set<AutomaticCapacityScaleRuleConfig> automaticCapacityScaleRuleConfigs = valuesAboveHighThresholdPerRule.keySet();
+        if (automaticCapacityScaleRuleConfigs.isEmpty()) {
+            throw new IllegalStateException("automaticCapacityScaleRuleConfigs cannot be empty");
+        }
+        final Iterator<AutomaticCapacityScaleRuleConfig> iterator = automaticCapacityScaleRuleConfigs.iterator();
+        CapacityRequirements minimunChange = null;
+        while (iterator.hasNext()) {
+            final AutomaticCapacityScaleRuleConfig ruleConfig = iterator.next();
+            CapacityRequirements change; 
+            if (increase) {
+                change = ruleConfig.getHighThresholdBreachedIncrease().toCapacityRequirements();
+                if (change.equalsZero()) {
+                    throw new IllegalStateException("highThresholdIncrease cannot be zero in scale rule " + ruleConfig);
+                }
+            }
+            else {
+                change = ruleConfig.getLowThresholdBreachedDecrease().toCapacityRequirements();
+                if (change.equalsZero()) {
+                    throw new IllegalStateException("lowThresholdIncrease cannot be zero in scale rule " + ruleConfig);
+                }
+            }
+            
+            if (minimunChange == null) {
+                minimunChange = change;
+            }
+            else {
+                minimunChange = minimunChange.min(change);
+            }
+        }
+        if (minimunChange.equalsZero()) {
+            throw new IllegalStateException("minimunCapcityHighThresholdIncreaseRequirements cannot be zero");
+        }
+        return minimunChange;
     }
     
     public boolean isBelowLowThreshold(AutomaticCapacityScaleRuleConfig rule, Object value) 
