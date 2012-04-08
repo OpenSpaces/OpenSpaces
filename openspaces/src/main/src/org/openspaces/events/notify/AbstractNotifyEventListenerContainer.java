@@ -514,8 +514,8 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
      */
     protected boolean isBatchEnabled() {
         return (batchSize != null && batchTime != null) || 
-               (durable != null && durable);
-        //||(!EventSessionConfig.USE_OLD_GUARANTEED_NOTIFICATIONS && guaranteed != null && guaranteed);
+               (durable != null && durable) ||
+               (!EventSessionConfig.USE_OLD_GUARANTEED_NOTIFICATIONS && guaranteed != null && guaranteed);
     }
 
     @Override
