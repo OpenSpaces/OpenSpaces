@@ -32,6 +32,6 @@ public class CpuPercentageTimeWindowStatisticsConfig
 
     @Override
     public Object calc(StatisticsObjectList values) {
-        return values.getDeltaValuePerMilliSecond();
+        return 100.0 * values.getDeltaValuePerMilliSecond();
     }
 }
