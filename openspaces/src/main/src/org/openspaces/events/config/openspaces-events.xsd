@@ -524,19 +524,7 @@
                                             notification listeners.
                                         </xsd:documentation>
                                     </xsd:annotation>
-                                </xsd:enumeration>
-                                <xsd:enumeration value="MULTICAST">
-                                    <xsd:annotation>
-                                        <xsd:documentation>
-                                            Controls how notification are propagated from the space to the listener.
-                                            Multicast propagation uses UDP multicast communication which is usually best
-                                            for large amount of registered clients.
-
-                                            Note, when using multicast notifications make sure to enable the multicast
-                                            worker within the Space.
-                                        </xsd:documentation>
-                                    </xsd:annotation>
-                                </xsd:enumeration>
+                                </xsd:enumeration>                                
                             </xsd:restriction>
                         </xsd:simpleType>
                     </xsd:attribute>
