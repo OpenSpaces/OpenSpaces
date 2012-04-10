@@ -42,7 +42,6 @@
         <fileset dir="${lib.dir}">
             <include name="**/*.jar"/>
             <exclude name="platform/ant/*.jar"/>
-            <exclude name="platform/jetty/*.jar"/>
             <exclude name="required/gs-openspaces.jar"/>
             <exclude name="optional/openspaces/**"/>
             <exclude name="platform/openspaces/**"/>
@@ -351,7 +350,10 @@
          Run test suite and generate test summary, for both main and sandbox tests.
          Does not halt on failure or error, in contrast to the "tests" target above.
      -->
-    <target name="testsummary" depends="buildtests" description="Run tests and generate test summary">
+      <target name="testsummary" depends="buildtests" description="Run tests and generate test summary">
+
+        <delete dir="${target.junit.reports.dir}" />
+        <delete dir="${target.junit.summary.dir}" />
 
         <mkdir dir="${target.junit.reports.dir}"/>
         <mkdir dir="${target.junit.summary.dir}"/>
