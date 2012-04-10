@@ -1694,9 +1694,9 @@ public class DefaultAdmin implements InternalAdmin {
             try {
                 runnable.run();
             } catch (Exception e) {
-                logger.warn("Failed to execute: " + runnable, e);
+                logger.warn("Failed to execute: " + runnable + " - " + e, e);
             } catch (Error e) {
-                logger.error("Failed to execute: " + runnable, e);
+                logger.error("Failed to execute: " + runnable + " - " + e, e);
                 throw e;
             }
         }
