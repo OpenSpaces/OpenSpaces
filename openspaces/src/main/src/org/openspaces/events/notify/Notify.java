@@ -79,6 +79,7 @@ public @interface Notify {
     /**
      * @see SimpleNotifyEventListenerContainer#setGuaranteed(Boolean)
      */
+    @Deprecated
     boolean guaranteed() default false;
 
     /**

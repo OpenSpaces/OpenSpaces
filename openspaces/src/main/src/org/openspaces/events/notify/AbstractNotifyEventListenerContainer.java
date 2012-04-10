@@ -451,7 +451,10 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
 
     /**
      * Controls if notifications will be guaranteed (at least once) in case of failover.
+     * 
+     * @deprecated Since 9.0 use {@link #setDurable(boolean)} instead.
      */
+    @Deprecated
     public void setGuaranteed(Boolean guaranteed) {
         this.guaranteed = guaranteed;
     }
