@@ -38,6 +38,7 @@ public class NotifyEventContainerServiceDetails extends EventContainerServiceDet
         public static final String FIFO = "fifo";
         public static final String BATCH_SIZE = "batch-size";
         public static final String BATCH_TIME = "batch-time";
+        public static final String BATCH_PENDING_THRESHOLD = "batch-pending-threshold";
         public static final String AUTO_RENEW = "auto-renew";
         public static final String NOTIFY_WRITE = "notify-write";
         public static final String NOTIFY_TAKE = "notify-take";
@@ -58,7 +59,7 @@ public class NotifyEventContainerServiceDetails extends EventContainerServiceDet
 
     public NotifyEventContainerServiceDetails(String id, String gigaSpace, Object template, boolean performSnapshot, String transactionManager,
                                               int commType,
-                                              boolean fifo, Integer batchSize, Integer batchTime, boolean autoRenew,
+                                              boolean fifo, Integer batchSize, Integer batchTime, Integer batchPendingThreshold, boolean autoRenew,
                                               Boolean notifyAll, Boolean notifyWrite, Boolean notifyUpdate, Boolean notifyTake, Boolean notifyLeaseExpire, Boolean notifyUnmatched,
                                               Boolean triggerNotifyTemplate, Boolean replicateNotifyTemplate,
                                               boolean performTakeOnNotify, boolean passArrayAsIs, boolean guaranteed, boolean durable) {
@@ -77,6 +78,7 @@ public class NotifyEventContainerServiceDetails extends EventContainerServiceDet
         getAttributes().put(Attributes.FIFO, fifo);
         getAttributes().put(Attributes.BATCH_SIZE, batchSize);
         getAttributes().put(Attributes.BATCH_TIME, batchTime);
+        getAttributes().put(Attributes.BATCH_PENDING_THRESHOLD, batchPendingThreshold);
         getAttributes().put(Attributes.AUTO_RENEW, autoRenew);
         if (notifyAll != null && notifyAll) {
             getAttributes().put(Attributes.NOTIFY_WRITE, true);

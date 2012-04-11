@@ -180,7 +180,7 @@ public class SimpleNotifyEventListenerContainer extends AbstractNotifyEventListe
             tempalte = null;
         }
         return new ServiceDetails[]{new NotifyEventContainerServiceDetails(beanName, getGigaSpace().getName(), tempalte, isPerformSnapshot(), getTransactionManagerName(),
-                getCommType(), isFifo(), getBatchSize(), getBatchTime(), isAutoRenew(),
+                getCommType(), isFifo(), getBatchSize(), getBatchTime(), getBatchPendingThreshold(), isAutoRenew(),
                 isNotifyAll(), isNotifyWrite(), isNotifyUpdate(), isNotifyTake(), isNotifyLeaseExpire(), isNotifyUnmatched(),
                 isTriggerNotifyTemplate(), isReplicateNotifyTemplate(), isPerformSnapshot(), isPassArrayAsIs(), isGuaranteed(), isDurable())};
     }

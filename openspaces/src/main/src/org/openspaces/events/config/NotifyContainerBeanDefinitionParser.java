@@ -54,6 +54,8 @@ public class NotifyContainerBeanDefinitionParser extends AbstractTxEventContaine
 
     private static final String BATCH_SIZE = "size";
 
+    private static final String BATCH_PENDING_THRESHOLD = "pending-threshold";
+
     private static final String LEASE = "lease";
 
     private static final String LEASE_AUTO_RENEW = "auto-renew";
@@ -121,6 +123,9 @@ public class NotifyContainerBeanDefinitionParser extends AbstractTxEventContaine
         if (batchEle != null) {
             builder.addPropertyValue("batchTime", batchEle.getAttribute(BATCH_TIME));
             builder.addPropertyValue("batchSize", batchEle.getAttribute(BATCH_SIZE));
+            if (batchEle.hasAttribute(BATCH_PENDING_THRESHOLD)) {
+                builder.addPropertyValue("batchPendingThreshold", batchEle.getAttribute(BATCH_PENDING_THRESHOLD));
+            }
         }
 
         Element leaseEle = DomUtils.getChildElementByTagName(element, LEASE);

@@ -415,8 +415,8 @@
                                         <xsd:documentation>
                                             If set, turns batching event notifications where the server space
                                             accumulates notifications to be sent and then send them in batch. The batch
-                                            size controls the number of notifications that will be batched before they
-                                            are sent. Note, if setting this property the 'batch time' must be set as
+                                            size controls the number of notifications that are sent in each batch.
+                                            Note, if setting this property the 'batch time' must be set as
                                             well.
                                         </xsd:documentation>
                                     </xsd:annotation>
@@ -429,6 +429,16 @@
                                             time controls the elapsed time until the batch buffer is cleared and sent.
                                             The time is in milliseconds. Note, if setting this property the 'batch size'
                                             must be set as well.
+                                        </xsd:documentation>
+                                    </xsd:annotation>
+                                </xsd:attribute>
+                                <xsd:attribute name="pending-threshold" type="xsd:string" use="optional">
+                                    <xsd:annotation>
+                                        <xsd:documentation>
+                                            If set, turns batching event notifications where the server space
+                                            accumulates notifications to be sent and then send them in batch. The batch
+                                            pending threshold controls the number of notifications that will be accumulated before they
+                                            are sent. If, this value is not set, 'size' property is used.
                                         </xsd:documentation>
                                     </xsd:annotation>
                                 </xsd:attribute>

@@ -155,6 +155,7 @@ public class NotifyAnnotationPostProcessor implements BeanPostProcessor, Applica
         if (notifyBatch != null) {
             notifyContainerConfigurer.batchSize(notifyBatch.size());
             notifyContainerConfigurer.batchTime(notifyBatch.time());
+            notifyContainerConfigurer.batchPendingThreshold(notifyBatch.pendingThreshold());
             notifyContainerConfigurer.passArrayAsIs(notifyBatch.passArrayAsIs());
         }
 

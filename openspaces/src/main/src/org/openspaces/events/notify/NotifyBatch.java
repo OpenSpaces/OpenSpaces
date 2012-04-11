@@ -33,7 +33,7 @@ public @interface NotifyBatch {
 
     /**
      * The batch size controls the number of notifications that
-     * will be batched before they are sent.
+     * will be sent in each batch.
      */
     int size();
 
@@ -43,6 +43,13 @@ public @interface NotifyBatch {
      */
     int time();
 
+    /**
+     * The batch pending threshold controls the number of notifications that
+     * will be accumulated before they are sent.
+     * If not set, size parameter will be used.
+     */
+    int pendingThreshold() default -1;
+    
     /**
      * When batching is turned on, should the batch of events be passed as an <code>Object[]</code> to
      * the listener. Default to <code>false</code> which means it will be passed one event at a time.

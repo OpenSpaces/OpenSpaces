@@ -121,6 +121,14 @@ public class SimpleNotifyContainerConfigurer {
     }
 
     /**
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setBatchPendingThreshold(Integer)
+     */
+    public SimpleNotifyContainerConfigurer batchPendingThreshold(Integer batchPendingThreshold) {
+        notifyEventListenerContainer.setBatchPendingThreshold(batchPendingThreshold);
+        return this;
+    }
+
+    /**
      * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setAutoRenew(boolean)
      */
     public SimpleNotifyContainerConfigurer autoRenew(boolean autoRenew) {

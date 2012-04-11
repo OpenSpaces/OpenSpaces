@@ -248,6 +248,7 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
         boolean fifo = Boolean.parseBoolean(props.get("fifo"));
         Integer batchSize = props.get("batch-size") == null? null : Integer.parseInt("batch-size");
         Integer batchTime = props.get("batch-time") == null? null : Integer.parseInt("batch-time");
+        Integer batchPendingThreshold = props.get("batch-pending-threshold") == null? null : Integer.parseInt("batch-pending-threshold");
         boolean autoRenew = Boolean.parseBoolean(props.get("auto-renew"));
         boolean notifyWrite = Boolean.parseBoolean(props.get("notify-write"));
         boolean notifyUpdate = Boolean.parseBoolean(props.get("notify-update"));
@@ -259,7 +260,7 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
         boolean guaranteed = Boolean.parseBoolean(props.get("guaranteed"));
         boolean durable = Boolean.parseBoolean(props.get("durable"));
         return new NotifyEventContainerServiceDetails(id, space, template, performSnapshot, txManager, commType, fifo, batchSize, 
-                    batchTime, autoRenew, null, notifyWrite, notifyUpdate, notifyTake, notifyLease, false, triggerNotifyTemplate, 
+                    batchTime, batchPendingThreshold, autoRenew, null, notifyWrite, notifyUpdate, notifyTake, notifyLease, false, triggerNotifyTemplate, 
                     replicateNotifyTemplate, performTakeOnNotify, batchProcessing, guaranteed, durable);
     }
 

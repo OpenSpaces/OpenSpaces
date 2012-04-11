@@ -128,6 +128,8 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
 
     private Integer batchTime;
 
+    private Integer batchPendingThreshold;
+    
     private boolean autoRenew = false;
 
     private long renewExpiration = EventSessionConfig.DEFAULT_RENEW_EXPIRATION;
@@ -204,8 +206,9 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
 
     /**
      * If set, turns batching event notifications where the server space accumalates notifications to
-     * be sent and then send them in batch. The batch size controls the number of notifications that
-     * will be batched before they are sent. Note, if setting this property the
+     * be sent and then send them in batch. The batch size controls the number of notifications are sent
+     * in each batch. If {@link #setBatchPendingThreshold(Integer)} is not specified, this property will
+     * determine it as well. Note, if setting this property the
      * {@link #setBatchTime(Integer)} must be set as well.
      */
     public void setBatchSize(Integer batchSize) {
@@ -230,6 +233,20 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
         return this.batchTime;
     }
 
+    /**
+     * If set, turns batching event notifications where the server space accumalates notifications to
+     * be sent and then send them in batch. The batch pending threshold controls the number of notifications that
+     * will be accumulated before they are sent. Note, if this property not set, 
+     * {@link #setBatchSize(Integer)} will be used.
+     */
+    public void setBatchPendingThreshold(Integer batchPendingThreshold) {
+        this.batchPendingThreshold = batchPendingThreshold;
+    }
+
+    protected Integer getBatchPendingThreshold() {
+        return this.batchPendingThreshold;
+    }
+    
     /**
      * If {@link #setListenerLease(long)} is set, automatically performs lease renewal. Defaults to
      * <code>false</code>.
@@ -614,7 +631,11 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
         }
         eventSessionConfig.setFifo(fifo);
         if (batchSize != null && batchTime != null) {
-            eventSessionConfig.setBatch(batchSize, batchTime);
+            if (batchPendingThreshold != null && batchPendingThreshold != -1) {
+                eventSessionConfig.setBatch(batchSize, batchTime, batchPendingThreshold);
+            } else {
+                eventSessionConfig.setBatch(batchSize, batchTime);
+            }
         }
         if (leaseListener == null) {
             Object possibleListener = getActualEventListener();
