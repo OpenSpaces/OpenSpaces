@@ -31,6 +31,8 @@ import java.io.ObjectOutput;
  */
 public class NotifyEventContainerServiceDetails extends EventContainerServiceDetails {
 
+    private static final long serialVersionUID = -3767022008839525953L;
+    
     public static final String SERVICE_SUB_TYPE = "notify";
 
     public static class Attributes extends EventContainerServiceDetails.Attributes {
