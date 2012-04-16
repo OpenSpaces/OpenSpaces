@@ -60,4 +60,10 @@ public interface SpaceRuntimeDetails {
      * @return a mapping of class name to template count.
      */
     Map<String, Integer> getNotifyTemplateCountPerClassName();
+    
+    /**
+     * @return the aggregated transaction details of all the Space instances.
+     * @since 9.0.0
+     */
+    SpaceTransactionDetails getTransactionDetails();
 }

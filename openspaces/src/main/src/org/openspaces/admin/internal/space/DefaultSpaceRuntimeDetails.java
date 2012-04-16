@@ -19,21 +19,24 @@ package org.openspaces.admin.internal.space;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.Map.Entry;
 
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.space.SpaceRuntimeDetails;
+import org.openspaces.admin.space.SpaceTransactionDetails;
 
 import com.gigaspaces.cluster.activeelection.SpaceMode;
 
 public class DefaultSpaceRuntimeDetails implements SpaceRuntimeDetails {
 
     private final DefaultSpace defaultSpace;
+    private final DefaultSpaceTransactionDetails spaceTransactionDetails;
 
     public DefaultSpaceRuntimeDetails(DefaultSpace defaultSpace) {
         this.defaultSpace = defaultSpace;
+        this.spaceTransactionDetails = new DefaultSpaceTransactionDetails(defaultSpace);
     }
     
     public String[] getClassNames() {
@@ -99,5 +102,9 @@ public class DefaultSpaceRuntimeDetails implements SpaceRuntimeDetails {
         }
         return mapping;
     }
-
+    
+    @Override
+    public SpaceTransactionDetails getTransactionDetails() {
+        return spaceTransactionDetails;
+    }
 }

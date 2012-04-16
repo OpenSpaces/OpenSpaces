@@ -19,6 +19,7 @@ package org.openspaces.admin.internal.space;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,18 +28,19 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.internal.admin.DefaultAdmin;
 import org.openspaces.admin.space.SpaceInstanceRuntimeDetails;
+import org.openspaces.admin.space.SpaceInstanceTransactionDetails;
 
 import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
-
-import java.util.Collections;
 
 public class DefaultSpaceInstanceRuntimeDetails implements SpaceInstanceRuntimeDetails {
 
     private static final Log logger = LogFactory.getLog(DefaultAdmin.class);
     private final DefaultSpaceInstance defaultSpaceInstance;
+    private final DefaultSpaceInstanceTransactionDetails spaceInstanceTransactionDetails;
 
     public DefaultSpaceInstanceRuntimeDetails(DefaultSpaceInstance defaultSpaceInstance) {
         this.defaultSpaceInstance = defaultSpaceInstance;
+        this.spaceInstanceTransactionDetails = new DefaultSpaceInstanceTransactionDetails(defaultSpaceInstance);
     }
 
     public int getCount() {
@@ -110,6 +112,11 @@ public class DefaultSpaceInstanceRuntimeDetails implements SpaceInstanceRuntimeD
             }
         }
         return mapping;
+    }
+    
+    @Override
+    public SpaceInstanceTransactionDetails getTransactionDetails() {
+        return spaceInstanceTransactionDetails;
     }
 
 }
