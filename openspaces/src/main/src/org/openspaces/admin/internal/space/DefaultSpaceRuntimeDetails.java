@@ -23,6 +23,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.openspaces.admin.space.SpaceConnectionDetails;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.space.SpaceRuntimeDetails;
 import org.openspaces.admin.space.SpaceTransactionDetails;
@@ -33,10 +34,12 @@ public class DefaultSpaceRuntimeDetails implements SpaceRuntimeDetails {
 
     private final DefaultSpace defaultSpace;
     private final DefaultSpaceTransactionDetails spaceTransactionDetails;
+    private final DefaultSpaceConnectionDetails spaceConnectionDetails;
 
     public DefaultSpaceRuntimeDetails(DefaultSpace defaultSpace) {
         this.defaultSpace = defaultSpace;
         this.spaceTransactionDetails = new DefaultSpaceTransactionDetails(defaultSpace);
+        this.spaceConnectionDetails = new DefaultSpaceConnectionDetails(defaultSpace);
     }
     
     public String[] getClassNames() {
@@ -106,5 +109,10 @@ public class DefaultSpaceRuntimeDetails implements SpaceRuntimeDetails {
     @Override
     public SpaceTransactionDetails getTransactionDetails() {
         return spaceTransactionDetails;
+    }
+    
+    @Override
+    public SpaceConnectionDetails getConnectionDetails() {
+        return spaceConnectionDetails;
     }
 }

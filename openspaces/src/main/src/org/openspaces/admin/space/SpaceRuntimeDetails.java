@@ -66,4 +66,10 @@ public interface SpaceRuntimeDetails {
      * @since 9.0.0
      */
     SpaceTransactionDetails getTransactionDetails();
+    
+    /**
+     * @return the aggregated connection details of all the Space instances.
+     * @since 9.0.0
+     */
+    SpaceConnectionDetails getConnectionDetails();
 }

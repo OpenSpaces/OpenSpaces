@@ -27,6 +27,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.internal.admin.DefaultAdmin;
+import org.openspaces.admin.space.SpaceInstanceConnectionDetails;
 import org.openspaces.admin.space.SpaceInstanceRuntimeDetails;
 import org.openspaces.admin.space.SpaceInstanceTransactionDetails;
 
@@ -37,10 +38,12 @@ public class DefaultSpaceInstanceRuntimeDetails implements SpaceInstanceRuntimeD
     private static final Log logger = LogFactory.getLog(DefaultAdmin.class);
     private final DefaultSpaceInstance defaultSpaceInstance;
     private final DefaultSpaceInstanceTransactionDetails spaceInstanceTransactionDetails;
+    private final DefaultSpaceInstanceConnectionDetails spaceInstanceConnectionDetails;
 
     public DefaultSpaceInstanceRuntimeDetails(DefaultSpaceInstance defaultSpaceInstance) {
         this.defaultSpaceInstance = defaultSpaceInstance;
         this.spaceInstanceTransactionDetails = new DefaultSpaceInstanceTransactionDetails(defaultSpaceInstance);
+        this.spaceInstanceConnectionDetails = new DefaultSpaceInstanceConnectionDetails(defaultSpaceInstance);
     }
 
     public int getCount() {
@@ -118,5 +121,8 @@ public class DefaultSpaceInstanceRuntimeDetails implements SpaceInstanceRuntimeD
     public SpaceInstanceTransactionDetails getTransactionDetails() {
         return spaceInstanceTransactionDetails;
     }
-
+    @Override
+    public SpaceInstanceConnectionDetails getConnectionDetails() {
+        return spaceInstanceConnectionDetails;
+    }
 }
