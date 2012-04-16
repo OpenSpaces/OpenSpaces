@@ -23,6 +23,8 @@ import com.gigaspaces.events.NotifyActionType;
 import com.gigaspaces.events.batching.BatchRemoteEvent;
 import com.j_spaces.core.client.EntryArrivedRemoteEvent;
 import com.j_spaces.core.client.INotifyDelegatorFilter;
+
+import net.jini.core.event.EventRegistration;
 import net.jini.core.event.RemoteEvent;
 import net.jini.core.event.RemoteEventListener;
 import net.jini.core.lease.Lease;
@@ -473,14 +475,22 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
      */
     @Deprecated
     public void setGuaranteed(Boolean guaranteed) {
-        this.guaranteed = guaranteed;
+        if (EventSessionConfig.USE_OLD_GUARANTEED_NOTIFICATIONS) {
+            this.guaranteed = guaranteed;
+        } else {
+            setDurable(guaranteed);
+        }
     }
 
     protected Boolean isGuaranteed() {
-        if (guaranteed == null) {
-            return Boolean.FALSE;
+        if (EventSessionConfig.USE_OLD_GUARANTEED_NOTIFICATIONS) {
+            if (guaranteed == null) {
+                return Boolean.FALSE;
+            }
+            return guaranteed;
+        } else {
+            return isDurable();
         }
-        return guaranteed;
     }
 
     /**
@@ -676,7 +686,7 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
      * Registers a listener using the provided {@link com.gigaspaces.events.DataEventSession} and
      * based on different parameters set on this container.
      */
-    protected void registerListener(DataEventSession dataEventSession, RemoteEventListener listener)
+    protected EventRegistration registerListener(DataEventSession dataEventSession, RemoteEventListener listener)
             throws NotifyListenerRegistrationException {
         NotifyActionType notifyType = NotifyActionType.NOTIFY_NONE;
         if (notifyWrite != null && notifyWrite) {
@@ -698,7 +708,7 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
             notifyType = notifyType.or(NotifyActionType.NOTIFY_ALL);
         }
         try {
-            dataEventSession.addListener(getReceiveTemplate(), listener, listenerLease, null, notifyFilter, notifyType);
+            return dataEventSession.addListener(getReceiveTemplate(), listener, listenerLease, null, notifyFilter, notifyType);
         } catch (Exception e) {
             throw new NotifyListenerRegistrationException("Failed to register notify listener", e);
         }

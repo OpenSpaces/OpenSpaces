@@ -24,7 +24,10 @@ import com.gigaspaces.events.batching.BatchRemoteEventListener;
 import com.gigaspaces.internal.dump.InternalDump;
 import com.gigaspaces.internal.dump.InternalDumpProcessor;
 import com.gigaspaces.internal.dump.InternalDumpProcessorFailedException;
+import com.gigaspaces.internal.events.IInternalEventSessionAdmin;
 import com.j_spaces.core.client.EntryArrivedRemoteEvent;
+
+import net.jini.core.event.EventRegistration;
 import net.jini.core.event.RemoteEvent;
 import net.jini.core.event.RemoteEventListener;
 import net.jini.core.event.UnknownEventException;
@@ -60,6 +63,8 @@ public class SimpleNotifyEventListenerContainer extends AbstractNotifyEventListe
     private boolean ignoreEventOnNullTake = false;
 
     private DataEventSession dataEventSession;
+
+    private EventRegistration eventRegistration;
 
     public SimpleNotifyEventListenerContainer() {
         // we register for notifications even when the embedded space is backup
@@ -146,9 +151,9 @@ public class SimpleNotifyEventListenerContainer extends AbstractNotifyEventListe
             dataEventSession = createDataEventSession(factory);
             try {
                 if (isBatchEnabled()) {
-                    registerListener(dataEventSession, new BatchNotifyListenerDelegate());
+                    eventRegistration = registerListener(dataEventSession, new BatchNotifyListenerDelegate());
                 } else {
-                    registerListener(dataEventSession, new NotifyListenerDelegate());
+                    eventRegistration = registerListener(dataEventSession, new NotifyListenerDelegate());
                 }
             } catch (NotifyListenerRegistrationException ex) {
                 // in case of an exception, close the session
@@ -231,11 +236,19 @@ public class SimpleNotifyEventListenerContainer extends AbstractNotifyEventListe
             writer.println("Replication Template  : [" + isReplicateNotifyTemplate() + "]");
             writer.println("Perform Snapshot      : [" + isPerformSnapshot() + "]");
             writer.println("Pass Array            : [" + isPassArrayAsIs() + "]");
-            writer.println("Guaranteed            : [" + isGuaranteed() + "]");
+            writer.println("Durable               : [" + isDurable() + "]");
             writer.println();
             writer.println("===== RUNTIME =====");
             writer.println("Status [" + getStatus() + "]");
             writer.println("Events: Processed [" + getProcessedEvents() + "], Failed [" + getFailedEvents() + "]");
+            
+            if (isDurable() && 
+                eventRegistration != null &&
+                dataEventSession instanceof IInternalEventSessionAdmin) {
+                writer.println("===== DURABLE =====");
+                writer.println(((IInternalEventSessionAdmin)dataEventSession).dumpState(eventRegistration));
+            }
+            
             writer.close();
         } finally {
             dump.removePrefix();
