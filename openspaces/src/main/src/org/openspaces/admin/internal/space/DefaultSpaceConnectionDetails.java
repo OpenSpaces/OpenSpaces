@@ -19,8 +19,6 @@ import org.openspaces.admin.space.SpaceConnectionDetails;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.space.SpaceInstanceConnectionDetails;
 
-import com.gigaspaces.cluster.activeelection.SpaceMode;
-
 /**
  * @author moran
  */
@@ -36,10 +34,8 @@ public class DefaultSpaceConnectionDetails implements SpaceConnectionDetails {
     public int getActiveConnectionCount() {
         int count = 0;
         for (SpaceInstance spaceInstance : defaultSpace.getSpaceInstances()) {
-            if (spaceInstance.getMode() == SpaceMode.PRIMARY) {
-                SpaceInstanceConnectionDetails connectionDetails = spaceInstance.getRuntimeDetails().getConnectionDetails();
-                count += connectionDetails.getActiveConnectionCount();
-            }
+            SpaceInstanceConnectionDetails connectionDetails = spaceInstance.getRuntimeDetails().getConnectionDetails();
+            count += connectionDetails.getActiveConnectionCount();
         }
         return count;
     }
