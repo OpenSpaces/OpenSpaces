@@ -20,6 +20,7 @@ package org.openspaces.grid.gsm.capacity;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.os.OperatingSystemDetails;
@@ -59,10 +60,11 @@ public class MachineCapacityRequirements extends CapacityRequirements {
     private static List<DriveCapacityRequirement> getDrives(Machine machine) {
         List<DriveCapacityRequirement> drives = new ArrayList<DriveCapacityRequirement>();
         Map<String,DriveDetails> osDetails = machine.getOperatingSystem().getDetails().getDriveDetails();
-        for (String drive : osDetails.keySet()) {
+        for (Entry<String, DriveDetails> pair : osDetails.entrySet()) {
+            String drive = pair.getKey();
             drives.add( 
                     new DriveCapacityRequirement(drive,
-                    osDetails.get(drive).getCapacityInMB()));
+                    pair.getValue().getCapacityInMB()));
         }
         return drives;
     }

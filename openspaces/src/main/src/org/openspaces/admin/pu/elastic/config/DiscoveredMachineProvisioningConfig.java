@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminException;
@@ -144,8 +145,9 @@ public class DiscoveredMachineProvisioningConfig implements ElasticMachineProvis
                     RESREVED_DRIVES_CAPACITY_MEGABYTES_PER_MACHINE_KEY, RESREVED_DRIVES_CAPACITY_MEGABYTES_PER_MACHINE_PAIR_SEPERATOR, RESREVED_DRIVES_CAPACITY_MEGABYTES_PER_MACHINE_KEY_VALUE_SEPERATOR, RESERVED_DRIVES_CAPACITY_PER_MACHINE_DEFAULT);
         
         Map<String,Long> reservedInMB = new HashMap<String,Long>();
-        for(String drive : reserved.keySet()) {
-            reservedInMB.put(drive, Long.valueOf(reserved.get(drive)));
+        for(Entry<String, String> pair : reserved.entrySet()) {
+            String drive = pair.getKey();
+            reservedInMB.put(drive, Long.valueOf(pair.getValue()));
         }
         
         return reservedInMB;
@@ -165,8 +167,9 @@ public class DiscoveredMachineProvisioningConfig implements ElasticMachineProvis
      */
     public void setReservedDriveCapacityPerMachineInMB(Map<String,Long> reservedInMB) {
         Map<String,String> reservedInString = new HashMap<String,String>();
-        for(String drive : reservedInMB.keySet()) {
-            reservedInString.put(drive, reservedInMB.get(drive).toString());
+        for(Entry<String, Long> pair : reservedInMB.entrySet()) {
+            String drive = pair.getKey();
+            reservedInString.put(drive, pair.getValue().toString());
         }
         this.properties.putKeyValuePairs(RESREVED_DRIVES_CAPACITY_MEGABYTES_PER_MACHINE_KEY, reservedInString, RESREVED_DRIVES_CAPACITY_MEGABYTES_PER_MACHINE_PAIR_SEPERATOR, RESREVED_DRIVES_CAPACITY_MEGABYTES_PER_MACHINE_KEY_VALUE_SEPERATOR);
     }
@@ -200,8 +203,9 @@ public class DiscoveredMachineProvisioningConfig implements ElasticMachineProvis
         requirements.add(new MemoryCapacityRequirement(getReservedMemoryCapacityPerMachineInMB()));
         requirements.add(new CpuCapacityRequirement(getReservedCpuCapacityPerMachine()));
         Map<String,Long> reservedDriveCapacity = getReservedDriveCapacityPerMachineInMB();
-        for (String drive : reservedDriveCapacity.keySet()) {
-            requirements.add(new DriveCapacityRequirement(drive,reservedDriveCapacity.get(drive)));
+        for (Entry<String, Long> pair : reservedDriveCapacity.entrySet()) {
+            String drive = pair.getKey();
+            requirements.add(new DriveCapacityRequirement(drive,pair.getValue()));
         }
         return new CapacityRequirements(requirements.toArray(new CapacityRequirement[requirements.size()]));
     }

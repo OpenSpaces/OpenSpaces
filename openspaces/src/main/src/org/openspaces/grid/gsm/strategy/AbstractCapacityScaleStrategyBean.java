@@ -16,6 +16,7 @@
 package org.openspaces.grid.gsm.strategy;
 
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.gsc.GridServiceContainer;
@@ -186,9 +187,10 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
                 new CpuCapacityRequirement(capacityRequirement.getNumberOfCpuCores()),
                 new MemoryCapacityRequirement(memoryInMB));
         Map<String, Long> drivesCapacityInMB = capacityRequirement.getDrivesCapacityInMB();
-        for (String drive : drivesCapacityInMB.keySet()) {
+        for (Entry<String, Long> pair : drivesCapacityInMB.entrySet()) {
+            String drive = pair.getKey();
             capacityRequirements = capacityRequirements.add(
-                    new DriveCapacityRequirement(drive,drivesCapacityInMB.get(drive)));
+                    new DriveCapacityRequirement(drive,pair.getValue()));
         }
         sla.setCapacityRequirements(capacityRequirements);
         sla.setMinimumNumberOfMachines(getMinimumNumberOfMachines());

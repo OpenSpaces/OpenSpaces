@@ -149,8 +149,9 @@ public class CapacityRequirementsConfig implements ScaleStrategyCapacityRequirem
                 DRIVE_CAPACITY_MEGABYTES_DEFAULT);
         
         Map<String,Long> megaBytesPerDrive = new HashMap<String,Long>();
-        for (String drive : capacityPerDrive.keySet()) {
-            megaBytesPerDrive.put(drive, Long.valueOf(capacityPerDrive.get(drive)));
+        for (Entry<String, String> pair : capacityPerDrive.entrySet()) {
+            String drive = pair.getKey();
+            megaBytesPerDrive.put(drive, Long.valueOf(pair.getValue()));
         }
         return megaBytesPerDrive;
     }
