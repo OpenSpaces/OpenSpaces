@@ -277,15 +277,12 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
             } catch (ExecutionException e) {
                 // if runtime or error propagate exception "as-is"
                 Throwable cause = e.getCause();
-                if (cause instanceof RuntimeException) {
-                    throw (RuntimeException)cause;
+                if (cause instanceof TimeoutException || cause instanceof AdminException || cause instanceof InterruptedException) {
+                    // expected exception
+                    exception = e;
                 }
                 else if (cause instanceof Error) {
                     throw (Error)cause;
-                }
-                else if (cause instanceof TimeoutException || cause instanceof AdminException || cause instanceof InterruptedException) {
-                    // expected exception
-                    exception = e;
                 }
                 else {
                     throw new IllegalStateException("Unexpected Exception when starting a new container.",e);
