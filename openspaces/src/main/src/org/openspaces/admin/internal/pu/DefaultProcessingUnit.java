@@ -1106,7 +1106,9 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
                     logger.debug("Failed to find processing unit " + this.getName() + " instance with UID " + instanceUid);
                 }
             }
-            injectInstanceStatisticsIfAvailable(statistics, statisticsId, instance);
+            else {
+                injectInstanceStatisticsIfAvailable(statistics, statisticsId, instance);
+            }
         }
         else {
             for (ProcessingUnitInstance instance : processingUnitInstances.values()) {
