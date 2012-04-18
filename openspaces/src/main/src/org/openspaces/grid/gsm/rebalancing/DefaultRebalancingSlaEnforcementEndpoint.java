@@ -927,10 +927,7 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
 
     private void throwFutureProcessingUnitInstanceException(Throwable throwable) throws RebalancingSlaEnforcementInProgressException {
         
-        if (throwable instanceof Error) {
-            throw (Error)throwable;
-        }
-        else if (throwable instanceof RebalancingSlaEnforcementInProgressException){
+        if (throwable instanceof RebalancingSlaEnforcementInProgressException){
             throw (RebalancingSlaEnforcementInProgressException)throwable;
         }
         else if (throwable instanceof AdminException) {

@@ -281,9 +281,6 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
                     // expected exception
                     exception = e;
                 }
-                else if (cause instanceof Error) {
-                    throw (Error)cause;
-                }
                 else {
                     throw new IllegalStateException("Unexpected Exception when starting a new container.",e);
                 }

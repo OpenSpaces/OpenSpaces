@@ -891,9 +891,6 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                     // expected exception
                     exception = e;
                 }
-                else if (cause instanceof Error) {
-                    throw (Error)cause;
-                }
                 else {
                     throw new IllegalStateException("Unexpected Exception from machine provisioning.",e);
                 }
