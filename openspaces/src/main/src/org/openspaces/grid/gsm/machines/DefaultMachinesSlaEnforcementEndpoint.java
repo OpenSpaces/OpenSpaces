@@ -69,7 +69,7 @@ import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisi
  */
 class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEndpoint {
 
-    private static final int START_AGENT_TIMEOUT_SECONDS = 10*60;
+    private static final int START_AGENT_TIMEOUT_SECONDS = 30*60;
     private static final long STOP_AGENT_TIMEOUT_SECONDS = 10*60;
 
     private final ProcessingUnit pu;
