@@ -31,6 +31,8 @@ import java.io.ObjectOutput;
  */
 public class AggregatedAsyncPollingEventContainerServiceDetails extends PlainAggregatedServiceDetails {
 
+    private static final long serialVersionUID = 6886365711202765516L;
+    
     public static class Attributes extends EventContainerServiceDetails.Attributes {
         public static final String RECEIVE_TIMEOUT = "receive-timeout";
         public static final String CONCURRENT_CONSUMERS = "concurrent-consumers";

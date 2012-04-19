@@ -31,6 +31,8 @@ import java.io.ObjectOutput;
  */
 public class AsyncPollingEventContainerServiceDetails extends EventContainerServiceDetails {
 
+    private static final long serialVersionUID = -2888577681327987480L;
+    
     public static final String SERVICE_SUB_TYPE = "async-polling";
 
     public static class Attributes extends EventContainerServiceDetails.Attributes {

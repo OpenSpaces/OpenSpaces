@@ -29,6 +29,8 @@ import java.io.ObjectOutput;
  */
 public class DotnetContainerServiceDetails extends PlainServiceDetails {
 
+    private static final long serialVersionUID = 2644937669655497764L;
+    
     public static final String SERVICE_TYPE = "dotnet";
     
     public DotnetContainerServiceDetails() {

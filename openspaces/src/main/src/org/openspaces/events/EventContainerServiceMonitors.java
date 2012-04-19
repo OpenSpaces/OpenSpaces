@@ -29,6 +29,8 @@ import java.io.ObjectOutput;
  */
 public class EventContainerServiceMonitors extends PlainServiceMonitors {
 
+    private static final long serialVersionUID = -6852327853548539168L;
+    
     public static class Attributes {
         public static final String PROCESSED_EVENTS = "processed-events";
         public static final String FAILED_EVENTS = "failed-events";

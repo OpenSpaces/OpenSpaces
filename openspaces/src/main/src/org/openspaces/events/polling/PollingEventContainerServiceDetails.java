@@ -31,6 +31,8 @@ import java.io.ObjectOutput;
  */
 public class PollingEventContainerServiceDetails extends EventContainerServiceDetails {
 
+    private static final long serialVersionUID = 6240507580002461248L;
+    
     public static final String SERVICE_SUB_TYPE = "polling";
 
     public static class Attributes extends EventContainerServiceDetails.Attributes {

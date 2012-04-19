@@ -28,6 +28,8 @@ import java.io.ObjectOutput;
  */
 public class CacheKey implements Externalizable {
 
+    private static final long serialVersionUID = -2943591983983393590L;
+    
     private String regionName;
 
     private Object key;

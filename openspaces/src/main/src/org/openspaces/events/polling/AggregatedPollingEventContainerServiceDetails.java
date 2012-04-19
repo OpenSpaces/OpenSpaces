@@ -28,6 +28,8 @@ import java.io.ObjectOutput;
  */
 public class AggregatedPollingEventContainerServiceDetails extends PlainAggregatedServiceDetails {
 
+    private static final long serialVersionUID = -4531279106221740074L;
+    
     public static class Attributes {
         public static final String RECEIVE_TIMEOUT = "receive-timeout";
         public static final String RECEIVE_OPERATION_HANDLER = "receive-operating-handler";

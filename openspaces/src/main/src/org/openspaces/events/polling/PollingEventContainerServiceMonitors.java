@@ -28,7 +28,9 @@ import java.io.ObjectOutput;
  * @author kimchy
  */
 public class PollingEventContainerServiceMonitors extends EventContainerServiceMonitors {
-
+    
+    private static final long serialVersionUID = 545174360485562728L;
+    
     public static class Attributes extends EventContainerServiceMonitors.Attributes {
         public static final String CONSUMERS = "consumers";
     }

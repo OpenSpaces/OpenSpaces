@@ -35,6 +35,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @SpaceClass
 public class SessionData implements Externalizable {
 
+    private static final long serialVersionUID = 3104738310898353395L;
+    
     private String _id;
     private long _accessed = -1;
     private volatile long _lastAccessed = -1;

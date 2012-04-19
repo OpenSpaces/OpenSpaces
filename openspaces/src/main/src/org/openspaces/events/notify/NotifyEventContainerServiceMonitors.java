@@ -29,6 +29,8 @@ import java.io.ObjectOutput;
  */
 public class NotifyEventContainerServiceMonitors extends EventContainerServiceMonitors {
 
+    private static final long serialVersionUID = 5733661691119820165L;
+    
     public static class Attributes extends EventContainerServiceMonitors.Attributes {
     }
 

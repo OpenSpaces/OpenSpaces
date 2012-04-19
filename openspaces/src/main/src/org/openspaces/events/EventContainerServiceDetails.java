@@ -29,6 +29,7 @@ import java.io.ObjectOutput;
  */
 public class EventContainerServiceDetails extends PlainServiceDetails {
 
+    private static final long serialVersionUID = 4051111058959971069L;
     public static final String SERVICE_TYPE = "event-container";
 
     public static class Attributes {

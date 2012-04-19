@@ -31,6 +31,8 @@ import java.io.ObjectOutput;
  */
 public class AggregatedNotifyEventContainerServiceDetails extends PlainAggregatedServiceDetails {
 
+    private static final long serialVersionUID = -4365506459855928055L;
+    
     public static class Attributes extends EventContainerServiceDetails.Attributes {
         public static final String COMM_TYPE = "comm-type";
         public static final String FIFO = "fifo";

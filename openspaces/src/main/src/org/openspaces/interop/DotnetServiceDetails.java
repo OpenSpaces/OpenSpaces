@@ -29,6 +29,8 @@ import java.io.ObjectOutput;
  */
 public class DotnetServiceDetails extends PlainServiceDetails {
 
+    private static final long serialVersionUID = 7883861120275264732L;
+    
     public DotnetServiceDetails() {
     }
 
