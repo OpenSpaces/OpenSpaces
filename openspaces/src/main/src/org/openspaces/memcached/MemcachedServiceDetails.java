@@ -24,6 +24,8 @@ import org.openspaces.pu.service.PlainServiceDetails;
  */
 public class MemcachedServiceDetails extends PlainServiceDetails {
 
+    private static final long serialVersionUID = 3543691389604775006L;
+    
     public static final String SERVICE_TYPE = "memcached";
 
     public static class Attributes {

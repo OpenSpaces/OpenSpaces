@@ -27,6 +27,8 @@ import java.io.ObjectOutput;
  */
 public class PUMonitors implements Externalizable {
 
+    private static final long serialVersionUID = -2151337794076639780L;
+    
     private long timestamp;
 
     private Object[] monitors;

@@ -24,6 +24,8 @@ import org.openspaces.pu.service.PlainServiceMonitors;
  */
 public class MemcachedServiceMonitors extends PlainServiceMonitors {
 
+    private static final long serialVersionUID = -4220791859808730040L;
+    
     public static class Attributes {
         public static final String GET_CMDS = "get-cmds";
         public static final String SET_CMDS = "set-cmds";

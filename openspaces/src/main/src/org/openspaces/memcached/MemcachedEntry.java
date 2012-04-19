@@ -33,6 +33,8 @@ import java.io.ObjectOutput;
 @SpaceClass
 public class MemcachedEntry implements Externalizable {
 
+    private static final long serialVersionUID = 7080552232191270155L;
+    
     private Key key;
 
     private byte[] value;

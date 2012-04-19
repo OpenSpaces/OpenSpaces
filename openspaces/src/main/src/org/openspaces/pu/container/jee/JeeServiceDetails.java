@@ -29,6 +29,8 @@ import java.io.ObjectOutput;
  */
 public class JeeServiceDetails extends PlainServiceDetails {
 
+    private static final long serialVersionUID = 5347342326588251565L;
+    
     public static final String ID = "jee-container";
     public static final String SERVICE_TYPE = "jee-container";
 

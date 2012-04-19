@@ -30,6 +30,8 @@ import java.util.Arrays;
  */
 public class Key implements Externalizable {
 
+    private static final long serialVersionUID = -1131139214094910487L;
+    
     public byte[] bytes;
     
     private transient int hashCode;

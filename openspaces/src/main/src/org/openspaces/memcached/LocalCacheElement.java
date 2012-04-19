@@ -28,6 +28,9 @@ import java.util.Arrays;
  * Represents information about a cache entry.
  */
 public final class LocalCacheElement implements Externalizable {
+    
+    private static final long serialVersionUID = -1132098185117104961L;
+    
     private int expire ;
     private int flags;
     private byte[] data;

@@ -32,6 +32,8 @@ import java.io.ObjectOutput;
  */
 public class PUDetails implements Externalizable {
 
+    private static final long serialVersionUID = -6918314643571673741L;
+    
     private ServiceID gscServiceID;
 
     private ClusterInfo clusterInfo;
