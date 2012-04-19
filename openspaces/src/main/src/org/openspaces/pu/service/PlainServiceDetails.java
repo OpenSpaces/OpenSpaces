@@ -31,6 +31,8 @@ import java.util.Map;
  */
 public class PlainServiceDetails implements ServiceDetails, Externalizable {
 
+    private static final long serialVersionUID = -6051967441062799406L;
+    
     protected String id;
 
     protected String serviceType;

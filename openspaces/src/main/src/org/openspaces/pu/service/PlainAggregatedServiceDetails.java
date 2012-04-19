@@ -33,6 +33,8 @@ import java.util.Map;
  */
 public class PlainAggregatedServiceDetails implements AggregatedServiceDetails, Externalizable {
 
+    private static final long serialVersionUID = 706793192579879135L;
+    
     private String serviceType;
 
     private Map<String, Object> attributes = new LinkedHashMap<String, Object>();

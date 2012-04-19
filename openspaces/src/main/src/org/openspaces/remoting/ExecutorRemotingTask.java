@@ -199,6 +199,8 @@ public class ExecutorRemotingTask<T extends Serializable> implements Distributed
      */
     public static class InternalExecutorResult<T extends Serializable> implements Externalizable {
 
+        private static final long serialVersionUID = -5336727166040169828L;
+        
         private T result;
 
         private Integer instanceId;
@@ -249,6 +251,8 @@ public class ExecutorRemotingTask<T extends Serializable> implements Distributed
      */
     public static class InternalExecutorException extends Exception implements Externalizable {
 
+        private static final long serialVersionUID = 7604645076693946565L;
+        
         private Throwable exception;
 
         private Integer instanceId;

@@ -37,6 +37,8 @@ public class RemotingUtils {
 
     public static class MethodHash implements Externalizable {
 
+        private static final long serialVersionUID = 872088354835809493L;
+        
         private byte[] hash;
 
         public MethodHash() {

@@ -31,9 +31,14 @@ import java.util.ArrayList;
  */
 public class RemotingServiceDetails extends PlainServiceDetails {
 
+    private static final long serialVersionUID = 5538531964331522954L;
+    
     public static final String SERVICE_TYPE = "remoting";
 
     public static class RemoteService implements Externalizable {
+        
+        private static final long serialVersionUID = -8527660067530155L;
+        
         private String beanId;
         private String className;
 

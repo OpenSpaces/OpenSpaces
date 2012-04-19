@@ -31,12 +31,17 @@ import java.util.ArrayList;
  */
 public class RemotingServiceMonitors extends PlainServiceMonitors {
 
+    private static final long serialVersionUID = -7084565982937002812L;
+    
     public static class Attributes {
         public static final String PROCESSED = "processed";
         public static final String FAILED = "failed";
     }
 
     public static class RemoteServiceStats implements Externalizable {
+        
+        private static final long serialVersionUID = 2541853099219414723L;
+        
         private String beanId;
         private long processed;
         private long failed;

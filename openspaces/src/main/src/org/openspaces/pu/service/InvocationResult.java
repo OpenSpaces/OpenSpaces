@@ -24,6 +24,8 @@ import java.io.ObjectOutput;
 
 public class InvocationResult implements Externalizable{
 
+    private static final long serialVersionUID = 1051610996828142259L;
+    
     private int instanceId;
     private boolean executeOnce;
     private boolean exceptionThrownWhileExecutingOnce;
