@@ -27,6 +27,7 @@ import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitFailureEvent;
 import com.gigaspaces.internal.io.IOUtils;
 
 public abstract class AbstractElasticProcessingUnitFailureEvent implements ElasticProcessingUnitFailureEvent , Event{
+    private static final long serialVersionUID = -4093118769084514194L;
     
     private String failureDescription;
     private String[] processingUnitNames;

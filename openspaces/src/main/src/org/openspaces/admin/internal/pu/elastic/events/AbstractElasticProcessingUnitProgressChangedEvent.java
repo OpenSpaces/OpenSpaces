@@ -27,6 +27,9 @@ import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitProgressChang
 import com.gigaspaces.internal.io.IOUtils;
 
 public abstract class AbstractElasticProcessingUnitProgressChangedEvent implements ElasticProcessingUnitProgressChangedEvent , Event{
+    
+    private static final long serialVersionUID = -3682386855602620479L;
+    
     private boolean isComplete;
     private String processingUnitName;
     private boolean isUndeploying;

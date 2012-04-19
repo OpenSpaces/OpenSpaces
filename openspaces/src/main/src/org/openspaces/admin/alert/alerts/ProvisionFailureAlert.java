@@ -34,6 +34,8 @@ import org.openspaces.admin.pu.ProcessingUnit;
  */
 public class ProvisionFailureAlert extends AbstractAlert {
     
+    private static final long serialVersionUID = -9088423967507099343L;
+    
     /** required by java.io.Externalizable */
     public ProvisionFailureAlert() {
     }
