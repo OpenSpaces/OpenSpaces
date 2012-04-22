@@ -33,6 +33,8 @@ import java.io.InputStreamReader;
  * @author kimchy
  */
 public class StaticResourceScript extends StaticScript {
+    
+    private static final long serialVersionUID = 3171153261690141988L;
 
     private ResourceLoader resourceLoader = new DefaultResourceLoader();
 

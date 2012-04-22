@@ -42,6 +42,8 @@ import java.util.Map;
  * @author kimchy
  */
 public class ResourceLazyLoadingScript implements LazyLoadingScript, Externalizable {
+    
+    private static final long serialVersionUID = -2086880053176632088L;
 
     private String name;
 
