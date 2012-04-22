@@ -31,24 +31,17 @@ import java.util.Map;
  * @author kimchy
  */
 public class StaticScript implements Script, Externalizable {
+    
+    private static final long serialVersionUID = -5652707951323528455L;
 
     private String name;
-
     private String type;
-
     private String script;
-
     private Map<String, Object> parameters;
-
     private boolean shouldCache = true;
-
-    
     private Object routing;
-
     private Boolean broadcast;
-
     private RemoteResultReducer remoteResultReducer;
-
     private Object[] metaArguments;
 
     /**

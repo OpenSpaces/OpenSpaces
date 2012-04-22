@@ -26,6 +26,8 @@ import java.util.Map;
  * @since 8.0.1
  */
 public class CustomServiceMonitors extends PlainServiceMonitors {
+    
+    private static final long serialVersionUID = -8725975653646227379L;
 
     public CustomServiceMonitors() {
     }
