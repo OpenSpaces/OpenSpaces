@@ -43,6 +43,7 @@ import org.openspaces.grid.gsm.capacity.MemoryCapacityRequirement;
 import org.openspaces.grid.gsm.capacity.NumberOfMachinesCapacityRequirement;
 import org.openspaces.grid.gsm.containers.ContainersSlaUtils;
 import org.openspaces.grid.gsm.machines.exceptions.CannotDetermineIfNeedToStartMoreMachinesException;
+import org.openspaces.grid.gsm.machines.exceptions.DelayingScaleInUntilAllMachinesHaveStarted;
 import org.openspaces.grid.gsm.machines.exceptions.FailedToDiscoverMachinesException;
 import org.openspaces.grid.gsm.machines.exceptions.FailedToStartNewMachineException;
 import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcementInProgressException;
@@ -305,6 +306,10 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         if (!capacityAllocatedAndMarked.getTotalAllocatedCapacity().equals(target) &&
             capacityAllocatedAndMarked.getTotalAllocatedCapacity().greaterOrEquals(target) &&
             machineShortage == 0) {
+            
+            if (state.getNumberOfFutureAgents(pu) > 0) {
+                throw new DelayingScaleInUntilAllMachinesHaveStarted();
+            }
             
             logger.debug("Considering scale in: "+
                     "target is "+ target + " " +
