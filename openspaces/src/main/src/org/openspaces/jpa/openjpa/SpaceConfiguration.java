@@ -46,6 +46,8 @@ import com.j_spaces.core.client.ReadModifiers;
  */
 public class SpaceConfiguration extends OpenJPAConfigurationImpl {
 
+    private static final long serialVersionUID = -61291372655467023L;
+    
     private IJSpace _space;
     private ITransactionManagerProvider _transactionManagerProvider;
     private int _readModifier;
