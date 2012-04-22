@@ -3,7 +3,7 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:os-core="http://www.openspaces.org/schema/core"
        xmlns:os-jdbc="http://www.openspaces.org/schema/jdbc"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
        http://www.openspaces.org/schema/core http://www.openspaces.org/schema/9.0/core/openspaces-core.xsd
        http://www.openspaces.org/schema/jdbc http://www.openspaces.org/schema/9.0/jdbc/openspaces-jdbc.xsd">
 
