@@ -41,7 +41,7 @@ public abstract class AbstractFifoGroupingReceiveOperationHandler extends Abstra
     /**
      * Allows to configure the take/read operation to be performed in a Fifo Grouping manner.
      * 
-     * @param useFifoGrouping- if true, will use {@link ReadModifiers#FIFO_GROUPING_POLL} / {@link TakeModifiers#FIFO_GROUPING_POLL} as read/take modifiers.
+     * @param useFifoGrouping if true, will use {@link ReadModifiers#FIFO_GROUPING_POLL} / {@link TakeModifiers#FIFO_GROUPING_POLL} as read/take modifiers.
      */
     public void setUseFifoGrouping(boolean useFifoGrouping) {
         this.useFifoGrouping = useFifoGrouping;
