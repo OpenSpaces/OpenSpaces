@@ -375,7 +375,7 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
      * This method is only available if the processing unit deployment is elastic  
      * 
      * @param strategyConfig
-     * @return 
+     * @return <code>false</code> if timeout occurred before scale operation has completed.
      * 
      * @since 8.0.5
      * @see ProcessingUnit#scale(ScaleStrategyConfig)
