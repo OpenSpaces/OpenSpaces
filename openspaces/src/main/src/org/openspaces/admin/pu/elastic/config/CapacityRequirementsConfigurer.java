@@ -20,7 +20,7 @@ import java.util.Map;
 import org.openspaces.core.util.MemoryUnit;
 
 /**
- * Fluent API for creating a new {@CapacityRequirementConfig} object. 
+ * Fluent API for creating a new {@link CapacityRequirementsConfig} object. 
  * @author itaif
  * @since 9.0.0
  */
