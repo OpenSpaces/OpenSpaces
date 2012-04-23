@@ -51,9 +51,9 @@ public class CustomServiceDetails extends PlainServiceDetails {
     
     /**
      * Constructor 
-     * @param id should identify that service, should be same as {@link #CustomServiceMonitors}'s id
+     * @param id should identify that service, should be same as {@link CustomServiceMonitors}'s id
      * @param serviceSubType 
-     * @param description should be same as {@link #CustomServiceMonitors}'s description 
+     * @param description should be same as {@link CustomServiceMonitors}'s description 
      * @param longDescription
      */
     public CustomServiceDetails( String id, String serviceSubType, String description, 
