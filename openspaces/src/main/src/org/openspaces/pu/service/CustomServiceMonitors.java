@@ -43,7 +43,7 @@ public class CustomServiceMonitors extends PlainServiceMonitors {
     /**
      * 
      * @param id should identify that service
-     * @param exposed monitors
+     * @param monitors exposed monitors
      */
     public CustomServiceMonitors(String id, Map<String,Object> monitors) {
         super(id, monitors);
