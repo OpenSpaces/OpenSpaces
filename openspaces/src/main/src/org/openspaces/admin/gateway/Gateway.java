@@ -24,7 +24,7 @@ import org.openspaces.admin.Admin;
 
 /**
  * A gateway is a composition of one or more of {@link GatewayProcessingUnit}s, and it is in charge of 
- * replication between different {@link Space}s. e.g. Replication between two sites over WAN.
+ * replication between different {@link org.openspaces.admin.space.Space}s. e.g. Replication between two sites over WAN.
  * 
  * @author eitany
  * @since 8.0.4
