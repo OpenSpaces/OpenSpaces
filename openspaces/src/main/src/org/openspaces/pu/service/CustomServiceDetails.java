@@ -41,7 +41,7 @@ public class CustomServiceDetails extends PlainServiceDetails {
      * @param longDescription
      * @deprecated since 9.0 Use {@link #CustomServiceDetails(String, String, String, String)} 
      * instead - constructor that does not receive service type as parameter since custom 
-     * type is always {@link SERVICE_TYPE}
+     * type is always {@link #SERVICE_TYPE}
      */
     public CustomServiceDetails(String id, String serviceType, String serviceSubType,
                                String description, String longDescription) {
