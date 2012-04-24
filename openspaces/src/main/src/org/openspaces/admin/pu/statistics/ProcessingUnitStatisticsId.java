@@ -60,7 +60,7 @@ public class ProcessingUnitStatisticsId {
     }
     
     /**
-     * @see ProcessingUnitStatisticsIdConfigurer#timeWindowStatistics(AbstractTimeWindowStatisticsConfig)
+     * @see ProcessingUnitStatisticsIdConfigurer#timeWindowStatistics(TimeWindowStatisticsConfig)
      */
     public void setTimeWindowStatistics(TimeWindowStatisticsConfig timeWindowStatistics) {
         properties.putMapWrapperObject(TIMEWINDOW_STATISTICS_KEY, timeWindowStatistics.getProperties(), timeWindowStatistics.getClass());
@@ -71,7 +71,7 @@ public class ProcessingUnitStatisticsId {
     }
     
     /**
-     * @see ProcessingUnitStatisticsIdConfigurer#instancesStatistics(InstancesAggregationStatisticsConfig)
+     * @see ProcessingUnitStatisticsIdConfigurer#instancesStatistics(InstancesStatisticsConfig)
      */
     public void setInstancesStatistics(InstancesStatisticsConfig instancesStatistics) {
         properties.putMapWrapperObject(INSTANCES_STATISTICS_KEY, instancesStatistics.getProperties(), instancesStatistics.getClass());
