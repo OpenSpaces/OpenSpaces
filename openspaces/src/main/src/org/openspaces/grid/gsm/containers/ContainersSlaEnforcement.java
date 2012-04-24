@@ -28,7 +28,7 @@ import org.openspaces.grid.gsm.sla.exceptions.ServiceLevelAgreementEnforcementEn
 /**
  * Starts and shutdowns grid service container based on the requested {@link ContainersSlaPolicy}
  * 
- * Use {@link #createEndpoint()} to enforce an SLA for a specific container zone.
+ * Use {@link #createEndpoint(ProcessingUnit))} to enforce an SLA for a specific container zone.
  * 
  * @see ContainersSlaEnforcementEndpoint
  * @see ContainersSlaPolicy
