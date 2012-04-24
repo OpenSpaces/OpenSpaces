@@ -16,19 +16,15 @@
 
 package org.openspaces.events.notify;
 
-import com.gigaspaces.events.DataEventSession;
-import com.gigaspaces.events.EventSessionConfig;
-import com.gigaspaces.events.EventSessionFactory;
-import com.gigaspaces.events.NotifyActionType;
-import com.gigaspaces.events.batching.BatchRemoteEvent;
-import com.j_spaces.core.client.EntryArrivedRemoteEvent;
-import com.j_spaces.core.client.INotifyDelegatorFilter;
+import java.rmi.RemoteException;
+import java.util.ArrayList;
 
 import net.jini.core.event.EventRegistration;
 import net.jini.core.event.RemoteEvent;
 import net.jini.core.event.RemoteEventListener;
 import net.jini.core.lease.Lease;
 import net.jini.lease.LeaseListener;
+
 import org.openspaces.core.UnusableEntryException;
 import org.openspaces.core.util.SpaceUtils;
 import org.openspaces.events.AbstractTransactionalEventListenerContainer;
@@ -38,8 +34,13 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.Assert;
 
-import java.rmi.RemoteException;
-import java.util.ArrayList;
+import com.gigaspaces.events.DataEventSession;
+import com.gigaspaces.events.EventSessionConfig;
+import com.gigaspaces.events.EventSessionFactory;
+import com.gigaspaces.events.NotifyActionType;
+import com.gigaspaces.events.batching.BatchRemoteEvent;
+import com.j_spaces.core.client.EntryArrivedRemoteEvent;
+import com.j_spaces.core.client.INotifyDelegatorFilter;
 
 /**
  * Base class for notifications based containers allowing to register listener that will be
@@ -471,7 +472,7 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
     /**
      * Controls if notifications will be guaranteed (at least once) in case of failover.
      * 
-     * @deprecated Since 9.0 use {@link #setDurable(boolean)} instead.
+     * @deprecated Since 9.0 use {@link #setDurable(Boolean)} instead.
      */
     @Deprecated
     public void setGuaranteed(Boolean guaranteed) {
