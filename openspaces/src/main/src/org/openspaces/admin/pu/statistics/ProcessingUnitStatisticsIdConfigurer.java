@@ -48,8 +48,6 @@ public class ProcessingUnitStatisticsIdConfigurer {
 
     /**
      * Aggregates values of using the specified cluster statistics function
-     * If cluster is null selects each instance statistics individually
-     * Cannot be used together with {@link #instanceUid(String)}
      */
     public ProcessingUnitStatisticsIdConfigurer instancesStatistics(InstancesStatisticsConfig instancesStatistics) {
         config.setInstancesStatistics(instancesStatistics);
