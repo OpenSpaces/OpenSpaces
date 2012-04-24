@@ -37,7 +37,7 @@ public interface AdvancedStatefulDeploymentTopology {
     /**
      * Defines the number of processing unit partitions.
      * 
-     * This property cannot be used with {@link #maxMemoryCapacity(String)} and {@link #maxNumberOfCpuCores(int)}.
+     * This property cannot be used with {@link ElasticStatefulDeploymentTopology#maxMemoryCapacity(String)} and {@link ElasticStatefulDeploymentTopology#maxNumberOfCpuCores(int)}.
      * 
      * This is an advanced property.
      * 
