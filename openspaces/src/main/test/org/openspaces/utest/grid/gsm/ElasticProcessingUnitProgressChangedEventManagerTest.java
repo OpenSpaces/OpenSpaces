@@ -46,7 +46,7 @@ public class ElasticProcessingUnitProgressChangedEventManagerTest extends TestCa
     @Before
     @Override
     protected void setUp() {
-        InternalAdmin admin = (InternalAdmin)(new AdminFactory().useDaemonThreads(true).createAdmin());
+        admin = (InternalAdmin)(new AdminFactory().useDaemonThreads(true).createAdmin());
         eventManager = new DefaultElasticGridServiceAgentProvisioningProgressChangedEventManager(admin);
     }
     
