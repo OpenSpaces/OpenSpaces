@@ -20,7 +20,7 @@ import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
 /**
  * Fluent API for creating a new {@link AutomaticCapacityScaleRuleConfig} object. 
  * @author itaif
- * @sine 9.0.0
+ * @since 9.0.0
  */
 public class AutomaticCapacityScaleRuleConfigurer {
     
@@ -55,7 +55,7 @@ public class AutomaticCapacityScaleRuleConfigurer {
     }
     
     /**
-     * @see AutomaticCapacityScaleRuleConfig#sethighThresholdBreachedIncrease(CapacityRequirementsConfig)
+     * @see AutomaticCapacityScaleRuleConfig#setHighThresholdBreachedIncrease(CapacityRequirementsConfig)
      */
     public AutomaticCapacityScaleRuleConfigurer highThresholdBreachedIncrease(CapacityRequirementsConfig capacityRequirementsConfig) {
         config.setHighThresholdBreachedIncrease(capacityRequirementsConfig);
