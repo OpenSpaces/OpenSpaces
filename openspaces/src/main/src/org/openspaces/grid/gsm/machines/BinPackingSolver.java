@@ -35,12 +35,9 @@ import org.openspaces.grid.gsm.capacity.MemoryCapacityRequirement;
 
 /**
  * A greedy 2D bin packing algorithm.
- * 
- * @see org.openspaces.utest.grid.gsm.BinPackingSolverTest for usage examples
- * 
  * @author itaif
- *
  */
+/* see org.openspaces.utest.grid.gsm.BinPackingSolverTest for usage examples */
 public class BinPackingSolver {
 
     private Log logger;
