@@ -72,8 +72,7 @@ public class AutomaticCapacityScaleRuleConfig
     /**
      * Defines a low threshold that triggers an increase or decrease of capacity
      * @param lowThreshold - An Object of a Class that implements Comparable and has a constructor accepting a String as a single argument.
-     * @see setLowThresholdCapacityDecrease
-     * @see setLowThresholdCapacityIncrease
+     * @see #setLowThresholdBreachedDecrease(CapacityRequirementsConfig)
      */
     public void setLowThreshold(Comparable<?> lowThreshold) {
         properties.putStringWrapperObject(LOW_THRESHOLD_KEY, lowThreshold);        
@@ -86,8 +85,7 @@ public class AutomaticCapacityScaleRuleConfig
     /**
      * Defines a high threshold that triggers an increase or decrease of capacity
      * @param highThreshold - An Object of a Class that implements Comparable and has a constructor accepting a String as a single argument.
-     * @see setLowThresholdCapacityDecrease
-     * @see setLowThresholdCapacityIncrease
+     * @see #setHighThresholdBreachedIncrease(CapacityRequirementsConfig)
      */
     public void setHighThreshold(Comparable<?> highThreshold) {
         properties.putStringWrapperObject(HIGH_THRESHOLD_KEY, highThreshold);        
