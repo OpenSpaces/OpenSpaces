@@ -70,7 +70,7 @@ public interface ElasticMachineProvisioningConfig extends BeanConfig {
      * cannot run a {@link org.openspaces.admin.gsm.GridServiceManager} nor {@link org.openspaces.admin.lus.LookupService} 
      * nor {@link org.openspaces.admin.esm.ElasticServiceManager}
      * 
-     * Usually setting this value to true means that {@link #getReservedCapacityPerMachineInMB()} memory can be decreased, 
+     * Usually setting this value to true means that {@link #getReservedCapacityPerMachine()} memory can be decreased, 
      * since no memory needs to be reserved for management processes.
      * 
      * @since 8.0.1
