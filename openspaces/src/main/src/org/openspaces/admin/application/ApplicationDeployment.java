@@ -31,7 +31,7 @@ public class ApplicationDeployment {
     
     public ApplicationDeployment(String applicationName) {
         config = new ApplicationConfig();
-        config.setApplicationName(applicationName);
+        config.setName(applicationName);
     }
     
     public ApplicationDeployment(String applicationName, ProcessingUnitDeploymentTopology ... processingUnitDeployments) {
@@ -54,7 +54,7 @@ public class ApplicationDeployment {
      * All processing units are deployed in parallel (unless dependencies are defined)
      */
     public ApplicationDeployment addProcessingUnitDeployment(ProcessingUnitDeploymentTopology puDeployment) {
-        config.addProcessingUnitDeployment(puDeployment.create());
+        config.addProcessingUnit(puDeployment.create());
         return this;
     }
     
