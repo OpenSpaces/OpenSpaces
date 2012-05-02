@@ -15,9 +15,11 @@
  *******************************************************************************/
 package org.openspaces.admin.application.config;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.openspaces.admin.pu.topology.ProcessingUnitConfigFactory;
+import org.springframework.beans.factory.annotation.Required;
 
 /**
  * @author itaif
@@ -25,26 +27,66 @@ import org.openspaces.admin.pu.topology.ProcessingUnitConfigFactory;
  */
 public class ApplicationConfig {
 
-    private String applicationName;
-    private List<ProcessingUnitConfigFactory> processingUnitDeployments;
+    private String name;
+    private List<ProcessingUnitConfigFactory> processingUnits = new ArrayList<ProcessingUnitConfigFactory>();
     
-    public String getApplicationName() {
-        return applicationName;
-    }
-    
-    public void setApplicationName(String applicationName) {
-        this.applicationName = applicationName;
-    }
-    
-    public List<ProcessingUnitConfigFactory> getProcessingUnitDeployments() {
-        return processingUnitDeployments;
-    }
-    
-    public void setProcessingUnitDeployments(List<ProcessingUnitConfigFactory> processingUnitDeployments) {
-        this.processingUnitDeployments = processingUnitDeployments;
+    public String getName() {
+        return name;
     }
 
-    public void addProcessingUnitDeployment(ProcessingUnitConfigFactory puConfigFactory) {
-        processingUnitDeployments.add(puConfigFactory);
+    @Required
+    public void setName(String name) {
+        this.name = name;
     }
+    
+    public List<ProcessingUnitConfigFactory> getProcessingUnits() {
+        return processingUnits;
+    }
+    
+    public void setProcessingUnits(List<ProcessingUnitConfigFactory> processingUnitDeployments) {
+        this.processingUnits = processingUnitDeployments;
+    }
+
+    public void addProcessingUnit(ProcessingUnitConfigFactory puConfigFactory) {
+        processingUnits.add(puConfigFactory);
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + ((processingUnits == null) ? 0 : processingUnits.hashCode());
+        return result;
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ApplicationConfig other = (ApplicationConfig) obj;
+        if (name == null) {
+            if (other.name != null)
+                return false;
+        } else if (!name.equals(other.name))
+            return false;
+        if (processingUnits == null) {
+            if (other.processingUnits != null)
+                return false;
+        } else if (!processingUnits.equals(other.processingUnits))
+            return false;
+        return true;
+    }
+    
+    
 }
