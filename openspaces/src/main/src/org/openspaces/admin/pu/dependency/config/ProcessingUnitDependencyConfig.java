@@ -15,13 +15,14 @@
  * limitations under the License.
  *  
  ******************************************************************************/
-package org.openspaces.admin.internal.pu.dependency;
+package org.openspaces.admin.pu.dependency.config;
 
 import org.jini.rio.core.RequiredDependency;
+import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependency;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
 import org.springframework.beans.factory.annotation.Required;
 
-public class DefaultProcessingUnitDependency implements InternalProcessingUnitDependency {
+public class ProcessingUnitDependencyConfig implements InternalProcessingUnitDependency {
 
     private boolean waitForDeploymentToComplete;
     private int minimumNumberOfDeployedInstancesPerPartition;
@@ -71,7 +72,7 @@ public class DefaultProcessingUnitDependency implements InternalProcessingUnitDe
     /**
      * For spring injection
      */
-    public DefaultProcessingUnitDependency() {
+    public ProcessingUnitDependencyConfig() {
     }
 
     @Override
@@ -115,7 +116,7 @@ public class DefaultProcessingUnitDependency implements InternalProcessingUnitDe
             return false;
         if (getClass() != obj.getClass())
             return false;
-        DefaultProcessingUnitDependency other = (DefaultProcessingUnitDependency) obj;
+        ProcessingUnitDependencyConfig other = (ProcessingUnitDependencyConfig) obj;
         if (minimumNumberOfDeployedInstances != other.minimumNumberOfDeployedInstances)
             return false;
         if (minimumNumberOfDeployedInstancesPerPartition != other.minimumNumberOfDeployedInstancesPerPartition)
