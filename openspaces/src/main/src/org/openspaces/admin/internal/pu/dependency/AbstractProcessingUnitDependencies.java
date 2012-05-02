@@ -115,4 +115,39 @@ public abstract class AbstractProcessingUnitDependencies<T extends ProcessingUni
         }
         return StringUtils.collectionToDelimitedString(commandline," ");
     }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime
+                * result
+                + ((requiredDependeciesPerCommandLineOption == null) ? 0 : requiredDependeciesPerCommandLineOption.hashCode());
+        return result;
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        AbstractProcessingUnitDependencies other = (AbstractProcessingUnitDependencies) obj;
+        if (requiredDependeciesPerCommandLineOption == null) {
+            if (other.requiredDependeciesPerCommandLineOption != null)
+                return false;
+        } else if (!requiredDependeciesPerCommandLineOption.equals(other.requiredDependeciesPerCommandLineOption))
+            return false;
+        return true;
+    }
+    
+    
 }
