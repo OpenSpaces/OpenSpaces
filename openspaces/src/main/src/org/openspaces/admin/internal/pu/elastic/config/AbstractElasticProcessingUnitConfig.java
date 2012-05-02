@@ -15,9 +15,14 @@
  *******************************************************************************/
 package org.openspaces.admin.internal.pu.elastic.config;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.openspaces.admin.bean.BeanConfig;
+import org.openspaces.admin.bean.BeanConfigPropertiesManager;
 import org.openspaces.admin.internal.pu.dependency.DefaultProcessingUnitDependencies;
 import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependencies;
 import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependency;
@@ -25,6 +30,7 @@ import org.openspaces.admin.internal.pu.elastic.ElasticMachineIsolationConfig;
 import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
 import org.openspaces.admin.internal.pu.elastic.MachineProvisioningBeanPropertiesManager;
 import org.openspaces.admin.internal.pu.elastic.ScaleStrategyBeanPropertiesManager;
+import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
 import org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig;
@@ -260,7 +266,7 @@ public class AbstractElasticProcessingUnitConfig {
         String containerZone = getDefaultZone();
             
         deployment.addZone(containerZone);
-        commandLineArgument("-Dcom.gs.zones=" + containerZone);
+        addCommandLineArgument("-Dcom.gs.zones=" + containerZone);
     
         // context properties defined by the user overrides the 
         // default context properties defined by the derived class.
@@ -287,4 +293,50 @@ public class AbstractElasticProcessingUnitConfig {
         return this.scaleStrategy;
     }
 
+
+    private String getDefaultZone() {
+        String zone = this.getName();
+        if (zone == null) {
+            //replace whitespaces
+            zone = this.getProcessingUnit();
+            
+            //trim closing slash
+            if (zone.endsWith("/") || zone.endsWith("\\")) {
+                zone = zone.substring(0,zone.length()-1);
+            }
+            // pick directory/file name
+            int seperatorIndex = Math.max(zone.lastIndexOf("/"),zone.lastIndexOf("\\"));
+            if (seperatorIndex >= 0 && seperatorIndex < zone.length()-1 ) {
+                zone = zone.substring(seperatorIndex+1,zone.length());
+            }
+            // remove file extension
+            if (zone.endsWith(".zip") ||
+                zone.endsWith(".jar") ||
+                zone.endsWith(".war")) {
+
+                zone = zone.substring(0, zone.length() - 4);
+            }
+        }
+        
+        zone = zone.replace(' ', '_');
+        return zone;
+    }
+
+    public void addCommandLineArgument(String argument) {
+        List<String> arguments = new ArrayList<String>(Arrays.asList(this.getCommandLineArguments()));
+        arguments.add(argument);
+        this.setCommandLineArguments(arguments.toArray(new String[arguments.size()]));
+    }
+
+
+    /**
+     * Sets the elastic scale strategy 
+     * @param config - the scale strategy bean configuration, or null to disable it.
+     * @see ProcessingUnit#scale(org.openspaces.admin.pu.ElasticScaleStrategyConfig)
+     */
+    private static void enableBean(BeanConfigPropertiesManager propertiesManager, BeanConfig config) {
+        propertiesManager.disableAllBeans();
+        propertiesManager.setBeanConfig(config.getBeanClassName(), config.getProperties());
+        propertiesManager.enableBean(config.getBeanClassName());
+    }
 }

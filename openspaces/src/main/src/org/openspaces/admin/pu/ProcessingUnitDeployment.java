@@ -78,7 +78,9 @@ public class ProcessingUnitDeployment implements ProcessingUnitDeploymentTopolog
 
     /**
      * Returns the processing unit that will be deployed.
+     * Use {@link ProcessingUnitConfig#getProcessingUnit()} instead
      */
+    @Deprecated
     public String getProcessingUnit() {
         return config.getProcessingUnit();
     }
@@ -263,6 +265,10 @@ public class ProcessingUnitDeployment implements ProcessingUnitDeploymentTopolog
         return config.getSecured();
     }
 
+    /**
+     * Use {@link ProcessingUnitConfig#getUserDetails()} instead
+     */
+    @Deprecated
     public UserDetails getUserDetails() {
         return config.getUserDetails();
     }
@@ -295,9 +301,11 @@ public class ProcessingUnitDeployment implements ProcessingUnitDeploymentTopolog
     
     /**
      * Transforms this deployment into a set of deployment options.
+     * Use {@link ProcessingUnitConfig#toDeploymentOptions()}
      */
+    @Deprecated
     public String[] getDeploymentOptions() {
-        return config.getDeploymentOptions();
+        return config.toDeploymentOptions();
     }
 
     public ProcessingUnitDeployment setElasticProperty(String key, String value) {
@@ -310,6 +318,10 @@ public class ProcessingUnitDeployment implements ProcessingUnitDeploymentTopolog
         config.setDependencies((InternalProcessingUnitDependencies<ProcessingUnitDependency, InternalProcessingUnitDependency>)dependencies);
     }
     
+    /**
+     * Use {@link ProcessingUnitConfig#getElasticProperties()} instead
+     */
+    @Deprecated
     public Map<String,String> getElasticProperties() {
         return config.getElasticProperties();
     }
@@ -317,6 +329,10 @@ public class ProcessingUnitDeployment implements ProcessingUnitDeploymentTopolog
     @Override
     public ProcessingUnitDeployment toProcessingUnitDeployment(Admin admin) {
         return this;
+    }
+    
+    public ProcessingUnitConfig create() {
+        return config;
     }
 
 }

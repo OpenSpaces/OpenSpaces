@@ -20,6 +20,7 @@ package org.openspaces.admin.application;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.openspaces.admin.application.config.ApplicationConfig;
 import org.openspaces.admin.internal.application.DefaultApplicationDeploymentOptions;
 import org.openspaces.admin.internal.application.InternalApplicationDeploymentOptions;
 import org.openspaces.admin.pu.topology.ProcessingUnitDeploymentTopology;
@@ -31,6 +32,7 @@ import org.openspaces.admin.pu.topology.ProcessingUnitDeploymentTopology;
  */
 public class ApplicationDeployment {
 
+    ApplicationConfig config;
     private final String applicationName;
     private final List<ProcessingUnitDeploymentTopology> processingUnitDeployments;
     

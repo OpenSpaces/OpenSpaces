@@ -195,7 +195,7 @@ public class ProcessingUnitConfig {
     /**
      * @see ProcessingUnitDeployment#getDeploymentOptions()
      */
-    public String[] getDeploymentOptions() {
+    public String[] toDeploymentOptions() {
         List<String> deployOptions = new ArrayList<String>();
 
         if (name != null) {

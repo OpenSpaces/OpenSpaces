@@ -145,9 +145,7 @@ public abstract class AbstractElasticProcessingUnitDeployment {
      * can be controlled using <code>-Xmx512m</code>.
      */
     protected AbstractElasticProcessingUnitDeployment commandLineArgument(String argument) {
-        List<String> arguments = new ArrayList<String>(Arrays.asList(config.getCommandLineArguments()));
-        arguments.add(argument);
-        config.setCommandLineArguments(arguments.toArray(new String[arguments.size()]));
+        config.addCommandLineArgument(argument);
         return this;
     }
 
@@ -182,34 +180,6 @@ public abstract class AbstractElasticProcessingUnitDeployment {
         dependencies.addDetailedDependencies(detailedDependencies);
         return this;
     }
-
-    private String getDefaultZone() {
-        String zone = this.name;
-        if (zone == null) {
-            //replace whitespaces
-            zone = processingUnit;
-            
-            //trim closing slash
-            if (zone.endsWith("/") || zone.endsWith("\\")) {
-                zone = zone.substring(0,zone.length()-1);
-            }
-            // pick directory/file name
-            int seperatorIndex = Math.max(zone.lastIndexOf("/"),zone.lastIndexOf("\\"));
-            if (seperatorIndex >= 0 && seperatorIndex < zone.length()-1 ) {
-                zone = zone.substring(seperatorIndex+1,zone.length());
-            }
-            // remove file extension
-            if (zone.endsWith(".zip") ||
-                zone.endsWith(".jar") ||
-                zone.endsWith(".war")) {
-
-                zone = zone.substring(0, zone.length() - 4);
-            }
-        }
-        
-        zone = zone.replace(' ', '_');
-        return zone;
-    }
     
     protected ProcessingUnitDeployment toProcessingUnitDeployment() {
         return config.toProcessingUnitDeployment();
@@ -219,14 +189,4 @@ public abstract class AbstractElasticProcessingUnitDeployment {
         return config.getElasticProperties();
     }
     
-    /**
-     * Sets the elastic scale strategy 
-     * @param config - the scale strategy bean configuration, or null to disable it.
-     * @see ProcessingUnit#scale(org.openspaces.admin.pu.ElasticScaleStrategyConfig)
-     */
-    private static void enableBean(BeanConfigPropertiesManager propertiesManager, BeanConfig config) {
-        propertiesManager.disableAllBeans();
-        propertiesManager.setBeanConfig(config.getBeanClassName(), config.getProperties());
-        propertiesManager.enableBean(config.getBeanClassName());
-    }
 }

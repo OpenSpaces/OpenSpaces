@@ -65,6 +65,7 @@ import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitAlreadyDeployedException;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
+import org.openspaces.admin.pu.config.ProcessingUnitConfig;
 import org.openspaces.admin.pu.elastic.ElasticStatefulProcessingUnitDeployment;
 import org.openspaces.admin.pu.elastic.ElasticStatelessProcessingUnitDeployment;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
@@ -153,6 +154,10 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
     }
     
     private ProcessingUnit deploy(ProcessingUnitDeployment deployment, String applicationName, long timeout, TimeUnit timeUnit) {
+        return deploy(deployment.create(), applicationName, timeout, timeUnit);
+    }
+    
+    private ProcessingUnit deploy(ProcessingUnitConfig puConfig, String applicationName, long timeout, TimeUnit timeUnit) {
         
         long end = System.currentTimeMillis() + timeUnit.toMillis(timeout);
         
@@ -165,16 +170,16 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         }
         deploy.setLocators(locatorsString.toString());
         deploy.initializeDiscovery(gsm);
-        if (deployment.isSecured() != null) {
-            deploy.setSecured(deployment.isSecured());
+        if (puConfig.getSecured() != null) {
+            deploy.setSecured(puConfig.getSecured());
         }
-        deploy.setUserDetails(deployment.getUserDetails());
+        deploy.setUserDetails(puConfig.getUserDetails());
         deploy.setApplicationName(applicationName);
         final OperationalString operationalString;
         try {
-            operationalString = deploy.buildOperationalString(deployment.getDeploymentOptions());
+            operationalString = deploy.buildOperationalString(puConfig.toDeploymentOptions());
         } catch (Exception e) {
-            throw new AdminException("Failed to deploy [" + deployment.getProcessingUnit() + "]", e);
+            throw new AdminException("Failed to deploy [" + puConfig.getProcessingUnit() + "]", e);
         }
 
         boolean alreadyDeployed = false;
@@ -209,13 +214,13 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         } catch (SecurityException se) {
             throw new AdminException("No privileges to deploy a processing unit", se);
         } catch (Exception e) {
-            throw new AdminException("Failed to deploy [" + deployment.getProcessingUnit() + "]", e);
+            throw new AdminException("Failed to deploy [" + puConfig.getProcessingUnit() + "]", e);
         } finally {
             Deploy.setDisableInfoLogging(false);
             getAdmin().getProcessingUnits().getProcessingUnitAdded().remove(added);
         }
         
-        if (!deployment.getElasticProperties().isEmpty()) {
+        if (!puConfig.getElasticProperties().isEmpty()) {
             // wait until elastic scale strategy is being enforced
             while (System.currentTimeMillis() < end) {
                 InternalGridServiceManager gridServiceManager = (InternalGridServiceManager)pu.getManagingGridServiceManager();
