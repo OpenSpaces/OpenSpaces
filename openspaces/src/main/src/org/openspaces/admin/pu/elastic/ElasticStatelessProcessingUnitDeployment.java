@@ -47,7 +47,8 @@ public class ElasticStatelessProcessingUnitDeployment
      * (should exists under the <code>[GS ROOT]/deploy</code> directory.
      */
     public ElasticStatelessProcessingUnitDeployment(String processingUnit) {
-        super(new ElasticStatelessProcessingUnitConfig(), processingUnit);
+        super(new ElasticStatelessProcessingUnitConfig());
+        getConfig().setProcessingUnit(processingUnit);
     }
     
     /**

@@ -33,9 +33,8 @@ public abstract class AbstractElasticProcessingUnitDeployment {
 
     private final AbstractElasticProcessingUnitConfig config;
         
-    public AbstractElasticProcessingUnitDeployment(AbstractElasticProcessingUnitConfig config, String processingUnit) {
+    public AbstractElasticProcessingUnitDeployment(AbstractElasticProcessingUnitConfig config) {
         this.config = config;
-        config.setProcessingUnit(processingUnit);
     }
         
     protected AbstractElasticProcessingUnitConfig getConfig() {

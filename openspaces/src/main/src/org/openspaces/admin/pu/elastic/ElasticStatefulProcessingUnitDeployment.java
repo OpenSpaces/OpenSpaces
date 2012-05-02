@@ -21,7 +21,6 @@ import java.io.File;
 
 import org.openspaces.admin.internal.pu.dependency.ProcessingUnitDetailedDependencies;
 import org.openspaces.admin.internal.pu.elastic.AbstractElasticProcessingUnitDeployment;
-import org.openspaces.admin.internal.pu.elastic.ProcessingUnitSchemaConfig;
 import org.openspaces.admin.internal.pu.elastic.config.ElasticStatefulProcessingUnitConfig;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDeploymentDependenciesConfigurer;
@@ -53,15 +52,8 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
      * exists under the <code>[GS ROOT]/deploy</code> directory.
      */
     public ElasticStatefulProcessingUnitDeployment(String processingUnit) {
-        super(new ElasticStatefulProcessingUnitConfig(), processingUnit);
-        
-        // add an elastic property indicating the cluster schema partitioned-sync2backup
-        new ProcessingUnitSchemaConfig(super.getElasticProperties()).setPartitionedSync2BackupSchema();        
-
-        // this default context property ensures that during active-election (primary relocations) 
-        // the proxy keeps retrying 20 times.
-        // see also the wiki documentation on the active election property: cluster-config.groups.group.fail-over-policy.active-election.yield-time
-        super.addContextPropertyDefault("space-config.proxy-settings.connection-retries","20");
+        super(new ElasticStatefulProcessingUnitConfig());
+        getConfig().setProcessingUnit(processingUnit);
     }
     
     /**
