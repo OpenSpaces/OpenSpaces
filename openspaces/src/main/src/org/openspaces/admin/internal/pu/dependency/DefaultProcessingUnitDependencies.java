@@ -27,4 +27,9 @@ public class DefaultProcessingUnitDependencies
     public InternalProcessingUnitDeploymentDependencies<ProcessingUnitDependency, InternalProcessingUnitDependency> getDeploymentDependencies() {
         return super.getDetailedDependencies(new DefaultProcessingUnitDeploymentDependencies());
     }
+    
+    @Override
+    public void setDeploymentDependencies(InternalProcessingUnitDeploymentDependencies<ProcessingUnitDependency,InternalProcessingUnitDependency> deploymentDependencies) {
+        super.setDetailedDependencies(deploymentDependencies);
+    }
 }

@@ -74,6 +74,10 @@ public abstract class AbstractProcessingUnitDependencies<T extends ProcessingUni
         return newDetailedDependencies;
     }
     
+    protected <Z extends InternalProcessingUnitDetailedDependencies<T,IT>> void setDetailedDependencies(Z newDetailedDependencies) {
+        requiredDependeciesPerCommandLineOption.put(newDetailedDependencies.getCommandLineOption(), newDetailedDependencies.toRequiredDependencies());
+    }
+    
     public CommandLineParser.Parameter[] toCommandLineParameters() {
         List<CommandLineParser.Parameter> parameters = new ArrayList<CommandLineParser.Parameter>();
         for (Entry<String, RequiredDependencies> entry : requiredDependeciesPerCommandLineOption.entrySet()) {

@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.internal.pu.dependency.DefaultProcessingUnitDependencies;
+import org.openspaces.admin.internal.pu.dependency.DefaultProcessingUnitDeploymentDependencies;
 import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependencies;
 import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependency;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
@@ -164,14 +165,23 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigFactory{
         return elasticProperties;
     }
 
-    public InternalProcessingUnitDependencies<ProcessingUnitDependency,InternalProcessingUnitDependency> getDependencies() {
-        return dependencies;
+    public void setDeploymentDependencies(List<ProcessingUnitDependency> dependencies) {
+        
+        DefaultProcessingUnitDeploymentDependencies deploymentDependencies = new DefaultProcessingUnitDeploymentDependencies();
+        for (ProcessingUnitDependency dependency : dependencies) {
+            deploymentDependencies.addDependency(dependency);
+        }
+        this.dependencies.setDeploymentDependencies(deploymentDependencies);
     }
-
-    public void setDependencies(InternalProcessingUnitDependencies<ProcessingUnitDependency,InternalProcessingUnitDependency> dependencies) {
-        this.dependencies = dependencies;
+    
+    public List<ProcessingUnitDependency> getDeploymentDependencies() {
+        List<ProcessingUnitDependency> dependenciesAsList = new ArrayList<ProcessingUnitDependency>();
+        for (String name : this.dependencies.getDeploymentDependencies().getRequiredProcessingUnitsNames()) {
+            dependenciesAsList.add(this.dependencies.getDeploymentDependencies().getDependencyByName(name));
+        }
+        return dependenciesAsList;
     }
-
+    
     /**
      * @see ProcessingUnitDeployment#maxInstancesPerZone(String, int)
      */

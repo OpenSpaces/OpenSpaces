@@ -32,4 +32,6 @@ public interface InternalProcessingUnitDependencies<T extends ProcessingUnitDepe
     void addDetailedDependenciesByCommandLineOption(String commandLineOption, RequiredDependencies requiredDependencies);
 
     CommandLineParser.Parameter[] toCommandLineParameters();
+
+    void setDeploymentDependencies(InternalProcessingUnitDeploymentDependencies<T,IT> deploymentDependencies);
 }
