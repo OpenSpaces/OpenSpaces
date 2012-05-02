@@ -13,7 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.openspaces.admin.pu.config;
+package org.openspaces.admin.space.config;
+
+import org.openspaces.admin.pu.config.ProcessingUnitConfig;
+import org.springframework.beans.factory.annotation.Required;
 
 
 /**
@@ -26,6 +29,12 @@ public class SpaceConfig extends ProcessingUnitConfig {
         super.setProcessingUnit("/templates/datagrid");
     }
     
+    @Override // not @Required
+    public void setProcessingUnit(String processingUnit) {
+        super.setProcessingUnit(processingUnit);
+    }
+    
+    @Required
     public void setName(String spaceName) {
         super.setName(spaceName);
         super.setContextProperty("dataGridName", spaceName);
