@@ -19,6 +19,7 @@ import java.util.Map;
 
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
+import org.openspaces.admin.internal.pu.elastic.ProcessingUnitSchemaConfig;
 import org.openspaces.admin.pu.config.ProcessingUnitConfig;
 import org.openspaces.admin.pu.elastic.config.DiscoveredMachineProvisioningConfig;
 import org.openspaces.admin.pu.topology.ProcessingUnitConfigFactory;
@@ -42,6 +43,18 @@ public class ElasticStatefulProcessingUnitConfig
     private double maxNumberOfCpuCores;
     private double minNumberOfCpuCoresPerMachine;
 
+    public ElasticStatefulProcessingUnitConfig() {
+        super();
+        
+     // add an elastic property indicating the cluster schema partitioned-sync2backup
+        new ProcessingUnitSchemaConfig(super.getElasticProperties()).setPartitionedSync2BackupSchema();        
+
+        // this default context property ensures that during active-election (primary relocations) 
+        // the proxy keeps retrying 20 times.
+        // see also the wiki documentation on the active election property: cluster-config.groups.group.fail-over-policy.active-election.yield-time
+        super.addContextPropertyDefault("space-config.proxy-settings.connection-retries","20");
+
+    }
     
     @Override
     public ProcessingUnitConfig toProcessingUnitConfig(Admin admin) {
