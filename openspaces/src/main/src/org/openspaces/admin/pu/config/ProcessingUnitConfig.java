@@ -29,6 +29,7 @@ import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
 import org.openspaces.admin.pu.topology.ProcessingUnitConfigFactory;
 import org.openspaces.pu.container.support.CommandLineParser.Parameter;
+import org.springframework.beans.factory.annotation.Required;
 
 import com.gigaspaces.grid.zone.ZoneHelper;
 import com.gigaspaces.security.directory.UserDetails;
@@ -73,6 +74,7 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigFactory{
         return processingUnit;
     }
 
+    @Required
     public void setProcessingUnit(String processingUnit) {
         this.processingUnit = processingUnit;
     }
@@ -296,4 +298,120 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigFactory{
         }
         return dependenciesAsList;
     }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((clusterSchema == null) ? 0 : clusterSchema.hashCode());
+        result = prime * result + ((contextProperties == null) ? 0 : contextProperties.hashCode());
+        result = prime * result + ((dependencies == null) ? 0 : dependencies.hashCode());
+        result = prime * result + ((elasticProperties == null) ? 0 : elasticProperties.hashCode());
+        result = prime * result + ((maxInstancesPerMachine == null) ? 0 : maxInstancesPerMachine.hashCode());
+        result = prime * result + ((maxInstancesPerVM == null) ? 0 : maxInstancesPerVM.hashCode());
+        result = prime * result + ((maxInstancesPerZone == null) ? 0 : maxInstancesPerZone.hashCode());
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + ((numberOfBackups == null) ? 0 : numberOfBackups.hashCode());
+        result = prime * result + ((numberOfInstances == null) ? 0 : numberOfInstances.hashCode());
+        result = prime * result + ((processingUnit == null) ? 0 : processingUnit.hashCode());
+        result = prime * result + ((secured == null) ? 0 : secured.hashCode());
+        result = prime * result + ((slaLocation == null) ? 0 : slaLocation.hashCode());
+        result = prime * result + ((userDetails == null) ? 0 : userDetails.hashCode());
+        result = prime * result + ((zones == null) ? 0 : zones.hashCode());
+        return result;
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ProcessingUnitConfig other = (ProcessingUnitConfig) obj;
+        if (clusterSchema == null) {
+            if (other.clusterSchema != null)
+                return false;
+        } else if (!clusterSchema.equals(other.clusterSchema))
+            return false;
+        if (contextProperties == null) {
+            if (other.contextProperties != null)
+                return false;
+        } else if (!contextProperties.equals(other.contextProperties))
+            return false;
+        if (dependencies == null) {
+            if (other.dependencies != null)
+                return false;
+        } else if (!dependencies.equals(other.dependencies))
+            return false;
+        if (elasticProperties == null) {
+            if (other.elasticProperties != null)
+                return false;
+        } else if (!elasticProperties.equals(other.elasticProperties))
+            return false;
+        if (maxInstancesPerMachine == null) {
+            if (other.maxInstancesPerMachine != null)
+                return false;
+        } else if (!maxInstancesPerMachine.equals(other.maxInstancesPerMachine))
+            return false;
+        if (maxInstancesPerVM == null) {
+            if (other.maxInstancesPerVM != null)
+                return false;
+        } else if (!maxInstancesPerVM.equals(other.maxInstancesPerVM))
+            return false;
+        if (maxInstancesPerZone == null) {
+            if (other.maxInstancesPerZone != null)
+                return false;
+        } else if (!maxInstancesPerZone.equals(other.maxInstancesPerZone))
+            return false;
+        if (name == null) {
+            if (other.name != null)
+                return false;
+        } else if (!name.equals(other.name))
+            return false;
+        if (numberOfBackups == null) {
+            if (other.numberOfBackups != null)
+                return false;
+        } else if (!numberOfBackups.equals(other.numberOfBackups))
+            return false;
+        if (numberOfInstances == null) {
+            if (other.numberOfInstances != null)
+                return false;
+        } else if (!numberOfInstances.equals(other.numberOfInstances))
+            return false;
+        if (processingUnit == null) {
+            if (other.processingUnit != null)
+                return false;
+        } else if (!processingUnit.equals(other.processingUnit))
+            return false;
+        if (secured == null) {
+            if (other.secured != null)
+                return false;
+        } else if (!secured.equals(other.secured))
+            return false;
+        if (slaLocation == null) {
+            if (other.slaLocation != null)
+                return false;
+        } else if (!slaLocation.equals(other.slaLocation))
+            return false;
+        if (userDetails == null) {
+            if (other.userDetails != null)
+                return false;
+        } else if (!userDetails.equals(other.userDetails))
+            return false;
+        if (zones == null) {
+            if (other.zones != null)
+                return false;
+        } else if (!zones.equals(other.zones))
+            return false;
+        return true;
+    }
+    
 }
