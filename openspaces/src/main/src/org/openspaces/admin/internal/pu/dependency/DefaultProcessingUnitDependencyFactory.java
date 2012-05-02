@@ -17,11 +17,13 @@
  ******************************************************************************/
 package org.openspaces.admin.internal.pu.dependency;
 
+import org.openspaces.admin.pu.dependency.config.ProcessingUnitDependencyConfig;
+
 public class DefaultProcessingUnitDependencyFactory implements InternalProcessingUnitDependencyFactory<InternalProcessingUnitDependency> {
 
     @Override
     public InternalProcessingUnitDependency create(String requiredProcessingUnitName) {
-        DefaultProcessingUnitDependency dependency = new DefaultProcessingUnitDependency();
+        ProcessingUnitDependencyConfig dependency = new ProcessingUnitDependencyConfig();
         dependency.setRequiredProcessingUnitName(requiredProcessingUnitName);
         return dependency;
     }
