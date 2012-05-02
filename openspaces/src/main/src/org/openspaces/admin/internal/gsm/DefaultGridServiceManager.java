@@ -134,7 +134,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
     }
 
     public ProcessingUnit deploy(SpaceDeployment deployment, long timeout, TimeUnit timeUnit) {
-        return deploy(deployment.toProcessingUnitDeployment(admin), timeout, timeUnit);
+        return deploy(deployment.create(), timeout, timeUnit);
     }
 
     public ProcessingUnit deploy(ProcessingUnitDeployment deployment) {
@@ -159,6 +159,11 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         return deploy(deployment.create(), applicationName, timeout, timeUnit);
     }
 
+    private ProcessingUnit deploy(ProcessingUnitConfigFactory puConfigFactory, long timeout, TimeUnit timeUnit) {
+        String applicationName = null;
+        return deploy(puConfigFactory, applicationName, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
+    }
+    
     private ProcessingUnit deploy(ProcessingUnitConfigFactory puConfigFactory, String applicationName, long timeout, TimeUnit timeUnit) {
         return deploy(puConfigFactory.toProcessingUnitConfig(admin), applicationName, timeout, timeUnit);
     }
@@ -463,12 +468,12 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
     }
 
     public ProcessingUnit deploy(ElasticSpaceDeployment deployment) throws ProcessingUnitAlreadyDeployedException {
-        return deploy(deployment.toProcessingUnitDeployment(admin));
+        return deploy(deployment.create(), admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
 
     public ProcessingUnit deploy(ElasticSpaceDeployment deployment, long timeout, TimeUnit timeUnit)
             throws ProcessingUnitAlreadyDeployedException {
-        return deploy(deployment.toProcessingUnitDeployment(admin),timeout,timeUnit);
+        return deploy(deployment.create(),timeout,timeUnit);
     }
 
     public ProcessingUnit deploy(ElasticStatefulProcessingUnitDeployment deployment)
@@ -479,7 +484,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
     public ProcessingUnit deploy(ElasticStatefulProcessingUnitDeployment deployment, long timeout, TimeUnit timeUnit)
             throws ProcessingUnitAlreadyDeployedException {
         
-        return deploy(deployment.toProcessingUnitDeployment(admin),timeout,timeUnit);
+        return deploy(deployment.create(),timeout,timeUnit);
     }
 
     public ProcessingUnit deploy(ElasticStatelessProcessingUnitDeployment deployment)
@@ -762,8 +767,8 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
 
     @Override
     public ProcessingUnit deploy(Application application, ProcessingUnitDeploymentTopology deploymentTopology, long timeout, TimeUnit timeUnit) {
-        ProcessingUnitDeployment deployment = deploymentTopology.toProcessingUnitDeployment(admin);
-        return this.deploy(deployment, application.getName(), timeout, timeUnit);
+        ProcessingUnitConfigFactory configFactory = deploymentTopology.create();
+        return this.deploy(configFactory, application.getName(), timeout, timeUnit);
     }
    
     @Override

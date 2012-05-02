@@ -235,13 +235,21 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
 
     @Override
     public ProcessingUnit deploy(ElasticSpaceDeployment deployment) throws ProcessingUnitAlreadyDeployedException {
-        return deploy(deployment.toProcessingUnitDeployment(admin));
+        GridServiceManager gridServiceManager = getGridServiceManager();
+        if (gridServiceManager == null) {
+            throw new AdminException("No Grid Service Manager found to deploy [" + deployment.create().getProcessingUnit() + "]");
+        }
+        return gridServiceManager.deploy(deployment);
     }
 
     @Override
     public ProcessingUnit deploy(ElasticSpaceDeployment deployment, long timeout, TimeUnit timeUnit)
             throws ProcessingUnitAlreadyDeployedException {
-        return deploy(deployment.toProcessingUnitDeployment(admin),timeout,timeUnit);
+        GridServiceManager gridServiceManager = getGridServiceManager();
+        if (gridServiceManager == null) {
+            throw new AdminException("No Grid Service Manager found to deploy [" + deployment.create().getProcessingUnit() + "]");
+        }
+        return gridServiceManager.deploy(deployment, timeout, timeUnit);
     }
 
     @Override
@@ -254,7 +262,11 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
     public ProcessingUnit deploy(ElasticStatefulProcessingUnitDeployment deployment, long timeout, TimeUnit timeUnit)
             throws ProcessingUnitAlreadyDeployedException {
         
-        return deploy(deployment.toProcessingUnitDeployment(admin),timeout,timeUnit);
+        GridServiceManager gridServiceManager = getGridServiceManager();
+        if (gridServiceManager == null) {
+            throw new AdminException("No Grid Service Manager found to deploy [" + deployment.create().getProcessingUnit() + "]");
+        }
+        return gridServiceManager.deploy(deployment, timeout, timeUnit);
     }
 
     @Override
@@ -373,7 +385,7 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
     public ProcessingUnit deploy(Application application, ProcessingUnitDeploymentTopology puDeploymentTopology, long timeout, TimeUnit timeUnit) {
         InternalGridServiceManager gridServiceManager = (InternalGridServiceManager)getGridServiceManager();
         if (gridServiceManager == null) {
-            throw new AdminException("No Grid Service Manager found to deploy [" + puDeploymentTopology.toProcessingUnitDeployment(admin).getProcessingUnit() + "] to application [" + application.getName() +"]");
+            throw new AdminException("No Grid Service Manager found to deploy [" + puDeploymentTopology.create().toProcessingUnitConfig(admin).getProcessingUnit() + "] to application [" + application.getName() +"]");
         }
         return gridServiceManager.deploy(application, puDeploymentTopology, timeout, timeUnit);
     }
