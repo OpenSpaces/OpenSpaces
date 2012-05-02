@@ -280,7 +280,7 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
     public ProcessingUnit deploy(ElasticStatelessProcessingUnitDeployment deployment, long timeout, TimeUnit timeUnit)
         throws ProcessingUnitAlreadyDeployedException {
 
-        return deploy(deployment.toProcessingUnitDeployment(admin),timeout,timeUnit);
+        return deploy(deployment,timeout,timeUnit);
     }
 
     @Override
