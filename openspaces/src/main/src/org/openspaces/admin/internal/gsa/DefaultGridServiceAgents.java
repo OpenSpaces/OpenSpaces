@@ -109,7 +109,7 @@ public class DefaultGridServiceAgents implements InternalGridServiceAgents {
     }
 
     public boolean isEmpty() {
-        return agents.size() == 0;
+        return agents.isEmpty();
     }
 
     public Iterator<GridServiceAgent> iterator() {

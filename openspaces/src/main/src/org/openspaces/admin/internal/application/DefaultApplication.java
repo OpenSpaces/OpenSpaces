@@ -115,7 +115,7 @@ public class DefaultApplication implements InternalApplication {
                 break;
             }
             
-            if (pusToUndeploy.size() == 0) {
+            if (pusToUndeploy.isEmpty()) {
                 throw new AdminException("Application undeployment does not support cyclic dependencies");
             }
             

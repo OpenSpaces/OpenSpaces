@@ -365,7 +365,7 @@ public class DefaultSpace implements InternalSpace {
         InternalSpaceInstance internalSpaceInstance = (InternalSpaceInstance) spaceInstance;
         // the first addition (which we make sure is added before the space becomes visible) will
         // cause the partition to initialize
-        if (spaceInstancesByUID.size() == 0) {
+        if (spaceInstancesByUID.isEmpty()) {
             // guess if its a partition (with no backup) since we can't tell if its replicated or just partitioned
             if (internalSpaceInstance.getClusterSchema() != null && internalSpaceInstance.getClusterSchema().contains("partition")) {
                 for (int i = 0; i < internalSpaceInstance.getNumberOfInstances(); i++) {

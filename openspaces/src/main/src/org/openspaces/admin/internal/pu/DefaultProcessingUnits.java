@@ -198,7 +198,7 @@ public class DefaultProcessingUnits implements InternalProcessingUnits {
     }
 
     public boolean isEmpty() {
-        return processingUnits.size() == 0;
+        return processingUnits.isEmpty();
     }
 
     public ProcessingUnit waitFor(String processingUnitName) {

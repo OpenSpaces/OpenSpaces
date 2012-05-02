@@ -107,7 +107,7 @@ public class DefaultMachines implements InternalMachines {
 
     @Override
     public boolean isEmpty() {
-        return machinesById.size() == 0;
+        return machinesById.isEmpty();
     }
 
     @Override

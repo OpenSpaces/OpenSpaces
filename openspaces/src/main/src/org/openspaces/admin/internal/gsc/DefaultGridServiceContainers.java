@@ -104,7 +104,7 @@ public class DefaultGridServiceContainers implements InternalGridServiceContaine
     }
 
     public boolean isEmpty() {
-        return containers.size() == 0;
+        return containers.isEmpty();
     }
 
     public boolean waitFor(int numberOfGridServiceContainers) {
