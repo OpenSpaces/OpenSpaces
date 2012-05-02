@@ -34,6 +34,7 @@ package org.openspaces.admin.memcached;
 
 import com.gigaspaces.security.directory.UserDetails;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
+import org.openspaces.admin.pu.topology.ProcessingUnitConfigFactory;
 import org.openspaces.pu.container.servicegrid.deploy.MemcachedDeploy;
 
 import java.io.File;
@@ -48,6 +49,7 @@ import java.io.File;
  */
 public class MemcachedDeployment {
 
+    //TODO: replace with MemcachedConfig
     private final ProcessingUnitDeployment deployment;
 
     private final String spaceUrl;
@@ -243,5 +245,12 @@ public class MemcachedDeployment {
      */
     public ProcessingUnitDeployment toProcessingUnitDeployment() {
         return deployment;
+    }
+
+    /**
+     * @return
+     */
+    public ProcessingUnitConfigFactory create() {
+        return deployment.create();
     }
 }

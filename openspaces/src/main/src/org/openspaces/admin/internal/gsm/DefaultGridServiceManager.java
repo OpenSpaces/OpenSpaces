@@ -159,9 +159,15 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         return deploy(deployment.create(), applicationName, timeout, timeUnit);
     }
 
-    private ProcessingUnit deploy(ProcessingUnitConfigFactory puConfigFactory, long timeout, TimeUnit timeUnit) {
+    @Override
+    public ProcessingUnit deploy(ProcessingUnitConfigFactory puConfigFactory) {
+        return deploy(puConfigFactory, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
+    }
+    
+    @Override
+    public ProcessingUnit deploy(ProcessingUnitConfigFactory puConfigFactory, long timeout, TimeUnit timeUnit) {
         String applicationName = null;
-        return deploy(puConfigFactory, applicationName, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
+        return deploy(puConfigFactory, applicationName, timeout, timeUnit);
     }
     
     private ProcessingUnit deploy(ProcessingUnitConfigFactory puConfigFactory, String applicationName, long timeout, TimeUnit timeUnit) {
@@ -793,4 +799,5 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         eventsCursor = events.getNextCursor();
         return events;
     }
+
 }
