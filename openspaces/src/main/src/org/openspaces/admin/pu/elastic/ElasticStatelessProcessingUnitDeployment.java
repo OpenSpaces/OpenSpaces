@@ -19,16 +19,16 @@ package org.openspaces.admin.pu.elastic;
 
 import java.io.File;
 
-import org.openspaces.admin.Admin;
 import org.openspaces.admin.internal.pu.dependency.ProcessingUnitDetailedDependencies;
 import org.openspaces.admin.internal.pu.elastic.AbstractElasticProcessingUnitDeployment;
-import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDeploymentDependenciesConfigurer;
 import org.openspaces.admin.pu.elastic.config.AutomaticCapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
+import org.openspaces.admin.pu.elastic.config.ElasticStatelessProcessingUnitConfig;
 import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.topology.ElasticStatelessDeploymentTopology;
+import org.openspaces.admin.pu.topology.ProcessingUnitConfigFactory;
 import org.openspaces.core.util.MemoryUnit;
 
 import com.gigaspaces.security.directory.UserDetails;
@@ -47,7 +47,7 @@ public class ElasticStatelessProcessingUnitDeployment
      * (should exists under the <code>[GS ROOT]/deploy</code> directory.
      */
     public ElasticStatelessProcessingUnitDeployment(String processingUnit) {
-        super(processingUnit);
+        super(new ElasticStatelessProcessingUnitConfig(), processingUnit);
     }
     
     /**
@@ -173,16 +173,13 @@ public class ElasticStatelessProcessingUnitDeployment
         return this; 
     }
     
-    public ProcessingUnitDeployment toProcessingUnitDeployment(Admin admin) {
-
-        ProcessingUnitDeployment deployment = super.toProcessingUnitDeployment();
-                
-        // disallow two instances to deploy on same Container
-        deployment.maxInstancesPerVM(1);
-        
-        // allow any number of instances to deploy on same Machine
-        deployment.maxInstancesPerMachine(0);
-          
-        return deployment;
+    @Override
+    protected ElasticStatelessProcessingUnitConfig getConfig() {
+        return (ElasticStatelessProcessingUnitConfig) super.getConfig();
+    }
+    
+    @Override
+    public ProcessingUnitConfigFactory create() {
+        return getConfig();
     }
 }
