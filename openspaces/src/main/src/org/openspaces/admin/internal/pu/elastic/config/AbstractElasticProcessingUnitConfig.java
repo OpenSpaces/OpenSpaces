@@ -99,6 +99,14 @@ public class AbstractElasticProcessingUnitConfig {
     public void setContextProperties(Map<String,String> contextProperties) {
         this.contextProperties = contextProperties;
     }
+    
+    protected void addContextProperty(String key, String value) {
+        this.contextProperties.put(key, value);
+    }
+    
+    protected void addContextPropertyDefault(String key, String value) {
+        this.defaultContextProperties.put(key, value);
+    }
 
     public Map<String,String> getDefaultContextProperties() {
         return defaultContextProperties;
