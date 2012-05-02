@@ -34,7 +34,6 @@ import org.openspaces.admin.internal.gsc.events.DefaultElasticGridServiceContain
 import org.openspaces.admin.internal.machine.events.DefaultElasticMachineProvisioningFailureEvent;
 import org.openspaces.admin.internal.machine.events.DefaultElasticMachineProvisioningProgressChangedEvent;
 import org.openspaces.admin.internal.pu.InternalProcessingUnit;
-import org.openspaces.admin.internal.pu.elastic.ElasticMachineIsolationConfig;
 import org.openspaces.admin.internal.pu.elastic.ProcessingUnitSchemaConfig;
 import org.openspaces.admin.internal.pu.elastic.ScaleStrategyConfigUtils;
 import org.openspaces.admin.internal.pu.elastic.events.DefaultElasticProcessingUnitInstanceProvisioningFailureEvent;
@@ -53,9 +52,7 @@ import org.openspaces.grid.gsm.containers.exceptions.ContainersSlaEnforcementInP
 import org.openspaces.grid.gsm.machines.MachinesSlaUtils;
 import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.machines.exceptions.MachinesSlaEnforcementInProgressException;
-import org.openspaces.grid.gsm.machines.isolation.DedicatedMachineIsolation;
 import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIsolation;
-import org.openspaces.grid.gsm.machines.isolation.SharedMachineIsolation;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
 import org.openspaces.grid.gsm.rebalancing.exceptions.RebalancingSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
@@ -77,7 +74,7 @@ public abstract class AbstractScaleStrategyBean implements
     private ProcessingUnitSchemaConfig schemaConfig;
     private NonBlockingElasticMachineProvisioning machineProvisioning;
     private StringProperties properties;
-    private ElasticMachineIsolationConfig isolationConfig;
+
     
     // created by afterPropertiesSet()
     private Log logger;
@@ -132,8 +129,8 @@ public abstract class AbstractScaleStrategyBean implements
     }
     
     @Override
-    public void setElasticMachineIsolation(ElasticMachineIsolationConfig isolationConfig) {
-        this.isolationConfig = isolationConfig;
+    public void setElasticProcessingUnitMachineIsolation(ElasticProcessingUnitMachineIsolation isolation) {
+        this.isolation = isolation;
     }
     
     protected ElasticProcessingUnitMachineIsolation getIsolation() {
@@ -196,20 +193,6 @@ public abstract class AbstractScaleStrategyBean implements
             throw new IllegalStateException("schemaConfig cannot be null.");
         }
     
-        if (isolationConfig == null) {
-            throw new IllegalStateException("isolationConfig cannot be null");
-        }
-        
-        if (isolationConfig.isDedicatedIsolation()) {
-            isolation = new DedicatedMachineIsolation(pu.getName());
-        }
-        else if (isolationConfig.isSharedIsolation()) {
-            isolation = new SharedMachineIsolation(isolationConfig.getSharingId());
-        }
-        else {
-            throw new IllegalStateException("unsupported PU isolation");
-        }
-        
         logger = new LogPerProcessingUnit(
                     new SingleThreadedPollingLog(
                             LogFactory.getLog(this.getClass())),

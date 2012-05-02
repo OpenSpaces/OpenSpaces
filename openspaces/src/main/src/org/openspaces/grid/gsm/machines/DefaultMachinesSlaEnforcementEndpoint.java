@@ -33,7 +33,9 @@ import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsa.GridServiceAgents;
+import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.pu.ProcessingUnit;
+import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.grid.gsm.LogPerProcessingUnit;
 import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.capacity.CapacityRequirement;
@@ -51,6 +53,7 @@ import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcemen
 import org.openspaces.grid.gsm.machines.exceptions.InconsistentMachineProvisioningException;
 import org.openspaces.grid.gsm.machines.exceptions.MachinesSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.machines.exceptions.NeedToStartMoreGridServiceAgentsException;
+import org.openspaces.grid.gsm.machines.exceptions.NeedToWaitUntilAllGridServiceAgentsDiscovered;
 import org.openspaces.grid.gsm.machines.exceptions.SomeProcessingUnitsHaveNotCompletedStateRecoveryException;
 import org.openspaces.grid.gsm.machines.exceptions.StartedTooManyMachinesException;
 import org.openspaces.grid.gsm.machines.exceptions.UnexpectedShutdownOfNewGridServiceAgentException;
@@ -134,7 +137,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             
     }
 
-    private void recoverStateAfterRestart(AbstractMachinesSlaPolicy sla) throws SomeProcessingUnitsHaveNotCompletedStateRecoveryException {
+    private void recoverStateAfterRestart(AbstractMachinesSlaPolicy sla) throws SomeProcessingUnitsHaveNotCompletedStateRecoveryException, NeedToWaitUntilAllGridServiceAgentsDiscovered {
 
         if (!state.isCompletedStateRecovery(pu)) {
                 
@@ -145,7 +148,15 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
     
             String zone = pu.getRequiredZones()[0];
             Admin admin = pu.getAdmin();
-            
+
+            // Validate all Agents have been discovered.
+            for (ProcessingUnitInstance instance : pu.getInstances()) {
+                GridServiceContainer container = instance.getGridServiceContainer();
+                if (container.isDiscovered() && container.getGridServiceAgent() == null) {
+                    throw new NeedToWaitUntilAllGridServiceAgentsDiscovered(pu, container);
+                }
+            }
+        
             // Recover the endpoint state based on running containers.
             for (GridServiceAgent agent: admin.getGridServiceAgents()) {
     

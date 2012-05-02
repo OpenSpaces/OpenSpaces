@@ -36,6 +36,7 @@ import org.openspaces.grid.gsm.capacity.NumberOfMachinesCapacityRequirement;
 import org.openspaces.grid.gsm.machines.FutureGridServiceAgent;
 import org.openspaces.grid.gsm.machines.FutureGridServiceAgents;
 import org.openspaces.grid.gsm.machines.exceptions.NoClassDefFoundElasticMachineProvisioningException;
+import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIsolation;
 
 /**
  * An adapter that wraps an {@link ElasticMachineProvisioning} and exposes a {@link NonBlockingElasticMachineProvisioning}
@@ -327,4 +328,10 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
         
         return maxNumberOfMachines;
     }
+
+    @Override
+    public void setElasticProcessingUnitMachineIsolation(ElasticProcessingUnitMachineIsolation isolation) {
+        machineProvisioning.setElasticProcessingUnitMachineIsolation(isolation);
+    }
+    
 }

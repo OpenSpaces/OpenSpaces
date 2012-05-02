@@ -37,6 +37,7 @@ public class SharedMachineIsolation extends ElasticProcessingUnitMachineIsolatio
         this.sharingId = sharingId;
     }
     
+    @Override
     public String toString() {
         return "shared-machine-isolation-" + sharingId;
     }

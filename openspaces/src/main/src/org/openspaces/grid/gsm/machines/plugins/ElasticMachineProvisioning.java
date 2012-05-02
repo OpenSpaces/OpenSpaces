@@ -23,6 +23,7 @@ import java.util.concurrent.TimeoutException;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
+import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIsolationAware;
 
 /**
  * An Elastic Service Manager plug-in that enables starting, stopping and discovering of virtual machines.
@@ -41,7 +42,7 @@ import org.openspaces.grid.gsm.capacity.CapacityRequirements;
  * @since 8.0
  *
  */
-public interface ElasticMachineProvisioning {
+public interface ElasticMachineProvisioning extends ElasticProcessingUnitMachineIsolationAware {
 
     /**
      * @return true if this object supports starting and stopping of machines. 

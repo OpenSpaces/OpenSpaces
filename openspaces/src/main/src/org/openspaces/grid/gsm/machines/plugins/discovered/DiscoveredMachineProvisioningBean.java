@@ -34,6 +34,7 @@ import org.openspaces.grid.gsm.ProcessingUnitAware;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.machines.FutureGridServiceAgent;
 import org.openspaces.grid.gsm.machines.FutureGridServiceAgents;
+import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIsolation;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
 
 public class DiscoveredMachineProvisioningBean implements NonBlockingElasticMachineProvisioning , Bean , ProcessingUnitAware {
@@ -106,5 +107,10 @@ public class DiscoveredMachineProvisioningBean implements NonBlockingElasticMach
 
     public void stopMachineAsync(GridServiceAgent agent, long duration, TimeUnit unit) {
         agent.shutdown();
+    }
+
+    @Override
+    public void setElasticProcessingUnitMachineIsolation(ElasticProcessingUnitMachineIsolation isolation) {
+        // not required
     }
 }
