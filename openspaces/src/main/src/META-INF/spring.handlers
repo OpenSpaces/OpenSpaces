@@ -5,6 +5,6 @@ http\://www.openspaces.org/schema/jdbc=org.openspaces.jdbc.config.JdbcNamespaceH
 http\://www.openspaces.org/schema/jms=org.openspaces.jms.config.JmsNamespaceHandler
 http\://www.openspaces.org/schema/sla=org.openspaces.pu.sla.config.SLANamespaceHandler
 http\://www.openspaces.org/schema/core/gateway=org.openspaces.core.gateway.config.GatewayNamespaceHandler
-http\://www.openspaces.org/schema/admin=org.openspaces.admin.application.config=org.openspaces.admin.config.AdminNamespaceHandler
+http\://www.openspaces.org/schema/admin=org.openspaces.admin.config.AdminNamespaceHandler
 
 
