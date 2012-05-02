@@ -19,10 +19,9 @@ package org.openspaces.admin.space;
 
 import org.openspaces.admin.internal.pu.dependency.ProcessingUnitDetailedDependencies;
 import org.openspaces.admin.internal.pu.elastic.AbstractElasticProcessingUnitDeployment;
-import org.openspaces.admin.internal.pu.elastic.config.ElasticStatefulProcessingUnitConfig;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
+import org.openspaces.admin.pu.dependency.ProcessingUnitDeploymentDependenciesConfigurer;
 import org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig;
-import org.openspaces.admin.pu.elastic.ElasticStatefulProcessingUnitDeployment;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.topology.AdvancedStatefulDeploymentTopology;
@@ -66,19 +65,19 @@ public class ElasticSpaceDeployment extends AbstractElasticProcessingUnitDeploym
 
     @Override
     public ElasticSpaceDeployment maxMemoryCapacity(String maxMemoryCapacity) {
-        getConfig().setMaxMemoryCapacity(maxMemoryCapacity);
+        getConfig().setMaximumMemoryCapacityInMB(MemoryUnit.toMegaBytes(maxMemoryCapacity));
         return this;
     }
     
     @Override
     public ElasticSpaceDeployment memoryCapacityPerContainer(int memoryCapacityPerContainer, MemoryUnit unit) {
-        deployment.memoryCapacityPerContainer(memoryCapacityPerContainer,unit);
+        super.memoryCapacityPerContainer(memoryCapacityPerContainer,unit);
         return this;
     }
 
     @Override
     public ElasticSpaceDeployment memoryCapacityPerContainer(String memoryCapacityPerContainer) {
-        deployment.memoryCapacityPerContainer(memoryCapacityPerContainer);
+        super.memoryCapacityPerContainer(memoryCapacityPerContainer);
         return this;
     }
     
@@ -90,55 +89,55 @@ public class ElasticSpaceDeployment extends AbstractElasticProcessingUnitDeploym
        
     @Override
     public ElasticSpaceDeployment scale(EagerScaleConfig strategy) {
-        deployment.scale(strategy);
+        super.scale(strategy);
         return this;
     }
 
     @Override
     public ElasticSpaceDeployment scale(ManualCapacityScaleConfig strategy) {
-        deployment.scale(strategy);
+        super.scale(strategy);
         return this;
     }
     
     @Override
     public ElasticSpaceDeployment name(String name) {
-        deployment.name(name);
+        super.name(name);
         return this;
     }
 
     @Override
     public ElasticSpaceDeployment addContextProperty(String key, String value) {
-        deployment.addContextProperty(key, value);
+        super.addContextProperty(key, value);
         return this;
     }
 
     @Override
     public ElasticSpaceDeployment secured(boolean secured) {
-        deployment.secured(secured);
+        super.secured(secured);
         return this;
     }
 
     @Override
     public ElasticSpaceDeployment userDetails(UserDetails userDetails) {
-        deployment.userDetails(userDetails);
+        super.userDetails(userDetails);
         return this;
     }
 
     @Override
     public ElasticSpaceDeployment userDetails(String userName, String password) {
-        deployment.userDetails(userName, password);
+        super.userDetails(userName, password);
         return this;
     }
     
     @Override
     public ElasticSpaceDeployment useScriptToStartContainer() {
-        deployment.useScriptToStartContainer();
+        super.useScriptToStartContainer();
         return this;
     }
 
     @Override
     public ElasticSpaceDeployment overrideCommandLineArguments() {
-        deployment.overrideCommandLineArguments();
+        super.overrideCommandLineArguments();
         return this;
     }
 
@@ -149,7 +148,7 @@ public class ElasticSpaceDeployment extends AbstractElasticProcessingUnitDeploym
     
     @Override
     public ElasticSpaceDeployment addCommandLineArgument(String commandLineArgument) {
-        deployment.commandLineArgument(commandLineArgument);
+        super.commandLineArgument(commandLineArgument);
         return this;
     }
 
@@ -160,37 +159,40 @@ public class ElasticSpaceDeployment extends AbstractElasticProcessingUnitDeploym
     
     @Override
     public ElasticSpaceDeployment addEnvironmentVariable(String name, String value) {
-        deployment.environmentVariable(name, value);
+        super.environmentVariable(name, value);
         return this;
     }
 
     @Override
     public ElasticSpaceDeployment highlyAvailable(boolean highlyAvailable) {
-        deployment.highlyAvailable(highlyAvailable);
+        numberOfBackupsPerPartition(highlyAvailable ? 1 : 0);
         return this;
     }
     
     @Override
     public ElasticSpaceDeployment dedicatedMachineProvisioning(ElasticMachineProvisioningConfig config) {
-        deployment.dedicatedMachineProvisioning(config);
+        machineProvisioning(config, null);
         return this;
     }
     
     @Override
     public ElasticSpaceDeployment sharedMachineProvisioning(String sharingId, ElasticMachineProvisioningConfig config) {
-        deployment.sharedMachineProvisioning(sharingId, config);
+        if (sharingId == null) {
+            throw new IllegalArgumentException("sharingId can't be null");
+        }
+        machineProvisioning(config, sharingId);
         return this;
     }
 
     @Override
     public ElasticSpaceDeployment numberOfBackupsPerPartition(int numberOfBackupsPerPartition) {
-        deployment.numberOfBackupsPerPartition(numberOfBackupsPerPartition);
+        getConfig().setNumberOfBackupInstancesPerPartition(numberOfBackupsPerPartition);
         return this;
     }
 
     @Override
     public ElasticSpaceDeployment numberOfPartitions(int numberOfPartitions) {
-        deployment.numberOfPartitions(numberOfPartitions);
+        getConfig().setNumberOfPartitions(numberOfPartitions);
         return this;
     }
     
@@ -200,30 +202,35 @@ public class ElasticSpaceDeployment extends AbstractElasticProcessingUnitDeploym
      */
     @Deprecated
     public ElasticSpaceDeployment minNumberOfCpuCoresPerMachine(double minNumberOfCpuCoresPerMachine) {
-        deployment.minNumberOfCpuCoresPerMachine(minNumberOfCpuCoresPerMachine);
+        getConfig().setMinNumberOfCpuCoresPerMachine(minNumberOfCpuCoresPerMachine);
         return this;
     }
     
     @Override
     public ElasticSpaceDeployment singleMachineDeployment() {
-        deployment.singleMachineDeployment();
+        getConfig().setMaxProcessingUnitInstancesFromSamePartitionPerMachine(0);
         return this;
     }
 
     @Override
     public ElasticSpaceDeployment addDependency(String requiredProcessingUnitName) {
-       deployment.addDependency(requiredProcessingUnitName);
+       addDependencies(new ProcessingUnitDeploymentDependenciesConfigurer().dependsOnDeployed(requiredProcessingUnitName).create());
        return this;
     }
 
     @Override
     public ElasticSpaceDeployment addDependencies(ProcessingUnitDetailedDependencies<? extends ProcessingUnitDependency> detailedDependencies) {
-        deployment.addDependencies(detailedDependencies);
+        super.addDependencies(detailedDependencies);
         return this;
     }
 
     @Override
     public ElasticSpaceConfig create() {
-        return (ElasticSpaceConfig) deployment.create();
+        return getConfig();
+    }
+    
+    @Override
+    public ElasticSpaceConfig getConfig() {
+        return (ElasticSpaceConfig) super.getConfig();
     }
 }
