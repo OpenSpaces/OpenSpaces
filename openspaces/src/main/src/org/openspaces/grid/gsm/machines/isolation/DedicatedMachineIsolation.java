@@ -49,4 +49,10 @@ public class DedicatedMachineIsolation extends ElasticProcessingUnitMachineIsola
     public int hashCode() {
          return puName.hashCode();
     }
+
+    @Override
+    public String getName() {
+        return puName;
+    }
+
 }

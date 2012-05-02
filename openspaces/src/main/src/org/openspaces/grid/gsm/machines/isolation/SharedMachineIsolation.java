@@ -52,4 +52,9 @@ public class SharedMachineIsolation extends ElasticProcessingUnitMachineIsolatio
     public int hashCode() {
         return sharingId.hashCode();
     }
+    
+    @Override
+    public String getName() {
+       return sharingId; 
+    }
 }

@@ -20,6 +20,11 @@ package org.openspaces.grid.gsm.machines.isolation;
 public abstract class ElasticProcessingUnitMachineIsolation {
     
     /**
+     * @return non-unique name that is specific to this isolation type.
+     */
+    public abstract String getName();
+    
+    /**
      * @return true if this processing unit can be deployed on the same machine as the specified processing unit deployment. 
      */
     public abstract boolean equals(Object otherProcessingUnitIsolation);
