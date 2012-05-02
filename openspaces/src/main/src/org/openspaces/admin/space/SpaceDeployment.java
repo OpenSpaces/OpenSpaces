@@ -35,11 +35,11 @@ package org.openspaces.admin.space;
 import java.io.File;
 
 import org.openspaces.admin.internal.pu.dependency.ProcessingUnitDetailedDependencies;
-import org.openspaces.admin.pu.config.SpaceConfig;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDeploymentDependenciesConfigurer;
 import org.openspaces.admin.pu.topology.ProcessingUnitConfigFactory;
 import org.openspaces.admin.pu.topology.ProcessingUnitDeploymentTopology;
+import org.openspaces.admin.space.config.SpaceConfig;
 
 import com.gigaspaces.security.directory.User;
 import com.gigaspaces.security.directory.UserDetails;
