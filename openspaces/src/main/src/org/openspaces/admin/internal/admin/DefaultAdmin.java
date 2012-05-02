@@ -163,9 +163,9 @@ import com.gigaspaces.grid.gsm.PUDetails;
 import com.gigaspaces.grid.gsm.PUsDetails;
 import com.gigaspaces.internal.jvm.JVMDetails;
 import com.gigaspaces.internal.os.OSDetails;
+import com.gigaspaces.internal.utils.concurrent.GSThreadFactory;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.security.directory.UserDetails;
-import com.j_spaces.kernel.GSThreadFactory;
 
 /**
  * @author kimchy

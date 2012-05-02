@@ -17,8 +17,8 @@
  ******************************************************************************/
 package org.openspaces.grid.gsa;
 
+import com.gigaspaces.internal.utils.concurrent.GSThread;
 import com.gigaspaces.start.SystemBoot;
-import com.j_spaces.kernel.GSThread;
 
 /**
  * Provides a configurer to start a GS-Agent.

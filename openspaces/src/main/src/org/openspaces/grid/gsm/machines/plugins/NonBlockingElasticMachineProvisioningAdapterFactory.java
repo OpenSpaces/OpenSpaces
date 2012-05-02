@@ -23,7 +23,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import org.openspaces.admin.pu.ProcessingUnit;
 
-import com.j_spaces.kernel.GSThreadFactory;
+import com.gigaspaces.internal.utils.concurrent.GSThreadFactory;
 
 public class NonBlockingElasticMachineProvisioningAdapterFactory {
 
