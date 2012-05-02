@@ -496,7 +496,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
     public ProcessingUnit deploy(ElasticStatelessProcessingUnitDeployment deployment, long timeout, TimeUnit timeUnit)
         throws ProcessingUnitAlreadyDeployedException {
 
-        return deploy(deployment.toProcessingUnitDeployment(admin),timeout,timeUnit);
+        return deploy(deployment.create(),timeout,timeUnit);
     }
     
     public void setProcessingUnitElasticProperties(ProcessingUnit pu, Map<String,String> properties) {
