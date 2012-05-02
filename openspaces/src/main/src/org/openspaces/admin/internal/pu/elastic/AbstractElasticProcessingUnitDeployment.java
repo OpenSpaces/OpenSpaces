@@ -17,7 +17,9 @@
  ******************************************************************************/
 package org.openspaces.admin.internal.pu.elastic;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.openspaces.admin.bean.BeanConfig;
@@ -26,6 +28,7 @@ import org.openspaces.admin.internal.pu.dependency.DefaultProcessingUnitDependen
 import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependencies;
 import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependency;
 import org.openspaces.admin.internal.pu.dependency.ProcessingUnitDetailedDependencies;
+import org.openspaces.admin.internal.pu.elastic.config.AbstractElasticProcessingUnitConfig;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
@@ -41,39 +44,23 @@ import com.gigaspaces.grid.gsa.GSProcessRestartOnExit;
 import com.gigaspaces.security.directory.User;
 import com.gigaspaces.security.directory.UserDetails;
 
+import java.util.Arrays;
+
 public abstract class AbstractElasticProcessingUnitDeployment {
 
-    private final String processingUnit;
-    private String name;
-    private final StringProperties contextProperties = new StringProperties();
-    private final StringProperties defaultContextProperties = new StringProperties();
-    private UserDetails userDetails;
-    private boolean secured;
-    private final Map<String,String> elasticProperties;
-
-    private final GridServiceContainerConfig containerConfig;
-    private final ElasticMachineIsolationConfig isolationConfig;
-    private final MachineProvisioningBeanPropertiesManager machineProvisioningPropertiesManager;
-    private final ScaleStrategyBeanPropertiesManager scaleStrategyPropertiesManager;
-    private ElasticMachineProvisioningConfig machineProvisioning;
-    private ScaleStrategyConfig scaleStrategy;
-    private InternalProcessingUnitDependencies<ProcessingUnitDependency,InternalProcessingUnitDependency> dependencies;
+    AbstractElasticProcessingUnitConfig config;
     
-    public AbstractElasticProcessingUnitDeployment(String processingUnit) {
-        this.processingUnit = processingUnit;
-        elasticProperties = new HashMap<String,String>();
-        containerConfig = new GridServiceContainerConfig(elasticProperties);       
-        isolationConfig = new ElasticMachineIsolationConfig(elasticProperties);
-        machineProvisioningPropertiesManager = new MachineProvisioningBeanPropertiesManager(elasticProperties);
-        scaleStrategyPropertiesManager = new ScaleStrategyBeanPropertiesManager(elasticProperties);
-        this.dependencies = new DefaultProcessingUnitDependencies();
+        
+    public AbstractElasticProcessingUnitDeployment(AbstractElasticProcessingUnitConfig config, String processingUnit) {
+        this.config = config;
+        config.setProcessingUnit(processingUnit);
     }
         
     protected void addContextPropertyDefault(String key, String defaultValue) {
         if (key == null) {
             throw new IllegalArgumentException("Key cannot be null");
         }
-        defaultContextProperties.put(key,defaultValue);
+        config.getDefaultContextProperties().put(key,defaultValue);
     }
     
     protected AbstractElasticProcessingUnitDeployment addContextProperty(String key, String value) {
@@ -83,12 +70,12 @@ public abstract class AbstractElasticProcessingUnitDeployment {
         if (key == null) {
             throw new IllegalArgumentException("Key cannot be null");
         }
-        contextProperties.put(key, value);
+        config.getContextProperties().put(key, value);
         return this;
     }
 
     protected AbstractElasticProcessingUnitDeployment secured(boolean secured) {
-        this.secured = secured;
+        config.setSecured(secured);
         return this;
     }
 
@@ -96,10 +83,10 @@ public abstract class AbstractElasticProcessingUnitDeployment {
         if (name == null) {
             throw new IllegalArgumentException("Name cannot be null");
         }
-        if (this.name != null && !this.name.equals(name)) {
-            throw new IllegalStateException("Name is already defined to " + this.name + " and cannot be modified to " + name);
+        if (config.getName() != null && !config.getName().equals(name)) {
+            throw new IllegalStateException("Name is already defined to " + config.getName() + " and cannot be modified to " + name);
         }
-        this.name = name;
+        config.setName(name);
         return this;
     }
 
@@ -108,10 +95,10 @@ public abstract class AbstractElasticProcessingUnitDeployment {
         if (userDetails == null) {
             throw new IllegalArgumentException("User details cannot be null");
         }
-        if (this.userDetails != null && !this.userDetails.equals(userDetails)) {
+        if (config.getUserDetails() != null && !config.getUserDetails().equals(userDetails)) {
             throw new IllegalStateException("User details are already defined and cannot be modified.");
         }
-        this.userDetails = userDetails;
+        config.setUserDetails(userDetails);
         return this;
     }
 
@@ -126,7 +113,7 @@ public abstract class AbstractElasticProcessingUnitDeployment {
      * and not a pure Java process.
      */
     protected AbstractElasticProcessingUnitDeployment useScriptToStartContainer() {
-        containerConfig.setUseScript(true);
+        config.setUseScript(true);
         return this;
     }
 
@@ -135,7 +122,7 @@ public abstract class AbstractElasticProcessingUnitDeployment {
      * that the JVM will start by default with.
      */
     protected AbstractElasticProcessingUnitDeployment overrideCommandLineArguments() {
-        containerConfig.setOverrideCommandLineArguments(true);
+        config.setOverrideCommandLineArguments(true);
         return this;
     }
 
@@ -145,7 +132,7 @@ public abstract class AbstractElasticProcessingUnitDeployment {
     }
 
     private void memoryCapacityPerContainer(long memoryInMB) {
-        containerConfig.setMaximumMemoryCapacityInMB(memoryInMB);
+        config.setMaximumMemoryCapacityInMB(memoryInMB);
     }
     
     protected AbstractElasticProcessingUnitDeployment memoryCapacityPerContainer(int memoryCapacityPerContainer, MemoryUnit unit) {
@@ -158,7 +145,9 @@ public abstract class AbstractElasticProcessingUnitDeployment {
      * can be controlled using <code>-Xmx512m</code>.
      */
     protected AbstractElasticProcessingUnitDeployment commandLineArgument(String argument) {
-        containerConfig.addCommandLineArgument(argument);
+        List<String> arguments = new ArrayList<String>(Arrays.asList(config.getCommandLineArguments()));
+        arguments.add(argument);
+        config.setCommandLineArguments(arguments.toArray(new String[arguments.size()]));
         return this;
     }
 
@@ -166,26 +155,26 @@ public abstract class AbstractElasticProcessingUnitDeployment {
      * Sets an environment variable that will be passed to forked process.
      */
     protected AbstractElasticProcessingUnitDeployment environmentVariable(String name, String value) {
-        containerConfig.setEnvironmentVariable(name, value);
+        Map<String,String> environmentVariables = config.getEnvironmentVariables();
+        environmentVariables.put(name, value);
+        config.setEnvironmentVariables(environmentVariables);
         return this;
     }
     
-    protected AbstractElasticProcessingUnitDeployment machineProvisioning(ElasticMachineProvisioningConfig config, String sharingId) {
+    protected AbstractElasticProcessingUnitDeployment machineProvisioning(ElasticMachineProvisioningConfig machineProvisioningConfig, String sharingId) {
+        
         if (sharingId == null) {
-            isolationConfig.setDedicated();
+            config.setDedicatedIsolation();
         }
         else {
-            isolationConfig.setSharingId(sharingId);
+            config.setSharedIsolation(sharingId);
         }
-        if ((config.getGridServiceAgentZones() == null || config.getGridServiceAgentZones().length == 0) && config.isGridServiceAgentZoneMandatory()) {
-            throw new IllegalArgumentException("isGridServiceAgentZoneMandatory returns true, but no Grid Service Agent zone is specified.");
-        }
-        machineProvisioning = config;
+        config.setMachineProvisioning(machineProvisioningConfig);
         return this;
     }    
 
-    protected AbstractElasticProcessingUnitDeployment scale(ScaleStrategyConfig config) {
-        scaleStrategy = config;
+    protected AbstractElasticProcessingUnitDeployment scale(ScaleStrategyConfig scaleStrategyConfig) {
+        config.setScaleStrategy(scaleStrategyConfig);
         return this;
     }
     
@@ -223,89 +212,11 @@ public abstract class AbstractElasticProcessingUnitDeployment {
     }
     
     protected ProcessingUnitDeployment toProcessingUnitDeployment() {
-        
-        if (containerConfig.getMaximumMemoryCapacityInMB() <= 0 && containerConfig.getMaximumJavaHeapSizeInMB() <=0) {
-            throw new IllegalArgumentException("maximumMemoryCapacity or Xmx commandline must be defined.");
-        }
-        else if (containerConfig.getMaximumMemoryCapacityInMB() <= 0 && containerConfig.getMaximumJavaHeapSizeInMB() > 0) {
-            // inject Xmx into maximumMemoryCapacityInMB
-            containerConfig.setMaximumMemoryCapacityInMB(containerConfig.getMaximumJavaHeapSizeInMB());
-        }
-        else if (containerConfig.getMaximumMemoryCapacityInMB() > 0 && containerConfig.getMaximumJavaHeapSizeInMB() <= 0) {
-            // inject maximumMemoryCapacityInMB into Xmx
-            containerConfig.addMaximumJavaHeapSizeInMBCommandLineArgument(containerConfig.getMaximumMemoryCapacityInMB());
-        }
-        else if (containerConfig.getMaximumMemoryCapacityInMB() < containerConfig.getMaximumJavaHeapSizeInMB() ) {
-            throw new IllegalArgumentException("maximumMemoryCapacity cannot be less than Xmx commandline argument.");
-        }
-        
-        if (containerConfig.getMinimumJavaHeapSizeInMB() <= 0) {
-            //inject Xmx into Xms
-            containerConfig.addMinimumJavaHeapSizeInMBCommandLineArgument(containerConfig.getMaximumJavaHeapSizeInMB());
-        }
-        else if (containerConfig.getMinimumJavaHeapSizeInMB() > containerConfig.getMaximumJavaHeapSizeInMB() ) {
-            throw new IllegalArgumentException("Xmx commandline argument "+ containerConfig.getMaximumJavaHeapSizeInMB() + "MB cannot be less than Xms commandline argument " + containerConfig.getMinimumJavaHeapSizeInMB() +"MB.");
-        }
-        
-        // ESM takes care of GSC restart, no need for GSA to restart GSC
-        containerConfig.setRestartOnExit(GSProcessRestartOnExit.NEVER); 
-        
-        if (machineProvisioning == null) {
-            machineProvisioning = new DiscoveredMachineProvisioningConfig();
-        }
-        
-        if (scaleStrategy == null) {
-            scaleStrategy = new ManualCapacityScaleConfig();
-        }
-        
-        if (machineProvisioning instanceof EagerScaleConfig && 
-            !(scaleStrategy instanceof DiscoveredMachineProvisioningConfig)) {
-            
-            throw new IllegalArgumentException("Eager scale does not support " + machineProvisioning.getClass() + " machine provisioning. Remove machineProvisioning or use DiscoveredMachineProvisioningConfig() instead.");
-         }
-
-        enableBean(machineProvisioningPropertiesManager, machineProvisioning);
-        enableBean(scaleStrategyPropertiesManager, scaleStrategy);
-            
-        ProcessingUnitDeployment deployment = 
-            new ProcessingUnitDeployment(this.processingUnit);
-        
-        if (this.name != null) {
-            deployment.name(name);
-        }
-        
-        if (this.secured) {
-            deployment.secured(secured);
-        }
-        
-        if (this.userDetails != null) {
-            deployment.userDetails(userDetails);
-        }
-
-        String containerZone = getDefaultZone();
-            
-        deployment.addZone(containerZone);
-        commandLineArgument("-Dcom.gs.zones=" + containerZone);
-    
-        // context properties defined by the user overrides the 
-        // default context properties defined by the derived class.
-        Map<String,String> context = defaultContextProperties.getProperties();
-        context.putAll(contextProperties.getProperties());
-        for (Map.Entry<String,String> entry : context.entrySet()) {
-            deployment.setContextProperty(entry.getKey(), entry.getValue());
-        }
-
-        for (String key : elasticProperties.keySet()) {
-            deployment.setElasticProperty(key, elasticProperties.get(key));
-        }
-        
-        deployment.setDependencies(dependencies);
-        
-        return deployment;
+        return config.toProcessingUnitDeployment();
     }
 
     protected Map<String,String> getElasticProperties() {
-        return this.elasticProperties;
+        return config.getElasticProperties();
     }
     
     /**
