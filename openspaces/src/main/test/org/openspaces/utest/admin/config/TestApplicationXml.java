@@ -26,21 +26,28 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
+ * Tests that reading an application.xml is the same as using fluent admin API. 
  * @author itaif
  * @since 9.0.1
  */
 
 public class TestApplicationXml extends TestCase {
 
+    private final String TEST_APPLICATION_XML = "/org/openspaces/utest/admin/config/test-application.xml";
+    
     public void testRelocationSchema() {
-        ApplicationContext context = new ClassPathXmlApplicationContext("/org/openspaces/utest/admin/config/test-application.xml");
-        ApplicationConfig applicationConfig = context.getBean(org.openspaces.admin.application.config.ApplicationConfig.class);
-        
-        Assert.assertNotNull(applicationConfig);
-        Assert.assertEquals(expectedResult(),applicationConfig);
+        Assert.assertEquals(createApplicationWithAdminApi(),createApplicationFromXml());
     }
 
-    private ApplicationConfig expectedResult() {
+    private ApplicationConfig createApplicationFromXml() {
+        
+        final ApplicationContext context = new ClassPathXmlApplicationContext(TEST_APPLICATION_XML);
+        final ApplicationConfig applicationConfig = context.getBean(org.openspaces.admin.application.config.ApplicationConfig.class);
+        Assert.assertNotNull(applicationConfig);
+        return applicationConfig;
+    }
+
+    private ApplicationConfig createApplicationWithAdminApi() {
         ApplicationDeployment applicationDeployment = new ApplicationDeployment("test-application")
         .addProcessingUnitDeployment(new SpaceDeployment("test-space"))//.addDependency("test-pu"))
         .addProcessingUnitDeployment(new ProcessingUnitDeployment("test-pu.jar"));
