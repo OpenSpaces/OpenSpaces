@@ -18,6 +18,7 @@
 package org.openspaces.admin.space;
 
 import org.openspaces.admin.internal.pu.dependency.ProcessingUnitDetailedDependencies;
+import org.openspaces.admin.internal.pu.elastic.AbstractElasticProcessingUnitDeployment;
 import org.openspaces.admin.internal.pu.elastic.config.ElasticStatefulProcessingUnitConfig;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
 import org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig;
@@ -45,30 +46,27 @@ import com.gigaspaces.security.directory.UserDetails;
  * @since 8.0
  */
 
-public class ElasticSpaceDeployment 
+public class ElasticSpaceDeployment extends AbstractElasticProcessingUnitDeployment 
     implements ElasticStatefulDeploymentTopology , AdvancedStatefulDeploymentTopology{
-
-    private final ElasticStatefulProcessingUnitDeployment deployment;
 
     /**
      * Constructs a new Space deployment with the space name that will be created (it will also
      * be the processing unit name).
      */
     public ElasticSpaceDeployment(String spaceName) {
-        this.deployment = new ElasticStatefulProcessingUnitDeployment("/templates/datagrid");
-        this.deployment.name(spaceName);
-        this.deployment.addContextProperty("dataGridName", spaceName);
+        super(new ElasticSpaceConfig());
+        getConfig().setName(spaceName);
     }
 
     @Override
     public ElasticSpaceDeployment maxMemoryCapacity(int maxMemoryCapacity, MemoryUnit unit) {
-        deployment.maxMemoryCapacity(maxMemoryCapacity,unit);
+        getConfig().setMaximumMemoryCapacityInMB(unit.toMegaBytes(maxMemoryCapacity));
         return this;
     }
 
     @Override
     public ElasticSpaceDeployment maxMemoryCapacity(String maxMemoryCapacity) {
-        deployment.maxMemoryCapacity(maxMemoryCapacity);
+        getConfig().setMaxMemoryCapacity(maxMemoryCapacity);
         return this;
     }
     
@@ -86,7 +84,7 @@ public class ElasticSpaceDeployment
     
     @Override
     public ElasticSpaceDeployment maxNumberOfCpuCores(int maxNumberOfCpuCores) {
-        deployment.maxNumberOfCpuCores(maxNumberOfCpuCores);
+        getConfig().setMaxNumberOfCpuCores(maxNumberOfCpuCores);
         return this;
     }
        
@@ -225,7 +223,7 @@ public class ElasticSpaceDeployment
     }
 
     @Override
-    public ElasticStatefulProcessingUnitConfig create() {
-        return deployment.create();
+    public ElasticSpaceConfig create() {
+        return (ElasticSpaceConfig) deployment.create();
     }
 }
