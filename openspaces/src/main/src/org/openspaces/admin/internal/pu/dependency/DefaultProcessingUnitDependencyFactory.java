@@ -21,7 +21,9 @@ public class DefaultProcessingUnitDependencyFactory implements InternalProcessin
 
     @Override
     public InternalProcessingUnitDependency create(String requiredProcessingUnitName) {
-        return new DefaultProcessingUnitDependency(requiredProcessingUnitName);
+        DefaultProcessingUnitDependency dependency = new DefaultProcessingUnitDependency();
+        dependency.setRequiredProcessingUnitName(requiredProcessingUnitName);
+        return dependency;
     }
 
 }

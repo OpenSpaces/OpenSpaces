@@ -49,7 +49,7 @@ public class TestApplicationXml extends TestCase {
 
     private ApplicationConfig createApplicationWithAdminApi() {
         ApplicationDeployment applicationDeployment = new ApplicationDeployment("test-application")
-        .addProcessingUnitDeployment(new SpaceDeployment("test-space"))//.addDependency("test-pu"))
+        .addProcessingUnitDeployment(new SpaceDeployment("test-space").addDependency("test-pu"))
         .addProcessingUnitDeployment(new ProcessingUnitDeployment("test-pu.jar"));
         return applicationDeployment.create();
     }

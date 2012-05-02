@@ -19,46 +19,59 @@ package org.openspaces.admin.internal.pu.dependency;
 
 import org.jini.rio.core.RequiredDependency;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
+import org.springframework.beans.factory.annotation.Required;
 
 public class DefaultProcessingUnitDependency implements InternalProcessingUnitDependency {
 
-    RequiredDependency requiredDependency;
+    private boolean waitForDeploymentToComplete;
+    private int minimumNumberOfDeployedInstancesPerPartition;
+    private int minimumNumberOfDeployedInstances;
+    private String requiredProcessingUnitName;    
     
-    public DefaultProcessingUnitDependency(String requiredProcessingUnitName) {
-        this(new RequiredDependency(requiredProcessingUnitName));
-    }
-    
-    private DefaultProcessingUnitDependency(RequiredDependency requiredDependency) {
-        this.requiredDependency = requiredDependency;
+    public boolean getWaitForDeploymentToComplete() {
+        return waitForDeploymentToComplete;
     }
 
-    public boolean getWaitForDeploymentToComplete() {
-        return this.requiredDependency.getWaitForDeploymentToComplete();
-    }
-    
     public void setWaitForDeploymentToComplete(boolean waitForDeploymentToComplete) {
-        this.requiredDependency.setWaitForDeploymentToComplete(waitForDeploymentToComplete);
+        this.waitForDeploymentToComplete = waitForDeploymentToComplete;
     }
 
     public int getMinimumNumberOfDeployedInstancesPerPartition() {
-        return this.requiredDependency.getMinimumNumberOfDeployedInstancesPerPartition();
+        return minimumNumberOfDeployedInstancesPerPartition;
     }
-    
+
     public void setMinimumNumberOfDeployedInstancesPerPartition(int minimumNumberOfDeployedInstancesPerPartition) {
-        this.requiredDependency.setMinimumNumberOfDeployedInstancesPerPartition(minimumNumberOfDeployedInstancesPerPartition);
+        this.minimumNumberOfDeployedInstancesPerPartition = minimumNumberOfDeployedInstancesPerPartition;
     }
 
     public int getMinimumNumberOfDeployedInstances() {
-        return this.requiredDependency.getMinimumNumberOfDeployedInstances();
-    }
-    
-    public void setMinimumNumberOfDeployedInstances(int minimumNumberOfDeployedInstances) {
-        this.requiredDependency.setMinimumNumberOfDeployedInstances(minimumNumberOfDeployedInstances);
+        return minimumNumberOfDeployedInstances;
     }
 
-    @Override
+    public void setMinimumNumberOfDeployedInstances(int minimumNumberOfDeployedInstances) {
+        this.minimumNumberOfDeployedInstances = minimumNumberOfDeployedInstances;
+    }
+
     public String getRequiredProcessingUnitName() {
-        return this.requiredDependency.getRequiredProcessingUnitName();
+        return requiredProcessingUnitName;
+    }
+
+    private void init(RequiredDependency requiredDependency) {
+        this.requiredProcessingUnitName = requiredDependency.getRequiredProcessingUnitName();
+        this.minimumNumberOfDeployedInstances = requiredDependency.getMinimumNumberOfDeployedInstances();
+        this.minimumNumberOfDeployedInstancesPerPartition = requiredDependency.getMinimumNumberOfDeployedInstancesPerPartition();
+        this.waitForDeploymentToComplete = requiredDependency.getWaitForDeploymentToComplete();
+    }
+    
+    @Required
+    public void setRequiredProcessingUnitName(String requiredProcessingUnitName) {
+        this.requiredProcessingUnitName = requiredProcessingUnitName;
+    }
+
+    /**
+     * For spring injection
+     */
+    public DefaultProcessingUnitDependency() {
     }
 
     @Override
@@ -68,12 +81,52 @@ public class DefaultProcessingUnitDependency implements InternalProcessingUnitDe
 
     @Override
     public void mergeDependency(RequiredDependency otherRequiredDependency) {
+        RequiredDependency requiredDependency = toRequiredDependency();
         requiredDependency.merge(otherRequiredDependency);
+        init(requiredDependency);
+    }
+    
+    
+    @Override
+    public RequiredDependency toRequiredDependency() {
+        RequiredDependency requiredDependency = new RequiredDependency(requiredProcessingUnitName);
+        requiredDependency.setMinimumNumberOfDeployedInstances(minimumNumberOfDeployedInstances);
+        requiredDependency.setMinimumNumberOfDeployedInstancesPerPartition(minimumNumberOfDeployedInstancesPerPartition);
+        requiredDependency.setWaitForDeploymentToComplete(waitForDeploymentToComplete);
+        return requiredDependency;
     }
 
     @Override
-    public RequiredDependency toRequiredDependency() {
-        return new RequiredDependency(requiredDependency);
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + minimumNumberOfDeployedInstances;
+        result = prime * result + minimumNumberOfDeployedInstancesPerPartition;
+        result = prime * result + ((requiredProcessingUnitName == null) ? 0 : requiredProcessingUnitName.hashCode());
+        result = prime * result + (waitForDeploymentToComplete ? 1231 : 1237);
+        return result;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        DefaultProcessingUnitDependency other = (DefaultProcessingUnitDependency) obj;
+        if (minimumNumberOfDeployedInstances != other.minimumNumberOfDeployedInstances)
+            return false;
+        if (minimumNumberOfDeployedInstancesPerPartition != other.minimumNumberOfDeployedInstancesPerPartition)
+            return false;
+        if (requiredProcessingUnitName == null) {
+            if (other.requiredProcessingUnitName != null)
+                return false;
+        } else if (!requiredProcessingUnitName.equals(other.requiredProcessingUnitName))
+            return false;
+        if (waitForDeploymentToComplete != other.waitForDeploymentToComplete)
+            return false;
+        return true;
+    }
 }
