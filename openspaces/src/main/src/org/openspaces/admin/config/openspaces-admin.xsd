@@ -10,4 +10,11 @@
 
     <xsd:import namespace="http://www.springframework.org/schema/beans"/>
     <xsd:import namespace="http://www.springframework.org/schema/tool"/>
+    
+    <xsd:element name="dependency">
+    	<xsd:complexType>
+          <xsd:attribute name="required-processing-unit-name" type="xsd:string" use="required"/>
+          <xsd:attribute name="wait-for-deployment-to-complete" type="xsd:boolean" use="required"/>
+        </xsd:complexType>
+    </xsd:element>
 </xsd:schema>

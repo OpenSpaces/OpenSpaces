@@ -33,15 +33,20 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public class TestApplicationXml extends TestCase {
 
-    private final String TEST_APPLICATION_XML = "/org/openspaces/utest/admin/config/test-application.xml";
+    private final String TEST_APPLICATION_RAW_XML = "/org/openspaces/utest/admin/config/test-application-raw.xml";
+    private final String TEST_APPLICATION_XML = "/org/openspaces/utest/admin/config/test-application-raw.xml";
     
-    public void testRelocationSchema() {
-        Assert.assertEquals(createApplicationWithAdminApi(),createApplicationFromXml());
+    public void testRawXml() {
+        Assert.assertEquals(createApplicationWithAdminApi(), createApplicationFromXml(TEST_APPLICATION_RAW_XML));
     }
 
-    private ApplicationConfig createApplicationFromXml() {
+    public void testOsAdminXml() {
+        Assert.assertEquals(createApplicationWithAdminApi(), createApplicationFromXml(TEST_APPLICATION_XML));
+    }
+    
+    private ApplicationConfig createApplicationFromXml(String relativePath) {
         
-        final ApplicationContext context = new ClassPathXmlApplicationContext(TEST_APPLICATION_XML);
+        final ApplicationContext context = new ClassPathXmlApplicationContext(relativePath);
         final ApplicationConfig applicationConfig = context.getBean(org.openspaces.admin.application.config.ApplicationConfig.class);
         Assert.assertNotNull(applicationConfig);
         return applicationConfig;

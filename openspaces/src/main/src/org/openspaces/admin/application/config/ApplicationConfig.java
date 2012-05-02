@@ -18,6 +18,7 @@ package org.openspaces.admin.application.config;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.openspaces.admin.config.XmlProperty;
 import org.openspaces.admin.pu.topology.ProcessingUnitConfigFactory;
 import org.springframework.beans.factory.annotation.Required;
 
@@ -35,6 +36,7 @@ public class ApplicationConfig {
     }
 
     @Required
+    @XmlProperty
     public void setName(String name) {
         this.name = name;
     }
@@ -43,6 +45,7 @@ public class ApplicationConfig {
         return processingUnits;
     }
     
+    @XmlProperty
     public void setProcessingUnits(List<ProcessingUnitConfigFactory> processingUnitDeployments) {
         this.processingUnits = processingUnitDeployments;
     }
@@ -87,6 +90,4 @@ public class ApplicationConfig {
             return false;
         return true;
     }
-    
-    
 }

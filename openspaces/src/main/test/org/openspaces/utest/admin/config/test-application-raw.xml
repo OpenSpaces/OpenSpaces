@@ -23,7 +23,11 @@
 
 					<property name="deploymentDependencies">
 						<list>
-							<os-admin:dependency required-processing-unit-name="test-pu" wait-for-deployment-to-complete="true"/>
+							<bean
+								class="org.openspaces.admin.pu.dependency.config.ProcessingUnitDependencyConfig">
+								<property name="requiredProcessingUnitName" value="test-pu" />
+								<property name="waitForDeploymentToComplete" value="true" />
+							</bean>
 						</list>
 					</property>
 				</bean>

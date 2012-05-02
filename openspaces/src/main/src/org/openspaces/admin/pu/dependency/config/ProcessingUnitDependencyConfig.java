@@ -18,6 +18,7 @@
 package org.openspaces.admin.pu.dependency.config;
 
 import org.jini.rio.core.RequiredDependency;
+import org.openspaces.admin.config.XmlProperty;
 import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependency;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
 import org.springframework.beans.factory.annotation.Required;
@@ -33,6 +34,7 @@ public class ProcessingUnitDependencyConfig implements InternalProcessingUnitDep
         return waitForDeploymentToComplete;
     }
 
+    @XmlProperty
     public void setWaitForDeploymentToComplete(boolean waitForDeploymentToComplete) {
         this.waitForDeploymentToComplete = waitForDeploymentToComplete;
     }
@@ -41,6 +43,7 @@ public class ProcessingUnitDependencyConfig implements InternalProcessingUnitDep
         return minimumNumberOfDeployedInstancesPerPartition;
     }
 
+    @XmlProperty
     public void setMinimumNumberOfDeployedInstancesPerPartition(int minimumNumberOfDeployedInstancesPerPartition) {
         this.minimumNumberOfDeployedInstancesPerPartition = minimumNumberOfDeployedInstancesPerPartition;
     }
@@ -49,6 +52,7 @@ public class ProcessingUnitDependencyConfig implements InternalProcessingUnitDep
         return minimumNumberOfDeployedInstances;
     }
 
+    @XmlProperty
     public void setMinimumNumberOfDeployedInstances(int minimumNumberOfDeployedInstances) {
         this.minimumNumberOfDeployedInstances = minimumNumberOfDeployedInstances;
     }
@@ -65,6 +69,7 @@ public class ProcessingUnitDependencyConfig implements InternalProcessingUnitDep
     }
     
     @Required
+    @XmlProperty
     public void setRequiredProcessingUnitName(String requiredProcessingUnitName) {
         this.requiredProcessingUnitName = requiredProcessingUnitName;
     }
