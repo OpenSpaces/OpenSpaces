@@ -292,7 +292,7 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
     public Application deploy(ApplicationDeployment deployment, long timeout, TimeUnit timeUnit) throws ApplicationAlreadyDeployedException, ProcessingUnitAlreadyDeployedException {
         GridServiceManager gridServiceManager = getGridServiceManager();
         if (gridServiceManager == null) {
-            throw new AdminException("No Grid Service Manager found to deploy [" + deployment.create().getApplicationName() + "]");
+            throw new AdminException("No Grid Service Manager found to deploy [" + deployment.create().getName() + "]");
         }
         return gridServiceManager.deploy(deployment, timeout, timeUnit);
     }
