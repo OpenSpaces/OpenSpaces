@@ -559,7 +559,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             throws ApplicationAlreadyDeployedException, ProcessingUnitAlreadyDeployedException {
         
         long end = System.currentTimeMillis()  + timeUnit.toMillis(timeout);
-        String applicationName = applicationDeployment.create().getApplicationName();
+        String applicationName = applicationDeployment.create().getName();
         if (applicationName == null) {
             throw new IllegalArgumentException("Application Name cannot be null");
         }
@@ -570,7 +570,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             throw new ApplicationAlreadyDeployedException(applicationName);
         }
         
-        List<ProcessingUnitConfigFactory> processingUnitConfigFactories = applicationDeployment.create().getProcessingUnitDeployments();
+        List<ProcessingUnitConfigFactory> processingUnitConfigFactories = applicationDeployment.create().getProcessingUnits();
         if (processingUnitConfigFactories.size() == 0) {
             throw new IllegalArgumentException("Application deployment must contain at least one processing unit deployment");
         }
