@@ -17,34 +17,17 @@
  ******************************************************************************/
 package org.openspaces.admin.internal.pu.elastic;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import org.openspaces.admin.bean.BeanConfig;
-import org.openspaces.admin.bean.BeanConfigPropertiesManager;
-import org.openspaces.admin.internal.pu.dependency.DefaultProcessingUnitDependencies;
-import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependencies;
-import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependency;
 import org.openspaces.admin.internal.pu.dependency.ProcessingUnitDetailedDependencies;
 import org.openspaces.admin.internal.pu.elastic.config.AbstractElasticProcessingUnitConfig;
-import org.openspaces.admin.pu.ProcessingUnit;
-import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
 import org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig;
-import org.openspaces.admin.pu.elastic.config.DiscoveredMachineProvisioningConfig;
-import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
-import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
 import org.openspaces.core.util.MemoryUnit;
-import org.openspaces.core.util.StringProperties;
 
-import com.gigaspaces.grid.gsa.GSProcessRestartOnExit;
 import com.gigaspaces.security.directory.User;
 import com.gigaspaces.security.directory.UserDetails;
-
-import java.util.Arrays;
 
 public abstract class AbstractElasticProcessingUnitDeployment {
 
@@ -180,7 +163,7 @@ public abstract class AbstractElasticProcessingUnitDeployment {
     }
     
     protected AbstractElasticProcessingUnitDeployment addDependencies(ProcessingUnitDetailedDependencies<? extends ProcessingUnitDependency> detailedDependencies) {
-        dependencies.addDetailedDependencies(detailedDependencies);
+        config.getDependencies().addDetailedDependencies(detailedDependencies);
         return this;
     }
     

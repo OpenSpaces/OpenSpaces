@@ -165,23 +165,6 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigFactory{
         return elasticProperties;
     }
 
-    public void setDeploymentDependencies(List<ProcessingUnitDependency> dependencies) {
-        
-        DefaultProcessingUnitDeploymentDependencies deploymentDependencies = new DefaultProcessingUnitDeploymentDependencies();
-        for (ProcessingUnitDependency dependency : dependencies) {
-            deploymentDependencies.addDependency(dependency);
-        }
-        this.dependencies.setDeploymentDependencies(deploymentDependencies);
-    }
-    
-    public List<ProcessingUnitDependency> getDeploymentDependencies() {
-        List<ProcessingUnitDependency> dependenciesAsList = new ArrayList<ProcessingUnitDependency>();
-        for (String name : this.dependencies.getDeploymentDependencies().getRequiredProcessingUnitsNames()) {
-            dependenciesAsList.add(this.dependencies.getDeploymentDependencies().getDependencyByName(name));
-        }
-        return dependenciesAsList;
-    }
-    
     /**
      * @see ProcessingUnitDeployment#maxInstancesPerZone(String, int)
      */
@@ -264,7 +247,7 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigFactory{
             deployOptions.add("embed://" + entry.getKey() + "=" + entry.getValue());
         }
 
-        for (Parameter parameter : dependencies.toCommandLineParameters()) {
+        for (Parameter parameter : getDependencies().toCommandLineParameters()) {
             deployOptions.add("-"+parameter.getName());
             for (String arg : parameter.getArguments()) {
                 deployOptions.add(arg);
@@ -284,5 +267,33 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigFactory{
     @Override
     public ProcessingUnitConfig toProcessingUnitConfig(Admin admin) {
         return this;
+    }
+
+    public InternalProcessingUnitDependencies<ProcessingUnitDependency,InternalProcessingUnitDependency> getDependencies() {
+        return dependencies;
+    }
+
+    public void setDependencies(InternalProcessingUnitDependencies<ProcessingUnitDependency,InternalProcessingUnitDependency> dependencies) {
+        this.dependencies = dependencies;
+    }
+    
+    /**
+     * A helper method for setting conditions for processing unit deployment.
+     */
+    public void setDeploymentDependencies(List<ProcessingUnitDependency> dependencies) {
+        
+        DefaultProcessingUnitDeploymentDependencies deploymentDependencies = new DefaultProcessingUnitDeploymentDependencies();
+        for (ProcessingUnitDependency dependency : dependencies) {
+            deploymentDependencies.addDependency(dependency);
+        }
+        this.getDependencies().setDeploymentDependencies(deploymentDependencies);
+    }
+    
+    public List<ProcessingUnitDependency> getDeploymentDependencies() {
+        List<ProcessingUnitDependency> dependenciesAsList = new ArrayList<ProcessingUnitDependency>();
+        for (String name : this.getDependencies().getDeploymentDependencies().getRequiredProcessingUnitsNames()) {
+            dependenciesAsList.add(this.getDependencies().getDeploymentDependencies().getDependencyByName(name));
+        }
+        return dependenciesAsList;
     }
 }

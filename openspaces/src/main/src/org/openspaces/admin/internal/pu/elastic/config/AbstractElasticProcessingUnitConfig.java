@@ -24,6 +24,7 @@ import java.util.Map;
 import org.openspaces.admin.bean.BeanConfig;
 import org.openspaces.admin.bean.BeanConfigPropertiesManager;
 import org.openspaces.admin.internal.pu.dependency.DefaultProcessingUnitDependencies;
+import org.openspaces.admin.internal.pu.dependency.DefaultProcessingUnitDeploymentDependencies;
 import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependencies;
 import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependency;
 import org.openspaces.admin.internal.pu.elastic.ElasticMachineIsolationConfig;
@@ -129,14 +130,6 @@ public class AbstractElasticProcessingUnitConfig {
 
     public void setElasticProperties(Map<String,String> elasticProperties) {
         this.elasticProperties = elasticProperties;
-    }
-
-    public InternalProcessingUnitDependencies<ProcessingUnitDependency,InternalProcessingUnitDependency> getDependencies() {
-        return dependencies;
-    }
-
-    public void setDependencies(InternalProcessingUnitDependencies<ProcessingUnitDependency,InternalProcessingUnitDependency> dependencies) {
-        this.dependencies = dependencies;
     }
 
     public void setUseScript(boolean useScript) {
@@ -337,5 +330,30 @@ public class AbstractElasticProcessingUnitConfig {
         propertiesManager.disableAllBeans();
         propertiesManager.setBeanConfig(config.getBeanClassName(), config.getProperties());
         propertiesManager.enableBean(config.getBeanClassName());
+    }
+    
+    public InternalProcessingUnitDependencies<ProcessingUnitDependency,InternalProcessingUnitDependency> getDependencies() {
+        return dependencies;
+    }
+
+    public void setDependencies(InternalProcessingUnitDependencies<ProcessingUnitDependency,InternalProcessingUnitDependency> dependencies) {
+        this.dependencies = dependencies;
+    }
+    
+    public void setDeploymentDependencies(List<ProcessingUnitDependency> dependencies) {
+        
+        DefaultProcessingUnitDeploymentDependencies deploymentDependencies = new DefaultProcessingUnitDeploymentDependencies();
+        for (ProcessingUnitDependency dependency : dependencies) {
+            deploymentDependencies.addDependency(dependency);
+        }
+        this.getDependencies().setDeploymentDependencies(deploymentDependencies);
+    }
+    
+    public List<ProcessingUnitDependency> getDeploymentDependencies() {
+        List<ProcessingUnitDependency> dependenciesAsList = new ArrayList<ProcessingUnitDependency>();
+        for (String name : this.getDependencies().getDeploymentDependencies().getRequiredProcessingUnitsNames()) {
+            dependenciesAsList.add(this.getDependencies().getDeploymentDependencies().getDependencyByName(name));
+        }
+        return dependenciesAsList;
     }
 }
