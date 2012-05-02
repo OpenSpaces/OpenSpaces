@@ -18,6 +18,7 @@
 package org.openspaces.admin.space;
 
 import org.openspaces.admin.internal.pu.dependency.ProcessingUnitDetailedDependencies;
+import org.openspaces.admin.internal.pu.elastic.config.ElasticStatefulProcessingUnitConfig;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
 import org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig;
 import org.openspaces.admin.pu.elastic.ElasticStatefulProcessingUnitDeployment;
@@ -25,7 +26,6 @@ import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.topology.AdvancedStatefulDeploymentTopology;
 import org.openspaces.admin.pu.elastic.topology.ElasticStatefulDeploymentTopology;
-import org.openspaces.admin.pu.topology.ProcessingUnitConfigFactory;
 import org.openspaces.core.util.MemoryUnit;
 
 import com.gigaspaces.security.directory.UserDetails;
@@ -225,7 +225,7 @@ public class ElasticSpaceDeployment
     }
 
     @Override
-    public ProcessingUnitConfigFactory create() {
+    public ElasticStatefulProcessingUnitConfig create() {
         return deployment.create();
     }
 }
