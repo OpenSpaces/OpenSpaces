@@ -48,14 +48,17 @@ import java.util.Arrays;
 
 public abstract class AbstractElasticProcessingUnitDeployment {
 
-    AbstractElasticProcessingUnitConfig config;
-    
+    private final AbstractElasticProcessingUnitConfig config;
         
     public AbstractElasticProcessingUnitDeployment(AbstractElasticProcessingUnitConfig config, String processingUnit) {
         this.config = config;
         config.setProcessingUnit(processingUnit);
     }
         
+    protected AbstractElasticProcessingUnitConfig getConfig() {
+        return config;
+    }
+    
     protected void addContextPropertyDefault(String key, String defaultValue) {
         if (key == null) {
             throw new IllegalArgumentException("Key cannot be null");
@@ -181,10 +184,6 @@ public abstract class AbstractElasticProcessingUnitDeployment {
         return this;
     }
     
-    protected ProcessingUnitDeployment toProcessingUnitDeployment() {
-        return config.toProcessingUnitDeployment();
-    }
-
     protected Map<String,String> getElasticProperties() {
         return config.getElasticProperties();
     }

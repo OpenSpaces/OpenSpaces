@@ -19,13 +19,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
+import org.openspaces.admin.Admin;
 import org.openspaces.admin.internal.pu.dependency.DefaultProcessingUnitDependencies;
 import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependencies;
 import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependency;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
+import org.openspaces.admin.pu.topology.ProcessingUnitConfigFactory;
 import org.openspaces.pu.container.support.CommandLineParser.Parameter;
 
 import com.gigaspaces.grid.zone.ZoneHelper;
@@ -35,7 +36,7 @@ import com.gigaspaces.security.directory.UserDetails;
  * @author itaif
  * @since 9.0.1
  */
-public class ProcessingUnitConfig {
+public class ProcessingUnitConfig implements ProcessingUnitConfigFactory{
 
     private String processingUnit;
 
@@ -55,7 +56,7 @@ public class ProcessingUnitConfig {
 
     private List<String> zones = new ArrayList<String>();
 
-    private Properties contextProperties = new Properties();
+    private Map<String,String> contextProperties = new HashMap<String,String>();
 
     private UserDetails userDetails;
 
@@ -131,7 +132,7 @@ public class ProcessingUnitConfig {
         return zones;
     }
 
-    public Properties getContextProperties() {
+    public Map<String,String> getContextProperties() {
         return contextProperties;
     }
 
@@ -181,8 +182,12 @@ public class ProcessingUnitConfig {
     /**
      * @see ProcessingUnitDeployment#setContextProperty(String, String)
      */
-    public void setContextProperties(Properties contextProperties) {
+    public void setContextProperties(Map<String,String> contextProperties) {
         this.contextProperties = contextProperties;
+    }
+    
+    public void setContextProperty(String key, String value) {
+        contextProperties.put(key, value);
     }
 
     /**
@@ -244,7 +249,7 @@ public class ProcessingUnitConfig {
             }
         }
         
-        for (Map.Entry<?,?> entry : contextProperties.entrySet()) {
+        for (Map.Entry<String,String> entry : contextProperties.entrySet()) {
             deployOptions.add("-properties");
             deployOptions.add("embed://" + entry.getKey() + "=" + entry.getValue());
         }
@@ -260,5 +265,14 @@ public class ProcessingUnitConfig {
 
         return deployOptions.toArray(new String[deployOptions.size()]);
 
+    }
+
+    public void setZones(List<String> zones) {
+        this.zones = zones;
+    }
+
+    @Override
+    public ProcessingUnitConfig toProcessingUnitConfig(Admin admin) {
+        return this;
     }
 }

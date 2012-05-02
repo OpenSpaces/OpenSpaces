@@ -35,7 +35,6 @@ package org.openspaces.admin.pu;
 import java.io.File;
 import java.util.Map;
 
-import org.openspaces.admin.Admin;
 import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependencies;
 import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependency;
 import org.openspaces.admin.internal.pu.dependency.ProcessingUnitDetailedDependencies;
@@ -324,11 +323,6 @@ public class ProcessingUnitDeployment implements ProcessingUnitDeploymentTopolog
     @Deprecated
     public Map<String,String> getElasticProperties() {
         return config.getElasticProperties();
-    }
-
-    @Override
-    public ProcessingUnitDeployment toProcessingUnitDeployment(Admin admin) {
-        return this;
     }
     
     public ProcessingUnitConfig create() {

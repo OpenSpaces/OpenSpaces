@@ -18,18 +18,13 @@
 package org.openspaces.admin.pu.elastic;
 
 import java.io.File;
-import java.util.Map;
 
-import org.openspaces.admin.Admin;
-import org.openspaces.admin.AdminException;
 import org.openspaces.admin.internal.pu.dependency.ProcessingUnitDetailedDependencies;
 import org.openspaces.admin.internal.pu.elastic.AbstractElasticProcessingUnitDeployment;
-import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
 import org.openspaces.admin.internal.pu.elastic.ProcessingUnitSchemaConfig;
-import org.openspaces.admin.pu.ProcessingUnitDeployment;
+import org.openspaces.admin.internal.pu.elastic.config.ElasticStatefulProcessingUnitConfig;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDeploymentDependenciesConfigurer;
-import org.openspaces.admin.pu.elastic.config.DiscoveredMachineProvisioningConfig;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.topology.AdvancedStatefulDeploymentTopology;
@@ -52,24 +47,13 @@ import com.gigaspaces.security.directory.UserDetails;
  */
 public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProcessingUnitDeployment 
     implements ElasticStatefulDeploymentTopology , AdvancedStatefulDeploymentTopology {
-
-    public static final String MAX_MEMORY_CAPACITY_MEGABYTES_DYNAMIC_PROPERTY = "max-memory-capacity-megabytes";
-    public static final String MIN_MEMORY_CAPACITY_MEGABYTES_DYNAMIC_PROPERTY = "min-memory-capacity-megabytes";
-    
-    Map<String,String> scaleStrategy;
-    private long maxMemoryCapacityInMB;
-    private int numberOfBackupInstancesPerPartition = 1;
-    private int numberOfPartitions;
-    private int maxProcessingUnitInstancesFromSamePartitionPerMachine = 1;
-    private double maxNumberOfCpuCores;
-    private double minNumberOfCpuCoresPerMachine;
     
     /**
      * Constructs a stateful processing unit deployment based on the specified processing unit name (should
      * exists under the <code>[GS ROOT]/deploy</code> directory.
      */
     public ElasticStatefulProcessingUnitDeployment(String processingUnit) {
-        super(processingUnit);
+        super(new ElasticStatefulProcessingUnitConfig(), processingUnit);
         
         // add an elastic property indicating the cluster schema partitioned-sync2backup
         new ProcessingUnitSchemaConfig(super.getElasticProperties()).setPartitionedSync2BackupSchema();        
@@ -90,13 +74,13 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
 
     @Override
     public ElasticStatefulProcessingUnitDeployment maxMemoryCapacity(int maxMemoryCapacity, MemoryUnit unit) {
-        this.maxMemoryCapacityInMB = unit.toMegaBytes(maxMemoryCapacity);
+        getConfig().setMaxMemoryCapacityInMB(unit.toMegaBytes(maxMemoryCapacity));
         return this;
     }
 
     @Override
     public ElasticStatefulProcessingUnitDeployment maxMemoryCapacity(String maxMemoryCapacity) {
-        this.maxMemoryCapacityInMB = MemoryUnit.toMegaBytes(maxMemoryCapacity);
+        getConfig().setMaxMemoryCapacityInMB(MemoryUnit.toMegaBytes(maxMemoryCapacity));
         return this;
     }
     
@@ -108,24 +92,24 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
     
     @Override
     public ElasticStatefulProcessingUnitDeployment numberOfBackupsPerPartition(int numberOfBackupsPerPartition) {
-        this.numberOfBackupInstancesPerPartition = numberOfBackupsPerPartition;
+        getConfig().setNumberOfBackupInstancesPerPartition(numberOfBackupsPerPartition);
         return this;
     }
     
     @Override
     public ElasticStatefulProcessingUnitDeployment numberOfPartitions(int numberOfPartitions) {
-        this.numberOfPartitions = numberOfPartitions;
+        getConfig().setNumberOfPartitions(numberOfPartitions);
         return this;
     }
 
     protected ElasticStatefulProcessingUnitDeployment maxProcessingUnitInstancesFromSamePartitionPerMachine(int maxProcessingUnitInstancesFromSamePartitionPerMachine) {
-        this.maxProcessingUnitInstancesFromSamePartitionPerMachine  = maxProcessingUnitInstancesFromSamePartitionPerMachine;
+        getConfig().setMaxProcessingUnitInstancesFromSamePartitionPerMachine(maxProcessingUnitInstancesFromSamePartitionPerMachine);
         return this;
     }
     
     @Override
     public ElasticStatefulProcessingUnitDeployment maxNumberOfCpuCores(int maxNumberOfCpuCores) {
-        this.maxNumberOfCpuCores = maxNumberOfCpuCores;
+        getConfig().setMaxNumberOfCpuCores(maxNumberOfCpuCores);
         return this;
     }
 
@@ -134,7 +118,7 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
      */
     @Deprecated
     public ElasticStatefulProcessingUnitDeployment minNumberOfCpuCoresPerMachine(double minNumberOfCpuCoresPerMachine) {
-        this.minNumberOfCpuCoresPerMachine = minNumberOfCpuCoresPerMachine;
+        getConfig().setMinNumberOfCpuCoresPerMachine(minNumberOfCpuCoresPerMachine);
         return this;
     }
     
@@ -222,21 +206,12 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
     }
     
     @Override
-    protected ElasticStatefulProcessingUnitDeployment machineProvisioning(ElasticMachineProvisioningConfig config, String sharingId) {
-        if (config == null) {
-            throw new IllegalArgumentException("config");
+    protected ElasticStatefulProcessingUnitDeployment machineProvisioning(ElasticMachineProvisioningConfig machineProvisioningConfig, String sharingId) {
+        if (machineProvisioningConfig == null) {
+            throw new IllegalArgumentException("machineProvisioningConfig");
         }
         
-        if (minNumberOfCpuCoresPerMachine <= 0) {
-            // try to figure out from machine provisioning
-            minNumberOfCpuCoresPerMachine = config.getMinimumNumberOfCpuCoresPerMachine();
-            if (minNumberOfCpuCoresPerMachine <= 0 &&
-                !(config instanceof DiscoveredMachineProvisioningConfig)) {
-                
-                throw new AdminException("Elastic Machine Provisioning configuration must supply the expected minimum number of CPU cores per machine.");
-            }
-        }
-        return (ElasticStatefulProcessingUnitDeployment) super.machineProvisioning(config, sharingId);
+        return (ElasticStatefulProcessingUnitDeployment) super.machineProvisioning(machineProvisioningConfig, sharingId);
     }
     
     @Override
@@ -262,73 +237,12 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
     public ElasticStatefulProcessingUnitDeployment addDependencies(ProcessingUnitDetailedDependencies<? extends ProcessingUnitDependency> detailedDependencies) {
         return (ElasticStatefulProcessingUnitDeployment) super.addDependencies(detailedDependencies); 
     }
-    @Override
-    public ProcessingUnitDeployment toProcessingUnitDeployment(Admin admin) {
-      
-        ProcessingUnitDeployment deployment = super.toProcessingUnitDeployment();
-        
-        if (this.maxMemoryCapacityInMB == 0 && this.numberOfPartitions == 0) {
-            throw new IllegalStateException("maxMemoryCapacity must be defined.");
-        }
-        
-        if (this.maxMemoryCapacityInMB != 0 && this.numberOfPartitions != 0) {
-            throw new IllegalStateException("numberOfPartitions conflicts with maxMemoryCapacity. Please specify only one of these properties.");
-        }
-        
-        if (this.maxNumberOfCpuCores != 0 && this.numberOfPartitions != 0) {
-            throw new IllegalStateException("numberOfPartitions conflicts with maxNumberOfCpuCores. Please specify only one of these properties.");
-        }
 
-        int numberOfInstances = this.numberOfPartitions;
-        if (numberOfInstances == 0) {
-            numberOfInstances = Math.max(calcNumberOfPartitionsFromMemoryRequirements(),calcNumberOfPartitionsFromCpuRequirements(admin));
-        }
-        
-        if (numberOfBackupInstancesPerPartition == 0) {
-            // allow instances from DIFFERENT partitions to deploy on same Container
-            deployment.maxInstancesPerMachine(0);   
-            deployment.maxInstancesPerVM(0);
-        }
-        else {
-            // disallow instances from SAME partition to deploy on same Container
-            deployment.maxInstancesPerVM(1);
-            // allow or disallow instances from SAME partition to deploy on same Container
-            deployment.maxInstancesPerMachine(this.maxProcessingUnitInstancesFromSamePartitionPerMachine);
-        }
-        
-        deployment
-        .partitioned(numberOfInstances, this.numberOfBackupInstancesPerPartition);
-      
-        return deployment;
+    public ElasticStatefulProcessingUnitConfig create() {
+        return getConfig();
     }
     
-    protected int calcNumberOfPartitionsFromMemoryRequirements() {
-        
-        long maximumMemoryCapacityInMB = new GridServiceContainerConfig(super.getElasticProperties()).getMaximumMemoryCapacityInMB();
-                
-        if (maximumMemoryCapacityInMB <= 0) {
-            throw new IllegalStateException("memoryCapacityPerContainer is undefined.");    
-        }
-                
-        double totalNumberOfInstances = Math.ceil(((double)maxMemoryCapacityInMB)/maximumMemoryCapacityInMB);
-        int numberOfPartitions = (int) Math.ceil(totalNumberOfInstances / (numberOfBackupInstancesPerPartition+1));
-                
-        return Math.max(1, numberOfPartitions);
+    protected ElasticStatefulProcessingUnitConfig getConfig() {
+        return (ElasticStatefulProcessingUnitConfig) super.getConfig();
     }
-
-    protected int calcNumberOfPartitionsFromCpuRequirements(Admin admin) {
-        
-        int maximumNumberOfPrimaryInstances = 1;
-        
-        if (maxNumberOfCpuCores > 0) {
-            
-            if (minNumberOfCpuCoresPerMachine <= 0) {
-                minNumberOfCpuCoresPerMachine = DiscoveredMachineProvisioningConfig.detectMinimumNumberOfCpuCoresPerMachine(admin);
-            }
-            
-            maximumNumberOfPrimaryInstances =(int) Math.ceil(this.maxNumberOfCpuCores / minNumberOfCpuCoresPerMachine);
-        }
-        return maximumNumberOfPrimaryInstances; 
-    }
-   
 }

@@ -34,13 +34,14 @@ package org.openspaces.admin.space;
 
 import java.io.File;
 
-import org.openspaces.admin.Admin;
 import org.openspaces.admin.internal.pu.dependency.ProcessingUnitDetailedDependencies;
-import org.openspaces.admin.pu.ProcessingUnitDeployment;
+import org.openspaces.admin.pu.config.SpaceConfig;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDeploymentDependenciesConfigurer;
+import org.openspaces.admin.pu.topology.ProcessingUnitConfigFactory;
 import org.openspaces.admin.pu.topology.ProcessingUnitDeploymentTopology;
 
+import com.gigaspaces.security.directory.User;
 import com.gigaspaces.security.directory.UserDetails;
 
 /**
@@ -53,26 +54,24 @@ import com.gigaspaces.security.directory.UserDetails;
  */
 public class SpaceDeployment implements ProcessingUnitDeploymentTopology {
 
-    private final ProcessingUnitDeployment deployment;
-
-    private final String spaceName;
+    private final SpaceConfig config;
 
     /**
      * Constructs a new Space deployment with the space name that will be created (it will also
      * be the processing unit name).
      */
     public SpaceDeployment(String spaceName) {
-        this.spaceName = spaceName;
-        this.deployment = new ProcessingUnitDeployment("/templates/datagrid");
-        this.deployment.name(spaceName);
-        this.deployment.setContextProperty("dataGridName", spaceName);
+        config = new SpaceConfig();
+        config.setName(spaceName);
     }
 
     /**
-     * Returns the Space name of the deployment.
+     * Returns the Space name of the config.set
+     * Use {@link SpaceConfig#getName()} instead
      */
+    @Deprecated
     public String getSpaceName() {
-        return spaceName;
+        return config.getName();
     }
 
     /**
@@ -121,23 +120,23 @@ public class SpaceDeployment implements ProcessingUnitDeploymentTopology {
      * @see #partitioned(int, int)
      */
     public SpaceDeployment clusterSchema(String clusterSchema) {
-        deployment.clusterSchema(clusterSchema);
+        config.setClusterSchema(clusterSchema);
         return this;
     }
 
     /**
-     * Sets the number of instances of the space deployment.
+     * Sets the number of instances of the space config.set
      */
     public SpaceDeployment numberOfInstances(int numberOfInstances) {
-        deployment.numberOfInstances(numberOfInstances);
+        config.setNumberOfInstances(numberOfInstances);
         return this;
     }
 
     /**
-     * Sets the number of backups per instance of the space deployment.
+     * Sets the number of backups per instance of the space config.set
      */
     public SpaceDeployment numberOfBackups(int numberOfBackups) {
-        deployment.numberOfBackups(numberOfBackups);
+        config.setNumberOfBackups(numberOfBackups);
         return this;
     }
 
@@ -151,7 +150,7 @@ public class SpaceDeployment implements ProcessingUnitDeploymentTopology {
      * the same virtual machine.
      */
     public SpaceDeployment maxInstancesPerVM(int maxInstancesPerVM) {
-        deployment.maxInstancesPerVM(maxInstancesPerVM);
+        config.setMaxInstancesPerVM(maxInstancesPerVM);
         return this;
     }
 
@@ -165,7 +164,7 @@ public class SpaceDeployment implements ProcessingUnitDeploymentTopology {
      * the same machine.
      */
     public SpaceDeployment maxInstancesPerMachine(int maxInstancesPerMachine) {
-        deployment.maxInstancesPerMachine(maxInstancesPerMachine);
+        config.setMaxInstancesPerMachine(maxInstancesPerMachine);
         return this;
     }
 
@@ -179,7 +178,7 @@ public class SpaceDeployment implements ProcessingUnitDeploymentTopology {
      * the same zone.
      */
     public SpaceDeployment maxInstancesPerZone(String zone, int maxInstancesPerZone) {
-        deployment.maxInstancesPerZone(zone, maxInstancesPerZone);
+        config.getMaxInstancesPerZone().put(zone, maxInstancesPerZone);
         return this;
     }
 
@@ -187,7 +186,7 @@ public class SpaceDeployment implements ProcessingUnitDeploymentTopology {
      * Adds a zone where the processing unit is allowed to be deployed on.
      */
     public SpaceDeployment addZone(String zone) {
-        deployment.addZone(zone);
+        config.getZones().add(zone);
         return this;
     }
 
@@ -196,7 +195,7 @@ public class SpaceDeployment implements ProcessingUnitDeploymentTopology {
      * unit configuration.
      */
     public SpaceDeployment setContextProperty(String key, String value) {
-        deployment.setContextProperty(key, value);
+        config.setContextProperty(key, value);
         return this;
     }
 
@@ -204,7 +203,7 @@ public class SpaceDeployment implements ProcessingUnitDeploymentTopology {
      * Will deploy a secured space. Note, by setting user details the space will be secured automatically.
      */
     public SpaceDeployment secured(boolean secured) {
-        deployment.secured(secured);
+        config.setSecured(secured);
         return this;
     }
 
@@ -213,16 +212,16 @@ public class SpaceDeployment implements ProcessingUnitDeploymentTopology {
      * processing unit.
      */
     public SpaceDeployment userDetails(UserDetails userDetails) {
-        deployment.userDetails(userDetails);
+        config.setUserDetails(userDetails);
         return this;
     }
 
     /**
      * Sets the username and password (effectively making the processing unit secured)
-     * for the processing unit deployment.
+     * for the processing unit config.set
      */
     public SpaceDeployment userDetails(String userName, String password) {
-        deployment.userDetails(userName, password);
+        config.setUserDetails(new User(userName,password));
         return this;
     }
 
@@ -230,7 +229,7 @@ public class SpaceDeployment implements ProcessingUnitDeploymentTopology {
      * Sets an external SLA definition location to be loaded.
      */
     public SpaceDeployment slaLocation(String slaLocation) {
-        deployment.slaLocation(slaLocation);
+        config.setSlaLocation(slaLocation);
         return this;
     }
 
@@ -238,7 +237,7 @@ public class SpaceDeployment implements ProcessingUnitDeploymentTopology {
      * Sets an external SLA definition location to be loaded.
      */
     public SpaceDeployment slaLocation(File slaLocation) {
-        deployment.slaLocation(slaLocation);
+        slaLocation(slaLocation.getAbsolutePath());
         return this;
     }
 
@@ -246,7 +245,7 @@ public class SpaceDeployment implements ProcessingUnitDeploymentTopology {
      * Postpones deployment of processing unit instances until the specified dependencies are met.
      * 
      * The following example postpones the deployment of this processing unit until B has completed the deployment and C has at least one instance deployed.
-     * deployment.addDependencies(new ProcessingUnitDeploymentDependenciesConfigurer().dependsOnDeployment("B").dependsOnMinimumNumberOfDeployedInstances("C",1).create())
+     * config.setaddDependencies(new ProcessingUnitDeploymentDependenciesConfigurer().dependsOnDeployment("B").dependsOnMinimumNumberOfDeployedInstances("C",1).create())
      * 
      * @see ProcessingUnitDeploymentDependenciesConfigurer
      * @since 8.0.6
@@ -254,32 +253,26 @@ public class SpaceDeployment implements ProcessingUnitDeploymentTopology {
     @Override
     public SpaceDeployment addDependencies(
             ProcessingUnitDetailedDependencies<? extends ProcessingUnitDependency> deploymentDependencies) {
-        deployment.addDependencies(deploymentDependencies);
+        config.getDependencies().addDetailedDependencies(deploymentDependencies);
         return this;
     }
     /**
      * Postpones deployment of processing unit instances deployment until the specified processing unit deployment is complete.
      * 
-     * Same as: deployment.addDependencies(new ProcessingUnitDeploymentDependenciesConfigurer().dependsOnDeployment(requiredProcessingUnitName).create())
+     * Same as: config.setaddDependencies(new ProcessingUnitDeploymentDependenciesConfigurer().dependsOnDeployment(requiredProcessingUnitName).create())
      * 
      * @since 8.0.6
      */
     public SpaceDeployment addDependency(String requiredProcessingUnitName) {
-        deployment.addDependency(requiredProcessingUnitName);
+        addDependencies(
+                new ProcessingUnitDeploymentDependenciesConfigurer()
+                .dependsOnDeployed(requiredProcessingUnitName)
+                .create());
         return this;
-    }    
-    
-    /**
-     * Transforms the space deployment to a processing unit deployment (it is a processing unit after all,
-     * that simply starts an embedded space).
-     */
-    public ProcessingUnitDeployment toProcessingUnitDeployment() {
-        return deployment;
-    }
-    
-    @Override
-    public ProcessingUnitDeployment toProcessingUnitDeployment(Admin admin) {
-        return deployment;
     }
 
+    @Override
+    public ProcessingUnitConfigFactory create() {
+        return config;
+    }
 }

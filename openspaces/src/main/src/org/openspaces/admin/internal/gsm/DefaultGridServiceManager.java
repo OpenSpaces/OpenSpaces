@@ -71,6 +71,7 @@ import org.openspaces.admin.pu.elastic.ElasticStatelessProcessingUnitDeployment;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
 import org.openspaces.admin.pu.events.ProcessingUnitAddedEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitRemovedEventListener;
+import org.openspaces.admin.pu.topology.ProcessingUnitConfigFactory;
 import org.openspaces.admin.pu.topology.ProcessingUnitDeploymentTopology;
 import org.openspaces.admin.space.ElasticSpaceDeployment;
 import org.openspaces.admin.space.SpaceDeployment;
@@ -153,8 +154,13 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         return deploy(deployment, applicationName, timeout, timeUnit);
     }
     
-    private ProcessingUnit deploy(ProcessingUnitDeployment deployment, String applicationName, long timeout, TimeUnit timeUnit) {
+    private ProcessingUnit deploy(ProcessingUnitDeployment deployment, String applicationName, long timeout,
+            TimeUnit timeUnit) {
         return deploy(deployment.create(), applicationName, timeout, timeUnit);
+    }
+
+    private ProcessingUnit deploy(ProcessingUnitConfigFactory puConfigFactory, String applicationName, long timeout, TimeUnit timeUnit) {
+        return deploy(puConfigFactory.toProcessingUnitConfig(admin), applicationName, timeout, timeUnit);
     }
     
     private ProcessingUnit deploy(ProcessingUnitConfig puConfig, String applicationName, long timeout, TimeUnit timeUnit) {
@@ -548,7 +554,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             throws ApplicationAlreadyDeployedException, ProcessingUnitAlreadyDeployedException {
         
         long end = System.currentTimeMillis()  + timeUnit.toMillis(timeout);
-        String applicationName = applicationDeployment.getDeploymentOptions().getApplicationName();
+        String applicationName = applicationDeployment.create().getApplicationName();
         if (applicationName == null) {
             throw new IllegalArgumentException("Application Name cannot be null");
         }
@@ -559,22 +565,22 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             throw new ApplicationAlreadyDeployedException(applicationName);
         }
         
-        ProcessingUnitDeployment[] processingUnitDeployments = applicationDeployment.getDeploymentOptions().getProcessingUnitDeployments(admin);
-        if (processingUnitDeployments.length == 0) {
+        List<ProcessingUnitConfigFactory> processingUnitConfigFactories = applicationDeployment.create().getProcessingUnitDeployments();
+        if (processingUnitConfigFactories.size() == 0) {
             throw new IllegalArgumentException("Application deployment must contain at least one processing unit deployment");
         }
         
         // iterate in a deterministic order, so if deployed in parallel by another admin client, only one will succeed
         boolean timedOut = false;
         Set<String> deployedPuNames = new HashSet<String>();
-        for (ProcessingUnitDeployment deployment : processingUnitDeployments) {
+        for (ProcessingUnitConfigFactory puConfigFactory : processingUnitConfigFactories) {
             try {
                 long remaining = end - System.currentTimeMillis();
                 if (remaining <= 0) {
                     timedOut = true;
                     break;
                 }
-                ProcessingUnit pu = deploy(deployment,applicationName, remaining,TimeUnit.MILLISECONDS);
+                ProcessingUnit pu = deploy(puConfigFactory,applicationName, remaining,TimeUnit.MILLISECONDS);
                 if (pu == null) {
                     timedOut = true;
                     break;

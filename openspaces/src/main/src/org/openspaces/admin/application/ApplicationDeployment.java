@@ -17,12 +17,7 @@
  ******************************************************************************/
 package org.openspaces.admin.application;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.openspaces.admin.application.config.ApplicationConfig;
-import org.openspaces.admin.internal.application.DefaultApplicationDeploymentOptions;
-import org.openspaces.admin.internal.application.InternalApplicationDeploymentOptions;
 import org.openspaces.admin.pu.topology.ProcessingUnitDeploymentTopology;
 
 /**
@@ -32,19 +27,17 @@ import org.openspaces.admin.pu.topology.ProcessingUnitDeploymentTopology;
  */
 public class ApplicationDeployment {
 
-    ApplicationConfig config;
-    private final String applicationName;
-    private final List<ProcessingUnitDeploymentTopology> processingUnitDeployments;
+    private final ApplicationConfig config;
     
     public ApplicationDeployment(String applicationName) {
-        this.applicationName = applicationName;
-        processingUnitDeployments = new ArrayList<ProcessingUnitDeploymentTopology>();
+        config = new ApplicationConfig();
+        config.setApplicationName(applicationName);
     }
     
     public ApplicationDeployment(String applicationName, ProcessingUnitDeploymentTopology ... processingUnitDeployments) {
         this(applicationName);
         for (ProcessingUnitDeploymentTopology puDeployment : processingUnitDeployments) {
-            deployProcessingUnit(puDeployment);
+            addProcessingUnitDeployment(puDeployment);
         }
     }
 
@@ -61,13 +54,12 @@ public class ApplicationDeployment {
      * All processing units are deployed in parallel (unless dependencies are defined)
      */
     public ApplicationDeployment addProcessingUnitDeployment(ProcessingUnitDeploymentTopology puDeployment) {
-        processingUnitDeployments.add(puDeployment);
+        config.addProcessingUnitDeployment(puDeployment.create());
         return this;
     }
     
-    public InternalApplicationDeploymentOptions getDeploymentOptions() {
-        DefaultApplicationDeploymentOptions deploymentOptions = new DefaultApplicationDeploymentOptions(applicationName,processingUnitDeployments);
-        return deploymentOptions;
-    }
+    public ApplicationConfig create() {
+        return config;
 
+    }
 }

@@ -17,9 +17,7 @@
  ******************************************************************************/
 package org.openspaces.admin.pu.topology;
 
-import org.openspaces.admin.Admin;
 import org.openspaces.admin.internal.pu.dependency.ProcessingUnitDetailedDependencies;
-import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDeploymentDependenciesConfigurer;
 
@@ -64,8 +62,7 @@ public interface ProcessingUnitDeploymentTopology {
     ProcessingUnitDeploymentTopology addDependency(String requiredProcessingUnitName);
     
     /**
-     * Converts the deployment to a standard {@link ProcessingUnitDeployment} 
+     * Converts fluent API object to a POJO
      */
-    ProcessingUnitDeployment toProcessingUnitDeployment(Admin admin);
-    
+    ProcessingUnitConfigFactory create();
 }

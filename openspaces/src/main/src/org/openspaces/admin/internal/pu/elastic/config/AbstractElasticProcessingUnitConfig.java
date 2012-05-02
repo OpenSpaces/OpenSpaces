@@ -31,14 +31,13 @@ import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
 import org.openspaces.admin.internal.pu.elastic.MachineProvisioningBeanPropertiesManager;
 import org.openspaces.admin.internal.pu.elastic.ScaleStrategyBeanPropertiesManager;
 import org.openspaces.admin.pu.ProcessingUnit;
-import org.openspaces.admin.pu.ProcessingUnitDeployment;
+import org.openspaces.admin.pu.config.ProcessingUnitConfig;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
 import org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig;
 import org.openspaces.admin.pu.elastic.config.DiscoveredMachineProvisioningConfig;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
-import org.openspaces.core.util.StringProperties;
 
 import com.gigaspaces.grid.gsa.GSProcessRestartOnExit;
 import com.gigaspaces.security.directory.UserDetails;
@@ -51,8 +50,8 @@ public class AbstractElasticProcessingUnitConfig {
 
     private String processingUnit;
     private String name;
-    private StringProperties contextProperties = new StringProperties();
-    private StringProperties defaultContextProperties = new StringProperties();
+    private Map<String,String> contextProperties = new HashMap<String,String> ();
+    private Map<String,String> defaultContextProperties = new HashMap<String,String> ();
     private UserDetails userDetails;
     private boolean secured;
     private Map<String,String> elasticProperties = new HashMap<String,String>();
@@ -92,19 +91,19 @@ public class AbstractElasticProcessingUnitConfig {
         this.name = name;
     }
 
-    public StringProperties getContextProperties() {
+    public Map<String,String> getContextProperties() {
         return contextProperties;
     }
 
-    public void setContextProperties(StringProperties contextProperties) {
+    public void setContextProperties(Map<String,String> contextProperties) {
         this.contextProperties = contextProperties;
     }
 
-    public StringProperties getDefaultContextProperties() {
+    public Map<String,String> getDefaultContextProperties() {
         return defaultContextProperties;
     }
 
-    public void setDefaultContextProperties(StringProperties defaultContextProperties) {
+    public void setDefaultContextProperties(Map<String,String> defaultContextProperties) {
         this.defaultContextProperties = defaultContextProperties;
     }
 
@@ -196,6 +195,10 @@ public class AbstractElasticProcessingUnitConfig {
         return getElasticMachineIsolationConfig().getSharingId();
     }
 
+    public ElasticMachineProvisioningConfig getMachineProvisioning() {
+        return machineProvisioning;
+    }
+
     public void setMachineProvisioning(ElasticMachineProvisioningConfig machineProvisioningConfig) {
         if ((machineProvisioningConfig.getGridServiceAgentZones() == null || machineProvisioningConfig.getGridServiceAgentZones().length == 0) && machineProvisioningConfig.isGridServiceAgentZoneMandatory()) {
             throw new IllegalArgumentException("isGridServiceAgentZoneMandatory returns true, but no Grid Service Agent zone is specified.");
@@ -203,7 +206,8 @@ public class AbstractElasticProcessingUnitConfig {
         this.machineProvisioning = machineProvisioningConfig;
     }
 
-    public ProcessingUnitDeployment toProcessingUnitDeployment() {
+    public ProcessingUnitConfig toProcessingUnitConfig() {
+        
         GridServiceContainerConfig containerConfig = getGridServiceContainerConfig();
         if (containerConfig.getMaximumMemoryCapacityInMB() <= 0 && containerConfig.getMaximumJavaHeapSizeInMB() <=0) {
             throw new IllegalArgumentException("maximumMemoryCapacity or Xmx commandline must be defined.");
@@ -248,41 +252,36 @@ public class AbstractElasticProcessingUnitConfig {
         enableBean(getMachineProvisioningBeanPropertiesManager(), machineProvisioning);
         enableBean(getScaleStrategyBeanPropertiesManager(), scaleStrategy);
             
-        ProcessingUnitDeployment deployment = 
-            new ProcessingUnitDeployment(this.processingUnit);
+        ProcessingUnitConfig config = new ProcessingUnitConfig();
+        config.setProcessingUnit(this.processingUnit);
         
         if (this.name != null) {
-            deployment.name(name);
+            config.setName(name);
         }
         
         if (this.secured) {
-            deployment.secured(secured);
+            config.setSecured(secured);
         }
         
         if (this.userDetails != null) {
-            deployment.userDetails(userDetails);
+            config.setUserDetails(userDetails);
         }
 
         String containerZone = getDefaultZone();
-            
-        deployment.addZone(containerZone);
         addCommandLineArgument("-Dcom.gs.zones=" + containerZone);
+        List<String> zones = new ArrayList<String>(Arrays.asList(new String[]{containerZone}));
+        config.setZones(zones);
     
         // context properties defined by the user overrides the 
         // default context properties defined by the derived class.
-        Map<String,String> context = defaultContextProperties.getProperties();
-        context.putAll(contextProperties.getProperties());
-        for (Map.Entry<String,String> entry : context.entrySet()) {
-            deployment.setContextProperty(entry.getKey(), entry.getValue());
-        }
-
-        for (String key : elasticProperties.keySet()) {
-            deployment.setElasticProperty(key, elasticProperties.get(key));
-        }
+        Map<String,String> mergedContextProperties = defaultContextProperties;
+        mergedContextProperties.putAll(contextProperties);
+        config.setContextProperties(mergedContextProperties);
+        config.setElasticProperties(elasticProperties);
         
-        deployment.setDependencies(dependencies);
+        config.setDependencies(dependencies);
         
-        return deployment;
+        return config;
     }
 
     public void setScaleStrategy(ScaleStrategyConfig scaleStrategy) {

@@ -17,7 +17,7 @@ package org.openspaces.admin.application.config;
 
 import java.util.List;
 
-import org.openspaces.admin.pu.topology.ProcessingUnitDeploymentTopology;
+import org.openspaces.admin.pu.topology.ProcessingUnitConfigFactory;
 
 /**
  * @author itaif
@@ -25,7 +25,26 @@ import org.openspaces.admin.pu.topology.ProcessingUnitDeploymentTopology;
  */
 public class ApplicationConfig {
 
-    private final String applicationName;
-    private final List<ProcessingUnitDeploymentTopology> processingUnitDeployments;
+    private String applicationName;
+    private List<ProcessingUnitConfigFactory> processingUnitDeployments;
     
+    public String getApplicationName() {
+        return applicationName;
+    }
+    
+    public void setApplicationName(String applicationName) {
+        this.applicationName = applicationName;
+    }
+    
+    public List<ProcessingUnitConfigFactory> getProcessingUnitDeployments() {
+        return processingUnitDeployments;
+    }
+    
+    public void setProcessingUnitDeployments(List<ProcessingUnitConfigFactory> processingUnitDeployments) {
+        this.processingUnitDeployments = processingUnitDeployments;
+    }
+
+    public void addProcessingUnitDeployment(ProcessingUnitConfigFactory puConfigFactory) {
+        processingUnitDeployments.add(puConfigFactory);
+    }
 }
