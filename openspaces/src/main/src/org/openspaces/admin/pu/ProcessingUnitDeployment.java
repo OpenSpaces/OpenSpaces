@@ -33,24 +33,18 @@
 package org.openspaces.admin.pu;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import org.openspaces.admin.Admin;
-import org.openspaces.admin.internal.pu.dependency.DefaultProcessingUnitDependencies;
 import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependencies;
 import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependency;
 import org.openspaces.admin.internal.pu.dependency.ProcessingUnitDetailedDependencies;
+import org.openspaces.admin.pu.config.ProcessingUnitConfig;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependencies;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDeploymentDependenciesConfigurer;
 import org.openspaces.admin.pu.topology.ProcessingUnitDeploymentTopology;
-import org.openspaces.pu.container.support.CommandLineParser.Parameter;
 
-import com.gigaspaces.grid.zone.ZoneHelper;
 import com.gigaspaces.security.directory.User;
 import com.gigaspaces.security.directory.UserDetails;
 
@@ -63,44 +57,15 @@ import com.gigaspaces.security.directory.UserDetails;
  */
 public class ProcessingUnitDeployment implements ProcessingUnitDeploymentTopology {
 
-    private final String processingUnit;
-
-    private String name;
-
-    private String clusterSchema;
-
-    private Integer numberOfInstances;
-
-    private Integer numberOfBackups;
-
-    private Integer maxInstancesPerVM;
-
-    private Integer maxInstancesPerMachine;
-
-    private final Map<String, Integer> maxInstancesPerZone = new HashMap<String, Integer>();
-
-    private final List<String> zones = new ArrayList<String>();
-
-    private final Properties contextProperties = new Properties();
-
-    private UserDetails userDetails;
-
-    private String slaLocation;
-
-    private Boolean secured;
-
-    private final Map<String,String> elasticProperties;
-
-    private InternalProcessingUnitDependencies<ProcessingUnitDependency,InternalProcessingUnitDependency> dependencies;
-
+    private final ProcessingUnitConfig config;
+    
     /**
      * Constructs a processing unit deployment based on the specified processing unit name (should
      * exists under the <code>[GS ROOT]/deploy</code> directory.
      */
     public ProcessingUnitDeployment(String processingUnitName) {
-        this.processingUnit = processingUnitName;
-        this.elasticProperties = new HashMap<String,String>();
-        this.dependencies = new DefaultProcessingUnitDependencies();
+        config = new ProcessingUnitConfig();
+        config.setProcessingUnit(processingUnitName);
     }
 
     /**
@@ -115,7 +80,7 @@ public class ProcessingUnitDeployment implements ProcessingUnitDeploymentTopolog
      * Returns the processing unit that will be deployed.
      */
     public String getProcessingUnit() {
-        return processingUnit;
+        return config.getProcessingUnit();
     }
 
     /**
@@ -123,7 +88,7 @@ public class ProcessingUnitDeployment implements ProcessingUnitDeploymentTopolog
      * parameter passed in the constructor.
      */
     public ProcessingUnitDeployment name(String name) {
-        this.name = name;
+        config.setName(name);
         return this;
     }
 
@@ -172,7 +137,7 @@ public class ProcessingUnitDeployment implements ProcessingUnitDeploymentTopolog
      * defined within the processing unit.
      */
     public ProcessingUnitDeployment clusterSchema(String clusterSchema) {
-        this.clusterSchema = clusterSchema;
+        config.setClusterSchema(clusterSchema);
         return this;
     }
 
@@ -180,7 +145,7 @@ public class ProcessingUnitDeployment implements ProcessingUnitDeploymentTopolog
      * Sets the number of instances that will be deployed as part of this processing unit instance.
      */
     public ProcessingUnitDeployment numberOfInstances(int numberOfInstances) {
-        this.numberOfInstances = numberOfInstances;
+        config.setNumberOfInstances(numberOfInstances);
         return this;
     }
 
@@ -189,7 +154,7 @@ public class ProcessingUnitDeployment implements ProcessingUnitDeploymentTopolog
      * when the processing unit has an embedded space.
      */
     public ProcessingUnitDeployment numberOfBackups(int numberOfBackups) {
-        this.numberOfBackups = numberOfBackups;
+        config.setNumberOfBackups(numberOfBackups);
         return this;
     }
 
@@ -203,7 +168,7 @@ public class ProcessingUnitDeployment implements ProcessingUnitDeploymentTopolog
      * the same virtual machine.
      */
     public ProcessingUnitDeployment maxInstancesPerVM(int maxInstancesPerVM) {
-        this.maxInstancesPerVM = maxInstancesPerVM;
+        config.setMaxInstancesPerVM(maxInstancesPerVM);
         return this;
     }
 
@@ -217,7 +182,7 @@ public class ProcessingUnitDeployment implements ProcessingUnitDeploymentTopolog
      * the same machine.
      */
     public ProcessingUnitDeployment maxInstancesPerMachine(int maxInstancesPerMachine) {
-        this.maxInstancesPerMachine = maxInstancesPerMachine;
+        config.setMaxInstancesPerMachine(maxInstancesPerMachine);
         return this;
     }
 
@@ -231,7 +196,7 @@ public class ProcessingUnitDeployment implements ProcessingUnitDeploymentTopolog
      * the same zone.
      */
     public ProcessingUnitDeployment maxInstancesPerZone(String zone, int maxInstancesPerZone) {
-        this.maxInstancesPerZone.put(zone, maxInstancesPerZone);
+        config.getMaxInstancesPerZone().put(zone, maxInstancesPerZone);
         return this;
     }
 
@@ -239,7 +204,7 @@ public class ProcessingUnitDeployment implements ProcessingUnitDeploymentTopolog
      * Adds a zone where the processing unit is allowed to be deployed on.
      */
     public ProcessingUnitDeployment addZone(String zone) {
-        zones.add(zone);
+        config.getZones().add(zone);
         return this;
     }
 
@@ -248,7 +213,7 @@ public class ProcessingUnitDeployment implements ProcessingUnitDeploymentTopolog
      * unit configuration.
      */
     public ProcessingUnitDeployment setContextProperty(String key, String value) {
-        contextProperties.put(key, value);
+        config.getContextProperties().put(key, value);
         return this;
     }
 
@@ -256,7 +221,7 @@ public class ProcessingUnitDeployment implements ProcessingUnitDeploymentTopolog
      * Will deploy a secured processing unit. Note, by setting user details the processing unit will be secured automatically.
      */
     public ProcessingUnitDeployment secured(boolean secured) {
-        this.secured = secured;
+        config.setSecured(secured);
         return this;
     }
 
@@ -265,7 +230,7 @@ public class ProcessingUnitDeployment implements ProcessingUnitDeploymentTopolog
      * processing unit.
      */
     public ProcessingUnitDeployment userDetails(UserDetails userDetails) {
-        this.userDetails = userDetails;
+        config.setUserDetails(userDetails);
         return this;
     }
 
@@ -273,7 +238,7 @@ public class ProcessingUnitDeployment implements ProcessingUnitDeploymentTopolog
      * Sets an external SLA definition location to be loaded.
      */
     public ProcessingUnitDeployment slaLocation(String slaLocation) {
-        this.slaLocation = slaLocation;
+        config.setSlaLocation(slaLocation);
         return this;
     }
 
@@ -281,7 +246,7 @@ public class ProcessingUnitDeployment implements ProcessingUnitDeploymentTopolog
      * Sets an external SLA definition location to be loaded.
      */
     public ProcessingUnitDeployment slaLocation(File slaLocation) {
-        this.slaLocation = slaLocation.getAbsolutePath();
+        config.setSlaLocation(slaLocation.getAbsolutePath());
         return this;
     }
 
@@ -290,16 +255,16 @@ public class ProcessingUnitDeployment implements ProcessingUnitDeploymentTopolog
      * for the processing unit deployment.
      */
     public ProcessingUnitDeployment userDetails(String userName, String password) {
-        this.userDetails = new User(userName, password);
+        config.setUserDetails(new User(userName, password));
         return this;
     }
 
     public Boolean isSecured() {
-        return secured;
+        return config.getSecured();
     }
 
     public UserDetails getUserDetails() {
-        return this.userDetails;
+        return config.getUserDetails();
     }
     
     /**
@@ -312,7 +277,7 @@ public class ProcessingUnitDeployment implements ProcessingUnitDeploymentTopolog
      * @since 8.0.6
      */
     public ProcessingUnitDeployment addDependencies(ProcessingUnitDetailedDependencies<? extends ProcessingUnitDependency> detailedDependencies) {
-        dependencies.addDetailedDependencies(detailedDependencies);
+        config.getDependencies().addDetailedDependencies(detailedDependencies);
         return this;
     }
 
@@ -332,82 +297,21 @@ public class ProcessingUnitDeployment implements ProcessingUnitDeploymentTopolog
      * Transforms this deployment into a set of deployment options.
      */
     public String[] getDeploymentOptions() {
-        List<String> deployOptions = new ArrayList<String>();
-
-        if (name != null) {
-            deployOptions.add("-override-name");
-            deployOptions.add(name);
-        }
-        if (slaLocation != null) {
-            deployOptions.add("-sla");
-            deployOptions.add(slaLocation);
-        }
-        if (clusterSchema != null || numberOfInstances != null || numberOfBackups != null) {
-            deployOptions.add("-cluster");
-            if (clusterSchema != null) {
-                deployOptions.add("schema=" + clusterSchema);
-            }
-            if (numberOfInstances != null) {
-                String totalMembers = "total_members=" + numberOfInstances;
-                if (numberOfBackups != null) {
-                    totalMembers += "," + numberOfBackups;
-                }
-                deployOptions.add(totalMembers);
-            }
-        }
-        if (maxInstancesPerVM != null) {
-            deployOptions.add("-max-instances-per-vm");
-            deployOptions.add(maxInstancesPerVM.toString());
-        }
-        if (maxInstancesPerMachine != null) {
-            deployOptions.add("-max-instances-per-machine");
-            deployOptions.add(maxInstancesPerMachine.toString());
-        }
-        if (!maxInstancesPerZone.isEmpty()) {
-            deployOptions.add("-max-instances-per-zone");
-            deployOptions.add(ZoneHelper.unparse(maxInstancesPerZone));
-        }
-        if (!zones.isEmpty()) {
-            deployOptions.add("-zones");
-            for (String requiredZone : zones) {
-                deployOptions.add(requiredZone);
-            }
-        }
-        if (!elasticProperties.isEmpty()){
-            deployOptions.add("-elastic-properties");
-            for (Map.Entry<String, String> elasticProp : elasticProperties.entrySet()){
-                deployOptions.add(elasticProp.getKey() + "=" + elasticProp.getValue());
-            }
-        }
-        
-        for (Map.Entry<?,?> entry : contextProperties.entrySet()) {
-            deployOptions.add("-properties");
-            deployOptions.add("embed://" + entry.getKey() + "=" + entry.getValue());
-        }
-
-        for (Parameter parameter : dependencies.toCommandLineParameters()) {
-            deployOptions.add("-"+parameter.getName());
-            for (String arg : parameter.getArguments()) {
-                deployOptions.add(arg);
-            }
-        }
-        
-        deployOptions.add(getProcessingUnit());
-
-        return deployOptions.toArray(new String[deployOptions.size()]);
+        return config.getDeploymentOptions();
     }
 
     public ProcessingUnitDeployment setElasticProperty(String key, String value) {
-        this.elasticProperties.put(key,value);
+        config.getElasticProperties().put(key,value);
         return this;
     }
 
+    @SuppressWarnings("unchecked")
     public void setDependencies(ProcessingUnitDependencies<ProcessingUnitDependency> dependencies) {
-        this.dependencies = (InternalProcessingUnitDependencies<ProcessingUnitDependency, InternalProcessingUnitDependency>)dependencies;
+        config.setDependencies((InternalProcessingUnitDependencies<ProcessingUnitDependency, InternalProcessingUnitDependency>)dependencies);
     }
     
     public Map<String,String> getElasticProperties() {
-        return this.elasticProperties;
+        return config.getElasticProperties();
     }
 
     @Override
