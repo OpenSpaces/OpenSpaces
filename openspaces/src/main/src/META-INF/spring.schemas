@@ -20,6 +20,7 @@ http\://www.openspaces.org/schema/9.0/remoting/openspaces-remoting.xsd=org/opens
 http\://www.openspaces.org/schema/9.0/jdbc/openspaces-jdbc.xsd=org/openspaces/jdbc/config/openspaces-jdbc.xsd
 http\://www.openspaces.org/schema/9.0/jms/openspaces-jms.xsd=org/openspaces/jms/config/openspaces-jms.xsd
 http\://www.openspaces.org/schema/9.0/sla/openspaces-sla.xsd=org/openspaces/pu/sla/config/openspaces-sla.xsd
+http\://www.openspaces.org/schema/9.0/admin/openspaces-admin.xsd=org/openspaces/admin/config/openspaces-admin.xsd
 
 
 
