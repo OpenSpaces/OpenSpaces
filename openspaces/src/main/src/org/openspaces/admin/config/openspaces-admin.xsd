@@ -28,7 +28,7 @@
 		</xsd:complexType>
 	</xsd:element>
 
-	<xsd:element name="processing-unit">
+	<xsd:element name="pu">
 		<xsd:complexType>
 			<xsd:choice minOccurs="0" maxOccurs="unbounded">
 				<xsd:element ref="depends-on" />
@@ -40,7 +40,7 @@
 	<xsd:element name="application">
 		<xsd:complexType>
 			<xsd:choice minOccurs="0" maxOccurs="unbounded">
-					<xsd:element minOccurs="0" maxOccurs="unbounded" ref="processing-unit" />
+					<xsd:element minOccurs="0" maxOccurs="unbounded" ref="pu" />
 					<xsd:element minOccurs="0" maxOccurs="unbounded" ref="space" />
 			</xsd:choice>
 			<xsd:attribute name="name" type="xsd:string" use="required" />

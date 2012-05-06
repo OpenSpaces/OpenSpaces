@@ -18,6 +18,8 @@ package org.openspaces.admin.memcached.config;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.bind.annotation.XmlTransient;
+
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependencies;
 import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependency;
@@ -32,7 +34,7 @@ import com.gigaspaces.security.directory.UserDetails;
 
 /**
  * @author itaif
- *
+ * @since 9.0.1
  */
 public class MemcachedConfig implements ProcessingUnitConfigFactory {
 
@@ -131,6 +133,7 @@ public class MemcachedConfig implements ProcessingUnitConfigFactory {
     /**
      * @see ProcessingUnitDeployment#setContextProperty(String, String)
      */
+    @XmlTransient
     public void setContextProperty(String key, String value) {
         config.setContextProperty(key, value);
     }
@@ -215,6 +218,7 @@ public class MemcachedConfig implements ProcessingUnitConfigFactory {
         return config.getDependencies();
     }
 
+    @XmlTransient
     public void setDependencies(InternalProcessingUnitDependencies<ProcessingUnitDependency,InternalProcessingUnitDependency> dependencies) {
         config.setDependencies(dependencies);
     }

@@ -15,7 +15,7 @@
 			<os-admin:depends-on name="test-pu" />
 		</os-admin:space>
 		
-		<os-admin:processing-unit processing-unit="test-pu.jar" />
+		<os-admin:pu processing-unit="test-pu.jar" />
 
 	</os-admin:application>
 </beans>

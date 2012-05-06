@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.bind.annotation.XmlTransient;
+
 import org.openspaces.admin.bean.BeanConfig;
 import org.openspaces.admin.bean.BeanConfigPropertiesManager;
 import org.openspaces.admin.internal.pu.dependency.DefaultProcessingUnitDependencies;
@@ -136,6 +138,7 @@ public class AbstractElasticProcessingUnitConfig {
         return elasticProperties;
     }
 
+    @XmlTransient
     public void setElasticProperties(Map<String,String> elasticProperties) {
         this.elasticProperties = elasticProperties;
     }
@@ -180,6 +183,7 @@ public class AbstractElasticProcessingUnitConfig {
         getGridServiceContainerConfig().setEnvironmentVariables(environmentVariables);
     }
 
+    @XmlTransient
     public void setDedicatedIsolation() {
         getElasticMachineIsolationConfig().setDedicated();
     }
@@ -200,6 +204,7 @@ public class AbstractElasticProcessingUnitConfig {
         return machineProvisioning;
     }
 
+    @XmlTransient
     public void setMachineProvisioning(ElasticMachineProvisioningConfig machineProvisioningConfig) {
         if ((machineProvisioningConfig.getGridServiceAgentZones() == null || machineProvisioningConfig.getGridServiceAgentZones().length == 0) && machineProvisioningConfig.isGridServiceAgentZoneMandatory()) {
             throw new IllegalArgumentException("isGridServiceAgentZoneMandatory returns true, but no Grid Service Agent zone is specified.");
@@ -344,6 +349,7 @@ public class AbstractElasticProcessingUnitConfig {
         return dependencies;
     }
 
+    @XmlTransient
     public void setDependencies(InternalProcessingUnitDependencies<ProcessingUnitDependency,InternalProcessingUnitDependency> dependencies) {
         this.dependencies = dependencies;
     }
