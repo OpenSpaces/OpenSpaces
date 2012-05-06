@@ -55,14 +55,14 @@ import com.gigaspaces.security.directory.UserDetails;
 public class SpaceDeployment implements ProcessingUnitDeploymentTopology {
 
     private final SpaceConfig config;
-
+    
     /**
      * Constructs a new Space deployment with the space name that will be created (it will also
      * be the processing unit name).
      */
     public SpaceDeployment(String spaceName) {
         config = new SpaceConfig();
-        config.setName(spaceName);
+        config.setSpaceName(spaceName);
     }
 
     /**
@@ -71,7 +71,7 @@ public class SpaceDeployment implements ProcessingUnitDeploymentTopology {
      */
     @Deprecated
     public String getSpaceName() {
-        return config.getName();
+        return config.getSpaceName();
     }
 
     /**
@@ -263,6 +263,7 @@ public class SpaceDeployment implements ProcessingUnitDeploymentTopology {
      * 
      * @since 8.0.6
      */
+    @Override
     public SpaceDeployment addDependency(String requiredProcessingUnitName) {
         addDependencies(
                 new ProcessingUnitDeploymentDependenciesConfigurer()
