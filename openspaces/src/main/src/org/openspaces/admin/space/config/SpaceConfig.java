@@ -18,8 +18,10 @@ package org.openspaces.admin.space.config;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
+
 import org.openspaces.admin.Admin;
-import org.openspaces.admin.config.XmlProperty;
 import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependencies;
 import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependency;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
@@ -44,11 +46,6 @@ public class SpaceConfig implements ProcessingUnitConfigFactory {
         config.setProcessingUnit("/templates/datagrid");
     }
     
-    public void setProcessingUnit(String processingUnit) {
-        config.setProcessingUnit(processingUnit);
-    }
-    
-    @XmlProperty
     @Required
     public void setName(String spaceName) {
         config.setName(spaceName);
@@ -135,6 +132,7 @@ public class SpaceConfig implements ProcessingUnitConfigFactory {
     /**
      * @see ProcessingUnitDeployment#setContextProperty(String, String)
      */
+    @XmlTransient
     public void setContextProperty(String key, String value) {
         config.setContextProperty(key, value);
     }
@@ -157,6 +155,7 @@ public class SpaceConfig implements ProcessingUnitConfigFactory {
     /**
      * @see ProcessingUnitDeployment#addZone(String)
      */
+    @XmlTransient
     public void addZone(String zone) {
         config.addZone(zone);
     }
@@ -175,6 +174,7 @@ public class SpaceConfig implements ProcessingUnitConfigFactory {
     /**
      * @see ProcessingUnitDeployment#maxInstancesPerZone(String, int)
      */
+    @XmlTransient
     public void setMaxInstancesPerZone(String zone, int maxInstancesPerZone) {
         config.setMaxInstancesPerZone(zone, maxInstancesPerZone);
     }
@@ -204,7 +204,7 @@ public class SpaceConfig implements ProcessingUnitConfigFactory {
     /**
      * @see ProcessingUnitConfig#setDeploymentDependencies(List)
      */
-    @XmlProperty("depends-on")
+    @XmlElement(type = ProcessingUnitDependency.class)
     public void setDeploymentDependencies(List<ProcessingUnitDependency> dependencies) {
         config.setDeploymentDependencies(dependencies);
     }
@@ -220,6 +220,7 @@ public class SpaceConfig implements ProcessingUnitConfigFactory {
         return config.getDependencies();
     }
 
+    @XmlTransient
     public void setDependencies(InternalProcessingUnitDependencies<ProcessingUnitDependency,InternalProcessingUnitDependency> dependencies) {
         config.setDependencies(dependencies);
     }

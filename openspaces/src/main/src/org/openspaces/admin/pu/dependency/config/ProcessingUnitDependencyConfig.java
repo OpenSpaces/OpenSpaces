@@ -18,9 +18,9 @@
 package org.openspaces.admin.pu.dependency.config;
 
 import javax.annotation.PostConstruct;
+import javax.xml.bind.annotation.XmlAttribute;
 
 import org.jini.rio.core.RequiredDependency;
-import org.openspaces.admin.config.XmlProperty;
 import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependency;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
 import org.springframework.beans.factory.annotation.Required;
@@ -36,7 +36,7 @@ public class ProcessingUnitDependencyConfig implements InternalProcessingUnitDep
         return waitForDeploymentToComplete;
     }
 
-    @XmlProperty("deployed")
+    @XmlAttribute(name = "deployed")
     public void setWaitForDeploymentToComplete(boolean waitForDeploymentToComplete) {
         this.waitForDeploymentToComplete = waitForDeploymentToComplete;
     }
@@ -45,7 +45,7 @@ public class ProcessingUnitDependencyConfig implements InternalProcessingUnitDep
         return minimumNumberOfDeployedInstancesPerPartition;
     }
 
-    @XmlProperty("minimum-number-of-instances-per-partition")
+    @XmlAttribute(name = "minimum-number-of-instances-per-partition")
     public void setMinimumNumberOfDeployedInstancesPerPartition(int minimumNumberOfDeployedInstancesPerPartition) {
         this.minimumNumberOfDeployedInstancesPerPartition = minimumNumberOfDeployedInstancesPerPartition;
     }
@@ -54,7 +54,7 @@ public class ProcessingUnitDependencyConfig implements InternalProcessingUnitDep
         return minimumNumberOfDeployedInstances;
     }
 
-    @XmlProperty("minimum-number-of-instances")
+    @XmlAttribute(name = "minimum-number-of-instances")
     public void setMinimumNumberOfDeployedInstances(int minimumNumberOfDeployedInstances) {
         this.minimumNumberOfDeployedInstances = minimumNumberOfDeployedInstances;
     }
@@ -64,7 +64,7 @@ public class ProcessingUnitDependencyConfig implements InternalProcessingUnitDep
     }
 
     @Required
-    @XmlProperty("name")
+    @XmlAttribute(name = "name")
     public void setRequiredProcessingUnitName(String requiredProcessingUnitName) {
         this.requiredProcessingUnitName = requiredProcessingUnitName;
     }

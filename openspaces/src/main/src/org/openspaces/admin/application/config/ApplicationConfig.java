@@ -18,7 +18,8 @@ package org.openspaces.admin.application.config;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.openspaces.admin.config.XmlProperty;
+import javax.xml.bind.annotation.XmlElement;
+
 import org.openspaces.admin.pu.topology.ProcessingUnitConfigFactory;
 import org.springframework.beans.factory.annotation.Required;
 
@@ -36,7 +37,6 @@ public class ApplicationConfig {
     }
 
     @Required
-    @XmlProperty
     public void setName(String name) {
         this.name = name;
     }
@@ -45,7 +45,7 @@ public class ApplicationConfig {
         return processingUnits;
     }
     
-    @XmlProperty("processing-unit,space")
+    @XmlElement(type = ProcessingUnitConfigFactory.class)
     public void setProcessingUnits(List<ProcessingUnitConfigFactory> processingUnitDeployments) {
         this.processingUnits = processingUnitDeployments;
     }
@@ -88,7 +88,5 @@ public class ApplicationConfig {
     @Override
     public String toString() {
         return "ApplicationConfig [name=" + name + ", processingUnits=" + processingUnits + "]";
-    }
-
-    
+    }   
 }

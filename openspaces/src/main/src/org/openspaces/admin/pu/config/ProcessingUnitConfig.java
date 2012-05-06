@@ -20,8 +20,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
+
 import org.openspaces.admin.Admin;
-import org.openspaces.admin.config.XmlProperty;
 import org.openspaces.admin.internal.pu.dependency.DefaultProcessingUnitDependencies;
 import org.openspaces.admin.internal.pu.dependency.DefaultProcessingUnitDeploymentDependencies;
 import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependencies;
@@ -75,7 +78,7 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigFactory {
         return processingUnit;
     }
 
-    @XmlProperty
+    @XmlAttribute
     @Required
     public void setProcessingUnit(String processingUnit) {
         this.processingUnit = processingUnit;
@@ -181,6 +184,7 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigFactory {
     /**
      * @see ProcessingUnitDeployment#maxInstancesPerZone(String, int)
      */
+    @XmlTransient
     public void setMaxInstancesPerZone(String zone, int maxInstancesPerZone) {
         getMaxInstancesPerZone().put(zone,maxInstancesPerZone);
     }
@@ -195,6 +199,7 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigFactory {
     /**
      * @see ProcessingUnitDeployment#setContextProperty(String, String)
      */
+    @XmlTransient
     public void setContextProperty(String key, String value) {
         contextProperties.put(key, value);
     }
@@ -290,6 +295,7 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigFactory {
     /**
      * @see ProcessingUnitDeployment#addZone(String)
      */
+    @XmlTransient
     public void addZone(String zone) {
         zones.add(zone);
     }
@@ -306,6 +312,7 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigFactory {
         return dependencies;
     }
 
+    @XmlTransient
     public void setDependencies(InternalProcessingUnitDependencies<ProcessingUnitDependency,InternalProcessingUnitDependency> dependencies) {
         this.dependencies = dependencies;
     }
@@ -313,7 +320,7 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigFactory {
     /**
      * A helper method for setting conditions for processing unit deployment.
      */
-    @XmlProperty("depends-on")
+    @XmlElement(type = ProcessingUnitDependency.class)
     public void setDeploymentDependencies(List<ProcessingUnitDependency> dependencies) {
         
         DefaultProcessingUnitDeploymentDependencies deploymentDependencies = new DefaultProcessingUnitDeploymentDependencies();
