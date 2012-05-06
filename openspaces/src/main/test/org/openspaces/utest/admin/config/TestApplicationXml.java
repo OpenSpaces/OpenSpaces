@@ -34,7 +34,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 public class TestApplicationXml extends TestCase {
 
     private final String TEST_APPLICATION_RAW_XML = "/org/openspaces/utest/admin/config/test-application-raw.xml";
-    private final String TEST_APPLICATION_XML = "/org/openspaces/utest/admin/config/test-application-raw.xml";
+    private final String TEST_APPLICATION_XML = "/org/openspaces/utest/admin/config/test-application.xml";
     
     public void testRawXml() {
         Assert.assertEquals(createApplicationWithAdminApi(), createApplicationFromXml(TEST_APPLICATION_RAW_XML));
