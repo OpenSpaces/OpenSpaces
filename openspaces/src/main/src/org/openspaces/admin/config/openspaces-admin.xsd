@@ -14,8 +14,8 @@
 	<xsd:element name="depends-on">
     	<xsd:complexType>
           <xsd:attribute name="name" type="xsd:string" use="required"/>
-          <xsd:attribute name="minimum-number-of-instances-per-partition" use="optional"/>
-          <xsd:attribute name="minimum-number-of-instances" use="optional"/>          
+          <xsd:attribute name="min-instances-per-partition" use="optional"/>
+          <xsd:attribute name="min-instances" use="optional"/>          
         </xsd:complexType>
     </xsd:element>
 
@@ -25,6 +25,11 @@
 				<xsd:element ref="depends-on" />
 			</xsd:choice>
 			<xsd:attribute name="name" type="xsd:string" use="required" />
+			<xsd:attribute name="cluster-schema" type="xsd:string" use="optional" />
+			<xsd:attribute name="number-of-instances" type="xsd:int" use="optional" />
+			<xsd:attribute name="number-of-backups" type="xsd:int" use="optional" />
+			<xsd:attribute name="max-instances-per-vm" type="xsd:int" use="optional" />
+			<xsd:attribute name="max-instances-per-machine" type="xsd:int" use="optional" />
 		</xsd:complexType>
 	</xsd:element>
 

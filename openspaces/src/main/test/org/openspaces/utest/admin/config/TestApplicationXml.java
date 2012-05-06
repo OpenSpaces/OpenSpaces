@@ -21,6 +21,7 @@ import junit.framework.TestCase;
 import org.openspaces.admin.application.ApplicationDeployment;
 import org.openspaces.admin.application.config.ApplicationConfig;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
+import org.openspaces.admin.pu.dependency.ProcessingUnitDeploymentDependenciesConfigurer;
 import org.openspaces.admin.space.SpaceDeployment;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -54,8 +55,14 @@ public class TestApplicationXml extends TestCase {
 
     private ApplicationConfig createApplicationWithAdminApi() {
         ApplicationDeployment applicationDeployment = new ApplicationDeployment("test-application")
-        .addProcessingUnitDeployment(new SpaceDeployment("test-space").addDependency("test-pu"))
-        .addProcessingUnitDeployment(new ProcessingUnitDeployment("test-pu.jar"));
+        .addProcessingUnitDeployment(new SpaceDeployment("space").partitioned(1,1).maxInstancesPerVM(1).maxInstancesPerMachine(0))
+        .addProcessingUnitDeployment(
+                new ProcessingUnitDeployment("feeder.jar")
+                .addDependencies(
+                        new ProcessingUnitDeploymentDependenciesConfigurer()
+                        .dependsOnMinimumNumberOfDeployedInstancesPerPartition("space", 1).
+                        create()));
+
         return applicationDeployment.create();
     }
 }

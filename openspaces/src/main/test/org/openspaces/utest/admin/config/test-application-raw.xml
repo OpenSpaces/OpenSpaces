@@ -19,22 +19,25 @@
 
 				<bean class="org.openspaces.admin.space.config.SpaceConfig">
 
-					<property name="name" value="test-space" />
+					<property name="name" value="space" />
+					<property name="clusterSchema" value="partitioned-sync2backup" />
+					<property name="numberOfInstances" value="1"/>
+					<property name="numberOfBackups" value="1" />
+					<property name="maxInstancesPerVM" value="1" /> 
+					<property name="maxInstancesPerMachine" value="0" />
+				</bean>
 
+				<bean class="org.openspaces.admin.pu.config.ProcessingUnitConfig">
+					<property name="processingUnit" value="feeder.jar" />
 					<property name="deploymentDependencies">
 						<list>
 							<bean
 								class="org.openspaces.admin.pu.dependency.config.ProcessingUnitDependencyConfig">
-								<property name="requiredProcessingUnitName" value="test-pu" />
-								<property name="waitForDeploymentToComplete" value="true" />
+								<property name="requiredProcessingUnitName" value="space" />
+								<property name="minimumNumberOfDeployedInstancesPerPartition" value="1" />
 							</bean>
 						</list>
 					</property>
-				</bean>
-
-				<bean class="org.openspaces.admin.pu.config.ProcessingUnitConfig">
-
-					<property name="processingUnit" value="test-pu.jar" />
 				</bean>
 			</list>
 		</property>
