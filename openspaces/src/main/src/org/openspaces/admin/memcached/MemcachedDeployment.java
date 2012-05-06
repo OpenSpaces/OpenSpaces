@@ -32,12 +32,17 @@
 
 package org.openspaces.admin.memcached;
 
-import com.gigaspaces.security.directory.UserDetails;
-import org.openspaces.admin.pu.ProcessingUnitDeployment;
-import org.openspaces.admin.pu.topology.ProcessingUnitConfigFactory;
-import org.openspaces.pu.container.servicegrid.deploy.MemcachedDeploy;
-
 import java.io.File;
+
+import org.openspaces.admin.internal.pu.dependency.ProcessingUnitDetailedDependencies;
+import org.openspaces.admin.memcached.config.MemcachedConfig;
+import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
+import org.openspaces.admin.pu.dependency.ProcessingUnitDeploymentDependenciesConfigurer;
+import org.openspaces.admin.pu.topology.ProcessingUnitConfigFactory;
+import org.openspaces.admin.pu.topology.ProcessingUnitDeploymentTopology;
+
+import com.gigaspaces.security.directory.User;
+import com.gigaspaces.security.directory.UserDetails;
 
 /**
  * A deployment of a pure memcached processing unit (comes built in
@@ -47,29 +52,24 @@ import java.io.File;
  * @see org.openspaces.admin.gsm.GridServiceManager#deploy(org.openspaces.admin.memcached.MemcachedDeployment)
  * @see org.openspaces.admin.gsm.GridServiceManagers#deploy(org.openspaces.admin.memcached.MemcachedDeployment)
  */
-public class MemcachedDeployment {
+public class MemcachedDeployment implements ProcessingUnitDeploymentTopology {
 
-    //TODO: replace with MemcachedConfig
-    private final ProcessingUnitDeployment deployment;
-
-    private final String spaceUrl;
+    private final MemcachedConfig config;
 
     /**
      * Constructs a new Space deployment with the space name that will be created (it will also
      * be the processing unit name).
      */
     public MemcachedDeployment(String spaceUrl) {
-        this.spaceUrl = spaceUrl;
-        this.deployment = new ProcessingUnitDeployment("/templates/memcached");
-        this.deployment.name(MemcachedDeploy.extractName(spaceUrl) + "-memcached");
-        this.deployment.setContextProperty("url", spaceUrl);
+        config = new MemcachedConfig();
+        config.setSpaceUrl(spaceUrl);
     }
 
     /**
-     * Returns the Space url of the deployment.
+     * Returns the Space url of the config.
      */
     public String getSpaceUrl() {
-        return spaceUrl;
+        return config.getSpaceUrl();
     }
 
     /**
@@ -118,23 +118,23 @@ public class MemcachedDeployment {
      * @see #partitioned(int, int)
      */
     public MemcachedDeployment clusterSchema(String clusterSchema) {
-        deployment.clusterSchema(clusterSchema);
+        config.setClusterSchema(clusterSchema);
         return this;
     }
 
     /**
-     * Sets the number of instances of the space deployment.
+     * Sets the number of instances of the space config.
      */
     public MemcachedDeployment numberOfInstances(int numberOfInstances) {
-        deployment.numberOfInstances(numberOfInstances);
+        config.setNumberOfInstances(numberOfInstances);
         return this;
     }
 
     /**
-     * Sets the number of backups per instance of the space deployment.
+     * Sets the number of backups per instance of the space config.
      */
     public MemcachedDeployment numberOfBackups(int numberOfBackups) {
-        deployment.numberOfBackups(numberOfBackups);
+        config.setNumberOfBackups(numberOfBackups);
         return this;
     }
 
@@ -148,7 +148,7 @@ public class MemcachedDeployment {
      * the same virtual machine.
      */
     public MemcachedDeployment maxInstancesPerVM(int maxInstancesPerVM) {
-        deployment.maxInstancesPerVM(maxInstancesPerVM);
+        config.setMaxInstancesPerVM(maxInstancesPerVM);
         return this;
     }
 
@@ -162,7 +162,7 @@ public class MemcachedDeployment {
      * the same machine.
      */
     public MemcachedDeployment maxInstancesPerMachine(int maxInstancesPerMachine) {
-        deployment.maxInstancesPerMachine(maxInstancesPerMachine);
+        config.setMaxInstancesPerMachine(maxInstancesPerMachine);
         return this;
     }
 
@@ -176,7 +176,7 @@ public class MemcachedDeployment {
      * the same zone.
      */
     public MemcachedDeployment maxInstancesPerZone(String zone, int maxInstancesPerZone) {
-        deployment.maxInstancesPerZone(zone, maxInstancesPerZone);
+        config.setMaxInstancesPerZone(zone, maxInstancesPerZone);
         return this;
     }
 
@@ -184,7 +184,7 @@ public class MemcachedDeployment {
      * Adds a zone where the processing unit is allowed to be deployed on.
      */
     public MemcachedDeployment addZone(String zone) {
-        deployment.addZone(zone);
+        config.addZone(zone);
         return this;
     }
 
@@ -193,7 +193,7 @@ public class MemcachedDeployment {
      * unit configuration.
      */
     public MemcachedDeployment setContextProperty(String key, String value) {
-        deployment.setContextProperty(key, value);
+        config.setContextProperty(key, value);
         return this;
     }
 
@@ -201,7 +201,7 @@ public class MemcachedDeployment {
      * Will deploy a secured space. Note, by setting user details the space will be secured automatically.
      */
     public MemcachedDeployment secured(boolean secured) {
-        deployment.secured(secured);
+        config.setSecured(secured);
         return this;
     }
 
@@ -210,16 +210,16 @@ public class MemcachedDeployment {
      * processing unit.
      */
     public MemcachedDeployment userDetails(UserDetails userDetails) {
-        deployment.userDetails(userDetails);
+        config.setUserDetails(userDetails);
         return this;
     }
 
     /**
      * Sets the username and password (effectively making the processing unit secured)
-     * for the processing unit deployment.
+     * for the processing unit config.
      */
     public MemcachedDeployment userDetails(String userName, String password) {
-        deployment.userDetails(userName, password);
+        config.setUserDetails(new User(userName, password));
         return this;
     }
 
@@ -227,7 +227,7 @@ public class MemcachedDeployment {
      * Sets an external SLA definition location to be loaded.
      */
     public MemcachedDeployment slaLocation(String slaLocation) {
-        deployment.slaLocation(slaLocation);
+        config.setSlaLocation(slaLocation);
         return this;
     }
 
@@ -235,22 +235,44 @@ public class MemcachedDeployment {
      * Sets an external SLA definition location to be loaded.
      */
     public MemcachedDeployment slaLocation(File slaLocation) {
-        deployment.slaLocation(slaLocation);
+        config.setSlaLocation(slaLocation.getAbsolutePath());
         return this;
     }
 
     /**
-     * Transforms the space deployment to a processing unit deployment (it is a processing unit after all,
-     * that simply starts an embedded space).
+     * Postpones deployment of processing unit instances until the specified dependencies are met.
+     * 
+     * The following example postpones the deployment of this processing unit until B has completed the deployment and C has at least one instance deployed.
+     * config.setaddDependencies(new ProcessingUnitDeploymentDependenciesConfigurer().dependsOnDeployment("B").dependsOnMinimumNumberOfDeployedInstances("C",1).create())
+     * 
+     * @see ProcessingUnitDeploymentDependenciesConfigurer
+     * @since 8.0.6
      */
-    public ProcessingUnitDeployment toProcessingUnitDeployment() {
-        return deployment;
+    @Override
+    public MemcachedDeployment addDependencies(
+            ProcessingUnitDetailedDependencies<? extends ProcessingUnitDependency> deploymentDependencies) {
+        config.getDependencies().addDetailedDependencies(deploymentDependencies);
+        return this;
     }
-
+    /**
+     * Postpones deployment of processing unit instances deployment until the specified processing unit deployment is complete.
+     * 
+     * Same as: config.setaddDependencies(new ProcessingUnitDeploymentDependenciesConfigurer().dependsOnDeployment(requiredProcessingUnitName).create())
+     * 
+     * @since 8.0.6
+     */
+    @Override
+    public MemcachedDeployment addDependency(String requiredProcessingUnitName) {
+        addDependencies(
+                new ProcessingUnitDeploymentDependenciesConfigurer()
+                .dependsOnDeployed(requiredProcessingUnitName)
+                .create());
+        return this;
+    }
     /**
      * @return
      */
     public ProcessingUnitConfigFactory create() {
-        return deployment.create();
+        return config;
     }
 }

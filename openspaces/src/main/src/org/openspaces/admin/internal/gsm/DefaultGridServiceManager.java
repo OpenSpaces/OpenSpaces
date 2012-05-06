@@ -146,7 +146,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
     }
 
     public ProcessingUnit deploy(MemcachedDeployment deployment, long timeout, TimeUnit timeUnit) {
-        return deploy(deployment.toProcessingUnitDeployment(), timeout, timeUnit);
+        return deploy(deployment.create(), timeout, timeUnit);
     }
 
     public ProcessingUnit deploy(ProcessingUnitDeployment deployment, long timeout, TimeUnit timeUnit) {
