@@ -15,11 +15,13 @@
  *******************************************************************************/
 package org.openspaces.admin.application.config;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 import org.openspaces.admin.pu.topology.ProcessingUnitConfigFactory;
 import org.springframework.beans.factory.annotation.Required;
@@ -33,6 +35,7 @@ public class ApplicationConfig {
 
     private String name;
     private List<ProcessingUnitConfigFactory> processingUnits = new ArrayList<ProcessingUnitConfigFactory>();
+    private File jarsDirectory;
     
     public String getName() {
         return name;
@@ -56,10 +59,21 @@ public class ApplicationConfig {
         this.processingUnits.add(puConfigFactory);
     }
 
+    public File getJarsDirectory() {
+        return jarsDirectory;
+    }
+    
+    @XmlTransient
+    public void setJarsDirectory(File jarsDirectory) {
+        this.jarsDirectory = jarsDirectory;
+        
+    }
+    
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+        result = prime * result + ((jarsDirectory == null) ? 0 : jarsDirectory.hashCode());
         result = prime * result + ((name == null) ? 0 : name.hashCode());
         result = prime * result + ((processingUnits == null) ? 0 : processingUnits.hashCode());
         return result;
@@ -74,6 +88,11 @@ public class ApplicationConfig {
         if (getClass() != obj.getClass())
             return false;
         ApplicationConfig other = (ApplicationConfig) obj;
+        if (jarsDirectory == null) {
+            if (other.jarsDirectory != null)
+                return false;
+        } else if (!jarsDirectory.equals(other.jarsDirectory))
+            return false;
         if (name == null) {
             if (other.name != null)
                 return false;
@@ -89,6 +108,8 @@ public class ApplicationConfig {
 
     @Override
     public String toString() {
-        return "ApplicationConfig [name=" + name + ", processingUnits=" + processingUnits + "]";
-    }   
+        return "ApplicationConfig [" + (name != null ? "name=" + name + ", " : "")
+                + (processingUnits != null ? "processingUnits=" + processingUnits + ", " : "")
+                + (jarsDirectory != null ? "jarsDirectory=" + jarsDirectory : "") + "]";
+    }
 }

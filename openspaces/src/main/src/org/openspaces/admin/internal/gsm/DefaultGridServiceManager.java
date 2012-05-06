@@ -18,6 +18,7 @@
 package org.openspaces.admin.internal.gsm;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
@@ -51,6 +52,7 @@ import org.openspaces.admin.GridComponent;
 import org.openspaces.admin.application.Application;
 import org.openspaces.admin.application.ApplicationAlreadyDeployedException;
 import org.openspaces.admin.application.ApplicationDeployment;
+import org.openspaces.admin.application.config.ApplicationConfig;
 import org.openspaces.admin.dump.DumpResult;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.admin.InternalAdmin;
@@ -563,9 +565,13 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
     @Override
     public Application deploy(ApplicationDeployment applicationDeployment, long timeout, TimeUnit timeUnit)
             throws ApplicationAlreadyDeployedException, ProcessingUnitAlreadyDeployedException {
-        
+        return deploy(applicationDeployment.create(), timeout, timeUnit);
+    }
+    
+    private Application deploy(ApplicationConfig applicationConfig, long timeout, TimeUnit timeUnit)
+            throws ApplicationAlreadyDeployedException, ProcessingUnitAlreadyDeployedException {
         long end = System.currentTimeMillis()  + timeUnit.toMillis(timeout);
-        String applicationName = applicationDeployment.create().getName();
+        String applicationName = applicationConfig.getName();
         if (applicationName == null) {
             throw new IllegalArgumentException("Application Name cannot be null");
         }
@@ -576,9 +582,9 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             throw new ApplicationAlreadyDeployedException(applicationName);
         }
         
-        List<ProcessingUnitConfigFactory> processingUnitConfigFactories = applicationDeployment.create().getProcessingUnits();
+        List<ProcessingUnitConfigFactory> processingUnitConfigFactories = applicationConfig.getProcessingUnits();
         if (processingUnitConfigFactories.size() == 0) {
-            throw new IllegalArgumentException("Application deployment must contain at least one processing unit deployment");
+            throw new AdminException("Application must contain at least one processing unit.");
         }
         
         // iterate in a deterministic order, so if deployed in parallel by another admin client, only one will succeed
@@ -591,7 +597,24 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
                     timedOut = true;
                     break;
                 }
-                ProcessingUnit pu = deploy(puConfigFactory,applicationName, remaining,TimeUnit.MILLISECONDS);
+                
+                ProcessingUnitConfig puConfig = puConfigFactory.toProcessingUnitConfig(admin);
+                
+                //correct Jars path in case of an application deployment from xml file
+                if (applicationConfig.getJarsDirectory() != null) {
+                    if (!new File(puConfig.getProcessingUnit()).isAbsolute() &&
+                        !puConfig.getProcessingUnit().startsWith("/"))  {
+                        String absolutePuPath = 
+                            new File(
+                                applicationConfig.getJarsDirectory(),
+                                puConfig.getProcessingUnit())
+                            .getAbsolutePath();
+                        puConfig.setProcessingUnit(absolutePuPath);
+                    }
+                }
+                
+                //deploy pu
+                ProcessingUnit pu = deploy(puConfig, applicationName, remaining,TimeUnit.MILLISECONDS);
                 if (pu == null) {
                     timedOut = true;
                     break;
@@ -600,7 +623,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             }
             catch (ProcessingUnitAlreadyDeployedException e) {
                 if (deployedPuNames.contains(e.getProcessingUnitName())) {
-                    throw new IllegalArgumentException("Application deployment contains two Processing Units with the same name " + e.getProcessingUnitName(),e);
+                    throw new AdminException("Application deployment contains two Processing Units with the same name " + e.getProcessingUnitName(),e);
                 }
                 ProcessingUnit otherPu = admin.getProcessingUnits().getProcessingUnit(e.getProcessingUnitName());
                 if (otherPu != null && 
@@ -615,7 +638,6 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         if (timedOut) {
             return null;
         }
-        
         return admin.getApplications().getApplication(applicationName);
     }
 
