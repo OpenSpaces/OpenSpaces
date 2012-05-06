@@ -21,6 +21,7 @@ import org.openspaces.admin.application.config.ApplicationConfig;
 import org.openspaces.admin.pu.config.ProcessingUnitConfig;
 import org.openspaces.admin.pu.dependency.config.ProcessingUnitDependencyConfig;
 import org.openspaces.admin.space.config.SpaceConfig;
+import org.openspaces.core.config.xmlparser.XmlBeanDefinitionParser;
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 
 /**
