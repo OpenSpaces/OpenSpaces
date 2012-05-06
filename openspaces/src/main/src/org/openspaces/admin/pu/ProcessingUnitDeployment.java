@@ -197,7 +197,7 @@ public class ProcessingUnitDeployment implements ProcessingUnitDeploymentTopolog
      * the same zone.
      */
     public ProcessingUnitDeployment maxInstancesPerZone(String zone, int maxInstancesPerZone) {
-        config.getMaxInstancesPerZone().put(zone, maxInstancesPerZone);
+        config.setMaxInstancesPerZone(zone, maxInstancesPerZone);
         return this;
     }
 
@@ -205,7 +205,7 @@ public class ProcessingUnitDeployment implements ProcessingUnitDeploymentTopolog
      * Adds a zone where the processing unit is allowed to be deployed on.
      */
     public ProcessingUnitDeployment addZone(String zone) {
-        config.getZones().add(zone);
+        config.addZone(zone);
         return this;
     }
 
