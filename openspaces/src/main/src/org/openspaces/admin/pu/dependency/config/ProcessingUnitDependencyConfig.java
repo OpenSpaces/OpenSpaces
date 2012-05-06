@@ -52,7 +52,7 @@ public class ProcessingUnitDependencyConfig implements InternalProcessingUnitDep
         return minimumNumberOfDeployedInstancesPerPartition;
     }
 
-    @XmlAttribute(name = "minimum-number-of-instances-per-partition")
+    @XmlAttribute(name = "min-instances-per-partition")
     public void setMinimumNumberOfDeployedInstancesPerPartition(int minimumNumberOfDeployedInstancesPerPartition) {
         this.minimumNumberOfDeployedInstancesPerPartition = minimumNumberOfDeployedInstancesPerPartition;
     }
@@ -61,7 +61,7 @@ public class ProcessingUnitDependencyConfig implements InternalProcessingUnitDep
         return minimumNumberOfDeployedInstances;
     }
 
-    @XmlAttribute(name = "minimum-number-of-instances")
+    @XmlAttribute(name = "min-instances")
     public void setMinimumNumberOfDeployedInstances(int minimumNumberOfDeployedInstances) {
         this.minimumNumberOfDeployedInstances = minimumNumberOfDeployedInstances;
     }

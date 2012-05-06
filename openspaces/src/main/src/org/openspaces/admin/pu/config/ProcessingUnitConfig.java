@@ -80,6 +80,9 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigFactory {
         return processingUnit;
     }
 
+    /**
+     * @see ProcessingUnitDeployment#ProcessingUnitDeployment(String)
+     */
     @XmlAttribute
     @Required
     public void setProcessingUnit(String processingUnit) {
@@ -90,6 +93,9 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigFactory {
         return name;
     }
 
+    /**
+     * @see ProcessingUnitDeployment#name(String)
+     */
     public void setName(String name) {
         this.name = name;
     }
@@ -98,6 +104,9 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigFactory {
         return clusterSchema;
     }
 
+    /**
+     * @see ProcessingUnitDeployment#clusterSchema(String)
+     */
     public void setClusterSchema(String clusterSchema) {
         this.clusterSchema = clusterSchema;
     }
@@ -106,6 +115,9 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigFactory {
         return numberOfInstances;
     }
 
+    /**
+     * @see ProcessingUnitDeployment#numberOfInstances(int)
+     */
     public void setNumberOfInstances(Integer numberOfInstances) {
         this.numberOfInstances = numberOfInstances;
     }
@@ -114,6 +126,9 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigFactory {
         return numberOfBackups;
     }
 
+    /**
+     * @see ProcessingUnitDeployment#numberOfBackups(int)
+     */
     public void setNumberOfBackups(Integer numberOfBackups) {
         this.numberOfBackups = numberOfBackups;
     }
@@ -122,6 +137,10 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigFactory {
         return maxInstancesPerVM;
     }
 
+    /**
+     * @see ProcessingUnitDeployment#maxInstancesPerVM(int)
+     */
+    @XmlAttribute(name="max-instances-per-vm")
     public void setMaxInstancesPerVM(Integer maxInstancesPerVM) {
         this.maxInstancesPerVM = maxInstancesPerVM;
     }
@@ -130,6 +149,9 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigFactory {
         return maxInstancesPerMachine;
     }
 
+    /**
+     * @see ProcessingUnitDeployment#maxInstancesPerMachine(int)
+     */
     public void setMaxInstancesPerMachine(Integer maxInstancesPerMachine) {
         this.maxInstancesPerMachine = maxInstancesPerMachine;
     }
@@ -153,6 +175,9 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigFactory {
         return slaLocation;
     }
 
+    /**
+     * @see ProcessingUnitDeployment#slaLocation(String)
+     */
     public void setSlaLocation(String slaLocation) {
         this.slaLocation = slaLocation;
     }
@@ -164,6 +189,9 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigFactory {
         return secured;
     }
 
+    /**
+     * @see ProcessingUnitDeployment#secured(boolean)
+     */
     public void setSecured(Boolean secured) {
         this.secured = secured;
     }

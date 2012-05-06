@@ -18,6 +18,7 @@ package org.openspaces.admin.space.config;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -109,6 +110,7 @@ public class SpaceConfig implements ProcessingUnitConfigFactory {
     /**
      * @see ProcessingUnitDeployment#maxInstancesPerVM(int)
      */
+    @XmlAttribute(name="max-instances-per-vm")
     public void setMaxInstancesPerVM(Integer maxInstancesPerVM) {
         config.setMaxInstancesPerVM(maxInstancesPerVM);
     }
@@ -261,5 +263,10 @@ public class SpaceConfig implements ProcessingUnitConfigFactory {
         } else if (!config.equals(other.config))
             return false;
         return true;
+    }
+
+    @Override
+    public String toString() {
+        return config.toString();
     }
 }
