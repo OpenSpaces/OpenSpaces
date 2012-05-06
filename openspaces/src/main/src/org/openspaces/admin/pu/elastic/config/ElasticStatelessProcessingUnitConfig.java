@@ -15,6 +15,8 @@
  *******************************************************************************/
 package org.openspaces.admin.pu.elastic.config;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.internal.pu.elastic.config.AbstractElasticProcessingUnitConfig;
 import org.openspaces.admin.pu.config.ProcessingUnitConfig;
@@ -25,6 +27,7 @@ import org.openspaces.admin.pu.topology.ProcessingUnitConfigFactory;
  * @author itaif
  * @since 9.0.1
  */
+@XmlRootElement(name="elastic-stateless-pu")
 public class ElasticStatelessProcessingUnitConfig extends AbstractElasticProcessingUnitConfig 
     implements ProcessingUnitConfigFactory{
 

@@ -15,12 +15,15 @@
  *******************************************************************************/
 package org.openspaces.admin.space;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 import org.openspaces.admin.pu.elastic.config.ElasticStatefulProcessingUnitConfig;
 
 /**
  * @author itaif
  * @since 9.0.1
  */
+@XmlRootElement(name="elastic-space")
 public class ElasticSpaceConfig extends ElasticStatefulProcessingUnitConfig {
 
     public ElasticSpaceConfig() {

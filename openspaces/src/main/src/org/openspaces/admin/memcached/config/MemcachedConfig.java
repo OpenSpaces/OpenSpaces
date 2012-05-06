@@ -18,6 +18,7 @@ package org.openspaces.admin.memcached.config;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.openspaces.admin.Admin;
@@ -36,6 +37,7 @@ import com.gigaspaces.security.directory.UserDetails;
  * @author itaif
  * @since 9.0.1
  */
+@XmlRootElement(name="memcached")
 public class MemcachedConfig implements ProcessingUnitConfigFactory {
 
     private final ProcessingUnitConfig config;

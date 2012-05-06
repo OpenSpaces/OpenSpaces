@@ -19,12 +19,19 @@ package org.openspaces.admin.pu.dependency.config;
 
 import javax.annotation.PostConstruct;
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
 
 import org.jini.rio.core.RequiredDependency;
 import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependency;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
 import org.springframework.beans.factory.annotation.Required;
 
+/**
+ * 
+ * @author itaif
+ * @since 9.0.1
+ */
+@XmlRootElement(name = "depends-on")
 public class ProcessingUnitDependencyConfig implements InternalProcessingUnitDependency {
 
     private boolean waitForDeploymentToComplete;

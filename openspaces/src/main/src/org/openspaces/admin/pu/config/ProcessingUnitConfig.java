@@ -22,6 +22,7 @@ import java.util.Map;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.openspaces.admin.Admin;
@@ -42,6 +43,7 @@ import com.gigaspaces.security.directory.UserDetails;
  * @author itaif
  * @since 9.0.1
  */
+@XmlRootElement(name = "pu")
 public class ProcessingUnitConfig implements ProcessingUnitConfigFactory {
 
     private String processingUnit;

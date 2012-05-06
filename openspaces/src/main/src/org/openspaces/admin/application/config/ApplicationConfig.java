@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
 import org.openspaces.admin.pu.topology.ProcessingUnitConfigFactory;
 import org.springframework.beans.factory.annotation.Required;
@@ -27,6 +28,7 @@ import org.springframework.beans.factory.annotation.Required;
  * @author itaif
  * @since 9.0.1
  */
+@XmlRootElement(name="application")
 public class ApplicationConfig {
 
     private String name;

@@ -17,6 +17,8 @@ package org.openspaces.admin.pu.elastic.config;
 
 import java.util.Map;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
 import org.openspaces.admin.internal.pu.elastic.ProcessingUnitSchemaConfig;
@@ -29,6 +31,7 @@ import org.openspaces.admin.pu.topology.ProcessingUnitConfigFactory;
  * @author itaif
  * @since 9.0.1
  */
+@XmlRootElement(name="elastic-stateful-pu")
 public class ElasticStatefulProcessingUnitConfig 
     extends AbstractElasticProcessingUnitConfig 
     implements ProcessingUnitConfigFactory{

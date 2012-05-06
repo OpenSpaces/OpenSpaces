@@ -25,8 +25,7 @@ import org.openspaces.admin.pu.elastic.config.ElasticStatefulProcessingUnitConfi
 import org.openspaces.admin.pu.elastic.config.ElasticStatelessProcessingUnitConfig;
 import org.openspaces.admin.space.ElasticSpaceConfig;
 import org.openspaces.admin.space.config.SpaceConfig;
-import org.openspaces.core.config.xmlparser.XmlBeanDefinitionParser;
-import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
+import org.openspaces.core.config.xmlparser.AbstractXmlBeanNamespaceHandler;
 
 /**
  * A spring namespace handler for the "admin" namespace.
@@ -36,21 +35,17 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
  * @see openspaces-admin.xsd
  *
  */
-public class AdminNamespaceHandler extends NamespaceHandlerSupport {
+public class AdminNamespaceHandler extends AbstractXmlBeanNamespaceHandler {
 
+    @Override
     public void init() {
-        register("depends-on", ProcessingUnitDependencyConfig.class);
-        register("pu", ProcessingUnitConfig.class);
-        register("space", SpaceConfig.class);
-        register("elastic-stateful-pu", ElasticStatefulProcessingUnitConfig.class);
-        register("elastic-stateless-pu", ElasticStatelessProcessingUnitConfig.class);
-        register("elastic-space", ElasticSpaceConfig.class);
-        register("memcached",MemcachedConfig.class);
-        register("application", ApplicationConfig.class);
+        register(ProcessingUnitDependencyConfig.class);
+        register(ProcessingUnitConfig.class);
+        register(SpaceConfig.class);
+        register(ElasticStatefulProcessingUnitConfig.class);
+        register(ElasticStatelessProcessingUnitConfig.class);
+        register(ElasticSpaceConfig.class);
+        register(MemcachedConfig.class);
+        register(ApplicationConfig.class);
     }
-    
-    private void register(String elementName, Class<?> clazz) {
-        registerBeanDefinitionParser(elementName, new XmlBeanDefinitionParser(clazz));
-    }
-
 }
