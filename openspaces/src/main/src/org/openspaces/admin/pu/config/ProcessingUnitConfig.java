@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.openspaces.admin.Admin;
+import org.openspaces.admin.config.XmlProperty;
 import org.openspaces.admin.internal.pu.dependency.DefaultProcessingUnitDependencies;
 import org.openspaces.admin.internal.pu.dependency.DefaultProcessingUnitDeploymentDependencies;
 import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependencies;
@@ -74,6 +75,7 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigFactory {
         return processingUnit;
     }
 
+    @XmlProperty
     @Required
     public void setProcessingUnit(String processingUnit) {
         this.processingUnit = processingUnit;
@@ -311,6 +313,7 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigFactory {
     /**
      * A helper method for setting conditions for processing unit deployment.
      */
+    @XmlProperty("depends-on")
     public void setDeploymentDependencies(List<ProcessingUnitDependency> dependencies) {
         
         DefaultProcessingUnitDeploymentDependencies deploymentDependencies = new DefaultProcessingUnitDeploymentDependencies();
@@ -441,5 +444,26 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigFactory {
         } else if (!zones.equals(other.zones))
             return false;
         return true;
-    }  
+    }
+    
+    @Override
+    public String toString() {
+        return "ProcessingUnitConfig [" + (processingUnit != null ? "processingUnit=" + processingUnit + ", " : "")
+                + (name != null ? "name=" + name + ", " : "")
+                + (clusterSchema != null ? "clusterSchema=" + clusterSchema + ", " : "")
+                + (numberOfInstances != null ? "numberOfInstances=" + numberOfInstances + ", " : "")
+                + (numberOfBackups != null ? "numberOfBackups=" + numberOfBackups + ", " : "")
+                + (maxInstancesPerVM != null ? "maxInstancesPerVM=" + maxInstancesPerVM + ", " : "")
+                + (maxInstancesPerMachine != null ? "maxInstancesPerMachine=" + maxInstancesPerMachine + ", " : "")
+                + (maxInstancesPerZone != null ? "maxInstancesPerZone=" + maxInstancesPerZone + ", " : "")
+                + (zones != null ? "zones=" + zones + ", " : "")
+                + (contextProperties != null ? "contextProperties=" + contextProperties + ", " : "")
+                + (userDetails != null ? "userDetails=" + userDetails + ", " : "")
+                + (slaLocation != null ? "slaLocation=" + slaLocation + ", " : "")
+                + (secured != null ? "secured=" + secured + ", " : "")
+                + (elasticProperties != null ? "elasticProperties=" + elasticProperties + ", " : "")
+                + (dependencies != null ? "dependencies=" + dependencies : "") + "]";
+    }
+    
+    
 }

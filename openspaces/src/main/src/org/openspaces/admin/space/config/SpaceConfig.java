@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.openspaces.admin.Admin;
+import org.openspaces.admin.config.XmlProperty;
 import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependencies;
 import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependency;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
@@ -47,6 +48,7 @@ public class SpaceConfig implements ProcessingUnitConfigFactory {
         config.setProcessingUnit(processingUnit);
     }
     
+    @XmlProperty
     @Required
     public void setName(String spaceName) {
         config.setName(spaceName);
@@ -202,6 +204,7 @@ public class SpaceConfig implements ProcessingUnitConfigFactory {
     /**
      * @see ProcessingUnitConfig#setDeploymentDependencies(List)
      */
+    @XmlProperty("depends-on")
     public void setDeploymentDependencies(List<ProcessingUnitDependency> dependencies) {
         config.setDeploymentDependencies(dependencies);
     }
@@ -209,7 +212,7 @@ public class SpaceConfig implements ProcessingUnitConfigFactory {
     public List<ProcessingUnitDependency> getDeploymentDependencies() {
         return config.getDeploymentDependencies();
     }
-    
+        
     /**
      * @see ProcessingUnitDeployment#addDependencies(org.openspaces.admin.internal.pu.dependency.ProcessingUnitDetailedDependencies)
      */

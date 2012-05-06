@@ -17,7 +17,10 @@
  ******************************************************************************/
 package org.openspaces.admin.config;
 
+import org.openspaces.admin.application.config.ApplicationConfig;
+import org.openspaces.admin.pu.config.ProcessingUnitConfig;
 import org.openspaces.admin.pu.dependency.config.ProcessingUnitDependencyConfig;
+import org.openspaces.admin.space.config.SpaceConfig;
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 
 /**
@@ -25,12 +28,20 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
  * 
  * @author itaif
  * @since 9.0.1
+ * @see openspaces-admin.xsd
  *
  */
 public class AdminNamespaceHandler extends NamespaceHandlerSupport {
 
     public void init() {
-        registerBeanDefinitionParser("dependency", new XmlBeanDefinitionParser(ProcessingUnitDependencyConfig.class));
+        register("depends-on", ProcessingUnitDependencyConfig.class);
+        register("processing-unit", ProcessingUnitConfig.class);
+        register("space", SpaceConfig.class);
+        register("application", ApplicationConfig.class);
+    }
+    
+    private void register(String elementName, Class<?> clazz) {
+        registerBeanDefinitionParser(elementName, new XmlBeanDefinitionParser(clazz));
     }
 
 }

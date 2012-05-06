@@ -45,18 +45,15 @@ public class ApplicationConfig {
         return processingUnits;
     }
     
-    @XmlProperty
+    @XmlProperty("processing-unit,space")
     public void setProcessingUnits(List<ProcessingUnitConfigFactory> processingUnitDeployments) {
         this.processingUnits = processingUnitDeployments;
     }
 
     public void addProcessingUnit(ProcessingUnitConfigFactory puConfigFactory) {
-        processingUnits.add(puConfigFactory);
+        this.processingUnits.add(puConfigFactory);
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -66,9 +63,6 @@ public class ApplicationConfig {
         return result;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -90,4 +84,11 @@ public class ApplicationConfig {
             return false;
         return true;
     }
+
+    @Override
+    public String toString() {
+        return "ApplicationConfig [name=" + name + ", processingUnits=" + processingUnits + "]";
+    }
+
+    
 }

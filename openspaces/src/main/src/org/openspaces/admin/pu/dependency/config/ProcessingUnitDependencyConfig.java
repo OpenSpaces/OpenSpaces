@@ -17,6 +17,8 @@
  ******************************************************************************/
 package org.openspaces.admin.pu.dependency.config;
 
+import javax.annotation.PostConstruct;
+
 import org.jini.rio.core.RequiredDependency;
 import org.openspaces.admin.config.XmlProperty;
 import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependency;
@@ -34,7 +36,7 @@ public class ProcessingUnitDependencyConfig implements InternalProcessingUnitDep
         return waitForDeploymentToComplete;
     }
 
-    @XmlProperty
+    @XmlProperty("deployed")
     public void setWaitForDeploymentToComplete(boolean waitForDeploymentToComplete) {
         this.waitForDeploymentToComplete = waitForDeploymentToComplete;
     }
@@ -43,7 +45,7 @@ public class ProcessingUnitDependencyConfig implements InternalProcessingUnitDep
         return minimumNumberOfDeployedInstancesPerPartition;
     }
 
-    @XmlProperty
+    @XmlProperty("minimum-number-of-instances-per-partition")
     public void setMinimumNumberOfDeployedInstancesPerPartition(int minimumNumberOfDeployedInstancesPerPartition) {
         this.minimumNumberOfDeployedInstancesPerPartition = minimumNumberOfDeployedInstancesPerPartition;
     }
@@ -52,7 +54,7 @@ public class ProcessingUnitDependencyConfig implements InternalProcessingUnitDep
         return minimumNumberOfDeployedInstances;
     }
 
-    @XmlProperty
+    @XmlProperty("minimum-number-of-instances")
     public void setMinimumNumberOfDeployedInstances(int minimumNumberOfDeployedInstances) {
         this.minimumNumberOfDeployedInstances = minimumNumberOfDeployedInstances;
     }
@@ -61,15 +63,8 @@ public class ProcessingUnitDependencyConfig implements InternalProcessingUnitDep
         return requiredProcessingUnitName;
     }
 
-    private void init(RequiredDependency requiredDependency) {
-        this.requiredProcessingUnitName = requiredDependency.getRequiredProcessingUnitName();
-        this.minimumNumberOfDeployedInstances = requiredDependency.getMinimumNumberOfDeployedInstances();
-        this.minimumNumberOfDeployedInstancesPerPartition = requiredDependency.getMinimumNumberOfDeployedInstancesPerPartition();
-        this.waitForDeploymentToComplete = requiredDependency.getWaitForDeploymentToComplete();
-    }
-    
     @Required
-    @XmlProperty
+    @XmlProperty("name")
     public void setRequiredProcessingUnitName(String requiredProcessingUnitName) {
         this.requiredProcessingUnitName = requiredProcessingUnitName;
     }
@@ -80,6 +75,13 @@ public class ProcessingUnitDependencyConfig implements InternalProcessingUnitDep
     public ProcessingUnitDependencyConfig() {
     }
 
+    @PostConstruct
+    public void afterPropertiesSet() {
+        if (!waitForDeploymentToComplete && minimumNumberOfDeployedInstances==0 && minimumNumberOfDeployedInstancesPerPartition == 0) {
+            waitForDeploymentToComplete = true;
+        }
+    }
+    
     @Override
     public void mergeDependency(ProcessingUnitDependency otherDependency) {
         mergeDependency(((InternalProcessingUnitDependency)otherDependency).toRequiredDependency());
@@ -89,7 +91,10 @@ public class ProcessingUnitDependencyConfig implements InternalProcessingUnitDep
     public void mergeDependency(RequiredDependency otherRequiredDependency) {
         RequiredDependency requiredDependency = toRequiredDependency();
         requiredDependency.merge(otherRequiredDependency);
-        init(requiredDependency);
+        this.requiredProcessingUnitName = requiredDependency.getRequiredProcessingUnitName();
+        this.minimumNumberOfDeployedInstances = requiredDependency.getMinimumNumberOfDeployedInstances();
+        this.minimumNumberOfDeployedInstancesPerPartition = requiredDependency.getMinimumNumberOfDeployedInstancesPerPartition();
+        this.waitForDeploymentToComplete = requiredDependency.getWaitForDeploymentToComplete();
     }
     
     
@@ -134,5 +139,13 @@ public class ProcessingUnitDependencyConfig implements InternalProcessingUnitDep
         if (waitForDeploymentToComplete != other.waitForDeploymentToComplete)
             return false;
         return true;
+    }
+
+    @Override
+    public String toString() {
+        return "ProcessingUnitDependencyConfig [waitForDeploymentToComplete=" + waitForDeploymentToComplete
+                + ", minimumNumberOfDeployedInstancesPerPartition=" + minimumNumberOfDeployedInstancesPerPartition
+                + ", minimumNumberOfDeployedInstances=" + minimumNumberOfDeployedInstances
+                + ", requiredProcessingUnitName=" + requiredProcessingUnitName + "]";
     }
 }
