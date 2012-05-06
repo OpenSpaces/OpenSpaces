@@ -16,21 +16,29 @@
 package org.openspaces.admin.config;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.xml.AbstractSimpleBeanDefinitionParser;
+import org.springframework.beans.factory.support.ManagedList;
+import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
+import org.springframework.core.Conventions;
+import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
+
+import com.gigaspaces.internal.utils.StringUtils;
 
 /**
  * @author itaif
  *
  */
-public class XmlBeanDefinitionParser extends AbstractSimpleBeanDefinitionParser {
+public class XmlBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
     private Class<?> clazz;
 
@@ -45,43 +53,129 @@ public class XmlBeanDefinitionParser extends AbstractSimpleBeanDefinitionParser 
     
     @Override
     protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
+    
         NamedNodeMap attributes = element.getAttributes();
-        for (int x = 0; x < attributes.getLength(); x++) {
-            Attr attribute = (Attr) attributes.item(x);
-            
-            Method method = findSetterMethodForAttribute(attribute.getName());
-            if (super.isEligibleAttribute(attribute, parserContext) &&
-                method != null &&
-                method.getReturnType().getPackage().getName().startsWith("org.openspaces.admin")) {
-                String propertyName = extractPropertyName(attribute.getLocalName());
-                Assert.state(StringUtils.hasText(propertyName),
-                        "Illegal property name returned from 'extractPropertyName(String)': cannot be null or empty.");
-                builder.addPropertyValue(propertyName, attribute.getValue());
+
+        /* parse properties */
+        for (int i = 0; i < attributes.getLength(); i++) {
+
+            Attr attribute = (Attr) attributes.item(i);
+            String xmlName = attribute.getName();
+            Method setter = findSetterMethodFromXmlName(xmlName);
+            if (setter != null) {
+                String propertyName = convertSetterMethodToPropertyName(setter);
+                String value = attribute.getValue();
+                builder.addPropertyValue(propertyName, value);
             }
         }
-        super.doParse(element, parserContext, builder);
+
+        /* parse child elements */
+        Map<Method,ManagedList<Object>> listValues = new HashMap<Method,ManagedList<Object>>();
+        for (Element child : DomUtils.getChildElements(element)) {
+            
+            String xmlName = child.getLocalName();
+            
+            Object value = parserContext.getDelegate().parsePropertySubElement(child, builder.getRawBeanDefinition());
+            Method setter = findSetterMethodFromXmlName(xmlName);
+            if (setter != null) {
+             
+                if (!isListSetterMethod(setter)) {
+                    String propertyName = convertSetterMethodToPropertyName(setter);
+                    builder.addPropertyValue(propertyName, value);
+                }
+                
+                else {
+                    
+                    ManagedList<Object> values = listValues.get(setter);
+                    if (values == null) {
+                        values = new ManagedList<Object>();
+                    }
+                    values.add(value);
+                    
+                    listValues.put(setter, values);
+                }
+            }
+        }
+        
+        
+        for (Entry<Method, ManagedList<Object>> pair : listValues.entrySet()) {
+            String propertyName = convertSetterMethodToPropertyName(pair.getKey());
+            builder.addPropertyValue(propertyName, pair.getValue());
+        }
+        
     }
     
+    /**
+     * @param propertyName
+     * @return
+     */
+    private String pluralOf(String propertyName) {
+        if (propertyName.endsWith("y")) {
+            return propertyName.substring(0, propertyName.length()-1)+"ies";
+        }
+        return propertyName+"s";
+    }  
+    
+
+    /**
+     * Auto generating bean ids to avoid the error
+     * Configuration problem: Id is required for element when used as a top-level tag
+     */
     @Override
-    protected boolean isEligibleAttribute(String attributeName) {
-        return super.isEligibleAttribute(attributeName) && 
-               isSetterMethodForAttribute(attributeName);
+    protected boolean shouldGenerateIdAsFallback() {
+      return true;
     }
-
-    private boolean isSetterMethodForAttribute(String attributeName) {
-        return findSetterMethodForAttribute(attributeName) != null;
-    }
-
-    private Method findSetterMethodForAttribute(String attributeName) {
-        final String expectedPropertyName = extractPropertyName(attributeName);
-        final String expectedMethodName = "set"+(""+expectedPropertyName.charAt(0)).toUpperCase()+ expectedPropertyName.substring(1);
+        
+    private Method findSetterMethodFromXmlName(String xmlName) {
+        
         for (final Method method : clazz.getMethods()) {
-            if (method.getAnnotation(XmlProperty.class) != null &&
-                method.getName().equals(expectedMethodName) && 
+            XmlProperty annotation = method.getAnnotation(XmlProperty.class);
+            if (annotation != null &&
                 method.getParameterTypes().length == 1) {
-                return method;
+                
+                List<String> annotationValue = Arrays.asList(StringUtils.commaDelimitedListToStringArray(annotation.value()));
+                if (!annotationValue.isEmpty()) {
+                    if (annotationValue.contains(xmlName)) {
+                        //xmlName matches the setter method annotation value.
+                        return method;
+                    }
+                    else {
+                        //not found in method annotation value
+                    }
+                }
+                else if (isXmlNameMatchesMethodName(xmlName, method)) {
+                    // no method annotation value, but xmlName matches method name.
+                    return method;
+                }
             }
         }
         return null;
     }
+
+    private boolean isXmlNameMatchesMethodName(final String xmlName, Method method) {
+        
+        String propertyName = Conventions.attributeNameToPropertyName(xmlName);
+        if (isListSetterMethod(method)) {
+            propertyName = pluralOf(propertyName);
+        }
+        String methodName =  convertPropertyNameToSetterMethodName(propertyName);
+        return method.getName().equals(methodName);
+    }
+
+    private String convertPropertyNameToSetterMethodName(String propertyName) {
+        return "set"+String.valueOf(propertyName.charAt(0)).toUpperCase()+ propertyName.substring(1);
+    }
+    
+    private String convertSetterMethodToPropertyName(Method method) {
+        String methodName = method.getName();
+        if (!methodName.startsWith("set")) {
+            throw new IllegalArgumentException(methodName + " does not start with 'set':" + methodName);
+        }
+        return String.valueOf(methodName.charAt(3)).toLowerCase() + methodName.substring(4);
+    }
+
+    private boolean isListSetterMethod(Method method) {
+        return method.getParameterTypes()[0].equals(List.class);
+    }
+
 }
