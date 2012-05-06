@@ -17,8 +17,13 @@
  ******************************************************************************/
 package org.openspaces.admin.application;
 
+import java.io.File;
+
+import org.openspaces.admin.AdminException;
 import org.openspaces.admin.application.config.ApplicationConfig;
 import org.openspaces.admin.pu.topology.ProcessingUnitDeploymentTopology;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * Describes an application deployment that consists of one or more processing unit deployments.
@@ -32,6 +37,15 @@ public class ApplicationDeployment {
     public ApplicationDeployment(String applicationName) {
         config = new ApplicationConfig();
         config.setName(applicationName);
+    }
+    
+    public ApplicationDeployment(File applicationFolder) {
+        String xmlFilePath = new File(applicationFolder,"application.xml").getAbsolutePath();
+        final ApplicationContext context = new ClassPathXmlApplicationContext(xmlFilePath);
+        config = context.getBean(org.openspaces.admin.application.config.ApplicationConfig.class);
+        if (config == null) {
+            throw new AdminException("Cannot find an application in " + xmlFilePath);
+        }
     }
     
     public ApplicationDeployment(String applicationName, ProcessingUnitDeploymentTopology ... processingUnitDeployments) {
