@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.openspaces.admin.space;
 
-import org.openspaces.admin.internal.pu.elastic.config.ElasticStatefulProcessingUnitConfig;
+import org.openspaces.admin.pu.elastic.config.ElasticStatefulProcessingUnitConfig;
 
 /**
  * @author itaif

@@ -18,10 +18,10 @@
 package org.openspaces.admin.config;
 
 import org.openspaces.admin.application.config.ApplicationConfig;
-import org.openspaces.admin.internal.pu.elastic.config.ElasticStatefulProcessingUnitConfig;
 import org.openspaces.admin.memcached.config.MemcachedConfig;
 import org.openspaces.admin.pu.config.ProcessingUnitConfig;
 import org.openspaces.admin.pu.dependency.config.ProcessingUnitDependencyConfig;
+import org.openspaces.admin.pu.elastic.config.ElasticStatefulProcessingUnitConfig;
 import org.openspaces.admin.pu.elastic.config.ElasticStatelessProcessingUnitConfig;
 import org.openspaces.admin.space.ElasticSpaceConfig;
 import org.openspaces.admin.space.config.SpaceConfig;
