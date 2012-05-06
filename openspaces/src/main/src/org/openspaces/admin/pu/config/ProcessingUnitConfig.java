@@ -38,7 +38,7 @@ import com.gigaspaces.security.directory.UserDetails;
  * @author itaif
  * @since 9.0.1
  */
-public class ProcessingUnitConfig implements ProcessingUnitConfigFactory{
+public class ProcessingUnitConfig implements ProcessingUnitConfigFactory {
 
     private String processingUnit;
 
@@ -127,14 +127,6 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigFactory{
         this.maxInstancesPerMachine = maxInstancesPerMachine;
     }
 
-    public Map<String, Integer> getMaxInstancesPerZone() {
-        return maxInstancesPerZone;
-    }
-
-    public List<String> getZones() {
-        return zones;
-    }
-
     public Map<String,String> getContextProperties() {
         return contextProperties;
     }
@@ -143,6 +135,9 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigFactory{
         return userDetails;
     }
 
+    /**
+     * @see ProcessingUnitDeployment#userDetails(UserDetails)
+     */
     public void setUserDetails(UserDetails userDetails) {
         this.userDetails = userDetails;
     }
@@ -155,6 +150,9 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigFactory{
         this.slaLocation = slaLocation;
     }
 
+    /**
+     * @see ProcessingUnitDeployment#secured(boolean)
+     */
     public Boolean getSecured() {
         return secured;
     }
@@ -167,6 +165,10 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigFactory{
         return elasticProperties;
     }
 
+    public Map<String, Integer> getMaxInstancesPerZone() {
+        return maxInstancesPerZone;
+    }
+    
     /**
      * @see ProcessingUnitDeployment#maxInstancesPerZone(String, int)
      */
@@ -175,12 +177,22 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigFactory{
     }
 
     /**
+     * @see ProcessingUnitDeployment#maxInstancesPerZone(String, int)
+     */
+    public void setMaxInstancesPerZone(String zone, int maxInstancesPerZone) {
+        getMaxInstancesPerZone().put(zone,maxInstancesPerZone);
+    }
+    
+    /**
      * @see ProcessingUnitDeployment#setContextProperty(String, String)
      */
     public void setContextProperties(Map<String,String> contextProperties) {
         this.contextProperties = contextProperties;
     }
     
+    /**
+     * @see ProcessingUnitDeployment#setContextProperty(String, String)
+     */
     public void setContextProperty(String key, String value) {
         contextProperties.put(key, value);
     }
@@ -262,15 +274,32 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigFactory{
 
     }
 
+    public List<String> getZones() {
+        return zones;
+    }
+    
+    /**
+     * @see ProcessingUnitDeployment#addZone(String)
+     */
     public void setZones(List<String> zones) {
         this.zones = zones;
     }
 
+    /**
+     * @see ProcessingUnitDeployment#addZone(String)
+     */
+    public void addZone(String zone) {
+        zones.add(zone);
+    }
+    
     @Override
     public ProcessingUnitConfig toProcessingUnitConfig(Admin admin) {
         return this;
     }
 
+    /**
+     * @see ProcessingUnitDeployment#addDependencies(org.openspaces.admin.internal.pu.dependency.ProcessingUnitDetailedDependencies)
+     */
     public InternalProcessingUnitDependencies<ProcessingUnitDependency,InternalProcessingUnitDependency> getDependencies() {
         return dependencies;
     }
@@ -412,6 +441,5 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigFactory{
         } else if (!zones.equals(other.zones))
             return false;
         return true;
-    }
-    
+    }  
 }
