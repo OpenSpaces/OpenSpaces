@@ -62,7 +62,7 @@ public class SpaceDeployment implements ProcessingUnitDeploymentTopology {
      */
     public SpaceDeployment(String spaceName) {
         config = new SpaceConfig();
-        config.setSpaceName(spaceName);
+        config.setName(spaceName);
     }
 
     /**
@@ -71,7 +71,7 @@ public class SpaceDeployment implements ProcessingUnitDeploymentTopology {
      */
     @Deprecated
     public String getSpaceName() {
-        return config.getSpaceName();
+        return config.getName();
     }
 
     /**
