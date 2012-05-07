@@ -59,13 +59,13 @@ public class ElasticSpaceDeployment extends AbstractElasticProcessingUnitDeploym
 
     @Override
     public ElasticSpaceDeployment maxMemoryCapacity(int maxMemoryCapacity, MemoryUnit unit) {
-        getConfig().setMaximumMemoryCapacityInMB(unit.toMegaBytes(maxMemoryCapacity));
+        getConfig().setMaxMemoryCapacityInMB(unit.toMegaBytes(maxMemoryCapacity));
         return this;
     }
 
     @Override
     public ElasticSpaceDeployment maxMemoryCapacity(String maxMemoryCapacity) {
-        getConfig().setMaximumMemoryCapacityInMB(MemoryUnit.toMegaBytes(maxMemoryCapacity));
+        getConfig().setMaxMemoryCapacityInMB(MemoryUnit.toMegaBytes(maxMemoryCapacity));
         return this;
     }
     

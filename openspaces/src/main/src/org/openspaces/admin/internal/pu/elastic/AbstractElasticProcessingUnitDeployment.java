@@ -117,7 +117,7 @@ public abstract class AbstractElasticProcessingUnitDeployment {
     }
 
     private void memoryCapacityPerContainer(long memoryInMB) {
-        config.setMaximumMemoryCapacityInMB(memoryInMB);
+        config.setMemoryCapacityPerContainerInMB(memoryInMB);
     }
     
     protected AbstractElasticProcessingUnitDeployment memoryCapacityPerContainer(int memoryCapacityPerContainer, MemoryUnit unit) {

@@ -159,11 +159,11 @@ public class AbstractElasticProcessingUnitConfig {
         return getGridServiceContainerConfig().getOverrideCommandLineArguments();
     }
 
-    public void setMaximumMemoryCapacityInMB(long memoryInMB) {
+    public void setMemoryCapacityPerContainerInMB(long memoryInMB) {
         getGridServiceContainerConfig().setMaximumMemoryCapacityInMB(memoryInMB);        
     }
     
-    public long getMaximumMemoryCapacityInMB() {
+    public long getMemoryCapacityPerContainerInMB() {
         return getGridServiceContainerConfig().getMaximumMemoryCapacityInMB();        
     }
 
