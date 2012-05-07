@@ -15,6 +15,11 @@
 			cluster-schema="partitioned-sync2backup"
 			number-of-instances="1" number-of-backups="1"
 			max-instances-per-vm="1" max-instances-per-machine="0" />
+			
+		<os-admin:pu processing-unit="processor.jar"
+			cluster-schema="partitioned-sync2backup"
+			number-of-instances="1" number-of-backups="1"
+			max-instances-per-vm="1" max-instances-per-machine="0" />
 		
 		<os-admin:pu processing-unit="feeder.jar" >
 			<os-admin:depends-on name="space" min-instances-per-partition="1"/> 

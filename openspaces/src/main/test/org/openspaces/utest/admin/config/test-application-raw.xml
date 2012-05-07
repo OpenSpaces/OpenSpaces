@@ -28,6 +28,16 @@
 				</bean>
 
 				<bean class="org.openspaces.admin.pu.config.ProcessingUnitConfig">
+
+					<property name="processingUnit" value="processor.jar" />
+					<property name="clusterSchema" value="partitioned-sync2backup" />
+					<property name="numberOfInstances" value="1"/>
+					<property name="numberOfBackups" value="1" />
+					<property name="maxInstancesPerVM" value="1" /> 
+					<property name="maxInstancesPerMachine" value="0" />
+				</bean>
+
+				<bean class="org.openspaces.admin.pu.config.ProcessingUnitConfig">
 					<property name="processingUnit" value="feeder.jar" />
 					<property name="deploymentDependencies">
 						<list>

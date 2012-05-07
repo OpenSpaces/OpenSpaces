@@ -55,7 +55,16 @@ public class TestApplicationXml extends TestCase {
 
     private ApplicationConfig createApplicationWithAdminApi() {
         ApplicationDeployment applicationDeployment = new ApplicationDeployment("test-application")
-        .addProcessingUnitDeployment(new SpaceDeployment("space").partitioned(1,1).maxInstancesPerVM(1).maxInstancesPerMachine(0))
+        .addProcessingUnitDeployment(
+                new SpaceDeployment("space")
+                .partitioned(1,1)
+                .maxInstancesPerVM(1)
+                .maxInstancesPerMachine(0))
+        .addProcessingUnitDeployment(
+                new ProcessingUnitDeployment("processor.jar")
+                .partitioned(1,1)
+                .maxInstancesPerVM(1)
+                .maxInstancesPerMachine(0))
         .addProcessingUnitDeployment(
                 new ProcessingUnitDeployment("feeder.jar")
                 .addDependencies(
