@@ -23,6 +23,7 @@ import junit.framework.TestCase;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.openspaces.admin.pu.DeploymentStatus;
 import org.openspaces.grid.gsm.autoscaling.AutomaticCapacityCooldownValidator;
 import org.openspaces.grid.gsm.autoscaling.exceptions.AutoScalingTemporarilyDisabledCooldownException;
 
@@ -45,21 +46,21 @@ public class AutomaticCapacityCooldownValidatorTest extends TestCase {
     public void testInstanceAddedCooldown() {
         
         try {
-            validator.validate(instancesUids("instance1","instance2"), 0L);
+            validator.validate(DeploymentStatus.INTACT, instancesUids("instance1","instance2"), 0L);
             Assert.assertTrue("Expected exception",false);
         } catch (AutoScalingTemporarilyDisabledCooldownException e) {
             //expected
         }
         
         try {
-            validator.validate(instancesUids("instance1","instance2"), 1L);
+            validator.validate(DeploymentStatus.INTACT, instancesUids("instance1","instance2"), 1L);
             Assert.assertTrue("Expected exception",false);
         } catch (AutoScalingTemporarilyDisabledCooldownException e) {
             //expected
         }
         
         try {
-            validator.validate(instancesUids("instance1","instance2"), 3L);
+            validator.validate(DeploymentStatus.INTACT, instancesUids("instance1","instance2"), 3L);
         } catch (AutoScalingTemporarilyDisabledCooldownException e) {
             Assert.assertEquals("Unexpected exception", null, e);
         }
@@ -69,28 +70,59 @@ public class AutomaticCapacityCooldownValidatorTest extends TestCase {
     public void testInstanceRemovedCooldown() {
         
         try {
-            validator.validate(instancesUids("instance1","instance2"), 0L);
+            validator.validate(DeploymentStatus.INTACT, instancesUids("instance1","instance2"), 0L);
             Assert.assertTrue("Expected exception",false);
         } catch (AutoScalingTemporarilyDisabledCooldownException e) {
             //expected
         }
         
         try {
-            validator.validate(instancesUids("instance1"), 10L);
+            validator.validate(DeploymentStatus.INTACT, instancesUids("instance1"), 10L);
             Assert.assertTrue("Expected exception",false);
         } catch (AutoScalingTemporarilyDisabledCooldownException e) {
             //expected
         }
         
         try {
-            validator.validate(instancesUids("instance1"), 11L);
+            validator.validate(DeploymentStatus.INTACT, instancesUids("instance1"), 11L);
             Assert.assertTrue("Expected exception",false);
         } catch (AutoScalingTemporarilyDisabledCooldownException e) {
             //expected
         }
         
         try {
-            validator.validate(instancesUids("instance1"), 16L);
+            validator.validate(DeploymentStatus.INTACT, instancesUids("instance1"), 16L);
+        } catch (AutoScalingTemporarilyDisabledCooldownException e) {
+            Assert.assertEquals("Unexpected exception", null, e);
+        }
+    }
+    
+    @Test
+    public void testInstanceStartedCooldown() {
+        
+        try {
+            validator.validate(DeploymentStatus.BROKEN, instancesUids("instance1"), 0L);
+            Assert.assertTrue("Expected exception",false);
+        } catch (AutoScalingTemporarilyDisabledCooldownException e) {
+            //expected
+        }
+        
+        try {
+            validator.validate(DeploymentStatus.INTACT, instancesUids("instance1"), 10L);
+            Assert.assertTrue("Expected exception",false);
+        } catch (AutoScalingTemporarilyDisabledCooldownException e) {
+            //expected
+        }
+        
+        try {
+            validator.validate(DeploymentStatus.INTACT, instancesUids("instance1"), 11L);
+            Assert.assertTrue("Expected exception",false);
+        } catch (AutoScalingTemporarilyDisabledCooldownException e) {
+            //expected
+        }
+        
+        try {
+            validator.validate(DeploymentStatus.INTACT, instancesUids("instance1"), 13L);
         } catch (AutoScalingTemporarilyDisabledCooldownException e) {
             Assert.assertEquals("Unexpected exception", null, e);
         }
@@ -100,28 +132,28 @@ public class AutomaticCapacityCooldownValidatorTest extends TestCase {
     public void testInstanceRemovedAndAddedCooldown() {
         
         try {
-            validator.validate(instancesUids("instance1","instance2"), 0L);
+            validator.validate(DeploymentStatus.INTACT, instancesUids("instance1","instance2"), 0L);
             Assert.assertTrue("Expected exception",false);
         } catch (AutoScalingTemporarilyDisabledCooldownException e) {
             //expected
         }
         
         try {
-            validator.validate(instancesUids("instance1","instance3"), 10L);
+            validator.validate(DeploymentStatus.INTACT, instancesUids("instance1","instance3"), 10L);
             Assert.assertTrue("Expected exception",false);
         } catch (AutoScalingTemporarilyDisabledCooldownException e) {
             //expected
         }
         
         try {
-            validator.validate(instancesUids("instance1","instance3"), 11L);
+            validator.validate(DeploymentStatus.INTACT, instancesUids("instance1","instance3"), 11L);
             Assert.assertTrue("Expected exception",false);
         } catch (AutoScalingTemporarilyDisabledCooldownException e) {
             //expected
         }
         
         try {
-            validator.validate(instancesUids("instance1","instance3"), 16L);
+            validator.validate(DeploymentStatus.INTACT, instancesUids("instance1","instance3"), 16L);
         } catch (AutoScalingTemporarilyDisabledCooldownException e) {
             Assert.assertEquals("Unexpected exception", null, e);
         }

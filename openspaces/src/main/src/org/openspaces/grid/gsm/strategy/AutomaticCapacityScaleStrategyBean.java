@@ -15,14 +15,11 @@
  *******************************************************************************/
 package org.openspaces.grid.gsm.strategy;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.internal.pu.elastic.events.DefaultElasticAutoScalingFailureEvent;
 import org.openspaces.admin.internal.pu.elastic.events.DefaultElasticAutoScalingProgressChangedEvent;
-import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.elastic.config.AutomaticCapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.config.AutomaticCapacityScaleRuleConfig;
 import org.openspaces.admin.pu.elastic.config.CapacityRequirementsConfig;
@@ -76,7 +73,7 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
         this.cooldownValidator = new AutomaticCapacityCooldownValidator();
         this.cooldownValidator.setCooldownAfterInstanceAdded(config.getCooldownAfterScaleOutSeconds(), TimeUnit.SECONDS);
         this.cooldownValidator.setCooldownAfterInstanceRemoved(config.getCooldownAfterScaleSeconds(), TimeUnit.SECONDS);
-        
+        this.cooldownValidator.setProcessingUnit(getProcessingUnit());
         CapacityRequirementsConfig initialCapacity = config.getInitialCapacity();
         if (initialCapacity == null) {   
             initialCapacity = config.getMinCapacity();
@@ -173,7 +170,9 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
         
         try {
             //make sure that we are not in the cooldown period
-            cooldownValidator.validate(getInstancesUids());
+            //Notice this check is performed after PU is INTACT, meaning the USM is already started
+            //@see DefaultAdmin#degradeUniversalServiceManagerProcessingUnitStatus()
+            cooldownValidator.validate();
         
             //enforce auto-scaling SLA
             newCapacityRequirements = enforceAutoScalingSla(capacityRequirements);
@@ -204,15 +203,6 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
         }
     }
 
-
-    private Set<String> getInstancesUids() {
-        Set<String> instanceUids = new HashSet<String>();
-        for (ProcessingUnitInstance instance : super.getProcessingUnit()) {
-            instanceUids.add(instance.getUid());
-        }
-        return instanceUids;
-    }
-    
     private CapacityRequirements enforceAutoScalingSla(final CapacityRequirements capacityRequirements)
             throws AutoScalingSlaEnforcementInProgressException {
         

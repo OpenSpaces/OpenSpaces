@@ -19,6 +19,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import org.openspaces.admin.internal.pu.InternalProcessingUnit;
+import org.openspaces.admin.pu.DeploymentStatus;
+import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.grid.gsm.autoscaling.exceptions.AutoScalingTemporarilyDisabledCooldownException;
 
 /**
@@ -36,7 +39,9 @@ public class AutomaticCapacityCooldownValidator {
     
     //state
     private Set<String> previousInstancesUids;
+    private DeploymentStatus previousDeploymentStatus;
     private Long cooldownExpiredTimestamp = 0L;
+    private InternalProcessingUnit processingUnit;
     
     public void setCooldownAfterInstanceRemoved(long period, TimeUnit timeUnit) {
         this.cooldownAfterInstanceRemovedMillis = timeUnit.toMillis(period);
@@ -46,16 +51,19 @@ public class AutomaticCapacityCooldownValidator {
         this.cooldownAfterInstanceAddedMillis = timeUnit.toMillis(period);
     }
     
+    public void setProcessingUnit(InternalProcessingUnit processingUnit) {
+        this.processingUnit = processingUnit;
+    }
+    
+    
     /**
      * Raises exception if cooldown period is active.
      * Cooldown is active if an instance was removed or added 
      * and the preconfigured cooldown period has not passed since.
      * @throws AutoScalingTemporarilyDisabledCooldownException
-     * 
-     * @param existingInstancesUids - set of discovered processing unit instance UIDs
      */
-    public void validate(Set<String> existingInstancesUids) throws AutoScalingTemporarilyDisabledCooldownException {
-        validate(existingInstancesUids, System.currentTimeMillis());
+    public void validate() throws AutoScalingTemporarilyDisabledCooldownException {
+        validate(processingUnit.getStatus(), getInstancesUids(), System.currentTimeMillis());
     }
     
     /**
@@ -67,37 +75,57 @@ public class AutomaticCapacityCooldownValidator {
      * @param existingInstancesUids - set of discovered processing unit instance UIDs
      * @param currentTimeMillis - current time in milliseconds 
      */
-    public void validate(Set<String> existingInstancesUids, long currentTimeMillis) throws AutoScalingTemporarilyDisabledCooldownException {
+    public void validate(DeploymentStatus deploymentStatus, Set<String> existingInstancesUids, long currentTimeMillis) throws AutoScalingTemporarilyDisabledCooldownException {
         
-        updateCooldownTimestamp(existingInstancesUids, currentTimeMillis);
+        updateCooldownTimestamp(deploymentStatus, existingInstancesUids, currentTimeMillis);
 
         if (cooldownExpiredTimestamp >= currentTimeMillis) {
             throw new AutoScalingTemporarilyDisabledCooldownException(cooldownExpiredTimestamp -currentTimeMillis);
         }
     }
 
-    private void updateCooldownTimestamp(final Set<String> existingInstancesUids, long currentTimeMillis) {
+    private void updateCooldownTimestamp(DeploymentStatus existingDeploymentStatus, final Set<String> existingInstancesUids, long currentTimeMillis) {
         
         Set<String> addedInstancesUids = new HashSet<String>();
         addedInstancesUids.addAll(existingInstancesUids);
         if (previousInstancesUids != null) {
             addedInstancesUids.removeAll(previousInstancesUids);
         }
-        
+                
         Set<String> removedInstancesUids = new HashSet<String>();
         if (previousInstancesUids != null) {
             removedInstancesUids.addAll(previousInstancesUids);
             removedInstancesUids.removeAll(existingInstancesUids);
         }
         
-        if (!addedInstancesUids.isEmpty()) {
+        boolean isInstanceJustStarted = 
+                addedInstancesUids.isEmpty() && 
+                removedInstancesUids.isEmpty() && 
+                (previousDeploymentStatus != DeploymentStatus.INTACT && 
+                existingDeploymentStatus==DeploymentStatus.INTACT);
+        
+        if (!addedInstancesUids.isEmpty() || 
+            isInstanceJustStarted) {
             cooldownExpiredTimestamp = Math.max(cooldownExpiredTimestamp, currentTimeMillis + cooldownAfterInstanceAddedMillis);
             previousInstancesUids = existingInstancesUids;
+            previousDeploymentStatus = existingDeploymentStatus;
         }
         
         if (!removedInstancesUids.isEmpty()) {
             cooldownExpiredTimestamp = Math.max(cooldownExpiredTimestamp, currentTimeMillis + cooldownAfterInstanceRemovedMillis);
             previousInstancesUids = existingInstancesUids;
+            previousDeploymentStatus = existingDeploymentStatus;
         }
+        
      }
+
+    
+    private Set<String> getInstancesUids() {
+        Set<String> instanceUids = new HashSet<String>();
+        for (ProcessingUnitInstance instance : processingUnit) {
+            instanceUids.add(instance.getUid());
+        }
+        return instanceUids;
+    }
+    
 }
