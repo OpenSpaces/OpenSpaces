@@ -42,6 +42,7 @@ import net.jini.core.lookup.ServiceID;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jini.rio.boot.PUZipUtils;
 import org.jini.rio.core.OperationalString;
 import org.jini.rio.monitor.DeployAdmin;
 import org.jini.rio.monitor.ProvisionMonitorAdmin;
@@ -587,6 +588,15 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             throw new AdminException("Application must contain at least one processing unit.");
         }
         
+        //(if necessary) unzip applicaiton.zip to temp directory 
+        File tempDirectory = null;
+        File jarsDirectory = applicationConfig.getJarsDirectoryOrZip();
+        if (jarsDirectory != null && jarsDirectory.isFile()) {
+            tempDirectory = unzipToTempFolder(applicationConfig.getJarsDirectoryOrZip());
+            jarsDirectory = tempDirectory;
+        }
+        
+        try {
         // iterate in a deterministic order, so if deployed in parallel by another admin client, only one will succeed
         boolean timedOut = false;
         Set<String> deployedPuNames = new HashSet<String>();
@@ -599,20 +609,19 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
                 }
                 
                 ProcessingUnitConfig puConfig = puConfigFactory.toProcessingUnitConfig(admin);
+            
+                //handle relative paths to jar files
+                boolean isAbsolute = 
+                        new File(puConfig.getProcessingUnit()).isAbsolute() ||
+                        puConfig.getProcessingUnit().startsWith("/"); // relative to gigaspaces home
                 
-                //correct Jars path in case of an application deployment from xml file
-                if (applicationConfig.getJarsDirectory() != null) {
-                    if (!new File(puConfig.getProcessingUnit()).isAbsolute() &&
-                        !puConfig.getProcessingUnit().startsWith("/"))  {
-                        String absolutePuPath = 
-                            new File(
-                                applicationConfig.getJarsDirectory(),
-                                puConfig.getProcessingUnit())
-                            .getAbsolutePath();
-                        puConfig.setProcessingUnit(absolutePuPath);
-                    }
+                if (jarsDirectory != null && !isAbsolute) {
+                    File jar = new File(
+                            jarsDirectory,
+                            puConfig.getProcessingUnit());
+                    puConfig.setProcessingUnit(jar.getAbsolutePath());
                 }
-                
+                                
                 //deploy pu
                 ProcessingUnit pu = deploy(puConfig, applicationName, remaining,TimeUnit.MILLISECONDS);
                 if (pu == null) {
@@ -639,6 +648,55 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             return null;
         }
         return admin.getApplications().getApplication(applicationName);
+        }
+        finally {
+            if (tempDirectory != null) {
+                deleteFileOrDirectory(tempDirectory);
+            }
+        }
+    }
+
+    private static void deleteFileOrDirectory(File fileOrDirectory) {
+        if (fileOrDirectory.isDirectory()) {
+          for (File file : fileOrDirectory.listFiles())
+              deleteFileOrDirectory(file);
+        }
+        if (!fileOrDirectory.delete()) {
+            throw new AdminException("Failed to delete " + fileOrDirectory);
+        }
+    }
+    
+    /**
+     * unzips the specified zip file to a temp folder
+     * @param zipFile
+     * @return the new temp folder
+     */
+    private static File unzipToTempFolder(File zipFile) {
+        String zipFilename = zipFile.getName();
+        String tempFolderPrefix = zipFilename.substring(0, zipFilename.lastIndexOf('.'));
+        File tempFolder = createTempFolder(tempFolderPrefix);
+        try {
+            PUZipUtils.unzip(zipFile, tempFolder);
+            return tempFolder;
+        } catch (Exception e) {
+            throw new AdminException("Failed to unzip file " + zipFile + " to " + tempFolder, e);
+        }
+    }
+
+    private static File createTempFolder(String tempFolderPrefix) {
+        File tempFile;
+        try {
+            tempFile = File.createTempFile(tempFolderPrefix, "");
+        } catch (final IOException e) {
+            throw new AdminException("Failed to create temp file with prefix " + tempFolderPrefix, e);
+        }
+        deleteFileOrDirectory(tempFile);
+        
+        final boolean created = tempFile.mkdirs();
+        if (!created) {
+            throw new AdminException("Failed to create temp file " + tempFile);
+        }
+        return tempFile;
     }
 
     public boolean undeployProcessingUnitsAndWait(ProcessingUnit[] processingUnits, long timeout, TimeUnit timeUnit) {

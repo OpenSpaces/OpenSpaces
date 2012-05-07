@@ -15,63 +15,166 @@
  *******************************************************************************/
 package org.openspaces.admin.application;
 
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.application.config.ApplicationConfig;
-import org.springframework.context.ApplicationContext;
+import org.openspaces.core.util.MemoryUnit;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
+import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 
 /**
+ * A helper method that creates a {@link ApplicationConfig} by reading an xml file
  * @author itaif
  * @since 9.0.1
  */
 public class ApplicationFileDeployment extends ApplicationDeployment {
 
     private static final String DEFAULT_APPLICATION_XML_FILENAME = "application.xml";
+    private static final int MAX_XML_FILE_SIZE = (int) MemoryUnit.toBytes("1m");
 
     /**
      * Creates a new application deployment based on the specified file
      * 
-     * @param application
-     *            - the application folder containing {@link #DEFAULT_APPLICATION_XML_FILENAME} file,
-     * 
-     *            or
-     * 
-     *            the application.xml file itself in which case all jars referenced from
-     *            application.xml are relative to the folder containing the applicaiton.xml file. If
+     * @param applicationDirectory
+     *            - the application directory or zip file containing the application xml file and 
+     *            the processing unit jar files.
+     *            
+     *            All jars referenced from application.xml are relative to this directory. If
      *            the processingUnit defined in the xml file with a '/' it is relative to the
-     *            gigaspaces installation folder, and not the applicaiton folder
+     *            gigaspaces installation directory, and not the application directory
+     *            
+     * Assumes the directory or zip file contains application.xml file.
      * 
      * @since 9.0.1
      */
-    public ApplicationFileDeployment(final File application) {
-        super(readApplication(application));
+    public ApplicationFileDeployment(final File applicationDirectory) {
+        this(applicationDirectory, DEFAULT_APPLICATION_XML_FILENAME);
+    }
+
+    /**
+     * Creates a new application deployment based on the specified file
+     * 
+     * @param applicationDirectory
+     *            - the application directory or zip file containing the application xml file and 
+     *            the processing unit jar files.
+     *            
+     *            All jars referenced from application.xml are relative to this directory. If
+     *            the processingUnit defined in the xml file with a '/' it is relative to the
+     *            gigaspaces installation directory, and not the application directory
+     *            
+     * @param applicationFilename
+     *            The application xml file (absolute or relative to the application directory)
+     */
+    public ApplicationFileDeployment(final File applicationDirectoryOrZip, final String applicationFile) {
+        super(readApplication(applicationDirectoryOrZip, applicationFile));
     }
     
-    private static ApplicationConfig readApplication(final File application) {
-        if (!application.exists()) {
-            throw new AdminException("Cannot find " + application.getAbsolutePath());
+    private static ApplicationConfig readApplication(final File directoryOrZip, String applicationFile) {
+        
+        if (!directoryOrZip.exists()) {
+            throw new AdminException("Application " + directoryOrZip.getAbsolutePath() + " does not exist.");
         }
         
-        File applicationXmlFile = application;
-        if (application.isDirectory()) {
-            //default xml filename
-            applicationXmlFile = new File(application,DEFAULT_APPLICATION_XML_FILENAME);
+        //read xml file into context
+        ApplicationConfig config;
+        if (new File(applicationFile).isAbsolute()) {
+            config = readConfigFromXmlFile(applicationFile);
         }
-        
-        // read xml file
-        final ApplicationContext context = new FileSystemXmlApplicationContext(applicationXmlFile.getAbsolutePath());
-        ApplicationConfig config = context.getBean(org.openspaces.admin.application.config.ApplicationConfig.class);
+        else if (directoryOrZip.isDirectory()) {
+            final String applicationFilePath = new File(directoryOrZip, applicationFile).getAbsolutePath();
+            config = readConfigFromXmlFile(applicationFilePath);
+        }
+        else {
+            config = readConfigFromZipFile(directoryOrZip, applicationFile);
+        }
+          
         if (config == null) {
-            throw new AdminException("Cannot find an application in " + applicationXmlFile.getAbsolutePath());
+            throw new AdminException("Cannot find an application bean in "+ applicationFile + "file");
         }
         
-        // inject application directory to config object
-        if (config.getJarsDirectory() == null) {
-            final File applicationDir = applicationXmlFile.getParentFile();
-            config.setJarsDirectory(applicationDir);
+        // store application directory to config object for later use (reading the pus inside it)
+        if (config.getJarsDirectoryOrZip() == null) {
+            config.setJarsDirectoryOrZip(directoryOrZip);
         }
         return config;
+    }
+
+    private static ApplicationConfig readConfigFromXmlFile(final String applicationFilePath) {
+        ApplicationConfig config;
+        final FileSystemXmlApplicationContext context = new FileSystemXmlApplicationContext(applicationFilePath);
+        try {
+            context.refresh();
+            config = context.getBean(ApplicationConfig.class);
+        }
+        finally {
+            if (context.isActive()) {
+                context.close();
+            }
+        }
+        return config;
+    }
+
+    private static ApplicationConfig readConfigFromZipFile(final File directoryOrZip, String applicationFile) {
+        byte[] buffer = unzipFileToMemory(applicationFile, directoryOrZip);
+        Resource resource = new ByteArrayResource(buffer);
+        return getSpringBeanFromResource(resource, ApplicationConfig.class);
+    }
+
+    private static <T> T getSpringBeanFromResource(Resource resource, Class<T> type) {
+        final GenericApplicationContext context = new GenericApplicationContext();
+        try {
+            final XmlBeanDefinitionReader xmlReader = new XmlBeanDefinitionReader(context);
+            xmlReader.loadBeanDefinitions(resource);
+            context.refresh();
+            return context.getBean(type);
+        }
+        finally {
+            if (context.isActive()) {
+                context.close();
+            }
+        }
+    }
+
+    private static byte[] unzipFileToMemory(String applicationFile, File directoryOrZip) {
+        ZipFile zipFile = null;
+        try {
+            zipFile = new ZipFile(directoryOrZip);
+            final ZipEntry zipEntry = zipFile.getEntry(applicationFile);
+            final int length = (int) zipEntry.getSize();
+            byte[] buffer = new byte[length];
+            final InputStream in = zipFile.getInputStream(zipEntry);
+            if (zipEntry.getSize() > MAX_XML_FILE_SIZE) {
+                throw new AdminException("Application xml file size cannot be bigger than " + MAX_XML_FILE_SIZE
+                        + " bytes");
+            }
+
+            final DataInputStream din = new DataInputStream(in);
+            try {
+                din.readFully(buffer, 0, length);
+                return buffer;
+            } catch (final IOException e) {
+                throw new AdminException("Failed to read application file input stream", e);
+            }
+
+        } catch (final IOException e) {
+            throw new AdminException("Failed to read zip file " + directoryOrZip, e);
+        } finally {
+            if (zipFile != null) {
+                try {
+                    zipFile.close();
+                } catch (final IOException e) {
+                    throw new AdminException("Failed to close zip file " + directoryOrZip, e);
+                }
+            }
+        }
     }
 }

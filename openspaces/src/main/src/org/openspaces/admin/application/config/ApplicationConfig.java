@@ -60,12 +60,12 @@ public class ApplicationConfig {
         this.processingUnits.add(puConfigFactory);
     }
 
-    public File getJarsDirectory() {
+    public File getJarsDirectoryOrZip() {
         return jarsDirectory;
     }
     
     @XmlTransient
-    public void setJarsDirectory(File jarsDirectory) {
+    public void setJarsDirectoryOrZip(File jarsDirectory) {
         this.jarsDirectory = jarsDirectory;
         
     }
