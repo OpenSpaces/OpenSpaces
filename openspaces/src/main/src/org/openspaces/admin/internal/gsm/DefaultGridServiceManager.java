@@ -582,8 +582,8 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             throw new ApplicationAlreadyDeployedException(applicationName);
         }
         
-        List<ProcessingUnitConfigFactory> processingUnitConfigFactories = applicationConfig.getProcessingUnits();
-        if (processingUnitConfigFactories.size() == 0) {
+        ProcessingUnitConfigFactory[] processingUnitConfigFactories = applicationConfig.getProcessingUnits();
+        if (processingUnitConfigFactories.length == 0) {
             throw new AdminException("Application must contain at least one processing unit.");
         }
         

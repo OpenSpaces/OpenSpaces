@@ -186,7 +186,7 @@ public class SpaceDeployment implements ProcessingUnitDeploymentTopology {
      * Adds a zone where the processing unit is allowed to be deployed on.
      */
     public SpaceDeployment addZone(String zone) {
-        config.getZones().add(zone);
+        config.addZone(zone);
         return this;
     }
 

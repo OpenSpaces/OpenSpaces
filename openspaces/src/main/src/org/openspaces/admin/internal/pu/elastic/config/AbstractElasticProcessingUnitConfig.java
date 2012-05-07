@@ -275,8 +275,7 @@ public class AbstractElasticProcessingUnitConfig {
 
         String containerZone = getDefaultZone();
         addCommandLineArgument("-Dcom.gs.zones=" + containerZone);
-        List<String> zones = new ArrayList<String>(Arrays.asList(new String[]{containerZone}));
-        config.setZones(zones);
+        config.setZones(new String[]{containerZone});
     
         // context properties defined by the user overrides the 
         // default context properties defined by the derived class.
@@ -354,7 +353,7 @@ public class AbstractElasticProcessingUnitConfig {
         this.dependencies = dependencies;
     }
     
-    public void setDeploymentDependencies(List<ProcessingUnitDependency> dependencies) {
+    public void setDeploymentDependencies(ProcessingUnitDependency[] dependencies) {
         
         DefaultProcessingUnitDeploymentDependencies deploymentDependencies = new DefaultProcessingUnitDeploymentDependencies();
         for (ProcessingUnitDependency dependency : dependencies) {
@@ -363,11 +362,11 @@ public class AbstractElasticProcessingUnitConfig {
         this.getDependencies().setDeploymentDependencies(deploymentDependencies);
     }
     
-    public List<ProcessingUnitDependency> getDeploymentDependencies() {
+    public ProcessingUnitDependency[] getDeploymentDependencies() {
         List<ProcessingUnitDependency> dependenciesAsList = new ArrayList<ProcessingUnitDependency>();
         for (String name : this.getDependencies().getDeploymentDependencies().getRequiredProcessingUnitsNames()) {
             dependenciesAsList.add(this.getDependencies().getDeploymentDependencies().getDependencyByName(name));
         }
-        return dependenciesAsList;
+        return dependenciesAsList.toArray(new ProcessingUnitDependency[dependenciesAsList.size()]);
     }
 }

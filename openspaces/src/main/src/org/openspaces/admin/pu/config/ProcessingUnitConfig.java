@@ -16,6 +16,7 @@
 package org.openspaces.admin.pu.config;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -311,15 +312,15 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigFactory {
 
     }
 
-    public List<String> getZones() {
-        return zones;
+    public String[] getZones() {
+        return zones.toArray(new String[zones.size()]);
     }
     
     /**
      * @see ProcessingUnitDeployment#addZone(String)
      */
-    public void setZones(List<String> zones) {
-        this.zones = zones;
+    public void setZones(String[] zones) {
+        this.zones = new ArrayList<String>(Arrays.asList(zones));
     }
 
     /**
@@ -351,7 +352,7 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigFactory {
      * A helper method for setting conditions for processing unit deployment.
      */
     @XmlElement(type = ProcessingUnitDependency.class)
-    public void setDeploymentDependencies(List<ProcessingUnitDependency> dependencies) {
+    public void setDeploymentDependencies(ProcessingUnitDependency[] dependencies) {
         
         DefaultProcessingUnitDeploymentDependencies deploymentDependencies = new DefaultProcessingUnitDeploymentDependencies();
         for (ProcessingUnitDependency dependency : dependencies) {
@@ -360,12 +361,12 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigFactory {
         this.getDependencies().setDeploymentDependencies(deploymentDependencies);
     }
     
-    public List<ProcessingUnitDependency> getDeploymentDependencies() {
+    public ProcessingUnitDependency[] getDeploymentDependencies() {
         List<ProcessingUnitDependency> dependenciesAsList = new ArrayList<ProcessingUnitDependency>();
         for (String name : this.getDependencies().getDeploymentDependencies().getRequiredProcessingUnitsNames()) {
             dependenciesAsList.add(this.getDependencies().getDeploymentDependencies().getDependencyByName(name));
         }
-        return dependenciesAsList;
+        return dependenciesAsList.toArray(new ProcessingUnitDependency[dependenciesAsList.size()]);
     }
 
     /* (non-Javadoc)

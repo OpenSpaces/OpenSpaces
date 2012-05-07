@@ -17,6 +17,7 @@ package org.openspaces.admin.application.config;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -46,13 +47,13 @@ public class ApplicationConfig {
         this.name = name;
     }
     
-    public List<ProcessingUnitConfigFactory> getProcessingUnits() {
-        return processingUnits;
+    public ProcessingUnitConfigFactory[] getProcessingUnits() {
+        return processingUnits.toArray(new ProcessingUnitConfigFactory[processingUnits.size()]);
     }
     
     @XmlElement(type = ProcessingUnitConfigFactory.class)
-    public void setProcessingUnits(List<ProcessingUnitConfigFactory> processingUnitDeployments) {
-        this.processingUnits = processingUnitDeployments;
+    public void setProcessingUnits(ProcessingUnitConfigFactory[] processingUnitDeployments) {
+        this.processingUnits = new ArrayList<ProcessingUnitConfigFactory>(Arrays.asList(processingUnitDeployments));
     }
 
     public void addProcessingUnit(ProcessingUnitConfigFactory puConfigFactory) {

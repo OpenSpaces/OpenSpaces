@@ -145,14 +145,14 @@ public class SpaceConfig implements ProcessingUnitConfigFactory {
         return config.getContextProperties();
     }
     
-    public List<String> getZones() {
+    public String[] getZones() {
         return config.getZones();
     }
     
     /**
      * @see ProcessingUnitDeployment#addZone(String)
      */
-    public void setZones(List<String> zones) {
+    public void setZones(String[] zones) {
         config.setZones(zones);
     }
 
@@ -209,11 +209,11 @@ public class SpaceConfig implements ProcessingUnitConfigFactory {
      * @see ProcessingUnitConfig#setDeploymentDependencies(List)
      */
     @XmlElement(type = ProcessingUnitDependency.class)
-    public void setDeploymentDependencies(List<ProcessingUnitDependency> dependencies) {
+    public void setDeploymentDependencies(ProcessingUnitDependency[] dependencies) {
         config.setDeploymentDependencies(dependencies);
     }
     
-    public List<ProcessingUnitDependency> getDeploymentDependencies() {
+    public ProcessingUnitDependency[] getDeploymentDependencies() {
         return config.getDeploymentDependencies();
     }
         

@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.openspaces.admin.memcached.config;
 
-import java.util.List;
 import java.util.Map;
 
 import javax.xml.bind.annotation.XmlAttribute;
@@ -147,14 +146,14 @@ public class MemcachedConfig implements ProcessingUnitConfigFactory {
         return config.getContextProperties();
     }
     
-    public List<String> getZones() {
+    public String[] getZones() {
         return config.getZones();
     }
     
     /**
      * @see ProcessingUnitDeployment#addZone(String)
      */
-    public void setZones(List<String> zones) {
+    public void setZones(String[] zones) {
         config.setZones(zones);
     }
 
@@ -206,13 +205,13 @@ public class MemcachedConfig implements ProcessingUnitConfigFactory {
     }
 
     /**
-     * @see ProcessingUnitConfig#setDeploymentDependencies(List)
+     * @see ProcessingUnitConfig#setDeploymentDependencies(ProcessingUnitDependency[])
      */
-    public void setDeploymentDependencies(List<ProcessingUnitDependency> dependencies) {
+    public void setDeploymentDependencies(ProcessingUnitDependency[] dependencies) {
         config.setDeploymentDependencies(dependencies);
     }
     
-    public List<ProcessingUnitDependency> getDeploymentDependencies() {
+    public ProcessingUnitDependency[] getDeploymentDependencies() {
         return config.getDeploymentDependencies();
     }
     
@@ -228,10 +227,6 @@ public class MemcachedConfig implements ProcessingUnitConfigFactory {
         config.setDependencies(dependencies);
     }
     
-
-    /* (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -241,9 +236,6 @@ public class MemcachedConfig implements ProcessingUnitConfigFactory {
         return result;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
