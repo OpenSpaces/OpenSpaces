@@ -17,13 +17,8 @@
  ******************************************************************************/
 package org.openspaces.admin.application;
 
-import java.io.File;
-
-import org.openspaces.admin.AdminException;
 import org.openspaces.admin.application.config.ApplicationConfig;
 import org.openspaces.admin.pu.topology.ProcessingUnitDeploymentTopology;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.FileSystemXmlApplicationContext;
 
 /**
  * Describes an application deployment that consists of one or more processing unit deployments.
@@ -43,43 +38,20 @@ public class ApplicationDeployment {
     }
     
     /**
-     * Creates a new application deployment based on a folder containing an application.xml file and the pu jars
-     * @param application - the application folder containing application.xml file, or the application.xml file itself
-     * All jars referenced from the application.xml are assumed to be relative to the folder containing the applicaiton.xml file.
-     * 
-     * @since 9.0.1
+     * Creates a new application deployment with the specified name, and pu deployments
      */
-    public ApplicationDeployment(final File application) {
-        
-        if (!application.exists()) {
-            throw new AdminException("Cannot find " + application.getAbsolutePath());
-        }
-        
-        File applicationXmlFile = application;
-        if (application.isDirectory()) {
-            //default xml filename
-            applicationXmlFile = new File(application,"application.xml");
-        }
-        
-        // read xml file
-        final ApplicationContext context = new FileSystemXmlApplicationContext(applicationXmlFile.getAbsolutePath());
-        config = context.getBean(org.openspaces.admin.application.config.ApplicationConfig.class);
-        if (config == null) {
-            throw new AdminException("Cannot find an application in " + applicationXmlFile.getAbsolutePath());
-        }
-        
-        // inject application directory to config object
-        if (config.getJarsDirectory() == null) {
-            File applicationDir = applicationXmlFile.getParentFile();
-            config.setJarsDirectory(applicationDir);
-        }
-    }
-    
     public ApplicationDeployment(String applicationName, ProcessingUnitDeploymentTopology ... processingUnitDeployments) {
         this(applicationName);
         for (ProcessingUnitDeploymentTopology puDeployment : processingUnitDeployments) {
             addProcessingUnitDeployment(puDeployment);
         }
+    }
+
+    /**
+     * @param readApplication - config created by derived class
+     */
+    protected ApplicationDeployment(ApplicationConfig config) {
+        this.config = config;
     }
 
     /**
