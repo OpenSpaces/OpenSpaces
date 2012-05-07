@@ -47,6 +47,7 @@ public class MemcachedConfig implements ProcessingUnitConfigFactory {
 
     public MemcachedConfig() {
         config = new ProcessingUnitConfig();
+        config.setProcessingUnit("/templates/memcached");
     }
 
     @Required
