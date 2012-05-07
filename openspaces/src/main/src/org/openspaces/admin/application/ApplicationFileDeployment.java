@@ -22,6 +22,8 @@ import java.io.InputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.application.config.ApplicationConfig;
 import org.openspaces.core.util.MemoryUnit;
@@ -38,6 +40,8 @@ import org.springframework.core.io.Resource;
  */
 public class ApplicationFileDeployment extends ApplicationDeployment {
 
+    private static final Log logger = LogFactory.getLog(ApplicationFileDeployment.class);
+    
     private static final String DEFAULT_APPLICATION_XML_FILENAME = "application.xml";
     private static final int MAX_XML_FILE_SIZE = (int) MemoryUnit.toBytes("1m");
 
@@ -172,7 +176,7 @@ public class ApplicationFileDeployment extends ApplicationDeployment {
                 try {
                     zipFile.close();
                 } catch (final IOException e) {
-                    throw new AdminException("Failed to close zip file " + directoryOrZip, e);
+                    logger.debug("Failed to close zip file " + directoryOrZip, e);
                 }
             }
         }
