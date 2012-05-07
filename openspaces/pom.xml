@@ -13,93 +13,122 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-aop</artifactId>
 			<version>${springVersion}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-asm</artifactId>
 			<version>${springVersion}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-aspects</artifactId>
 			<version>${springVersion}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-beans</artifactId>
 			<version>${springVersion}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
 			<version>${springVersion}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context-support</artifactId>
 			<version>${springVersion}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-core</artifactId>
 			<version>${springVersion}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-expression</artifactId>
 			<version>${springVersion}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-tx</artifactId>
 			<version>${springVersion}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>commons-logging</groupId>
 			<artifactId>commons-logging</artifactId>
 			<version>1.1.1</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>commons-beanutils</groupId>
 			<artifactId>commons-beanutils</artifactId>
 			<version>1.7.0</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>commons-lang</groupId>
 			<artifactId>commons-lang</artifactId>
 			<version>2.3</version>
+			<scope>provided</scope>
 		</dependency>
-		<dependency>
+		<dependency> <!-- Not original version -->
 			<groupId>org.apache.ant</groupId>
 			<artifactId>ant-junit</artifactId>
 			<version>1.8.3</version>
+			<scope>provided</scope>
 		</dependency>
-		<dependency>
+		<dependency> <!-- Not original version -->
 			<groupId>ant</groupId>
 			<artifactId>ant-launcher</artifactId>
 			<version>1.6.5</version>
+			<scope>provided</scope>
 		</dependency>
-		<dependency>
+		<dependency> <!-- Not original version -->
 			<groupId>org.apache.ant</groupId>
 			<artifactId>ant-trax</artifactId>
 			<version>1.8.0</version>
+			<scope>provided</scope>
 		</dependency>
-		<dependency>
+		<dependency> <!-- Not original version -->
 			<groupId>org.apache.ant</groupId>
 			<artifactId>ant</artifactId>
 			<version>1.8.3</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.openjpa</groupId>
 			<artifactId>openjpa-lib</artifactId>
 			<version>2.0.1</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>hsqldb</groupId>
+			<groupId>hsqldb</groupId> <!-- Not original version -->
 			<artifactId>hsqldb</artifactId>
 			<version>1.8.0.10</version>
+			<scope>provided</scope>
 		</dependency>
 
-
+		<dependency> <!-- Not original version -->
+			<groupId>javax.activation</groupId>
+			<artifactId>activation</artifactId>
+			<version>1.1</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>geronimo</groupId> <!-- Not original version -->
+			<artifactId>geronimo-connector</artifactId>
+			<version>1.0</version>
+			<scope>provided</scope>
+		</dependency>
 	</dependencies>
 </project>
