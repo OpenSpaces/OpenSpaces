@@ -96,7 +96,8 @@ public class ApplicationFileDeployment {
             throw new AdminException("Application " + directoryOrZip.getAbsolutePath() + " does not exist.");
         }
         if (applicationFile.contains("\\") || applicationFile.contains("/")) {
-            //TODO: Add test case to cover this scenario in folders and zip files
+            //TODO: Add test case to cover this scenario as a relative path in folders and zip files
+            //      and as an absolute path.
             throw new AdminException("applicationFile " + applicationFile + " cannot be a path");
         }
         //read xml file into context
@@ -106,11 +107,11 @@ public class ApplicationFileDeployment {
             config = readConfigFromXmlFile(applicationFilePath);
         }
         else {
-            readConfigFromZipFile(directoryOrZip, applicationFile);
+            config = readConfigFromZipFile(directoryOrZip, applicationFile);
         }
           
         if (config == null) {
-            throw new AdminException("Cannot find an application bean in "+ applicationFile + "file");
+            throw new AdminException("Cannot find an application bean in "+ applicationFile + " file.");
         }
         
         // store application directory to config object for later use (reading the pus inside it)
