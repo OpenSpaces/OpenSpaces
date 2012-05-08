@@ -86,7 +86,7 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
     }
 
     public void testAutoWiredTaskInjectTest() throws Exception {
-        AsyncFuture<Integer> result = clusteredGigaSpace1.execute(new MyTaskAuto());
+        AsyncFuture<Integer> result = clusteredGigaSpace1.execute(new MyTaskAuto(), 1);
         assertEquals(5, (int) result.get(1000, TimeUnit.MILLISECONDS));
     }
 
