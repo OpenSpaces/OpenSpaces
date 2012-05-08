@@ -67,6 +67,7 @@ import com.gigaspaces.grid.gsc.GSC;
 import com.gigaspaces.grid.gsm.GSM;
 import com.gigaspaces.grid.zone.GridZoneProvider;
 import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
+import com.gigaspaces.internal.client.spaceproxy.SpaceProxyImpl;
 import com.gigaspaces.internal.jvm.JVMDetails;
 import com.gigaspaces.internal.os.OSDetails;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
@@ -214,190 +215,211 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
     @Override
     public void serviceAdded(final ServiceDiscoveryEvent event) {
         final ServiceItem serviceItem = event.getPostEventServiceItem();
-        Object service = serviceItem.service;
-        ServiceID serviceID = serviceItem.serviceID;
+        final Object service = serviceItem.service;
         if (service instanceof GSM) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Service Added [GSM] with uid [" + serviceID + "]");
-            }
-            try {
-                final GSM gsm = (GSM) service;
-                if (gsm.isServiceSecured()) {
-                    gsm.login(admin.getUserDetails());
-                }
-                final InternalGridServiceManager gridServiceManager = new DefaultGridServiceManager(serviceID, gsm,
-                        admin, gsm.getAgentId(), gsm.getGSAServiceID());
-                // get the details here, on the thread pool
-                final NIODetails nioDetails = gridServiceManager.getNIODetails();
-                final OSDetails osDetails = gridServiceManager.getOSDetails();
-                final JVMDetails jvmDetails = gridServiceManager.getJVMDetails();
-                final String[] zones = gsm.getZones();
-                admin.scheduleNonBlockingStateChange(new Runnable() {
-                    @Override
-                    public void run() {
-                        String jmxUrl = getJMXConnection( serviceItem.attributeSets );
-                        admin.addGridServiceManager(gridServiceManager, nioDetails, osDetails, jvmDetails, jmxUrl, zones);
-                    }
-                });
-
-            } catch (Exception e) {
-                logger.warn("Failed to add [GSM] with uid [" + serviceID + "]", e);
-            }
+            initGSM((GSM) service, serviceItem.serviceID, serviceItem);
         } else if (service instanceof ESM) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Service Added [ESM] with uid [" + serviceID + "]");
-            }
-            try {
-                ESM esm = (ESM) service;
-                // if (esm.isServiceSecured()) {
-                // esm.login(admin.getUserDetails());
-                // }
-                final InternalElasticServiceManager elasticServiceManager = new DefaultElasticServiceManager(serviceID,
-                        esm, admin, esm.getAgentId(), esm.getGSAServiceID());
-                // get the details here, on the thread pool
-                final NIODetails nioDetails = elasticServiceManager.getNIODetails();
-                final OSDetails osDetails = elasticServiceManager.getOSDetails();
-                final JVMDetails jvmDetails = elasticServiceManager.getJVMDetails();
-                final String[] zones = esm.getZones();
-                admin.scheduleNonBlockingStateChange(new Runnable() {
-                    @Override
-                    public void run() {
-                        String jmxUrl = getJMXConnection( serviceItem.attributeSets );
-                        admin.addElasticServiceManager(elasticServiceManager, nioDetails, 
-                                                    osDetails, jvmDetails, jmxUrl, zones);
-                    }
-                });
-            } catch (Exception e) {
-                logger.warn("Failed to add [ESM] with uid [" + serviceID + "]", e);
-            }
+            initESM((ESM) service, serviceItem.serviceID, serviceItem);
         } else if (service instanceof GSA) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Service Added [GSA] with uid [" + serviceID + "]");
-            }
-            try {
-                GSA gsa = (GSA) service;
-                if (gsa.isServiceSecured()) {
-                    gsa.login(admin.getUserDetails());
-                }
-                AgentProcessesDetails processesDetails = gsa.getDetails();
-                final InternalGridServiceAgent gridServiceAgent = new DefaultGridServiceAgent(serviceID, gsa, admin,
-                        processesDetails);
-                // get the details here, on the thread pool
-                final NIODetails nioDetails = gridServiceAgent.getNIODetails();
-                final OSDetails osDetails = gridServiceAgent.getOSDetails();
-                final JVMDetails jvmDetails = gridServiceAgent.getJVMDetails();
-                final String[] zones = gsa.getZones();
-                admin.scheduleNonBlockingStateChange(new Runnable() {
-                    @Override
-                    public void run() {
-                        String jmxUrl = getJMXConnection( serviceItem.attributeSets );
-                        admin.addGridServiceAgent(gridServiceAgent, nioDetails, osDetails, jvmDetails, jmxUrl, zones);
-                    }
-                });
-            } catch (Exception e) {
-                logger.warn("Failed to add [GSA] with uid [" + serviceID + "]", e);
-            }
+            initGSA((GSA) service, serviceItem.serviceID, serviceItem);
         } else if (service instanceof GSC) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Service Added [GSC] with uid [" + serviceID + "]");
-            }
-            try {
-                GSC gsc = (GSC) service;
-                if (gsc.isServiceSecured()) {
-                    gsc.login(admin.getUserDetails());
-                }
-                final InternalGridServiceContainer gridServiceContainer = new DefaultGridServiceContainer(serviceID,
-                        gsc, admin, gsc.getAgentId(), gsc.getGSAServiceID());
-                // get the details here, on the thread pool
-                final NIODetails nioDetails = gridServiceContainer.getNIODetails();
-                final OSDetails osDetails = gridServiceContainer.getOSDetails();
-                final JVMDetails jvmDetails = gridServiceContainer.getJVMDetails();
-                final String[] zones = gsc.getZones();
-                admin.scheduleNonBlockingStateChange(new Runnable() {
-                    @Override
-                    public void run() {
-                        String jmxUrl = getJMXConnection( serviceItem.attributeSets );
-                        admin.addGridServiceContainer(gridServiceContainer, nioDetails, 
-                                osDetails, jvmDetails, jmxUrl, zones);
-                    }
-                });
-            } catch (Exception e) {
-                logger.warn("Failed to add GSC with uid [" + serviceID + "]", e);
-            }
+            initGSC((GSC) service, serviceItem.serviceID, serviceItem);
         } else if (service instanceof PUServiceBean) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Service Added [Processing Unit Instance] with uid [" + serviceID + "]");
-            }
-            try {
-                final PUServiceBean puServiceBean = (PUServiceBean) service;
-                PUDetails puDetails = puServiceBean.getPUDetails();
-                final InternalProcessingUnitInstance processingUnitInstance = new DefaultProcessingUnitInstance(
-                        serviceID, puDetails, puServiceBean, admin);
-                final NIODetails nioDetails = processingUnitInstance.getNIODetails();
-                final OSDetails osDetails = processingUnitInstance.getOSDetails();
-                final JVMDetails jvmDetails = processingUnitInstance.getJVMDetails();
-                final String[] zones = puServiceBean.getZones();
-                admin.scheduleNonBlockingStateChange(new Runnable() {
-                    @Override
-                    public void run() {
-                        String jmxUrl = getJMXConnection( serviceItem.attributeSets );
-                        admin.addProcessingUnitInstance(processingUnitInstance, nioDetails, osDetails, jvmDetails, jmxUrl,
-                                zones);
-                        if (!discoverUnmanagedSpaces) {
-                            for (SpaceServiceDetails serviceDetails : processingUnitInstance.getEmbeddedSpacesDetails()) {
-                                InternalSpaceInstance spaceInstance = new DefaultSpaceInstance(puServiceBean,
-                                        serviceDetails, admin);
-                                admin.addSpaceInstance(spaceInstance, nioDetails, osDetails, jvmDetails, jmxUrl, zones);
-                            }
-                        }
-
-                    }
-                });
-            } catch (Exception e) {
-                logger.warn("Failed to add [Processing Unit Instance] with uid [" + serviceID + "]", e);
-            }
+            initPU((PUServiceBean) service, serviceItem.serviceID, serviceItem);
         } else if (service instanceof IJSpace) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Service Added [Space Instance] with uid [" + serviceID + "]");
-            }
-            try {
-                ISpaceProxy clusteredIjspace = (ISpaceProxy) service;
-                if (clusteredIjspace.isServiceSecured()) {
-                    clusteredIjspace.login(admin.getUserDetails());
-                }
-
-                ISpaceProxy direcyIjspace = (ISpaceProxy) (clusteredIjspace).getClusterMember();
-                if (direcyIjspace.isServiceSecured()) {
-                    direcyIjspace.login(admin.getUserDetails());
-                }
-
-                IInternalRemoteJSpaceAdmin spaceAdmin = (IInternalRemoteJSpaceAdmin) direcyIjspace.getAdmin();
-
-                InternalSpaceInstance spaceInstance = new DefaultSpaceInstance(serviceID, direcyIjspace, spaceAdmin,
-                        admin);
-                NIODetails nioDetails = spaceInstance.getNIODetails();
-                OSDetails osDetails = spaceInstance.getOSDetails();
-                JVMDetails jvmDetails = spaceInstance.getJVMDetails();
-                
-                IJSpaceContainer container = direcyIjspace.getContainer();
-                IJSpaceContainerAdmin containerAdmin = ( IJSpaceContainerAdmin )container;
-                String jmxServiceURL = null;
-                try{
-                    String jndiUrl = containerAdmin.getConfig().jndiUrl;
-                    jmxServiceURL = JMXUtilities.createJMXUrl( jndiUrl );
-                }
-                catch( RemoteException re ){
-                    logger.warn( "Failed to fetch jndi url from space container", re);   
-                }
-                
-                
-                admin.addSpaceInstance(spaceInstance, nioDetails, osDetails, jvmDetails, jmxServiceURL, spaceAdmin.getZones());
-            } catch (Exception e) {
-                logger.warn("Failed to add [Space Instance] with uid [" + serviceID + "]", e);
-            }
+            initSpaceProxy((ISpaceProxy) service, serviceItem.serviceID);
         }
     }
     
+    private void initSpaceProxy(ISpaceProxy clusteredIjspace, ServiceID serviceID) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Service Added [Space Instance] with uid [" + serviceID + "]");
+        }
+        try {
+            if (clusteredIjspace instanceof SpaceProxyImpl) {                
+                SpaceProxyImpl spaceProxy = (SpaceProxyImpl) clusteredIjspace;
+                // TODO LB: generate finder url and spaceProxy.setFinderURL();
+            }
+            if (clusteredIjspace.isServiceSecured()) {
+                clusteredIjspace.login(admin.getUserDetails());
+            }
+
+            ISpaceProxy direcyIjspace = (ISpaceProxy) (clusteredIjspace).getClusterMember();
+            if (direcyIjspace.isServiceSecured()) {
+                direcyIjspace.login(admin.getUserDetails());
+            }
+
+            IInternalRemoteJSpaceAdmin spaceAdmin = (IInternalRemoteJSpaceAdmin) direcyIjspace.getAdmin();
+
+            InternalSpaceInstance spaceInstance = new DefaultSpaceInstance(serviceID, direcyIjspace, spaceAdmin,
+                    admin);
+            NIODetails nioDetails = spaceInstance.getNIODetails();
+            OSDetails osDetails = spaceInstance.getOSDetails();
+            JVMDetails jvmDetails = spaceInstance.getJVMDetails();
+            
+            IJSpaceContainer container = direcyIjspace.getContainer();
+            IJSpaceContainerAdmin containerAdmin = ( IJSpaceContainerAdmin )container;
+            String jmxServiceURL = null;
+            try{
+                String jndiUrl = containerAdmin.getConfig().jndiUrl;
+                jmxServiceURL = JMXUtilities.createJMXUrl( jndiUrl );
+            }
+            catch( RemoteException re ){
+                logger.warn( "Failed to fetch jndi url from space container", re);   
+            }
+            
+            
+            admin.addSpaceInstance(spaceInstance, nioDetails, osDetails, jvmDetails, jmxServiceURL, spaceAdmin.getZones());
+        } catch (Exception e) {
+            logger.warn("Failed to add [Space Instance] with uid [" + serviceID + "]", e);
+        }
+    }
+
+    private void initPU(final PUServiceBean puServiceBean, ServiceID serviceID, final ServiceItem serviceItem) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Service Added [Processing Unit Instance] with uid [" + serviceID + "]");
+        }
+        try {
+            PUDetails puDetails = puServiceBean.getPUDetails();
+            final InternalProcessingUnitInstance processingUnitInstance = new DefaultProcessingUnitInstance(
+                    serviceID, puDetails, puServiceBean, admin);
+            final NIODetails nioDetails = processingUnitInstance.getNIODetails();
+            final OSDetails osDetails = processingUnitInstance.getOSDetails();
+            final JVMDetails jvmDetails = processingUnitInstance.getJVMDetails();
+            final String[] zones = puServiceBean.getZones();
+            admin.scheduleNonBlockingStateChange(new Runnable() {
+                @Override
+                public void run() {
+                    String jmxUrl = getJMXConnection( serviceItem.attributeSets );
+                    admin.addProcessingUnitInstance(processingUnitInstance, nioDetails, osDetails, jvmDetails, jmxUrl,
+                            zones);
+                    if (!discoverUnmanagedSpaces) {
+                        for (SpaceServiceDetails serviceDetails : processingUnitInstance.getEmbeddedSpacesDetails()) {
+                            InternalSpaceInstance spaceInstance = new DefaultSpaceInstance(puServiceBean,
+                                    serviceDetails, admin);
+                            admin.addSpaceInstance(spaceInstance, nioDetails, osDetails, jvmDetails, jmxUrl, zones);
+                        }
+                    }
+
+                }
+            });
+        } catch (Exception e) {
+            logger.warn("Failed to add [Processing Unit Instance] with uid [" + serviceID + "]", e);
+        }
+    }
+
+    private void initGSC(GSC gsc, ServiceID serviceID, final ServiceItem serviceItem) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Service Added [GSC] with uid [" + serviceID + "]");
+        }
+        try {
+            if (gsc.isServiceSecured()) {
+                gsc.login(admin.getUserDetails());
+            }
+            final InternalGridServiceContainer gridServiceContainer = new DefaultGridServiceContainer(serviceID,
+                    gsc, admin, gsc.getAgentId(), gsc.getGSAServiceID());
+            // get the details here, on the thread pool
+            final NIODetails nioDetails = gridServiceContainer.getNIODetails();
+            final OSDetails osDetails = gridServiceContainer.getOSDetails();
+            final JVMDetails jvmDetails = gridServiceContainer.getJVMDetails();
+            final String[] zones = gsc.getZones();
+            admin.scheduleNonBlockingStateChange(new Runnable() {
+                @Override
+                public void run() {
+                    String jmxUrl = getJMXConnection( serviceItem.attributeSets );
+                    admin.addGridServiceContainer(gridServiceContainer, nioDetails, 
+                            osDetails, jvmDetails, jmxUrl, zones);
+                }
+            });
+        } catch (Exception e) {
+            logger.warn("Failed to add GSC with uid [" + serviceID + "]", e);
+        }
+    }
+
+    private void initGSA(GSA gsa, ServiceID serviceID, final ServiceItem serviceItem) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Service Added [GSA] with uid [" + serviceID + "]");
+        }
+        try {
+            if (gsa.isServiceSecured()) {
+                gsa.login(admin.getUserDetails());
+            }
+            AgentProcessesDetails processesDetails = gsa.getDetails();
+            final InternalGridServiceAgent gridServiceAgent = new DefaultGridServiceAgent(serviceID, gsa, admin,
+                    processesDetails);
+            // get the details here, on the thread pool
+            final NIODetails nioDetails = gridServiceAgent.getNIODetails();
+            final OSDetails osDetails = gridServiceAgent.getOSDetails();
+            final JVMDetails jvmDetails = gridServiceAgent.getJVMDetails();
+            final String[] zones = gsa.getZones();
+            admin.scheduleNonBlockingStateChange(new Runnable() {
+                @Override
+                public void run() {
+                    String jmxUrl = getJMXConnection( serviceItem.attributeSets );
+                    admin.addGridServiceAgent(gridServiceAgent, nioDetails, osDetails, jvmDetails, jmxUrl, zones);
+                }
+            });
+        } catch (Exception e) {
+            logger.warn("Failed to add [GSA] with uid [" + serviceID + "]", e);
+        }
+    }
+
+    private void initESM(ESM esm, ServiceID serviceID, final ServiceItem serviceItem) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Service Added [ESM] with uid [" + serviceID + "]");
+        }
+        try {
+            // if (esm.isServiceSecured()) {
+            // esm.login(admin.getUserDetails());
+            // }
+            final InternalElasticServiceManager elasticServiceManager = new DefaultElasticServiceManager(serviceID,
+                    esm, admin, esm.getAgentId(), esm.getGSAServiceID());
+            // get the details here, on the thread pool
+            final NIODetails nioDetails = elasticServiceManager.getNIODetails();
+            final OSDetails osDetails = elasticServiceManager.getOSDetails();
+            final JVMDetails jvmDetails = elasticServiceManager.getJVMDetails();
+            final String[] zones = esm.getZones();
+            admin.scheduleNonBlockingStateChange(new Runnable() {
+                @Override
+                public void run() {
+                    String jmxUrl = getJMXConnection( serviceItem.attributeSets );
+                    admin.addElasticServiceManager(elasticServiceManager, nioDetails, 
+                                                osDetails, jvmDetails, jmxUrl, zones);
+                }
+            });
+        } catch (Exception e) {
+            logger.warn("Failed to add [ESM] with uid [" + serviceID + "]", e);
+        }        
+    }
+
+    private void initGSM(GSM gsm, ServiceID serviceID, final ServiceItem serviceItem) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Service Added [GSM] with uid [" + serviceID + "]");
+        }
+        try {
+            if (gsm.isServiceSecured()) {
+                gsm.login(admin.getUserDetails());
+            }
+            final InternalGridServiceManager gridServiceManager = new DefaultGridServiceManager(serviceID, gsm,
+                    admin, gsm.getAgentId(), gsm.getGSAServiceID());
+            // get the details here, on the thread pool
+            final NIODetails nioDetails = gridServiceManager.getNIODetails();
+            final OSDetails osDetails = gridServiceManager.getOSDetails();
+            final JVMDetails jvmDetails = gridServiceManager.getJVMDetails();
+            final String[] zones = gsm.getZones();
+            admin.scheduleNonBlockingStateChange(new Runnable() {
+                @Override
+                public void run() {
+                    String jmxUrl = getJMXConnection( serviceItem.attributeSets );
+                    admin.addGridServiceManager(gridServiceManager, nioDetails, osDetails, jvmDetails, jmxUrl, zones);
+                }
+            });
+
+        } catch (Exception e) {
+            logger.warn("Failed to add [GSM] with uid [" + serviceID + "]", e);
+        }        
+    }
+
     /**
      * Get the String value found in the JMXConnection entry, or null if the attribute
      * set does not include a JMXConnection
