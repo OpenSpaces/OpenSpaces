@@ -62,7 +62,8 @@ public interface ProcessingUnitDeploymentTopology {
     ProcessingUnitDeploymentTopology addDependency(String requiredProcessingUnitName);
     
     /**
-     * Converts fluent API object to a POJO
+     * Converts this fluent API object to a lazy implementation of ProcessingUnitConfig 
+     * @since 9.0.0
      */
-    ProcessingUnitConfigFactory create();
+    ProcessingUnitConfigHolder create();
 }

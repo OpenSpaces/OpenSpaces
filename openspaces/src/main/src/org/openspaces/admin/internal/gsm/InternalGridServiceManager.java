@@ -31,7 +31,6 @@ import org.openspaces.admin.internal.support.InternalAgentGridComponent;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
-import org.openspaces.admin.pu.topology.ProcessingUnitConfigFactory;
 import org.openspaces.admin.pu.topology.ProcessingUnitDeploymentTopology;
 
 import com.gigaspaces.grid.gsm.GSM;
@@ -84,10 +83,6 @@ public interface InternalGridServiceManager extends GridServiceManager, Internal
      boolean undeployProcessingUnitsAndWait(ProcessingUnit[] processingUnits, long timeout, TimeUnit timeUnit);
 
     ProcessingUnit deploy(Application application, ProcessingUnitDeploymentTopology deploymentTopology, long timeout, TimeUnit timeUnit);
-
-    ProcessingUnit deploy(ProcessingUnitConfigFactory puConfigFactory);
-    
-    ProcessingUnit deploy(ProcessingUnitConfigFactory puConfigFactory, long timeout, TimeUnit timeUnit);
     
     /** @since 8.0.6 */
     String getCodeBaseURL();

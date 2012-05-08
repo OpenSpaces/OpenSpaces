@@ -18,6 +18,7 @@
 package org.openspaces.admin.application;
 
 import org.openspaces.admin.application.config.ApplicationConfig;
+import org.openspaces.admin.pu.topology.ProcessingUnitConfigHolder;
 import org.openspaces.admin.pu.topology.ProcessingUnitDeploymentTopology;
 
 /**
@@ -46,6 +47,17 @@ public class ApplicationDeployment {
             addProcessingUnitDeployment(puDeployment);
         }
     }
+    
+    
+    /**
+     * Creates a new application deployment with the specified name, and pu deployments
+     */
+    public ApplicationDeployment(String applicationName, ProcessingUnitConfigHolder... processingUnitConfigHolders) {
+        this(applicationName);
+        for (ProcessingUnitConfigHolder puConfigHolder : processingUnitConfigHolders) {
+            addProcessingUnitDeployment(puConfigHolder);
+        }
+    }
 
     /**
      * @param readApplication - config created by derived class
@@ -67,7 +79,12 @@ public class ApplicationDeployment {
      * All processing units are deployed in parallel (unless dependencies are defined)
      */
     public ApplicationDeployment addProcessingUnitDeployment(ProcessingUnitDeploymentTopology puDeployment) {
-        config.addProcessingUnit(puDeployment.create());
+        addProcessingUnitDeployment(puDeployment.create());
+        return this;
+    }
+    
+    public ApplicationDeployment addProcessingUnitDeployment(ProcessingUnitConfigHolder puConfigHolder) {
+        config.addProcessingUnit(puConfigHolder);
         return this;
     }
     

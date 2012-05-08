@@ -24,8 +24,7 @@ import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
 import org.openspaces.admin.internal.pu.elastic.ProcessingUnitSchemaConfig;
 import org.openspaces.admin.internal.pu.elastic.config.AbstractElasticProcessingUnitConfig;
 import org.openspaces.admin.pu.config.ProcessingUnitConfig;
-import org.openspaces.admin.pu.elastic.config.DiscoveredMachineProvisioningConfig;
-import org.openspaces.admin.pu.topology.ProcessingUnitConfigFactory;
+import org.openspaces.admin.pu.topology.ElasticStatefulProcessingUnitConfigHolder;
 
 /**
  * @author itaif
@@ -34,7 +33,7 @@ import org.openspaces.admin.pu.topology.ProcessingUnitConfigFactory;
 @XmlRootElement(name="elastic-stateful-pu")
 public class ElasticStatefulProcessingUnitConfig 
     extends AbstractElasticProcessingUnitConfig 
-    implements ProcessingUnitConfigFactory{
+    implements ElasticStatefulProcessingUnitConfigHolder {
 
     public static final String MAX_MEMORY_CAPACITY_MEGABYTES_DYNAMIC_PROPERTY = "max-memory-capacity-megabytes";
     public static final String MIN_MEMORY_CAPACITY_MEGABYTES_DYNAMIC_PROPERTY = "min-memory-capacity-megabytes";
@@ -46,6 +45,7 @@ public class ElasticStatefulProcessingUnitConfig
     private int maxProcessingUnitInstancesFromSamePartitionPerMachine = 1;
     private double maxNumberOfCpuCores;
     private double minNumberOfCpuCoresPerMachine;
+    private Admin admin;
 
     public ElasticStatefulProcessingUnitConfig() {
         super();
@@ -60,7 +60,7 @@ public class ElasticStatefulProcessingUnitConfig
     }
     
     @Override
-    public ProcessingUnitConfig toProcessingUnitConfig(Admin admin) {
+    public ProcessingUnitConfig toProcessingUnitConfig() {
       
         ProcessingUnitConfig config = super.toProcessingUnitConfig();
 
@@ -132,6 +132,9 @@ public class ElasticStatefulProcessingUnitConfig
         if (getMaxNumberOfCpuCores() > 0) {
             
             if (getMinNumberOfCpuCoresPerMachine() <= 0) {
+                if (admin == null) {
+                    throw new IllegalStateException("call #setAdmin() or #setNumberOfPartitions() before calling toProcessingUnitConfig()");
+                }
                 setMinNumberOfCpuCoresPerMachine(DiscoveredMachineProvisioningConfig.detectMinimumNumberOfCpuCoresPerMachine(admin));
             }
             
@@ -189,5 +192,10 @@ public class ElasticStatefulProcessingUnitConfig
     @Deprecated
     public void setMinNumberOfCpuCoresPerMachine(double minNumberOfCpuCoresPerMachine) {
         this.minNumberOfCpuCoresPerMachine = minNumberOfCpuCoresPerMachine;
+    }
+
+    @Override
+    public void setAdmin(Admin admin) {
+        this.admin = admin;
     }
 }

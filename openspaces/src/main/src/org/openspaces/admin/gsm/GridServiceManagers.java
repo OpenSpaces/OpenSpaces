@@ -23,6 +23,7 @@ import org.openspaces.admin.AdminAware;
 import org.openspaces.admin.application.Application;
 import org.openspaces.admin.application.ApplicationAlreadyDeployedException;
 import org.openspaces.admin.application.ApplicationDeployment;
+import org.openspaces.admin.application.config.ApplicationConfig;
 import org.openspaces.admin.dump.DumpProvider;
 import org.openspaces.admin.gsm.events.GridServiceManagerAddedEventManager;
 import org.openspaces.admin.gsm.events.GridServiceManagerLifecycleEventListener;
@@ -253,6 +254,30 @@ public interface GridServiceManagers extends AdminAware, Iterable<GridServiceMan
      */
     Application deploy(ApplicationDeployment deployment, long timeout, TimeUnit timeUnit) throws ApplicationAlreadyDeployedException, ProcessingUnitAlreadyDeployedException;
 
+    /**
+     * Deploys an application consisting of one or more processing unit deployments.
+     *
+     * <p>The deployment process will wait indefinitely
+     * 
+     * @return An application containing the actual processing units that can be used.
+     * 
+     * @throws ApplicationAlreadyDeployedException - Application with the same name has already been deployed.
+     * @throws ProcessingUnitAlreadyDeployedException - Processing unit with the same name has already been deployed. Processing Unit names are globally unique (regardless of the application name)
+     */
+    Application deploy(ApplicationConfig applicationConfig);
+    
+    /**
+     * Deploys an application consisting of one or more processing unit deployments.
+     *
+     * <p>The deployment process will wait for the given timeout 
+     * 
+     * @return An application configuration containing the actual processing units that can be used or null if timeout expired.
+     * 
+     * @throws ApplicationAlreadyDeployedException - Application with the same name has already been deployed.
+     * @throws ProcessingUnitAlreadyDeployedException - Processing unit with the same name has already been deployed. Processing Unit names are globally unique (regardless of the application name)
+     */
+    Application deploy(ApplicationConfig applicationConfig, long timeout, TimeUnit timeUnit)
+            throws ApplicationAlreadyDeployedException, ProcessingUnitAlreadyDeployedException;   
     /**
      * Returns the grid service manager added event manager allowing to add and remove
      * {@link org.openspaces.admin.gsm.events.GridServiceManagerAddedEventListener}s.

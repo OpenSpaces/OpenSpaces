@@ -26,14 +26,13 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
-import org.openspaces.admin.Admin;
 import org.openspaces.admin.internal.pu.dependency.DefaultProcessingUnitDependencies;
 import org.openspaces.admin.internal.pu.dependency.DefaultProcessingUnitDeploymentDependencies;
 import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependencies;
 import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependency;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
-import org.openspaces.admin.pu.topology.ProcessingUnitConfigFactory;
+import org.openspaces.admin.pu.topology.ProcessingUnitConfigHolder;
 import org.openspaces.pu.container.support.CommandLineParser.Parameter;
 import org.springframework.beans.factory.annotation.Required;
 
@@ -45,7 +44,7 @@ import com.gigaspaces.security.directory.UserDetails;
  * @since 9.0.1
  */
 @XmlRootElement(name = "pu")
-public class ProcessingUnitConfig implements ProcessingUnitConfigFactory {
+public class ProcessingUnitConfig implements ProcessingUnitConfigHolder {
 
     private String processingUnit;
 
@@ -331,11 +330,6 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigFactory {
         zones.add(zone);
     }
     
-    @Override
-    public ProcessingUnitConfig toProcessingUnitConfig(Admin admin) {
-        return this;
-    }
-
     /**
      * @see ProcessingUnitDeployment#addDependencies(org.openspaces.admin.internal.pu.dependency.ProcessingUnitDetailedDependencies)
      */
@@ -502,6 +496,9 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigFactory {
                 + (elasticProperties != null ? "elasticProperties=" + elasticProperties + ", " : "")
                 + (dependencies != null ? "dependencies=" + dependencies : "") + "]";
     }
-    
-    
+
+    @Override
+    public ProcessingUnitConfig toProcessingUnitConfig() {
+        return this;
+    }
 }

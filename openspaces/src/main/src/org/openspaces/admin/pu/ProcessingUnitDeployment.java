@@ -42,6 +42,7 @@ import org.openspaces.admin.pu.config.ProcessingUnitConfig;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependencies;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDeploymentDependenciesConfigurer;
+import org.openspaces.admin.pu.topology.ProcessingUnitConfigHolder;
 import org.openspaces.admin.pu.topology.ProcessingUnitDeploymentTopology;
 
 import com.gigaspaces.security.directory.User;
@@ -325,7 +326,8 @@ public class ProcessingUnitDeployment implements ProcessingUnitDeploymentTopolog
         return config.getElasticProperties();
     }
     
-    public ProcessingUnitConfig create() {
+    @Override
+    public ProcessingUnitConfigHolder create() {
         return config;
     }
 

@@ -38,7 +38,7 @@ import org.openspaces.admin.internal.pu.dependency.ProcessingUnitDetailedDepende
 import org.openspaces.admin.memcached.config.MemcachedConfig;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDeploymentDependenciesConfigurer;
-import org.openspaces.admin.pu.topology.ProcessingUnitConfigFactory;
+import org.openspaces.admin.pu.topology.ProcessingUnitConfigHolder;
 import org.openspaces.admin.pu.topology.ProcessingUnitDeploymentTopology;
 
 import com.gigaspaces.security.directory.User;
@@ -272,7 +272,7 @@ public class MemcachedDeployment implements ProcessingUnitDeploymentTopology {
     /**
      * @return
      */
-    public ProcessingUnitConfigFactory create() {
+    public ProcessingUnitConfigHolder create() {
         return config;
     }
 }

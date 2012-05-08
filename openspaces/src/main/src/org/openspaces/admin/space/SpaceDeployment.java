@@ -37,7 +37,7 @@ import java.io.File;
 import org.openspaces.admin.internal.pu.dependency.ProcessingUnitDetailedDependencies;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDeploymentDependenciesConfigurer;
-import org.openspaces.admin.pu.topology.ProcessingUnitConfigFactory;
+import org.openspaces.admin.pu.topology.ProcessingUnitConfigHolder;
 import org.openspaces.admin.pu.topology.ProcessingUnitDeploymentTopology;
 import org.openspaces.admin.space.config.SpaceConfig;
 
@@ -273,7 +273,7 @@ public class SpaceDeployment implements ProcessingUnitDeploymentTopology {
     }
 
     @Override
-    public ProcessingUnitConfigFactory create() {
+    public ProcessingUnitConfigHolder create() {
         return config;
     }
 }

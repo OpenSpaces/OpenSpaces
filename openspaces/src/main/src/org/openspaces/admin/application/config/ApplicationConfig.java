@@ -24,7 +24,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
-import org.openspaces.admin.pu.topology.ProcessingUnitConfigFactory;
+import org.openspaces.admin.pu.topology.ProcessingUnitConfigHolder;
 import org.springframework.beans.factory.annotation.Required;
 
 /**
@@ -35,7 +35,7 @@ import org.springframework.beans.factory.annotation.Required;
 public class ApplicationConfig {
 
     private String name;
-    private List<ProcessingUnitConfigFactory> processingUnits = new ArrayList<ProcessingUnitConfigFactory>();
+    private List<ProcessingUnitConfigHolder> processingUnits = new ArrayList<ProcessingUnitConfigHolder>();
     private File jarsDirectory;
     
     public String getName() {
@@ -47,16 +47,16 @@ public class ApplicationConfig {
         this.name = name;
     }
     
-    public ProcessingUnitConfigFactory[] getProcessingUnits() {
-        return processingUnits.toArray(new ProcessingUnitConfigFactory[processingUnits.size()]);
+    public ProcessingUnitConfigHolder[] getProcessingUnits() {
+        return processingUnits.toArray(new ProcessingUnitConfigHolder[processingUnits.size()]);
     }
     
-    @XmlElement(type = ProcessingUnitConfigFactory.class)
-    public void setProcessingUnits(ProcessingUnitConfigFactory[] processingUnitDeployments) {
-        this.processingUnits = new ArrayList<ProcessingUnitConfigFactory>(Arrays.asList(processingUnitDeployments));
+    @XmlElement(type = ProcessingUnitConfigHolder.class)
+    public void setProcessingUnits(ProcessingUnitConfigHolder[] processingUnitDeployments) {
+        this.processingUnits = new ArrayList<ProcessingUnitConfigHolder>(Arrays.asList(processingUnitDeployments));
     }
 
-    public void addProcessingUnit(ProcessingUnitConfigFactory puConfigFactory) {
+    public void addProcessingUnit(ProcessingUnitConfigHolder puConfigFactory) {
         this.processingUnits.add(puConfigFactory);
     }
 

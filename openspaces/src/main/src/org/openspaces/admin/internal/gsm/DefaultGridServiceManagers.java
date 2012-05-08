@@ -29,6 +29,7 @@ import org.openspaces.admin.AdminException;
 import org.openspaces.admin.application.Application;
 import org.openspaces.admin.application.ApplicationAlreadyDeployedException;
 import org.openspaces.admin.application.ApplicationDeployment;
+import org.openspaces.admin.application.config.ApplicationConfig;
 import org.openspaces.admin.dump.CompoundDumpResult;
 import org.openspaces.admin.dump.DumpResult;
 import org.openspaces.admin.gsm.GridServiceManager;
@@ -385,8 +386,30 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
     public ProcessingUnit deploy(Application application, ProcessingUnitDeploymentTopology puDeploymentTopology, long timeout, TimeUnit timeUnit) {
         InternalGridServiceManager gridServiceManager = (InternalGridServiceManager)getGridServiceManager();
         if (gridServiceManager == null) {
-            throw new AdminException("No Grid Service Manager found to deploy [" + puDeploymentTopology.create().toProcessingUnitConfig(admin).getProcessingUnit() + "] to application [" + application.getName() +"]");
+            throw new AdminException("Cannot deploy processing unit since no Grid Service Manager was discovered.");
         }
         return gridServiceManager.deploy(application, puDeploymentTopology, timeout, timeUnit);
+    }
+
+    @Override
+    public Application deploy(ApplicationConfig applicationConfig) {
+        InternalGridServiceManager gridServiceManager = (InternalGridServiceManager)getGridServiceManager();
+        if (gridServiceManager == null) {
+            throw new AdminException("No Grid Service Manager found to deploy [" + applicationConfig.getName() + "]");
+        }
+        return gridServiceManager.deploy(applicationConfig);
+    }
+
+    /* (non-Javadoc)
+     * @see org.openspaces.admin.gsm.GridServiceManagers#deploy(org.openspaces.admin.application.config.ApplicationConfig, long, java.util.concurrent.TimeUnit)
+     */
+    @Override
+    public Application deploy(ApplicationConfig applicationConfig, long timeout, TimeUnit timeUnit)
+            throws ApplicationAlreadyDeployedException, ProcessingUnitAlreadyDeployedException {
+        InternalGridServiceManager gridServiceManager = (InternalGridServiceManager)getGridServiceManager();
+        if (gridServiceManager == null) {
+            throw new AdminException("No Grid Service Manager found to deploy [" + applicationConfig.getName() + "]");
+        }
+        return gridServiceManager.deploy(applicationConfig, timeout, timeUnit);
     }
 }

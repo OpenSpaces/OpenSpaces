@@ -17,10 +17,9 @@ package org.openspaces.admin.pu.elastic.config;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.openspaces.admin.Admin;
 import org.openspaces.admin.internal.pu.elastic.config.AbstractElasticProcessingUnitConfig;
 import org.openspaces.admin.pu.config.ProcessingUnitConfig;
-import org.openspaces.admin.pu.topology.ProcessingUnitConfigFactory;
+import org.openspaces.admin.pu.topology.ProcessingUnitConfigHolder;
 
 
 /**
@@ -29,10 +28,10 @@ import org.openspaces.admin.pu.topology.ProcessingUnitConfigFactory;
  */
 @XmlRootElement(name="elastic-stateless-pu")
 public class ElasticStatelessProcessingUnitConfig extends AbstractElasticProcessingUnitConfig 
-    implements ProcessingUnitConfigFactory{
+    implements ProcessingUnitConfigHolder {
 
     @Override
-    public ProcessingUnitConfig toProcessingUnitConfig(Admin admin) {
+    public ProcessingUnitConfig toProcessingUnitConfig() {
         
         ProcessingUnitConfig processingUnitConfig = super.toProcessingUnitConfig();
         

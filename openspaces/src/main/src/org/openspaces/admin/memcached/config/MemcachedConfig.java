@@ -21,13 +21,12 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
-import org.openspaces.admin.Admin;
 import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependencies;
 import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependency;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.pu.config.ProcessingUnitConfig;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
-import org.openspaces.admin.pu.topology.ProcessingUnitConfigFactory;
+import org.openspaces.admin.pu.topology.ProcessingUnitConfigHolder;
 import org.openspaces.pu.container.servicegrid.deploy.MemcachedDeploy;
 import org.springframework.beans.factory.annotation.Required;
 
@@ -38,7 +37,7 @@ import com.gigaspaces.security.directory.UserDetails;
  * @since 9.0.1
  */
 @XmlRootElement(name="memcached")
-public class MemcachedConfig implements ProcessingUnitConfigFactory {
+public class MemcachedConfig implements ProcessingUnitConfigHolder {
 
     private final ProcessingUnitConfig config;
     private String spaceUrl;
@@ -259,7 +258,7 @@ public class MemcachedConfig implements ProcessingUnitConfigFactory {
     }
 
     @Override
-    public ProcessingUnitConfig toProcessingUnitConfig(Admin admin) {
+    public ProcessingUnitConfig toProcessingUnitConfig() {
         return config;
     }
 }

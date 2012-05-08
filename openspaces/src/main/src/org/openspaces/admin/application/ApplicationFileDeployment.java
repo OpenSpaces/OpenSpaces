@@ -38,12 +38,14 @@ import org.springframework.core.io.Resource;
  * @author itaif
  * @since 9.0.1
  */
-public class ApplicationFileDeployment extends ApplicationDeployment {
+public class ApplicationFileDeployment {
 
     private static final Log logger = LogFactory.getLog(ApplicationFileDeployment.class);
+    private File applicationDirectoryOrZip;
+    private String applicationFileName;
     
     private static final String DEFAULT_APPLICATION_XML_FILENAME = "application.xml";
-    private static final int MAX_XML_FILE_SIZE = (int) MemoryUnit.toBytes("1m");
+    private static final int MAX_XML_FILE_SIZE = (int) MemoryUnit.toBytes(System.getProperty("org.openspaces.admin.application.max-xml-file-size","10m"));
 
     /**
      * Creates a new application deployment based on the specified file
@@ -78,27 +80,33 @@ public class ApplicationFileDeployment extends ApplicationDeployment {
      * @param applicationFilename
      *            The application xml file (absolute or relative to the application directory)
      */
-    public ApplicationFileDeployment(final File applicationDirectoryOrZip, final String applicationFile) {
-        super(readApplication(applicationDirectoryOrZip, applicationFile));
+    public ApplicationFileDeployment(final File applicationDirectoryOrZip, final String applicationFileName) {
+        this.applicationDirectoryOrZip = applicationDirectoryOrZip;
+        this.applicationFileName = applicationFileName;
     }
-    
+
+    public ApplicationConfig create() {
+
+        return readApplication(applicationDirectoryOrZip, applicationFileName);
+    }
+
     private static ApplicationConfig readApplication(final File directoryOrZip, String applicationFile) {
         
         if (!directoryOrZip.exists()) {
             throw new AdminException("Application " + directoryOrZip.getAbsolutePath() + " does not exist.");
         }
-        
-        //read xml file into context
-        ApplicationConfig config;
-        if (new File(applicationFile).isAbsolute()) {
-            config = readConfigFromXmlFile(applicationFile);
+        if (applicationFile.contains("\\") || applicationFile.contains("/")) {
+            //TODO: Add test case to cover this scenario in folders and zip files
+            throw new AdminException("applicationFile " + applicationFile + " cannot be a path");
         }
-        else if (directoryOrZip.isDirectory()) {
+        //read xml file into context
+        ApplicationConfig config = null;
+        if (directoryOrZip.isDirectory()) {
             final String applicationFilePath = new File(directoryOrZip, applicationFile).getAbsolutePath();
             config = readConfigFromXmlFile(applicationFilePath);
         }
         else {
-            config = readConfigFromZipFile(directoryOrZip, applicationFile);
+            readConfigFromZipFile(directoryOrZip, applicationFile);
         }
           
         if (config == null) {
@@ -116,6 +124,7 @@ public class ApplicationFileDeployment extends ApplicationDeployment {
         ApplicationConfig config;
         final FileSystemXmlApplicationContext context = new FileSystemXmlApplicationContext(applicationFilePath);
         try {
+            //CR: Catch runtime exceptions. convert to AdminException(s)
             context.refresh();
             config = context.getBean(ApplicationConfig.class);
         }
@@ -154,13 +163,12 @@ public class ApplicationFileDeployment extends ApplicationDeployment {
             zipFile = new ZipFile(directoryOrZip);
             final ZipEntry zipEntry = zipFile.getEntry(applicationFile);
             final int length = (int) zipEntry.getSize();
-            byte[] buffer = new byte[length];
-            final InputStream in = zipFile.getInputStream(zipEntry);
-            if (zipEntry.getSize() > MAX_XML_FILE_SIZE) {
+            if (length > MAX_XML_FILE_SIZE) {
                 throw new AdminException("Application xml file size cannot be bigger than " + MAX_XML_FILE_SIZE
                         + " bytes");
             }
-
+            byte[] buffer = new byte[length];
+            final InputStream in = zipFile.getInputStream(zipEntry);
             final DataInputStream din = new DataInputStream(in);
             try {
                 din.readFully(buffer, 0, length);

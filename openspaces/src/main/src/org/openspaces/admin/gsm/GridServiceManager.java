@@ -24,6 +24,7 @@ import org.openspaces.admin.LogProviderGridComponent;
 import org.openspaces.admin.application.Application;
 import org.openspaces.admin.application.ApplicationAlreadyDeployedException;
 import org.openspaces.admin.application.ApplicationDeployment;
+import org.openspaces.admin.application.config.ApplicationConfig;
 import org.openspaces.admin.dump.DumpProvider;
 import org.openspaces.admin.memcached.MemcachedDeployment;
 import org.openspaces.admin.pu.ProcessingUnit;
@@ -31,6 +32,7 @@ import org.openspaces.admin.pu.ProcessingUnitAlreadyDeployedException;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.pu.elastic.ElasticStatefulProcessingUnitDeployment;
 import org.openspaces.admin.pu.elastic.ElasticStatelessProcessingUnitDeployment;
+import org.openspaces.admin.pu.topology.ProcessingUnitConfigHolder;
 import org.openspaces.admin.space.ElasticSpaceDeployment;
 import org.openspaces.admin.space.SpaceDeployment;
 
@@ -210,6 +212,47 @@ public interface GridServiceManager extends AgentGridComponent, LogProviderGridC
      * @throws ProcessingUnitAlreadyDeployedException - Processing unit with the same name has already been deployed. Processing Unit names are globally unique (regardless of the application name)
      */
     Application deploy(ApplicationDeployment deployment, long timeout, TimeUnit timeUnit) throws ApplicationAlreadyDeployedException, ProcessingUnitAlreadyDeployedException;
+
+    /**
+     * Deploys a new processing unit based on the specified configuration 
+     * 
+     * @throws ProcessingUnitAlreadyDeployedException - processing unit with the same name has already been deployed.
+     */
+    ProcessingUnit deploy(ProcessingUnitConfigHolder puConfigHolder);
     
-    boolean isDeployed( String processingUnitName );    
+    /**
+     * Deploys a new processing unit based on the specified configuration 
+     * 
+     * <p>The deployment process will wait for the given timeout and return the actual processing unit that can be used.
+     * 
+     * @throws ProcessingUnitAlreadyDeployedException - processing unit with the same name has already been deployed.
+     */
+    ProcessingUnit deploy(ProcessingUnitConfigHolder puConfigHolder, long timeout, TimeUnit timeUnit);
+    
+    boolean isDeployed( String processingUnitName );
+
+    /**
+     * Deploys an application consisting of one or more processing unit deployments.
+     *
+     * <p>The deployment process will wait indefinitely
+     * 
+     * @return An application containing the actual processing units that can be used.
+     * 
+     * @throws ApplicationAlreadyDeployedException - Application with the same name has already been deployed.
+     * @throws ProcessingUnitAlreadyDeployedException - Processing unit with the same name has already been deployed. Processing Unit names are globally unique (regardless of the application name)
+     */
+    Application deploy(ApplicationConfig applicationConfig);
+    
+    /**
+     * Deploys an application consisting of one or more processing unit deployments.
+     *
+     * <p>The deployment process will wait for the given timeout 
+     * 
+     * @return An application configuration containing the actual processing units that can be used or null if timeout expired.
+     * 
+     * @throws ApplicationAlreadyDeployedException - Application with the same name has already been deployed.
+     * @throws ProcessingUnitAlreadyDeployedException - Processing unit with the same name has already been deployed. Processing Unit names are globally unique (regardless of the application name)
+     */
+    Application deploy(ApplicationConfig applicationConfig, long timeout, TimeUnit timeUnit)
+            throws ApplicationAlreadyDeployedException, ProcessingUnitAlreadyDeployedException;    
 }

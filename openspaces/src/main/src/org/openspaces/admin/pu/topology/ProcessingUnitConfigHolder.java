@@ -15,14 +15,14 @@
  *******************************************************************************/
 package org.openspaces.admin.pu.topology;
 
-import org.openspaces.admin.Admin;
 import org.openspaces.admin.pu.config.ProcessingUnitConfig;
 
 /**
  * @author itaif
  * @since 9.0.1
  */
-public interface ProcessingUnitConfigFactory {
+public interface ProcessingUnitConfigHolder {
 
-    ProcessingUnitConfig toProcessingUnitConfig(Admin admin);
+    ProcessingUnitConfig toProcessingUnitConfig();
+
 }

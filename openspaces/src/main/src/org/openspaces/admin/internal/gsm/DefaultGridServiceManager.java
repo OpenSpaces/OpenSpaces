@@ -74,7 +74,8 @@ import org.openspaces.admin.pu.elastic.ElasticStatelessProcessingUnitDeployment;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
 import org.openspaces.admin.pu.events.ProcessingUnitAddedEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitRemovedEventListener;
-import org.openspaces.admin.pu.topology.ProcessingUnitConfigFactory;
+import org.openspaces.admin.pu.topology.ElasticStatefulProcessingUnitConfigHolder;
+import org.openspaces.admin.pu.topology.ProcessingUnitConfigHolder;
 import org.openspaces.admin.pu.topology.ProcessingUnitDeploymentTopology;
 import org.openspaces.admin.space.ElasticSpaceDeployment;
 import org.openspaces.admin.space.SpaceDeployment;
@@ -163,18 +164,18 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
     }
 
     @Override
-    public ProcessingUnit deploy(ProcessingUnitConfigFactory puConfigFactory) {
-        return deploy(puConfigFactory, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
+    public ProcessingUnit deploy(ProcessingUnitConfigHolder puConfigHolder) {
+        return deploy(puConfigHolder, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
     
     @Override
-    public ProcessingUnit deploy(ProcessingUnitConfigFactory puConfigFactory, long timeout, TimeUnit timeUnit) {
+    public ProcessingUnit deploy(ProcessingUnitConfigHolder puConfigHolder, long timeout, TimeUnit timeUnit) {
         String applicationName = null;
-        return deploy(puConfigFactory, applicationName, timeout, timeUnit);
+        return deploy(puConfigHolder, applicationName, timeout, timeUnit);
     }
     
-    private ProcessingUnit deploy(ProcessingUnitConfigFactory puConfigFactory, String applicationName, long timeout, TimeUnit timeUnit) {
-        return deploy(puConfigFactory.toProcessingUnitConfig(admin), applicationName, timeout, timeUnit);
+    private ProcessingUnit deploy(ProcessingUnitConfigHolder puConfigHolder, String applicationName, long timeout, TimeUnit timeUnit) {
+        return deploy(toProcessingUnitConfig(puConfigHolder), applicationName, timeout, timeUnit);
     }
     
     private ProcessingUnit deploy(ProcessingUnitConfig puConfig, String applicationName, long timeout, TimeUnit timeUnit) {
@@ -508,6 +509,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         return deploy(deployment.create(),timeout,timeUnit);
     }
     
+    @Override
     public void setProcessingUnitElasticProperties(ProcessingUnit pu, Map<String,String> properties) {
         getElasticServiceManager().setProcessingUnitElasticProperties(pu, properties);
     }
@@ -516,6 +518,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         getElasticServiceManager().setProcessingUnitScaleStrategyConfig(pu, scaleStrategyConfig);
     }
         
+    @Override
     public void updateProcessingUnitElasticPropertiesOnGsm(ProcessingUnit pu, Map<String, String> elasticProperties) {
         try {
             gsm.updateElasticProperties(pu.getName(), elasticProperties);
@@ -562,6 +565,12 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             throws ApplicationAlreadyDeployedException, ProcessingUnitAlreadyDeployedException {
         return deploy(deployment, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
+    
+    @Override
+    public Application deploy(ApplicationConfig applicationConfig) 
+            throws ApplicationAlreadyDeployedException, ProcessingUnitAlreadyDeployedException {
+        return deploy(applicationConfig, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
+    }
 
     @Override
     public Application deploy(ApplicationDeployment applicationDeployment, long timeout, TimeUnit timeUnit)
@@ -569,7 +578,9 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         return deploy(applicationDeployment.create(), timeout, timeUnit);
     }
     
-    private Application deploy(ApplicationConfig applicationConfig, long timeout, TimeUnit timeUnit)
+    
+    @Override
+    public Application deploy(ApplicationConfig applicationConfig, long timeout, TimeUnit timeUnit)
             throws ApplicationAlreadyDeployedException, ProcessingUnitAlreadyDeployedException {
         long end = System.currentTimeMillis()  + timeUnit.toMillis(timeout);
         String applicationName = applicationConfig.getName();
@@ -583,8 +594,8 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             throw new ApplicationAlreadyDeployedException(applicationName);
         }
         
-        ProcessingUnitConfigFactory[] processingUnitConfigFactories = applicationConfig.getProcessingUnits();
-        if (processingUnitConfigFactories.length == 0) {
+        ProcessingUnitConfigHolder[] processingUnitConfigHolders = applicationConfig.getProcessingUnits();
+        if (processingUnitConfigHolders.length == 0) {
             throw new AdminException("Application must contain at least one processing unit.");
         }
         
@@ -600,7 +611,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         // iterate in a deterministic order, so if deployed in parallel by another admin client, only one will succeed
         boolean timedOut = false;
         Set<String> deployedPuNames = new HashSet<String>();
-        for (ProcessingUnitConfigFactory puConfigFactory : processingUnitConfigFactories) {
+        for (ProcessingUnitConfigHolder puConfigHolder : processingUnitConfigHolders) {
             try {
                 long remaining = end - System.currentTimeMillis();
                 if (remaining <= 0) {
@@ -608,7 +619,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
                     break;
                 }
                 
-                ProcessingUnitConfig puConfig = puConfigFactory.toProcessingUnitConfig(admin);
+                final ProcessingUnitConfig puConfig = toProcessingUnitConfig(puConfigHolder);
             
                 //handle relative paths to jar files
                 boolean isAbsolute = 
@@ -656,6 +667,14 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         }
     }
 
+    private ProcessingUnitConfig toProcessingUnitConfig(ProcessingUnitConfigHolder puConfigHolder) {
+        if (puConfigHolder instanceof ElasticStatefulProcessingUnitConfigHolder) {
+            ((ElasticStatefulProcessingUnitConfigHolder) puConfigHolder).setAdmin(admin);
+        }
+        final ProcessingUnitConfig puConfig = puConfigHolder.toProcessingUnitConfig();
+        return puConfig;
+    }
+
     private static void deleteFileOrDirectory(File fileOrDirectory) {
         if (fileOrDirectory.isDirectory()) {
           for (File file : fileOrDirectory.listFiles())
@@ -679,14 +698,21 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             PUZipUtils.unzip(zipFile, tempFolder);
             return tempFolder;
         } catch (Exception e) {
+            try {
+                deleteFileOrDirectory(tempFolder);
+            }
+            catch (AdminException ex) {
+                logger.debug("Failed to delete folder " + tempFolder,ex);
+            }
             throw new AdminException("Failed to unzip file " + zipFile + " to " + tempFolder, e);
         }
     }
 
+    //TODO: Replace with commons-io implementation
     private static File createTempFolder(String tempFolderPrefix) {
         File tempFile;
         try {
-            tempFile = File.createTempFile(tempFolderPrefix, "");
+            tempFile = File.createTempFile("unzip_"+tempFolderPrefix.replace('.','_'), "");
         } catch (final IOException e) {
             throw new AdminException("Failed to create temp file with prefix " + tempFolderPrefix, e);
         }
@@ -853,7 +879,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
 
     @Override
     public ProcessingUnit deploy(Application application, ProcessingUnitDeploymentTopology deploymentTopology, long timeout, TimeUnit timeUnit) {
-        ProcessingUnitConfigFactory configFactory = deploymentTopology.create();
+        ProcessingUnitConfigHolder configFactory = deploymentTopology.create();
         return this.deploy(configFactory, application.getName(), timeout, timeUnit);
     }
    
@@ -879,5 +905,4 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         eventsCursor = events.getNextCursor();
         return events;
     }
-
 }
