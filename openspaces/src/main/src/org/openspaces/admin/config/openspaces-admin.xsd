@@ -2,20 +2,20 @@
 
 <xsd:schema xmlns="http://www.openspaces.org/schema/admin"
             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-            xmlns:beans="http://www.springframework.org/schema/beans/spring-beans-3.1.xsd"
+            xmlns:beans="http://www.springframework.org/schema/beans"
             xmlns:tool="http://www.springframework.org/schema/tool"
             targetNamespace="http://www.openspaces.org/schema/admin"
             elementFormDefault="qualified"
             attributeFormDefault="unqualified">
-
-    <xsd:import namespace="http://www.springframework.org/schema/beans"/>
+<!-- 
+    <xsd:import namespace="http://www.springframework.org/schema/beans" />
     <xsd:import namespace="http://www.springframework.org/schema/tool"/>
-
+ -->
 	<xsd:element name="depends-on">
     	<xsd:complexType>
           <xsd:attribute name="name" type="xsd:string" use="required"/>
-          <xsd:attribute name="min-instances-per-partition" use="optional"/>
-          <xsd:attribute name="min-instances" use="optional"/>          
+          <xsd:attribute name="min-instances-per-partition" type="xsd:int" use="optional"/>
+          <xsd:attribute name="min-instances" type="xsd:int" use="optional"/>          
         </xsd:complexType>
     </xsd:element>
 
@@ -30,6 +30,9 @@
 			<xsd:attribute name="number-of-backups" type="xsd:int" use="optional" />
 			<xsd:attribute name="max-instances-per-vm" type="xsd:int" use="optional" />
 			<xsd:attribute name="max-instances-per-machine" type="xsd:int" use="optional" />
+			<xsd:attribute name="zones" type="xsd:string" use="optional" />
+			<xsd:attribute name="secured" type="xsd:boolean" use="optional" />
+			<xsd:attribute name="sla-location" type="xsd:string" use="optional" />
 		</xsd:complexType>
 	</xsd:element>
 

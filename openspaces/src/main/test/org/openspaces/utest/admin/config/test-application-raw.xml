@@ -25,6 +25,25 @@
 					<property name="numberOfBackups" value="1" />
 					<property name="maxInstancesPerVM" value="1" /> 
 					<property name="maxInstancesPerMachine" value="0" />
+					<property name="zones" value="zone1,zone2"/>
+					<property name="secured" value="true" />
+					<property name="slaLocation" value="slaLocation" />
+					<property name="deploymentDependencies">
+					<list>
+						<bean class="org.openspaces.admin.pu.dependency.config.ProcessingUnitDependencyConfig">
+							<property name="requiredProcessingUnitName" value="a" />
+							<property name="waitForDeploymentToComplete" value="true" />
+						</bean>
+						<bean class="org.openspaces.admin.pu.dependency.config.ProcessingUnitDependencyConfig">
+							<property name="requiredProcessingUnitName" value="b" />
+							<property name="minimumNumberOfDeployedInstances" value="1" />
+						</bean>
+						<bean class="org.openspaces.admin.pu.dependency.config.ProcessingUnitDependencyConfig">
+							<property name="requiredProcessingUnitName" value="a" />
+							<property name="minimumNumberOfDeployedInstancesPerPartition" value="1" />
+						</bean>
+					</list>
+					</property>
 				</bean>
 
 				<bean class="org.openspaces.admin.pu.config.ProcessingUnitConfig">
@@ -41,8 +60,7 @@
 					<property name="processingUnit" value="feeder.jar" />
 					<property name="deploymentDependencies">
 						<list>
-							<bean
-								class="org.openspaces.admin.pu.dependency.config.ProcessingUnitDependencyConfig">
+							<bean class="org.openspaces.admin.pu.dependency.config.ProcessingUnitDependencyConfig">
 								<property name="requiredProcessingUnitName" value="space" />
 								<property name="minimumNumberOfDeployedInstancesPerPartition" value="1" />
 							</bean>

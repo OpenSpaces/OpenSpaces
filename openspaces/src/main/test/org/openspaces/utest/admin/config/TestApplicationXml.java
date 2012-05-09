@@ -58,6 +58,19 @@ public class TestApplicationXml extends TestCase {
         
         .addProcessingUnitDeployment(
                 new SpaceDeployment("space")
+                .addDependencies(
+                        new ProcessingUnitDeploymentDependenciesConfigurer()
+                        .dependsOnDeployed("a")
+                        .dependsOnMinimumNumberOfDeployedInstances("b", 1)
+                        .dependsOnMinimumNumberOfDeployedInstancesPerPartition("a", 1)
+                        .create())
+               .addZone("zone1")
+               .addZone("zone2")
+               //TODO:.maxInstancesPerZone("zone", 1)
+               .secured(true)
+               //TODO:.setContextProperty("key", "value")
+                .slaLocation("slaLocation")
+                //TODO:.userDetails("a", "b")
                 .partitioned(1,1)
                 .maxInstancesPerVM(1)
                 .maxInstancesPerMachine(0))
