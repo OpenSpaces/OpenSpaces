@@ -42,7 +42,6 @@ import net.jini.core.lookup.ServiceID;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jini.rio.boot.PUZipUtils;
 import org.jini.rio.core.OperationalString;
 import org.jini.rio.monitor.DeployAdmin;
 import org.jini.rio.monitor.ProvisionMonitorAdmin;
@@ -79,6 +78,7 @@ import org.openspaces.admin.pu.topology.ProcessingUnitConfigHolder;
 import org.openspaces.admin.pu.topology.ProcessingUnitDeploymentTopology;
 import org.openspaces.admin.space.ElasticSpaceDeployment;
 import org.openspaces.admin.space.SpaceDeployment;
+import org.openspaces.core.util.FileUtils;
 import org.openspaces.pu.container.servicegrid.deploy.Deploy;
 
 import com.gigaspaces.grid.gsm.GSM;
@@ -603,7 +603,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         File tempDirectory = null;
         File jarsDirectory = applicationConfig.getJarsDirectoryOrZip();
         if (jarsDirectory != null && jarsDirectory.isFile()) {
-            tempDirectory = unzipToTempFolder(applicationConfig.getJarsDirectoryOrZip());
+            tempDirectory = FileUtils.unzipToTempFolder(applicationConfig.getJarsDirectoryOrZip());
             jarsDirectory = tempDirectory;
         }
         
@@ -662,7 +662,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         }
         finally {
             if (tempDirectory != null) {
-                deleteFileOrDirectory(tempDirectory);
+                FileUtils.deleteFileOrDirectory(tempDirectory);
             }
         }
     }
@@ -673,56 +673,6 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         }
         final ProcessingUnitConfig puConfig = puConfigHolder.toProcessingUnitConfig();
         return puConfig;
-    }
-
-    private static void deleteFileOrDirectory(File fileOrDirectory) {
-        if (fileOrDirectory.isDirectory()) {
-          for (File file : fileOrDirectory.listFiles())
-              deleteFileOrDirectory(file);
-        }
-        if (!fileOrDirectory.delete()) {
-            throw new AdminException("Failed to delete " + fileOrDirectory);
-        }
-    }
-    
-    /**
-     * unzips the specified zip file to a temp folder
-     * @param zipFile
-     * @return the new temp folder
-     */
-    private static File unzipToTempFolder(File zipFile) {
-        String zipFilename = zipFile.getName();
-        String tempFolderPrefix = zipFilename.substring(0, zipFilename.lastIndexOf('.'));
-        File tempFolder = createTempFolder(tempFolderPrefix);
-        try {
-            PUZipUtils.unzip(zipFile, tempFolder);
-            return tempFolder;
-        } catch (Exception e) {
-            try {
-                deleteFileOrDirectory(tempFolder);
-            }
-            catch (AdminException ex) {
-                logger.debug("Failed to delete folder " + tempFolder,ex);
-            }
-            throw new AdminException("Failed to unzip file " + zipFile + " to " + tempFolder, e);
-        }
-    }
-
-    //TODO: Replace with commons-io implementation
-    private static File createTempFolder(String tempFolderPrefix) {
-        File tempFile;
-        try {
-            tempFile = File.createTempFile("unzip_"+tempFolderPrefix.replace('.','_'), "");
-        } catch (final IOException e) {
-            throw new AdminException("Failed to create temp file with prefix " + tempFolderPrefix, e);
-        }
-        deleteFileOrDirectory(tempFile);
-        
-        final boolean created = tempFile.mkdirs();
-        if (!created) {
-            throw new AdminException("Failed to create temp file " + tempFile);
-        }
-        return tempFile;
     }
 
     public boolean undeployProcessingUnitsAndWait(ProcessingUnit[] processingUnits, long timeout, TimeUnit timeUnit) {

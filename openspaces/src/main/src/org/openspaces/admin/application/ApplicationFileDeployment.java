@@ -15,17 +15,13 @@
  *******************************************************************************/
 package org.openspaces.admin.application;
 
-import java.io.DataInputStream;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.application.config.ApplicationConfig;
+import org.openspaces.core.util.FileUtils;
 import org.openspaces.core.util.MemoryUnit;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
@@ -45,7 +41,7 @@ public class ApplicationFileDeployment {
     private String applicationFileName;
     
     private static final String DEFAULT_APPLICATION_XML_FILENAME = "application.xml";
-    private static final int MAX_XML_FILE_SIZE = (int) MemoryUnit.toBytes(System.getProperty("org.openspaces.admin.application.max-xml-file-size","10m"));
+    private static final long MAX_XML_FILE_SIZE = MemoryUnit.toBytes(System.getProperty("org.openspaces.admin.application.max-xml-file-size","10m"));
 
     /**
      * Creates a new application deployment based on the specified file
@@ -138,7 +134,7 @@ public class ApplicationFileDeployment {
     }
 
     private static ApplicationConfig readConfigFromZipFile(final File directoryOrZip, String applicationFile) {
-        byte[] buffer = unzipFileToMemory(applicationFile, directoryOrZip);
+        byte[] buffer = FileUtils.unzipFileToMemory(applicationFile, directoryOrZip, MAX_XML_FILE_SIZE);
         Resource resource = new ByteArrayResource(buffer);
         return getSpringBeanFromResource(resource, ApplicationConfig.class);
     }
@@ -154,39 +150,6 @@ public class ApplicationFileDeployment {
         finally {
             if (context.isActive()) {
                 context.close();
-            }
-        }
-    }
-
-    private static byte[] unzipFileToMemory(String applicationFile, File directoryOrZip) {
-        ZipFile zipFile = null;
-        try {
-            zipFile = new ZipFile(directoryOrZip);
-            final ZipEntry zipEntry = zipFile.getEntry(applicationFile);
-            final int length = (int) zipEntry.getSize();
-            if (length > MAX_XML_FILE_SIZE) {
-                throw new AdminException("Application xml file size cannot be bigger than " + MAX_XML_FILE_SIZE
-                        + " bytes");
-            }
-            byte[] buffer = new byte[length];
-            final InputStream in = zipFile.getInputStream(zipEntry);
-            final DataInputStream din = new DataInputStream(in);
-            try {
-                din.readFully(buffer, 0, length);
-                return buffer;
-            } catch (final IOException e) {
-                throw new AdminException("Failed to read application file input stream", e);
-            }
-
-        } catch (final IOException e) {
-            throw new AdminException("Failed to read zip file " + directoryOrZip, e);
-        } finally {
-            if (zipFile != null) {
-                try {
-                    zipFile.close();
-                } catch (final IOException e) {
-                    logger.debug("Failed to close zip file " + directoryOrZip, e);
-                }
             }
         }
     }
