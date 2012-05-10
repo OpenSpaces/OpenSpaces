@@ -13,6 +13,7 @@
     <context:annotation-config/>
  
 	<bean id="conflictResolver" class="org.openspaces.itest.gateway.MyConflictResolver" />
+	<bean id="consolidationInterceptor" class="org.openspaces.itest.gateway.MyTransactionConsolidationInterceptor" />
 	
     <os-gateway:sink id="sink" local-gateway-name="localGateway" gateway-lookups="gatewayLookups" local-space-url="jini://*/*/localCluster" requires-bootstrap="true" tx-timeout="7500" local-space-lookup-timeout="10">
 	    <os-gateway:sources>    
@@ -20,7 +21,7 @@
 	    	<os-gateway:source name="targetGateway" />
 	    </os-gateway:sources>
 		<os-gateway:error-handling conflict-resolver="conflictResolver" max-retries-on-tx-lock="5" tx-lock-retry-interval="1000" />
-		<os-gateway:tx-support dist-tx-wait-timeout-millis="15000" dist-tx-wait-for-opers="50" dist-tx-consolidation-failure-action="abort" />
+		<os-gateway:tx-support dist-tx-wait-timeout-millis="15000" dist-tx-wait-for-opers="50" dist-tx-consolidation-interceptor="consolidationInterceptor" />
     </os-gateway:sink>
 
     <os-gateway:lookups id="gatewayLookups">
