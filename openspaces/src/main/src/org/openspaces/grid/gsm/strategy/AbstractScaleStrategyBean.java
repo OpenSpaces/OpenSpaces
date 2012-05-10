@@ -57,6 +57,7 @@ import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisi
 import org.openspaces.grid.gsm.rebalancing.exceptions.RebalancingSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementInProgressException;
+import org.openspaces.grid.gsm.sla.exceptions.WrongNumberOfESMComponentsException;
 
 public abstract class AbstractScaleStrategyBean implements 
     ElasticMachineProvisioningAware ,
@@ -304,6 +305,9 @@ public abstract class AbstractScaleStrategyBean implements
     public void run() {
 
         try {
+
+            validateOnlyOneESMRunning();
+
             if (getLogger().isDebugEnabled()) {
                 getLogger().debug("enforcing SLA.");
             }
@@ -326,14 +330,27 @@ public abstract class AbstractScaleStrategyBean implements
             else if (getLogger().isDebugEnabled()) {
                 getLogger().debug("SLA has not been reached",e);
             }
+        
             // we do not pass the exception into the event since there are other fine grained events that report failures.
-            scaleEventState.enqueuProvisioningInProgressEvent();
+            scaleEventState.enqueuProvisioningInProgressEvent();    
+            
             isScaleInProgress = true;
         }
         catch (Throwable e) {
             getLogger().error("Unhandled Exception",e);
             scaleEventState.enqueuProvisioningInProgressEvent();
             isScaleInProgress = true;
+        }
+    }
+
+    private void validateOnlyOneESMRunning() throws WrongNumberOfESMComponentsException {
+        final int numberOfEsms = admin.getElasticServiceManagers().getSize();
+        if (numberOfEsms != 1) {
+            
+            final WrongNumberOfESMComponentsException e = new WrongNumberOfESMComponentsException(numberOfEsms, this.getProcessingUnit().getName());
+            //eventually raises a machines alert alert. That's good enough
+            machineProvisioningEventState.enqueuProvisioningInProgressEvent(e);
+            throw e;
         }
     }
 

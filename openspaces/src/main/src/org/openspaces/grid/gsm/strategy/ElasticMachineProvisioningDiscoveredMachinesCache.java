@@ -171,15 +171,6 @@ public class ElasticMachineProvisioningDiscoveredMachinesCache implements
      */
     public void run() {
         
-        
-        //TODO: Move this check to EsmImpl, this component should not be aware it is running in an ESM
-        //TODO: Raise an alert
-        int numberOfEsms = admin.getElasticServiceManagers().getSize();
-        if (numberOfEsms != 1) {
-            logger.error("Number of ESMs must be 1. Currently " + numberOfEsms + " running.");
-            return;
-        }
-    
         if (syncAgents) {
             syncAgents = false;
             if (logger.isDebugEnabled()) {
