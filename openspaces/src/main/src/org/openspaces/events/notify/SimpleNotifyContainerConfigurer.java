@@ -250,7 +250,9 @@ public class SimpleNotifyContainerConfigurer {
 
     /**
      * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setGuaranteed(Boolean)
+     * @deprecated Since 9.0 use {@link #durable(Boolean)} instead.
      */
+    @Deprecated
     public SimpleNotifyContainerConfigurer guaranteed(boolean guaranteed) {
         notifyEventListenerContainer.setGuaranteed(guaranteed);
         return this;
