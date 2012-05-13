@@ -51,8 +51,6 @@ public class MemcachedConfig implements ProcessingUnitConfigHolder {
     @Required
     public void setSpaceUrl(String spaceUrl) {
         this.spaceUrl = spaceUrl;
-        config.setName(MemcachedDeploy.extractName(spaceUrl) + "-memcached");
-        config.setContextProperty("url", spaceUrl);
     }
 
     public String getSpaceUrl() {
@@ -259,6 +257,8 @@ public class MemcachedConfig implements ProcessingUnitConfigHolder {
 
     @Override
     public ProcessingUnitConfig toProcessingUnitConfig() {
+        config.setName(MemcachedDeploy.extractName(spaceUrl) + "-memcached");
+        config.setContextProperty("url", spaceUrl);
         return config;
     }
 }

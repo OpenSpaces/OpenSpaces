@@ -51,7 +51,6 @@ public class SpaceConfig implements ProcessingUnitConfigHolder {
     @Required
     public void setName(String spaceName) {
         config.setName(spaceName);
-        config.setContextProperty("dataGridName", spaceName);
     }
 
     public String getName() {
@@ -230,6 +229,7 @@ public class SpaceConfig implements ProcessingUnitConfigHolder {
     
     @Override
     public ProcessingUnitConfig toProcessingUnitConfig() {
+        config.setContextProperty("dataGridName", getName());
         return config;
     }
 

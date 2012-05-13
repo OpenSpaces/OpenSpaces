@@ -17,6 +17,7 @@ package org.openspaces.admin.space;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.openspaces.admin.pu.config.ProcessingUnitConfig;
 import org.openspaces.admin.pu.elastic.config.ElasticStatefulProcessingUnitConfig;
 
 /**
@@ -31,8 +32,9 @@ public class ElasticSpaceConfig extends ElasticStatefulProcessingUnitConfig {
         super.setProcessingUnit("/templates/datagrid");
     }
     
-    public void setName(String spaceName) {
-        super.setName(spaceName);
-        super.addContextProperty("dataGridName", spaceName);
+    @Override
+    public ProcessingUnitConfig toProcessingUnitConfig() {
+        super.addContextProperty("dataGridName", getName());
+        return super.toProcessingUnitConfig();
     }
 }

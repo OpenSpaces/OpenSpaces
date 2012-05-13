@@ -44,6 +44,9 @@
 						</bean>
 					</list>
 					</property>
+					<property name="contextProperties">
+						<map><entry key="key" value="value"/></map>
+					</property>
 				</bean>
 
 				<bean class="org.openspaces.admin.pu.config.ProcessingUnitConfig">
