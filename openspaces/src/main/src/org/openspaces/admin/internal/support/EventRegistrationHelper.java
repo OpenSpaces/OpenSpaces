@@ -124,6 +124,34 @@ public abstract class EventRegistrationHelper {
         if (eventListener instanceof GridServiceContainerRemovedEventListener) {
             admin.getGridServiceContainers().getGridServiceContainerRemoved().add((GridServiceContainerRemovedEventListener) eventListener);
         }
+        
+        /*
+         * Space listeners
+         */
+        
+        if (eventListener instanceof SpaceAddedEventListener) {
+            admin.getSpaces().getSpaceAdded().add((SpaceAddedEventListener) eventListener);
+        }
+        if (eventListener instanceof SpaceRemovedEventListener) {
+            admin.getSpaces().getSpaceRemoved().add((SpaceRemovedEventListener) eventListener);
+        }
+        if (eventListener instanceof SpaceInstanceAddedEventListener) {
+            admin.getSpaces().getSpaceInstanceAdded().add((SpaceInstanceAddedEventListener) eventListener);
+        }
+        if (eventListener instanceof SpaceInstanceRemovedEventListener) {
+            admin.getSpaces().getSpaceInstanceRemoved().add((SpaceInstanceRemovedEventListener) eventListener);
+        }
+        if (eventListener instanceof SpaceModeChangedEventListener) {
+            admin.getSpaces().getSpaceModeChanged().add((SpaceModeChangedEventListener) eventListener);
+        }
+        if (eventListener instanceof ReplicationStatusChangedEventListener) {
+            admin.getSpaces().getReplicationStatusChanged().add((ReplicationStatusChangedEventListener) eventListener);
+        }
+        
+        /*
+         * Processing Unit listeners
+         */
+        
         if (eventListener instanceof ProcessingUnitAddedEventListener) {
             admin.getProcessingUnits().getProcessingUnitAdded().add((ProcessingUnitAddedEventListener) eventListener);
         }
@@ -151,24 +179,11 @@ public abstract class EventRegistrationHelper {
         if (eventListener instanceof BackupGridServiceManagerChangedEventListener) {
             admin.getProcessingUnits().getBackupGridServiceManagerChanged().add((BackupGridServiceManagerChangedEventListener) eventListener);
         }
-        if (eventListener instanceof SpaceAddedEventListener) {
-            admin.getSpaces().getSpaceAdded().add((SpaceAddedEventListener) eventListener);
-        }
-        if (eventListener instanceof SpaceRemovedEventListener) {
-            admin.getSpaces().getSpaceRemoved().add((SpaceRemovedEventListener) eventListener);
-        }
-        if (eventListener instanceof SpaceInstanceAddedEventListener) {
-            admin.getSpaces().getSpaceInstanceAdded().add((SpaceInstanceAddedEventListener) eventListener);
-        }
-        if (eventListener instanceof SpaceInstanceRemovedEventListener) {
-            admin.getSpaces().getSpaceInstanceRemoved().add((SpaceInstanceRemovedEventListener) eventListener);
-        }
-        if (eventListener instanceof SpaceModeChangedEventListener) {
-            admin.getSpaces().getSpaceModeChanged().add((SpaceModeChangedEventListener) eventListener);
-        }
-        if (eventListener instanceof ReplicationStatusChangedEventListener) {
-            admin.getSpaces().getReplicationStatusChanged().add((ReplicationStatusChangedEventListener) eventListener);
-        }
+        
+        /*
+         * Application listeners
+         */
+        
         if (eventListener instanceof ApplicationAddedEventListener ){
             admin.getApplications().getApplicationAdded().add( (ApplicationAddedEventListener ) eventListener);
         }
@@ -176,7 +191,9 @@ public abstract class EventRegistrationHelper {
             admin.getApplications().getApplicationRemoved().add( ( ApplicationRemovedEventListener ) eventListener);
         }
 
-        //add statistics listeners
+        /*
+         * Statistics listeners
+         */
         if( eventListener instanceof StatisticsListenersRegistrationDelayAware ){
             
             long statisticsListenerRegistrationDelay = 
@@ -329,6 +346,40 @@ public abstract class EventRegistrationHelper {
         if (eventListener instanceof GridServiceContainerRemovedEventListener) {
             admin.getGridServiceContainers().getGridServiceContainerRemoved().remove((GridServiceContainerRemovedEventListener) eventListener);
         }
+        
+
+        /**
+         * Space listeners
+         */
+        if (eventListener instanceof SpaceAddedEventListener) {
+            admin.getSpaces().getSpaceAdded().remove((SpaceAddedEventListener) eventListener);
+        }
+        if (eventListener instanceof SpaceRemovedEventListener) {
+            admin.getSpaces().getSpaceRemoved().remove((SpaceRemovedEventListener) eventListener);
+        }
+        if (eventListener instanceof SpaceInstanceAddedEventListener) {
+            admin.getSpaces().getSpaceInstanceAdded().remove((SpaceInstanceAddedEventListener) eventListener);
+        }
+        if (eventListener instanceof SpaceInstanceRemovedEventListener) {
+            admin.getSpaces().getSpaceInstanceRemoved().remove((SpaceInstanceRemovedEventListener) eventListener);
+        }
+        if (eventListener instanceof SpaceModeChangedEventListener) {
+            admin.getSpaces().getSpaceModeChanged().remove((SpaceModeChangedEventListener) eventListener);
+        }
+        if (eventListener instanceof ReplicationStatusChangedEventListener) {
+            admin.getSpaces().getReplicationStatusChanged().remove((ReplicationStatusChangedEventListener) eventListener);
+        }
+        if (eventListener instanceof SpaceStatisticsChangedEventListener) {
+            admin.getSpaces().getSpaceStatisticsChanged().remove((SpaceStatisticsChangedEventListener) eventListener);
+        }
+        if (eventListener instanceof SpaceInstanceStatisticsChangedEventListener) {
+            admin.getSpaces().getSpaceInstanceStatisticsChanged().remove((SpaceInstanceStatisticsChangedEventListener) eventListener);
+        }
+        
+        
+        /*
+         * Processing Unit listeners
+         */
         if (eventListener instanceof ProcessingUnitAddedEventListener) {
             admin.getProcessingUnits().getProcessingUnitAdded().remove((ProcessingUnitAddedEventListener) eventListener);
         }
@@ -359,36 +410,18 @@ public abstract class EventRegistrationHelper {
         if( eventListener instanceof ProcessingUnitInstanceStatisticsChangedEventListener ){
             admin.getProcessingUnits().getProcessingUnitInstanceStatisticsChanged().remove((ProcessingUnitInstanceStatisticsChangedEventListener) eventListener);
         }
-        if (eventListener instanceof SpaceAddedEventListener) {
-            admin.getSpaces().getSpaceAdded().remove((SpaceAddedEventListener) eventListener);
-        }
-        if (eventListener instanceof SpaceRemovedEventListener) {
-            admin.getSpaces().getSpaceRemoved().remove((SpaceRemovedEventListener) eventListener);
-        }
-        if (eventListener instanceof SpaceInstanceAddedEventListener) {
-            admin.getSpaces().getSpaceInstanceAdded().remove((SpaceInstanceAddedEventListener) eventListener);
-        }
-        if (eventListener instanceof SpaceInstanceRemovedEventListener) {
-            admin.getSpaces().getSpaceInstanceRemoved().remove((SpaceInstanceRemovedEventListener) eventListener);
-        }
-        if (eventListener instanceof SpaceModeChangedEventListener) {
-            admin.getSpaces().getSpaceModeChanged().remove((SpaceModeChangedEventListener) eventListener);
-        }
-        if (eventListener instanceof ReplicationStatusChangedEventListener) {
-            admin.getSpaces().getReplicationStatusChanged().remove((ReplicationStatusChangedEventListener) eventListener);
-        }
-        if (eventListener instanceof SpaceStatisticsChangedEventListener) {
-            admin.getSpaces().getSpaceStatisticsChanged().remove((SpaceStatisticsChangedEventListener) eventListener);
-        }
-        if (eventListener instanceof SpaceInstanceStatisticsChangedEventListener) {
-            admin.getSpaces().getSpaceInstanceStatisticsChanged().remove((SpaceInstanceStatisticsChangedEventListener) eventListener);
-        }
+        
+        /*
+         * Application listeners
+         */
         if (eventListener instanceof ApplicationAddedEventListener ){
             admin.getApplications().getApplicationAdded().remove( (ApplicationAddedEventListener ) eventListener);
         }
         if (eventListener instanceof ApplicationRemovedEventListener ){
             admin.getApplications().getApplicationRemoved().remove( ( ApplicationRemovedEventListener ) eventListener);
         }
+        
+        
         if (eventListener instanceof ElasticGridServiceContainerProvisioningFailureEventListener) {
             admin.getGridServiceContainers().getElasticGridServiceContainerProvisioningFailure().remove(
                     (ElasticGridServiceContainerProvisioningFailureEventListener) eventListener);
