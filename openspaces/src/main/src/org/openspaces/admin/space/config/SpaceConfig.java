@@ -28,6 +28,7 @@ import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDepende
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.pu.config.ContextPropertyConfig;
 import org.openspaces.admin.pu.config.ProcessingUnitConfig;
+import org.openspaces.admin.pu.config.UserDetailsConfig;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
 import org.openspaces.admin.pu.topology.ProcessingUnitConfigHolder;
 import org.springframework.beans.factory.annotation.Required;
@@ -204,8 +205,14 @@ public class SpaceConfig implements ProcessingUnitConfigHolder {
     /**
      * @see ProcessingUnitDeployment#userDetails(UserDetails)
      */
+    @XmlTransient
     public void setUserDetails(UserDetails userDetails) {
         config.setUserDetails(userDetails);
+    }
+    
+    @XmlElement(name="user-details")
+    public void setUserDetailsConfig(UserDetailsConfig userDetails) {
+        setUserDetails(userDetails.toUser());
     }
     
     /**

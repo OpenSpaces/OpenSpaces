@@ -22,7 +22,8 @@
 		<os-admin:depends-on name="a" />
 
 		<os-admin:context-property key="key" value="value" />
-				
+		<os-admin:user-details username="username" password="password"/>
+						
 			<!-- 
 		<property name="max-instances-per-zone">
 			<map><entry key="zone" value="1"/></map>

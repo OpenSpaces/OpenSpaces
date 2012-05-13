@@ -47,6 +47,13 @@
 					<property name="contextProperties">
 						<map><entry key="key" value="value"/></map>
 					</property>
+					
+					<property name="userDetails">
+						<bean class="com.gigaspaces.security.directory.User">
+						 	<constructor-arg index="0" value="username"/>
+						 	<constructor-arg index="1" value="password"/>
+						</bean>
+					</property>
 				</bean>
 
 				<bean class="org.openspaces.admin.pu.config.ProcessingUnitConfig">

@@ -70,7 +70,7 @@ public class TestApplicationXml extends TestCase {
                .secured(true)
                .setContextProperty("key", "value")
                 .slaLocation("slaLocation")
-                //TODO:.userDetails("a", "b")
+                .userDetails("username", "password")
                 .partitioned(1,1)
                 .maxInstancesPerVM(1)
                 .maxInstancesPerMachine(0))

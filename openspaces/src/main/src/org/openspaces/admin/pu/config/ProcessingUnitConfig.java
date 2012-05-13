@@ -167,8 +167,14 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigHolder {
     /**
      * @see ProcessingUnitDeployment#userDetails(UserDetails)
      */
+    @XmlTransient
     public void setUserDetails(UserDetails userDetails) {
         this.userDetails = userDetails;
+    }
+    
+    @XmlElement(name="user-details")
+    public void setUserDetailsConfig(UserDetailsConfig userDetails) {
+        setUserDetails(userDetails.toUser());
     }
 
     public String getSlaLocation() {
