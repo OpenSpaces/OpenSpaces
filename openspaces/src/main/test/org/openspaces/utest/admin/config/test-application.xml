@@ -20,12 +20,14 @@
         <os-admin:depends-on name="a" min-instances-per-partition="1"/>
         <os-admin:depends-on name="b" min-instances="1"/>
 		<os-admin:depends-on name="a" />
-		
+
+		<os-admin:context-property key="key" value="value" />
+				
 			<!-- 
 		<property name="max-instances-per-zone">
 			<map><entry><key><value>zone</value></key><value>1</value></entry></map>
       	</property>
-      	<property name="context-properties"><map><entry><key><value>key</value></key><value>value</value></entry></map></property>
+      	
       	 -->
 		</os-admin:space>
 			

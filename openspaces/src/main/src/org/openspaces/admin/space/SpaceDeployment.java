@@ -198,7 +198,7 @@ public class SpaceDeployment implements ProcessingUnitDeploymentTopology {
         config.setContextProperty(key, value);
         return this;
     }
-
+    
     /**
      * Will deploy a secured space. Note, by setting user details the space will be secured automatically.
      */

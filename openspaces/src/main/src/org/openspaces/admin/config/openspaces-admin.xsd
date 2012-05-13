@@ -19,10 +19,19 @@
         </xsd:complexType>
     </xsd:element>
 
+	<xsd:element name="context-property">
+    	<xsd:complexType>
+          <xsd:attribute name="key" type="xsd:string" use="required"/>
+          <xsd:attribute name="value" type="xsd:string" use="required"/>          
+        </xsd:complexType>
+    </xsd:element>
+
+
 	<xsd:element name="space">
 		<xsd:complexType>
 			<xsd:choice minOccurs="0" maxOccurs="unbounded">
 				<xsd:element ref="depends-on" />
+				<xsd:element ref="context-property" />
 			</xsd:choice>
 			<xsd:attribute name="name" type="xsd:string" use="required" />
 			<xsd:attribute name="cluster-schema" type="xsd:string" use="optional" />

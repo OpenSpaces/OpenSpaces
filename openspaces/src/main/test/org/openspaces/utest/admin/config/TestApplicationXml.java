@@ -68,7 +68,7 @@ public class TestApplicationXml extends TestCase {
                .addZone("zone2")
                //TODO:.maxInstancesPerZone("zone", 1)
                .secured(true)
-               //TODO:.setContextProperty("key", "value")
+               .setContextProperty("key", "value")
                 .slaLocation("slaLocation")
                 //TODO:.userDetails("a", "b")
                 .partitioned(1,1)

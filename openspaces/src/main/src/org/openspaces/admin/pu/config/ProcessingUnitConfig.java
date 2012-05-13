@@ -234,6 +234,10 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigHolder {
         contextProperties.put(key, value);
     }
 
+    public void setContextProperty(ContextPropertyConfig propertyConfig) {
+        setContextProperty(propertyConfig.getKey(), propertyConfig.getValue());
+    }
+    
     /**
      * @see ProcessingUnitDeployment#setElasticProperty(String, String)
      */

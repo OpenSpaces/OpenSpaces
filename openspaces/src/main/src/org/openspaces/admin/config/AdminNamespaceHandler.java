@@ -19,6 +19,7 @@ package org.openspaces.admin.config;
 
 import org.openspaces.admin.application.config.ApplicationConfig;
 import org.openspaces.admin.memcached.config.MemcachedConfig;
+import org.openspaces.admin.pu.config.ContextPropertyConfig;
 import org.openspaces.admin.pu.config.ProcessingUnitConfig;
 import org.openspaces.admin.pu.dependency.config.ProcessingUnitDependencyConfig;
 import org.openspaces.admin.pu.elastic.config.ElasticStatefulProcessingUnitConfig;
@@ -47,5 +48,6 @@ public class AdminNamespaceHandler extends AbstractXmlBeanNamespaceHandler {
         register(ElasticSpaceConfig.class);
         register(MemcachedConfig.class);
         register(ApplicationConfig.class);
+        register(ContextPropertyConfig.class);
     }
 }
