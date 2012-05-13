@@ -64,11 +64,11 @@ public class TestApplicationXml extends TestCase {
                         .dependsOnMinimumNumberOfDeployedInstances("b", 1)
                         .dependsOnMinimumNumberOfDeployedInstancesPerPartition("a", 1)
                         .create())
-               .addZone("zone1")
-               .addZone("zone2")
-               //TODO:.maxInstancesPerZone("zone", 1)
-               .secured(true)
-               .setContextProperty("key", "value")
+                .addZone("zone1")
+                .addZone("zone2")
+                .maxInstancesPerZone("zone", 1)
+                .secured(true)
+                .setContextProperty("key", "value")
                 .slaLocation("slaLocation")
                 .userDetails("username", "password")
                 .partitioned(1,1)
@@ -77,17 +77,23 @@ public class TestApplicationXml extends TestCase {
         
         .addProcessingUnitDeployment(
                 new ProcessingUnitDeployment("processor.jar")
-                .partitioned(1,1)
-                .maxInstancesPerVM(1)
-                .maxInstancesPerMachine(0))
-        
-        .addProcessingUnitDeployment(
-                new ProcessingUnitDeployment("feeder.jar")
                 .addDependencies(
                         new ProcessingUnitDeploymentDependenciesConfigurer()
-                        .dependsOnMinimumNumberOfDeployedInstancesPerPartition("space", 1).
-                        create()));
-
+                        .dependsOnDeployed("a")
+                        .dependsOnMinimumNumberOfDeployedInstances("b", 1)
+                        .dependsOnMinimumNumberOfDeployedInstancesPerPartition("a", 1)
+                        .create())
+                .addZone("zone1")
+                .addZone("zone2")
+                .maxInstancesPerZone("zone", 1)
+                .secured(true)
+                .setContextProperty("key", "value")
+                .slaLocation("slaLocation")
+                .userDetails("username", "password")
+                .partitioned(1,1)
+                .maxInstancesPerVM(1)
+                .maxInstancesPerMachine(0));
+        
         return applicationDeployment.create();
     }
 }

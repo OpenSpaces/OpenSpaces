@@ -27,6 +27,7 @@ import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDepende
 import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependency;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.pu.config.ContextPropertyConfig;
+import org.openspaces.admin.pu.config.MaxInstancesPerZoneConfig;
 import org.openspaces.admin.pu.config.ProcessingUnitConfig;
 import org.openspaces.admin.pu.config.UserDetailsConfig;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
@@ -175,6 +176,7 @@ public class SpaceConfig implements ProcessingUnitConfigHolder {
     /**
      * @see ProcessingUnitDeployment#maxInstancesPerZone(String, int)
      */
+    @XmlTransient
     public void setMaxInstancesPerZone(Map<String, Integer> maxInstancesPerZone) {
         config.setMaxInstancesPerZone(maxInstancesPerZone);
     }
@@ -187,6 +189,11 @@ public class SpaceConfig implements ProcessingUnitConfigHolder {
         config.setMaxInstancesPerZone(zone, maxInstancesPerZone);
     }
     
+    @XmlElement(name="max-instances-per-zone")
+    public void setMaxInstancesPerZoneConfig(MaxInstancesPerZoneConfig maxInstancesPerZoneConfig) {
+        config.setMaxInstancesPerZone(maxInstancesPerZoneConfig.getZone(), maxInstancesPerZoneConfig.getMaxNumberOfInstances());
+    }
+        
     /**
      * @see ProcessingUnitDeployment#secured(boolean)
      */

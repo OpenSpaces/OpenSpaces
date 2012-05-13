@@ -213,6 +213,7 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigHolder {
     /**
      * @see ProcessingUnitDeployment#maxInstancesPerZone(String, int)
      */
+    @XmlTransient
     public void setMaxInstancesPerZone(Map<String, Integer> maxInstancesPerZone) {
         this.maxInstancesPerZone = maxInstancesPerZone;
     }
@@ -223,6 +224,11 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigHolder {
     @XmlTransient
     public void setMaxInstancesPerZone(String zone, int maxInstancesPerZone) {
         getMaxInstancesPerZone().put(zone,maxInstancesPerZone);
+    }
+    
+    @XmlElement(name="max-instances-per-zone")
+    public void setMaxInstancesPerZoneConfig(MaxInstancesPerZoneConfig maxInstancesPerZoneConfig) {
+        setMaxInstancesPerZone(maxInstancesPerZoneConfig.getZone(), maxInstancesPerZoneConfig.getMaxNumberOfInstances());
     }
     
     /**
@@ -240,7 +246,8 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigHolder {
         contextProperties.put(key, value);
     }
 
-    public void setContextProperty(ContextPropertyConfig propertyConfig) {
+    @XmlElement(name="context-property")
+    public void setContextPropertyConfig(ContextPropertyConfig propertyConfig) {
         setContextProperty(propertyConfig.getKey(), propertyConfig.getValue());
     }
     

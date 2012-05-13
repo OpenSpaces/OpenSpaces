@@ -25,6 +25,10 @@
 					<property name="numberOfBackups" value="1" />
 					<property name="maxInstancesPerVM" value="1" /> 
 					<property name="maxInstancesPerMachine" value="0" />
+					<property name="maxInstancesPerZone">
+						<map><entry key="zone" value="1"/></map>
+      				</property>
+					
 					<property name="zones" value="zone1,zone2"/>
 					<property name="secured" value="true" />
 					<property name="slaLocation" value="slaLocation" />
@@ -64,19 +68,42 @@
 					<property name="numberOfBackups" value="1" />
 					<property name="maxInstancesPerVM" value="1" /> 
 					<property name="maxInstancesPerMachine" value="0" />
+					<property name="maxInstancesPerZone">
+						<map><entry key="zone" value="1"/></map>
+      				</property>
+					
+					<property name="zones" value="zone1,zone2"/>
+					<property name="secured" value="true" />
+					<property name="slaLocation" value="slaLocation" />
+					<property name="deploymentDependencies">
+					<list>
+						<bean class="org.openspaces.admin.pu.dependency.config.ProcessingUnitDependencyConfig">
+							<property name="requiredProcessingUnitName" value="a" />
+							<property name="waitForDeploymentToComplete" value="true" />
+						</bean>
+						<bean class="org.openspaces.admin.pu.dependency.config.ProcessingUnitDependencyConfig">
+							<property name="requiredProcessingUnitName" value="b" />
+							<property name="minimumNumberOfDeployedInstances" value="1" />
+						</bean>
+						<bean class="org.openspaces.admin.pu.dependency.config.ProcessingUnitDependencyConfig">
+							<property name="requiredProcessingUnitName" value="a" />
+							<property name="minimumNumberOfDeployedInstancesPerPartition" value="1" />
+						</bean>
+					</list>
+					</property>
+					<property name="contextProperties">
+						<map><entry key="key" value="value"/></map>
+					</property>
+					
+					<property name="userDetails">
+						<bean class="com.gigaspaces.security.directory.User">
+						 	<constructor-arg index="0" value="username"/>
+						 	<constructor-arg index="1" value="password"/>
+						</bean>
+					</property>
+					
 				</bean>
 
-				<bean class="org.openspaces.admin.pu.config.ProcessingUnitConfig">
-					<property name="processingUnit" value="feeder.jar" />
-					<property name="deploymentDependencies">
-						<list>
-							<bean class="org.openspaces.admin.pu.dependency.config.ProcessingUnitDependencyConfig">
-								<property name="requiredProcessingUnitName" value="space" />
-								<property name="minimumNumberOfDeployedInstancesPerPartition" value="1" />
-							</bean>
-						</list>
-					</property>
-				</bean>
 			</list>
 		</property>
 	</bean>

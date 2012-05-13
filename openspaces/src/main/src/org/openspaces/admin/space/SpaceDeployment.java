@@ -178,7 +178,7 @@ public class SpaceDeployment implements ProcessingUnitDeploymentTopology {
      * the same zone.
      */
     public SpaceDeployment maxInstancesPerZone(String zone, int maxInstancesPerZone) {
-        config.getMaxInstancesPerZone().put(zone, maxInstancesPerZone);
+        config.setMaxInstancesPerZone(zone, maxInstancesPerZone);
         return this;
     }
 

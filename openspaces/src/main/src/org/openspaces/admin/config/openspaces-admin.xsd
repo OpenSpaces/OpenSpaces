@@ -33,6 +33,12 @@
         </xsd:complexType>
     </xsd:element>
 
+	<xsd:element name="max-instances-per-zone">
+    	<xsd:complexType>
+          <xsd:attribute name="zone" type="xsd:string" use="required"/>
+          <xsd:attribute name="max-instances" type="xsd:int" use="required"/>          
+        </xsd:complexType>
+    </xsd:element>
 
 	<xsd:element name="space">
 		<xsd:complexType>
@@ -40,6 +46,7 @@
 				<xsd:element ref="depends-on" />
 				<xsd:element ref="context-property" />
 				<xsd:element ref="user-details" />
+				<xsd:element ref="max-instances-per-zone" />
 			</xsd:choice>
 			<xsd:attribute name="name" type="xsd:string" use="required" />
 			<xsd:attribute name="cluster-schema" type="xsd:string" use="optional" />
@@ -57,13 +64,20 @@
 		<xsd:complexType>
 			<xsd:choice minOccurs="0" maxOccurs="unbounded">
 				<xsd:element ref="depends-on" />
+				<xsd:element ref="context-property" />
+				<xsd:element ref="user-details" />
+				<xsd:element ref="max-instances-per-zone" />
 			</xsd:choice>
 			<xsd:attribute name="processing-unit" type="xsd:string" use="required" />
+			<xsd:attribute name="name" type="xsd:string" use="optional" />
 			<xsd:attribute name="cluster-schema" type="xsd:string" use="optional" />
 			<xsd:attribute name="number-of-instances" type="xsd:int" use="optional" />
 			<xsd:attribute name="number-of-backups" type="xsd:int" use="optional" />
 			<xsd:attribute name="max-instances-per-vm" type="xsd:int" use="optional" />
-			<xsd:attribute name="max-instances-per-machine" type="xsd:int" use="optional" />			
+			<xsd:attribute name="max-instances-per-machine" type="xsd:int" use="optional" />
+			<xsd:attribute name="zones" type="xsd:string" use="optional" />
+			<xsd:attribute name="secured" type="xsd:boolean" use="optional" />
+			<xsd:attribute name="sla-location" type="xsd:string" use="optional" />			
 		</xsd:complexType>
 	</xsd:element>
 	

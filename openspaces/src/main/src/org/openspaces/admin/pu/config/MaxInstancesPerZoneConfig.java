@@ -15,46 +15,43 @@
  *******************************************************************************/
 package org.openspaces.admin.pu.config;
 
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
-
-import org.springframework.beans.factory.annotation.Required;
-
-import com.gigaspaces.security.directory.User;
 
 /**
  * @author itaif
  * @since 9.0.1
  */
-@XmlRootElement(name="user-details")
-public class UserDetailsConfig {
+@XmlRootElement(name="max-instances-per-zone")
+public class MaxInstancesPerZoneConfig {
 
-    private String password;
-    private String username;
-
-    public String getPassword() {
-        return password;
+    private String zone;
+    private int maxNumberOfInstances;
+    
+    public String getZone() {
+        return zone;
     }
-
-    public String getUsername() {
-        return username;
+    
+    public void setZone(String zone) {
+        this.zone = zone;
     }
+    
 
-    @Required
-    public void setPassword(String password) {
-        this.password = password;
+    public int getMaxNumberOfInstances() {
+        return maxNumberOfInstances;
     }
-
-    @Required
-    public void setUsername(String username) {
-        this.username = username;
+    
+    @XmlAttribute(name ="max-instances")    
+    public void setMaxNumberOfInstances(int maxNumberOfInstances) {
+        this.maxNumberOfInstances = maxNumberOfInstances;
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((password == null) ? 0 : password.hashCode());
-        result = prime * result + ((username == null) ? 0 : username.hashCode());
+        result = prime * result + maxNumberOfInstances;
+        result = prime * result + ((zone == null) ? 0 : zone.hashCode());
         return result;
     }
 
@@ -66,28 +63,22 @@ public class UserDetailsConfig {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        UserDetailsConfig other = (UserDetailsConfig) obj;
-        if (password == null) {
-            if (other.password != null)
-                return false;
-        } else if (!password.equals(other.password))
+        MaxInstancesPerZoneConfig other = (MaxInstancesPerZoneConfig) obj;
+        if (maxNumberOfInstances != other.maxNumberOfInstances)
             return false;
-        if (username == null) {
-            if (other.username != null)
+        if (zone == null) {
+            if (other.zone != null)
                 return false;
-        } else if (!username.equals(other.username))
+        } else if (!zone.equals(other.zone))
             return false;
         return true;
     }
 
     @Override
     public String toString() {
-        return "UserDetailsConfig ["
-                + (password != null ? "password=" + "***, " : "")
-                + (username != null ? "username=" + username : "") + "]";
+        return "MaxInstancesPerZoneConfig [" + (zone != null ? "zone=" + zone + ", " : "") + "maxNumberOfInstances="
+                + maxNumberOfInstances + "]";
     }
     
-    public User toUser() {
-        return new User(username,password);
-    }
+    
 }
