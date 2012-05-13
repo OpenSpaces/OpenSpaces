@@ -26,6 +26,7 @@ import javax.xml.bind.annotation.XmlTransient;
 import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependencies;
 import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependency;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
+import org.openspaces.admin.pu.config.ContextPropertyConfig;
 import org.openspaces.admin.pu.config.ProcessingUnitConfig;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
 import org.openspaces.admin.pu.topology.ProcessingUnitConfigHolder;
@@ -137,6 +138,10 @@ public class SpaceConfig implements ProcessingUnitConfigHolder {
     @XmlTransient
     public void setContextProperty(String key, String value) {
         config.setContextProperty(key, value);
+    }
+    
+    public void setContextProperty(ContextPropertyConfig propertyConfig) {
+        setContextProperty(propertyConfig.getKey(), propertyConfig.getValue());
     }
     
     public Map<String,String> getContextProperties() {

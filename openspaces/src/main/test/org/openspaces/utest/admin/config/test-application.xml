@@ -25,7 +25,7 @@
 				
 			<!-- 
 		<property name="max-instances-per-zone">
-			<map><entry><key><value>zone</value></key><value>1</value></entry></map>
+			<map><entry key="zone" value="1"/></map>
       	</property>
       	
       	 -->
