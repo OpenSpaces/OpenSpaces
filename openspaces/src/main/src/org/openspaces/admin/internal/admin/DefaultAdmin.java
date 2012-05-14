@@ -1695,7 +1695,7 @@ public class DefaultAdmin implements InternalAdmin {
         public void run() {
             if (closeEnded) {
                 Exception e = new IllegalStateException("Not executing: " + runnable + " - Admin already closed. executorService.shutdownNow should have been called.");
-                logger.error(e.getMessage(), e);
+                logger.warn(e.getMessage(), e);
                 //TODO: In order to stop the scheduler completely this time, raise an exception
                 //throw e;
                 return;
