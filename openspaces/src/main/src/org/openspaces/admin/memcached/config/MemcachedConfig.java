@@ -255,6 +255,13 @@ public class MemcachedConfig implements ProcessingUnitConfigHolder {
         return true;
     }
 
+    
+    @Override
+    public String toString() {
+        return "MemcachedConfig [" + (config != null ? "config=" + config + ", " : "")
+                + (spaceUrl != null ? "spaceUrl=" + spaceUrl : "") + "]";
+    }
+
     @Override
     public ProcessingUnitConfig toProcessingUnitConfig() {
         config.setName(MemcachedDeploy.extractName(spaceUrl) + "-memcached");

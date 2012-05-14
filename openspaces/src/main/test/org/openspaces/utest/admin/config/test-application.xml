@@ -42,5 +42,21 @@
 			<os-admin:max-instances-per-zone zone="zone" max-instances="1" />
 		</os-admin:pu>
 
+		<os-admin:memcached space-url="spaceUrl"
+			cluster-schema="partitioned-sync2backup"
+			number-of-instances="1" number-of-backups="1"
+			max-instances-per-vm="1" max-instances-per-machine="0" 
+			zones="zone1,zone2" secured="true" sla-location="slaLocation">
+        
+	        <os-admin:depends-on name="a" min-instances-per-partition="1"/>
+	        <os-admin:depends-on name="b" min-instances="1"/>
+			<os-admin:depends-on name="a" />
+	
+			<os-admin:context-property key="key" value="value" />
+			<os-admin:user-details username="username" password="password"/>
+			<os-admin:max-instances-per-zone zone="zone" max-instances="1" />
+
+		</os-admin:memcached>
+
 	</os-admin:application>
 </beans>

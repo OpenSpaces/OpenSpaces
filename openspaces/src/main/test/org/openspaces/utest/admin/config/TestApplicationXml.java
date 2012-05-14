@@ -20,6 +20,7 @@ import junit.framework.TestCase;
 
 import org.openspaces.admin.application.ApplicationDeployment;
 import org.openspaces.admin.application.config.ApplicationConfig;
+import org.openspaces.admin.memcached.MemcachedDeployment;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDeploymentDependenciesConfigurer;
 import org.openspaces.admin.space.SpaceDeployment;
@@ -77,6 +78,25 @@ public class TestApplicationXml extends TestCase {
         
         .addProcessingUnitDeployment(
                 new ProcessingUnitDeployment("processor.jar")
+                .addDependencies(
+                        new ProcessingUnitDeploymentDependenciesConfigurer()
+                        .dependsOnDeployed("a")
+                        .dependsOnMinimumNumberOfDeployedInstances("b", 1)
+                        .dependsOnMinimumNumberOfDeployedInstancesPerPartition("a", 1)
+                        .create())
+                .addZone("zone1")
+                .addZone("zone2")
+                .maxInstancesPerZone("zone", 1)
+                .secured(true)
+                .setContextProperty("key", "value")
+                .slaLocation("slaLocation")
+                .userDetails("username", "password")
+                .partitioned(1,1)
+                .maxInstancesPerVM(1)
+                .maxInstancesPerMachine(0))
+                
+        .addProcessingUnitDeployment(
+                new MemcachedDeployment("spaceUrl")
                 .addDependencies(
                         new ProcessingUnitDeploymentDependenciesConfigurer()
                         .dependsOnDeployed("a")
