@@ -18,13 +18,17 @@ package org.openspaces.admin.memcached.config;
 import java.util.Map;
 
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependencies;
 import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependency;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
+import org.openspaces.admin.pu.config.ContextPropertyConfig;
+import org.openspaces.admin.pu.config.MaxInstancesPerZoneConfig;
 import org.openspaces.admin.pu.config.ProcessingUnitConfig;
+import org.openspaces.admin.pu.config.UserDetailsConfig;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
 import org.openspaces.admin.pu.topology.ProcessingUnitConfigHolder;
 import org.openspaces.pu.container.servicegrid.deploy.MemcachedDeploy;
@@ -139,6 +143,11 @@ public class MemcachedConfig implements ProcessingUnitConfigHolder {
         config.setContextProperty(key, value);
     }
     
+    @XmlElement(name="context-property")
+    public void setContextPropertyConfig(ContextPropertyConfig propertyConfig) {
+        setContextProperty(propertyConfig.getKey(), propertyConfig.getValue());
+    }
+    
     public Map<String,String> getContextProperties() {
         return config.getContextProperties();
     }
@@ -157,6 +166,7 @@ public class MemcachedConfig implements ProcessingUnitConfigHolder {
     /**
      * @see ProcessingUnitDeployment#addZone(String)
      */
+    @XmlTransient
     public void addZone(String zone) {
         config.addZone(zone);
     }
@@ -168,6 +178,7 @@ public class MemcachedConfig implements ProcessingUnitConfigHolder {
     /**
      * @see ProcessingUnitDeployment#maxInstancesPerZone(String, int)
      */
+    @XmlTransient
     public void setMaxInstancesPerZone(Map<String, Integer> maxInstancesPerZone) {
         config.setMaxInstancesPerZone(maxInstancesPerZone);
     }
@@ -175,8 +186,14 @@ public class MemcachedConfig implements ProcessingUnitConfigHolder {
     /**
      * @see ProcessingUnitDeployment#maxInstancesPerZone(String, int)
      */
+    @XmlTransient
     public void setMaxInstancesPerZone(String zone, int maxInstancesPerZone) {
         config.setMaxInstancesPerZone(zone, maxInstancesPerZone);
+    }
+    
+    @XmlElement(name="max-instances-per-zone")
+    public void setMaxInstancesPerZoneConfig(MaxInstancesPerZoneConfig maxInstancesPerZoneConfig) {
+        setMaxInstancesPerZone(maxInstancesPerZoneConfig.getZone(), maxInstancesPerZoneConfig.getMaxNumberOfInstances());
     }
     
     /**
@@ -197,13 +214,20 @@ public class MemcachedConfig implements ProcessingUnitConfigHolder {
     /**
      * @see ProcessingUnitDeployment#userDetails(UserDetails)
      */
+    @XmlTransient
     public void setUserDetails(UserDetails userDetails) {
         config.setUserDetails(userDetails);
     }
 
+    @XmlElement(name="user-details")
+    public void setUserDetailsConfig(UserDetailsConfig userDetails) {
+        setUserDetails(userDetails.toUser());
+    }
+    
     /**
      * @see ProcessingUnitConfig#setDeploymentDependencies(ProcessingUnitDependency[])
      */
+    @XmlElement(type = ProcessingUnitDependency.class)
     public void setDeploymentDependencies(ProcessingUnitDependency[] dependencies) {
         config.setDeploymentDependencies(dependencies);
     }

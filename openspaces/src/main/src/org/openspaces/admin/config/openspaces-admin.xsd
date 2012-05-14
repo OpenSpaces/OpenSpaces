@@ -89,7 +89,7 @@
 				<xsd:element ref="user-details" />
 				<xsd:element ref="max-instances-per-zone" />
 			</xsd:choice>
-			<xsd:attribute name="spaceUrl" type="xsd:string" use="required" />
+			<xsd:attribute name="space-url" type="xsd:string" use="required" />
 			<xsd:attribute name="cluster-schema" type="xsd:string" use="optional" />
 			<xsd:attribute name="number-of-instances" type="xsd:int" use="optional" />
 			<xsd:attribute name="number-of-backups" type="xsd:int" use="optional" />
@@ -107,6 +107,7 @@
 			<xsd:choice minOccurs="1" maxOccurs="unbounded">
 					<xsd:element ref="pu" />
 					<xsd:element ref="space" />
+					<xsd:element ref="memcached" />
 			</xsd:choice>
 			<xsd:attribute name="name" type="xsd:string" use="required" />
 		</xsd:complexType>
