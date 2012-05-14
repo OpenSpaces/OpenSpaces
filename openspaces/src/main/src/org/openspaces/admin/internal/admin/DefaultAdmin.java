@@ -234,7 +234,8 @@ public class DefaultAdmin implements InternalAdmin {
 
     private boolean scheduledStatisticsMonitor = false;
 
-    private volatile boolean closed = false;
+    private volatile boolean closeStarted = false;
+    private volatile boolean closeEnded = false;
 
     private volatile UserDetails userDetails;
 
@@ -403,7 +404,7 @@ public class DefaultAdmin implements InternalAdmin {
 
     @Override
     public void setProcessingUnitMonitorInterval(long interval, TimeUnit timeUnit) {
-        if (closed) {
+        if (closeStarted) {
             throw new IllegalStateException("Admin already closed");
         }
         this.scheduledProcessingUnitMonitorInterval = timeUnit.toMillis(interval);
@@ -415,7 +416,7 @@ public class DefaultAdmin implements InternalAdmin {
 
     @Override
     public void setAgentProcessessMonitorInterval(long interval, TimeUnit timeUnit) {
-        if (closed) {
+        if (closeStarted) {
             throw new IllegalStateException("Admin already closed");
         }
         this.scheduledAgentProcessessMonitorInterval = timeUnit.toMillis(interval);
@@ -473,15 +474,16 @@ public class DefaultAdmin implements InternalAdmin {
 
     @Override
     public void close() {
-        if (closed) {
+        if (closeStarted) {
             return;
         }
-        closed = true;
+        closeStarted = true;
         discoveryService.stop();
         scheduledExecutorService.shutdownNow();
         for (ExecutorService executorService : eventsExecutorServices) {
             executorService.shutdownNow();
         }
+        closeEnded = true;
     }
 
     @Override
@@ -606,7 +608,7 @@ public class DefaultAdmin implements InternalAdmin {
     }
 
     public synchronized void flushEvents() {
-        if (closed) {
+        if (closeStarted) {
             //clear all pending events in queue that may have arrived just before closing of the admin.
             for (LinkedList<Runnable> l : eventsQueue) {
                 l.clear();
@@ -1682,7 +1684,7 @@ public class DefaultAdmin implements InternalAdmin {
         }
     }
 
-    private static class LoggerRunnable implements Runnable {
+    private class LoggerRunnable implements Runnable {
         private final Runnable runnable;
 
         private LoggerRunnable(Runnable runnable) {
@@ -1691,6 +1693,14 @@ public class DefaultAdmin implements InternalAdmin {
 
         @Override
         public void run() {
+            if (closeEnded) {
+                Exception e = new IllegalStateException("Not executing: " + runnable + " - Admin already closed. executorService.shutdownNow should have been called.");
+                logger.error(e.getMessage(), e);
+                //TODO: In order to stop the scheduler completely this time, raise an exception
+                //throw e;
+                return;
+            }
+
             try {
                 runnable.run();
             } catch (Exception e) {
