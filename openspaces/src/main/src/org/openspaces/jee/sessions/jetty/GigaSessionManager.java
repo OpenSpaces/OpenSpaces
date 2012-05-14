@@ -142,10 +142,12 @@ public class GigaSessionManager extends AbstractSessionManager {
     @Override
     public void doStop() throws Exception {
         synchronized (executorMonitor) {
-            scavengerFuture.cancel(true);
-            if (--totalNumberOfScavangers == 0) {
-                if (Log.isDebugEnabled()) Log.debug("Stopping scavenger");
-                executorService.shutdown();
+            if (scavengerFuture != null) {
+                scavengerFuture.cancel(true);
+                if (--totalNumberOfScavangers == 0) {
+                    if (Log.isDebugEnabled()) Log.debug("Stopping scavenger");
+                    executorService.shutdown();
+                }
             }
         }
         space = null;
