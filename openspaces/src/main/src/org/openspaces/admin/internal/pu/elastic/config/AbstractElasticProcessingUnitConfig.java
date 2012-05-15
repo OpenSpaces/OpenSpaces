@@ -35,6 +35,7 @@ import org.openspaces.admin.internal.pu.elastic.MachineProvisioningBeanPropertie
 import org.openspaces.admin.internal.pu.elastic.ScaleStrategyBeanPropertiesManager;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.config.ProcessingUnitConfig;
+import org.openspaces.admin.pu.config.UserDetailsConfig;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
 import org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig;
 import org.openspaces.admin.pu.elastic.config.DiscoveredMachineProvisioningConfig;
@@ -43,7 +44,6 @@ import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
 
 import com.gigaspaces.grid.gsa.GSProcessRestartOnExit;
-import com.gigaspaces.security.directory.UserDetails;
 
 /**
  * @author itaif
@@ -55,8 +55,8 @@ public class AbstractElasticProcessingUnitConfig {
     private String name;
     private Map<String,String> contextProperties = new HashMap<String,String> ();
     private Map<String,String> defaultContextProperties = new HashMap<String,String> ();
-    private UserDetails userDetails;
-    private boolean secured;
+    private UserDetailsConfig userDetails;
+    private Boolean secured;
     private Map<String,String> elasticProperties = new HashMap<String,String>();
     private InternalProcessingUnitDependencies<ProcessingUnitDependency,InternalProcessingUnitDependency> dependencies = new DefaultProcessingUnitDependencies();
     private ElasticMachineProvisioningConfig machineProvisioning;
@@ -118,19 +118,19 @@ public class AbstractElasticProcessingUnitConfig {
         this.defaultContextProperties = defaultContextProperties;
     }
 
-    public UserDetails getUserDetails() {
+    public UserDetailsConfig getUserDetails() {
         return userDetails;
     }
 
-    public void setUserDetails(UserDetails userDetails) {
+    public void setUserDetails(UserDetailsConfig userDetails) {
         this.userDetails = userDetails;
     }
 
-    public boolean isSecured() {
+    public Boolean getSecured() {
         return secured;
     }
-
-    public void setSecured(boolean secured) {
+    
+    public void setSecured(Boolean secured) {
         this.secured = secured;
     }
 

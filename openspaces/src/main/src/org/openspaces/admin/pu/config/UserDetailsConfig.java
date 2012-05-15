@@ -19,8 +19,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.springframework.beans.factory.annotation.Required;
 
-import com.gigaspaces.security.directory.User;
-
 /**
  * @author itaif
  * @since 9.0.1
@@ -85,9 +83,5 @@ public class UserDetailsConfig {
         return "UserDetailsConfig ["
                 + (password != null ? "password=" + "***, " : "")
                 + (username != null ? "username=" + username : "") + "]";
-    }
-    
-    public User toUser() {
-        return new User(username,password);
     }
 }

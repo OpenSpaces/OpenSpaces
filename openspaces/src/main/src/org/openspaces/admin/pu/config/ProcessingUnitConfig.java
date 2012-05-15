@@ -66,7 +66,7 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigHolder {
 
     private Map<String,String> contextProperties = new HashMap<String,String>();
 
-    private UserDetails userDetails;
+    private UserDetailsConfig userDetails;
 
     private String slaLocation;
 
@@ -160,21 +160,16 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigHolder {
         return contextProperties;
     }
 
-    public UserDetails getUserDetails() {
+    public UserDetailsConfig getUserDetails() {
         return userDetails;
     }
 
     /**
      * @see ProcessingUnitDeployment#userDetails(UserDetails)
      */
-    @XmlTransient
-    public void setUserDetails(UserDetails userDetails) {
-        this.userDetails = userDetails;
-    }
-    
     @XmlElement(name="user-details")
-    public void setUserDetailsConfig(UserDetailsConfig userDetails) {
-        setUserDetails(userDetails.toUser());
+    public void setUserDetails(UserDetailsConfig userDetails) {
+        this.userDetails = userDetails;
     }
 
     public String getSlaLocation() {

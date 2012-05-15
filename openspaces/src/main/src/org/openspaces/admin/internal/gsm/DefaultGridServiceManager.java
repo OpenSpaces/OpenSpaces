@@ -68,6 +68,7 @@ import org.openspaces.admin.pu.ProcessingUnitAlreadyDeployedException;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.config.ProcessingUnitConfig;
+import org.openspaces.admin.pu.config.UserDetailsConfig;
 import org.openspaces.admin.pu.elastic.ElasticStatefulProcessingUnitDeployment;
 import org.openspaces.admin.pu.elastic.ElasticStatelessProcessingUnitDeployment;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
@@ -93,6 +94,7 @@ import com.gigaspaces.log.LogProcessType;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOStatistics;
 import com.gigaspaces.security.SecurityException;
+import com.gigaspaces.security.directory.User;
 
 /**
  * @author kimchy
@@ -194,7 +196,8 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         if (puConfig.getSecured() != null) {
             deploy.setSecured(puConfig.getSecured());
         }
-        deploy.setUserDetails(puConfig.getUserDetails());
+        UserDetailsConfig userDetailsConfig = puConfig.getUserDetails();
+        deploy.setUserDetails(new User(userDetailsConfig.getUsername(), userDetailsConfig.getPassword()));
         deploy.setApplicationName(applicationName);
         final OperationalString operationalString;
         try {

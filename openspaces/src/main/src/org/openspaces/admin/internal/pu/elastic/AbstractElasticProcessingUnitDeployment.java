@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.openspaces.admin.internal.pu.dependency.ProcessingUnitDetailedDependencies;
 import org.openspaces.admin.internal.pu.elastic.config.AbstractElasticProcessingUnitConfig;
+import org.openspaces.admin.pu.config.UserDetailsConfig;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
 import org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
@@ -83,7 +84,11 @@ public abstract class AbstractElasticProcessingUnitDeployment {
         if (config.getUserDetails() != null && !config.getUserDetails().equals(userDetails)) {
             throw new IllegalStateException("User details are already defined and cannot be modified.");
         }
-        config.setUserDetails(userDetails);
+        
+        UserDetailsConfig userDetailsConfig = new UserDetailsConfig();
+        userDetailsConfig.setUsername(userDetails.getUsername());
+        userDetailsConfig.setPassword(userDetails.getPassword());
+        config.setUserDetails(userDetailsConfig);
         return this;
     }
 

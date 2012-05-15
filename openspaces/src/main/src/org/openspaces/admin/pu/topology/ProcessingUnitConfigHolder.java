@@ -15,7 +15,11 @@
  *******************************************************************************/
 package org.openspaces.admin.pu.topology;
 
+import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.pu.config.ProcessingUnitConfig;
+import org.openspaces.admin.pu.config.UserDetailsConfig;
+
+import com.gigaspaces.security.directory.UserDetails;
 
 /**
  * @author itaif
@@ -23,6 +27,20 @@ import org.openspaces.admin.pu.config.ProcessingUnitConfig;
  */
 public interface ProcessingUnitConfigHolder {
 
+    /**
+     * @see ProcessingUnitDeployment#secured(boolean)
+     */
+    void setSecured(Boolean secured);
+    
+    Boolean getSecured();
+    
+    /**
+     * @see ProcessingUnitDeployment#userDetails(UserDetails)
+     */
+    void setUserDetails(UserDetailsConfig userDetails);
+    
+    UserDetailsConfig getUserDetails();
+    
     ProcessingUnitConfig toProcessingUnitConfig();
 
 }

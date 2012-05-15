@@ -197,29 +197,27 @@ public class SpaceConfig implements ProcessingUnitConfigHolder {
     /**
      * @see ProcessingUnitDeployment#secured(boolean)
      */
+    @Override
     public Boolean getSecured() {
         return config.getSecured();
     }
-
+    
+    @Override
     public void setSecured(Boolean secured) {
         config.setSecured(secured);
     }
 
-    public UserDetails getUserDetails() {
+    @Override
+    public UserDetailsConfig getUserDetails() {
         return config.getUserDetails();
     }
 
     /**
      * @see ProcessingUnitDeployment#userDetails(UserDetails)
      */
-    @XmlTransient
-    public void setUserDetails(UserDetails userDetails) {
+    @Override
+    public void setUserDetails(UserDetailsConfig userDetails) {
         config.setUserDetails(userDetails);
-    }
-    
-    @XmlElement(name="user-details")
-    public void setUserDetailsConfig(UserDetailsConfig userDetails) {
-        setUserDetails(userDetails.toUser());
     }
     
     /**

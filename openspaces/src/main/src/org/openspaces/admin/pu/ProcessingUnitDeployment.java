@@ -39,6 +39,7 @@ import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDepende
 import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependency;
 import org.openspaces.admin.internal.pu.dependency.ProcessingUnitDetailedDependencies;
 import org.openspaces.admin.pu.config.ProcessingUnitConfig;
+import org.openspaces.admin.pu.config.UserDetailsConfig;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependencies;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDeploymentDependenciesConfigurer;
@@ -232,7 +233,7 @@ public class ProcessingUnitDeployment implements ProcessingUnitDeploymentTopolog
      * processing unit.
      */
     public ProcessingUnitDeployment userDetails(UserDetails userDetails) {
-        config.setUserDetails(userDetails);
+        userDetails(userDetails.getUsername(), userDetails.getPassword());
         return this;
     }
 
@@ -257,7 +258,10 @@ public class ProcessingUnitDeployment implements ProcessingUnitDeploymentTopolog
      * for the processing unit deployment.
      */
     public ProcessingUnitDeployment userDetails(String userName, String password) {
-        config.setUserDetails(new User(userName, password));
+        UserDetailsConfig userDetailsConfig = new UserDetailsConfig();
+        userDetailsConfig.setUsername(userName);
+        userDetailsConfig.setPassword(password);
+        config.setUserDetails(userDetailsConfig);
         return this;
     }
 
@@ -270,7 +274,9 @@ public class ProcessingUnitDeployment implements ProcessingUnitDeploymentTopolog
      */
     @Deprecated
     public UserDetails getUserDetails() {
-        return config.getUserDetails();
+        String username = config.getUserDetails().getUsername();
+        String password = config.getUserDetails().getPassword();
+        return new User(username, password);
     }
     
     /**

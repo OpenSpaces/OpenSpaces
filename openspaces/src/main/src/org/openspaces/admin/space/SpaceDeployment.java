@@ -35,13 +35,13 @@ package org.openspaces.admin.space;
 import java.io.File;
 
 import org.openspaces.admin.internal.pu.dependency.ProcessingUnitDetailedDependencies;
+import org.openspaces.admin.pu.config.UserDetailsConfig;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDeploymentDependenciesConfigurer;
 import org.openspaces.admin.pu.topology.ProcessingUnitConfigHolder;
 import org.openspaces.admin.pu.topology.ProcessingUnitDeploymentTopology;
 import org.openspaces.admin.space.config.SpaceConfig;
 
-import com.gigaspaces.security.directory.User;
 import com.gigaspaces.security.directory.UserDetails;
 
 /**
@@ -212,16 +212,19 @@ public class SpaceDeployment implements ProcessingUnitDeploymentTopology {
      * processing unit.
      */
     public SpaceDeployment userDetails(UserDetails userDetails) {
-        config.setUserDetails(userDetails);
+        userDetails(userDetails.getUsername(), userDetails.getPassword());
         return this;
     }
 
     /**
-     * Sets the username and password (effectively making the processing unit secured)
+     * Sets the user name and password (effectively making the processing unit secured)
      * for the processing unit config.set
      */
     public SpaceDeployment userDetails(String userName, String password) {
-        config.setUserDetails(new User(userName,password));
+        UserDetailsConfig userDetailsConfig = new UserDetailsConfig();
+        userDetailsConfig.setUsername(userName);
+        userDetailsConfig.setPassword(password);
+        config.setUserDetails(userDetailsConfig);
         return this;
     }
 
