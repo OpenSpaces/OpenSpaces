@@ -36,6 +36,7 @@ import org.openspaces.admin.internal.pu.elastic.ScaleStrategyBeanPropertiesManag
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.config.ProcessingUnitConfig;
 import org.openspaces.admin.pu.config.UserDetailsConfig;
+import org.openspaces.admin.pu.dependency.ProcessingUnitDependencies;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
 import org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig;
 import org.openspaces.admin.pu.elastic.config.DiscoveredMachineProvisioningConfig;
@@ -58,7 +59,7 @@ public class AbstractElasticProcessingUnitConfig {
     private UserDetailsConfig userDetails;
     private Boolean secured;
     private Map<String,String> elasticProperties = new HashMap<String,String>();
-    private InternalProcessingUnitDependencies<ProcessingUnitDependency,InternalProcessingUnitDependency> dependencies = new DefaultProcessingUnitDependencies();
+    private ProcessingUnitDependencies<ProcessingUnitDependency> dependencies = new DefaultProcessingUnitDependencies();
     private ElasticMachineProvisioningConfig machineProvisioning;
     private ScaleStrategyConfig scaleStrategy;;
 
@@ -344,22 +345,24 @@ public class AbstractElasticProcessingUnitConfig {
         propertiesManager.enableBean(config.getBeanClassName());
     }
     
-    public InternalProcessingUnitDependencies<ProcessingUnitDependency,InternalProcessingUnitDependency> getDependencies() {
+    public ProcessingUnitDependencies<ProcessingUnitDependency> getDependencies() {
         return dependencies;
     }
 
     @XmlTransient
-    public void setDependencies(InternalProcessingUnitDependencies<ProcessingUnitDependency,InternalProcessingUnitDependency> dependencies) {
+    public void setDependencies(ProcessingUnitDependencies<ProcessingUnitDependency> dependencies) {
         this.dependencies = dependencies;
     }
     
+    @SuppressWarnings("unchecked")
     public void setDeploymentDependencies(ProcessingUnitDependency[] dependencies) {
         
         DefaultProcessingUnitDeploymentDependencies deploymentDependencies = new DefaultProcessingUnitDeploymentDependencies();
         for (ProcessingUnitDependency dependency : dependencies) {
             deploymentDependencies.addDependency(dependency);
         }
-        this.getDependencies().setDeploymentDependencies(deploymentDependencies);
+        ((InternalProcessingUnitDependencies<ProcessingUnitDependency,InternalProcessingUnitDependency>)this.getDependencies())
+            .setDeploymentDependencies(deploymentDependencies);
     }
     
     public ProcessingUnitDependency[] getDeploymentDependencies() {

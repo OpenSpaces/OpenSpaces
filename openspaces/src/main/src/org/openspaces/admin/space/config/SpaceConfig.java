@@ -23,13 +23,12 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
-import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependencies;
-import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependency;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.pu.config.ContextPropertyConfig;
 import org.openspaces.admin.pu.config.MaxInstancesPerZoneConfig;
 import org.openspaces.admin.pu.config.ProcessingUnitConfig;
 import org.openspaces.admin.pu.config.UserDetailsConfig;
+import org.openspaces.admin.pu.dependency.ProcessingUnitDependencies;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
 import org.openspaces.admin.pu.topology.ProcessingUnitConfigHolder;
 import org.springframework.beans.factory.annotation.Required;
@@ -52,10 +51,12 @@ public class SpaceConfig implements ProcessingUnitConfigHolder {
     }
     
     @Required
+    @Override
     public void setName(String spaceName) {
         config.setName(spaceName);
     }
 
+    @Override
     public String getName() {
         return config.getName();
     }
@@ -235,12 +236,14 @@ public class SpaceConfig implements ProcessingUnitConfigHolder {
     /**
      * @see ProcessingUnitDeployment#addDependencies(org.openspaces.admin.internal.pu.dependency.ProcessingUnitDetailedDependencies)
      */
-    public InternalProcessingUnitDependencies<ProcessingUnitDependency,InternalProcessingUnitDependency> getDependencies() {
+    @Override
+    public ProcessingUnitDependencies<ProcessingUnitDependency> getDependencies() {
         return config.getDependencies();
     }
 
     @XmlTransient
-    public void setDependencies(InternalProcessingUnitDependencies<ProcessingUnitDependency,InternalProcessingUnitDependency> dependencies) {
+    @Override
+    public void setDependencies(ProcessingUnitDependencies<ProcessingUnitDependency> dependencies) {
         config.setDependencies(dependencies);
     }
     

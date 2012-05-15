@@ -31,6 +31,7 @@ import org.openspaces.admin.internal.pu.dependency.DefaultProcessingUnitDeployme
 import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependencies;
 import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependency;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
+import org.openspaces.admin.pu.dependency.ProcessingUnitDependencies;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
 import org.openspaces.admin.pu.topology.ProcessingUnitConfigHolder;
 import org.openspaces.pu.container.support.CommandLineParser.Parameter;
@@ -74,7 +75,7 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigHolder {
 
     private Map<String,String> elasticProperties = new HashMap<String,String>();
 
-    private InternalProcessingUnitDependencies<ProcessingUnitDependency,InternalProcessingUnitDependency> dependencies = new DefaultProcessingUnitDependencies();
+    private ProcessingUnitDependencies<ProcessingUnitDependency> dependencies = new DefaultProcessingUnitDependencies();
 
     public String getProcessingUnit() {
         return processingUnit;
@@ -89,6 +90,7 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigHolder {
         this.processingUnit = processingUnit;
     }
 
+    @Override
     public String getName() {
         return name;
     }
@@ -96,6 +98,7 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigHolder {
     /**
      * @see ProcessingUnitDeployment#name(String)
      */
+    @Override
     public void setName(String name) {
         this.name = name;
     }
@@ -310,7 +313,7 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigHolder {
             deployOptions.add("embed://" + entry.getKey() + "=" + entry.getValue());
         }
 
-        for (Parameter parameter : getDependencies().toCommandLineParameters()) {
+        for (Parameter parameter : ((InternalProcessingUnitDependencies<?,?>)getDependencies()).toCommandLineParameters()) {
             deployOptions.add("-"+parameter.getName());
             for (String arg : parameter.getArguments()) {
                 deployOptions.add(arg);
@@ -345,18 +348,21 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigHolder {
     /**
      * @see ProcessingUnitDeployment#addDependencies(org.openspaces.admin.internal.pu.dependency.ProcessingUnitDetailedDependencies)
      */
-    public InternalProcessingUnitDependencies<ProcessingUnitDependency,InternalProcessingUnitDependency> getDependencies() {
+    @Override
+    public ProcessingUnitDependencies<ProcessingUnitDependency> getDependencies() {
         return dependencies;
     }
 
     @XmlTransient
-    public void setDependencies(InternalProcessingUnitDependencies<ProcessingUnitDependency,InternalProcessingUnitDependency> dependencies) {
+    @Override
+    public void setDependencies(ProcessingUnitDependencies<ProcessingUnitDependency> dependencies) {
         this.dependencies = dependencies;
     }
     
     /**
      * A helper method for setting conditions for processing unit deployment.
      */
+    @SuppressWarnings("unchecked")
     @XmlElement(type = ProcessingUnitDependency.class)
     public void setDeploymentDependencies(ProcessingUnitDependency[] dependencies) {
         
@@ -364,7 +370,7 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigHolder {
         for (ProcessingUnitDependency dependency : dependencies) {
             deploymentDependencies.addDependency(dependency);
         }
-        this.getDependencies().setDeploymentDependencies(deploymentDependencies);
+        ((InternalProcessingUnitDependencies<ProcessingUnitDependency,InternalProcessingUnitDependency>)this.getDependencies()).setDeploymentDependencies(deploymentDependencies);
     }
     
     public ProcessingUnitDependency[] getDeploymentDependencies() {

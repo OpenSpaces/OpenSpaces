@@ -34,14 +34,16 @@ package org.openspaces.admin.memcached;
 
 import java.io.File;
 
+import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependencies;
+import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependency;
 import org.openspaces.admin.internal.pu.dependency.ProcessingUnitDetailedDependencies;
 import org.openspaces.admin.memcached.config.MemcachedConfig;
+import org.openspaces.admin.pu.config.UserDetailsConfig;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDeploymentDependenciesConfigurer;
 import org.openspaces.admin.pu.topology.ProcessingUnitConfigHolder;
 import org.openspaces.admin.pu.topology.ProcessingUnitDeploymentTopology;
 
-import com.gigaspaces.security.directory.User;
 import com.gigaspaces.security.directory.UserDetails;
 
 /**
@@ -210,7 +212,7 @@ public class MemcachedDeployment implements ProcessingUnitDeploymentTopology {
      * processing unit.
      */
     public MemcachedDeployment userDetails(UserDetails userDetails) {
-        config.setUserDetails(userDetails);
+        userDetails(userDetails.getUsername(), userDetails.getPassword());
         return this;
     }
 
@@ -219,7 +221,10 @@ public class MemcachedDeployment implements ProcessingUnitDeploymentTopology {
      * for the processing unit config.
      */
     public MemcachedDeployment userDetails(String userName, String password) {
-        config.setUserDetails(new User(userName, password));
+        UserDetailsConfig userDetailsConfig = new UserDetailsConfig();
+        userDetailsConfig.setUsername(userName);
+        userDetailsConfig.setPassword(password);
+        config.setUserDetails(userDetailsConfig);
         return this;
     }
 
@@ -248,10 +253,12 @@ public class MemcachedDeployment implements ProcessingUnitDeploymentTopology {
      * @see ProcessingUnitDeploymentDependenciesConfigurer
      * @since 8.0.6
      */
+    @SuppressWarnings("unchecked")
     @Override
     public MemcachedDeployment addDependencies(
             ProcessingUnitDetailedDependencies<? extends ProcessingUnitDependency> deploymentDependencies) {
-        config.getDependencies().addDetailedDependencies(deploymentDependencies);
+        ((InternalProcessingUnitDependencies<ProcessingUnitDependency,InternalProcessingUnitDependency>)config.getDependencies())
+            .addDetailedDependencies(deploymentDependencies);
         return this;
     }
     /**

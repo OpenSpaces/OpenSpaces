@@ -19,6 +19,8 @@ package org.openspaces.admin.internal.pu.elastic;
 
 import java.util.Map;
 
+import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependencies;
+import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependency;
 import org.openspaces.admin.internal.pu.dependency.ProcessingUnitDetailedDependencies;
 import org.openspaces.admin.internal.pu.elastic.config.AbstractElasticProcessingUnitConfig;
 import org.openspaces.admin.pu.config.UserDetailsConfig;
@@ -166,8 +168,10 @@ public abstract class AbstractElasticProcessingUnitDeployment {
         return this;
     }
     
+    @SuppressWarnings("unchecked")
     protected AbstractElasticProcessingUnitDeployment addDependencies(ProcessingUnitDetailedDependencies<? extends ProcessingUnitDependency> detailedDependencies) {
-        config.getDependencies().addDetailedDependencies(detailedDependencies);
+        ((InternalProcessingUnitDependencies<ProcessingUnitDependency,InternalProcessingUnitDependency>)config.getDependencies())
+            .addDetailedDependencies(detailedDependencies);
         return this;
     }
     

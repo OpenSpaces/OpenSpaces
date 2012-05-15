@@ -34,6 +34,8 @@ package org.openspaces.admin.space;
 
 import java.io.File;
 
+import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependencies;
+import org.openspaces.admin.internal.pu.dependency.InternalProcessingUnitDependency;
 import org.openspaces.admin.internal.pu.dependency.ProcessingUnitDetailedDependencies;
 import org.openspaces.admin.pu.config.UserDetailsConfig;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
@@ -253,10 +255,12 @@ public class SpaceDeployment implements ProcessingUnitDeploymentTopology {
      * @see ProcessingUnitDeploymentDependenciesConfigurer
      * @since 8.0.6
      */
+    @SuppressWarnings("unchecked")
     @Override
     public SpaceDeployment addDependencies(
             ProcessingUnitDetailedDependencies<? extends ProcessingUnitDependency> deploymentDependencies) {
-        config.getDependencies().addDetailedDependencies(deploymentDependencies);
+        ((InternalProcessingUnitDependencies<ProcessingUnitDependency,InternalProcessingUnitDependency>)config.getDependencies())
+            .addDetailedDependencies(deploymentDependencies);
         return this;
     }
     /**

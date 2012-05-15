@@ -289,7 +289,7 @@ public class ProcessingUnitDeployment implements ProcessingUnitDeploymentTopolog
      * @since 8.0.6
      */
     public ProcessingUnitDeployment addDependencies(ProcessingUnitDetailedDependencies<? extends ProcessingUnitDependency> detailedDependencies) {
-        config.getDependencies().addDetailedDependencies(detailedDependencies);
+        ((InternalProcessingUnitDependencies<?,?>)config.getDependencies()).addDetailedDependencies(detailedDependencies);
         return this;
     }
 

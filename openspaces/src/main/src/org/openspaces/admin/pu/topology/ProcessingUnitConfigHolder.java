@@ -15,9 +15,13 @@
  *******************************************************************************/
 package org.openspaces.admin.pu.topology;
 
+import java.util.Map;
+
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.pu.config.ProcessingUnitConfig;
 import org.openspaces.admin.pu.config.UserDetailsConfig;
+import org.openspaces.admin.pu.dependency.ProcessingUnitDependencies;
+import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
 
 import com.gigaspaces.security.directory.UserDetails;
 
@@ -40,7 +44,26 @@ public interface ProcessingUnitConfigHolder {
     void setUserDetails(UserDetailsConfig userDetails);
     
     UserDetailsConfig getUserDetails();
+
+    /**
+     * @see ProcessingUnitDeployment#setContextProperty(String, String)
+     */
+    void setContextProperties(Map<String,String> contextProperties);
+
+    Map<String,String> getContextProperties();
+    
+    void setDependencies(ProcessingUnitDependencies<ProcessingUnitDependency> dependencies);
+
+    String getName();
+    
+    /**
+     * @see ProcessingUnitDeployment#setName(String)
+     */
+    void setName(String name);
+    
+    public ProcessingUnitDependencies<ProcessingUnitDependency> getDependencies();
     
     ProcessingUnitConfig toProcessingUnitConfig();
+
 
 }
