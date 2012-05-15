@@ -16,13 +16,13 @@
 
 package org.openspaces.events.notify;
 
-import org.openspaces.events.EventContainerServiceDetails;
-import org.openspaces.pu.service.AggregatedServiceDetails;
-import org.openspaces.pu.service.ServiceDetails;
-
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+
+import org.openspaces.events.EventContainerServiceDetails;
+import org.openspaces.pu.service.AggregatedServiceDetails;
+import org.openspaces.pu.service.ServiceDetails;
 
 /**
  * Notify container service details.
@@ -107,7 +107,7 @@ public class NotifyEventContainerServiceDetails extends EventContainerServiceDet
         return (String) getAttributes().get(Attributes.COMM_TYPE);
     }
 
-    public boolean isFifo() {
+    public Boolean isFifo() {
         return (Boolean) getAttributes().get(Attributes.FIFO);
     }
 
@@ -119,27 +119,27 @@ public class NotifyEventContainerServiceDetails extends EventContainerServiceDet
         return (Integer) getAttributes().get(Attributes.BATCH_TIME);
     }
 
-    public boolean isAutoRenew() {
+    public Boolean isAutoRenew() {
         return (Boolean) getAttributes().get(Attributes.AUTO_RENEW);
     }
 
-    public boolean isNotifyWrite() {
+    public Boolean isNotifyWrite() {
         return (Boolean) getAttributes().get(Attributes.NOTIFY_WRITE);
     }
 
-    public boolean isNotifyUpdate() {
+    public Boolean isNotifyUpdate() {
         return (Boolean) getAttributes().get(Attributes.NOTIFY_UPDATE);
     }
 
-    public boolean isNotifyTake() {
+    public Boolean isNotifyTake() {
         return (Boolean) getAttributes().get(Attributes.NOTIFY_TAKE);
     }
 
-    public boolean isNotifyLeaseExpire() {
+    public Boolean isNotifyLeaseExpire() {
         return (Boolean) getAttributes().get(Attributes.NOTIFY_LEASE_EXPIRE);
     }
 
-    public boolean isNotifyUnmatched() {
+    public Boolean isNotifyUnmatched() {
         return (Boolean) getAttributes().get(Attributes.NOTIFY_UNMATCHED);
     }
 
@@ -151,19 +151,19 @@ public class NotifyEventContainerServiceDetails extends EventContainerServiceDet
         return (Boolean) getAttributes().get(Attributes.REPLICATE_NOTIFY_TEMPLATE);
     }
 
-    public boolean isPerformTakeOnNotify() {
+    public Boolean isPerformTakeOnNotify() {
         return (Boolean) getAttributes().get(Attributes.PERFORM_TAKE_ON_NOTIFY);
     }
 
-    public boolean isPassArrayAsIs() {
+    public Boolean isPassArrayAsIs() {
         return (Boolean) getAttributes().get(Attributes.PASS_ARRAY_AS_IS);
     }
 
-    public boolean isGuaranteed() {
+    public Boolean isGuaranteed() {
         return (Boolean) getAttributes().get(Attributes.GUARANTEED);
     }
 
-    public boolean isDurable() {
+    public Boolean isDurable() {
         Boolean durable = (Boolean) getAttributes().get(Attributes.DURABLE);
         return durable == null ? false : durable.booleanValue();
     }

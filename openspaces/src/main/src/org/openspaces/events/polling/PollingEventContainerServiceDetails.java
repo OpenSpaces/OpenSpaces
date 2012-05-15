@@ -16,13 +16,13 @@
 
 package org.openspaces.events.polling;
 
-import org.openspaces.events.EventContainerServiceDetails;
-import org.openspaces.pu.service.AggregatedServiceDetails;
-import org.openspaces.pu.service.ServiceDetails;
-
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+
+import org.openspaces.events.EventContainerServiceDetails;
+import org.openspaces.pu.service.AggregatedServiceDetails;
+import org.openspaces.pu.service.ServiceDetails;
 
 /**
  * Polling container service details.
@@ -61,7 +61,7 @@ public class PollingEventContainerServiceDetails extends EventContainerServiceDe
         getAttributes().put(Attributes.PASS_ARRAY_AS_IS, passArrayAsIs);
     }
 
-    public long getReceiveTimeout() {
+    public Long getReceiveTimeout() {
         return (Long) getAttributes().get(Attributes.RECEIVE_TIMEOUT);
     }
 
@@ -73,15 +73,15 @@ public class PollingEventContainerServiceDetails extends EventContainerServiceDe
         return (String) getAttributes().get(Attributes.TRIGGER_OPERATION_HANDLER);
     }
 
-    public int getConcurrentConsumers() {
+    public Integer getConcurrentConsumers() {
         return (Integer) getAttributes().get(Attributes.CONCURRENT_CONSUMERS);
     }
 
-    public int getMaxConcurrentConsumers() {
+    public Integer getMaxConcurrentConsumers() {
         return (Integer) getAttributes().get(Attributes.MAX_CONCURRENT_CONSUMERS);
     }
 
-    public boolean isPassArrayAsIs() {
+    public Boolean isPassArrayAsIs() {
         return (Boolean) getAttributes().get(Attributes.PASS_ARRAY_AS_IS);
     }
 

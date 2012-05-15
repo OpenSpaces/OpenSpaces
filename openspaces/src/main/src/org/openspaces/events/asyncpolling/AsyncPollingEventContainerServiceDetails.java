@@ -16,13 +16,13 @@
 
 package org.openspaces.events.asyncpolling;
 
-import org.openspaces.events.EventContainerServiceDetails;
-import org.openspaces.pu.service.AggregatedServiceDetails;
-import org.openspaces.pu.service.ServiceDetails;
-
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+
+import org.openspaces.events.EventContainerServiceDetails;
+import org.openspaces.pu.service.AggregatedServiceDetails;
+import org.openspaces.pu.service.ServiceDetails;
 
 /**
  * Async Polling container service details.
@@ -51,11 +51,11 @@ public class AsyncPollingEventContainerServiceDetails extends EventContainerServ
         getAttributes().put(Attributes.CONCURRENT_CONSUMERS, concurrentConsumers);
     }
 
-    public long getReceiveTimeout() {
+    public Long getReceiveTimeout() {
         return (Long) getAttributes().get(Attributes.RECEIVE_TIMEOUT);
     }
 
-    public int getConcurrentConsumers() {
+    public Integer getConcurrentConsumers() {
         return (Integer) getAttributes().get(Attributes.CONCURRENT_CONSUMERS);
     }
 

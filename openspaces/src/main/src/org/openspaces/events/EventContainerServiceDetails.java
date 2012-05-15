@@ -16,11 +16,11 @@
 
 package org.openspaces.events;
 
-import org.openspaces.pu.service.PlainServiceDetails;
-
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+
+import org.openspaces.pu.service.PlainServiceDetails;
 
 /**
  * A generic event container service details.
@@ -56,7 +56,7 @@ public class EventContainerServiceDetails extends PlainServiceDetails {
         return getAttributes().get(Attributes.TEMPLATE);
     }
 
-    public boolean isPerformSnapshot() {
+    public Boolean isPerformSnapshot() {
         return (Boolean) getAttributes().get(Attributes.PERFORM_SNAPSHOT);
     }
 
@@ -64,7 +64,7 @@ public class EventContainerServiceDetails extends PlainServiceDetails {
         return (String) getAttributes().get(Attributes.GIGA_SPACE);
     }
 
-    public boolean isTransactional() {
+    public Boolean isTransactional() {
         return getAttributes().get(Attributes.TRANSACTION_MANAGER) != null;
     }
 

@@ -46,7 +46,7 @@ public class MemcachedServiceDetails extends PlainServiceDetails {
         return (String) getAttributes().get(Attributes.SPACE);
     }
 
-    public int getPort() {
+    public Integer getPort() {
         return (Integer) getAttributes().get(Attributes.PORT);
     }
 }

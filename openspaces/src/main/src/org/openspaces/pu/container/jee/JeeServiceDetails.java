@@ -16,11 +16,11 @@
 
 package org.openspaces.pu.container.jee;
 
-import org.openspaces.pu.service.PlainServiceDetails;
-
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+
+import org.openspaces.pu.service.PlainServiceDetails;
 
 /**
  * A service that holds a jee container (such as jetty).
@@ -67,14 +67,14 @@ public class JeeServiceDetails extends PlainServiceDetails {
     /**
      * Returns the port of where the service is running on.
      */
-    public int getPort() {
+    public Integer getPort() {
         return (Integer) getAttributes().get(Attributes.PORT);
     }
 
     /**
      * Returns the ssl port of where the service is running on.
      */
-    public int getSslPort() {
+    public Integer getSslPort() {
         return (Integer) getAttributes().get(Attributes.SSLPORT);
     }
 
@@ -90,7 +90,7 @@ public class JeeServiceDetails extends PlainServiceDetails {
      * web container. <code>false</code> if the web application instance is running on its
      * own dedicated web container.
      */
-    public boolean isShared() {
+    public Boolean isShared() {
         return (Boolean) getAttributes().get(Attributes.SHARED);
     }
     @Override
