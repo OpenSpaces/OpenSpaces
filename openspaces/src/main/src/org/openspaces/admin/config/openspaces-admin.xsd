@@ -12,17 +12,51 @@
     <xsd:import namespace="http://www.springframework.org/schema/tool"/>
  -->
 	<xsd:element name="depends-on">
+	<xsd:annotation>
+            <xsd:documentation>
+                Delay the deployment of this processing unit until the specified processing unit is deployed.
+                By default waits until the specified processing unit is in-tact (all instances deployed)  
+            </xsd:documentation>
+        </xsd:annotation>
     	<xsd:complexType>
-          <xsd:attribute name="name" type="xsd:string" use="required"/>
-          <xsd:attribute name="min-instances-per-partition" type="xsd:int" use="optional"/>
-          <xsd:attribute name="min-instances" type="xsd:int" use="optional"/>          
+          <xsd:attribute name="name" type="xsd:string" use="required">
+          <xsd:annotation>
+	          <xsd:documentation>
+	                The name of the processing unit to wait for  
+	            </xsd:documentation>
+            </xsd:annotation>
+          </xsd:attribute>
+          <xsd:attribute name="min-instances-per-partition" type="xsd:int" use="optional">
+          <xsd:annotation>
+	          <xsd:documentation>
+	                Wait for the specified minimum number of instances deployed per partition.
+	                Use this if the specified processing unit is a highly availably space/datagrid. 
+	                1 instance per parition, means that all partitions have at least one primary instance.
+	            </xsd:documentation>
+            </xsd:annotation>
+          </xsd:attribute>
+          <xsd:attribute name="min-instances" type="xsd:int" use="optional">
+          <xsd:annotation>
+	          <xsd:documentation>
+	                Wait for the specified minimum number of instances deployed.
+	                Use this if the specified processing unit is highly availably and state-less.
+	                1 instance means that at least one instance has been started.
+	            </xsd:documentation>
+            </xsd:annotation>
+          </xsd:attribute>          
         </xsd:complexType>
     </xsd:element>
 
 	<xsd:element name="context-property">
+		<xsd:annotation>
+	         <xsd:documentation>
+					Sets a context deploy time property overriding any <code>${...}</code> defined within a processing unit configuration.
+		     </xsd:documentation>
+	     </xsd:annotation>
     	<xsd:complexType>
-          <xsd:attribute name="key" type="xsd:string" use="required"/>
-          <xsd:attribute name="value" type="xsd:string" use="required"/>          
+          <xsd:attribute name="key" type="xsd:string" use="required">
+          </xsd:attribute>
+          <xsd:attribute name="value" type="xsd:string" use="required"></xsd:attribute>          
         </xsd:complexType>
     </xsd:element>
     
