@@ -23,6 +23,7 @@ import org.openspaces.admin.AdminException;
 import org.openspaces.admin.application.config.ApplicationConfig;
 import org.openspaces.core.util.FileUtils;
 import org.openspaces.core.util.MemoryUnit;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
@@ -99,11 +100,21 @@ public class ApplicationFileDeployment {
         //read xml file into context
         ApplicationConfig config = null;
         if (directoryOrZip.isDirectory()) {
-            final String applicationFilePath = new File(directoryOrZip, applicationFile).getAbsolutePath();
-            config = readConfigFromXmlFile(applicationFilePath);
+            final String applicationFilePath = new File(directoryOrZip, applicationFile).getPath();
+            try {
+                config = readConfigFromXmlFile(applicationFilePath);
+            }
+            catch (BeansException e) {
+                throw new AdminException("Failed to load " + applicationFilePath +". directoryOrZip="+directoryOrZip +" applicationFile="+applicationFile,e);
+            }
         }
         else {
-            config = readConfigFromZipFile(directoryOrZip, applicationFile);
+            try {
+                config = readConfigFromZipFile(directoryOrZip, applicationFile);
+            }
+            catch (BeansException e) {
+                throw new AdminException("Failed to load " + applicationFile +" from " +directoryOrZip, e);
+            }
         }
           
         if (config == null) {
@@ -117,7 +128,7 @@ public class ApplicationFileDeployment {
         return config;
     }
 
-    private static ApplicationConfig readConfigFromXmlFile(final String applicationFilePath) {
+    private static ApplicationConfig readConfigFromXmlFile(final String applicationFilePath) throws BeansException{
         ApplicationConfig config;
         final FileSystemXmlApplicationContext context = new FileSystemXmlApplicationContext(applicationFilePath);
         try {
@@ -133,13 +144,13 @@ public class ApplicationFileDeployment {
         return config;
     }
 
-    private static ApplicationConfig readConfigFromZipFile(final File directoryOrZip, String applicationFile) {
+    private static ApplicationConfig readConfigFromZipFile(final File directoryOrZip, String applicationFile) throws AdminException,BeansException {
         byte[] buffer = FileUtils.unzipFileToMemory(applicationFile, directoryOrZip, MAX_XML_FILE_SIZE);
         Resource resource = new ByteArrayResource(buffer);
         return getSpringBeanFromResource(resource, ApplicationConfig.class);
     }
 
-    private static <T> T getSpringBeanFromResource(Resource resource, Class<T> type) {
+    private static <T> T getSpringBeanFromResource(Resource resource, Class<T> type) throws BeansException {
         final GenericApplicationContext context = new GenericApplicationContext();
         try {
             final XmlBeanDefinitionReader xmlReader = new XmlBeanDefinitionReader(context);
