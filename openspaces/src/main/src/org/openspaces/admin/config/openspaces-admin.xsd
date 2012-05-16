@@ -1,143 +1,220 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 
 <xsd:schema xmlns="http://www.openspaces.org/schema/admin"
-            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-            targetNamespace="http://www.openspaces.org/schema/admin"
-            elementFormDefault="qualified"
-            attributeFormDefault="unqualified">
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.openspaces.org/schema/admin"
+	elementFormDefault="qualified" attributeFormDefault="unqualified">
 
 	<xsd:element name="depends-on">
-	<xsd:annotation>
-            <xsd:documentation>
-                Postpones the deployment of this processing unit until the specified processing unit is deployed.
-                By default waits until the specified processing unit is in-tact (all instances deployed)  
-            </xsd:documentation>
-        </xsd:annotation>
-    	<xsd:complexType>
-          <xsd:attribute name="name" type="xsd:string" use="required">
-          <xsd:annotation>
-	          <xsd:documentation>
-	                The name of the processing unit to wait for  
-	            </xsd:documentation>
-            </xsd:annotation>
-          </xsd:attribute>
-          <xsd:attribute name="min-instances-per-partition" type="xsd:int" use="optional">
-          <xsd:annotation>
-	          <xsd:documentation>
-	                Wait for the specified minimum number of instances deployed per partition.
-	                Use this if the specified processing unit is a highly availably space/datagrid. 
-	                1 instance per parition, means that all partitions have at least one primary instance.
-	            </xsd:documentation>
-            </xsd:annotation>
-          </xsd:attribute>
-          <xsd:attribute name="min-instances" type="xsd:int" use="optional">
-          <xsd:annotation>
-	          <xsd:documentation>
-	                Wait for the specified minimum number of instances deployed.
-	                Use this if the specified processing unit is highly availably and state-less.
-	                1 instance means that at least one instance has been started.
-	            </xsd:documentation>
-            </xsd:annotation>
-          </xsd:attribute>          
-        </xsd:complexType>
-    </xsd:element>
+		<xsd:annotation>
+			<xsd:documentation>
+				Postpones the deployment of this processing unit until the specified
+				processing unit is deployed.
+				By default waits until the specified processing unit is in-tact (all
+				instances deployed)
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:attribute name="name" type="xsd:string" use="required">
+				<xsd:annotation>
+					<xsd:documentation>
+						The name of the processing unit to wait for
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="min-instances-per-partition" type="xsd:int"
+				use="optional">
+				<xsd:annotation>
+					<xsd:documentation>
+						Wait for the specified minimum number of instances deployed per
+						partition.
+						Use this if the specified processing unit is a highly availably
+						space/datagrid.
+						1 instance per parition, means that all partitions have at least
+						one primary instance.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="min-instances" type="xsd:int" use="optional">
+				<xsd:annotation>
+					<xsd:documentation>
+						Wait for the specified minimum number of instances deployed.
+						Use this if the specified processing unit is highly availably and
+						state-less.
+						1 instance means that at least one instance has been started.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+		</xsd:complexType>
+	</xsd:element>
 	<xsd:element name="context-property">
 		<xsd:annotation>
-	         <xsd:documentation>
-					Sets a context deploy time property overriding default values defined within a processing unit configuration.
-		     </xsd:documentation>
-	     </xsd:annotation>
-    	<xsd:complexType>
-          <xsd:attribute name="key" type="xsd:string" use="required">
-          <xsd:annotation>
-	         <xsd:documentation>
-					The property key name
-		     </xsd:documentation>
-	     </xsd:annotation>
-          </xsd:attribute>
-          <xsd:attribute name="value" type="xsd:string" use="required">
-	          <xsd:annotation>
-		         <xsd:documentation>
+			<xsd:documentation>
+				Sets a context deploy time property overriding default values defined
+				within a processing unit configuration.
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:attribute name="key" type="xsd:string" use="required">
+				<xsd:annotation>
+					<xsd:documentation>
+						The property key name
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="value" type="xsd:string" use="required">
+				<xsd:annotation>
+					<xsd:documentation>
 						The property value
-			     </xsd:documentation>
-		     </xsd:annotation>
-          </xsd:attribute>
-        </xsd:complexType>
-    </xsd:element>
-    
-    <xsd:element name="user-details">
-	    <xsd:annotation>
-		     <xsd:documentation>
-					Sets the security user details for authentication and authorization of the processing unit.
-		     </xsd:documentation>
-	     </xsd:annotation>
-    	<xsd:complexType>
-          <xsd:attribute name="username" type="xsd:string" use="required"/>
-          <xsd:attribute name="password" type="xsd:string" use="required"/>          
-        </xsd:complexType>
-    </xsd:element>
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="user-details">
+		<xsd:annotation>
+			<xsd:documentation>
+				Sets the security user details for authentication and authorization of
+				the processing unit.
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:attribute name="username" type="xsd:string" use="required" />
+			<xsd:attribute name="password" type="xsd:string" use="required" />
+		</xsd:complexType>
+	</xsd:element>
 
 	<xsd:element name="max-instances-per-zone">
 		<xsd:annotation>
-		     <xsd:documentation>
+			<xsd:documentation>
 				Sets the maximum number of instances per zone.
-    		     On partitioned topology with backups topology, controls that a primary and a backup won't run
-			     on the same zone if set to 1. Note, for each zone this will have to be set.
-			     On a non partitioned with backups topology, controls the maximum number of instances running on
-			     the same zone.
-		     </xsd:documentation>
-	     </xsd:annotation>
+				On partitioned topology with backups topology, controls that a primary
+				and a backup won't run
+				on the same zone if set to 1. Note, for each zone this will have to be
+				set.
+				On a non partitioned with backups topology, controls the maximum
+				number of instances running on
+				the same zone.
+			</xsd:documentation>
+		</xsd:annotation>
 		<xsd:complexType>
-          <xsd:attribute name="zone" type="xsd:string" use="required"/>
-          <xsd:attribute name="max-instances" type="xsd:int" use="required"/>          
-        </xsd:complexType>
-    </xsd:element>
+			<xsd:attribute name="zone" type="xsd:string" use="required" />
+			<xsd:attribute name="max-instances" type="xsd:int" use="required" />
+		</xsd:complexType>
+	</xsd:element>
 
 	<xsd:element name="space">
 		<xsd:complexType>
 			<xsd:choice minOccurs="0" maxOccurs="unbounded">
-				<xsd:element ref="depends-on" >
-				<xsd:annotation><xsd:documentation>Postpones deployment of processing unit instances until the specified dependency is met.</xsd:documentation></xsd:annotation></xsd:element>
+				<xsd:element ref="depends-on">
+					<xsd:annotation>
+						<xsd:documentation>Postpones deployment of processing unit
+							instances until the specified dependency is met.
+						</xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
 				<xsd:element ref="context-property">
-				<xsd:annotation><xsd:documentation>Sets a context deploy time property overriding default values defined within a processing unit configuration.</xsd:documentation></xsd:annotation></xsd:element>
+					<xsd:annotation>
+						<xsd:documentation>Sets a context deploy time property overriding
+							default values defined within a processing unit configuration.
+						</xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
 				<xsd:element ref="user-details">
-				<xsd:annotation><xsd:documentation>Sets the security user details for authentication and authorization of the processing unit.</xsd:documentation></xsd:annotation></xsd:element>
+					<xsd:annotation>
+						<xsd:documentation>Sets the security user details for
+							authentication and authorization of the processing unit.
+						</xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
 				<xsd:element ref="max-instances-per-zone">
-				<xsd:annotation><xsd:documentation>Sets the maximum number of instances per zone.
-    		     On partitioned topology with backups topology, controls that a primary and a backup won't run
-			     on the same zone if set to 1. Note, for each zone this will have to be set.
-			     On a non partitioned with backups topology, controls the maximum number of instances running on
-			     the same zone.</xsd:documentation></xsd:annotation></xsd:element>
+					<xsd:annotation>
+						<xsd:documentation>Sets the maximum number of instances per zone.
+							On partitioned topology with backups topology, controls that a
+							primary and a backup won't run
+							on the same zone if set to 1. Note, for each zone this will have to
+							be set.
+							On a non partitioned with backups topology, controls the maximum
+							number of instances running on
+							the same zone.
+						</xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
 			</xsd:choice>
 			<xsd:attribute name="name" type="xsd:string" use="required">
-				<xsd:annotation><xsd:documentation>The space name (required)</xsd:documentation></xsd:annotation>
+				<xsd:annotation>
+					<xsd:documentation>The space name (required)</xsd:documentation>
+				</xsd:annotation>
 			</xsd:attribute>
-			<xsd:attribute name="cluster-schema" type="xsd:string" use="optional" >
-			<xsd:annotation><xsd:documentation>Controls the cluster schema of the deployment. When there is an embedded space defined within the processing unit set this value to partitioned-sync2backup</xsd:documentation></xsd:annotation>
+			<xsd:attribute name="cluster-schema" type="xsd:string"
+				use="optional">
+				<xsd:annotation>
+					<xsd:documentation>Controls the cluster schema of the deployment.
+						When there is an embedded space defined within the processing unit
+						set this value to partitioned-sync2backup</xsd:documentation>
+				</xsd:annotation>
 			</xsd:attribute>
-			<xsd:attribute name="number-of-instances" type="xsd:int" use="optional" >
-			<xsd:annotation><xsd:documentation>Sets the number of instances that will be deployed as part of this processing unit instance. In case of partitioned-sync2backup, defines the number of partitions.</xsd:documentation></xsd:annotation>
+			<xsd:attribute name="number-of-instances" type="xsd:int"
+				use="optional">
+				<xsd:annotation>
+					<xsd:documentation>Sets the number of instances that will be
+						deployed as part of this processing unit instance. In case of
+						partitioned-sync2backup, defines the number of partitions.
+					</xsd:documentation>
+				</xsd:annotation>
 			</xsd:attribute>
-			<xsd:attribute name="number-of-backups" type="xsd:int" use="optional" >
-			<xsd:annotation><xsd:documentation>Sets the number of backups that will be deployed as part of this processing unit. Only applicable when the processing unit has an embedded space.</xsd:documentation></xsd:annotation>
+			<xsd:attribute name="number-of-backups" type="xsd:int"
+				use="optional">
+				<xsd:annotation>
+					<xsd:documentation>Sets the number of backups that will be deployed
+						as part of this processing unit. Only applicable when the
+						processing unit has an embedded space.</xsd:documentation>
+				</xsd:annotation>
 			</xsd:attribute>
-			<xsd:attribute name="max-instances-per-vm" type="xsd:int" use="optional" >
-			<xsd:annotation><xsd:documentation> Sets the maximum number of instances per virtual machine.
-			On partitioned topology with backups topology, controls that a primary and a backup won't run on the same java virtual machine if set to 1.
- On a non partitioned with backups topology, controls the maximum number of instances running on the same java virtual machine.</xsd:documentation></xsd:annotation>
+			<xsd:attribute name="max-instances-per-vm" type="xsd:int"
+				use="optional">
+				<xsd:annotation>
+					<xsd:documentation> Sets the maximum number of instances per
+						virtual machine.
+						On partitioned topology with backups topology, controls that a
+						primary and a backup won't run on the same java virtual machine if
+						set to 1.
+						On a non partitioned with backups topology, controls the maximum
+						number of instances running on the same java virtual machine.
+					</xsd:documentation>
+				</xsd:annotation>
 			</xsd:attribute>
-			<xsd:attribute name="max-instances-per-machine" type="xsd:int" use="optional" >
-			<xsd:annotation><xsd:documentation>Sets the maximum number of instances per machine. On partitioned topology with backups topology, controls that a primary and a backup won't run on the same machine if set to 1.
-     On a non partitioned with backups topology, controls the maximum number of instances running on the same machine.</xsd:documentation></xsd:annotation>
+			<xsd:attribute name="max-instances-per-machine" type="xsd:int"
+				use="optional">
+				<xsd:annotation>
+					<xsd:documentation>Sets the maximum number of instances per
+						machine. On partitioned topology with backups topology, controls
+						that a primary and a backup won't run on the same machine if set
+						to 1.
+						On a non partitioned with backups topology, controls the maximum
+						number of instances running on the same machine.
+					</xsd:documentation>
+				</xsd:annotation>
 			</xsd:attribute>
-			<xsd:attribute name="zones" type="xsd:string" use="optional" >
-			<xsd:annotation><xsd:documentation>Zone that define which Container the processing unit is allowed to be deployed on.</xsd:documentation></xsd:annotation>
+			<xsd:attribute name="zones" type="xsd:string" use="optional">
+				<xsd:annotation>
+					<xsd:documentation>Zone that define which Container the processing
+						unit is allowed to be deployed on.</xsd:documentation>
+				</xsd:annotation>
 			</xsd:attribute>
-			<xsd:attribute name="secured" type="xsd:boolean" use="optional" >
-			<xsd:annotation><xsd:documentation>Will deploy a secured processing unit. Note, by setting user details the processing unit will be secured automatically.</xsd:documentation></xsd:annotation>
+			<xsd:attribute name="secured" type="xsd:boolean" use="optional">
+				<xsd:annotation>
+					<xsd:documentation>Will deploy a secured processing unit. Note, by
+						setting user details the processing unit will be secured
+						automatically.</xsd:documentation>
+				</xsd:annotation>
 			</xsd:attribute>
-			<xsd:attribute name="sla-location" type="xsd:string" use="optional" >
-			<xsd:annotation><xsd:documentation>Sets an external SLA definition location to be loaded.</xsd:documentation></xsd:annotation>
+			<xsd:attribute name="sla-location" type="xsd:string"
+				use="optional">
+				<xsd:annotation>
+					<xsd:documentation>Sets an external SLA definition location to be
+						loaded.</xsd:documentation>
+				</xsd:annotation>
 			</xsd:attribute>
 		</xsd:complexType>
 	</xsd:element>
@@ -150,16 +227,23 @@
 				<xsd:element ref="user-details" />
 				<xsd:element ref="max-instances-per-zone" />
 			</xsd:choice>
-			<xsd:attribute name="processing-unit" type="xsd:string" use="required" />
+			<xsd:attribute name="processing-unit" type="xsd:string"
+				use="required" />
 			<xsd:attribute name="name" type="xsd:string" use="optional" />
-			<xsd:attribute name="cluster-schema" type="xsd:string" use="optional" />
-			<xsd:attribute name="number-of-instances" type="xsd:int" use="optional" />
-			<xsd:attribute name="number-of-backups" type="xsd:int" use="optional" />
-			<xsd:attribute name="max-instances-per-vm" type="xsd:int" use="optional" />
-			<xsd:attribute name="max-instances-per-machine" type="xsd:int" use="optional" />
+			<xsd:attribute name="cluster-schema" type="xsd:string"
+				use="optional" />
+			<xsd:attribute name="number-of-instances" type="xsd:int"
+				use="optional" />
+			<xsd:attribute name="number-of-backups" type="xsd:int"
+				use="optional" />
+			<xsd:attribute name="max-instances-per-vm" type="xsd:int"
+				use="optional" />
+			<xsd:attribute name="max-instances-per-machine" type="xsd:int"
+				use="optional" />
 			<xsd:attribute name="zones" type="xsd:string" use="optional" />
 			<xsd:attribute name="secured" type="xsd:boolean" use="optional" />
-			<xsd:attribute name="sla-location" type="xsd:string" use="optional" />			
+			<xsd:attribute name="sla-location" type="xsd:string"
+				use="optional" />
 		</xsd:complexType>
 	</xsd:element>
 
@@ -172,14 +256,20 @@
 				<xsd:element ref="max-instances-per-zone" />
 			</xsd:choice>
 			<xsd:attribute name="space-url" type="xsd:string" use="required" />
-			<xsd:attribute name="cluster-schema" type="xsd:string" use="optional" />
-			<xsd:attribute name="number-of-instances" type="xsd:int" use="optional" />
-			<xsd:attribute name="number-of-backups" type="xsd:int" use="optional" />
-			<xsd:attribute name="max-instances-per-vm" type="xsd:int" use="optional" />
-			<xsd:attribute name="max-instances-per-machine" type="xsd:int" use="optional" />
+			<xsd:attribute name="cluster-schema" type="xsd:string"
+				use="optional" />
+			<xsd:attribute name="number-of-instances" type="xsd:int"
+				use="optional" />
+			<xsd:attribute name="number-of-backups" type="xsd:int"
+				use="optional" />
+			<xsd:attribute name="max-instances-per-vm" type="xsd:int"
+				use="optional" />
+			<xsd:attribute name="max-instances-per-machine" type="xsd:int"
+				use="optional" />
 			<xsd:attribute name="zones" type="xsd:string" use="optional" />
 			<xsd:attribute name="secured" type="xsd:boolean" use="optional" />
-			<xsd:attribute name="sla-location" type="xsd:string" use="optional" />
+			<xsd:attribute name="sla-location" type="xsd:string"
+				use="optional" />
 		</xsd:complexType>
 	</xsd:element>
 
@@ -187,12 +277,12 @@
 	<xsd:element name="application">
 		<xsd:complexType>
 			<xsd:choice minOccurs="1" maxOccurs="unbounded">
-					<xsd:element ref="pu" />
-					<xsd:element ref="space" />
-					<xsd:element ref="memcached" />
+				<xsd:element ref="pu" />
+				<xsd:element ref="space" />
+				<xsd:element ref="memcached" />
 			</xsd:choice>
 			<xsd:attribute name="name" type="xsd:string" use="required" />
 		</xsd:complexType>
 	</xsd:element>
-    
+
 </xsd:schema>
