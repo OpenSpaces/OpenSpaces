@@ -105,8 +105,8 @@ public class ApplicationFileDeployment {
                 config = readConfigFromXmlFile(applicationFilePath);
             }
             catch (BeansException e) {
-                throw new AdminException("Failed to load " + applicationFilePath +". directoryOrZip="+directoryOrZip +" applicationFile="+applicationFile,e);
-            }
+                throw new AdminException("Failed to load " + applicationFilePath,e);
+            } 
         }
         else {
             try {
@@ -128,9 +128,14 @@ public class ApplicationFileDeployment {
         return config;
     }
 
-    private static ApplicationConfig readConfigFromXmlFile(final String applicationFilePath) throws BeansException{
+    private static ApplicationConfig readConfigFromXmlFile(final String applicationFilePath) throws BeansException {
         ApplicationConfig config;
-        final FileSystemXmlApplicationContext context = new FileSystemXmlApplicationContext(applicationFilePath);
+   
+        // Convert to URL to workaround the "everything is a relative paths problem"
+        // see spring documentation 5.7.3 FileSystemResource caveats.
+        String fileUri = new File(applicationFilePath).toURI().toString();
+        final FileSystemXmlApplicationContext context = new FileSystemXmlApplicationContext(fileUri);
+                
         try {
             //CR: Catch runtime exceptions. convert to AdminException(s)
             context.refresh();
