@@ -266,7 +266,7 @@ public class AbstractElasticProcessingUnitConfig {
             config.setName(name);
         }
         
-        if (this.secured) {
+        if (this.secured != null) {
             config.setSecured(secured);
         }
         
