@@ -197,7 +197,9 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             deploy.setSecured(puConfig.getSecured());
         }
         UserDetailsConfig userDetailsConfig = puConfig.getUserDetails();
-        deploy.setUserDetails(new User(userDetailsConfig.getUsername(), userDetailsConfig.getPassword()));
+        if (userDetailsConfig != null) {
+            deploy.setUserDetails(new User(userDetailsConfig.getUsername(), userDetailsConfig.getPassword()));
+        }
         deploy.setApplicationName(applicationName);
         final OperationalString operationalString;
         try {
