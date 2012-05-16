@@ -627,11 +627,18 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
                 final ProcessingUnitConfig puConfig = toProcessingUnitConfig(puConfigHolder);
             
                 //handle relative paths to jar files
-                boolean isAbsolute = 
-                        new File(puConfig.getProcessingUnit()).isAbsolute() ||
-                        puConfig.getProcessingUnit().startsWith("/"); // relative to gigaspaces home
-                
-                if (jarsDirectory != null && !isAbsolute) {
+                boolean isAbsolutePath = new File(puConfig.getProcessingUnit()).isAbsolute();
+                boolean isRelativeToGSHomedir = puConfig.getProcessingUnit().trim().startsWith("/");
+                boolean isAddDirectory = !isAbsolutePath && !isRelativeToGSHomedir;
+                        
+                if (logger.isDebugEnabled()) {
+                    logger.debug(
+                            "puConfig.getProcessingUnit()="+puConfig.getProcessingUnit()+" "+
+                            "isAbsolutePath="+isAbsolutePath+" "+
+                            "isRelativeToGSHomedir="+isRelativeToGSHomedir+" "+
+                            "isAddDirectory=" +isAddDirectory);
+                }
+                if (jarsDirectory != null && isAddDirectory) {
                     File jar = new File(
                             jarsDirectory,
                             puConfig.getProcessingUnit());
