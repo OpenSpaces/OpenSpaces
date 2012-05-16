@@ -365,23 +365,106 @@
 			</xsd:choice>
 			<xsd:attribute name="processing-unit" type="xsd:string"
 				use="required">
-
+				<xsd:annotation>
+					<xsd:documentation>
+						Constructs a processing unit deployment based on
+						the specified processing unit file path (points either
+						to a
+						processing unit jar/zip file or a directory
+					</xsd:documentation>
+				</xsd:annotation>
 			</xsd:attribute>
-			<xsd:attribute name="name" type="xsd:string" use="optional" />
+			<xsd:attribute name="name" type="xsd:string" use="optional">
+				<xsd:annotation>
+					<xsd:documentation>
+						Sets the processing unit name that will be
+						deployed. By default it will be based on the
+						processing-unit
+						folder/jar filename.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
 			<xsd:attribute name="cluster-schema" type="xsd:string"
-				use="optional" />
+				use="optional">
+				<xsd:annotation>
+					<xsd:documentation>Controls the cluster schema of the deployment.
+						When there is an embedded space defined within the processing unit
+						set this value to partitioned-sync2backup
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
 			<xsd:attribute name="number-of-instances" type="xsd:int"
-				use="optional" />
+				use="optional">
+				<xsd:annotation>
+					<xsd:documentation>Sets the number of instances that will be
+						deployed as part of this processing unit instance. In case of
+						partitioned-sync2backup, defines the number of partitions.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
 			<xsd:attribute name="number-of-backups" type="xsd:int"
-				use="optional" />
+				use="optional">
+				<xsd:annotation>
+					<xsd:documentation>Sets the number of backups that will be deployed
+						as part of this processing unit. Only applicable when the
+						processing unit has an embedded space.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
 			<xsd:attribute name="max-instances-per-vm" type="xsd:int"
-				use="optional" />
+				use="optional">
+				<xsd:annotation>
+					<xsd:documentation> Sets the maximum number of instances per
+						virtual machine.
+						On partitioned topology with backups topology,
+						controls that a
+						primary and a backup won't run on the same java
+						virtual machine if
+						set to 1.
+						On a non partitioned with backups
+						topology, controls the maximum
+						number of instances running on the
+						same java virtual machine.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
 			<xsd:attribute name="max-instances-per-machine" type="xsd:int"
-				use="optional" />
-			<xsd:attribute name="zones" type="xsd:string" use="optional" />
-			<xsd:attribute name="secured" type="xsd:boolean" use="optional" />
+				use="optional">
+				<xsd:annotation>
+					<xsd:documentation>Sets the maximum number of instances per
+						machine. On partitioned topology with backups topology, controls
+						that a primary and a backup won't run on the same machine if set
+						to 1.
+						On a non partitioned with backups topology, controls the
+						maximum
+						number of instances running on the same machine.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="zones" type="xsd:string" use="optional">
+				<xsd:annotation>
+					<xsd:documentation>Zone that define which Container the processing
+						unit is allowed to be deployed on.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="secured" type="xsd:boolean" use="optional">
+				<xsd:annotation>
+					<xsd:documentation>Will deploy a secured processing unit. Note, by
+						setting user details the processing unit will be secured
+						automatically.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
 			<xsd:attribute name="sla-location" type="xsd:string"
-				use="optional" />
+				use="optional">
+				<xsd:annotation>
+					<xsd:documentation>Sets an external SLA definition location to be
+						loaded.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+
 		</xsd:complexType>
 	</xsd:element>
 
@@ -393,33 +476,146 @@
 				<xsd:element ref="user-details" />
 				<xsd:element ref="max-instances-per-zone" />
 			</xsd:choice>
-			<xsd:attribute name="space-url" type="xsd:string" use="required" />
+			<xsd:attribute name="space-url" type="xsd:string" use="required">
+				<xsd:annotation>
+					<xsd:documentation>The url to the space that holds the memcached
+						key/value pairs.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="name" type="xsd:string" use="optional">
+				<xsd:annotation>
+					<xsd:documentation>
+						Sets the processing unit name that will be deployed. By default it is
+						the
+						space name extracted from the space-url with the -memcached postfix.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
 			<xsd:attribute name="cluster-schema" type="xsd:string"
-				use="optional" />
+				use="optional">
+				<xsd:annotation>
+					<xsd:documentation>Controls the cluster schema of the deployment.
+						When there is an embedded space defined within the processing
+						unit
+						set this value to partitioned-sync2backup
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
 			<xsd:attribute name="number-of-instances" type="xsd:int"
-				use="optional" />
+				use="optional">
+				<xsd:annotation>
+					<xsd:documentation>Sets the number of instances that will be
+						deployed as part of this processing unit instance. In case of
+						partitioned-sync2backup, defines the number of partitions.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
 			<xsd:attribute name="number-of-backups" type="xsd:int"
-				use="optional" />
+				use="optional">
+				<xsd:annotation>
+					<xsd:documentation>Sets the number of backups that will be
+						deployed
+						as part of this processing unit. Only applicable when the
+						processing unit has an embedded space.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
 			<xsd:attribute name="max-instances-per-vm" type="xsd:int"
-				use="optional" />
+				use="optional">
+				<xsd:annotation>
+					<xsd:documentation> Sets the maximum number of instances per
+						virtual machine.
+						On partitioned topology with backups topology,
+						controls that a
+						primary and a backup won't run on the same java
+						virtual machine if
+						set to 1.
+						On a non partitioned with backups
+						topology, controls the maximum
+						number of instances running on the
+						same java virtual machine.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
 			<xsd:attribute name="max-instances-per-machine" type="xsd:int"
-				use="optional" />
-			<xsd:attribute name="zones" type="xsd:string" use="optional" />
-			<xsd:attribute name="secured" type="xsd:boolean" use="optional" />
+				use="optional">
+				<xsd:annotation>
+					<xsd:documentation>Sets the maximum number of instances per
+						machine. On partitioned topology with backups topology, controls
+						that a primary and a backup won't run on the same machine if set
+						to 1.
+						On a non partitioned with backups topology, controls the
+						maximum
+						number of instances running on the same machine.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="zones" type="xsd:string" use="optional">
+				<xsd:annotation>
+					<xsd:documentation>Zone that define which Container the processing
+						unit is allowed to be deployed on.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="secured" type="xsd:boolean" use="optional">
+				<xsd:annotation>
+					<xsd:documentation>Will deploy a secured processing unit. Note, by
+						setting user details the processing unit will be secured
+						automatically.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
 			<xsd:attribute name="sla-location" type="xsd:string"
-				use="optional" />
+				use="optional">
+				<xsd:annotation>
+					<xsd:documentation>Sets an external SLA definition location to be
+						loaded.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
 		</xsd:complexType>
 	</xsd:element>
 
 
 	<xsd:element name="application">
+		<xsd:annotation>
+			<xsd:documentation>
+				Creates a new application with the specified
+				processing units.
+			</xsd:documentation>
+		</xsd:annotation>
 		<xsd:complexType>
 			<xsd:choice minOccurs="1" maxOccurs="unbounded">
-				<xsd:element ref="pu" />
-				<xsd:element ref="space" />
-				<xsd:element ref="memcached" />
+				<xsd:element ref="pu">
+					<xsd:annotation>
+						<xsd:documentation>
+							Adds a new processing unit to the application.
+						</xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
+				<xsd:element ref="space">
+					<xsd:annotation>
+						<xsd:documentation>
+							Adds a new space to the application.
+						</xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
+				<xsd:element ref="memcached">
+					<xsd:annotation>
+						<xsd:documentation>
+							Adds a new memcached to the applicaiton.
+						</xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
 			</xsd:choice>
-			<xsd:attribute name="name" type="xsd:string" use="required" />
+			<xsd:attribute name="name" type="xsd:string" use="required">
+				<xsd:annotation>
+					<xsd:documentation>
+						Sets the application name
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
 		</xsd:complexType>
 	</xsd:element>
 
