@@ -146,6 +146,7 @@ public class ProcessingUnitDeployment implements ProcessingUnitDeploymentTopolog
 
     /**
      * Sets the number of instances that will be deployed as part of this processing unit instance.
+     * In case of partitioned-sync2backup, defines the number of partitions.
      */
     public ProcessingUnitDeployment numberOfInstances(int numberOfInstances) {
         config.setNumberOfInstances(numberOfInstances);
@@ -162,13 +163,13 @@ public class ProcessingUnitDeployment implements ProcessingUnitDeploymentTopolog
     }
 
     /**
-     * Sets the maximum number of instances per virtual machine.
+     * Sets the maximum number of instances per java virtual machine.
      *
      * <p>On partitioned topology with backups topology, controls that a primary and a backup won't run
-     * on the same virtual machine if set to <code>1</code>.
+     * on the same java virtual machine if set to <code>1</code>.
      *
      * <p>On a non partitioned with backups topology, controls the maximum number of instances running on
-     * the same virtual machine.
+     * the same java virtual machine.
      */
     public ProcessingUnitDeployment maxInstancesPerVM(int maxInstancesPerVM) {
         config.setMaxInstancesPerVM(maxInstancesPerVM);
@@ -229,7 +230,7 @@ public class ProcessingUnitDeployment implements ProcessingUnitDeploymentTopolog
     }
 
     /**
-     * Advance: Sets the security user details for authentication and autherization of the
+     * Sets the security user details for authentication and authorization of the
      * processing unit.
      */
     public ProcessingUnitDeployment userDetails(UserDetails userDetails) {
