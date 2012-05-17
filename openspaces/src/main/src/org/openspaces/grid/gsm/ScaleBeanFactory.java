@@ -162,11 +162,10 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
         if (machineProvisioning == null) {
             throw new IllegalStateException("machineProvisioning bean cannot be found");
         }
-        
-        if (machineProvisioning instanceof ElasticProcessingUnitMachineIsolationAware) {
-            ((ElasticProcessingUnitMachineIsolationAware)machineProvisioning).setElasticProcessingUnitMachineIsolation(isolation); 
+        if (isolation == null) {
+            throw new IllegalArgumentException("isolation cannot be null.");
         }
-        
+        machineProvisioning.setElasticProcessingUnitMachineIsolation(isolation); 
         return machineProvisioning;
     }
 
