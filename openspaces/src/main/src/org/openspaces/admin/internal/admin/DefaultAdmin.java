@@ -1382,6 +1382,15 @@ public class DefaultAdmin implements InternalAdmin {
 
         @Override
         public void run() {
+            
+            if (closeEnded) {
+                Exception e = new IllegalStateException("Not executing ScheduledProcessingUnitMonitor - Admin already closed. scheduledExecutorService.shutdownNow should have been called.");
+                logger.warn(e.getMessage(), e);
+                //TODO: In order to stop the scheduler completely this time, raise an exception
+                //throw e;
+                return;
+            }
+            
             final List<Events> eventsFromGSMs = new ArrayList<Events>();
             final Map<String, Holder> holders = new HashMap<String, Holder>();
             for (GridServiceManager gsm : gridServiceManagers) {
