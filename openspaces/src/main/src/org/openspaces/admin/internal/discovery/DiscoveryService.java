@@ -67,7 +67,6 @@ import com.gigaspaces.grid.gsc.GSC;
 import com.gigaspaces.grid.gsm.GSM;
 import com.gigaspaces.grid.zone.GridZoneProvider;
 import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
-import com.gigaspaces.internal.client.spaceproxy.SpaceProxyImpl;
 import com.gigaspaces.internal.jvm.JVMDetails;
 import com.gigaspaces.internal.os.OSDetails;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
@@ -236,15 +235,11 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
             logger.debug("Service Added [Space Instance] with uid [" + serviceID + "]");
         }
         try {
-            if (clusteredIjspace instanceof SpaceProxyImpl) {                
-                SpaceProxyImpl spaceProxy = (SpaceProxyImpl) clusteredIjspace;
-                // TODO LB: generate finder url and spaceProxy.setFinderURL();
-            }
             if (clusteredIjspace.isServiceSecured()) {
                 clusteredIjspace.login(admin.getUserDetails());
             }
 
-            ISpaceProxy direcyIjspace = (ISpaceProxy) (clusteredIjspace).getClusterMember();
+            ISpaceProxy direcyIjspace = (ISpaceProxy)clusteredIjspace.getClusterMember();
             if (direcyIjspace.isServiceSecured()) {
                 direcyIjspace.login(admin.getUserDetails());
             }
