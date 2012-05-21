@@ -17,6 +17,7 @@
  ******************************************************************************/
 package org.openspaces.admin.internal.space;
 
+import java.net.MalformedURLException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,8 +59,10 @@ import org.openspaces.pu.container.servicegrid.PUServiceBean;
 
 import com.gigaspaces.cluster.activeelection.SpaceMode;
 import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
+import com.gigaspaces.internal.client.spaceproxy.SpaceProxyImpl;
 import com.gigaspaces.internal.jvm.JVMDetails;
 import com.gigaspaces.internal.jvm.JVMStatistics;
+import com.gigaspaces.internal.lookup.SpaceUrlBuilder;
 import com.gigaspaces.internal.os.OSDetails;
 import com.gigaspaces.internal.os.OSStatistics;
 import com.gigaspaces.internal.version.PlatformLogicalVersion;
@@ -71,6 +74,7 @@ import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
 import com.j_spaces.core.admin.RuntimeHolder;
 import com.j_spaces.core.admin.StatisticsAdmin;
 import com.j_spaces.core.client.SpaceURL;
+import com.j_spaces.core.client.SpaceURLParser;
 import com.j_spaces.core.filters.StatisticsHolder;
 
 /**
@@ -139,7 +143,7 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
         this.puService = null;
         this.uid = serviceID.toString();
         this.serviceID = serviceID;
-        this.ijspace = (ISpaceProxy) directSpace;
+        setIJSpace((ISpaceProxy) directSpace);
         this.gigaSpace = new GigaSpaceConfigurer(directSpace).gigaSpace();
         this.spaceAdmin = spaceAdmin;
         this.spaceURL = ijspace.getURL();
@@ -328,7 +332,7 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
     public IJSpace getIJSpace() {
         if (this.ijspace == null) {
             try {
-                this.ijspace = (ISpaceProxy) puService.getSpaceDirect(serviceID);
+                setIJSpace((ISpaceProxy) puService.getSpaceDirect(serviceID));
                 if (this.ijspace.isSecured()) {
                     this.ijspace.login(admin.getUserDetails());
                 }
@@ -338,7 +342,19 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
         }
         return this.ijspace;
     }
-
+    
+    protected void setIJSpace(ISpaceProxy spaceProxy) {
+        this.ijspace = spaceProxy;
+        if (spaceProxy instanceof SpaceProxyImpl) {
+            String url = SpaceUrlBuilder.buildJiniUrl(spaceProxy.getURL().getContainerName(), spaceProxy.getURL().getSpaceName(), admin.getGroups(), admin.getLocators());
+            try {
+                ((SpaceProxyImpl)spaceProxy).setFinderURL(SpaceURLParser.parseURL(url));
+            } catch (MalformedURLException e) {
+                throw new IllegalStateException("Failed to build finder url", e);
+            }
+        }
+    }
+    
     public IInternalRemoteJSpaceAdmin getSpaceAdmin() {
         if (spaceAdmin == null) {
             try {
