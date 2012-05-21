@@ -37,6 +37,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor.DiscardPolicy;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import net.jini.core.discovery.LookupLocator;
@@ -234,8 +235,8 @@ public class DefaultAdmin implements InternalAdmin {
 
     private boolean scheduledStatisticsMonitor = false;
 
-    private volatile boolean closeStarted = false;
-    private volatile boolean closeEnded = false;
+    private final AtomicBoolean closeStarted = new AtomicBoolean(false);
+    private final AtomicBoolean closeEnded = new AtomicBoolean(false);
 
     private volatile UserDetails userDetails;
 
@@ -404,7 +405,7 @@ public class DefaultAdmin implements InternalAdmin {
 
     @Override
     public void setProcessingUnitMonitorInterval(long interval, TimeUnit timeUnit) {
-        if (closeStarted) {
+        if (closeStarted.get()) {
             throw new IllegalStateException("Admin already closed");
         }
         this.scheduledProcessingUnitMonitorInterval = timeUnit.toMillis(interval);
@@ -416,7 +417,7 @@ public class DefaultAdmin implements InternalAdmin {
 
     @Override
     public void setAgentProcessessMonitorInterval(long interval, TimeUnit timeUnit) {
-        if (closeStarted) {
+        if (closeStarted.get()) {
             throw new IllegalStateException("Admin already closed");
         }
         this.scheduledAgentProcessessMonitorInterval = timeUnit.toMillis(interval);
@@ -474,16 +475,19 @@ public class DefaultAdmin implements InternalAdmin {
 
     @Override
     public void close() {
-        if (closeStarted) {
+        if (closeStarted.get()) {
             return;
         }
-        closeStarted = true;
+        closeStarted.set(true);
         discoveryService.stop();
+        if (scheduledProcessingUnitMonitorFuture != null) { // during initialization
+            scheduledProcessingUnitMonitorFuture.cancel(true);
+        }
         scheduledExecutorService.shutdownNow();
         for (ExecutorService executorService : eventsExecutorServices) {
             executorService.shutdownNow();
         }
-        closeEnded = true;
+        closeEnded.set(true);
     }
 
     @Override
@@ -608,7 +612,7 @@ public class DefaultAdmin implements InternalAdmin {
     }
 
     public synchronized void flushEvents() {
-        if (closeStarted) {
+        if (closeStarted.get()) {
             //clear all pending events in queue that may have arrived just before closing of the admin.
             for (LinkedList<Runnable> l : eventsQueue) {
                 l.clear();
@@ -1383,7 +1387,7 @@ public class DefaultAdmin implements InternalAdmin {
         @Override
         public void run() {
             
-            if (closeEnded) {
+            if (closeEnded.get()) {
                 Exception e = new IllegalStateException("Not executing: " + this.toString() + " - Admin already closed. scheduledExecutorService.shutdownNow should have been called.");
                 if (logger.isDebugEnabled()) {
                     logger.debug(e.getMessage(), e);
@@ -1546,6 +1550,9 @@ public class DefaultAdmin implements InternalAdmin {
                     }
                 } else { // we have a new processing unit
                     if (holder.managingGSM != null) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Discovered new PU " + processingUnit.getName());
+                        }
                         processingUnit.setManagingGridServiceManager(holder.managingGSM);
                         processingUnits.addProcessingUnit(processingUnit);
                         processingUnit.addManagingGridServiceManager(holder.managingGSM);
@@ -1704,7 +1711,7 @@ public class DefaultAdmin implements InternalAdmin {
 
         @Override
         public void run() {
-            if (closeEnded) {
+            if (closeEnded.get()) {
                 Exception e = new IllegalStateException("Not executing: " + runnable + " - Admin already closed. executorService.shutdownNow should have been called.");
                 if (logger.isDebugEnabled()) {
                     logger.debug(e.getMessage(), e);
