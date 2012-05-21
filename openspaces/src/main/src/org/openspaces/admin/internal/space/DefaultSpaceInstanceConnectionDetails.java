@@ -45,7 +45,9 @@ public class DefaultSpaceInstanceConnectionDetails implements SpaceInstanceConne
         if (spaceAdmin != null) {
             try {
                 List<ITransportConnection> connectionsInfo = spaceAdmin.getConnectionsInfo();
-                count = connectionsInfo.size();
+                if( connectionsInfo != null ){
+                    count = connectionsInfo.size();
+                }
             } catch (RemoteException e) {
                 logger.debug("RemoteException caught while trying to get Space connection information from "
                         + defaultSpaceInstance.getSpaceName(), e);
