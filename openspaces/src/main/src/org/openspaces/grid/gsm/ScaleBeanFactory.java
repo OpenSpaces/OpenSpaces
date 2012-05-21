@@ -38,6 +38,7 @@ import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpointAware;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpointAware;
 import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIsolation;
+import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIsolationAware;
 import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIsolationFactory;
 import org.openspaces.grid.gsm.machines.plugins.ElasticMachineProvisioning;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
@@ -118,14 +119,17 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
         }
                 
         if (instance instanceof ElasticMachineProvisioningAware) {
-            ElasticProcessingUnitMachineIsolation isolation = new ElasticProcessingUnitMachineIsolationFactory().create(pu.getName(), isolationConfig);
-            NonBlockingElasticMachineProvisioning machineProvisioning = getNonBlockingElasticMachineProvisioningBean(beanServer, isolation);
+            NonBlockingElasticMachineProvisioning machineProvisioning = getNonBlockingElasticMachineProvisioningBean(beanServer);
             ((ElasticMachineProvisioningAware)instance).setElasticMachineProvisioning(machineProvisioning);
-            ((ElasticMachineProvisioningAware)instance).setElasticProcessingUnitMachineIsolation(isolation);
         }
         
         if (instance instanceof ElasticScaleStrategyEventStorageAware) {
             ((ElasticScaleStrategyEventStorageAware)instance).setElasticScaleStrategyEventStorage(eventStore);
+        }
+        
+        if (instance instanceof ElasticProcessingUnitMachineIsolationAware) {
+            ElasticProcessingUnitMachineIsolation isolation = new ElasticProcessingUnitMachineIsolationFactory().create(pu.getName(), isolationConfig);
+            ((ElasticProcessingUnitMachineIsolationAware)instance).setElasticProcessingUnitMachineIsolation(isolation); 
         }
         
         ElasticConfigBean elasticConfigBean = findElasticConfigBean(beanServer);
@@ -139,7 +143,7 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
         return instance;
     }
 
-    private NonBlockingElasticMachineProvisioning getNonBlockingElasticMachineProvisioningBean(BeanServer<Bean> beanServer, ElasticProcessingUnitMachineIsolation isolation) {
+    private NonBlockingElasticMachineProvisioning getNonBlockingElasticMachineProvisioningBean(BeanServer<Bean> beanServer) {
         List<Bean> injectedInstances = beanServer.getEnabledBeansAssignableTo(
                 new Class[]{
                         ElasticMachineProvisioning.class,
@@ -161,10 +165,7 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
         if (machineProvisioning == null) {
             throw new IllegalStateException("machineProvisioning bean cannot be found");
         }
-        if (isolation == null) {
-            throw new IllegalArgumentException("isolation cannot be null.");
-        }
-        machineProvisioning.setElasticProcessingUnitMachineIsolation(isolation); 
+
         return machineProvisioning;
     }
 

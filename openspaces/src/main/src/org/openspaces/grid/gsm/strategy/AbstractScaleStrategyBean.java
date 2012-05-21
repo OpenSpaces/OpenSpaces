@@ -53,6 +53,7 @@ import org.openspaces.grid.gsm.machines.MachinesSlaUtils;
 import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.machines.exceptions.MachinesSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIsolation;
+import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIsolationAware;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
 import org.openspaces.grid.gsm.rebalancing.exceptions.RebalancingSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
@@ -64,6 +65,7 @@ public abstract class AbstractScaleStrategyBean implements
     ProcessingUnitAware,
     ElasticScaleStrategyEventStorageAware,
     ScaleStrategyBean,
+    ElasticProcessingUnitMachineIsolationAware,
     Bean,
     Runnable{
     
