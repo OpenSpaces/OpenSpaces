@@ -42,11 +42,16 @@ public class ApplicationDeployCommand extends AbstractApplicationCommand {
                 return;
             }
             
-            deployer.deployAndWait(args);
+            try {
+                deployer.deployAndWait(args);
+            }
+            catch(TimeoutException e) {
+                System.exit(1);
+            }
         }
 
         
-        public void deployAndWait(String[] args) {
+        public void deployAndWait(String[] args) throws TimeoutException {
             
             try {
                 parseArgs(args);
@@ -89,6 +94,7 @@ public class ApplicationDeployCommand extends AbstractApplicationCommand {
             }
             catch (TimeoutException e) {
                 info(e.getMessage());
+                throw e;
             }
         }
 
