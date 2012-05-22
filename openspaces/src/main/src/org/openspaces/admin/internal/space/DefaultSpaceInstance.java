@@ -62,7 +62,7 @@ import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
 import com.gigaspaces.internal.client.spaceproxy.SpaceProxyImpl;
 import com.gigaspaces.internal.jvm.JVMDetails;
 import com.gigaspaces.internal.jvm.JVMStatistics;
-import com.gigaspaces.internal.lookup.SpaceUrlBuilder;
+import com.gigaspaces.internal.lookup.SpaceUrlUtils;
 import com.gigaspaces.internal.os.OSDetails;
 import com.gigaspaces.internal.os.OSStatistics;
 import com.gigaspaces.internal.version.PlatformLogicalVersion;
@@ -346,7 +346,7 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
     protected void setIJSpace(ISpaceProxy spaceProxy) {
         this.ijspace = spaceProxy;
         if (spaceProxy instanceof SpaceProxyImpl) {
-            String url = SpaceUrlBuilder.buildJiniUrl(spaceProxy.getURL().getContainerName(), spaceProxy.getURL().getSpaceName(), admin.getGroups(), admin.getLocators());
+            String url = SpaceUrlUtils.buildJiniUrl(spaceProxy.getURL().getContainerName(), spaceProxy.getURL().getSpaceName(), admin.getGroups(), admin.getLocators());
             try {
                 ((SpaceProxyImpl)spaceProxy).setFinderURL(SpaceURLParser.parseURL(url));
             } catch (MalformedURLException e) {
