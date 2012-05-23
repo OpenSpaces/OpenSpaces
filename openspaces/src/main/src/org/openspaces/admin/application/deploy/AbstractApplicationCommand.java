@@ -63,8 +63,8 @@ public abstract class AbstractApplicationCommand {
             return lookupTimeout;
         }
 
-        protected long getDeployTimeout() {
-            return deployTimeout;
+        protected long getTimeout() {
+            return timeout;
         }
 
         protected boolean isSout() {
@@ -87,7 +87,7 @@ public abstract class AbstractApplicationCommand {
 
         private int lookupTimeout = 5000;
         
-        private long deployTimeout = Long.MAX_VALUE;
+        private long timeout = Long.MAX_VALUE;
 
         private boolean sout = false;
 
@@ -131,8 +131,8 @@ public abstract class AbstractApplicationCommand {
             this.userDetails = new User(userName, password);
         }
         
-        public void setDeployTimeout(long deployTimeout) {
-            this.deployTimeout = deployTimeout;
+        public void setTimeout(long timeout) {
+            this.timeout = timeout;
         }
         
         public void setManaged(boolean managed) {
@@ -174,8 +174,9 @@ public abstract class AbstractApplicationCommand {
                     setLookupTimeout(Integer.valueOf(param.getArguments()[0]));
                 }
                 
-                if (param.getName().equalsIgnoreCase("deploy-timeout")) {
-                    setDeployTimeout(Long.valueOf(param.getArguments()[0]));
+                if (param.getName().equalsIgnoreCase("deploy-timeout") || 
+                    param.getName().equalsIgnoreCase("undeploy-timeout")) {
+                    setTimeout(Long.valueOf(param.getArguments()[0]));
                 }
                 
                 if (param.getName().equals("user")) {

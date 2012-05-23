@@ -60,7 +60,7 @@ public class ApplicationDeployCommand extends AbstractApplicationCommand {
                 
                 File applicationFolder = new File(args[args.length-1]);
                 
-                long end = System.currentTimeMillis() + getDeployTimeout();
+                long end = System.currentTimeMillis() + getTimeout();
                 
                 ApplicationConfig applicationConfig = new ApplicationFileDeployment(applicationFolder).create();
                 
@@ -113,7 +113,7 @@ public class ApplicationDeployCommand extends AbstractApplicationCommand {
             }
             sb.append("\n    -user xxx -password yyyy                 : Deploys a secured processing unit propagated with the supplied user and password");
             sb.append("\n    -secured true                            : Deploys a secured processing unit (implicit when using -user/-password)");
-            sb.append("\n    -deploy-timeout [timeout value in ms]    : Timeout for deploy operation, otherwise blocks until all successful/failed deployment events arrive (default)");
+            sb.append("\n    -undeploy-timeout [timeout value in ms]    : Timeout for deploy operation, otherwise blocks until all successful/failed deployment events arrive (default)");
             sb.append("\n");
             sb.append("\n");
             sb.append("\nSome Examples:");
