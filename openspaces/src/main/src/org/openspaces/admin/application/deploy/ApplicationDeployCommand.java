@@ -19,6 +19,7 @@ import java.io.File;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.openspaces.admin.AdminException;
 import org.openspaces.admin.application.Application;
 import org.openspaces.admin.application.ApplicationFileDeployment;
 import org.openspaces.admin.application.config.ApplicationConfig;
@@ -51,7 +52,7 @@ public class ApplicationDeployCommand extends AbstractApplicationCommand {
         }
 
         
-        public void deployAndWait(String[] args) throws TimeoutException {
+        public void deployAndWait(String[] args) throws TimeoutException,AdminException {
             
             try {
                 parseArgs(args);
@@ -117,9 +118,19 @@ public class ApplicationDeployCommand extends AbstractApplicationCommand {
             sb.append("\n");
             sb.append("\n");
             sb.append("\nSome Examples:");
-            sb.append("\n1. Deploy data-app");
+            if (!getManaged()) {
+                sb.append("\n1. ApplicationDeployCommand examples/data/dist");
+            }
+            else {
+                sb.append("\n1. deploy-application examples/data/dist");
+            }
             sb.append("\n    - Deploys the application in the data-app directory.");
-            sb.append("\n2. Deploy data-app.zip");
+            if (!getManaged()) {
+                sb.append("\n1. ApplicationDeployCommand examples/data/dist.zip");
+            }
+            else {
+                sb.append("\n1. deploy-application examples/data/dist.zip");
+            }
             sb.append("\n    - Deploys the application in the data-app zip file.");
             return sb.toString();
       }
