@@ -114,7 +114,7 @@ public class ApplicationDeployCommand extends AbstractApplicationCommand {
             }
             sb.append("\n    -user xxx -password yyyy                 : Deploys a secured processing unit propagated with the supplied user and password");
             sb.append("\n    -secured true                            : Deploys a secured processing unit (implicit when using -user/-password)");
-            sb.append("\n    -undeploy-timeout [timeout value in ms]    : Timeout for deploy operation, otherwise blocks until all successful/failed deployment events arrive (default)");
+            sb.append("\n    -deploy-timeout [timeout value in ms]    : Timeout for deploy operation, otherwise blocks until all successful/failed deployment events arrive (default)");
             sb.append("\n");
             sb.append("\n");
             sb.append("\nSome Examples:");
