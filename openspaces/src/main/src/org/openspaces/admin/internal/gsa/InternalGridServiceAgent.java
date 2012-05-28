@@ -43,4 +43,28 @@ public interface InternalGridServiceAgent extends GridServiceAgent, InternalGrid
     void restart(InternalAgentGridComponent agentGridComponent);
 
     int internalStartGridService(GridServiceContainerConfig config);
+
+    /**
+     * Invoked to mark a child grid component as added to lookup service
+     * @since 9.0.1
+     * @author itaif
+     */
+    void addAgentGridComponent(InternalAgentGridComponent agentGridComponent);
+    
+    /**
+     * Invoked to mark a child grid component as removed from lookup service
+     * @since 9.0.1
+     * @author itaif
+     */
+    void removeAgentGridComponent(InternalAgentGridComponent agentGridComponent);
+    
+    /**
+     * @return all child grid components marked as removed from lookup service, but are still managed by this agent
+     * This is a temporary condition that could happen if the grid component is experiencing GC 
+     * or has other delays updating the lookup lease.
+     * @since 9.0.1
+     * @author itaif 
+     */
+    InternalAgentGridComponent[] getUnconfirmedRemovedAgentGridComponents();
+    
 }

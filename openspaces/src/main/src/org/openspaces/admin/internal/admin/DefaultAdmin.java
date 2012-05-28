@@ -685,8 +685,10 @@ public class DefaultAdmin implements InternalAdmin {
 
         for (Iterator<Map.Entry<String, InternalAgentGridComponent>> it = orphanedAgentGridComponents.entrySet().iterator(); it.hasNext();) {
             Map.Entry<String, InternalAgentGridComponent> entry = it.next();
-            if (entry.getValue().getAgentUid().equals(gridServiceAgent.getUid())) {
-                entry.getValue().setGridServiceAgent(gridServiceAgent);
+            InternalAgentGridComponent agentGridComponent = entry.getValue();
+            if (agentGridComponent.getAgentUid().equals(gridServiceAgent.getUid())) {
+                agentGridComponent.setGridServiceAgent(gridServiceAgent);
+                gridServiceAgent.addAgentGridComponent(agentGridComponent);
                 it.remove();
             }
         }
@@ -919,9 +921,11 @@ public class DefaultAdmin implements InternalAdmin {
 
     @Override
     public synchronized void removeGridServiceContainer(String uid) {
+        
         if (logger.isDebugEnabled()) {
             logger.debug("Removing GSC uid=" + uid);
         }
+        
         InternalGridServiceContainer gridServiceContainer = gridServiceContainers.removeGridServiceContainer(uid);
         if (gridServiceContainer != null) {
             gridServiceContainer.setDiscovered(false);
@@ -937,6 +941,11 @@ public class DefaultAdmin implements InternalAdmin {
             processZonesOnServiceRemoval(uid, gridServiceContainer);
             for (Zone zone : gridServiceContainer.getZones().values()) {
                 ((InternalGridServiceContainers) zone.getGridServiceContainers()).removeGridServiceContainer(uid);
+            }
+            
+            InternalGridServiceAgent agent = (InternalGridServiceAgent)gridServiceContainer.getGridServiceAgent();
+            if (agent != null) {
+                agent.removeAgentGridComponent(gridServiceContainer);
             }
         }
 
@@ -1101,11 +1110,12 @@ public class DefaultAdmin implements InternalAdmin {
             // did not start by an agent, disard
             return;
         }
-        GridServiceAgent gridServiceAgent = gridServiceAgents.getAgentByUID(agentGridComponent.getAgentUid());
+        InternalGridServiceAgent gridServiceAgent = (InternalGridServiceAgent) gridServiceAgents.getAgentByUID(agentGridComponent.getAgentUid());
         if (gridServiceAgent == null) {
             orphanedAgentGridComponents.put(agentGridComponent.getUid(), agentGridComponent);
         } else {
             agentGridComponent.setGridServiceAgent(gridServiceAgent);
+            gridServiceAgent.addAgentGridComponent(agentGridComponent);
         }
     }
 

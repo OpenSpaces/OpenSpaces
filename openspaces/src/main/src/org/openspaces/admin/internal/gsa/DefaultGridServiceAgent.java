@@ -20,8 +20,13 @@ package org.openspaces.admin.internal.gsa;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -54,6 +59,7 @@ import org.openspaces.admin.internal.support.NetworkExceptionHelper;
 import org.openspaces.admin.lus.LookupService;
 import org.openspaces.admin.lus.events.LookupServiceAddedEventListener;
 
+import com.gigaspaces.grid.gsa.AgentProcessDetails;
 import com.gigaspaces.grid.gsa.AgentProcessesDetails;
 import com.gigaspaces.grid.gsa.GSA;
 import com.gigaspaces.internal.jvm.JVMDetails;
@@ -79,6 +85,8 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
 
     private volatile AgentProcessesDetails processesDetails;
 
+    private ConcurrentHashMap<Integer,InternalAgentGridComponent> removedAgentGridComponents = new ConcurrentHashMap<Integer,InternalAgentGridComponent>();
+
     public DefaultGridServiceAgent(ServiceID serviceID, GSA gsa, InternalAdmin admin, AgentProcessesDetails processesDetails) {
         super(admin);
         this.serviceID = serviceID;
@@ -97,6 +105,28 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
     public void setProcessesDetails(AgentProcessesDetails processesDetails) {
         assertStateChangesPermitted();
         this.processesDetails = processesDetails;
+        
+        //find all agentIds as reported by agent
+        Map<Integer,AgentProcessDetails> agentIds = new HashMap<Integer,AgentProcessDetails>();
+        for (AgentProcessDetails p : processesDetails.getProcessDetails()) {
+            agentIds.put(p.getAgentId(),p);
+        }
+        
+        //find all removed containers that are not reported by agent (confirmed to be removed)
+        Set<InternalAgentGridComponent> confirmedRemovedProcesses = new HashSet<InternalAgentGridComponent>();
+        for (InternalAgentGridComponent c : removedAgentGridComponents.values()) {
+            
+            AgentProcessDetails pdetails = agentIds.get(c.getAgentId());
+            if (pdetails==null || 
+                pdetails.getProcessId() != c.getVirtualMachine().getDetails().getPid()) {
+                confirmedRemovedProcesses.add(c);
+            }
+        }
+        
+        //remove containers that have been confirmed to be removed 
+        for (InternalAgentGridComponent confirmedRemovedProcess : confirmedRemovedProcesses) {
+            removedAgentGridComponents.remove(confirmedRemovedProcess.getAgentId());
+        }
     }
 
     public ServiceID getServiceID() {
@@ -469,5 +499,23 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
 
     public void runGc() throws RemoteException {
         gsa.runGc();
+    }
+
+    @Override
+    public void removeAgentGridComponent(InternalAgentGridComponent agentGridComponent) {
+        assertStateChangesPermitted();
+        removedAgentGridComponents.put(agentGridComponent.getAgentId(), agentGridComponent);
+    }
+    
+    @Override
+    public void addAgentGridComponent(InternalAgentGridComponent agentGridComponent) {
+        assertStateChangesPermitted();
+        removedAgentGridComponents.remove(agentGridComponent.getAgentId());
+    }
+    
+    @Override
+    public InternalAgentGridComponent[] getUnconfirmedRemovedAgentGridComponents() {
+        Collection<InternalAgentGridComponent> values = new ArrayList<InternalAgentGridComponent>(removedAgentGridComponents.values());
+        return values.toArray(new InternalAgentGridComponent[values.size()]);
     }
 }
