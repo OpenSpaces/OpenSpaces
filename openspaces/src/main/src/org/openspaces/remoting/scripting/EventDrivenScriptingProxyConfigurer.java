@@ -32,7 +32,7 @@ import org.openspaces.remoting.EventDrivenRemotingProxyConfigurer;
  * Integer result = executor.execute(new StaticScript()
  *                  .type("groovy")
  *                  .name("myScript")
- *                  .script("return 1")));
+ *                  .script("return 1"));
  * </pre>
  *
  * @author Uri Cohen
