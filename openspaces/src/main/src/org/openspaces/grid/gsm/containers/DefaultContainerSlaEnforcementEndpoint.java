@@ -28,6 +28,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsa.GridServiceAgents;
@@ -35,11 +36,14 @@ import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.gsa.InternalGridServiceAgent;
 import org.openspaces.admin.internal.gsc.InternalGridServiceContainer;
+import org.openspaces.admin.internal.support.InternalAgentGridComponent;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.LogPerProcessingUnit;
 import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
+import org.openspaces.grid.gsm.capacity.ClusterCapacityRequirements;
 import org.openspaces.grid.gsm.capacity.MemoryCapacityRequirement;
+import org.openspaces.grid.gsm.containers.exceptions.ContainerNotDiscoveredException;
 import org.openspaces.grid.gsm.containers.exceptions.ContainersSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.containers.exceptions.ContainersSlaEnforcementPendingProcessingUnitDeallocationException;
 import org.openspaces.grid.gsm.containers.exceptions.FailedToStartNewGridServiceContainersException;
@@ -90,6 +94,8 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
         
         validateSla(sla, pu);
 
+        checkAllUndiscoveredContainersAreNotRunning(sla);
+        
         enforceSlaInternal(sla);
     }
 
@@ -193,6 +199,34 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
         }
     }
 
+    /**
+     * Looks for containers that should have been discovered since they are managed by the GSA
+     * or containers that should have been removed since they are no longer managed by the GSA
+     * @throws ContainerNotDiscoveredException 
+     */
+    private void checkAllUndiscoveredContainersAreNotRunning(final ContainersSlaPolicy sla) throws ContainerNotDiscoveredException {
+        ClusterCapacityRequirements requirements = sla.getClusterCapacityRequirements();
+        final Collection<String> allocatedAgentUids = requirements.getAgentUids();
+        final String zone = ContainersSlaUtils.getContainerZone(pu);
+        Admin admin = pu.getAdmin();
+        for (String agentUid : allocatedAgentUids) {
+            
+            InternalGridServiceAgent agent = (InternalGridServiceAgent) admin.getGridServiceAgents().getAgentByUID(agentUid);
+            if (agent == null) {
+                throw new IllegalStateException("agent " + agentUid +" is not discovered");
+            }
+            
+            for (InternalAgentGridComponent component : agent.getUnconfirmedRemovedAgentGridComponents()) {
+                if (component instanceof GridServiceContainer) {
+                    GridServiceContainer container = (GridServiceContainer) component;
+                    if (ContainersSlaUtils.isContainerMatchesZone(container, zone)) {
+                        throw new ContainerNotDiscoveredException(container);
+                    }
+                }
+            }
+        }
+    }
+    
     private void startContainersOnMachineWithAllocatedCapacitySurplus(final ContainersSlaPolicy sla) {
         final String zone = ContainersSlaUtils.getContainerZone(pu);
         final Collection<String> allocatedAgentUids = sla.getClusterCapacityRequirements().getAgentUids();
