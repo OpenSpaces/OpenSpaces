@@ -35,10 +35,10 @@ import java.io.*;
 import java.util.List;
 
 /**
- * A {@link org.openspaces.core.executor.Task} that can be used to simulate remote invcation with
+ * A {@link org.openspaces.core.executor.Task} that can be used to simulate remote invocation with
  * {@link org.openspaces.remoting.SpaceRemotingServiceExporter}. When executed, the task searches
  * for a service exporter (first under the hardwired name <code>serviceExporter</code>, then any
- * bean that define this class), and based on paramters passed on the task itself (such as method
+ * bean that define this class), and based on parameters passed on the task itself (such as method
  * name, lookup name and arguments) invokes service methods that are registered with the service
  * exporter.
  *
