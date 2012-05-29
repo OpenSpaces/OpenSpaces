@@ -87,7 +87,7 @@ public class ApplicationDeployCommand extends AbstractApplicationCommand {
                     long remaining = end - System.currentTimeMillis();
                     if (remaining < 0 ||
                         !pu.waitFor(pu.getTotalNumberOfInstances(), remaining, TimeUnit.MILLISECONDS)) {
-                        throw new TimeoutException("Application " + name + " deployment timed out");
+                        throw new TimeoutException("Application " + name + " deployment timed out after " + TimeUnit.SECONDS.convert(getTimeout(), TimeUnit.MILLISECONDS) + " seconds");
                     }
                 }
                 
