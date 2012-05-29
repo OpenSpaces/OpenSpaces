@@ -156,14 +156,13 @@ public abstract class AbstractApplicationCommand {
                 logger.info(message);
             }
         }
-                
+        
         
         protected void parseArgs(String[] args) {
             CommandLineParser.Parameter[] params = CommandLineParser.parse(args, args.length - 1);
             String username = null;
             String password = null;
             for (CommandLineParser.Parameter param : params) {
-                
                 if (param.getName().equalsIgnoreCase("groups")) {
                     setGroups(param.getArguments());
                 }
@@ -210,11 +209,11 @@ public abstract class AbstractApplicationCommand {
 
 
         protected GridServiceManager waitForGridServiceManager() throws TimeoutException {
-            
+            info("Waiting for Grid Service Manager");
             final Admin admin = createAdmin();
             final GridServiceManager gsm = admin.getGridServiceManagers().waitForAtLeastOne(lookupTimeout,TimeUnit.MILLISECONDS);
             if (gsm == null) {
-                throw new TimeoutException("GSM discovery timed out.");
+                throw new TimeoutException("GSM discovery timed out after " + TimeUnit.SECONDS.convert(lookupTimeout, TimeUnit.MILLISECONDS) + " seconds");
             }
             return gsm;
         }
