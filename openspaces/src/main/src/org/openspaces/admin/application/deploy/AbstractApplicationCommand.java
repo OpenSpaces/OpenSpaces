@@ -39,14 +39,14 @@ public abstract class AbstractApplicationCommand {
 
         private String[] groups;
 
-        private UserDetails loggedInUser;
+        private UserDetails adminUser;
 
         public Boolean getSecured() {
             return secured;
         }
 
         public void setAdminUserDetails(UserDetails user) {
-            this.loggedInUser = user;
+            this.adminUser = user;
         }
         
         public void setSecured(Boolean secured) {
@@ -231,8 +231,8 @@ public abstract class AbstractApplicationCommand {
                 }
             }
             
-            if (loggedInUser != null) {
-                adminFactory.userDetails(loggedInUser);
+            if (adminUser != null) {
+                adminFactory.userDetails(adminUser);
             }
             
             final Admin admin = adminFactory.create();
