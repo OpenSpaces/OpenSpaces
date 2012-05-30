@@ -20,7 +20,7 @@ package org.openspaces.itest.gateway;
 import org.openspaces.core.gateway.GatewaySinkFactoryBean;
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 
-import com.gigaspaces.cluster.replication.gateway.transaction.TransactionConsolidationInterceptor;
+import com.gigaspaces.sync.SyncEndPointInterceptor;
 
 /**
  * Test Sink component spring configuration
@@ -43,9 +43,9 @@ public class GatewaySinkWithInterceptorConfigurationTest extends AbstractDepende
     protected GatewaySinkFactoryBean sink;
     
     public void testClusterConfiguration() throws SecurityException, NoSuchFieldException {
-        TransactionConsolidationInterceptor interceptor = sink.getDistributedTransactionProcessingConfiguration().getDistributedTransactionConsolidationInterceptor();
+        SyncEndPointInterceptor interceptor = sink.getSyncEndpointInterceptorConfiguration().getInterceptor();
         assertNotNull(interceptor);
-        assertTrue(interceptor instanceof MyTransactionConsolidationInterceptor);
+        assertTrue(interceptor instanceof MySyncEndPointInterceptor);
     }
 
 

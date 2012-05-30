@@ -15,12 +15,12 @@
  *******************************************************************************/
 package org.openspaces.itest.gateway;
 
-import com.gigaspaces.cluster.replication.gateway.transaction.TransactionConsolidationInterceptor;
+import com.gigaspaces.sync.SyncEndPointInterceptor;
 
 /**
  * @author eitany
  *
  */
-public class MyTransactionConsolidationInterceptor extends TransactionConsolidationInterceptor {
+public class MySyncEndPointInterceptor extends SyncEndPointInterceptor {
 
 }
