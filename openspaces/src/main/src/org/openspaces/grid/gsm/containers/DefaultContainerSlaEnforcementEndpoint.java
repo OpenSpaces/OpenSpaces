@@ -220,7 +220,11 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
                 if (component instanceof GridServiceContainer) {
                     GridServiceContainer container = (GridServiceContainer) component;
                     if (ContainersSlaUtils.isContainerMatchesZone(container, zone)) {
-                        throw new ContainerNotDiscoveredException(container);
+                        ContainerNotDiscoveredException exception = new ContainerNotDiscoveredException(container);
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Admin API undiscovered container validation failed", exception);
+                        }
+                        throw exception;
                     }
                 }
             }
