@@ -181,16 +181,16 @@ public class RebalancingUtils {
                 int maxNumberOfInstances = containers.length;
                 if (numberOfInstances < maxNumberOfInstances) {
                    if (targetNumberOfInstances.get() == numberOfInstances+1) {
-                       if (logger.isDebugEnabled()) {
-                           logger.debug(
+                       if (logger.isInfoEnabled()) {
+                           logger.info(
                                   "Waiting for pu.numberOfInstances to increment from "+numberOfInstances + " to " + targetNumberOfInstances.get() + ". "+
                                   "Number of relevant containers " + maxNumberOfInstances);
                        }
                    }
                    else {
                        targetNumberOfInstances.set(numberOfInstances+1);
-                       if (logger.isDebugEnabled()) {
-                           logger.debug(
+                       if (logger.isInfoEnabled()) {
+                           logger.info(
                                   "Planning to increment pu.numberOfInstances from "+numberOfInstances + " to " + targetNumberOfInstances.get() + ". "+
                                   "Number of relevant containers " + maxNumberOfInstances);
                        }
@@ -200,8 +200,8 @@ public class RebalancingUtils {
                                    // this is an async operation 
                                    // pu.getNumberOfInstances() still shows the old value.
                                    pu.incrementInstance();
-                                   if (logger.isDebugEnabled()) {
-                                       logger.debug("pu.incrementInstance() called");
+                                   if (logger.isInfoEnabled()) {
+                                       logger.info("pu.incrementInstance() called");
                                    }
                                } catch (AdminException e) {
                                    throwable.set(e);
