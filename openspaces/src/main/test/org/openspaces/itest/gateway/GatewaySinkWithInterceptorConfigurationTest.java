@@ -20,7 +20,7 @@ package org.openspaces.itest.gateway;
 import org.openspaces.core.gateway.GatewaySinkFactoryBean;
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 
-import com.gigaspaces.sync.SyncEndPointInterceptor;
+import com.gigaspaces.sync.SynchronizationEndpointInterceptor;
 
 /**
  * Test Sink component spring configuration
@@ -43,7 +43,7 @@ public class GatewaySinkWithInterceptorConfigurationTest extends AbstractDepende
     protected GatewaySinkFactoryBean sink;
     
     public void testClusterConfiguration() throws SecurityException, NoSuchFieldException {
-        SyncEndPointInterceptor interceptor = sink.getSyncEndpointInterceptorConfiguration().getInterceptor();
+        SynchronizationEndpointInterceptor interceptor = sink.getSyncEndpointInterceptorConfiguration().getInterceptor();
         assertNotNull(interceptor);
         assertTrue(interceptor instanceof MySyncEndPointInterceptor);
     }

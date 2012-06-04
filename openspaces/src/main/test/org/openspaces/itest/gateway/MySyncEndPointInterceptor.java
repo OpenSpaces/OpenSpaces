@@ -15,12 +15,12 @@
  *******************************************************************************/
 package org.openspaces.itest.gateway;
 
-import com.gigaspaces.sync.SyncEndPointInterceptor;
+import com.gigaspaces.sync.SynchronizationEndpointInterceptor;
 
 /**
  * @author eitany
  *
  */
-public class MySyncEndPointInterceptor extends SyncEndPointInterceptor {
+public class MySyncEndPointInterceptor extends SynchronizationEndpointInterceptor {
 
 }
