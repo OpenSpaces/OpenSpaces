@@ -29,7 +29,7 @@ public class RebalancingSlaEnforcementInProgressException extends SlaEnforcement
     }
     
     public RebalancingSlaEnforcementInProgressException(ProcessingUnit pu, Throwable cause) {
-        super(inProgressMessage(pu), cause);
+        super(inProgressMessage(pu,cause), cause);
     }
 
     public RebalancingSlaEnforcementInProgressException(ProcessingUnit pu, String message) {
@@ -39,6 +39,14 @@ public class RebalancingSlaEnforcementInProgressException extends SlaEnforcement
     }
     
     private static String inProgressMessage(ProcessingUnit pu) {
-        return pu.getName() + " rebalancing SLA enforcement is in progress";
+        return inProgressMessage(pu, null);
+    }
+    
+    private static String inProgressMessage(ProcessingUnit pu, Throwable cause) {
+        String causeMessage = "";
+        if (cause != null) {
+            causeMessage = cause.getMessage();
+        }
+        return pu.getName() + " rebalancing SLA enforcement is in progress." + causeMessage;
     }
 }
