@@ -59,6 +59,7 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
     
     // events state
     private ScaleStrategyProgressEventState autoScalingEventState;
+    private CapacityRequirements enforcedCapacityRequirements;
     
     @Override
     public void afterPropertiesSet() {
@@ -145,9 +146,11 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
     protected void enforceSla() throws SlaEnforcementInProgressException {
         
         SlaEnforcementInProgressException pendingException=null;
+        final CapacityRequirements capacityRequirements = super.getCapacityRequirementConfig().toCapacityRequirements();
         
         try {
             super.enforceCapacityRequirement(); //enforces the last call to #setCapacityRequirementConfig
+            enforcedCapacityRequirements = capacityRequirements;
             // no exception means that manual scale is complete.
         }
         catch (RebalancingSlaEnforcementInProgressException e) {
@@ -159,14 +162,19 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
             throw e;
         }
         catch (SlaEnforcementInProgressException e) {
+            
+            if (enforcedCapacityRequirements == null) {
+                // no prev capacityRequirements to work with
+                throw e;
+            }
+            
             // no effect on instances yet... proceed with auto scaling rules
             // The reasoning is that it may take a long time for machines to start
             // and during that time the capacity requirements may need to change
             pendingException = e;
         }
-         
+        
         CapacityRequirements newCapacityRequirements;
-        final CapacityRequirements capacityRequirements = super.getCapacityRequirementConfig().toCapacityRequirements();
         
         try {
             //make sure that we are not in the cooldown period
@@ -175,7 +183,9 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
             cooldownValidator.validate();
         
             //enforce auto-scaling SLA
-            newCapacityRequirements = enforceAutoScalingSla(capacityRequirements);
+            //based on the last enforced SLA, the reason is that the monitored data reflects the last enforced SLA
+            //and it could have changed since then (happens when pendingException != null)
+            newCapacityRequirements = enforceAutoScalingSla(enforcedCapacityRequirements);
         }
         catch (SlaEnforcementInProgressException e) {
             if (pendingException != null) {
