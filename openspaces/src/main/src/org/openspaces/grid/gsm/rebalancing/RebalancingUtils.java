@@ -511,11 +511,7 @@ public class RebalancingUtils {
     }
     
     private static boolean isProcessingUnitHasMinimumNumberOfInstancesPerPartition(ProcessingUnit pu, GridServiceContainer[] containers, int minimumNumberOfInstancesPerPartition) {
-        
-        if (minimumNumberOfInstancesPerPartition > 1 + pu.getNumberOfBackups()) {
-            throw new IllegalArgumentException("minimumNumberOfInstancesPerPartition cannot be larger than 1+numberOfBackups="+(1 + pu.getNumberOfBackups()));
-        }
-        
+                
         boolean hasMinimum = true;
         if (pu.getNumberOfBackups() > 0) {
             for (int instanceId = 1 ; hasMinimum && instanceId <= pu.getNumberOfInstances() ; instanceId ++) {
