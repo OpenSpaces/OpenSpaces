@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -177,12 +178,13 @@ public class RebalancingUtils {
             }
             
             private void incrementInstance() {
+                final String uuid = "[incrementUid:"+UUID.randomUUID().toString()+"] ";
                 int numberOfInstances = pu.getNumberOfInstances();
                 int maxNumberOfInstances = containers.length;
                 if (numberOfInstances < maxNumberOfInstances) {
                    if (targetNumberOfInstances.get() == numberOfInstances+1) {
                        if (logger.isInfoEnabled()) {
-                           logger.info(
+                           logger.info(uuid+
                                   "Waiting for pu.numberOfInstances to increment from "+numberOfInstances + " to " + targetNumberOfInstances.get() + ". "+
                                   "Number of relevant containers " + maxNumberOfInstances);
                        }
@@ -190,7 +192,7 @@ public class RebalancingUtils {
                    else {
                        targetNumberOfInstances.set(numberOfInstances+1);
                        if (logger.isInfoEnabled()) {
-                           logger.info(
+                           logger.info(uuid+
                                   "Planning to increment pu.numberOfInstances from "+numberOfInstances + " to " + targetNumberOfInstances.get() + ". "+
                                   "Number of relevant containers " + maxNumberOfInstances);
                        }
@@ -201,12 +203,12 @@ public class RebalancingUtils {
                                    // pu.getNumberOfInstances() still shows the old value.
                                    pu.incrementInstance();
                                    if (logger.isInfoEnabled()) {
-                                       logger.info("pu.incrementInstance() called");
+                                       logger.info(uuid+"pu.incrementInstance() called");
                                    }
                                } catch (AdminException e) {
                                    throwable.set(e);
                                } catch (Throwable e) {
-                                   logger.error("Unexpected Exception: " + e.getMessage(),e);
+                                   logger.error(uuid+"Unexpected Exception: " + e.getMessage(),e);
                                    throwable.set(e);
                                }
                            }
