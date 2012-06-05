@@ -297,6 +297,9 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             throw new AdminException("Processing unit does not allow to decrement instances on it");
         }
         try {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Decrementing planned instance if pending of " + processingUnit.getName());
+            }
             return gsm.decrementPlannedIfPending(processingUnit.getName());
         } catch (SecurityException se) {
             throw new AdminException("No privileges to decrement a processing unit instance", se);
@@ -315,6 +318,9 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             throw new AdminException("Processing unit does not allow to decrement instances on it");
         }
         try {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Decrementing instance " + ((InternalProcessingUnitInstance) processingUnitInstance).getServiceID() + " of " + processingUnitInstance.getProcessingUnit().getName());
+            }
             gsm.decrement(processingUnitInstance.getProcessingUnit().getName(), ((InternalProcessingUnitInstance) processingUnitInstance).getServiceID(), true);
         } catch (SecurityException se) {
             throw new AdminException("No privileges to decrement a processing unit instance", se);
@@ -332,6 +338,9 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             throw new AdminException("Processing unit does not allow to increment instances on it");
         }
         try {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Incrementing instance of " + processingUnit.getName());
+            }
             gsm.increment(processingUnit.getName(), null);
         } catch (SecurityException se) {
             throw new AdminException("No privileges to increment a processing unit instance", se);
