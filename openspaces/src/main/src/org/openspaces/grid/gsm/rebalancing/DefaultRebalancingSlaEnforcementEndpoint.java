@@ -157,7 +157,12 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
     private void enforceSlaStatelessProcessingUnit(RebalancingSlaPolicy sla) throws RebalancingSlaEnforcementInProgressException {
         
         GridServiceContainer[] containers = sla.getContainers();
-        
+        if (state.getNumberOfFutureDeployments(pu) > 0) {
+            // incrementNumberOfStatelessInstancesAsync can be called only one at a time
+            // if called concurrently they won't share state and it causes too many increment instance calls to the GSM.
+            throw new ProcessingUnitIsNotEvenlyDistributedAcrossContainersException(pu, containers);
+        }
+            
         Collection<FutureStatelessProcessingUnitInstance> futureInstances = 
             RebalancingUtils.incrementNumberOfStatelessInstancesAsync(
                     pu, 
