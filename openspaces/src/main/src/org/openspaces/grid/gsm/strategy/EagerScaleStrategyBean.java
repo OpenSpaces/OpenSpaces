@@ -194,6 +194,7 @@ public class EagerScaleStrategyBean extends AbstractScaleStrategyBean
         sla.setMaximumNumberOfConcurrentRelocationsPerMachine(slaConfig.getMaxConcurrentRelocationsPerMachine());
         sla.setSchemaConfig(getSchemaConfig());
         sla.setAllocatedCapacity(machinesEndpoint.getAllocatedCapacity());
+        sla.setMinimumNumberOfInstancesPerPartition(1);
         try {
             rebalancingEndpoint.enforceSla(sla);
             puInstanceProvisioningCompletedEvent();

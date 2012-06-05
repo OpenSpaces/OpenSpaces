@@ -220,7 +220,7 @@ class RebalancingSlaEnforcementState {
         return doneFutureStatefulDeployments;
     }
 
-    public Iterable<ProcessingUnitInstance> getRemovedStatelessProcessingUnitInstances(ProcessingUnit pu) {
+    public List<ProcessingUnitInstance> getRemovedStatelessProcessingUnitInstances(ProcessingUnit pu) {
         
         List<ProcessingUnitInstance> removedInstances = new ArrayList<ProcessingUnitInstance>();
         

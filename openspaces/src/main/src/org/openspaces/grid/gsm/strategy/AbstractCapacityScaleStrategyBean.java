@@ -21,6 +21,7 @@ import java.util.Map.Entry;
 import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
+import org.openspaces.admin.pu.elastic.config.AutomaticCapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyCapacityRequirementConfig;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
 import org.openspaces.grid.gsm.GridServiceContainerConfigAware;
@@ -253,6 +254,15 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
         sla.setMaximumNumberOfConcurrentRelocationsPerMachine(scaleStrategy.getMaxConcurrentRelocationsPerMachine());
         sla.setSchemaConfig(getSchemaConfig());
         sla.setAllocatedCapacity(machinesEndpoint.getAllocatedCapacity());
+        if (getSchemaConfig().isDefaultSchema() && scaleStrategy instanceof AutomaticCapacityScaleConfig) {
+            //make sure that number of instances does not go below the specified minimum, even when relocations are required.
+            AutomaticCapacityScaleConfig automaticCapacityScaleConfig = (AutomaticCapacityScaleConfig) scaleStrategy;
+            int minimumNumberOfInstancesPerPartition = (int)(automaticCapacityScaleConfig.getMinCapacity().getMemoryCapacityInMB() / containersConfig.getMaximumMemoryCapacityInMB());
+            sla.setMinimumNumberOfInstancesPerPartition(minimumNumberOfInstancesPerPartition);
+        }
+        else {
+            sla.setMinimumNumberOfInstancesPerPartition(1);
+        }
         try {
             rebalancingEndpoint.enforceSla(sla);
             puInstanceProvisioningCompletedEvent();

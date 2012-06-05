@@ -76,6 +76,7 @@ public class RebalancingUtils {
        
        final Admin admin = pu.getAdmin();
        final Map<GridServiceContainer,FutureStatelessProcessingUnitInstance> futureInstances = new HashMap<GridServiceContainer, FutureStatelessProcessingUnitInstance>();
+       
        final AtomicInteger targetNumberOfInstances = new AtomicInteger(pu.getNumberOfInstances());
        
        final long start = System.currentTimeMillis();
@@ -180,7 +181,7 @@ public class RebalancingUtils {
             private void incrementInstance() {
                 final String uuid = "[incrementUid:"+UUID.randomUUID().toString()+"] ";
                 int numberOfInstances = pu.getNumberOfInstances();
-                int maxNumberOfInstances = containers.length;
+                int maxNumberOfInstances = getContainersOnMachines(pu).length;
                 if (numberOfInstances < maxNumberOfInstances) {
                    if (targetNumberOfInstances.get() == numberOfInstances+1) {
                        if (logger.isInfoEnabled()) {
@@ -505,6 +506,33 @@ public class RebalancingUtils {
         return intact;
     }
     
+    public static boolean isProcessingUnitHasMinimumNumberOfInstancesPerPartition(ProcessingUnit pu, int minimumNumberOfInstancesPerPartition) {
+        return isProcessingUnitHasMinimumNumberOfInstancesPerPartition(pu, pu.getAdmin().getGridServiceContainers().getContainers(), minimumNumberOfInstancesPerPartition);
+    }
+    
+    private static boolean isProcessingUnitHasMinimumNumberOfInstancesPerPartition(ProcessingUnit pu, GridServiceContainer[] containers, int minimumNumberOfInstancesPerPartition) {
+        
+        if (minimumNumberOfInstancesPerPartition > 1 + pu.getNumberOfBackups()) {
+            throw new IllegalArgumentException("minimumNumberOfInstancesPerPartition cannot be larger than 1+numberOfBackups="+(1 + pu.getNumberOfBackups()));
+        }
+        
+        boolean hasMinimum = true;
+        if (pu.getNumberOfBackups() > 0) {
+            for (int instanceId = 1 ; hasMinimum && instanceId <= pu.getNumberOfInstances() ; instanceId ++) {
+                if (!isProcessingUnitPartitionHasMinimumNumberOfInstances(pu, instanceId, containers, minimumNumberOfInstancesPerPartition)) {
+                    hasMinimum = false;
+                    break;
+                }
+            }
+        }
+        else {
+            hasMinimum = isProcessingUnitIntact(pu,containers);
+        }
+    
+        return hasMinimum;
+    }
+    
+
     public static boolean isProcessingUnitPartitionIntact(ProcessingUnitInstance instance) {
         GridServiceContainer[] containers = instance.getAdmin().getGridServiceContainers().getContainers();
         return isProcessingUnitPartitionIntact(instance.getProcessingUnit(), instance.getInstanceId(), containers);
@@ -527,33 +555,41 @@ public class RebalancingUtils {
     }
     
     public static boolean isProcessingUnitPartitionIntact(ProcessingUnit pu,int instanceId, GridServiceContainer[] containers) {
-        
-        boolean intact = true;
-    
-        int numberOfPrimaryInstances = 0;
-        int numberOfBackupInstances = 0;
-        
-        for (int backupId = 0 ; backupId <= pu.getNumberOfBackups() ; backupId++) {
-            ProcessingUnitInstance instance = findProcessingUnitInstance(pu, instanceId, backupId, containers);
-            if (instance != null &&
-                instance.getSpaceInstance() != null) {
-                
-                if (instance.getSpaceInstance().getMode() == SpaceMode.BACKUP) {
-                    numberOfBackupInstances++;
-                }
-                else if (instance.getSpaceInstance().getMode() == SpaceMode.PRIMARY) {
-                    numberOfPrimaryInstances++;
-                }
-            }
-        }
-        
-        intact = (numberOfPrimaryInstances == 1 && 
-                  numberOfBackupInstances == pu.getNumberOfBackups());
-        
 
-        return intact;
+        return isProcessingUnitPartitionHasMinimumNumberOfInstances(pu, instanceId, containers, 1+pu.getNumberOfBackups());
     }
 
+    private static boolean isProcessingUnitPartitionHasMinimumNumberOfInstances(ProcessingUnit pu, int instanceId,
+            GridServiceContainer[] containers, int minimumNumberOfInstancesPerPartition) {
+        
+        boolean hasMinimum = true;
+        
+        if (minimumNumberOfInstancesPerPartition >= 1) {
+            
+            int numberOfPrimaryInstances = 0;
+            int numberOfBackupInstances = 0;
+            
+            for (int backupId = 0 ; backupId <= pu.getNumberOfBackups() ; backupId++) {
+                ProcessingUnitInstance instance = findProcessingUnitInstance(pu, instanceId, backupId, containers);
+                if (instance != null &&
+                        instance.getSpaceInstance() != null) {
+                    
+                    if (instance.getSpaceInstance().getMode() == SpaceMode.BACKUP) {
+                        numberOfBackupInstances++;
+                    }
+                    else if (instance.getSpaceInstance().getMode() == SpaceMode.PRIMARY) {
+                        numberOfPrimaryInstances++;
+                    }
+                }
+            }
+            
+            hasMinimum = 
+                    numberOfPrimaryInstances == 1 && 
+                    1+numberOfBackupInstances >= minimumNumberOfInstancesPerPartition;
+        }
+        return hasMinimum;
+    }
+    
     /**
      * @param instance
      * @return all instances from the same partition that is not the specified instance.
@@ -710,6 +746,13 @@ public class RebalancingUtils {
 */
     private static boolean isProcessingUnitIntact(ProcessingUnit pu, Machine[] machines) {
         return isProcessingUnitIntact(pu, getContainersOnMachines(pu,machines));
+    }
+    
+    /**
+     * @return all containers that the gsm can deploy the specified pu.
+     */
+    private static GridServiceContainer[] getContainersOnMachines(ProcessingUnit pu) {
+        return getContainersOnMachines(pu, pu.getAdmin().getMachines().getMachines());
     }
     
     private static GridServiceContainer[] getContainersOnMachines(ProcessingUnit pu, Machine[] machines) {

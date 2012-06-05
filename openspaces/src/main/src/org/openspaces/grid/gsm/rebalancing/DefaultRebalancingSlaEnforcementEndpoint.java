@@ -42,6 +42,8 @@ import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.CpuCapacityRequirement;
 import org.openspaces.grid.gsm.rebalancing.exceptions.FutureProcessingUnitInstanceDeploymentException;
+import org.openspaces.grid.gsm.rebalancing.exceptions.NumberOfInstancesIsBelowMinimumException;
+import org.openspaces.grid.gsm.rebalancing.exceptions.NumberOfInstancesPerPartitionIsBelowMinimumException;
 import org.openspaces.grid.gsm.rebalancing.exceptions.ProcessingUnitIsNotEvenlyDistributedAccrossMachinesException;
 import org.openspaces.grid.gsm.rebalancing.exceptions.ProcessingUnitIsNotEvenlyDistributedAcrossContainersException;
 import org.openspaces.grid.gsm.rebalancing.exceptions.ProcessingUnitIsNotInTactException;
@@ -157,12 +159,13 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
     private void enforceSlaStatelessProcessingUnit(RebalancingSlaPolicy sla) throws RebalancingSlaEnforcementInProgressException {
         
         GridServiceContainer[] containers = sla.getContainers();
+
         if (state.getNumberOfFutureDeployments(pu) > 0) {
             // incrementNumberOfStatelessInstancesAsync can be called only one at a time
             // if called concurrently they won't share state and it causes too many increment instance calls to the GSM.
             throw new ProcessingUnitIsNotEvenlyDistributedAcrossContainersException(pu, containers);
         }
-            
+
         Collection<FutureStatelessProcessingUnitInstance> futureInstances = 
             RebalancingUtils.incrementNumberOfStatelessInstancesAsync(
                     pu, 
@@ -175,11 +178,14 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
         if (state.getNumberOfFutureDeployments(pu) > 0) {
             throw new ProcessingUnitIsNotEvenlyDistributedAcrossContainersException(pu, containers);
         }
+
+        if (pu.getInstances().length < sla.getMinimumNumberOfInstancesPerPartition()) {
+            throw new NumberOfInstancesIsBelowMinimumException(pu, sla.getMinimumNumberOfInstancesPerPartition());
+        }
         
         // find all containers with instances that are not in the approved containers
         Set<GridServiceContainer> approvedContainers = new HashSet<GridServiceContainer>(Arrays.asList(containers));
         List<ProcessingUnitInstance> instancesToRemove = new ArrayList<ProcessingUnitInstance>();
-       
         for (GridServiceContainer container : pu.getAdmin().getGridServiceContainers()) {
             if (!approvedContainers.contains(container)) {
                 
@@ -195,6 +201,10 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
                 logger.info(
                         "removing pu instance " + RebalancingUtils.puInstanceToString(instanceToRemove) + " "+
                         "since not deployed on approved container");
+                if (pu.getInstances().length - state.getRemovedStatelessProcessingUnitInstances(pu).size() <= sla.getMinimumNumberOfInstancesPerPartition()) {
+                    //don't remove any more instances - we don't want to get below the minimum number of instances.
+                    break;
+                }
                 removeInstance(instanceToRemove);
             }
             
@@ -261,6 +271,10 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
     private void enfroceSlaStatefulProcessingUnit(RebalancingSlaPolicy sla)
             throws RebalancingSlaEnforcementInProgressException {
         
+        if (!RebalancingUtils.isProcessingUnitHasMinimumNumberOfInstancesPerPartition(pu, sla.getMinimumNumberOfInstancesPerPartition())) {
+            throw new NumberOfInstancesPerPartitionIsBelowMinimumException(pu, sla.getMinimumNumberOfInstancesPerPartition());
+        }
+    
         if (!RebalancingUtils.isProcessingUnitIntact(pu)) {
             throw new ProcessingUnitIsNotInTactException(pu);
         }

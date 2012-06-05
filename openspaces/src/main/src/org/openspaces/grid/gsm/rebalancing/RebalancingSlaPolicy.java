@@ -30,6 +30,7 @@ public class RebalancingSlaPolicy extends ServiceLevelAgreementPolicy {
     private int maxNumberOfConcurrentRelocationsPerMachine;
     private ProcessingUnitSchemaConfig schema;
     private ClusterCapacityRequirements allocatedCapacity;
+    private int minimumNumberOfInstancesPerPartition;
     
     public void setContainers(GridServiceContainer[] containers) {
         this.containers = containers;
@@ -63,9 +64,6 @@ public class RebalancingSlaPolicy extends ServiceLevelAgreementPolicy {
         this.allocatedCapacity = allocatedCapacity;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -73,13 +71,11 @@ public class RebalancingSlaPolicy extends ServiceLevelAgreementPolicy {
         result = prime * result + ((allocatedCapacity == null) ? 0 : allocatedCapacity.hashCode());
         result = prime * result + Arrays.hashCode(containers);
         result = prime * result + maxNumberOfConcurrentRelocationsPerMachine;
+        result = prime * result + minimumNumberOfInstancesPerPartition;
         result = prime * result + ((schema == null) ? 0 : schema.hashCode());
         return result;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -97,6 +93,8 @@ public class RebalancingSlaPolicy extends ServiceLevelAgreementPolicy {
         if (!Arrays.equals(containers, other.containers))
             return false;
         if (maxNumberOfConcurrentRelocationsPerMachine != other.maxNumberOfConcurrentRelocationsPerMachine)
+            return false;
+        if (minimumNumberOfInstancesPerPartition != other.minimumNumberOfInstancesPerPartition)
             return false;
         if (schema == null) {
             if (other.schema != null)
@@ -124,5 +122,17 @@ public class RebalancingSlaPolicy extends ServiceLevelAgreementPolicy {
         if (allocatedCapacity == null) {
             throw new IllegalArgumentException("allocatedCapacity cannot be null");
         }
+        
+        if (minimumNumberOfInstancesPerPartition < 0) {
+            throw new IllegalArgumentException("minimumNumberOfInstancesPerPartition must be zero or positive");
+        }
+    }
+
+    public int getMinimumNumberOfInstancesPerPartition() {
+        return minimumNumberOfInstancesPerPartition;
+    }
+
+    public void setMinimumNumberOfInstancesPerPartition(int minimumNumberOfInstancesPerPartition) {
+        this.minimumNumberOfInstancesPerPartition = minimumNumberOfInstancesPerPartition;
     }
 }
