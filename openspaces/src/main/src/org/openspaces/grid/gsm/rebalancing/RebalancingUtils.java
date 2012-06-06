@@ -747,7 +747,7 @@ public class RebalancingUtils {
     /**
      * @return all containers that the gsm can deploy the specified pu.
      */
-    private static GridServiceContainer[] getContainersOnMachines(ProcessingUnit pu) {
+    public static GridServiceContainer[] getContainersOnMachines(ProcessingUnit pu) {
         return getContainersOnMachines(pu, pu.getAdmin().getMachines().getMachines());
     }
     
