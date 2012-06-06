@@ -158,7 +158,7 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
 
     private void enforceSlaStatelessProcessingUnit(RebalancingSlaPolicy sla) throws RebalancingSlaEnforcementInProgressException {
         
-        GridServiceContainer[] containers = sla.getContainers();
+        final GridServiceContainer[] containers = sla.getContainers();
 
         if (state.getNumberOfFutureDeployments(pu) > 0) {
             // incrementNumberOfStatelessInstancesAsync can be called only one at a time
@@ -214,28 +214,46 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
         if (state.getRemovedStatelessProcessingUnitInstances(pu).iterator().hasNext()) {
             throw new ProcessingUnitIsNotEvenlyDistributedAcrossContainersException(pu, containers);
         }
-        
-        if (containers.length < pu.getNumberOfInstances() &&
-            pu.getInstances().length > 1) {
-            // the number of instances is more than the sla.
-            // there has been an sla changed that leaved us with too many instances.
-            int numberOfInstancesBeforeDecrement = pu.getNumberOfInstances();
-            boolean decremented = ((InternalProcessingUnit)pu).decrementPlannedInstances();
-            if (decremented) {
-                logger.info(
-                        "Number of instances is " + numberOfInstancesBeforeDecrement + " "+
-                        "instead of " + containers.length +". "+
-                        "Removed one pu instance of " + pu.getName());
-            } else {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Number of instances is " + numberOfInstancesBeforeDecrement + " "+
-                            "instead of " + containers.length +". "+
-                            "Retry to remove one pu instance of " + pu.getName() + " next time.");
-                }
-            }
+
+        final int numberOfInstancesBeforeDecrement = pu.getNumberOfInstances();
+        final int totalContainers = RebalancingUtils.getContainersOnMachines(pu).length;
+
+        if (numberOfInstancesBeforeDecrement > totalContainers &&
+            numberOfInstancesBeforeDecrement > sla.getMinimumNumberOfInstancesPerPartition()) {
+            
+            // the GSA is not INTACT since planned number of instances is more than available containers.
+            ((InternalAdmin)pu.getAdmin()).scheduleAdminOperation(new Runnable() {
+
+                public void run() {
+                    try {
+
+                        boolean decremented = ((InternalProcessingUnit)pu).decrementPlannedInstances();
+                        if (decremented) {
+                            logger.info(
+                                    "Planned number of instances is " + numberOfInstancesBeforeDecrement + " "+
+                                    "instead of " + totalContainers +". "+
+                                    "Removed one pu instance of " + pu.getName());
+                        } else {
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("Number of instances is " + numberOfInstancesBeforeDecrement + " "+
+                                        "instead of " + containers.length +". "+
+                                        "Retry to remove one pu instance of " + pu.getName() + " next time.");
+                            }
+                        }
+                    }
+                    catch (AdminException e) {
+                        logger.info(
+                                "Failed to decrement planned number of instances for " + pu.getName(),e);
+                    }
+                    catch (Throwable t) {
+                        logger.warn("Unexpected exception when decrementing planned number of instances for "+ pu.getName(),t);
+                    }
+                }}
+            );
+
             throw new ProcessingUnitIsNotInTactException(pu);
         }
-        
+
         if (!RebalancingUtils.isProcessingUnitIntact(pu,containers)) {
             throw new ProcessingUnitIsNotInTactException(pu);
         }
@@ -261,8 +279,8 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
                         logger.info(
                                 "Failed to remove instance " + RebalancingUtils.puInstanceToString(instance),e);
                     }
-                    catch (Exception e) {
-                        logger.warn("Unexpected exception when removing "+ RebalancingUtils.puInstanceToString(instance));
+                    catch (Throwable t) {
+                        logger.warn("Unexpected exception when removing "+ RebalancingUtils.puInstanceToString(instance),t);
                     }
                 }});
         }
