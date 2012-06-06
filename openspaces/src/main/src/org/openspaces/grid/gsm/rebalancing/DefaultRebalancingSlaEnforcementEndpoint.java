@@ -160,6 +160,24 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
         
         final GridServiceContainer[] containers = sla.getContainers();
 
+        increasePlannedInstancesUntilDeployedOnApprovedContainers(containers);
+        
+        if (pu.getInstances().length < sla.getMinimumNumberOfInstancesPerPartition()) {
+            throw new NumberOfInstancesIsBelowMinimumException(pu, sla.getMinimumNumberOfInstancesPerPartition());
+        }
+        
+        decreasePlannedInstancesIfMoreThanAllContainers(sla);
+        
+        removeInstancesNotOnApprovedContainers(sla, containers);
+        
+        if (!RebalancingUtils.isProcessingUnitIntact(pu,containers)) {
+            throw new ProcessingUnitIsNotInTactException(pu);
+        }
+    }
+
+    private void increasePlannedInstancesUntilDeployedOnApprovedContainers(final GridServiceContainer[] containers) 
+            throws ProcessingUnitIsNotEvenlyDistributedAcrossContainersException {
+        
         if (state.getNumberOfFutureDeployments(pu) > 0) {
             // incrementNumberOfStatelessInstancesAsync can be called only one at a time
             // if called concurrently they won't share state and it causes too many increment instance calls to the GSM.
@@ -169,7 +187,7 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
         Collection<FutureStatelessProcessingUnitInstance> futureInstances = 
             RebalancingUtils.incrementNumberOfStatelessInstancesAsync(
                     pu, 
-                    sla.getContainers(),
+                    containers,
                     logger, 
                     DEPLOYMENT_TIMEOUT_FAILURE_SECONDS , TimeUnit.SECONDS);
         
@@ -178,18 +196,17 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
         if (state.getNumberOfFutureDeployments(pu) > 0) {
             throw new ProcessingUnitIsNotEvenlyDistributedAcrossContainersException(pu, containers);
         }
+    }
 
-        if (pu.getInstances().length < sla.getMinimumNumberOfInstancesPerPartition()) {
-            throw new NumberOfInstancesIsBelowMinimumException(pu, sla.getMinimumNumberOfInstancesPerPartition());
-        }
-        
+    private void removeInstancesNotOnApprovedContainers(RebalancingSlaPolicy sla, final GridServiceContainer[] containers)
+            throws ProcessingUnitIsNotEvenlyDistributedAcrossContainersException {
         // find all containers with instances that are not in the approved containers
-        Set<GridServiceContainer> approvedContainers = new HashSet<GridServiceContainer>(Arrays.asList(containers));
-        List<ProcessingUnitInstance> instancesToRemove = new ArrayList<ProcessingUnitInstance>();
-        for (GridServiceContainer container : pu.getAdmin().getGridServiceContainers()) {
+        final Set<GridServiceContainer> approvedContainers = new HashSet<GridServiceContainer>(Arrays.asList(containers));
+        final List<ProcessingUnitInstance> instancesToRemove = new ArrayList<ProcessingUnitInstance>();
+        for (final GridServiceContainer container : pu.getAdmin().getGridServiceContainers()) {
             if (!approvedContainers.contains(container)) {
                 
-                for (ProcessingUnitInstance instance : container.getProcessingUnitInstances(pu.getName())) {
+                for (final ProcessingUnitInstance instance : container.getProcessingUnitInstances(pu.getName())) {
                     instancesToRemove.add(instance);
                 }
             }
@@ -197,7 +214,7 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
         
         if (instancesToRemove.size() > 0) {
 
-            for (ProcessingUnitInstance instanceToRemove : instancesToRemove) {
+            for (final ProcessingUnitInstance instanceToRemove : instancesToRemove) {
                 logger.info(
                         "removing pu instance " + RebalancingUtils.puInstanceToString(instanceToRemove) + " "+
                         "since not deployed on approved container");
@@ -215,6 +232,10 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
             throw new ProcessingUnitIsNotEvenlyDistributedAcrossContainersException(pu, containers);
         }
 
+    }
+
+    private void decreasePlannedInstancesIfMoreThanAllContainers(RebalancingSlaPolicy sla)
+            throws ProcessingUnitIsNotInTactException {
         final int numberOfInstancesBeforeDecrement = pu.getNumberOfInstances();
         final int totalContainers = RebalancingUtils.getContainersOnMachines(pu).length;
 
@@ -227,7 +248,7 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
                 public void run() {
                     try {
 
-                        boolean decremented = ((InternalProcessingUnit)pu).decrementPlannedInstances();
+                        final boolean decremented = ((InternalProcessingUnit)pu).decrementPlannedInstances();
                         if (decremented) {
                             logger.info(
                                     "Planned number of instances is " + numberOfInstancesBeforeDecrement + " "+
@@ -236,25 +257,21 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
                         } else {
                             if (logger.isDebugEnabled()) {
                                 logger.debug("Number of instances is " + numberOfInstancesBeforeDecrement + " "+
-                                        "instead of " + containers.length +". "+
+                                        "instead of " + totalContainers +". "+
                                         "Retry to remove one pu instance of " + pu.getName() + " next time.");
                             }
                         }
                     }
-                    catch (AdminException e) {
+                    catch (final AdminException e) {
                         logger.info(
                                 "Failed to decrement planned number of instances for " + pu.getName(),e);
                     }
-                    catch (Throwable t) {
+                    catch (final Throwable t) {
                         logger.warn("Unexpected exception when decrementing planned number of instances for "+ pu.getName(),t);
                     }
                 }}
             );
 
-            throw new ProcessingUnitIsNotInTactException(pu);
-        }
-
-        if (!RebalancingUtils.isProcessingUnitIntact(pu,containers)) {
             throw new ProcessingUnitIsNotInTactException(pu);
         }
     }
