@@ -459,6 +459,9 @@ public class DefaultAdmin implements InternalAdmin {
     
     @Override
     public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit) {
+        if (closeStarted.get()) {
+            throw new IllegalStateException("Admin already closed");
+        }
         return getScheduler().scheduleWithFixedDelay(new LoggerRunnable(command), initialDelay, delay, unit);
     }
 
@@ -635,6 +638,9 @@ public class DefaultAdmin implements InternalAdmin {
 
     @Override
     public void scheduleNonBlockingStateChange(Runnable command) {
+        if (closeStarted.get()) {
+            throw new IllegalStateException("Admin already closed");
+        }
         if (singleThreadedEventListeners) {
             raiseEvent(this,command);
         }
@@ -1745,6 +1751,9 @@ public class DefaultAdmin implements InternalAdmin {
     @Override
     public ScheduledFuture<?> scheduleWithFixedDelayNonBlockingStateChange(final Runnable command, long initialDelay,
             long delay, TimeUnit unit) {
+        if (closeStarted.get()) {
+            throw new IllegalStateException("Admin already closed");
+        }
         return this.scheduleWithFixedDelay(new Runnable() {
 
             @Override
@@ -1759,6 +1768,9 @@ public class DefaultAdmin implements InternalAdmin {
     public ScheduledFuture<?> scheduleOneTimeWithDelayNonBlockingStateChange(
             final Runnable command, 
             long delay, TimeUnit unit) {
+        if (closeStarted.get()) {
+            throw new IllegalStateException("Admin already closed");
+        }
         return this.getScheduler().schedule(new Runnable() {
 
             @Override
