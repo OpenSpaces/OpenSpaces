@@ -372,7 +372,7 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
                         try {
                             hasProcessingUnitInstances = ((InternalGridServiceContainer)container).hasProcessingUnitInstances();
                         } catch (AdminException e) {
-                            logger.info("Cannot determine number of processing unit instances running on conatiner " + ContainersSlaUtils.gscToString(container) + ".");
+                            logger.info("Cannot determine number of processing unit instances running on conatiner " + ContainersSlaUtils.gscToString(container),e);
                             return;
                         }
                         
