@@ -17,40 +17,42 @@
  ******************************************************************************/
 package org.openspaces.admin.internal.gsc;
 
-import com.gigaspaces.grid.gsc.GSC;
-import com.gigaspaces.internal.jvm.JVMDetails;
-import com.gigaspaces.internal.jvm.JVMStatistics;
-import com.gigaspaces.internal.os.OSDetails;
-import com.gigaspaces.internal.os.OSStatistics;
-import com.gigaspaces.lrmi.nio.info.NIODetails;
-import com.gigaspaces.lrmi.nio.info.NIOStatistics;
-import com.gigaspaces.log.LogEntryMatcher;
-import com.gigaspaces.log.LogEntries;
-import com.gigaspaces.log.LogProcessType;
-import com.gigaspaces.security.SecurityException;
+import java.io.IOException;
+import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import net.jini.core.lookup.ServiceID;
 
 import org.jini.rio.core.provision.ServiceRecord;
+import org.openspaces.admin.AdminException;
+import org.openspaces.admin.dump.DumpResult;
 import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.dump.InternalDumpResult;
 import org.openspaces.admin.internal.pu.DefaultProcessingUnitInstances;
 import org.openspaces.admin.internal.pu.InternalProcessingUnitInstances;
 import org.openspaces.admin.internal.support.AbstractAgentGridComponent;
-import org.openspaces.admin.internal.dump.InternalDumpResult;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventManager;
-import org.openspaces.admin.AdminException;
-import org.openspaces.admin.dump.DumpResult;
 
-import java.rmi.RemoteException;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.io.IOException;
+import com.gigaspaces.grid.gsc.GSC;
+import com.gigaspaces.internal.jvm.JVMDetails;
+import com.gigaspaces.internal.jvm.JVMStatistics;
+import com.gigaspaces.internal.os.OSDetails;
+import com.gigaspaces.internal.os.OSStatistics;
+import com.gigaspaces.log.LogEntries;
+import com.gigaspaces.log.LogEntryMatcher;
+import com.gigaspaces.log.LogProcessType;
+import com.gigaspaces.lrmi.nio.info.NIODetails;
+import com.gigaspaces.lrmi.nio.info.NIOStatistics;
+import com.gigaspaces.security.SecurityException;
 
 /**
  * @author kimchy
@@ -247,7 +249,25 @@ public class DefaultGridServiceContainer extends AbstractAgentGridComponent impl
         } catch (RemoteException e) {
             throw new AdminException("Failed to check if container has processing unit instances", e);
         }
-          
+    }
+    
+    public String[] getUnconfirmedRemovedProcessingUnitInstancesUid() {
+        try {
+            ServiceRecord[] serviceRecords = gsc.getServiceRecords(ServiceRecord.ACTIVE_SERVICE_RECORD | ServiceRecord.INACTIVE_SERVICE_RECORD);
+            List<String> removedInstancesUid = new ArrayList<String>();
+            for (ServiceRecord serviceRecord : serviceRecords) {
+                String uuid = serviceRecord.getServiceID().toString();
+                ProcessingUnitInstance instance = this.processingUnitInstances.getInstanceByUID(uuid);
+                if (instance == null) {
+                    removedInstancesUid.add(uuid);
+                }
+            }
+            return removedInstancesUid.toArray(new String[removedInstancesUid.size()]);
+        } catch (SecurityException se) {
+            throw new AdminException("No privileges to check if container has removed processing unit instances", se);
+        } catch (RemoteException e) {
+            throw new AdminException("Failed to check if container has processing unit instances", e);
+        }
     }
     
     @Override

@@ -46,4 +46,9 @@ public interface InternalGridServiceContainer extends GridServiceContainer, Inte
      */
     boolean hasProcessingUnitInstances();
     
+    /**
+     * @return UIDs of instances that have been removed from the lookup service/Admin API, but are still reported by the GSC
+     * @since 9.0.1
+     */
+    String[] getUnconfirmedRemovedProcessingUnitInstancesUid();
 }

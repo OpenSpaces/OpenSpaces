@@ -372,12 +372,13 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
                         try {
                             hasProcessingUnitInstances = ((InternalGridServiceContainer)container).hasProcessingUnitInstances();
                         } catch (AdminException e) {
-                            logger.info("Cannot determine number of processing unit instances running on conatiner " + ContainersSlaUtils.gscToString(container),e);
+                            logger.info("Cannot determine number of processing unit instances running on conatiner " + ContainersSlaUtils.gscToString(container) + ".");
                             return;
                         }
                         
                         if (hasProcessingUnitInstances) {
-                            logger.debug("Processing unit instances in container " + ContainersSlaUtils.gscToString(container) + " are shutting down.");
+                            logger.debug("Processing unit instances in container " + ContainersSlaUtils.gscToString(container) + " are shutting down. " +
+                                    "Suspect instance uids:"+Arrays.toString(((InternalGridServiceContainer)container).getUnconfirmedRemovedProcessingUnitInstancesUid()));
                         }
                         else {
                             logger.info("Killing container " + ContainersSlaUtils.gscToString(container) + " since it is not running any processing unit instances.");
