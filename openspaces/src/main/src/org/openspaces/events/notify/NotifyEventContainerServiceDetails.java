@@ -83,17 +83,17 @@ public class NotifyEventContainerServiceDetails extends EventContainerServiceDet
         getAttributes().put(Attributes.BATCH_PENDING_THRESHOLD, batchPendingThreshold);
         getAttributes().put(Attributes.AUTO_RENEW, autoRenew);
         if (notifyAll != null && notifyAll) {
-            getAttributes().put(Attributes.NOTIFY_WRITE, true);
-            getAttributes().put(Attributes.NOTIFY_UPDATE, true);
-            getAttributes().put(Attributes.NOTIFY_TAKE, true);
-            getAttributes().put(Attributes.NOTIFY_LEASE_EXPIRE, true);
-            getAttributes().put(Attributes.NOTIFY_UNMATCHED, true);
+            getAttributes().put(Attributes.NOTIFY_WRITE, Boolean.TRUE);
+            getAttributes().put(Attributes.NOTIFY_UPDATE, Boolean.TRUE);
+            getAttributes().put(Attributes.NOTIFY_TAKE, Boolean.TRUE);
+            getAttributes().put(Attributes.NOTIFY_LEASE_EXPIRE, Boolean.TRUE);
+            getAttributes().put(Attributes.NOTIFY_UNMATCHED, Boolean.TRUE);
         } else {
-            getAttributes().put(Attributes.NOTIFY_WRITE, notifyWrite == null ? false : notifyWrite);
-            getAttributes().put(Attributes.NOTIFY_UPDATE, notifyUpdate == null ? false : notifyUpdate);
-            getAttributes().put(Attributes.NOTIFY_TAKE, notifyTake == null ? false : notifyTake);
-            getAttributes().put(Attributes.NOTIFY_LEASE_EXPIRE, notifyLeaseExpire == null ? false : notifyLeaseExpire);
-            getAttributes().put(Attributes.NOTIFY_UNMATCHED, notifyUnmatched == null ? false : notifyUnmatched);
+            getAttributes().put(Attributes.NOTIFY_WRITE, notifyWrite == null ? Boolean.FALSE : notifyWrite);
+            getAttributes().put(Attributes.NOTIFY_UPDATE, notifyUpdate == null ? Boolean.FALSE : notifyUpdate);
+            getAttributes().put(Attributes.NOTIFY_TAKE, notifyTake == null ?  Boolean.FALSE : notifyTake);
+            getAttributes().put(Attributes.NOTIFY_LEASE_EXPIRE, notifyLeaseExpire == null ? Boolean.FALSE : notifyLeaseExpire);
+            getAttributes().put(Attributes.NOTIFY_UNMATCHED, notifyUnmatched == null ? Boolean.FALSE : notifyUnmatched);
         }
         getAttributes().put(Attributes.TRIGGER_NOTIFY_TEMPLATE, triggerNotifyTemplate);
         getAttributes().put(Attributes.REPLICATE_NOTIFY_TEMPLATE, replicateNotifyTemplate);
@@ -165,7 +165,7 @@ public class NotifyEventContainerServiceDetails extends EventContainerServiceDet
 
     public Boolean isDurable() {
         Boolean durable = (Boolean) getAttributes().get(Attributes.DURABLE);
-        return durable == null ? false : durable.booleanValue();
+        return durable == null ?  Boolean.FALSE : durable.booleanValue();
     }
     
     @Override
