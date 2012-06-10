@@ -165,7 +165,7 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
         if (pu.getInstances().length < sla.getMinimumNumberOfInstancesPerPartition()) {
             throw new NumberOfInstancesIsBelowMinimumException(pu, sla.getMinimumNumberOfInstancesPerPartition());
         }
-        
+
         decreasePlannedInstancesIfMoreThanAllContainers(sla);
         
         removeInstancesNotOnApprovedContainers(sla, containers);
@@ -215,11 +215,12 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
         if (instancesToRemove.size() > 0) {
 
             for (final ProcessingUnitInstance instanceToRemove : instancesToRemove) {
-                logger.info(
-                        "removing pu instance " + RebalancingUtils.puInstanceToString(instanceToRemove) + " "+
-                        "since not deployed on approved container");
                 if (pu.getInstances().length - state.getRemovedStatelessProcessingUnitInstances(pu).size() <= sla.getMinimumNumberOfInstancesPerPartition()) {
-                    //don't remove any more instances - we don't want to get below the minimum number of instances.
+                    logger.info(
+                            "Not removing pu instance " + RebalancingUtils.puInstanceToString(instanceToRemove) + " "+
+                            "even though deployed on an unapproved container. "+
+                            "#instances="+pu.getInstances().length+"-"+state.getRemovedStatelessProcessingUnitInstances(pu).size()+" "+
+                            "#minInstances="+sla.getMinimumNumberOfInstancesPerPartition());
                     break;
                 }
                 removeInstance(instanceToRemove);
@@ -278,8 +279,7 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
     
     private void removeInstance(final ProcessingUnitInstance instance) {
         
-        if (instance.isDiscovered() &&
-            !state.isStatelessProcessingUnitInstanceBeingRemoved(instance)) {
+        if (!state.isStatelessProcessingUnitInstanceBeingRemoved(instance)) {
             
             // this makes sure we try to decrement it only once
             state.addRemovedStatelessProcessingUnitInstance(instance);
@@ -288,9 +288,11 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
 
                 public void run() {
                     try {
-                        if (instance.isDiscovered()) {
-                            instance.decrement();
-                        }
+                        // don't check if (instance.isDiscovered()) since the GSM has to decide this
+                        logger.info(
+                                "removing pu instance " + RebalancingUtils.puInstanceToString(instance) + " "+
+                                "since deployed on an unapproved container");
+                        instance.decrement();                   
                     }
                     catch (AdminException e) {
                         logger.info(
