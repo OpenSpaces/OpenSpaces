@@ -159,8 +159,15 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
     private void enforceSlaStatelessProcessingUnit(RebalancingSlaPolicy sla) throws RebalancingSlaEnforcementInProgressException {
         
         final GridServiceContainer[] containers = sla.getContainers();
-
-        increasePlannedInstancesUntilDeployedOnApprovedContainers(containers);
+        
+        if (//don't add instances while removing instances
+            state.getRemovedStatelessProcessingUnitInstances(pu).size() == 0 ||
+            //unless the sla is breached and we have to add instances
+            //(even if it's more than we actually need, and later we would need to remove these instances again)
+            pu.getInstances().length < sla.getMinimumNumberOfInstancesPerPartition()) {
+            
+            increasePlannedInstancesUntilDeployedOnApprovedContainers(containers);
+        }
         
         if (pu.getInstances().length < sla.getMinimumNumberOfInstancesPerPartition()) {
             throw new NumberOfInstancesIsBelowMinimumException(pu, sla.getMinimumNumberOfInstancesPerPartition());
