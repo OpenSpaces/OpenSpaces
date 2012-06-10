@@ -156,7 +156,7 @@ public class DefaultApplication implements InternalApplication {
             
             for (final String requiredPuName : pu.getDependencies().getDependenciesRequiredProcessingUnitNames()) {
                 final List<String> dependantPUs = puReverseDependencies.get(requiredPuName);
-                if (!dependantPUs.contains(dependantPuName)) {
+                if (dependantPUs != null && !dependantPUs.contains(dependantPuName)) {
                     dependantPUs.add(dependantPuName);
                 }
             }
