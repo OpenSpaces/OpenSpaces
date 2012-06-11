@@ -19,6 +19,8 @@ package org.openspaces.remoting;
 import com.gigaspaces.async.AsyncFuture;
 import com.gigaspaces.async.AsyncFutureListener;
 import com.gigaspaces.async.AsyncResult;
+import com.gigaspaces.async.internal.DefaultAsyncResult;
+
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.openspaces.core.GigaSpace;
@@ -478,38 +480,11 @@ public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implem
                 if (e instanceof ExecutorRemotingTask.InternalExecutorException) {
                     e = (Exception) ((ExecutorRemotingTask.InternalExecutorException) e).getException();
                 }
-                listener.onResult(new ExecutorAsyncResult(e));
+                listener.onResult(new DefaultAsyncResult(null, e));
             } else {
-                listener.onResult(new ExecutorAsyncResult(((ExecutorRemotingTask.InternalExecutorResult) result.getResult()).getResult()));
+                Object res = ((ExecutorRemotingTask.InternalExecutorResult) result.getResult()).getResult();
+                listener.onResult(new DefaultAsyncResult(res, null));
             }
-        }
-    }
-
-    private static class ExecutorAsyncResult implements AsyncResult {
-
-        private final Object result;
-
-        private final Exception exception;
-
-        public ExecutorAsyncResult(Object result) {
-            this(null, result);
-        }
-
-        public ExecutorAsyncResult(Exception exception) {
-            this(exception, null);
-        }
-
-        private ExecutorAsyncResult(Exception exception, Object result) {
-            this.exception = exception;
-            this.result = result;
-        }
-
-        public Object getResult() {
-            return result;
-        }
-
-        public Exception getException() {
-            return exception;
         }
     }
 
