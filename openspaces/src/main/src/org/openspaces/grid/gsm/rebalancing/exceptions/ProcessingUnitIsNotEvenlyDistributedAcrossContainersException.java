@@ -17,6 +17,7 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.rebalancing.exceptions;
 
+import org.openspaces.admin.AdminException;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.containers.ContainersSlaUtils;
@@ -25,8 +26,12 @@ public class ProcessingUnitIsNotEvenlyDistributedAcrossContainersException exten
 
     private static final long serialVersionUID = 1L;
 
-    public ProcessingUnitIsNotEvenlyDistributedAcrossContainersException(ProcessingUnit pu, GridServiceContainer[] containers) {
-        super(pu, "Instances are not evenly distributed accress containers: " + ContainersSlaUtils.gscsToString(containers));
+    public ProcessingUnitIsNotEvenlyDistributedAcrossContainersException(String context, ProcessingUnit pu, GridServiceContainer[] containers) {
+        super(pu, context+". Instances are not evenly distributed accress containers: " + ContainersSlaUtils.gscsToString(containers));
+    }
+
+    public ProcessingUnitIsNotEvenlyDistributedAcrossContainersException(String context, ProcessingUnit pu, GridServiceContainer[] containers, AdminException e) {
+        super(pu, context+". "+e.getMessage() +". Instances are not evenly distributed accress containers: " + ContainersSlaUtils.gscsToString(containers), e);
     }
 
 }

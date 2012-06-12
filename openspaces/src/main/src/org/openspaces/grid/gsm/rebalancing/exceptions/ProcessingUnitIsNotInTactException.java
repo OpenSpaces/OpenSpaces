@@ -26,5 +26,9 @@ public class ProcessingUnitIsNotInTactException extends RebalancingSlaEnforcemen
     public ProcessingUnitIsNotInTactException(ProcessingUnit pu) {
         super(pu, "Deployment is not intact.");
     }
+    
+    public ProcessingUnitIsNotInTactException(ProcessingUnit pu, String message) {
+        super(pu, "Deployment is not intact." + message);
+    }
 
 }

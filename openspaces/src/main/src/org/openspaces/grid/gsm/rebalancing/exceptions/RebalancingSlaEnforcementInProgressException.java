@@ -38,6 +38,13 @@ public class RebalancingSlaEnforcementInProgressException extends SlaEnforcement
                 " Status = " + pu.getStatus());
     }
     
+    public RebalancingSlaEnforcementInProgressException(ProcessingUnit pu, String message, Throwable cause) {
+        super(inProgressMessage(pu)+": " + message + 
+                " Instances " + RebalancingUtils.processingUnitDeploymentToString(pu) + 
+                " Status = " + pu.getStatus(), cause);
+    }
+
+    
     private static String inProgressMessage(ProcessingUnit pu) {
         return inProgressMessage(pu, null);
     }

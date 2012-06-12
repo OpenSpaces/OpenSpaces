@@ -154,6 +154,10 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
             throw new IllegalStateException(pu.getName() + " schema " + sla.getSchemaConfig().getSchema() + " is not supported." );
         }
         
+        if (logger.isDebugEnabled()) {
+            logger.debug(pu.getName() + " rebalancing is complete");
+        }
+        
     }
 
     private void enforceSlaStatelessProcessingUnit(RebalancingSlaPolicy sla) throws RebalancingSlaEnforcementInProgressException {
@@ -188,7 +192,7 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
         if (state.getNumberOfFutureDeployments(pu) > 0) {
             // incrementNumberOfStatelessInstancesAsync can be called only one at a time
             // if called concurrently they won't share state and it causes too many increment instance calls to the GSM.
-            throw new ProcessingUnitIsNotEvenlyDistributedAcrossContainersException(pu, containers);
+            throw new ProcessingUnitIsNotEvenlyDistributedAcrossContainersException("Instances deployment is in progress", pu, containers);
         }
 
         Collection<FutureStatelessProcessingUnitInstance> futureInstances = 
@@ -201,7 +205,7 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
         state.addFutureStatelessDeployments(futureInstances);
         
         if (state.getNumberOfFutureDeployments(pu) > 0) {
-            throw new ProcessingUnitIsNotEvenlyDistributedAcrossContainersException(pu, containers);
+            throw new ProcessingUnitIsNotEvenlyDistributedAcrossContainersException("Instances deployment is in progress", pu, containers);
         }
     }
 
@@ -233,11 +237,11 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
                 removeInstance(instanceToRemove);
             }
             
-            throw new ProcessingUnitIsNotEvenlyDistributedAcrossContainersException(pu, containers);
+            throw new ProcessingUnitIsNotEvenlyDistributedAcrossContainersException("Instances removal is in progress", pu, containers);
         }
         
         if (state.getRemovedStatelessProcessingUnitInstances(pu).iterator().hasNext()) {
-            throw new ProcessingUnitIsNotEvenlyDistributedAcrossContainersException(pu, containers);
+            throw new ProcessingUnitIsNotEvenlyDistributedAcrossContainersException("Instances removal is in progress", pu, containers);
         }
 
     }
@@ -263,8 +267,8 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
                                     "instead of " + totalContainers +". "+
                                     "Removed one pu instance of " + pu.getName());
                         } else {
-                            if (logger.isDebugEnabled()) {
-                                logger.debug("Number of instances is " + numberOfInstancesBeforeDecrement + " "+
+                            if (logger.isInfoEnabled()) {
+                                logger.info("Number of instances is " + numberOfInstancesBeforeDecrement + " "+
                                         "instead of " + totalContainers +". "+
                                         "Retry to remove one pu instance of " + pu.getName() + " next time.");
                             }
@@ -280,7 +284,7 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
                 }}
             );
 
-            throw new ProcessingUnitIsNotInTactException(pu);
+            throw new ProcessingUnitIsNotInTactException(pu ,"Planned number of instances is "+ numberOfInstancesBeforeDecrement + " instead of " + totalContainers);
         }
     }
     
@@ -333,7 +337,7 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
                 logger.debug(
                         "Rebalancing of backup instances is in progress after Stage 1. "+
                         "Number of deployments in progress is " + state.getNumberOfFutureDeployments(pu));
-                throw new ProcessingUnitIsNotEvenlyDistributedAcrossContainersException(pu, containers);
+                throw new ProcessingUnitIsNotEvenlyDistributedAcrossContainersException("Instances deployment is in progress", pu, containers);
             }
     
             // if not all of pu instances are in the approved containers...
@@ -361,7 +365,7 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
             logger.debug(
                     "Rebalancing of primary or backup instances is in progress after Stage 3. "+
                     "Number of deployments in progress is " + state.getNumberOfFutureDeployments(pu));
-            throw new ProcessingUnitIsNotEvenlyDistributedAcrossContainersException(pu, containers);
+            throw new ProcessingUnitIsNotEvenlyDistributedAcrossContainersException("Instances deployment is in progress", pu, containers);
         }
         
         if (!RebalancingUtils.isProcessingUnitIntact(pu, containers)) {
