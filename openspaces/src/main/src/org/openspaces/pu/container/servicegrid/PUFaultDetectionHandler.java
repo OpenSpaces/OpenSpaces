@@ -16,11 +16,9 @@
 
 package org.openspaces.pu.container.servicegrid;
 
-import com.sun.jini.config.Config;
-import com.gigaspaces.lrmi.LRMIInvocationContext;
-import com.gigaspaces.lrmi.nio.info.NIODetails;
-import com.gigaspaces.internal.jvm.JVMDetails;
-import com.j_spaces.core.SpaceUnhealthyException;
+import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import net.jini.config.ConfigurationException;
 import net.jini.config.ConfigurationProvider;
@@ -28,9 +26,11 @@ import net.jini.core.lookup.ServiceID;
 
 import org.jini.rio.resources.client.AbstractFaultDetectionHandler;
 
-import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.gigaspaces.internal.jvm.JVMDetails;
+import com.gigaspaces.lrmi.LRMIInvocationContext;
+import com.gigaspaces.lrmi.nio.info.NIODetails;
+import com.j_spaces.core.SpaceUnhealthyException;
+import com.sun.jini.config.Config;
 
 /**
  * A processing unit fault detection handler. Invokes {@link PUServiceBean#isAlive()}.
@@ -95,6 +95,8 @@ public class PUFaultDetectionHandler extends AbstractFaultDetectionHandler {
         volatile int retriesCount = 0;
         volatile Throwable lastThrown;
         volatile long roundtrip;
+        
+        volatile long lastInvocationTime = 0;
 
         final ServiceDetails serviceDetails = new ServiceDetails();
 
@@ -164,6 +166,23 @@ public class PUFaultDetectionHandler extends AbstractFaultDetectionHandler {
             try {
                 LRMIInvocationContext.enableLivenessPriorityForNextInvocation();
                 final boolean isAlive = ((PUServiceBean) proxy).isAlive();
+                long timeElapsedForIsAliveInvocation = System.nanoTime() - start;
+
+                long timeElapsedFromLastInvocation = start - lastInvocationTime;
+                lastInvocationTime = start;
+                //if last call to isAlive was more than 1 minute, log a warning
+                if (timeElapsedFromLastInvocation > 60000000000L) {
+                    if (logger.isLoggable(Level.WARNING)) {
+                        logger.log(Level.WARNING, "Previous verification of service: " + serviceDetails + " was [" + formatDuration(timeElapsedFromLastInvocation) + "] ago.");
+                    }
+                }
+                
+                //if isAlive remote call took more than 1 minute
+                if (timeElapsedForIsAliveInvocation > 60000000000L) {
+                    if (logger.isLoggable(Level.WARNING)) {
+                        logger.log(Level.WARNING, "Verification of service: " + serviceDetails + " took - RTT[" + formatDuration(timeElapsedForIsAliveInvocation) + "] - isAlive="+isAlive);
+                    }
+                }
 
                 if (isAlive) {
                     retriesCount = 0;
