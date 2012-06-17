@@ -655,10 +655,13 @@ public class DefaultSpace implements InternalSpace {
                                         String mirrorServiceName = outgoingChannel.getTargetMemberName().split(":")[1];
                                         Space mirrorServiceSpace = spaceInstance.getAdmin().getSpaces().getSpaceByName(mirrorServiceName);
                                         if (mirrorServiceSpace != null) {
-                                            SpaceInstance mirrorInstance = mirrorServiceSpace.getInstances()[0];
-                                            if (mirrorInstance != null && mirrorInstance.getSpaceUrl().getSchema().equals("mirror")) {
-                                                //note: don't cache it in spaceInstanceByMemberName map since we don't get a removal event on this instance
-                                                targetSpaceInstance = mirrorInstance;
+                                            SpaceInstance[] instances = mirrorServiceSpace.getInstances();
+                                            if (instances.length > 0) {
+                                                SpaceInstance mirrorInstance = instances[0];
+                                                if (mirrorInstance != null && mirrorInstance.getSpaceUrl().getSchema().equals("mirror")) {
+                                                    //note: don't cache it in spaceInstanceByMemberName map since we don't get a removal event on this instance
+                                                    targetSpaceInstance = mirrorInstance;
+                                                }
                                             }
                                         }
                                     }
