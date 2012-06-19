@@ -66,7 +66,7 @@ public class ApplicationFileDeployment {
     /**
      * Creates a new application deployment based on the specified file
      * 
-     * @param applicationDirectory
+     * @param applicationDirectoryOrZip
      *            - the application directory or zip file containing the application xml file and 
      *            the processing unit jar files.
      *            
@@ -74,7 +74,7 @@ public class ApplicationFileDeployment {
      *            the processingUnit defined in the xml file with a '/' it is relative to the
      *            gigaspaces installation directory, and not the application directory
      *            
-     * @param applicationFilename
+     * @param applicationFileName
      *            The application xml file (absolute or relative to the application directory)
      */
     public ApplicationFileDeployment(final File applicationDirectoryOrZip, final String applicationFileName) {

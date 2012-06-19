@@ -16,14 +16,16 @@
 
 package org.openspaces.events.notify;
 
-import com.j_spaces.core.client.INotifyDelegatorFilter;
 import net.jini.lease.LeaseListener;
+
 import org.openspaces.core.GigaSpace;
 import org.openspaces.events.EventExceptionHandler;
 import org.openspaces.events.SpaceDataEventListener;
 import org.openspaces.events.adapter.AnnotationEventListenerAdapter;
 import org.openspaces.events.adapter.MethodEventListenerAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
+
+import com.j_spaces.core.client.INotifyDelegatorFilter;
 
 /**
  * A simplified programmatic configuration that for {@link org.openspaces.events.notify.SimpleNotifyEventListenerContainer}.
@@ -250,7 +252,7 @@ public class SimpleNotifyContainerConfigurer {
 
     /**
      * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setGuaranteed(Boolean)
-     * @deprecated Since 9.0 use {@link #durable(Boolean)} instead.
+     * @deprecated Since 9.0 use {@link #durable(boolean)} instead.
      */
     @Deprecated
     public SimpleNotifyContainerConfigurer guaranteed(boolean guaranteed) {

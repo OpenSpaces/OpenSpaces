@@ -60,7 +60,7 @@ public class ApplicationDeployment {
     }
 
     /**
-     * @param readApplication - config created by derived class
+     * @param config created by derived class
      */
     protected ApplicationDeployment(ApplicationConfig config) {
         this.config = config;

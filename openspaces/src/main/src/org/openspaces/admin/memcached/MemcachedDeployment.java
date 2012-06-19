@@ -276,9 +276,7 @@ public class MemcachedDeployment implements ProcessingUnitDeploymentTopology {
                 .create());
         return this;
     }
-    /**
-     * @return
-     */
+
     public ProcessingUnitConfigHolder create() {
         return config;
     }

@@ -57,7 +57,7 @@ public interface ProcessingUnitConfigHolder {
     String getName();
     
     /**
-     * @see ProcessingUnitDeployment#setName(String)
+     * @see ProcessingUnitDeployment#name(String)
      */
     void setName(String name);
     

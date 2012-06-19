@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.openspaces.admin.space.config;
 
-import java.util.List;
 import java.util.Map;
 
 import javax.xml.bind.annotation.XmlAttribute;
@@ -222,7 +221,7 @@ public class SpaceConfig implements ProcessingUnitConfigHolder {
     }
     
     /**
-     * @see ProcessingUnitConfig#setDeploymentDependencies(List)
+     * @see ProcessingUnitConfig#setDeploymentDependencies(ProcessingUnitDependency[])
      */
     @XmlElement(type = ProcessingUnitDependency.class)
     public void setDeploymentDependencies(ProcessingUnitDependency[] dependencies) {

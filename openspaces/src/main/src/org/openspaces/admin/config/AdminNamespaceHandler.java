@@ -29,10 +29,10 @@ import org.openspaces.core.config.xmlparser.AbstractXmlBeanNamespaceHandler;
 
 /**
  * A spring namespace handler for the "admin" namespace.
+ * see openspaces-admin.xsd
  * 
  * @author itaif
  * @since 9.0.1
- * @see openspaces-admin.xsd
  *
  */
 public class AdminNamespaceHandler extends AbstractXmlBeanNamespaceHandler {
