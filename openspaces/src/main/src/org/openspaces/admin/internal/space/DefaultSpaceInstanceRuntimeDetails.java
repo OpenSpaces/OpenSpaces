@@ -32,6 +32,7 @@ import org.openspaces.admin.space.SpaceInstanceRuntimeDetails;
 import org.openspaces.admin.space.SpaceInstanceTransactionDetails;
 
 import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
+import com.j_spaces.core.admin.SpaceRuntimeInfo;
 
 public class DefaultSpaceInstanceRuntimeDetails implements SpaceInstanceRuntimeDetails {
 
@@ -84,8 +85,9 @@ public class DefaultSpaceInstanceRuntimeDetails implements SpaceInstanceRuntimeD
         IInternalRemoteJSpaceAdmin spaceAdmin = defaultSpaceInstance.getSpaceAdmin();
         if (spaceAdmin != null) {
             try {
-                List<String> classNames = spaceAdmin.getRuntimeInfo().m_ClassNames;
-                List<Integer> numOfEntries = spaceAdmin.getRuntimeInfo().m_NumOFEntries;
+                SpaceRuntimeInfo spaceRuntimeInfo = spaceAdmin.getRuntimeInfo();
+                List<String> classNames = spaceRuntimeInfo.m_ClassNames;
+                List<Integer> numOfEntries = spaceRuntimeInfo.m_NumOFEntries;
                 for (int i=0; i<classNames.size(); ++i) {
                     mapping.put(classNames.get(i), numOfEntries.get(i));
                 }
@@ -103,8 +105,9 @@ public class DefaultSpaceInstanceRuntimeDetails implements SpaceInstanceRuntimeD
         IInternalRemoteJSpaceAdmin spaceAdmin = defaultSpaceInstance.getSpaceAdmin();
         if (spaceAdmin != null) {
             try {
-                List<String> classNames = spaceAdmin.getRuntimeInfo().m_ClassNames;
-                List<Integer> numOfTemplates = spaceAdmin.getRuntimeInfo().m_NumOFTemplates;
+                SpaceRuntimeInfo spaceRuntimeInfo = spaceAdmin.getRuntimeInfo();
+                List<String> classNames = spaceRuntimeInfo.m_ClassNames;
+                List<Integer> numOfTemplates = spaceRuntimeInfo.m_NumOFTemplates;
                 for (int i=0; i<classNames.size(); ++i) {
                     mapping.put(classNames.get(i), numOfTemplates.get(i));
                 }
