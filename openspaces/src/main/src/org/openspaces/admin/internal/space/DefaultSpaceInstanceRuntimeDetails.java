@@ -26,6 +26,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.internal.admin.DefaultAdmin;
 import org.openspaces.admin.space.SpaceInstanceConnectionDetails;
 import org.openspaces.admin.space.SpaceInstanceRuntimeDetails;
@@ -40,6 +41,15 @@ public class DefaultSpaceInstanceRuntimeDetails implements SpaceInstanceRuntimeD
     private final DefaultSpaceInstance defaultSpaceInstance;
     private final DefaultSpaceInstanceTransactionDetails spaceInstanceTransactionDetails;
     private final DefaultSpaceInstanceConnectionDetails spaceInstanceConnectionDetails;
+    
+    private long statisticsInterval = StatisticsMonitor.DEFAULT_MONITOR_INTERVAL;
+
+    private long lastStatisticsTimestamp = 0;
+    
+    private Object monitor = new Object();
+
+    private volatile SpaceRuntimeInfo lastSpaceRuntimeInfo;
+    
 
     public DefaultSpaceInstanceRuntimeDetails(DefaultSpaceInstance defaultSpaceInstance) {
         this.defaultSpaceInstance = defaultSpaceInstance;
@@ -47,74 +57,67 @@ public class DefaultSpaceInstanceRuntimeDetails implements SpaceInstanceRuntimeD
         this.spaceInstanceConnectionDetails = new DefaultSpaceInstanceConnectionDetails(defaultSpaceInstance);
     }
 
+    @Override
     public int getCount() {
         int count = 0;
         IInternalRemoteJSpaceAdmin spaceAdmin = defaultSpaceInstance.getSpaceAdmin();
         if (spaceAdmin != null) {
-            try {
-                for (Integer num : spaceAdmin.getRuntimeInfo().m_NumOFEntries) {
+            SpaceRuntimeInfo spaceRuntimeInfo = getCachedSpaceRuntimeInfo( spaceAdmin );
+            if( spaceRuntimeInfo != null ){
+                for( Integer num : spaceRuntimeInfo.m_NumOFEntries ) {
                     count += num.intValue();
                 }
-            } catch (RemoteException e) {
-                logger.debug("RemoteException caught while trying to get Space count information from "
-                        + defaultSpaceInstance.getSpaceName(), e);
             }
         }
         return count;
     }
 
+    @Override
     public String[] getClassNames() {
         IInternalRemoteJSpaceAdmin spaceAdmin = defaultSpaceInstance.getSpaceAdmin();
-        if (spaceAdmin != null) {
-            try {
-                ArrayList<String> classNames = new ArrayList<String>(spaceAdmin.getRuntimeInfo().m_ClassNames);
+        if(spaceAdmin != null) {
+            SpaceRuntimeInfo spaceRuntimeInfo = getCachedSpaceRuntimeInfo( spaceAdmin );
+            if( spaceRuntimeInfo != null ){
+                ArrayList<String> classNames = 
+                    new ArrayList<String>( spaceRuntimeInfo.m_ClassNames );
                 Collections.sort(classNames);
                 return classNames.toArray(new String[classNames.size()]);
-            } catch (RemoteException e) {
-                logger.debug("RemoteException caught while trying to get Space class names information from "
-                        + defaultSpaceInstance.getSpaceName(), e);
-                return new String[0];
             }
-        }else {
-            return new String[0];
         }
+
+        return new String[0];
     }
 
+    @Override
     public Map<String, Integer> getCountPerClassName() {
         Map<String, Integer> mapping = new HashMap<String, Integer>();
         IInternalRemoteJSpaceAdmin spaceAdmin = defaultSpaceInstance.getSpaceAdmin();
         if (spaceAdmin != null) {
-            try {
-                SpaceRuntimeInfo spaceRuntimeInfo = spaceAdmin.getRuntimeInfo();
+            SpaceRuntimeInfo spaceRuntimeInfo = getCachedSpaceRuntimeInfo( spaceAdmin );
+            if( spaceRuntimeInfo != null ){
                 List<String> classNames = spaceRuntimeInfo.m_ClassNames;
                 List<Integer> numOfEntries = spaceRuntimeInfo.m_NumOFEntries;
                 for (int i=0; i<classNames.size(); ++i) {
                     mapping.put(classNames.get(i), numOfEntries.get(i));
                 }
-            } catch (RemoteException e) {
-                logger.debug("RemoteException caught while trying to get Space count per class name information from "
-                        + defaultSpaceInstance.getSpaceName(), e);
-                return mapping;
             }
         }
+        
         return mapping;
     }
 
+    @Override
     public Map<String, Integer> getNotifyTemplateCountPerClassName() {
         Map<String, Integer> mapping = new HashMap<String, Integer>();
         IInternalRemoteJSpaceAdmin spaceAdmin = defaultSpaceInstance.getSpaceAdmin();
-        if (spaceAdmin != null) {
-            try {
-                SpaceRuntimeInfo spaceRuntimeInfo = spaceAdmin.getRuntimeInfo();
+        if( spaceAdmin != null ) {
+            SpaceRuntimeInfo spaceRuntimeInfo = getCachedSpaceRuntimeInfo( spaceAdmin );
+            if( spaceRuntimeInfo != null ){
                 List<String> classNames = spaceRuntimeInfo.m_ClassNames;
                 List<Integer> numOfTemplates = spaceRuntimeInfo.m_NumOFTemplates;
-                for (int i=0; i<classNames.size(); ++i) {
-                    mapping.put(classNames.get(i), numOfTemplates.get(i));
+                for( int i=0; i<classNames.size(); ++i ) {
+                    mapping.put( classNames.get(i), numOfTemplates.get(i) );
                 }
-            } catch (RemoteException e) {
-                logger.debug("RemoteException caught while trying to get Space template count per class name information from "
-                        + defaultSpaceInstance.getSpaceName(), e);
-                return mapping;
             }
         }
         return mapping;
@@ -127,5 +130,32 @@ public class DefaultSpaceInstanceRuntimeDetails implements SpaceInstanceRuntimeD
     @Override
     public SpaceInstanceConnectionDetails getConnectionDetails() {
         return spaceInstanceConnectionDetails;
+    }
+    
+    private SpaceRuntimeInfo getCachedSpaceRuntimeInfo( IInternalRemoteJSpaceAdmin spaceAdmin ){
+ 
+        synchronized( monitor ){
+
+            long currentTime = System.currentTimeMillis();
+            if( ( currentTime - lastStatisticsTimestamp ) < statisticsInterval ) {
+                return lastSpaceRuntimeInfo;
+            }
+
+            lastStatisticsTimestamp = currentTime;
+
+            SpaceRuntimeInfo spaceRuntimeInfo;
+            try {
+                spaceRuntimeInfo = spaceAdmin.getRuntimeInfo();
+                this.lastSpaceRuntimeInfo = spaceRuntimeInfo;
+            } 
+            catch( RemoteException e ) {
+
+                logger.debug(
+                        "RemoteException caught while trying to retrieve Space Runtime Info " +
+                        "from space admin.", e );
+            }
+            
+            return this.lastSpaceRuntimeInfo;
+        }
     }
 }
