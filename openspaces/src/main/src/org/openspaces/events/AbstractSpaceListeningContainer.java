@@ -323,6 +323,9 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
             return;
         }
         synchronized (this.lifecycleMonitor) {
+            if (running) {
+                return;
+            }
             this.running = true;
             this.lifecycleMonitor.notifyAll();
             for (Iterator<Object> it = this.pausedTasks.iterator(); it.hasNext();) {
