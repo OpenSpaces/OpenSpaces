@@ -254,6 +254,7 @@ public class DefaultAdmin implements InternalAdmin {
     
     private final AtomicInteger eventListenersCount = new AtomicInteger();
     
+    //removedProcessingUnitInstances Needs to be locked under DefaultAdmin.this
     private final List<ProcessingUnitInstance> removedProcessingUnitInstances = new LinkedList<ProcessingUnitInstance>();
     
     public DefaultAdmin() {
@@ -899,7 +900,7 @@ public class DefaultAdmin implements InternalAdmin {
     @Override
     public synchronized void addGridServiceContainer(InternalGridServiceContainer gridServiceContainer,
             NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones) {
-    	 if (logger.isDebugEnabled()) {
+         if (logger.isDebugEnabled()) {
              logger.debug("Adding GSC uid=" + gridServiceContainer.getUid());
          }
         OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(gridServiceContainer, osDetails);
@@ -996,16 +997,15 @@ public class DefaultAdmin implements InternalAdmin {
         processingUnitInstances.removeOrphaned(uid);
         InternalProcessingUnitInstance processingUnitInstance = (InternalProcessingUnitInstance) processingUnitInstances.removeInstance(uid);
         if (processingUnitInstance != null) {
-            synchronized(removedProcessingUnitInstances) {
-                Iterator<ProcessingUnitInstance> iterator = removedProcessingUnitInstances.iterator();
-                while (iterator.hasNext()) {
-                    ProcessingUnitInstance alreadyRemovedInstance =  iterator.next();
-                    if (alreadyRemovedInstance.getProcessingUnitInstanceName().equals(processingUnitInstance.getProcessingUnitInstanceName())) {
-                        iterator.remove();
-                    }
+            //removedProcessingUnitInstances Needs to be locked under DefaultAdmin.this
+            Iterator<ProcessingUnitInstance> iterator = removedProcessingUnitInstances.iterator();
+            while (iterator.hasNext()) {
+                ProcessingUnitInstance alreadyRemovedInstance =  iterator.next();
+                if (alreadyRemovedInstance.getProcessingUnitInstanceName().equals(processingUnitInstance.getProcessingUnitInstanceName())) {
+                    iterator.remove();
                 }
-                removedProcessingUnitInstances.add(processingUnitInstance);
             }
+            removedProcessingUnitInstances.add(processingUnitInstance);
             
             processingUnitInstance.setDiscovered(false);
             ((InternalProcessingUnit) processingUnitInstance.getProcessingUnit()).removeProcessingUnitInstance(uid);
@@ -1508,7 +1508,7 @@ public class DefaultAdmin implements InternalAdmin {
                         }
                         processingUnit.stopStatisticsMonitor();
                     }
-                    synchronized(removedProcessingUnitInstances) {
+                    synchronized (DefaultAdmin.this) {
                         Iterator<ProcessingUnitInstance> iterator = removedProcessingUnitInstances.iterator();
                         while (iterator.hasNext()) {
                             ProcessingUnitInstance removedInstance = iterator.next();
@@ -1630,7 +1630,7 @@ public class DefaultAdmin implements InternalAdmin {
                             //will raise a member alive indicator event (no need to flush)
                             ((InternalProcessingUnitInstance)puInstanceByUID).setMemberAliveIndicatorStatus(serviceFaultDetectionEvent);
                         } else {
-                            synchronized (removedProcessingUnitInstances) {
+                            synchronized (DefaultAdmin.this) {
                                 Iterator<ProcessingUnitInstance> iterator = removedProcessingUnitInstances.iterator();
                                 while (iterator.hasNext()) {
                                     ProcessingUnitInstance removedInstance = iterator.next();
