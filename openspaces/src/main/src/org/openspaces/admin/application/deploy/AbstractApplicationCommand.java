@@ -15,6 +15,7 @@
  *******************************************************************************/
 package org.openspaces.admin.application.deploy;
 
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -157,12 +158,25 @@ public abstract class AbstractApplicationCommand {
             }
         }
         
+        protected void debug(String message) {
+            if (disableInfoLogging) {
+                return;
+            }
+            if (logger.isDebugEnabled()) {
+                if (sout) {
+                    System.out.println(message);
+                }
+                logger.debug(message);
+            }
+        }
+        
         
         protected void parseArgs(String[] args) {
             CommandLineParser.Parameter[] params = CommandLineParser.parse(args, args.length - 1);
             String username = null;
             String password = null;
             for (CommandLineParser.Parameter param : params) {
+                debug("parsing param name=" + param.getName() + " args=" + Arrays.toString(param.getArguments()));
                 if (param.getName().equalsIgnoreCase("groups")) {
                     setGroups(param.getArguments());
                 }
@@ -205,6 +219,7 @@ public abstract class AbstractApplicationCommand {
                 setUserDetails(username, password);
             }
            
+            debug("command line parsing complete: " + this.toString());
         }
 
 
@@ -237,5 +252,15 @@ public abstract class AbstractApplicationCommand {
             
             final Admin admin = adminFactory.create();
             return admin;
+        }
+
+        @Override
+        public String toString() {
+            return this.getClass().getName() + " [" + (groups != null ? "groups=" + Arrays.toString(groups) + ", " : "")
+                    + (adminUser != null ? "adminUser=" + adminUser + ", " : "")
+                    + (locators != null ? "locators=" + locators + ", " : "") + "lookupTimeout=" + lookupTimeout
+                    + ", timeout=" + timeout + ", sout=" + sout + ", disableInfoLogging=" + disableInfoLogging + ", "
+                    + (secured != null ? "secured=" + secured + ", " : "")
+                    + (userDetails != null ? "userDetails=" + userDetails + ", " : "") + "managed=" + managed + "]";
         }
 }
