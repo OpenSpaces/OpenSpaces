@@ -48,7 +48,7 @@ public class PUFaultDetectionHandler extends AbstractFaultDetectionHandler {
      * A Logger
      */
     private static final Logger logger = Logger.getLogger(COMPONENT);
-
+    
     /**
      * @see org.jini.rio.core.FaultDetectionHandler#setConfiguration
      */
@@ -164,12 +164,12 @@ public class PUFaultDetectionHandler extends AbstractFaultDetectionHandler {
         public boolean verify() {
             long start = System.nanoTime();
             try {
-                warnIfLastInvocationOfIsAliveWasDelayed(start);
+                logIfLastInvocationOfIsAliveWasDelayed(start);
 
                 LRMIInvocationContext.enableLivenessPriorityForNextInvocation();
                 final boolean isAlive = ((PUServiceBean) proxy).isAlive();
 
-                warnIfInvocationOfIsAliveTookTooLong(start, isAlive);
+                logIfInvocationOfIsAliveTookTooLong(start, isAlive);
 
                 if (isAlive) {
                     retriesCount = 0;
@@ -199,30 +199,32 @@ public class PUFaultDetectionHandler extends AbstractFaultDetectionHandler {
             }
         }
 
-        /**
-         * log a warning message if invocation call of isAlive() took more than 1 minute (round trip).
-         * @param start
-         * @param isAlive
-         */
-        private void warnIfInvocationOfIsAliveTookTooLong(long start, final boolean isAlive) {
-            long timeElapsedForIsAliveInvocation = System.nanoTime() - start;
-            //if isAlive remote call took more than 1 minute
-            if (timeElapsedForIsAliveInvocation > 60000000000L) {
-                if (logger.isLoggable(Level.WARNING)) {
-                    logger.log(Level.WARNING, "Verification of service: " + serviceDetails + " took - RTT[" + formatDuration(timeElapsedForIsAliveInvocation) + "] - isAlive="+isAlive);
-                }
-            }
-        }
 
-        private void warnIfLastInvocationOfIsAliveWasDelayed(long start) {
-            long timeElapsedFromLastInvocation = start - lastInvocationTime;
-            //if last call to isAlive was more than 1 minute, log a warning
-            if (lastInvocationTime > 0 && timeElapsedFromLastInvocation > 60000000000L) {
-                if (logger.isLoggable(Level.WARNING)) {
-                    logger.log(Level.WARNING, "Previous verification of service: " + serviceDetails + " was [" + formatDuration(timeElapsedFromLastInvocation) + "] ago.");
+        /**
+         * log if invocation call of isAlive() was delayed by more than 1 minute
+         */
+        private void logIfLastInvocationOfIsAliveWasDelayed(long start) {
+            if (logger.isLoggable(Level.FINE)) {
+                long timeElapsedFromLastInvocation = start - lastInvocationTime;
+                //last call to isAlive was more than 1 minute
+                if (lastInvocationTime > 0 && timeElapsedFromLastInvocation > 60000000000L) {
+                    logger.log(Level.FINE, "Verification of service: " + serviceDetails + " was delayed by [" + formatDuration(timeElapsedFromLastInvocation) + "]");
                 }
             }
             lastInvocationTime = start;
+        }
+        
+        /**
+         * log if invocation call of isAlive() took more than 1 minute (round trip).
+         */
+        private void logIfInvocationOfIsAliveTookTooLong(long start, final boolean isAlive) {
+            if (logger.isLoggable(Level.FINE)) {
+                long timeElapsedForIsAliveInvocation = System.nanoTime() - start;
+                //if isAlive remote call took more than 1 minute
+                if (timeElapsedForIsAliveInvocation > 60000000000L) {
+                    logger.log(Level.FINE, "Verification of service: " + serviceDetails + " - RTT[" + formatDuration(timeElapsedForIsAliveInvocation) + "], isAlive["+isAlive+"]");
+                }
+            }
         }
         
         /**
