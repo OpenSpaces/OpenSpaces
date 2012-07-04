@@ -346,6 +346,9 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         assertStateChangesPermitted();
         Space existingSpace = spaces.putIfAbsent(space.getName(), space);
         if (existingSpace == null) {
+           if (logger.isDebugEnabled()) {
+               logger.debug("Processing Unit " + getName() + " discovered embedded space " + space.getName());
+           }
             spaceCorrelatedEventManager.processingUnitSpaceCorrelated(new ProcessingUnitSpaceCorrelatedEvent(space, this));
         }
     }
@@ -491,7 +494,11 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         getSpaceCorrelated().add(correlated);
         try {
             latch.await(timeout, timeUnit);
-            return ref.get();
+            Space space = ref.get();
+            if (logger.isDebugEnabled()) {
+                logger.debug("pu " + getName() + " #waitForSpace() " + (space == null ? "timed out" : " returns space "+space.getName()));
+            }
+            return space;
         } catch (InterruptedException e) {
             return null;
         } finally {
