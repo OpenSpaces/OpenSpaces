@@ -464,11 +464,22 @@ public class DefaultSpace implements InternalSpace {
 
     public IJSpace getIJSpace() {
         if (space == null) {
-            if (spaceInstancesByUID.isEmpty()) {
+            
+            SpaceInstance firstInstance = null;
+            for (SpaceInstance instance : spaceInstancesByUID.values()) {
+                firstInstance = instance;
+                break;
+            }
+            
+            if (firstInstance == null) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Space " + getName() + " cannot create IJSpace since it has no instances");
+                }
                 return null;
             }
+            
             try {
-                space = ((ISpaceProxy) ((InternalSpaceInstance) spaceInstancesByUID.values().iterator().next()).getIJSpace()).getClusteredSpace();
+                space = ((ISpaceProxy) ((InternalSpaceInstance) firstInstance).getIJSpace()).getClusteredSpace();
                 if (space.isSecured()) {
                     ((ISpaceProxy)space).login(admin.getUserDetails());
                 }
@@ -483,6 +494,7 @@ public class DefaultSpace implements InternalSpace {
 
     public GigaSpace getGigaSpace() {
         if (gigaSpace == null) {
+            
             this.gigaSpace = new GigaSpaceConfigurer(getIJSpace()).clustered(true).gigaSpace();
         }
         return this.gigaSpace;
