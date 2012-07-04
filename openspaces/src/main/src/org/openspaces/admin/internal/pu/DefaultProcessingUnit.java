@@ -687,7 +687,11 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         if (tempStatus != deploymentStatus) {
             ProcessingUnitStatusChangedEvent event = new ProcessingUnitStatusChangedEvent(this, deploymentStatus, tempStatus);
             processingUnitStatusChangedEventManager.processingUnitStatusChanged(event);
+            if (logger.isDebugEnabled()) {
+                logger.debug("ProcessingUnit " + event.getProcessingUnit().getName() + " status changed from " + event.getPreviousStatus() + " to " + event.getNewStatus());
+            }
             ((InternalProcessingUnitStatusChangedEventManager) processingUnits.getProcessingUnitStatusChanged()).processingUnitStatusChanged(event);
+            
             deploymentStatus = tempStatus;
             return true;
         }
