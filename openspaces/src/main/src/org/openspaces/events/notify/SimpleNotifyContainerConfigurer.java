@@ -212,7 +212,9 @@ public class SimpleNotifyContainerConfigurer {
 
     /**
      * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setNotifyUpdate(Boolean)
+     * @deprecated since 9.1 use {@link #notifyMatched(boolean)} or {@link #notifyRematched(boolean)} instead.
      */
+    @Deprecated
     public SimpleNotifyContainerConfigurer notifyUpdate(boolean notifyUpdate) {
         notifyEventListenerContainer.setNotifyUpdate(notifyUpdate);
         return this;
@@ -241,6 +243,24 @@ public class SimpleNotifyContainerConfigurer {
         notifyEventListenerContainer.setNotifyUnmatched(notifyUnmatched);
         return this;
     }
+    
+    /**
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setNotifyMatched(Boolean)
+     */
+    public SimpleNotifyContainerConfigurer notifyMatched(boolean notifyMatched) {
+        notifyEventListenerContainer.setNotifyMatched(notifyMatched);
+        return this;
+    }
+    
+    /**
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setNotifyRematched(Boolean)
+     */
+    public SimpleNotifyContainerConfigurer notifyRematched(boolean notifyRematched) {
+        notifyEventListenerContainer.setNotifyRematched(notifyRematched);
+        return this;
+    }
+    
+    
 
     /**
      * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setNotifyLeaseExpire(Boolean)

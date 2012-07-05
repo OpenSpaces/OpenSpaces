@@ -254,14 +254,17 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
         boolean notifyUpdate = Boolean.parseBoolean(props.get("notify-update"));
         boolean notifyTake = Boolean.parseBoolean(props.get("notify-take"));
         boolean notifyLease = Boolean.parseBoolean(props.get("notify-lease-expire"));
+        boolean notifyUnmatched = Boolean.parseBoolean(props.get("notify-unmatched"));
+        boolean notifyMatched = Boolean.parseBoolean(props.get("notify-matched"));
+        boolean notifyRematched = Boolean.parseBoolean(props.get("notify-rematched"));
         Boolean triggerNotifyTemplate = props.get("trigger-notify-template") == null? null : Boolean.parseBoolean(props.get("trigger-notify-template"));
         Boolean replicateNotifyTemplate = props.get("replicate-notify-template") == null? null : Boolean.parseBoolean(props.get("replicate-notify-template"));
         boolean performTakeOnNotify = Boolean.parseBoolean(props.get("perform-take-on-notify"));
         boolean guaranteed = Boolean.parseBoolean(props.get("guaranteed"));
         boolean durable = Boolean.parseBoolean(props.get("durable"));
         return new NotifyEventContainerServiceDetails(id, space, template, performSnapshot, txManager, commType, fifo, batchSize, 
-                    batchTime, batchPendingThreshold, autoRenew, null, notifyWrite, notifyUpdate, notifyTake, notifyLease, false, triggerNotifyTemplate, 
-                    replicateNotifyTemplate, performTakeOnNotify, batchProcessing, guaranteed, durable);
+                    batchTime, batchPendingThreshold, autoRenew, null, notifyWrite, notifyUpdate, notifyTake, notifyLease, notifyUnmatched, notifyMatched, notifyRematched,
+                    triggerNotifyTemplate, replicateNotifyTemplate, performTakeOnNotify, batchProcessing, guaranteed, durable);
     }
 
     private PollingEventContainerServiceDetails buildPollingContainerServiceDetails(String id, Map<String, String> props) {

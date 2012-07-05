@@ -149,6 +149,10 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
 
     private Boolean notifyWrite;
 
+    /**
+     * @deprecated since 9.1 use {@link #notifyMatched} or {@link #notifyRematched} instead
+     */
+    @Deprecated
     private Boolean notifyUpdate;
 
     private Boolean notifyTake;
@@ -156,6 +160,10 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
     private Boolean notifyLeaseExpire;
 
     private Boolean notifyUnmatched;
+    
+    private Boolean notifyMatched;
+    
+    private Boolean notifyRematched;
 
     private Boolean notifyAll;
 
@@ -367,11 +375,18 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
 
     /**
      * Turns on notifications for update operations. Defaults to <code>false</code>.
+     * @deprecated since 9.1 use {@link #setNotifyMatched()} or {@link #setNotifyRematched()} instead
      */
+    @Deprecated
     public void setNotifyUpdate(Boolean notifyUpdate) {
         this.notifyUpdate = notifyUpdate;
     }
 
+    /**
+     * Turns on notifications for update operations. Defaults to <code>false</code>.
+     * @deprecated since 9.1 use {@link #isNotifyMatched()} or {@link #isNotifyRematched()} instead
+     */
+    @Deprecated
     protected Boolean isNotifyUpdate() {
         if (notifyUpdate == null) {
             return false;
@@ -429,12 +444,47 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
     public void setNotifyUnmatched(Boolean notifyUnmatched) {
         this.notifyUnmatched = notifyUnmatched;
     }
+    
+    /**
+     * Turns on notifications for matched templates (a template that matches an entry after the entry was updated and not before). 
+     * Defaults to <code>false</code>.
+     * 
+     * @since 9.1
+     */
+    public void setNotifyMatched(Boolean notifyMatched) {
+        this.notifyMatched = notifyMatched;
+    }
+    
+    /**
+     * Turns on notifications for unmatched templates (a template that matches an entry before and after the entry was updated). 
+     * Defaults to <code>false</code>.
+     * 
+     * @since 9.1
+     */
+    public void setNotifyRematched(Boolean notifyRematched) {
+        this.notifyRematched = notifyRematched;
+    }
 
+    
     protected Boolean isNotifyUnmatched() {
         if (notifyUnmatched == null) {
             return Boolean.FALSE;
         }
         return this.notifyUnmatched;
+    }
+    
+    protected Boolean isNotifyMatched() {
+        if (notifyMatched == null) {
+            return Boolean.FALSE;
+        }
+        return this.notifyMatched;
+    }
+    
+    protected Boolean isNotifyRematched() {
+        if (notifyRematched == null) {
+            return Boolean.FALSE;
+        }
+        return this.notifyRematched;
     }
 
     /**
@@ -524,6 +574,11 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
         return notifyWrite;
     }
 
+    /**
+     * 
+     * @deprecated since 9.1 use {@link #getNotifyMatched()} or {@link #getNotifyRematched()} instead/
+     */
+    @Deprecated
     protected Boolean getNotifyUpdate() {
         return notifyUpdate;
     }
@@ -538,6 +593,14 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
 
     protected Boolean getNotifyUnmatched() {
         return notifyUnmatched;
+    }
+    
+    protected Boolean getNotifyMatched() {
+        return notifyMatched;
+    }
+    
+    protected Boolean getNotifyRematched() {
+        return notifyRematched;
     }
 
     /**
@@ -587,6 +650,12 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
             }
             if (notifyTypeProvider.isUnmatched() != null && notifyUnmatched == null) {
                 notifyUnmatched = notifyTypeProvider.isUnmatched();
+            }
+            if (notifyTypeProvider.isMatched() != null && notifyMatched == null) {
+                notifyMatched = notifyTypeProvider.isMatched();
+            }
+            if (notifyTypeProvider.isRematched() != null && notifyRematched == null) {
+                notifyRematched = notifyTypeProvider.isRematched();
             }
         }
 
@@ -704,6 +773,12 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
         }
         if (notifyUnmatched != null && notifyUnmatched) {
             notifyType = notifyType.or(NotifyActionType.NOTIFY_UNMATCHED);
+        }
+        if (notifyMatched != null && notifyMatched) {
+            notifyType = notifyType.or(NotifyActionType.NOTIFY_MATCHED);
+        }
+        if (notifyRematched != null && notifyRematched) {
+            notifyType = notifyType.or(NotifyActionType.NOTIFY_REMATCHED);
         }
         if (notifyAll != null && notifyAll) {
             notifyType = notifyType.or(NotifyActionType.NOTIFY_ALL);

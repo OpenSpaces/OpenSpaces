@@ -44,9 +44,15 @@ public class NotifyEventContainerServiceDetails extends EventContainerServiceDet
         public static final String AUTO_RENEW = "auto-renew";
         public static final String NOTIFY_WRITE = "notify-write";
         public static final String NOTIFY_TAKE = "notify-take";
+        /**
+         * @deprecated since 9.1 use {@link #NOTIFY_MATCHED} or {@link #NOTIFY_REMATCHED} instead
+         */
+        @Deprecated
         public static final String NOTIFY_UPDATE = "notify-update";
         public static final String NOTIFY_LEASE_EXPIRE = "notify-lease-expire";
         public static final String NOTIFY_UNMATCHED = "notify-unmatched";
+        public static final String NOTIFY_MATCHED = "notify-matched";
+        public static final String NOTIFY_REMATCHED = "notify-rematched";
         public static final String TRIGGER_NOTIFY_TEMPLATE = "trigger-notify-template";
         public static final String REPLICATE_NOTIFY_TEMPLATE = "replicate-notify-template";
         public static final String PERFORM_TAKE_ON_NOTIFY = "perform-take-on-notify";
@@ -62,7 +68,9 @@ public class NotifyEventContainerServiceDetails extends EventContainerServiceDet
     public NotifyEventContainerServiceDetails(String id, String gigaSpace, Object template, boolean performSnapshot, String transactionManager,
                                               int commType,
                                               boolean fifo, Integer batchSize, Integer batchTime, Integer batchPendingThreshold, boolean autoRenew,
-                                              Boolean notifyAll, Boolean notifyWrite, Boolean notifyUpdate, Boolean notifyTake, Boolean notifyLeaseExpire, Boolean notifyUnmatched,
+                                              Boolean notifyAll, Boolean notifyWrite, Boolean notifyUpdate, 
+                                              Boolean notifyTake, Boolean notifyLeaseExpire, Boolean notifyUnmatched,
+                                              Boolean notifyMatched, Boolean notifyRematched,
                                               Boolean triggerNotifyTemplate, Boolean replicateNotifyTemplate,
                                               boolean performTakeOnNotify, boolean passArrayAsIs, boolean guaranteed, boolean durable) {
         super(id, SERVICE_SUB_TYPE, gigaSpace, "Notify event container", "Notify event container, template [" + template + "]", template, performSnapshot, transactionManager);
@@ -87,13 +95,15 @@ public class NotifyEventContainerServiceDetails extends EventContainerServiceDet
             getAttributes().put(Attributes.NOTIFY_UPDATE, Boolean.TRUE);
             getAttributes().put(Attributes.NOTIFY_TAKE, Boolean.TRUE);
             getAttributes().put(Attributes.NOTIFY_LEASE_EXPIRE, Boolean.TRUE);
-            getAttributes().put(Attributes.NOTIFY_UNMATCHED, Boolean.TRUE);
+
         } else {
             getAttributes().put(Attributes.NOTIFY_WRITE, notifyWrite == null ? Boolean.FALSE : notifyWrite);
             getAttributes().put(Attributes.NOTIFY_UPDATE, notifyUpdate == null ? Boolean.FALSE : notifyUpdate);
             getAttributes().put(Attributes.NOTIFY_TAKE, notifyTake == null ?  Boolean.FALSE : notifyTake);
             getAttributes().put(Attributes.NOTIFY_LEASE_EXPIRE, notifyLeaseExpire == null ? Boolean.FALSE : notifyLeaseExpire);
             getAttributes().put(Attributes.NOTIFY_UNMATCHED, notifyUnmatched == null ? Boolean.FALSE : notifyUnmatched);
+            getAttributes().put(Attributes.NOTIFY_MATCHED, notifyMatched == null ? Boolean.FALSE : notifyMatched);
+            getAttributes().put(Attributes.NOTIFY_REMATCHED, notifyRematched == null ? Boolean.FALSE : notifyRematched);
         }
         getAttributes().put(Attributes.TRIGGER_NOTIFY_TEMPLATE, triggerNotifyTemplate);
         getAttributes().put(Attributes.REPLICATE_NOTIFY_TEMPLATE, replicateNotifyTemplate);
@@ -127,6 +137,11 @@ public class NotifyEventContainerServiceDetails extends EventContainerServiceDet
         return (Boolean) getAttributes().get(Attributes.NOTIFY_WRITE);
     }
 
+    /**
+     * 
+     * @deprecated since 9.1 use {@link #isNotifyMatched()} or {@link #isNotifyRematched()} instead.
+     */
+    @Deprecated
     public Boolean isNotifyUpdate() {
         return (Boolean) getAttributes().get(Attributes.NOTIFY_UPDATE);
     }
@@ -141,6 +156,14 @@ public class NotifyEventContainerServiceDetails extends EventContainerServiceDet
 
     public Boolean isNotifyUnmatched() {
         return (Boolean) getAttributes().get(Attributes.NOTIFY_UNMATCHED);
+    }
+    
+    public Boolean isNotifyMatched() {
+        return (Boolean) getAttributes().get(Attributes.NOTIFY_MATCHED);
+    }
+    
+    public Boolean isNotifyRematched() {
+        return (Boolean) getAttributes().get(Attributes.NOTIFY_REMATCHED);
     }
 
     public Boolean isTriggerNotifyTemplate() {

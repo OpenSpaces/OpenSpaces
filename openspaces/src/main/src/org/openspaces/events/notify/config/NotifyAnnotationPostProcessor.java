@@ -149,6 +149,9 @@ public class NotifyAnnotationPostProcessor implements BeanPostProcessor, Applica
             notifyContainerConfigurer.notifyTake(notifyType.take());
             notifyContainerConfigurer.notifyLeaseExpire(notifyType.leaseExpire());
             notifyContainerConfigurer.notifyUnmatched(notifyType.unmatched());
+            notifyContainerConfigurer.notifyMatched(notifyType.matched());
+            notifyContainerConfigurer.notifyRematched(notifyType.rematched());
+
         }
 
         NotifyBatch notifyBatch = AnnotationUtils.findAnnotation(beanClass, NotifyBatch.class);

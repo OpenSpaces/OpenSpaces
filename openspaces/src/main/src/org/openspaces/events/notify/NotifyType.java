@@ -42,7 +42,9 @@ public @interface NotifyType {
 
     /**
      * Should this listener be notified when update occurs and it matches the given template.
+     * @deprecated since 9.1 use {@link #matched()} or {@link #rematched()} instead.
      */
+    @Deprecated
     boolean update() default false;
 
     /**
@@ -54,4 +56,16 @@ public @interface NotifyType {
      * Should this listener be notified when entries that no longer match the provided template be notified.
      */
     boolean unmatched() default false;
+    
+    /**
+     * Should this listener be notified when entries that weren't match to a provided template become match after an update occurs.
+     * @since 9.1
+     */
+    boolean matched() default false;
+    
+    /**
+     * Should this listener be notified when entries that were already match to a provided template stays match after an update occurs.
+     * @since 9.1
+     */
+    boolean rematched() default false;
 }

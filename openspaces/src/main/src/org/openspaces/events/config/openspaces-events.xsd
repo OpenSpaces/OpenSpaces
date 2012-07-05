@@ -398,7 +398,22 @@
                                         </xsd:documentation>
                                     </xsd:annotation>
                                 </xsd:attribute>
-                            </xsd:complexType>
+                                <xsd:attribute name="matched" type="xsd:boolean">
+                                    <xsd:annotation>
+                                        <xsd:documentation>
+                                            Matched entries that were not match the template before the update
+                                            will cause this listener to be invoked.
+                                        </xsd:documentation>
+                                    </xsd:annotation>
+                                </xsd:attribute>
+                                <xsd:attribute name="rematched" type="xsd:boolean">
+                                    <xsd:annotation>
+                                        <xsd:documentation>
+                                            Matched entries that were match the template before the update
+                                            will cause this listener to be invoked.
+                                        </xsd:documentation>
+                                    </xsd:annotation>
+                                </xsd:attribute>                            </xsd:complexType>
                         </xsd:element>
                         <xsd:element name="batch" minOccurs="0" maxOccurs="1">
                             <xsd:annotation>
