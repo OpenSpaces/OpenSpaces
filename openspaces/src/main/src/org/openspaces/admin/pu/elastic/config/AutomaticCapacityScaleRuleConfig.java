@@ -25,7 +25,7 @@ import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
 import org.openspaces.core.util.StringProperties;
 
 /**
- * Configures an automatic scaling rule based on a monitred statistics and thresholds.
+ * Configures an automatic scaling rule based on a monitored statistics and thresholds.
  * @author itaif
  * @since 9.0.0
  * @see AutomaticCapacityScaleConfig
