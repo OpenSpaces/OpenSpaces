@@ -228,6 +228,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Spac
         }
     }
 
+    @Override
     public void onApplicationEvent(ApplicationEvent applicationEvent) {
         if (applicationEvent instanceof ContextRefreshedEvent) {
             Assert.notNull(services, "services property is required");
