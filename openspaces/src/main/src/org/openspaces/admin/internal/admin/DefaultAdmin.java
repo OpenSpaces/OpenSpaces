@@ -1538,7 +1538,10 @@ public class DefaultAdmin implements InternalAdmin {
                             }
                         }
                     }
-                    
+                    Space space = processingUnit.getSpace();
+                    if (space != null) {
+                        ((InternalProcessingUnit)processingUnit).removeEmbeddedSpace(space);
+                    }
                     removeRemovedSpace(processingUnit);
                 }
             }
