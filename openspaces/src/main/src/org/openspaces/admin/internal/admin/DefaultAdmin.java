@@ -325,23 +325,29 @@ public class DefaultAdmin implements InternalAdmin {
     }
 
     @Override
-    public synchronized void startStatisticsMonitor() {
-        scheduledStatisticsMonitor = true;
-        this.spaces.startStatisticsMonitor();
-        this.virtualMachines.startStatisticsMonitor();
-        this.transports.startStatisticsMonitor();
-        this.operatingSystems.startStatisticsMonitor();
-        this.processingUnits.startStatisticsMonitor();
+    public void startStatisticsMonitor() {
+        assertStateChangesPermitted();
+        synchronized (DefaultAdmin.this) {
+            scheduledStatisticsMonitor = true;
+            this.spaces.startStatisticsMonitor();
+            this.virtualMachines.startStatisticsMonitor();
+            this.transports.startStatisticsMonitor();
+            this.operatingSystems.startStatisticsMonitor();
+            this.processingUnits.startStatisticsMonitor();
+        }
     }
 
     @Override
-    public synchronized void stopStatisticsMonitor() {
-        scheduledStatisticsMonitor = false;
-        this.spaces.stopStatisticsMonitor();
-        this.virtualMachines.stopStatisticsMonitor();
-        this.transports.stopStatisticsMonitor();
-        this.operatingSystems.stopStatisticsMonitor();
-        this.processingUnits.stopStatisticsMonitor();
+    public void stopStatisticsMonitor() {
+        assertStateChangesPermitted();
+        synchronized (DefaultAdmin.this) {
+            scheduledStatisticsMonitor = false;
+            this.spaces.stopStatisticsMonitor();
+            this.virtualMachines.stopStatisticsMonitor();
+            this.transports.stopStatisticsMonitor();
+            this.operatingSystems.stopStatisticsMonitor();
+            this.processingUnits.stopStatisticsMonitor();
+        }
     }
 
     @Override
@@ -451,9 +457,12 @@ public class DefaultAdmin implements InternalAdmin {
     }
 
     @Override
-    public synchronized void setSpaceMonitorInterval(long interval, TimeUnit timeUnit) {
-        this.scheduledSpaceMonitorInterval = timeUnit.toMillis(interval);
-        this.spaces.refreshScheduledSpaceMonitors();
+    public void setSpaceMonitorInterval(long interval, TimeUnit timeUnit) {
+        assertStateChangesPermitted();
+        synchronized (DefaultAdmin.this) {
+            this.scheduledSpaceMonitorInterval = timeUnit.toMillis(interval);
+            this.spaces.refreshScheduledSpaceMonitors();
+        }
     }
 
     @Override
@@ -609,35 +618,47 @@ public class DefaultAdmin implements InternalAdmin {
     }
 
     @Override
-    public synchronized void pushEvent(Object listener, Runnable notifier) {
-        eventsQueue[Math.abs(listener.hashCode() % eventsExecutorServices.length)].add(new LoggerRunnable(notifier));
-    }
-
-    @Override
-    public synchronized void pushEventAsFirst(Object listener, Runnable notifier) {
-        eventsQueue[Math.abs(listener.hashCode() % eventsExecutorServices.length)].addFirst(new LoggerRunnable(notifier));
-    }
-
-    public synchronized void flushEvents() {
-        if (closeStarted.get()) {
-            //clear all pending events in queue that may have arrived just before closing of the admin.
-            for (LinkedList<Runnable> l : eventsQueue) {
-                l.clear();
-            }
-            return;
-        }
-        
-        for (int i = 0; i < eventsExecutorServices.length; i++) {
-            for (Runnable notifier : eventsQueue[i]) {
-                eventsExecutorServices[i].submit(notifier);
-            }
-            eventsQueue[i].clear();
+    public void pushEvent(Object listener, Runnable notifier) {
+        assertStateChangesPermitted();
+        synchronized (DefaultAdmin.this) {
+            eventsQueue[Math.abs(listener.hashCode() % eventsExecutorServices.length)].add(new LoggerRunnable(notifier));
         }
     }
 
     @Override
-    public synchronized void raiseEvent(Object listener, Runnable notifier) {
-        eventsExecutorServices[Math.abs(listener.hashCode() % eventsExecutorServices.length)].submit(new LoggerRunnable(notifier));
+    public void pushEventAsFirst(Object listener, Runnable notifier) {
+        assertStateChangesPermitted();
+        synchronized (DefaultAdmin.this) {
+            eventsQueue[Math.abs(listener.hashCode() % eventsExecutorServices.length)].addFirst(new LoggerRunnable(notifier));
+        }
+    }
+
+    public void flushEvents() {
+        assertStateChangesPermitted();
+        synchronized (DefaultAdmin.this) {
+            if (closeStarted.get()) {
+                //clear all pending events in queue that may have arrived just before closing of the admin.
+                for (LinkedList<Runnable> l : eventsQueue) {
+                    l.clear();
+                }
+                return;
+            }
+            
+            for (int i = 0; i < eventsExecutorServices.length; i++) {
+                for (Runnable notifier : eventsQueue[i]) {
+                    eventsExecutorServices[i].submit(notifier);
+                }
+                eventsQueue[i].clear();
+            }
+        }
+    }
+
+    @Override
+    public void raiseEvent(Object listener, Runnable notifier) {
+        assertStateChangesPermitted();
+        synchronized (DefaultAdmin.this) {
+            eventsExecutorServices[Math.abs(listener.hashCode() % eventsExecutorServices.length)].submit(new LoggerRunnable(notifier));
+        }
     }
 
     @Override
@@ -670,423 +691,464 @@ public class DefaultAdmin implements InternalAdmin {
     }
     
     @Override
-    public synchronized void addGridServiceAgent(InternalGridServiceAgent gridServiceAgent, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Adding GSA uid=" + gridServiceAgent.getUid());
-        }
-        OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(gridServiceAgent, osDetails);
-        VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(gridServiceAgent, jvmDetails, jmxUrl);
-        InternalTransport transport = processTransportOnServiceAddition(gridServiceAgent, nioDetails, virtualMachine);
-
-        InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(),
-                transport, operatingSystem, virtualMachine,
-                (InternalMachineAware) virtualMachine, gridServiceAgent);
-
-        processZonesOnServiceAddition(zones, gridServiceAgent.getUid(), transport, virtualMachine, machine, gridServiceAgent);
-
-        ((InternalGridServiceAgents) machine.getGridServiceAgents()).addGridServiceAgent(gridServiceAgent);
-        ((InternalGridServiceAgents) ((InternalVirtualMachine) virtualMachine).getGridServiceAgents()).addGridServiceAgent(gridServiceAgent);
-        for (Zone zone : gridServiceAgent.getZones().values()) {
-            ((InternalGridServiceAgents) zone.getGridServiceAgents()).addGridServiceAgent(gridServiceAgent);
-        }
-
-        gridServiceAgents.addGridServiceAgent(gridServiceAgent);
-
-
-        for (Iterator<Map.Entry<String, InternalAgentGridComponent>> it = orphanedAgentGridComponents.entrySet().iterator(); it.hasNext();) {
-            Map.Entry<String, InternalAgentGridComponent> entry = it.next();
-            InternalAgentGridComponent agentGridComponent = entry.getValue();
-            if (agentGridComponent.getAgentUid().equals(gridServiceAgent.getUid())) {
-                agentGridComponent.setGridServiceAgent(gridServiceAgent);
-                gridServiceAgent.addAgentGridComponent(agentGridComponent);
-                it.remove();
+    public void addGridServiceAgent(InternalGridServiceAgent gridServiceAgent, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones) {
+        assertStateChangesPermitted();
+        synchronized (DefaultAdmin.this) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Adding GSA uid=" + gridServiceAgent.getUid());
             }
-        }
-
-        flushEvents();
-    }
-
-    @Override
-    public synchronized void removeGridServiceAgent(String uid) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Removing GSA uid=" + uid);
-        }
-        InternalGridServiceAgent gridServiceAgent = gridServiceAgents.removeGridServiceAgent(uid);
-        if (gridServiceAgent != null) {
-            gridServiceAgent.setDiscovered(false);
-            processTransportOnServiceRemoval(gridServiceAgent, gridServiceAgent, gridServiceAgent);
-            processOperatingSystemOnServiceRemoval(gridServiceAgent, gridServiceAgent);
-
-            processVirtualMachineOnServiceRemoval(gridServiceAgent, gridServiceAgent, gridServiceAgent);
-            ((InternalGridServiceAgents) ((InternalVirtualMachine) gridServiceAgent.getVirtualMachine()).getGridServiceAgents()).removeGridServiceAgent(uid);
-
-            processMachineOnServiceRemoval(gridServiceAgent, gridServiceAgent);
-            ((InternalGridServiceAgents) ((InternalMachine) gridServiceAgent.getMachine()).getGridServiceAgents()).removeGridServiceAgent(uid);
-
-            processZonesOnServiceRemoval(uid, gridServiceAgent);
+            OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(gridServiceAgent, osDetails);
+            VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(gridServiceAgent, jvmDetails, jmxUrl);
+            InternalTransport transport = processTransportOnServiceAddition(gridServiceAgent, nioDetails, virtualMachine);
+    
+            InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(),
+                    transport, operatingSystem, virtualMachine,
+                    (InternalMachineAware) virtualMachine, gridServiceAgent);
+    
+            processZonesOnServiceAddition(zones, gridServiceAgent.getUid(), transport, virtualMachine, machine, gridServiceAgent);
+    
+            ((InternalGridServiceAgents) machine.getGridServiceAgents()).addGridServiceAgent(gridServiceAgent);
+            ((InternalGridServiceAgents) ((InternalVirtualMachine) virtualMachine).getGridServiceAgents()).addGridServiceAgent(gridServiceAgent);
             for (Zone zone : gridServiceAgent.getZones().values()) {
-                ((InternalGridServiceAgents) zone.getGridServiceAgents()).removeGridServiceAgent(uid);
+                ((InternalGridServiceAgents) zone.getGridServiceAgents()).addGridServiceAgent(gridServiceAgent);
             }
-
+    
+            gridServiceAgents.addGridServiceAgent(gridServiceAgent);
+    
+    
             for (Iterator<Map.Entry<String, InternalAgentGridComponent>> it = orphanedAgentGridComponents.entrySet().iterator(); it.hasNext();) {
                 Map.Entry<String, InternalAgentGridComponent> entry = it.next();
-                if (entry.getValue().getAgentUid().equals(gridServiceAgent.getUid())) {
+                InternalAgentGridComponent agentGridComponent = entry.getValue();
+                if (agentGridComponent.getAgentUid().equals(gridServiceAgent.getUid())) {
+                    agentGridComponent.setGridServiceAgent(gridServiceAgent);
+                    gridServiceAgent.addAgentGridComponent(agentGridComponent);
                     it.remove();
                 }
             }
-        }
-
-        flushEvents();
-    }
-
-    @Override
-    public synchronized void addLookupService(InternalLookupService lookupService,
-            NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Adding LUS uid=" + lookupService.getUid());
-        }
-        OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(lookupService, osDetails);
-        VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(lookupService, jvmDetails, jmxUrl );
-        InternalTransport transport = processTransportOnServiceAddition(lookupService, nioDetails, virtualMachine);
-
-        InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(),
-                transport, operatingSystem, virtualMachine,
-                (InternalMachineAware) virtualMachine, lookupService);
-
-        processZonesOnServiceAddition(zones, lookupService.getUid(), transport, virtualMachine, machine, lookupService);
-        processAgentOnServiceAddition(lookupService);
-
-        ((InternalLookupServices) machine.getLookupServices()).addLookupService(lookupService);
-        ((InternalLookupServices) ((InternalVirtualMachine) virtualMachine).getLookupServices()).addLookupService(lookupService);
-
-        for (Zone zone : lookupService.getZones().values()) {
-            ((InternalLookupServices) zone.getLookupServices()).addLookupService(lookupService);
-        }
-
-        lookupServices.addLookupService(lookupService);
-
-        flushEvents();
-    }
-
-    @Override
-    public synchronized void removeLookupService(String uid) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Removing LUS uid=" + uid);
-        }
-        InternalLookupService lookupService = lookupServices.removeLookupService(uid);
-        if (lookupService != null) {
-            lookupService.setDiscovered(false);
-            processTransportOnServiceRemoval(lookupService, lookupService, lookupService);
-            processOperatingSystemOnServiceRemoval(lookupService, lookupService);
-            processVirtualMachineOnServiceRemoval(lookupService, lookupService, lookupService);
-
-            processMachineOnServiceRemoval(lookupService, lookupService);
-            ((InternalLookupServices) ((InternalMachine) lookupService.getMachine()).getLookupServices()).removeLookupService(uid);
-
-            processZonesOnServiceRemoval(uid, lookupService);
-            for (Zone zone : lookupService.getZones().values()) {
-                ((InternalLookupServices) zone.getLookupServices()).removeLookupService(uid);
-            }
-        }
-
-        flushEvents();
-    }
-
-    @Override
-    public synchronized void addGridServiceManager(InternalGridServiceManager gridServiceManager,
-            NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Adding GSM uid=" + gridServiceManager.getUid());
-        }
-        OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(gridServiceManager, osDetails);
-        VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(gridServiceManager, jvmDetails, jmxUrl);
-        InternalTransport transport = processTransportOnServiceAddition(gridServiceManager, nioDetails, virtualMachine);
-
-        InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(),
-                transport, operatingSystem, virtualMachine,
-                (InternalMachineAware) virtualMachine, gridServiceManager);
-
-        processAgentOnServiceAddition(gridServiceManager);
-        processZonesOnServiceAddition(zones, gridServiceManager.getUid(), transport, virtualMachine, machine, gridServiceManager);
-
-        ((InternalGridServiceManagers) machine.getGridServiceManagers()).addGridServiceManager(gridServiceManager);
-        ((InternalGridServiceManagers) ((InternalVirtualMachine) virtualMachine).getGridServiceManagers()).addGridServiceManager(gridServiceManager);
-        for (Zone zone : gridServiceManager.getZones().values()) {
-            ((InternalGridServiceManagers) zone.getGridServiceManagers()).addGridServiceManager(gridServiceManager);
-        }
-
-        gridServiceManagers.addGridServiceManager(gridServiceManager);
-
-        flushEvents();
-    }
-
-    @Override
-    public synchronized void removeGridServiceManager(String uid) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Removing GSM uid=" + uid);
-        }
-        InternalGridServiceManager gridServiceManager = gridServiceManagers.removeGridServiceManager(uid);
-        if (gridServiceManager != null) {
-            gridServiceManager.setDiscovered(false);
-            processTransportOnServiceRemoval(gridServiceManager, gridServiceManager, gridServiceManager);
-            processOperatingSystemOnServiceRemoval(gridServiceManager, gridServiceManager);
-
-            processVirtualMachineOnServiceRemoval(gridServiceManager, gridServiceManager, gridServiceManager);
-            ((InternalGridServiceManagers) ((InternalVirtualMachine) gridServiceManager.getVirtualMachine()).getGridServiceManagers()).removeGridServiceManager(uid);
-
-            processMachineOnServiceRemoval(gridServiceManager, gridServiceManager);
-            ((InternalGridServiceManagers) ((InternalMachine) gridServiceManager.getMachine()).getGridServiceManagers()).removeGridServiceManager(uid);
-
-            processZonesOnServiceRemoval(uid, gridServiceManager);
-            for (Zone zone : gridServiceManager.getZones().values()) {
-                ((InternalGridServiceManagers) zone.getGridServiceManagers()).removeGridServiceManager(uid);
-            }
-        }
-
-        flushEvents();
-    }
     
-    @Override
-    public synchronized void addElasticServiceManager(InternalElasticServiceManager elasticServiceManager,
-            NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Adding ESM uid=" + elasticServiceManager.getUid());
+            flushEvents();
         }
-        OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(elasticServiceManager, osDetails);
-        VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(elasticServiceManager, jvmDetails, jmxUrl );
-        InternalTransport transport = processTransportOnServiceAddition(elasticServiceManager, nioDetails, virtualMachine);
-
-        InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(),
-                transport, operatingSystem, virtualMachine,
-                (InternalMachineAware) virtualMachine, elasticServiceManager);
-
-        processAgentOnServiceAddition(elasticServiceManager);
-        processZonesOnServiceAddition(zones, elasticServiceManager.getUid(), transport, virtualMachine, machine, elasticServiceManager);
-
-        ((InternalElasticServiceManagers) machine.getElasticServiceManagers()).addElasticServiceManager(elasticServiceManager);
-        ((InternalElasticServiceManagers) ((InternalVirtualMachine) virtualMachine).getElasticServiceManagers()).addElasticServiceManager(elasticServiceManager);
-        for (Zone zone : elasticServiceManager.getZones().values()) {
-            ((InternalElasticServiceManagers) zone.getElasticServiceManagers()).addElasticServiceManager(elasticServiceManager);
-        }
-
-        elasticServiceManagers.addElasticServiceManager(elasticServiceManager);
-
-        flushEvents();
     }
 
     @Override
-    public synchronized void removeElasticServiceManager(String uid) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Removing ESM uid=" + uid);
-        }
-        InternalElasticServiceManager elasticServiceManager = elasticServiceManagers.removeElasticServiceManager(uid);
-        if (elasticServiceManager != null) {
-            elasticServiceManager.setDiscovered(false);
-            processTransportOnServiceRemoval(elasticServiceManager, elasticServiceManager, elasticServiceManager);
-            processOperatingSystemOnServiceRemoval(elasticServiceManager, elasticServiceManager);
-
-            processVirtualMachineOnServiceRemoval(elasticServiceManager, elasticServiceManager, elasticServiceManager);
-            ((InternalElasticServiceManagers) ((InternalVirtualMachine) elasticServiceManager.getVirtualMachine()).getElasticServiceManagers()).removeElasticServiceManager(uid);
-
-            processMachineOnServiceRemoval(elasticServiceManager, elasticServiceManager);
-            ((InternalElasticServiceManagers) ((InternalMachine) elasticServiceManager.getMachine()).getElasticServiceManagers()).removeElasticServiceManager(uid);
-
-            processZonesOnServiceRemoval(uid, elasticServiceManager);
-            for (Zone zone : elasticServiceManager.getZones().values()) {
-                ((InternalElasticServiceManagers) zone.getElasticServiceManagers()).removeElasticServiceManager(uid);
-            }
-        }
-
-        flushEvents();
-    }
-
-    @Override
-    public synchronized void addGridServiceContainer(InternalGridServiceContainer gridServiceContainer,
-            NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones) {
-         if (logger.isDebugEnabled()) {
-             logger.debug("Adding GSC uid=" + gridServiceContainer.getUid());
-         }
-        OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(gridServiceContainer, osDetails);
-        VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(gridServiceContainer, jvmDetails, jmxUrl);
-        InternalTransport transport = processTransportOnServiceAddition(gridServiceContainer, nioDetails, virtualMachine);
-
-        InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(),
-                transport, operatingSystem, virtualMachine,
-                (InternalMachineAware) virtualMachine, gridServiceContainer);
-
-        processAgentOnServiceAddition(gridServiceContainer);
-
-        processZonesOnServiceAddition(zones, gridServiceContainer.getUid(), transport, virtualMachine, machine, gridServiceContainer);
-
-        ((InternalGridServiceContainers) machine.getGridServiceContainers()).addGridServiceContainer(gridServiceContainer);
-        ((InternalGridServiceContainers) ((InternalVirtualMachine) virtualMachine).getGridServiceContainers()).addGridServiceContainer(gridServiceContainer);
-        for (Zone zone : gridServiceContainer.getZones().values()) {
-            ((InternalGridServiceContainers) zone.getGridServiceContainers()).addGridServiceContainer(gridServiceContainer);
-        }
-
-        gridServiceContainers.addGridServiceContainer(gridServiceContainer);
-
-        flushEvents();
-    }
-
-    @Override
-    public synchronized void removeGridServiceContainer(String uid) {
-        
-        if (logger.isDebugEnabled()) {
-            logger.debug("Removing GSC uid=" + uid);
-        }
-        
-        InternalGridServiceContainer gridServiceContainer = gridServiceContainers.removeGridServiceContainer(uid);
-        if (gridServiceContainer != null) {
-            gridServiceContainer.setDiscovered(false);
-            processTransportOnServiceRemoval(gridServiceContainer, gridServiceContainer, gridServiceContainer);
-            processOperatingSystemOnServiceRemoval(gridServiceContainer, gridServiceContainer);
-
-            processVirtualMachineOnServiceRemoval(gridServiceContainer, gridServiceContainer, gridServiceContainer);
-            ((InternalGridServiceContainers) ((InternalVirtualMachine) gridServiceContainer.getVirtualMachine()).getGridServiceContainers()).removeGridServiceContainer(uid);
-
-            processMachineOnServiceRemoval(gridServiceContainer, gridServiceContainer);
-            ((InternalGridServiceContainers) ((InternalMachine) gridServiceContainer.getMachine()).getGridServiceContainers()).removeGridServiceContainer(uid);
-
-            processZonesOnServiceRemoval(uid, gridServiceContainer);
-            for (Zone zone : gridServiceContainer.getZones().values()) {
-                ((InternalGridServiceContainers) zone.getGridServiceContainers()).removeGridServiceContainer(uid);
-            }
-            
-            InternalGridServiceAgent agent = (InternalGridServiceAgent)gridServiceContainer.getGridServiceAgent();
-            if (agent != null) {
-                agent.removeAgentGridComponent(gridServiceContainer);
-            }
-        }
-
-        flushEvents();
-    }
-
-    @Override
-    public synchronized void addProcessingUnitInstance(InternalProcessingUnitInstance processingUnitInstance, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Service Added [Processing Unit Instance] " + processingUnitInstance.getProcessingUnitInstanceName() + " with uid [" + processingUnitInstance.getUid() + "]");
-        }
-        OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(processingUnitInstance, osDetails);
-        VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(processingUnitInstance, jvmDetails, jmxUrl);
-        InternalTransport transport = processTransportOnServiceAddition(processingUnitInstance, nioDetails, virtualMachine);
-
-        InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(),
-                transport, operatingSystem, virtualMachine,
-                (InternalMachineAware) virtualMachine, processingUnitInstance);
-
-        processZonesOnServiceAddition(zones, processingUnitInstance.getUid(), transport, virtualMachine, machine, processingUnitInstance);
-
-        InternalProcessingUnit processingUnit = (InternalProcessingUnit) processingUnits.getProcessingUnit(processingUnitInstance.getClusterInfo().getName());
-        InternalGridServiceContainer gridServiceContainer = (InternalGridServiceContainer) gridServiceContainers.getContainerByUID(processingUnitInstance.getGridServiceContainerServiceID().toString());
-
-        if (processingUnit == null || gridServiceContainer == null) {
+    public void removeGridServiceAgent(String uid) {
+        assertStateChangesPermitted();
+        synchronized (DefaultAdmin.this) {
             if (logger.isDebugEnabled()) {
-                logger.debug(processingUnitInstance.getProcessingUnitInstanceName() + " is orphaned until it's hosting container is discovered");
+                logger.debug("Removing GSA uid=" + uid);
             }
-            processingUnitInstances.addOrphaned(processingUnitInstance);
-        } else {
-            processProcessingUnitInstanceAddition(processingUnit, processingUnitInstance);
-        }
-
-        flushEvents();
-    }
-
-    @Override
-    public synchronized void removeProcessingUnitInstance(String uid, boolean removeEmbeddedSpaces) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Removing Processing Unit Instance uid=" + uid);
-        }
-        processingUnitInstances.removeOrphaned(uid);
-        InternalProcessingUnitInstance processingUnitInstance = (InternalProcessingUnitInstance) processingUnitInstances.removeInstance(uid);
-        if (processingUnitInstance != null) {
-            //removedProcessingUnitInstances Needs to be locked under DefaultAdmin.this
-            Iterator<ProcessingUnitInstance> iterator = removedProcessingUnitInstances.iterator();
-            while (iterator.hasNext()) {
-                ProcessingUnitInstance alreadyRemovedInstance =  iterator.next();
-                if (alreadyRemovedInstance.getProcessingUnitInstanceName().equals(processingUnitInstance.getProcessingUnitInstanceName())) {
-                    iterator.remove();
+            InternalGridServiceAgent gridServiceAgent = gridServiceAgents.removeGridServiceAgent(uid);
+            if (gridServiceAgent != null) {
+                gridServiceAgent.setDiscovered(false);
+                processTransportOnServiceRemoval(gridServiceAgent, gridServiceAgent, gridServiceAgent);
+                processOperatingSystemOnServiceRemoval(gridServiceAgent, gridServiceAgent);
+    
+                processVirtualMachineOnServiceRemoval(gridServiceAgent, gridServiceAgent, gridServiceAgent);
+                ((InternalGridServiceAgents) ((InternalVirtualMachine) gridServiceAgent.getVirtualMachine()).getGridServiceAgents()).removeGridServiceAgent(uid);
+    
+                processMachineOnServiceRemoval(gridServiceAgent, gridServiceAgent);
+                ((InternalGridServiceAgents) ((InternalMachine) gridServiceAgent.getMachine()).getGridServiceAgents()).removeGridServiceAgent(uid);
+    
+                processZonesOnServiceRemoval(uid, gridServiceAgent);
+                for (Zone zone : gridServiceAgent.getZones().values()) {
+                    ((InternalGridServiceAgents) zone.getGridServiceAgents()).removeGridServiceAgent(uid);
                 }
-            }
-            removedProcessingUnitInstances.add(processingUnitInstance);
-            
-            processingUnitInstance.setDiscovered(false);
-            ((InternalProcessingUnit) processingUnitInstance.getProcessingUnit()).removeProcessingUnitInstance(uid);
-            Application application = processingUnitInstance.getProcessingUnit().getApplication();
-            if (application != null) {
-                ((InternalProcessingUnitInstanceRemovedEventManager) application.getProcessingUnits().getProcessingUnitInstanceRemoved()).processingUnitInstanceRemoved(processingUnitInstance);
-            }
-            ((InternalGridServiceContainer) processingUnitInstance.getGridServiceContainer()).removeProcessingUnitInstance(uid);
-            ((InternalVirtualMachine) processingUnitInstance.getVirtualMachine()).removeProcessingUnitInstance(processingUnitInstance.getUid());
-            ((InternalMachine) processingUnitInstance.getMachine()).removeProcessingUnitInstance(processingUnitInstance.getUid());
-            for (Zone zone : processingUnitInstance.getZones().values()) {
-                ((InternalZone) zone).removeProcessingUnitInstance(processingUnitInstance.getUid());
-            }
-
-            processTransportOnServiceRemoval(processingUnitInstance, processingUnitInstance, processingUnitInstance);
-            processOperatingSystemOnServiceRemoval(processingUnitInstance, processingUnitInstance);
-            processVirtualMachineOnServiceRemoval(processingUnitInstance, processingUnitInstance, processingUnitInstance);
-            processMachineOnServiceRemoval(processingUnitInstance, processingUnitInstance);
-            processZonesOnServiceRemoval(processingUnitInstance.getUid(), processingUnitInstance);
-            if (logger.isDebugEnabled()) {
-                logger.debug("removed processing unit instance " + processingUnitInstance.getProcessingUnitInstanceName() +" uid:"+uid);
-            }
-            if (removeEmbeddedSpaces) {
-                for (SpaceServiceDetails serviceDetails : processingUnitInstance.getEmbeddedSpacesDetails()) {
-                    removeSpaceInstance(serviceDetails.getServiceID().toString());
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("removed space instance " + serviceDetails.getName() +" id:"+serviceDetails.getServiceID());
+    
+                for (Iterator<Map.Entry<String, InternalAgentGridComponent>> it = orphanedAgentGridComponents.entrySet().iterator(); it.hasNext();) {
+                    Map.Entry<String, InternalAgentGridComponent> entry = it.next();
+                    if (entry.getValue().getAgentUid().equals(gridServiceAgent.getUid())) {
+                        it.remove();
                     }
                 }
             }
+    
+            flushEvents();
         }
-
-        flushEvents();
     }
 
     @Override
-    public synchronized void addSpaceInstance(InternalSpaceInstance spaceInstance, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Adding Space Instance uid=" + spaceInstance.getUid());
+    public void addLookupService(InternalLookupService lookupService,
+            NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones) {
+        assertStateChangesPermitted();
+        synchronized (DefaultAdmin.this) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Adding LUS uid=" + lookupService.getUid());
+            }
+            OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(lookupService, osDetails);
+            VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(lookupService, jvmDetails, jmxUrl );
+            InternalTransport transport = processTransportOnServiceAddition(lookupService, nioDetails, virtualMachine);
+    
+            InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(),
+                    transport, operatingSystem, virtualMachine,
+                    (InternalMachineAware) virtualMachine, lookupService);
+    
+            processZonesOnServiceAddition(zones, lookupService.getUid(), transport, virtualMachine, machine, lookupService);
+            processAgentOnServiceAddition(lookupService);
+    
+            ((InternalLookupServices) machine.getLookupServices()).addLookupService(lookupService);
+            ((InternalLookupServices) ((InternalVirtualMachine) virtualMachine).getLookupServices()).addLookupService(lookupService);
+    
+            for (Zone zone : lookupService.getZones().values()) {
+                ((InternalLookupServices) zone.getLookupServices()).addLookupService(lookupService);
+            }
+    
+            lookupServices.addLookupService(lookupService);
+    
+            flushEvents();
         }
-        OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(spaceInstance, osDetails);
-        VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(spaceInstance, jvmDetails, jmxUrl);
-        InternalTransport transport = processTransportOnServiceAddition(spaceInstance, nioDetails, virtualMachine);
+    }
 
-        InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(),
-                transport, operatingSystem, virtualMachine,
-                (InternalMachineAware) virtualMachine, spaceInstance);
+    @Override
+    public void removeLookupService(String uid) {
+        assertStateChangesPermitted();
+        synchronized (DefaultAdmin.this) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Removing LUS uid=" + uid);
+            }
+            InternalLookupService lookupService = lookupServices.removeLookupService(uid);
+            if (lookupService != null) {
+                lookupService.setDiscovered(false);
+                processTransportOnServiceRemoval(lookupService, lookupService, lookupService);
+                processOperatingSystemOnServiceRemoval(lookupService, lookupService);
+                processVirtualMachineOnServiceRemoval(lookupService, lookupService, lookupService);
+    
+                processMachineOnServiceRemoval(lookupService, lookupService);
+                ((InternalLookupServices) ((InternalMachine) lookupService.getMachine()).getLookupServices()).removeLookupService(uid);
+    
+                processZonesOnServiceRemoval(uid, lookupService);
+                for (Zone zone : lookupService.getZones().values()) {
+                    ((InternalLookupServices) zone.getLookupServices()).removeLookupService(uid);
+                }
+            }
+    
+            flushEvents();
+        }
+    }
 
-        processZonesOnServiceAddition(zones, spaceInstance.getUid(), transport, virtualMachine, machine, spaceInstance);
+    @Override
+    public void addGridServiceManager(InternalGridServiceManager gridServiceManager,
+            NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones) {
+        assertStateChangesPermitted();
+        synchronized (DefaultAdmin.this) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Adding GSM uid=" + gridServiceManager.getUid());
+            }
+            OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(gridServiceManager, osDetails);
+            VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(gridServiceManager, jvmDetails, jmxUrl);
+            InternalTransport transport = processTransportOnServiceAddition(gridServiceManager, nioDetails, virtualMachine);
+    
+            InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(),
+                    transport, operatingSystem, virtualMachine,
+                    (InternalMachineAware) virtualMachine, gridServiceManager);
+    
+            processAgentOnServiceAddition(gridServiceManager);
+            processZonesOnServiceAddition(zones, gridServiceManager.getUid(), transport, virtualMachine, machine, gridServiceManager);
+    
+            ((InternalGridServiceManagers) machine.getGridServiceManagers()).addGridServiceManager(gridServiceManager);
+            ((InternalGridServiceManagers) ((InternalVirtualMachine) virtualMachine).getGridServiceManagers()).addGridServiceManager(gridServiceManager);
+            for (Zone zone : gridServiceManager.getZones().values()) {
+                ((InternalGridServiceManagers) zone.getGridServiceManagers()).addGridServiceManager(gridServiceManager);
+            }
+    
+            gridServiceManagers.addGridServiceManager(gridServiceManager);
+    
+            flushEvents();
+        }
+    }
 
-        InternalSpace space = (InternalSpace) spaces.getSpaceByName(spaceInstance.getSpaceName());
-        if (space == null) {
-            String spaceUid = spaceInstance.getSpaceName();
-            // find space that had its last instance removed without the pu being removed
-            space = (InternalSpace) DefaultAdmin.this.removeRemovedSpace(spaceUid);
+    @Override
+    public void removeGridServiceManager(String uid) {
+        assertStateChangesPermitted();
+        synchronized (DefaultAdmin.this) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Removing GSM uid=" + uid);
+            }
+            InternalGridServiceManager gridServiceManager = gridServiceManagers.removeGridServiceManager(uid);
+            if (gridServiceManager != null) {
+                gridServiceManager.setDiscovered(false);
+                processTransportOnServiceRemoval(gridServiceManager, gridServiceManager, gridServiceManager);
+                processOperatingSystemOnServiceRemoval(gridServiceManager, gridServiceManager);
+    
+                processVirtualMachineOnServiceRemoval(gridServiceManager, gridServiceManager, gridServiceManager);
+                ((InternalGridServiceManagers) ((InternalVirtualMachine) gridServiceManager.getVirtualMachine()).getGridServiceManagers()).removeGridServiceManager(uid);
+    
+                processMachineOnServiceRemoval(gridServiceManager, gridServiceManager);
+                ((InternalGridServiceManagers) ((InternalMachine) gridServiceManager.getMachine()).getGridServiceManagers()).removeGridServiceManager(uid);
+    
+                processZonesOnServiceRemoval(uid, gridServiceManager);
+                for (Zone zone : gridServiceManager.getZones().values()) {
+                    ((InternalGridServiceManagers) zone.getGridServiceManagers()).removeGridServiceManager(uid);
+                }
+            }
+    
+            flushEvents();
+        }
+    }
+    
+    @Override
+    public void addElasticServiceManager(InternalElasticServiceManager elasticServiceManager,
+            NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones) {
+        assertStateChangesPermitted();
+        synchronized (DefaultAdmin.this) {
+            
+            if (logger.isDebugEnabled()) {
+                logger.debug("Adding ESM uid=" + elasticServiceManager.getUid());
+            }
+            OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(elasticServiceManager, osDetails);
+            VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(elasticServiceManager, jvmDetails, jmxUrl );
+            InternalTransport transport = processTransportOnServiceAddition(elasticServiceManager, nioDetails, virtualMachine);
+    
+            InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(),
+                    transport, operatingSystem, virtualMachine,
+                    (InternalMachineAware) virtualMachine, elasticServiceManager);
+    
+            processAgentOnServiceAddition(elasticServiceManager);
+            processZonesOnServiceAddition(zones, elasticServiceManager.getUid(), transport, virtualMachine, machine, elasticServiceManager);
+    
+            ((InternalElasticServiceManagers) machine.getElasticServiceManagers()).addElasticServiceManager(elasticServiceManager);
+            ((InternalElasticServiceManagers) ((InternalVirtualMachine) virtualMachine).getElasticServiceManagers()).addElasticServiceManager(elasticServiceManager);
+            for (Zone zone : elasticServiceManager.getZones().values()) {
+                ((InternalElasticServiceManagers) zone.getElasticServiceManagers()).addElasticServiceManager(elasticServiceManager);
+            }
+    
+            elasticServiceManagers.addElasticServiceManager(elasticServiceManager);
+    
+            flushEvents();
+        }
+    }
+
+    @Override
+    public void removeElasticServiceManager(String uid) {
+        assertStateChangesPermitted();
+        synchronized (DefaultAdmin.this) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Removing ESM uid=" + uid);
+            }
+            InternalElasticServiceManager elasticServiceManager = elasticServiceManagers.removeElasticServiceManager(uid);
+            if (elasticServiceManager != null) {
+                elasticServiceManager.setDiscovered(false);
+                processTransportOnServiceRemoval(elasticServiceManager, elasticServiceManager, elasticServiceManager);
+                processOperatingSystemOnServiceRemoval(elasticServiceManager, elasticServiceManager);
+    
+                processVirtualMachineOnServiceRemoval(elasticServiceManager, elasticServiceManager, elasticServiceManager);
+                ((InternalElasticServiceManagers) ((InternalVirtualMachine) elasticServiceManager.getVirtualMachine()).getElasticServiceManagers()).removeElasticServiceManager(uid);
+    
+                processMachineOnServiceRemoval(elasticServiceManager, elasticServiceManager);
+                ((InternalElasticServiceManagers) ((InternalMachine) elasticServiceManager.getMachine()).getElasticServiceManagers()).removeElasticServiceManager(uid);
+    
+                processZonesOnServiceRemoval(uid, elasticServiceManager);
+                for (Zone zone : elasticServiceManager.getZones().values()) {
+                    ((InternalElasticServiceManagers) zone.getElasticServiceManagers()).removeElasticServiceManager(uid);
+                }
+            }
+    
+            flushEvents();
+        }
+    }
+
+    @Override
+    public void addGridServiceContainer(InternalGridServiceContainer gridServiceContainer,
+            NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones) {
+        assertStateChangesPermitted();
+        synchronized (DefaultAdmin.this) { 
+            if (logger.isDebugEnabled()) {
+                 logger.debug("Adding GSC uid=" + gridServiceContainer.getUid());
+             }
+            OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(gridServiceContainer, osDetails);
+            VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(gridServiceContainer, jvmDetails, jmxUrl);
+            InternalTransport transport = processTransportOnServiceAddition(gridServiceContainer, nioDetails, virtualMachine);
+    
+            InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(),
+                    transport, operatingSystem, virtualMachine,
+                    (InternalMachineAware) virtualMachine, gridServiceContainer);
+    
+            processAgentOnServiceAddition(gridServiceContainer);
+    
+            processZonesOnServiceAddition(zones, gridServiceContainer.getUid(), transport, virtualMachine, machine, gridServiceContainer);
+    
+            ((InternalGridServiceContainers) machine.getGridServiceContainers()).addGridServiceContainer(gridServiceContainer);
+            ((InternalGridServiceContainers) ((InternalVirtualMachine) virtualMachine).getGridServiceContainers()).addGridServiceContainer(gridServiceContainer);
+            for (Zone zone : gridServiceContainer.getZones().values()) {
+                ((InternalGridServiceContainers) zone.getGridServiceContainers()).addGridServiceContainer(gridServiceContainer);
+            }
+    
+            gridServiceContainers.addGridServiceContainer(gridServiceContainer);
+    
+            flushEvents();
+        }
+    }
+
+    @Override
+    public void removeGridServiceContainer(String uid) {
+        
+        assertStateChangesPermitted();
+        synchronized (DefaultAdmin.this) {
+            
+            if (logger.isDebugEnabled()) {
+                logger.debug("Removing GSC uid=" + uid);
+            }
+            
+            InternalGridServiceContainer gridServiceContainer = gridServiceContainers.removeGridServiceContainer(uid);
+            if (gridServiceContainer != null) {
+                gridServiceContainer.setDiscovered(false);
+                processTransportOnServiceRemoval(gridServiceContainer, gridServiceContainer, gridServiceContainer);
+                processOperatingSystemOnServiceRemoval(gridServiceContainer, gridServiceContainer);
+    
+                processVirtualMachineOnServiceRemoval(gridServiceContainer, gridServiceContainer, gridServiceContainer);
+                ((InternalGridServiceContainers) ((InternalVirtualMachine) gridServiceContainer.getVirtualMachine()).getGridServiceContainers()).removeGridServiceContainer(uid);
+    
+                processMachineOnServiceRemoval(gridServiceContainer, gridServiceContainer);
+                ((InternalGridServiceContainers) ((InternalMachine) gridServiceContainer.getMachine()).getGridServiceContainers()).removeGridServiceContainer(uid);
+    
+                processZonesOnServiceRemoval(uid, gridServiceContainer);
+                for (Zone zone : gridServiceContainer.getZones().values()) {
+                    ((InternalGridServiceContainers) zone.getGridServiceContainers()).removeGridServiceContainer(uid);
+                }
+                
+                InternalGridServiceAgent agent = (InternalGridServiceAgent)gridServiceContainer.getGridServiceAgent();
+                if (agent != null) {
+                    agent.removeAgentGridComponent(gridServiceContainer);
+                }
+            }
+    
+            flushEvents();
+        }
+    }
+
+    @Override
+    public void addProcessingUnitInstance(InternalProcessingUnitInstance processingUnitInstance, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones) {
+        assertStateChangesPermitted();
+        synchronized (DefaultAdmin.this) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Service Added [Processing Unit Instance] " + processingUnitInstance.getProcessingUnitInstanceName() + " with uid [" + processingUnitInstance.getUid() + "]");
+            }
+            OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(processingUnitInstance, osDetails);
+            VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(processingUnitInstance, jvmDetails, jmxUrl);
+            InternalTransport transport = processTransportOnServiceAddition(processingUnitInstance, nioDetails, virtualMachine);
+    
+            InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(),
+                    transport, operatingSystem, virtualMachine,
+                    (InternalMachineAware) virtualMachine, processingUnitInstance);
+    
+            processZonesOnServiceAddition(zones, processingUnitInstance.getUid(), transport, virtualMachine, machine, processingUnitInstance);
+    
+            InternalProcessingUnit processingUnit = (InternalProcessingUnit) processingUnits.getProcessingUnit(processingUnitInstance.getClusterInfo().getName());
+            InternalGridServiceContainer gridServiceContainer = (InternalGridServiceContainer) gridServiceContainers.getContainerByUID(processingUnitInstance.getGridServiceContainerServiceID().toString());
+    
+            if (processingUnit == null || gridServiceContainer == null) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug(processingUnitInstance.getProcessingUnitInstanceName() + " is orphaned until it's hosting container is discovered");
+                }
+                processingUnitInstances.addOrphaned(processingUnitInstance);
+            } else {
+                processProcessingUnitInstanceAddition(processingUnit, processingUnitInstance);
+            }
+    
+            flushEvents();
+        }
+    }
+
+    @Override
+    public void removeProcessingUnitInstance(String uid, boolean removeEmbeddedSpaces) {
+        assertStateChangesPermitted();
+        synchronized (DefaultAdmin.this) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Removing Processing Unit Instance uid=" + uid);
+            }
+            processingUnitInstances.removeOrphaned(uid);
+            InternalProcessingUnitInstance processingUnitInstance = (InternalProcessingUnitInstance) processingUnitInstances.removeInstance(uid);
+            if (processingUnitInstance != null) {
+                //removedProcessingUnitInstances Needs to be locked under DefaultAdmin.this
+                Iterator<ProcessingUnitInstance> iterator = removedProcessingUnitInstances.iterator();
+                while (iterator.hasNext()) {
+                    ProcessingUnitInstance alreadyRemovedInstance =  iterator.next();
+                    if (alreadyRemovedInstance.getProcessingUnitInstanceName().equals(processingUnitInstance.getProcessingUnitInstanceName())) {
+                        iterator.remove();
+                    }
+                }
+                removedProcessingUnitInstances.add(processingUnitInstance);
+                
+                processingUnitInstance.setDiscovered(false);
+                ((InternalProcessingUnit) processingUnitInstance.getProcessingUnit()).removeProcessingUnitInstance(uid);
+                Application application = processingUnitInstance.getProcessingUnit().getApplication();
+                if (application != null) {
+                    ((InternalProcessingUnitInstanceRemovedEventManager) application.getProcessingUnits().getProcessingUnitInstanceRemoved()).processingUnitInstanceRemoved(processingUnitInstance);
+                }
+                ((InternalGridServiceContainer) processingUnitInstance.getGridServiceContainer()).removeProcessingUnitInstance(uid);
+                ((InternalVirtualMachine) processingUnitInstance.getVirtualMachine()).removeProcessingUnitInstance(processingUnitInstance.getUid());
+                ((InternalMachine) processingUnitInstance.getMachine()).removeProcessingUnitInstance(processingUnitInstance.getUid());
+                for (Zone zone : processingUnitInstance.getZones().values()) {
+                    ((InternalZone) zone).removeProcessingUnitInstance(processingUnitInstance.getUid());
+                }
+    
+                processTransportOnServiceRemoval(processingUnitInstance, processingUnitInstance, processingUnitInstance);
+                processOperatingSystemOnServiceRemoval(processingUnitInstance, processingUnitInstance);
+                processVirtualMachineOnServiceRemoval(processingUnitInstance, processingUnitInstance, processingUnitInstance);
+                processMachineOnServiceRemoval(processingUnitInstance, processingUnitInstance);
+                processZonesOnServiceRemoval(processingUnitInstance.getUid(), processingUnitInstance);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("removed processing unit instance " + processingUnitInstance.getProcessingUnitInstanceName() +" uid:"+uid);
+                }
+                if (removeEmbeddedSpaces) {
+                    for (SpaceServiceDetails serviceDetails : processingUnitInstance.getEmbeddedSpacesDetails()) {
+                        removeSpaceInstance(serviceDetails.getServiceID().toString());
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("removed space instance " + serviceDetails.getName() +" id:"+serviceDetails.getServiceID());
+                        }
+                    }
+                }
+            }
+    
+            flushEvents();
+        }
+    }
+
+    @Override
+    public void addSpaceInstance(InternalSpaceInstance spaceInstance, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones) {
+        assertStateChangesPermitted();
+        synchronized (DefaultAdmin.this) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Adding Space Instance uid=" + spaceInstance.getUid());
+            }
+            OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(spaceInstance, osDetails);
+            VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(spaceInstance, jvmDetails, jmxUrl);
+            InternalTransport transport = processTransportOnServiceAddition(spaceInstance, nioDetails, virtualMachine);
+    
+            InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(),
+                    transport, operatingSystem, virtualMachine,
+                    (InternalMachineAware) virtualMachine, spaceInstance);
+    
+            processZonesOnServiceAddition(zones, spaceInstance.getUid(), transport, virtualMachine, machine, spaceInstance);
+    
+            InternalSpace space = (InternalSpace) spaces.getSpaceByName(spaceInstance.getSpaceName());
             if (space == null) {
-                space = new DefaultSpace(spaces, spaceUid, spaceInstance.getSpaceName());
+                String spaceUid = spaceInstance.getSpaceName();
+                // find space that had its last instance removed without the pu being removed
+                space = (InternalSpace) DefaultAdmin.this.removeRemovedSpace(spaceUid);
+                if (space == null) {
+                    space = new DefaultSpace(spaces, spaceUid, spaceInstance.getSpaceName());
+                }
+                spaces.addSpace(space);
             }
-            spaces.addSpace(space);
-        }
-        spaceInstance.setSpace(space);
-        space.addInstance(spaceInstance);
-        spaces.addSpaceInstance(spaceInstance);
-
-        // go over all the processing unit instances and add the space if matching
-        for (ProcessingUnit processingUnit : processingUnits) {
-            for (ProcessingUnitInstance processingUnitInstance : processingUnit) {
-                addSpaceInstanceIfMatching(spaceInstance, processingUnitInstance);
+            spaceInstance.setSpace(space);
+            space.addInstance(spaceInstance);
+            spaces.addSpaceInstance(spaceInstance);
+    
+            // go over all the processing unit instances and add the space if matching
+            for (ProcessingUnit processingUnit : processingUnits) {
+                for (ProcessingUnitInstance processingUnitInstance : processingUnit) {
+                    addSpaceInstanceIfMatching(spaceInstance, processingUnitInstance);
+                }
             }
+    
+            machine.addSpaceInstance(spaceInstance);
+            ((InternalVirtualMachine) virtualMachine).addSpaceInstance(spaceInstance);
+            for (Zone zone : spaceInstance.getZones().values()) {
+                ((InternalZone) zone).addSpaceInstance(spaceInstance);
+            }
+    
+            flushEvents();
         }
-
-        machine.addSpaceInstance(spaceInstance);
-        ((InternalVirtualMachine) virtualMachine).addSpaceInstance(spaceInstance);
-        for (Zone zone : spaceInstance.getZones().values()) {
-            ((InternalZone) zone).addSpaceInstance(spaceInstance);
-        }
-
-        flushEvents();
     }
 
     private void addSpaceInstanceIfMatching(SpaceInstance spaceInstance, ProcessingUnitInstance processingUnitInstance) {
@@ -1096,38 +1158,41 @@ public class DefaultAdmin implements InternalAdmin {
     }
 
     @Override
-    public synchronized void removeSpaceInstance(String uid) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Removing Space Instance uid=" + uid);
-        }
-        InternalSpaceInstance spaceInstance = (InternalSpaceInstance) spaces.removeSpaceInstance(uid);
-        if (spaceInstance != null) {
-            spaceInstance.setDiscovered(false);
-            InternalSpace space = (InternalSpace) spaces.getSpaceByName(spaceInstance.getSpaceName());
-            space.removeInstance(uid);
-            if (space.getSize() == 0) {
-                // no more instances, remove it completely
-                spaces.removeSpace(space.getUid());
-                ProcessingUnit processingUnit = processingUnits.removeEmbeddedSpace(space);
-                if (processingUnit != null) {
-                    addRemovedSpace(space,processingUnit);
+    public void removeSpaceInstance(String uid) {
+        assertStateChangesPermitted();
+        synchronized (DefaultAdmin.this) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Removing Space Instance uid=" + uid);
+            }
+            InternalSpaceInstance spaceInstance = (InternalSpaceInstance) spaces.removeSpaceInstance(uid);
+            if (spaceInstance != null) {
+                spaceInstance.setDiscovered(false);
+                InternalSpace space = (InternalSpace) spaces.getSpaceByName(spaceInstance.getSpaceName());
+                space.removeInstance(uid);
+                if (space.getSize() == 0) {
+                    // no more instances, remove it completely
+                    spaces.removeSpace(space.getUid());
+                    ProcessingUnit processingUnit = processingUnits.removeEmbeddedSpace(space);
+                    if (processingUnit != null) {
+                        addRemovedSpace(space,processingUnit);
+                    }
                 }
+                
+                ((InternalVirtualMachine) spaceInstance.getVirtualMachine()).removeSpaceInstance(spaceInstance.getUid());
+                ((InternalMachine) spaceInstance.getMachine()).removeSpaceInstance(spaceInstance.getUid());
+                for (Zone zone : spaceInstance.getZones().values()) {
+                    ((InternalZone) zone).removeSpaceInstance(uid);
+                }
+    
+                processTransportOnServiceRemoval(spaceInstance, spaceInstance, spaceInstance);
+                processOperatingSystemOnServiceRemoval(spaceInstance, spaceInstance);
+                processVirtualMachineOnServiceRemoval(spaceInstance, spaceInstance, spaceInstance);
+                processMachineOnServiceRemoval(spaceInstance, spaceInstance);
+                processZonesOnServiceRemoval(uid, spaceInstance);
             }
-            
-            ((InternalVirtualMachine) spaceInstance.getVirtualMachine()).removeSpaceInstance(spaceInstance.getUid());
-            ((InternalMachine) spaceInstance.getMachine()).removeSpaceInstance(spaceInstance.getUid());
-            for (Zone zone : spaceInstance.getZones().values()) {
-                ((InternalZone) zone).removeSpaceInstance(uid);
-            }
-
-            processTransportOnServiceRemoval(spaceInstance, spaceInstance, spaceInstance);
-            processOperatingSystemOnServiceRemoval(spaceInstance, spaceInstance);
-            processVirtualMachineOnServiceRemoval(spaceInstance, spaceInstance, spaceInstance);
-            processMachineOnServiceRemoval(spaceInstance, spaceInstance);
-            processZonesOnServiceRemoval(uid, spaceInstance);
+    
+            flushEvents();
         }
-
-        flushEvents();
     }
 
     private void processAgentOnServiceAddition(InternalAgentGridComponent agentGridComponent) {
@@ -1144,43 +1209,46 @@ public class DefaultAdmin implements InternalAdmin {
         }
     }
 
-    private synchronized void processProcessingUnitInstanceAddition(InternalProcessingUnit processingUnit, InternalProcessingUnitInstance processingUnitInstance) {
-        if (logger.isDebugEnabled()) {
-            logger.debug(processingUnitInstance.getProcessingUnitInstanceName() + " is being added");
-        }
-        processingUnitInstances.removeOrphaned(processingUnitInstance.getUid());
-
-        processingUnitInstance.setProcessingUnit(processingUnit);
-        processingUnit.addProcessingUnitInstance(processingUnitInstance);
-        Application application = processingUnit.getApplication();
-        if (application != null) {
-            ((InternalProcessingUnitInstanceAddedEventManager) application.getProcessingUnits().getProcessingUnitInstanceAdded()).processingUnitInstanceAdded(processingUnitInstance);
-        }
-        
-        InternalGridServiceContainer gridServiceContainer = (InternalGridServiceContainer) gridServiceContainers.getContainerByUID(processingUnitInstance.getGridServiceContainerServiceID().toString());
-        if (gridServiceContainer == null) {
-            throw new IllegalStateException("Internal error in admin, should not happen");
-        }
-        processingUnitInstance.setGridServiceContainer(gridServiceContainer);
-        gridServiceContainer.addProcessingUnitInstance(processingUnitInstance);
-
-        ((InternalMachine) processingUnitInstance.getMachine()).addProcessingUnitInstance(processingUnitInstance);
-        ((InternalVirtualMachine) processingUnitInstance.getVirtualMachine()).addProcessingUnitInstance(processingUnitInstance);
-        for (Zone zone : processingUnitInstance.getZones().values()) {
-            ((InternalZone) zone).addProcessingUnitInstance(processingUnitInstance);
-        }
-
-        // go over all the space instances, and add the matched one to the processing unit
-        for (Space space : spaces) {
-            for (SpaceInstance spaceInstance : space) {
-                addSpaceInstanceIfMatching(spaceInstance, processingUnitInstance);
+    private void processProcessingUnitInstanceAddition(InternalProcessingUnit processingUnit, InternalProcessingUnitInstance processingUnitInstance) {
+        assertStateChangesPermitted();
+        synchronized (DefaultAdmin.this) {
+            if (logger.isDebugEnabled()) {
+                logger.debug(processingUnitInstance.getProcessingUnitInstanceName() + " is being added");
             }
-        }
-
-        processingUnitInstances.addInstance(processingUnitInstance);
-        
-        if (logger.isDebugEnabled()) {
-            logger.debug(processingUnitInstance.getProcessingUnitInstanceName() + " has been added");
+            processingUnitInstances.removeOrphaned(processingUnitInstance.getUid());
+    
+            processingUnitInstance.setProcessingUnit(processingUnit);
+            processingUnit.addProcessingUnitInstance(processingUnitInstance);
+            Application application = processingUnit.getApplication();
+            if (application != null) {
+                ((InternalProcessingUnitInstanceAddedEventManager) application.getProcessingUnits().getProcessingUnitInstanceAdded()).processingUnitInstanceAdded(processingUnitInstance);
+            }
+            
+            InternalGridServiceContainer gridServiceContainer = (InternalGridServiceContainer) gridServiceContainers.getContainerByUID(processingUnitInstance.getGridServiceContainerServiceID().toString());
+            if (gridServiceContainer == null) {
+                throw new IllegalStateException("Internal error in admin, should not happen");
+            }
+            processingUnitInstance.setGridServiceContainer(gridServiceContainer);
+            gridServiceContainer.addProcessingUnitInstance(processingUnitInstance);
+    
+            ((InternalMachine) processingUnitInstance.getMachine()).addProcessingUnitInstance(processingUnitInstance);
+            ((InternalVirtualMachine) processingUnitInstance.getVirtualMachine()).addProcessingUnitInstance(processingUnitInstance);
+            for (Zone zone : processingUnitInstance.getZones().values()) {
+                ((InternalZone) zone).addProcessingUnitInstance(processingUnitInstance);
+            }
+    
+            // go over all the space instances, and add the matched one to the processing unit
+            for (Space space : spaces) {
+                for (SpaceInstance spaceInstance : space) {
+                    addSpaceInstanceIfMatching(spaceInstance, processingUnitInstance);
+                }
+            }
+    
+            processingUnitInstances.addInstance(processingUnitInstance);
+            
+            if (logger.isDebugEnabled()) {
+                logger.debug(processingUnitInstance.getProcessingUnitInstanceName() + " has been added");
+            }
         }
     }
 
@@ -1527,6 +1595,7 @@ public class DefaultAdmin implements InternalAdmin {
                         }
                         processingUnit.stopStatisticsMonitor();
                     }
+                    assertStateChangesPermitted();
                     synchronized (DefaultAdmin.this) {
                         Iterator<ProcessingUnitInstance> iterator = removedProcessingUnitInstances.iterator();
                         while (iterator.hasNext()) {
@@ -1620,6 +1689,7 @@ public class DefaultAdmin implements InternalAdmin {
             }
 
             // Now, process any orphaned processing unit instances
+            assertStateChangesPermitted();
             synchronized (DefaultAdmin.this) {
                 for (ProcessingUnitInstance orphanedX : processingUnitInstances.getOrphaned()) {
                     InternalProcessingUnitInstance orphaned = (InternalProcessingUnitInstance) orphanedX;
@@ -1653,6 +1723,7 @@ public class DefaultAdmin implements InternalAdmin {
                             //will raise a member alive indicator event (no need to flush)
                             ((InternalProcessingUnitInstance)puInstanceByUID).setMemberAliveIndicatorStatus(serviceFaultDetectionEvent);
                         } else {
+                            assertStateChangesPermitted();
                             synchronized (DefaultAdmin.this) {
                                 Iterator<ProcessingUnitInstance> iterator = removedProcessingUnitInstances.iterator();
                                 while (iterator.hasNext()) {
@@ -1813,8 +1884,8 @@ public class DefaultAdmin implements InternalAdmin {
      * forget a removed space that was hosted by the specified processing unit
      */
     private Space removeRemovedSpace(ProcessingUnit processingUnit) {
-        synchronized (this) {
-            assertStateChangesPermitted();
+        assertStateChangesPermitted();
+        synchronized (DefaultAdmin.this) {
             final Space space = removedSpacesPerProcessingUnit.remove(processingUnit);
             return space;
         }
@@ -1824,8 +1895,8 @@ public class DefaultAdmin implements InternalAdmin {
      * forget a removed space with the specified uid
      */
     private Space removeRemovedSpace(String spaceUid) {
-        synchronized (this) {
-            assertStateChangesPermitted();
+        assertStateChangesPermitted();
+        synchronized (DefaultAdmin.this) {
             Space space = null;
             Iterator<Entry<ProcessingUnit, Space>> iterator = removedSpacesPerProcessingUnit.entrySet().iterator();
             while (iterator.hasNext()) {
