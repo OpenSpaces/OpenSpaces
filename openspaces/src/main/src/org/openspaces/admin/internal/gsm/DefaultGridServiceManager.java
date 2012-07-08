@@ -79,6 +79,7 @@ import org.openspaces.admin.pu.topology.ProcessingUnitConfigHolder;
 import org.openspaces.admin.pu.topology.ProcessingUnitDeploymentTopology;
 import org.openspaces.admin.space.ElasticSpaceDeployment;
 import org.openspaces.admin.space.SpaceDeployment;
+import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.core.util.FileUtils;
 import org.openspaces.pu.container.servicegrid.deploy.Deploy;
 
@@ -724,13 +725,20 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         long end = System.currentTimeMillis() + timeUnit.toMillis(timeout);
          
         List<GridServiceContainer> containersPendingRemoval = new ArrayList<GridServiceContainer>();
-        List<ProcessingUnitInstance> instancesPendingRemoval = new ArrayList<ProcessingUnitInstance>();
+        List<ProcessingUnitInstance> puInstancesPendingRemoval = new ArrayList<ProcessingUnitInstance>();
+        List<SpaceInstance> spaceInstancesPendingRemoval = new ArrayList<SpaceInstance>();
         
         for (ProcessingUnit pu : processingUnits) {
             for (GridServiceContainer container : admin.getGridServiceContainers()) {
                 ProcessingUnitInstance[] processingUnitInstances = container.getProcessingUnitInstances(pu.getName());
                 if (processingUnitInstances.length > 0) {
-                    instancesPendingRemoval.addAll(Arrays.asList(processingUnitInstances));
+                    puInstancesPendingRemoval.addAll(Arrays.asList(processingUnitInstances));
+                    for (ProcessingUnitInstance puInstance : processingUnitInstances) {
+                        SpaceInstance spaceInstance = puInstance.getSpaceInstance();
+                        if (spaceInstance != null) {
+                            spaceInstancesPendingRemoval.add(spaceInstance);
+                        }
+                    }
                     if (isManagedByElasticServiceManager(pu)) {
                         // add all containers that are managed by the elastic pu
                         containersPendingRemoval .add(container);
@@ -789,9 +797,10 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         while (true) {
             try {
                 verifyUndeployComplete(processingUnits); 
-                verifyNotDiscovered(instancesPendingRemoval);
+                verifyNotDiscovered(puInstancesPendingRemoval);
+                verifyNotDiscovered(spaceInstancesPendingRemoval);
                 verifyNotDiscovered(containersPendingRemoval);
-                verifyInstancesNotUndeploying(instancesPendingRemoval);
+                verifyInstancesNotUndeploying(puInstancesPendingRemoval);
                 break;
             }
             catch (TimeoutException e) {
@@ -832,6 +841,10 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             int numberOfInstances = pu.getInstances().length;
             if (numberOfInstances > 0) {
                 throw new TimeoutException(pu.getName() + " is still undeploying " + numberOfInstances + " instances");
+            }
+            
+            if (pu.getSpace() != null) {
+                throw new TimeoutException(pu.getName() + " still has an embedded space");
             }
             
             if (isManagedByElasticServiceManager(pu)) {
