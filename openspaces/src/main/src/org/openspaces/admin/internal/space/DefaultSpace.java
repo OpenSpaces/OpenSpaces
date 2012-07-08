@@ -495,7 +495,11 @@ public class DefaultSpace implements InternalSpace {
     public GigaSpace getGigaSpace() {
         if (gigaSpace == null) {
             
-            this.gigaSpace = new GigaSpaceConfigurer(getIJSpace()).clustered(true).gigaSpace();
+            IJSpace ijSpace = getIJSpace();
+            if (ijSpace == null) {
+                throw new AdminException("Cannot create GigaSpace object since no space instance is discovered");
+            }
+            this.gigaSpace = new GigaSpaceConfigurer(ijSpace).clustered(true).gigaSpace();
         }
         return this.gigaSpace;
     }
