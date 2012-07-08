@@ -53,6 +53,11 @@ public interface InternalProcessingUnit extends ProcessingUnit, InternalProcessi
 
     void addEmbeddedSpace(Space space);
     
+    /**
+     * @since 9.1.0
+     */
+    boolean removeEmbeddedSpace(Space space);
+    
     Map<String, String> getElasticProperties();
 
     String getApplicationName();

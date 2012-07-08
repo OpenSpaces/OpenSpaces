@@ -1094,6 +1094,7 @@ public class DefaultAdmin implements InternalAdmin {
             if (space.getSize() == 0) {
                 // no more instances, remove it completely
                 spaces.removeSpace(space.getUid());
+                processingUnits.removeEmbeddedSpace(space);                
             }
             
             ((InternalVirtualMachine) spaceInstance.getVirtualMachine()).removeSpaceInstance(spaceInstance.getUid());

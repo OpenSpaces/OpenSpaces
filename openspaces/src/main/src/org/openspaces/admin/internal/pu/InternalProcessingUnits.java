@@ -17,6 +17,7 @@
  ******************************************************************************/
 package org.openspaces.admin.internal.pu;
 
+import org.openspaces.admin.internal.space.InternalSpace;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnits;
 import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitEvent;
@@ -36,4 +37,11 @@ public interface InternalProcessingUnits extends ProcessingUnits, InternalProces
      * @author itaif
      */
     void processElasticScaleStrategyEvent(ElasticProcessingUnitEvent event);
+
+    /**
+     * Removes the reference to the specified space from the hosting processing unit.
+     * @return the hosting processing unit from which the space was removed, or null if such a processing unit was not found
+     * @since 9.1.0
+     */
+    ProcessingUnit removeEmbeddedSpace(InternalSpace space);
 }

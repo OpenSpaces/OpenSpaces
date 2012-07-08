@@ -53,6 +53,7 @@ import org.openspaces.admin.internal.pu.events.InternalProcessingUnitInstanceRem
 import org.openspaces.admin.internal.pu.events.InternalProcessingUnitInstanceStatisticsChangedEventManager;
 import org.openspaces.admin.internal.pu.events.InternalProcessingUnitRemovedEventManager;
 import org.openspaces.admin.internal.pu.events.InternalProcessingUnitStatusChangedEventManager;
+import org.openspaces.admin.internal.space.InternalSpace;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.elastic.events.ElasticAutoScalingFailureEvent;
@@ -348,5 +349,16 @@ public class DefaultProcessingUnits implements InternalProcessingUnits {
         else if (event instanceof ElasticAutoScalingProgressChangedEvent) {
             elasticAutoScalingProgressChangedEventManager.elasticAutoScalingProgressChanged((ElasticAutoScalingProgressChangedEvent)event);
         }
+    }
+
+    @Override
+    public ProcessingUnit removeEmbeddedSpace(InternalSpace space) {
+        assertStateChangesPermitted();
+        for (ProcessingUnit pu : this.processingUnits.values()) {
+            if (((InternalProcessingUnit) pu).removeEmbeddedSpace(space)) {
+                return pu;
+            }
+        }
+        return null;
     }
 }

@@ -354,6 +354,12 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     }
     
     @Override
+    public boolean removeEmbeddedSpace(Space space) {
+        assertStateChangesPermitted();
+        return spaces.remove(space.getName()) != null;
+    }
+    
+    @Override
     public Map<String, String> getElasticProperties() {
         return this.elasticProperties;
     }
