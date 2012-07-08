@@ -254,8 +254,13 @@ public class DefaultAdmin implements InternalAdmin {
     
     private final AtomicInteger eventListenersCount = new AtomicInteger();
     
-    //removedProcessingUnitInstances Needs to be locked under DefaultAdmin.this
+    //removedProcessingUnitInstances needs to be locked under DefaultAdmin.this
     private final List<ProcessingUnitInstance> removedProcessingUnitInstances = new LinkedList<ProcessingUnitInstance>();
+
+  //removedSpacesPerProcessingUnit needs to be locked under DefaultAdmin.this
+    private Map<String, Space> removedSpacesPerUid = new HashMap<String,Space>();
+    
+    private Map<ProcessingUnit, Space> removedSpacesPerProcessingUnit = new HashMap<ProcessingUnit,Space>();
     
     public DefaultAdmin() {
         this.discoveryService = new DiscoveryService(this);
@@ -1058,7 +1063,12 @@ public class DefaultAdmin implements InternalAdmin {
 
         InternalSpace space = (InternalSpace) spaces.getSpaceByName(spaceInstance.getSpaceName());
         if (space == null) {
-            space = new DefaultSpace(spaces, spaceInstance.getSpaceName(), spaceInstance.getSpaceName());
+            String spaceUid = spaceInstance.getSpaceName();
+            // find space that had its last instance removed without the pu being removed
+            space = (InternalSpace) DefaultAdmin.this.removeRemovedSpace(spaceUid);
+            if (space == null) {
+                space = new DefaultSpace(spaces, spaceUid, spaceInstance.getSpaceName());
+            }
             spaces.addSpace(space);
         }
         spaceInstance.setSpace(space);
@@ -1100,7 +1110,10 @@ public class DefaultAdmin implements InternalAdmin {
             if (space.getSize() == 0) {
                 // no more instances, remove it completely
                 spaces.removeSpace(space.getUid());
-                processingUnits.removeEmbeddedSpace(space);                
+                ProcessingUnit processingUnit = processingUnits.removeEmbeddedSpace(space);
+                if (processingUnit != null) {
+                    addRemovedSpace(space,processingUnit);
+                }
             }
             
             ((InternalVirtualMachine) spaceInstance.getVirtualMachine()).removeSpaceInstance(spaceInstance.getUid());
@@ -1526,6 +1539,7 @@ public class DefaultAdmin implements InternalAdmin {
                         }
                     }
                     
+                    removeRemovedSpace(processingUnit);
                 }
             }
             // now, go over and update what needed to be updated
@@ -1662,7 +1676,7 @@ public class DefaultAdmin implements InternalAdmin {
                 }
             }
         }
-        
+                
         /*
          * Extract USM service state if processing unit is a USM. Returns SCHEDULED if underlying USM process is not in a running state.
          * Otherwise, returns the original status as returned by the GSM.
@@ -1793,4 +1807,54 @@ public class DefaultAdmin implements InternalAdmin {
     public boolean isSingleThreadedEventListeners() {
         return singleThreadedEventListeners;
     }
+    
+    /**
+     * forget a removed space that was hosted by the specified processing unit
+     */
+    private Space removeRemovedSpace(ProcessingUnit processingUnit) {
+        synchronized (this) {
+            assertStateChangesPermitted();
+            final Space space = removedSpacesPerProcessingUnit.remove(processingUnit);
+            if (space != null) {
+                removedSpacesPerUid.remove(space.getUid());
+            }
+            return space;
+        }
+    }
+
+    /**
+     * forget a removed space with the specified uid
+     */
+    private Space removeRemovedSpace(String spaceUid) {
+        synchronized (this) {
+            assertStateChangesPermitted();
+            Space space = (InternalSpace) removedSpacesPerUid.remove(spaceUid);
+            
+            if (space != null) {
+                Iterator<Entry<ProcessingUnit, Space>> iterator = removedSpacesPerProcessingUnit.entrySet().iterator();
+                boolean removed = false;
+                while (iterator.hasNext()) {
+                    Entry<ProcessingUnit, Space> pair = iterator.next();
+                    if (pair.getValue().equals(space)) {
+                        iterator.remove();
+                        removed = true;
+                        break;
+                    }
+                }
+                if (!removed) {
+                    throw new IllegalStateException("space " + space.getName() + " was in removedSpacesPerUid  but not in removedSpacesPerProcessingUnit");
+                }
+            }
+            return space;
+        }
+    }
+    
+    /**
+     * remember a removed space hosted in the specified pu
+     */
+    private void addRemovedSpace(InternalSpace removedSpace, ProcessingUnit processingUnit) {
+        removedSpacesPerUid.put(removedSpace.getUid(),removedSpace);
+        removedSpacesPerProcessingUnit.put(processingUnit,removedSpace);
+    }
+
 }
