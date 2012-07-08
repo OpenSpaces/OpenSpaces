@@ -1068,7 +1068,7 @@ public class DefaultAdmin implements InternalAdmin {
         // go over all the processing unit instances and add the space if matching
         for (ProcessingUnit processingUnit : processingUnits) {
             for (ProcessingUnitInstance processingUnitInstance : processingUnit) {
-                ((InternalProcessingUnitInstance) processingUnitInstance).addSpaceInstanceIfMatching(spaceInstance);
+                addSpaceInstanceIfMatching(spaceInstance, processingUnitInstance);
             }
         }
 
@@ -1079,6 +1079,12 @@ public class DefaultAdmin implements InternalAdmin {
         }
 
         flushEvents();
+    }
+
+    private void addSpaceInstanceIfMatching(SpaceInstance spaceInstance, ProcessingUnitInstance processingUnitInstance) {
+        if (((InternalProcessingUnitInstance) processingUnitInstance).addSpaceInstanceIfMatching(spaceInstance)) {
+            ((InternalProcessingUnit) processingUnitInstance.getProcessingUnit()).addEmbeddedSpace(spaceInstance.getSpace());
+        }
     }
 
     @Override
@@ -1156,9 +1162,7 @@ public class DefaultAdmin implements InternalAdmin {
         // go over all the space instances, and add the matched one to the processing unit
         for (Space space : spaces) {
             for (SpaceInstance spaceInstance : space) {
-                if (processingUnitInstance.addSpaceInstanceIfMatching(spaceInstance)) {
-                    processingUnit.addEmbeddedSpace(spaceInstance.getSpace());
-                }
+                addSpaceInstanceIfMatching(spaceInstance, processingUnitInstance);
             }
         }
 
