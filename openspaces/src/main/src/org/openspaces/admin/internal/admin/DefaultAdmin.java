@@ -1095,6 +1095,7 @@ public class DefaultAdmin implements InternalAdmin {
                 // no more instances, remove it completely
                 spaces.removeSpace(space.getUid());
             }
+            
             ((InternalVirtualMachine) spaceInstance.getVirtualMachine()).removeSpaceInstance(spaceInstance.getUid());
             ((InternalMachine) spaceInstance.getMachine()).removeSpaceInstance(spaceInstance.getUid());
             for (Zone zone : spaceInstance.getZones().values()) {
@@ -1154,7 +1155,9 @@ public class DefaultAdmin implements InternalAdmin {
         // go over all the space instances, and add the matched one to the processing unit
         for (Space space : spaces) {
             for (SpaceInstance spaceInstance : space) {
-                processingUnitInstance.addSpaceInstanceIfMatching(spaceInstance);
+                if (processingUnitInstance.addSpaceInstanceIfMatching(spaceInstance)) {
+                    processingUnit.addEmbeddedSpace(spaceInstance.getSpace());
+                }
             }
         }
 

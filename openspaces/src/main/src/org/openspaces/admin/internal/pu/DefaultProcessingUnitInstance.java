@@ -386,15 +386,17 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
         }
     }
 
-    public void addSpaceInstanceIfMatching(SpaceInstance spaceInstance) {
+    public boolean addSpaceInstanceIfMatching(SpaceInstance spaceInstance) {
         for (SpaceServiceDetails spaceDetails : embeddedSpacesDetails) {
             if (((InternalSpaceInstance) spaceInstance).getServiceID().equals(spaceDetails.getServiceID())) {
                 spaceInstances.addSpaceInstance(spaceInstance);
-                processingUnit.addEmbeddedSpace(spaceInstance.getSpace());
+                return true;
             }
         }
+        return false;
     }
 
+    @Override
     public void removeSpaceInstance(String uid) {
         spaceInstances.removeSpaceInstance(uid);
     }

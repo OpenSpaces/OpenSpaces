@@ -50,7 +50,7 @@ public interface InternalProcessingUnitInstance extends ProcessingUnitInstance, 
     /**
      * Adds a space instance only if it is one that the processing unit has started.
      */
-    void addSpaceInstanceIfMatching(SpaceInstance spaceInstance);
+    boolean addSpaceInstanceIfMatching(SpaceInstance spaceInstance);
 
     void removeSpaceInstance(String uid);
 
