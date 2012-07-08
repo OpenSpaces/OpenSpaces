@@ -257,9 +257,7 @@ public class DefaultAdmin implements InternalAdmin {
     //removedProcessingUnitInstances needs to be locked under DefaultAdmin.this
     private final List<ProcessingUnitInstance> removedProcessingUnitInstances = new LinkedList<ProcessingUnitInstance>();
 
-  //removedSpacesPerProcessingUnit needs to be locked under DefaultAdmin.this
-    private Map<String, Space> removedSpacesPerUid = new HashMap<String,Space>();
-    
+    //removedSpacesPerProcessingUnit needs to be locked under DefaultAdmin.this
     private Map<ProcessingUnit, Space> removedSpacesPerProcessingUnit = new HashMap<ProcessingUnit,Space>();
     
     public DefaultAdmin() {
@@ -1818,9 +1816,6 @@ public class DefaultAdmin implements InternalAdmin {
         synchronized (this) {
             assertStateChangesPermitted();
             final Space space = removedSpacesPerProcessingUnit.remove(processingUnit);
-            if (space != null) {
-                removedSpacesPerUid.remove(space.getUid());
-            }
             return space;
         }
     }
@@ -1831,21 +1826,14 @@ public class DefaultAdmin implements InternalAdmin {
     private Space removeRemovedSpace(String spaceUid) {
         synchronized (this) {
             assertStateChangesPermitted();
-            Space space = (InternalSpace) removedSpacesPerUid.remove(spaceUid);
-            
-            if (space != null) {
-                Iterator<Entry<ProcessingUnit, Space>> iterator = removedSpacesPerProcessingUnit.entrySet().iterator();
-                boolean removed = false;
-                while (iterator.hasNext()) {
-                    Entry<ProcessingUnit, Space> pair = iterator.next();
-                    if (pair.getValue().equals(space)) {
-                        iterator.remove();
-                        removed = true;
-                        break;
-                    }
-                }
-                if (!removed) {
-                    throw new IllegalStateException("space " + space.getName() + " was in removedSpacesPerUid  but not in removedSpacesPerProcessingUnit");
+            Space space = null;
+            Iterator<Entry<ProcessingUnit, Space>> iterator = removedSpacesPerProcessingUnit.entrySet().iterator();
+            while (iterator.hasNext()) {
+                Entry<ProcessingUnit, Space> pair = iterator.next();
+                if (pair.getValue().getUid().equals(spaceUid)) {
+                    space = pair.getValue();
+                    iterator.remove();
+                    break;
                 }
             }
             return space;
@@ -1856,8 +1844,6 @@ public class DefaultAdmin implements InternalAdmin {
      * remember a removed space hosted in the specified pu
      */
     private void addRemovedSpace(InternalSpace removedSpace, ProcessingUnit processingUnit) {
-        removedSpacesPerUid.put(removedSpace.getUid(),removedSpace);
         removedSpacesPerProcessingUnit.put(processingUnit,removedSpace);
     }
-
 }
