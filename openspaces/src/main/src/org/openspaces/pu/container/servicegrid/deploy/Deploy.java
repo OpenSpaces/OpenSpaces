@@ -470,18 +470,23 @@ public class Deploy {
 
         ClusterInfo clusterInfo = ClusterInfoParser.parse(params);
         if (clusterInfo != null) {
+
             // override specific cluster info parameters on the SLA
-            if (clusterInfo.getSchema() != null) {
+            if (clusterInfo.getSchema() != null && clusterInfo.getSchema().length() > 0) {
                 info("Overrding SLA cluster schema with [" + clusterInfo.getSchema() + "]");
                 sla.setClusterSchema(clusterInfo.getSchema());
             }
             if (clusterInfo.getNumberOfInstances() != null) {
                 info("Overrding SLA numberOfInstances with [" + clusterInfo.getNumberOfInstances() + "]");
                 sla.setNumberOfInstances(clusterInfo.getNumberOfInstances());
-                info("Overrding SLA numberOfBackups with [" + clusterInfo.getNumberOfBackups() + "]");
                 if (clusterInfo.getNumberOfBackups() == null) {
+                    info("Overrding SLA numberOfBackups with [" + clusterInfo.getNumberOfBackups() + "]");
                     sla.setNumberOfBackups(0);
                 } else {
+                    if (sla.getClusterSchema() == null) {
+                        throw new IllegalArgumentException("Number of backup instances override without a specified cluster schema");
+                    }
+                    info("Overrding SLA numberOfBackups with [" + clusterInfo.getNumberOfBackups() + "]");
                     sla.setNumberOfBackups(clusterInfo.getNumberOfBackups());
                 }
             }
