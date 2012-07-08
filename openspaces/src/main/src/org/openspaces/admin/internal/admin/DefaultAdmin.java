@@ -655,8 +655,9 @@ public class DefaultAdmin implements InternalAdmin {
 
     @Override
     public void raiseEvent(Object listener, Runnable notifier) {
-        assertStateChangesPermitted();
         synchronized (DefaultAdmin.this) {
+            // even though we are taking a lock we are not calling #assertStateChangesPermitted()
+            // this is ok since submit() is non-blocking.
             eventsExecutorServices[Math.abs(listener.hashCode() % eventsExecutorServices.length)].submit(new LoggerRunnable(notifier));
         }
     }
