@@ -46,9 +46,7 @@ public interface NotifyTypeProvider extends SpaceDataEventListener {
      * Should this listener be notified on update operations.
      * <code>null</code> will leave the flag un changed.
      * 
-     * @deprecated since 9.1 use {@link #isMatched()} or {@link #isRematched()} instead
      */
-    @Deprecated
     Boolean isUpdate();
 
     /**
@@ -75,7 +73,7 @@ public interface NotifyTypeProvider extends SpaceDataEventListener {
      * 
      * @since 9.1
      */
-    Boolean isMatched();
+    Boolean isMatchedUpdate();
     
     /**
      * Should this listener be notified when re-matched templates
@@ -83,5 +81,5 @@ public interface NotifyTypeProvider extends SpaceDataEventListener {
      * 
      * @since 9.1
      */
-    Boolean isRematched();
+    Boolean isRematchedUpdate();
 }

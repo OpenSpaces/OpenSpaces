@@ -123,11 +123,11 @@ public class SimpleNotifyEventListenerContainer extends AbstractNotifyEventListe
             if (getNotifyUnmatched() != null && getNotifyUnmatched()) {
                 sb.append("unmatched,");
             }
-            if (getNotifyMatched() != null && getNotifyMatched()) {
-                sb.append("matched,");
+            if (getNotifyMatchedUpdate() != null && getNotifyMatchedUpdate()) {
+                sb.append("matchedUpdate,");
             }
-            if (getNotifyRematched() != null && getNotifyRematched()) {
-                sb.append("rematched,");
+            if (getNotifyRematchedUpdate() != null && getNotifyRematchedUpdate()) {
+                sb.append("rematchedUpdate,");
             }
             if (getNotifyTake() != null && getNotifyTake()) {
                 sb.append("take,");
@@ -195,7 +195,7 @@ public class SimpleNotifyEventListenerContainer extends AbstractNotifyEventListe
         }
         return new ServiceDetails[]{new NotifyEventContainerServiceDetails(beanName, getGigaSpace().getName(), tempalte, isPerformSnapshot(), getTransactionManagerName(),
                 getCommType(), isFifo(), getBatchSize(), getBatchTime(), getBatchPendingThreshold(), isAutoRenew(),
-                isNotifyAll(), isNotifyWrite(), isNotifyUpdate(), isNotifyTake(), isNotifyLeaseExpire(), isNotifyUnmatched(), isNotifyMatched(), isNotifyRematched(),
+                isNotifyAll(), isNotifyWrite(), isNotifyUpdate(), isNotifyTake(), isNotifyLeaseExpire(), isNotifyUnmatched(), isNotifyMatchedUpdate(), isNotifyRematchedUpdate(),
                 isTriggerNotifyTemplate(), isReplicateNotifyTemplate(), isPerformSnapshot(), isPassArrayAsIs(), isGuaranteed(), isDurable())};
     }
 
@@ -227,11 +227,11 @@ public class SimpleNotifyEventListenerContainer extends AbstractNotifyEventListe
         if (isNotifyUnmatched()) {
             notifications.append("UNMATCHED, ");
         }
-        if (isNotifyMatched()) {
-            notifications.append("MATCHED, ");
+        if (isNotifyMatchedUpdate()) {
+            notifications.append("MATCHED_UPDATE, ");
         }
-        if (isNotifyRematched()) {
-            notifications.append("REMATCHED, ");
+        if (isNotifyRematchedUpdate()) {
+            notifications.append("REMATCHED_UPDATE, ");
         }
 
         dump.addPrefix("event-containers/");

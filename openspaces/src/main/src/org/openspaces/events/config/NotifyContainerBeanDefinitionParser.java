@@ -113,6 +113,14 @@ public class NotifyContainerBeanDefinitionParser extends AbstractTxEventContaine
             if (StringUtils.hasLength(unmatched)) {
                 builder.addPropertyValue("notifyUnmatched", unmatched);
             }
+            String matched = notifyEle.getAttribute("matched-update");
+            if (StringUtils.hasLength(matched)) {
+                builder.addPropertyValue("notifyMatchedUpdate", matched);
+            }
+            String rematched = notifyEle.getAttribute("rematched-update");
+            if (StringUtils.hasLength(rematched)) {
+                builder.addPropertyValue("notifyRematchedUpdate", rematched);
+            }
             String all = notifyEle.getAttribute("all");
             if (StringUtils.hasLength(all)) {
                 builder.addPropertyValue("notifyAll", all);

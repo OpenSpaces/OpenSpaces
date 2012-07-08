@@ -212,9 +212,7 @@ public class SimpleNotifyContainerConfigurer {
 
     /**
      * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setNotifyUpdate(Boolean)
-     * @deprecated since 9.1 use {@link #notifyMatched(boolean)} or {@link #notifyRematched(boolean)} instead.
      */
-    @Deprecated
     public SimpleNotifyContainerConfigurer notifyUpdate(boolean notifyUpdate) {
         notifyEventListenerContainer.setNotifyUpdate(notifyUpdate);
         return this;
@@ -245,18 +243,18 @@ public class SimpleNotifyContainerConfigurer {
     }
     
     /**
-     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setNotifyMatched(Boolean)
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setNotifyMatchedUpdate(Boolean)
      */
-    public SimpleNotifyContainerConfigurer notifyMatched(boolean notifyMatched) {
-        notifyEventListenerContainer.setNotifyMatched(notifyMatched);
+    public SimpleNotifyContainerConfigurer notifyMatchedUpdate(boolean notifyMatched) {
+        notifyEventListenerContainer.setNotifyMatchedUpdate(notifyMatched);
         return this;
     }
     
     /**
-     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setNotifyRematched(Boolean)
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setNotifyRematchedUpdate(Boolean)
      */
-    public SimpleNotifyContainerConfigurer notifyRematched(boolean notifyRematched) {
-        notifyEventListenerContainer.setNotifyRematched(notifyRematched);
+    public SimpleNotifyContainerConfigurer notifyRematchedUpdate(boolean notifyRematched) {
+        notifyEventListenerContainer.setNotifyRematchedUpdate(notifyRematched);
         return this;
     }
     
