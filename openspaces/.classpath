@@ -45,9 +45,9 @@
 	<classpathentry kind="lib" path="lib/external/dom4j/dom4j-1.6.1.jar"/>
 	<classpathentry kind="lib" path="lib/external/hibernate/hibernate3.jar"/>
 	<classpathentry kind="lib" path="lib/external/javassist/javassist.jar"/>
-	<classpathentry kind="lib" path="lib/external/jbossts/concurrent.jar"/>
-	<classpathentry kind="lib" path="lib/external/jbossts/jbossjts.jar"/>
-	<classpathentry kind="lib" path="lib/external/jbossts/jbossts-common.jar"/>
+	<classpathentry kind="lib" path="lib/external/jbossts/jbossjta.jar"/>
+	<classpathentry kind="lib" path="lib/external/jbossts/jbossjta-integration.jar"/>
+	<classpathentry kind="lib" path="lib/external/jbossts/jboss-logging.jar"/>
 	<classpathentry kind="lib" path="lib/external/jmock/jmock-1.1.0.jar"/>
 	<classpathentry kind="lib" path="lib/external/jmock/jmock-cglib-1.1.0.jar"/>
 	<classpathentry kind="lib" path="lib/external/jotm/howl.jar"/>
