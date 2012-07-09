@@ -483,9 +483,6 @@ public class Deploy {
                     info("Overrding SLA numberOfBackups with [" + clusterInfo.getNumberOfBackups() + "]");
                     sla.setNumberOfBackups(0);
                 } else {
-                    if (sla.getClusterSchema() == null) {
-                        throw new IllegalArgumentException("Number of backup instances override without a specified cluster schema");
-                    }
                     info("Overrding SLA numberOfBackups with [" + clusterInfo.getNumberOfBackups() + "]");
                     sla.setNumberOfBackups(clusterInfo.getNumberOfBackups());
                 }
