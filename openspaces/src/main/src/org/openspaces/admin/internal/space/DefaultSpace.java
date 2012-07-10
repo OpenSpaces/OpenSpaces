@@ -422,7 +422,7 @@ public class DefaultSpace implements InternalSpace {
             spaceInstancesByMemberName.remove(fullSpaceName);
             spaceInstanceRemovedEventManager.spaceInstanceRemoved(spaceInstance);
             ((InternalSpaceInstanceRemovedEventManager) spaces.getSpaceInstanceRemoved()).spaceInstanceRemoved(spaceInstance);
-            Future fetcher = scheduledRuntimeFetchers.get(uid);
+            Future fetcher = scheduledRuntimeFetchers.remove(uid);
             if (fetcher != null) {
                 fetcher.cancel(true);
             }
