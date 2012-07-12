@@ -281,7 +281,11 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
     public ProcessingUnit deploy(ElasticStatelessProcessingUnitDeployment deployment, long timeout, TimeUnit timeUnit)
         throws ProcessingUnitAlreadyDeployedException {
 
-        return deploy(deployment,timeout,timeUnit);
+        GridServiceManager gridServiceManager = getGridServiceManager();
+        if (gridServiceManager == null) {
+            throw new AdminException("No Grid Service Manager found to deploy [" + deployment.create().getProcessingUnit() + "]");
+        }
+        return gridServiceManager.deploy(deployment,timeout,timeUnit);
     }
 
     @Override

@@ -28,7 +28,6 @@ import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ElasticStatelessProcessingUnitConfig;
 import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.topology.ElasticStatelessDeploymentTopology;
-import org.openspaces.admin.pu.topology.ProcessingUnitConfigHolder;
 import org.openspaces.core.util.MemoryUnit;
 
 import com.gigaspaces.security.directory.UserDetails;
@@ -180,7 +179,7 @@ public class ElasticStatelessProcessingUnitDeployment
     }
     
     @Override
-    public ProcessingUnitConfigHolder create() {
+    public ElasticStatelessProcessingUnitConfig create() {
         return getConfig();
     }
 }
