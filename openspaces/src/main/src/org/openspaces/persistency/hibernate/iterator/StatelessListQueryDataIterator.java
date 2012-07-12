@@ -16,15 +16,15 @@
 
 package org.openspaces.persistency.hibernate.iterator;
 
-import com.gigaspaces.datasource.DataIterator;
-import com.j_spaces.core.client.SQLQuery;
+import java.util.Iterator;
+
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 import org.hibernate.StatelessSession;
-import org.hibernate.Transaction;
 
-import java.util.Iterator;
+import com.gigaspaces.datasource.DataIterator;
+import com.j_spaces.core.client.SQLQuery;
 
 /**
  * A simple iterator that iterates over a {@link com.j_spaces.core.client.SQLQuery} by creating
@@ -43,8 +43,6 @@ public class StatelessListQueryDataIterator implements DataIterator {
     protected final int from;
 
     protected final int size;
-
-    protected Transaction transaction;
 
     protected StatelessSession session;
 
@@ -98,19 +96,11 @@ public class StatelessListQueryDataIterator implements DataIterator {
     }
 
     public void close() {
-        try {
-            if (transaction == null) {
-                return;
-            }
-            transaction.commit();
-        } finally {
-            transaction = null;
-            if (session != null) {
-                try {
-                    session.close();
-                } catch (Exception e) {
-                    // ignore
-                }
+        if (session != null) {
+            try {
+                session.close();
+            } catch (Exception e) {
+                // ignore
             }
         }
     }
