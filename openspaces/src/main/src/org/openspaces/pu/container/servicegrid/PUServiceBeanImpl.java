@@ -26,7 +26,6 @@ import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.rmi.MarshalledObject;
 import java.rmi.RemoteException;
 import java.text.NumberFormat;
@@ -69,6 +68,7 @@ import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.core.properties.BeanLevelPropertiesAware;
 import org.openspaces.core.space.SpaceServiceDetails;
 import org.openspaces.core.space.SpaceType;
+import org.openspaces.core.util.ClassLoaderUtils;
 import org.openspaces.interop.DotnetProcessingUnitContainerProvider;
 import org.openspaces.pu.container.CannotCreateContainerException;
 import org.openspaces.pu.container.ClassLoaderAwareProcessingUnitContainerProvider;
@@ -227,8 +227,8 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             if (logger.isDebugEnabled()) {
                 ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
                 StringBuilder classpath = new StringBuilder();
-                if (isClassLoaderProblem(e)) {
-                    classpath.append(getClassPathString(classLoader));
+                if (ClassLoaderUtils.isClassLoaderProblem(e)) {
+                    classpath.append(ClassLoaderUtils.getClassPathString(classLoader));
                 }
                 logger.debug(logMessage(
                      "Failed to start PU with xml [" + springXML + "] " + 
@@ -254,56 +254,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         }
     }
 
-    private String getClassPathString(ClassLoader classLoader) {
-        StringBuilder classpath = new StringBuilder();
-        for (;classLoader != null; classLoader=classLoader.getParent()) {
-            classpath.append("[classloader "+classLoader);
-            if (classLoader instanceof URLClassLoader) {
-                final URLClassLoader ucl = (URLClassLoader)classLoader;
-                classpath.append(" URL=")
-                         .append(getURLsString(ucl.getURLs()));
-            }
-            if (classLoader instanceof ServiceClassLoader) {
-                final ServiceClassLoader scl = (ServiceClassLoader) classLoader;
-                classpath.append(" searchPath=")
-                         .append(getURLsString(scl.getSearchPath()))
-                         .append(" slashPath=")
-                         .append(getURLsString(scl.getSlashPath()))
-                         .append(" libPath=")
-                         .append(getURLsString(scl.getLibPath()));
-            }
-            classpath.append("]");
-        }
-        return classpath.toString();
-    }
     
-    private String getURLsString(URL url) {
-        return getURLsString(new URL[] { url });
-    }
-    
-    private String getURLsString(URL[] urls) {
-        StringBuilder classpath = new StringBuilder();
-        for (final URL url : urls) {
-            final String file = url.getFile();
-            classpath.append(file);
-            if (!new File(file).exists()) {
-                classpath.append("(not exists)");
-            }
-            classpath.append(",");
-        }
-        return classpath.toString();
-    }
-    
-    private boolean isClassLoaderProblem(Throwable t) {
-        boolean classLoaderProblem = false;
-        for (; !classLoaderProblem && t != null; t=t.getCause())  {
-            if (t instanceof NoClassDefFoundError) {
-                classLoaderProblem = true;
-            }
-        }
-        return classLoaderProblem;
-    }
-
     /**
      * Override initialize to perform additional initialization
      */
