@@ -315,7 +315,7 @@ public class ContainersSlaUtils {
         return Arrays.toString(containersToString);
     }
 
-    public static String gscsToString(List<GridServiceContainer> containers) {
+    public static String gscsToString(Collection<GridServiceContainer> containers) {
         return gscsToString(containers.toArray(new GridServiceContainer[containers.size()]));
     }
 }
