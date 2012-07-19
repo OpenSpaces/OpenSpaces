@@ -83,13 +83,14 @@ public abstract class AbstractElasticProcessingUnitDeployment {
         if (userDetails == null) {
             throw new IllegalArgumentException("User details cannot be null");
         }
-        if (config.getUserDetails() != null && !config.getUserDetails().equals(userDetails)) {
-            throw new IllegalStateException("User details are already defined and cannot be modified.");
-        }
-        
         UserDetailsConfig userDetailsConfig = new UserDetailsConfig();
         userDetailsConfig.setUsername(userDetails.getUsername());
         userDetailsConfig.setPassword(userDetails.getPassword());
+        
+        if (config.getUserDetails() != null && !config.getUserDetails().equals(userDetailsConfig)) {
+            throw new IllegalStateException("User details are already defined and cannot be modified.");
+        }
+        
         config.setUserDetails(userDetailsConfig);
         return this;
     }
