@@ -9,10 +9,10 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/gigaspaces"/>
 	<classpathentry kind="lib" path="lib/external/common/commons-beanutils-1.7.0.jar"/>
 	<classpathentry kind="lib" path="lib/external/common/commons-lang-2.3.jar"/>
-	<classpathentry kind="lib" path="lib/platform/ant/ant-junit-1.8.4.jar"/>
-	<classpathentry kind="lib" path="lib/platform/ant/ant-launcher-1.8.4.jar"/>
+	<classpathentry kind="lib" path="lib/platform/ant/ant-junit-1.8.3.jar"/>
+	<classpathentry kind="lib" path="lib/platform/ant/ant-launcher-1.8.3.jar"/>
 	<classpathentry kind="lib" path="lib/platform/ant/ant-trax-1.8.0.jar"/>
-	<classpathentry kind="lib" path="lib/platform/ant/ant-1.8.4.jar"/>
+	<classpathentry kind="lib" path="lib/platform/ant/ant-1.8.3.jar"/>
 	<classpathentry kind="lib" path="lib/platform/jpa/openjpa-all-2.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/platform/jdbc/hsqldb.jar"/>
 	<classpathentry kind="lib" path="lib/platform/jee/activation.jar"/>
