@@ -79,7 +79,7 @@ public interface ProcessingUnitInstance extends GridComponent, Iterable<ServiceD
 
     /**
      * Decrements the instance (and destroying it in the process). Will not attempt to create it again.
-     *
+     * Does not apply for partitioned nor replicated topologies.
      * @see ProcessingUnit#canDecrementInstance()
      */
     void decrement();

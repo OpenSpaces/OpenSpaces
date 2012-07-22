@@ -193,13 +193,15 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
     boolean canDecrementInstance();
 
     /**
-     * Will increment a processing unit instance.
+     * Increments the number of processing unit instances.
+     * Does not apply for partitioned nor replicated topologies.
      */
     void incrementInstance();
 
     /**
-     * Will randomly decrement an instance from the processing units. For more fine
-     * grained control see {@link ProcessingUnitInstance#decrement()}.
+     * Removes a randomly chosen instance from the processing unit, and decrements the number of instances. 
+     * For finer control use {@link ProcessingUnitInstance#decrement()} instead.
+     * Does not apply for partitioned nor replicated topologies.
      */
     void decrementInstance();
 
