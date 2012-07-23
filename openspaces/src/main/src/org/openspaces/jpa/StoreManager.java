@@ -408,9 +408,9 @@ public class StoreManager extends AbstractStoreManager {
 
         ITemplatePacket template;
         if (typeDescriptor.isAutoGenerateId())
-            template = TemplatePacketFactory.createUidPacket((String) ids[0], null, 0, QueryResultTypeInternal.OBJECT);
+            template = TemplatePacketFactory.createUidPacket((String) ids[0], null, 0, QueryResultTypeInternal.OBJECT_JAVA);
         else
-            template = TemplatePacketFactory.createIdPacket(ids[0], null, 0, typeDescriptor, QueryResultTypeInternal.OBJECT);
+            template = TemplatePacketFactory.createIdPacket(ids[0], null, 0, typeDescriptor, QueryResultTypeInternal.OBJECT_JAVA);
         result = (IEntryPacket) proxy.read(template, _transaction, 0, readModifier);
         return result;
     }
@@ -550,9 +550,9 @@ public class StoreManager extends AbstractStoreManager {
                 final Object routing = sm.fetch(typeDescriptor.getRoutingPropertyId());                             
                 ITemplatePacket template;
                 if (typeDescriptor.isAutoGenerateId())
-                    template = TemplatePacketFactory.createUidPacket((String) ids[0], routing, 0, QueryResultTypeInternal.OBJECT);
+                    template = TemplatePacketFactory.createUidPacket((String) ids[0], routing, 0, QueryResultTypeInternal.OBJECT_JAVA);
                 else
-                    template = TemplatePacketFactory.createIdPacket(ids[0], routing, 0, typeDescriptor, QueryResultTypeInternal.OBJECT);
+                    template = TemplatePacketFactory.createIdPacket(ids[0], routing, 0, typeDescriptor, QueryResultTypeInternal.OBJECT_JAVA);
                 
                 int result = proxy.clear(template, _transaction, 0);
                 if (result != 1)
