@@ -56,6 +56,7 @@ import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIs
 import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIsolationAware;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
 import org.openspaces.grid.gsm.rebalancing.exceptions.RebalancingSlaEnforcementInProgressException;
+import org.openspaces.grid.gsm.sla.exceptions.DisconnectedFromLookupServiceException;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.sla.exceptions.WrongNumberOfESMComponentsException;
@@ -308,6 +309,7 @@ public abstract class AbstractScaleStrategyBean implements
 
         try {
 
+            validateAtLeastOneLookupServiceDiscovered();
             validateOnlyOneESMRunning();
 
             if (getLogger().isDebugEnabled()) {
@@ -345,12 +347,23 @@ public abstract class AbstractScaleStrategyBean implements
         }
     }
 
+    private void validateAtLeastOneLookupServiceDiscovered() throws DisconnectedFromLookupServiceException {
+        final int numberOfLookupServices= admin.getLookupServices().getSize();
+        if (numberOfLookupServices == 0) {
+            final DisconnectedFromLookupServiceException e = new DisconnectedFromLookupServiceException(this.getProcessingUnit().getName(), admin.getLocators(), admin.getGroups());
+            //eventually raises a machines alert. That's good enough
+            machineProvisioningEventState.enqueuProvisioningInProgressEvent(e);
+            throw e;
+        }
+        
+    }
+
     private void validateOnlyOneESMRunning() throws WrongNumberOfESMComponentsException {
         final int numberOfEsms = admin.getElasticServiceManagers().getSize();
         if (numberOfEsms != 1) {
             
             final WrongNumberOfESMComponentsException e = new WrongNumberOfESMComponentsException(numberOfEsms, this.getProcessingUnit().getName());
-            //eventually raises a machines alert alert. That's good enough
+            //eventually raises a machines alert. That's good enough
             machineProvisioningEventState.enqueuProvisioningInProgressEvent(e);
             throw e;
         }

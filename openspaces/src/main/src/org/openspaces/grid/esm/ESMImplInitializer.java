@@ -27,9 +27,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.openspaces.admin.Admin;
+import org.openspaces.admin.esm.ElasticServiceManager;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.gsm.InternalGridServiceManager;
+import org.openspaces.admin.lus.LookupService;
 import org.openspaces.admin.pu.ProcessingUnit;
 
 import com.gigaspaces.grid.gsm.GSM;
@@ -86,7 +88,8 @@ public class ESMImplInitializer {
                 @Override
                 public void run() {
                     
-                    if (isLookupDiscoverySyncedWithGsm(gridServiceManagers, numberOfInstancesPerProcessingUnit)) {
+                    if (isManagementDiscovered(admin) &&
+                        isLookupDiscoverySyncedWithGsm(gridServiceManagers, numberOfInstancesPerProcessingUnit)) {
                         esmInitializer.run();
                     }
                     else {
@@ -155,4 +158,60 @@ public class ESMImplInitializer {
      
         return true;
     }
+
+    /**
+     * We want to discover one ESM and at least one GSM We want to discover as much agents as we
+     * can, to avoid false alerts such as "need more machines failures"
+     * 
+     * @param admin
+     * @return
+     */
+    private boolean isManagementDiscovered(InternalAdmin admin) {
+           
+        LookupService[] lookupServices = admin.getLookupServices().getLookupServices();
+        if (lookupServices.length == 0) {
+            logger.log(Level.INFO, "Waiting to discover at least one lookup service.");
+            return false;
+        }
+        
+        for (LookupService lus : lookupServices) {
+               if (lus.getGridServiceAgent() == null) {
+                   logger.log(Level.INFO, "Waiting to discover GSA that started lookup service " + lus.getUid());
+                   return false;
+               }
+           }
+           
+           GridServiceManager[] gsms = admin.getGridServiceManagers().getManagers();
+           if ( gsms.length == 0) {
+               logger.log(Level.INFO, "Waiting to discover at least one GSM");
+               return false;
+           }
+           
+           for (GridServiceManager gsm : gsms) {
+               if (gsm.getGridServiceAgent() == null) {
+                   logger.log(Level.INFO, "Waiting to discover GSA that started GSM " + gsm.getUid());
+                   return false;
+               }
+           }
+           
+           ElasticServiceManager[] esms = admin.getElasticServiceManagers().getManagers();
+           if ( esms.length == 0) {
+               logger.log(Level.INFO, "Waiting to discover one ESM");
+               return false;
+           }
+           
+           if ( esms.length > 1) {
+               logger.log(Level.INFO, "Waiting for one of the ESMs to stop. Currently running " + esms.length +" ESMs");
+               return false;
+           }
+           
+           for (ElasticServiceManager esm : admin.getElasticServiceManagers()) {
+               if (esm.getGridServiceAgent() == null) {
+                   logger.log(Level.INFO, "Waiting to discover GSA that started ESM " + esm.getUid());
+                   return false;
+               }
+           }
+           return true;
+       }
+    
 }
