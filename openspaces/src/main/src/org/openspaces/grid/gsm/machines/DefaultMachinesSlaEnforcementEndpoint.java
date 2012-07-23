@@ -152,7 +152,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             // Validate all Agents have been discovered.
             for (ProcessingUnitInstance instance : pu.getInstances()) {
                 GridServiceContainer container = instance.getGridServiceContainer();
-                if (container.isDiscovered() && container.getGridServiceAgent() == null) {
+                if (container.isDiscovered() && container.getAgentId() != -1 && container.getGridServiceAgent() == null) {
                     throw new NeedToWaitUntilAllGridServiceAgentsDiscovered(pu, container);
                 }
             }
