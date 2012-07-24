@@ -1918,4 +1918,86 @@ public class DefaultAdmin implements InternalAdmin {
     private void addRemovedSpace(InternalSpace removedSpace, ProcessingUnit processingUnit) {
         removedSpacesPerProcessingUnit.put(processingUnit,removedSpace);
     }
+    
+    
+    public ScheduledLeasedCommand scheduleWithFixedDelayUntilLeaseExpires(Runnable command, long initialDelay,
+            long delay, TimeUnit delayUnit, long lease, TimeUnit leaseUnit) {
+        
+        long leaseInMillis = leaseUnit.toMillis(lease);
+        if (leaseInMillis < delay) {
+            throw new IllegalArgumentException("requested lease ["+lease+" ms] can't be less than [" + delay + " ms]");
+        }
+        ScheduledLeasedCommand leasedCommand = new ScheduledLeasedCommand(command, leaseInMillis);
+        ScheduledFuture<?> scheduledFuture = scheduledExecutorService.scheduleAtFixedRate(leasedCommand, initialDelay, delay, delayUnit);
+        leasedCommand.setScheduledFuture(scheduledFuture);
+        return leasedCommand;
+    }
+    
+    /**
+     * @see DefaultAdmin#scheduleWithFixedDelayUntilLeaseExpires(Runnable, long, long, TimeUnit, long, TimeUnit)
+     */
+    public class ScheduledLeasedCommand implements Runnable{
+        private final Runnable command;
+        private final long lease;
+        private long desiredExpiration;
+        private Object desiredExpirationLock = new Object(); //lock object between renew operation which calculates desiredExpiration and run command which checks the desiredExpiration
+        private ScheduledFuture<?> scheduledFuture;
+        
+        public ScheduledLeasedCommand(Runnable command, long lease) {
+            this.command = command;
+            this.lease = lease;
+            calcDesiredExpiration();
+        }
+        
+        //happens once on post construction
+        private void setScheduledFuture(ScheduledFuture<?> scheduledFuture) {
+            this.scheduledFuture = scheduledFuture;
+        }
+
+        private void calcDesiredExpiration() {
+            this.desiredExpiration = (lease + System.currentTimeMillis());
+        }
+        
+        /**
+         * @return <code>true</code> if the lease has expired and the command is no longer scheduled.
+         */
+        public boolean isExpired() {
+            return (scheduledFuture.isCancelled());
+        }
+        
+        /**
+         * Renews the command for another period - i.e. 'lease' from now.
+         * @return <code>true</code> if the leased command was renewed; <code>false</code> if lease has
+         *         expired - command is no longer scheduled.
+         */
+        public boolean renew() {
+            synchronized (desiredExpirationLock) {
+                if (isExpired()) {
+                    return false;
+                } else {
+                    calcDesiredExpiration();
+                    return true;
+                }
+            }
+        }
+        
+        @Override
+        public void run() {
+            synchronized (desiredExpirationLock) {
+                long now = System.currentTimeMillis();
+                long delta = (desiredExpiration - now);
+                if (delta <=0) {
+                    scheduledFuture.cancel(false);
+                    return;
+                }
+            }
+            
+            try {
+                command.run();
+            } catch (Throwable t) {
+                logger.warn("Failed to execute scheduled command " + command.getClass().getName(), t);
+                scheduledFuture.cancel(false);
+            }
+        }
+    }
 }

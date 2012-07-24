@@ -51,8 +51,10 @@ import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.space.ReplicationStatus;
 import org.openspaces.admin.space.ReplicationTarget;
 import org.openspaces.admin.space.ReplicationTargetType;
+import org.openspaces.admin.space.RuntimeDetailsMonitor;
 import org.openspaces.admin.space.Space;
 import org.openspaces.admin.space.SpaceInstance;
+import org.openspaces.admin.space.SpaceInstanceRuntimeDetails;
 import org.openspaces.admin.space.SpaceInstanceStatistics;
 import org.openspaces.admin.space.SpacePartition;
 import org.openspaces.admin.space.SpaceReplicationManager;
@@ -145,13 +147,20 @@ public class DefaultSpace implements InternalSpace {
 
     private SpaceStatistics lastBackupStatistics;
     
-    private final SpaceRuntimeDetails spaceRuntimeDetails;
-    
     private final SpaceReplicationManager spaceReplicationManager;
 
     private Future scheduledStatisticsMonitor;
     
     private int scheduledStatisticsRefCount = 0;
+    
+    /*
+     * Runtime Details Monitor
+     */
+    private final Object runtimeDetailsMonitor = new Object();
+    private SpaceRuntimeDetails lastRuntimeDetails;
+    private long lastRuntimeDetailsTimestamp = 0;
+    private long runtimeDetailsInterval = RuntimeDetailsMonitor.DEFAULT_MONITOR_INTERVAL;
+    
 
     public DefaultSpace(InternalSpaces spaces, String uid, String name) {
         this.spaces = spaces;
@@ -165,7 +174,6 @@ public class DefaultSpace implements InternalSpace {
         this.replicationStatusChangedEventManager = new DefaultReplicationStatusChangedEventManager(admin);
         this.statisticsChangedEventManager = new DefaultSpaceStatisticsChangedEventManager(admin);
         this.instanceStatisticsChangedEventManager = new DefaultSpaceInstanceStatisticsChangedEventManager(admin);
-        this.spaceRuntimeDetails = new DefaultSpaceRuntimeDetails(this);
         this.spaceReplicationManager = new DefaultSpaceReplicationManager(this);
     }
 
@@ -352,6 +360,34 @@ public class DefaultSpace implements InternalSpace {
     }
     
     public SpaceRuntimeDetails getRuntimeDetails() {
+        synchronized (runtimeDetailsMonitor) {
+            long currentTime = System.currentTimeMillis();
+            if ((currentTime - lastRuntimeDetailsTimestamp) < runtimeDetailsInterval) {
+                return lastRuntimeDetails;
+            }
+            lastRuntimeDetailsTimestamp = currentTime;
+            List<SpaceInstanceRuntimeDetails> runtimeDetails = new ArrayList<SpaceInstanceRuntimeDetails>(spaceInstancesByUID.size());
+            for (SpaceInstance spaceInstance : spaceInstancesByUID.values()) {
+                runtimeDetails.add(spaceInstance.getRuntimeDetails());
+            }
+            lastRuntimeDetails = new DefaultSpaceRuntimeDetails(runtimeDetails);
+            return lastRuntimeDetails;
+        }
+    }
+    
+    @Override
+    public SpaceRuntimeDetails waitForRuntimeDetails(long timeout, TimeUnit timeUnit) {
+        
+        SpaceInstance[] spaceInstances = getSpaceInstances();
+        long maxTimeoutForEachInstance = spaceInstances.length == 0 ? 0 : timeout / spaceInstances.length;
+        
+        List<SpaceInstanceRuntimeDetails> runtimeDetails = new ArrayList<SpaceInstanceRuntimeDetails>(spaceInstances.length);
+        for (SpaceInstance spaceInstance : spaceInstances) {
+            SpaceInstanceRuntimeDetails spaceInstanceRuntimeDetails = ((InternalSpaceInstance)spaceInstance).waitForRuntimeDetails(maxTimeoutForEachInstance, timeUnit);
+            runtimeDetails.add(spaceInstanceRuntimeDetails);
+        }
+        
+        DefaultSpaceRuntimeDetails spaceRuntimeDetails = new DefaultSpaceRuntimeDetails(runtimeDetails);
         return spaceRuntimeDetails;
     }
     
@@ -610,8 +646,6 @@ public class DefaultSpace implements InternalSpace {
         public void run() {
             try {
                 final RuntimeHolder runtimeHolder = spaceInstance.getRuntimeHolder();
-                final StatisticsHolder statisticsHolder = spaceInstance.getStatisticsHolder();
-                final ReplicationStatistics replicationStatistics = (statisticsHolder == null) ? null : statisticsHolder.getReplicationStatistics();
                 if (runtimeHolder.getSpaceState() != null &&
                         (runtimeHolder.getSpaceState() == ISpaceState.STOPPED ||
                         runtimeHolder.getSpaceState() == ISpaceState.STARTING)) {
@@ -623,6 +657,10 @@ public class DefaultSpace implements InternalSpace {
                     }
                     return;
                 }
+
+                final StatisticsHolder statisticsHolder = spaceInstance.getStatisticsHolder();
+                final ReplicationStatistics replicationStatistics = (statisticsHolder == null) ? null : statisticsHolder.getReplicationStatistics();
+                
                 DefaultSpace.this.admin.scheduleNonBlockingStateChange(new Runnable() {
                     public void run() {                        
                         spaceInstance.setMode(runtimeHolder.getSpaceMode());

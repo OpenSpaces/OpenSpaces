@@ -13,32 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.openspaces.admin.internal.space;
-
-import org.openspaces.admin.space.SpaceInstanceTransactionDetails;
-
-import com.j_spaces.core.admin.SpaceRuntimeInfo;
+package org.openspaces.admin.space;
 
 /**
  * @author moran
+ * @since 9.1.0
  */
-public class DefaultSpaceInstanceTransactionDetails implements SpaceInstanceTransactionDetails {
+public interface RuntimeDetailsMonitor {
 
-    private final SpaceRuntimeInfo spaceRuntimeInfo;
-    
     /**
-     * @param spaceRuntimeInfo
+     * The default statistics interval which is 5 seconds.
      */
-    public DefaultSpaceInstanceTransactionDetails(SpaceRuntimeInfo spaceRuntimeInfo) {
-        this.spaceRuntimeInfo = spaceRuntimeInfo;
-    }
-
-    @Override
-    public int getActiveTransactionCount() {
-        int count = 0;
-        if (spaceRuntimeInfo != null) {
-            count = spaceRuntimeInfo.getActiveTransactionCount();
-        }
-        return count;
-    }
+    static final long DEFAULT_MONITOR_INTERVAL = 5000;
+    
 }

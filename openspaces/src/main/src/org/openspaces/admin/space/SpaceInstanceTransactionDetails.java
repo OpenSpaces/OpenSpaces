@@ -23,16 +23,8 @@ package org.openspaces.admin.space;
  */
 public interface SpaceInstanceTransactionDetails {
 
-    int getActiveTransactionCount();
-    
-    /*
-     * TODO expose:
-     * //returns all of the transactions
-     * TransactionDetails[] getTransactionDetails()
-     * 
-     * //returns all of the transactions
-     * TransactionDetails[] getTransactionDetails(TransactionState, TransactionType)
-     * where TransactionState: ACTIVE, COMMITTED, ABORTED, PREPARED... (see TransactionConstants)
-     * and TransactionType: ALL, JINI, LOCAL, XA
+    /**
+     * @return the number of active transactions (of all types) for this space instance.
      */
+    int getActiveTransactionCount();
 }

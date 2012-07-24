@@ -15,7 +15,9 @@
  *******************************************************************************/
 package org.openspaces.admin.internal.space;
 
-import org.openspaces.admin.space.SpaceInstance;
+import java.util.List;
+
+import org.openspaces.admin.space.SpaceInstanceRuntimeDetails;
 import org.openspaces.admin.space.SpaceInstanceTransactionDetails;
 import org.openspaces.admin.space.SpaceTransactionDetails;
 
@@ -26,18 +28,18 @@ import com.gigaspaces.cluster.activeelection.SpaceMode;
  */
 public class DefaultSpaceTransactionDetails implements SpaceTransactionDetails {
 
-    private final DefaultSpace defaultSpace;
+    private final List<SpaceInstanceRuntimeDetails> spaceInstancesDetails;
 
-    public DefaultSpaceTransactionDetails(DefaultSpace defaultSpace) {
-        this.defaultSpace = defaultSpace;
+    public DefaultSpaceTransactionDetails(List<SpaceInstanceRuntimeDetails> details) {
+        this.spaceInstancesDetails = details;
     }
     
     @Override
     public int getActiveTransactionCount() {
         int count = 0;
-        for (SpaceInstance spaceInstance : defaultSpace.getSpaceInstances()) {
-            if (spaceInstance.getMode() == SpaceMode.PRIMARY) {
-                SpaceInstanceTransactionDetails transactionDetails = spaceInstance.getRuntimeDetails().getTransactionDetails();
+        for (SpaceInstanceRuntimeDetails runtimeDetails : spaceInstancesDetails) {
+            if ( ((InternalSpaceInstanceRuntimeDetails)runtimeDetails).getSpaceInstance().getMode() == SpaceMode.PRIMARY) {
+                SpaceInstanceTransactionDetails transactionDetails = runtimeDetails.getTransactionDetails();
                 count += transactionDetails.getActiveTransactionCount();
             }
         }

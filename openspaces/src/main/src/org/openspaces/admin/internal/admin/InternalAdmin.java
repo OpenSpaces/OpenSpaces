@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.openspaces.admin.Admin;
+import org.openspaces.admin.internal.admin.DefaultAdmin.ScheduledLeasedCommand;
 import org.openspaces.admin.internal.esm.InternalElasticServiceManager;
 import org.openspaces.admin.internal.gsa.InternalGridServiceAgent;
 import org.openspaces.admin.internal.gsc.InternalGridServiceContainer;
@@ -132,6 +133,22 @@ public interface InternalAdmin extends Admin {
      */
     void scheduleAdminOperation(Runnable runnable);
 
+    /**
+     * Schedules a Runnable with a fixed delay until its lease expires. Using the {@link ScheduledLeasedCommand} to renew the lease if necessary.
+     * Polling mechanisms can use this method for updating objects for a specified interval (lease) to ensure:
+     * 1. On-demand polling only when requested (similar to startStatisticsMonitor and stopStatisticsMonitor methods)
+     * 2. polling never continues more than the requested lease (e.g. even if client fails to call stopStatisticsMonitor)
+     * 3. polling does not block user thread requesting updated objects
+     * 
+     * @param command the command to execute each scheduled period
+     * @param initialDelay initial delay before executing the command
+     * @param delay the delay period between successive executions
+     * @param delayUnit the time unit of the initialDelay and delay parameters
+     * @param lease the period of time until this command may continue to be scheduled
+     * @param leaseUnit the time unit of the lease parameter
+     * @return a scheduled leased task which can be renewed or checked for expiration.
+     */
+    ScheduledLeasedCommand scheduleWithFixedDelayUntilLeaseExpires(Runnable command, long initialDelay, long delay, TimeUnit delayUnit, long lease, TimeUnit leaseUnit);
     
     /**
      * Enables a single event loop threading model in which all

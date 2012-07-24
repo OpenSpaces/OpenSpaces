@@ -23,5 +23,8 @@ package org.openspaces.admin.space;
  */
 public interface SpaceInstanceConnectionDetails {
     
+    /**
+     * @return The number of active connections to this space instance.
+     */
     int getActiveConnectionCount();
 }

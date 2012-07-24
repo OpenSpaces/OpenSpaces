@@ -30,6 +30,7 @@ import net.jini.core.lookup.ServiceID;
 
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.StatisticsMonitor;
+import org.openspaces.admin.internal.admin.DefaultAdmin.ScheduledLeasedCommand;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.space.events.DefaultReplicationStatusChangedEventManager;
 import org.openspaces.admin.internal.space.events.DefaultSpaceInstanceStatisticsChangedEventManager;
@@ -40,6 +41,7 @@ import org.openspaces.admin.internal.space.events.InternalSpaceModeChangedEventM
 import org.openspaces.admin.internal.support.AbstractGridComponent;
 import org.openspaces.admin.internal.utils.NameUtils;
 import org.openspaces.admin.space.ReplicationTarget;
+import org.openspaces.admin.space.RuntimeDetailsMonitor;
 import org.openspaces.admin.space.Space;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.space.SpaceInstanceRuntimeDetails;
@@ -72,6 +74,7 @@ import com.gigaspaces.lrmi.nio.info.NIOStatistics;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
 import com.j_spaces.core.admin.RuntimeHolder;
+import com.j_spaces.core.admin.SpaceRuntimeInfo;
 import com.j_spaces.core.admin.StatisticsAdmin;
 import com.j_spaces.core.client.SpaceURL;
 import com.j_spaces.core.client.SpaceURLParser;
@@ -132,7 +135,16 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
 
     private SpaceInstanceStatistics lastStatistics;
     
-    private final SpaceInstanceRuntimeDetails spaceInstanceRuntimeDetails;
+    /*
+     * Runtime Details Monitor
+     */
+    private final Object runtimeDetailsMonitor = new Object();
+    private SpaceInstanceRuntimeDetails lastRuntimeDetails;
+    private long lastRuntimeDetailsTimestamp = 0;
+    private long runtimeDetailsInterval = RuntimeDetailsMonitor.DEFAULT_MONITOR_INTERVAL;
+    
+    private ScheduledLeasedCommand runtimeDetailsScheduledLeasedCommand;
+    private volatile SpaceInstanceRuntimeDetails spaceInstanceRuntimeDetails;
 
     private Future scheduledStatisticsMonitor;
 
@@ -151,7 +163,6 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
         this.spaceModeChangedEventManager = new DefaultSpaceModeChangedEventManager(null, admin);
         this.replicationStatusChangedEventManager = new DefaultReplicationStatusChangedEventManager(admin);
         this.statisticsChangedEventManager = new DefaultSpaceInstanceStatisticsChangedEventManager(admin);
-        this.spaceInstanceRuntimeDetails = new DefaultSpaceInstanceRuntimeDetails(this);
 
         this.clusterSchema = spaceURL.getProperty(SpaceURL.CLUSTER_SCHEMA);
 
@@ -193,7 +204,6 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
         this.spaceModeChangedEventManager = new DefaultSpaceModeChangedEventManager(null, admin);
         this.replicationStatusChangedEventManager = new DefaultReplicationStatusChangedEventManager(admin);
         this.statisticsChangedEventManager = new DefaultSpaceInstanceStatisticsChangedEventManager(admin);
-        this.spaceInstanceRuntimeDetails = new DefaultSpaceInstanceRuntimeDetails(this);
 
         this.clusterSchema = spaceURL.getProperty(SpaceURL.CLUSTER_SCHEMA);
 
@@ -424,13 +434,9 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
         }
         lastStatisticsTimestamp = currentTime;
         try {
-            StatisticsHolder holder;
-            if (spaceAdmin != null) {
-                holder = ((StatisticsAdmin) spaceAdmin).getHolder();
-            } else {
-                holder = puService.getSpaceStatisticsHolder(serviceID);
-            }
             if (getVirtualMachine().getMachine() == null) return NA_STATISTICS; //machine has not yet been set
+
+            StatisticsHolder holder = getStatisticsHolder();
             lastStatistics = new DefaultSpaceInstanceStatistics(holder, lastStatistics, statisticsHistorySize, getVirtualMachine().getMachine().getOperatingSystem().getTimeDelta());
         } catch (RemoteException e) {
             lastStatistics = NA_STATISTICS;
@@ -438,10 +444,62 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
         return lastStatistics;
     }
     
+    private final SpaceInstanceRuntimeDetails NA_RUNTIME_DETAILS = new DefaultSpaceInstanceRuntimeDetails(this);
+    
     public SpaceInstanceRuntimeDetails getRuntimeDetails() {
-        return spaceInstanceRuntimeDetails;
-    }
+        
+        synchronized (runtimeDetailsMonitor) {
+            long currentTime = System.currentTimeMillis();
+            if ((currentTime - lastRuntimeDetailsTimestamp) < runtimeDetailsInterval) {
+                return lastRuntimeDetails;
+            }
+            
+            IInternalRemoteJSpaceAdmin spaceAdmin = getSpaceAdmin();
+            if (spaceAdmin != null) {
+                lastRuntimeDetailsTimestamp = currentTime;
 
+                try {
+                    SpaceRuntimeInfo spaceRuntimeInfo = spaceAdmin.getRuntimeInfo(); //remote call
+                    lastRuntimeDetails = new DefaultSpaceInstanceRuntimeDetails(DefaultSpaceInstance.this, spaceRuntimeInfo);
+
+                } catch(RemoteException e) {
+                    lastRuntimeDetails = NA_RUNTIME_DETAILS;
+                }
+            } else {
+                lastRuntimeDetails = NA_RUNTIME_DETAILS;
+            }
+
+            return lastRuntimeDetails;
+        }
+    }
+    
+    public SpaceInstanceRuntimeDetails waitForRuntimeDetails(long timeout, TimeUnit timeUnit) {
+        
+        final FutureSpaceInstanceRuntimeDetails futureRutimeDetails = new FutureSpaceInstanceRuntimeDetails();
+        
+        if (runtimeDetailsScheduledLeasedCommand == null || !runtimeDetailsScheduledLeasedCommand.renew() /*expired*/) {
+
+            //fetch runtime details every 5 seconds, leased for 1 minute unless renewed for another minute
+            runtimeDetailsScheduledLeasedCommand = admin.scheduleWithFixedDelayUntilLeaseExpires(new Runnable() {
+                @Override
+                public void run() {
+                    SpaceInstanceRuntimeDetails runtimeDetails = getRuntimeDetails();
+                    futureRutimeDetails.set(runtimeDetails);
+                }
+            }, 0, runtimeDetailsInterval, TimeUnit.MILLISECONDS, 1, TimeUnit.MINUTES);
+        }
+        
+        try {
+            SpaceInstanceRuntimeDetails runtimeDetails = futureRutimeDetails.get(timeout, timeUnit);
+            if (runtimeDetails == null) { //may return null if timeout==0
+                runtimeDetails = NA_RUNTIME_DETAILS;
+            }
+            return runtimeDetails;
+        } catch (Exception e) {
+            return NA_RUNTIME_DETAILS; //ignore - InterruptedException, ExecutionException, TimeoutException; just return NA
+        }
+    }
+    
     public ReplicationTarget[] getReplicationTargets() {
         return replicationTargets;
     }

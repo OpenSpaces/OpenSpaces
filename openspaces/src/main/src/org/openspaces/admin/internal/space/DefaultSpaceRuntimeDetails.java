@@ -18,13 +18,14 @@
 package org.openspaces.admin.internal.space;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 
 import org.openspaces.admin.space.SpaceConnectionDetails;
-import org.openspaces.admin.space.SpaceInstance;
+import org.openspaces.admin.space.SpaceInstanceRuntimeDetails;
 import org.openspaces.admin.space.SpaceRuntimeDetails;
 import org.openspaces.admin.space.SpaceTransactionDetails;
 
@@ -32,43 +33,56 @@ import com.gigaspaces.cluster.activeelection.SpaceMode;
 
 public class DefaultSpaceRuntimeDetails implements SpaceRuntimeDetails {
 
-    private final DefaultSpace defaultSpace;
+    private final List<SpaceInstanceRuntimeDetails> spaceInstancesDetails;
     private final DefaultSpaceTransactionDetails spaceTransactionDetails;
     private final DefaultSpaceConnectionDetails spaceConnectionDetails;
 
-    public DefaultSpaceRuntimeDetails(DefaultSpace defaultSpace) {
-        this.defaultSpace = defaultSpace;
-        this.spaceTransactionDetails = new DefaultSpaceTransactionDetails(defaultSpace);
-        this.spaceConnectionDetails = new DefaultSpaceConnectionDetails(defaultSpace);
+    public DefaultSpaceRuntimeDetails(List<SpaceInstanceRuntimeDetails> details) {
+        this.spaceInstancesDetails = details;
+        this.spaceTransactionDetails = new DefaultSpaceTransactionDetails(details);
+        this.spaceConnectionDetails = new DefaultSpaceConnectionDetails(details);
+    }
+    
+    @Override
+    public boolean isNA() {
+        if (spaceInstancesDetails.size() == 0) {
+            return true;
+        }
+        for (SpaceInstanceRuntimeDetails runtimeDetails : spaceInstancesDetails) {
+            if (runtimeDetails.isNA()) {
+                return true;
+            }
+        }
+        return false;
     }
     
     public String[] getClassNames() {
         Set<String> classNames = new TreeSet<String>(); //keep same order
-        for (SpaceInstance spaceInstance : defaultSpace.getSpaceInstances()) {
-            if (spaceInstance.getMode() == SpaceMode.PRIMARY) {
-                for (String className : spaceInstance.getRuntimeDetails().getClassNames()) {
+        for (SpaceInstanceRuntimeDetails runtimeDetails : spaceInstancesDetails) {
+            if ( ((InternalSpaceInstanceRuntimeDetails)runtimeDetails).getSpaceInstance().getMode() == SpaceMode.PRIMARY) {
+                for (String className : runtimeDetails.getClassNames()) {
                     classNames.add(className);
                 }
             }
-        }
+         }
         return classNames.toArray(new String[classNames.size()]);
     }
 
     public int getCount() {
         int count = 0;
-        for (SpaceInstance spaceInstance : defaultSpace.getSpaceInstances()) {
-            if (spaceInstance.getMode() == SpaceMode.PRIMARY) {
-                count += spaceInstance.getRuntimeDetails().getCount();
+        for (SpaceInstanceRuntimeDetails runtimeDetails : spaceInstancesDetails) {
+            if ( ((InternalSpaceInstanceRuntimeDetails)runtimeDetails).getSpaceInstance().getMode() == SpaceMode.PRIMARY) {
+                count += runtimeDetails.getCount();
             }
-        }
+         }
         return count;
     }
 
     public Map<String, Integer> getCountPerClassName() {
         Map<String, Integer> mapping = new HashMap<String, Integer>();
-        for (SpaceInstance spaceInstance : defaultSpace.getSpaceInstances()) {
-            if (spaceInstance.getMode() == SpaceMode.PRIMARY) {
-                Map<String, Integer> countPerClassName = spaceInstance.getRuntimeDetails().getCountPerClassName();
+        for (SpaceInstanceRuntimeDetails runtimeDetails : spaceInstancesDetails) {
+            if ( ((InternalSpaceInstanceRuntimeDetails)runtimeDetails).getSpaceInstance().getMode() == SpaceMode.PRIMARY) {
+                Map<String, Integer> countPerClassName = runtimeDetails.getCountPerClassName();
                 for (Entry<String, Integer> entry : countPerClassName.entrySet()) {
                     Integer value = mapping.get(entry.getKey());
                     if (value == null) { 
@@ -87,9 +101,9 @@ public class DefaultSpaceRuntimeDetails implements SpaceRuntimeDetails {
 
     public Map<String, Integer> getNotifyTemplateCountPerClassName() {
         Map<String, Integer> mapping = new HashMap<String, Integer>();
-        for (SpaceInstance spaceInstance : defaultSpace.getSpaceInstances()) {
-            if (spaceInstance.getMode() == SpaceMode.PRIMARY) {
-                Map<String, Integer> notifyTemplateCountPerClassName = spaceInstance.getRuntimeDetails().getNotifyTemplateCountPerClassName();
+        for (SpaceInstanceRuntimeDetails runtimeDetails : spaceInstancesDetails) {
+            if ( ((InternalSpaceInstanceRuntimeDetails)runtimeDetails).getSpaceInstance().getMode() == SpaceMode.PRIMARY) {
+                Map<String, Integer> notifyTemplateCountPerClassName = runtimeDetails.getNotifyTemplateCountPerClassName();
                 for (Entry<String, Integer> entry : notifyTemplateCountPerClassName.entrySet()) {
                     Integer value = mapping.get(entry.getKey());
                     if (value == null) { 

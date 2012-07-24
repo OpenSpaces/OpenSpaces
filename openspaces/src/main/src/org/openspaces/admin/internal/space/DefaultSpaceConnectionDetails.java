@@ -15,26 +15,28 @@
  *******************************************************************************/
 package org.openspaces.admin.internal.space;
 
+import java.util.List;
+
 import org.openspaces.admin.space.SpaceConnectionDetails;
-import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.space.SpaceInstanceConnectionDetails;
+import org.openspaces.admin.space.SpaceInstanceRuntimeDetails;
 
 /**
  * @author moran
  */
 public class DefaultSpaceConnectionDetails implements SpaceConnectionDetails {
 
-    private final DefaultSpace defaultSpace;
+    private final List<SpaceInstanceRuntimeDetails> spaceInstanceRuntimeDetails;
 
-    public DefaultSpaceConnectionDetails(DefaultSpace defaultSpace) {
-        this.defaultSpace = defaultSpace;
+    public DefaultSpaceConnectionDetails(List<SpaceInstanceRuntimeDetails> details) {
+        this.spaceInstanceRuntimeDetails = details;
     }
     
     @Override
     public int getActiveConnectionCount() {
         int count = 0;
-        for (SpaceInstance spaceInstance : defaultSpace.getSpaceInstances()) {
-            SpaceInstanceConnectionDetails connectionDetails = spaceInstance.getRuntimeDetails().getConnectionDetails();
+        for (SpaceInstanceRuntimeDetails runtimeDetails : spaceInstanceRuntimeDetails) {
+            SpaceInstanceConnectionDetails connectionDetails = runtimeDetails.getConnectionDetails();
             count += connectionDetails.getActiveConnectionCount();
         }
         return count;

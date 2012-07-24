@@ -40,6 +40,7 @@ import org.openspaces.admin.gateway.Gateways;
 import org.openspaces.admin.gsa.GridServiceAgents;
 import org.openspaces.admin.gsc.GridServiceContainers;
 import org.openspaces.admin.gsm.GridServiceManagers;
+import org.openspaces.admin.internal.admin.DefaultAdmin.ScheduledLeasedCommand;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.esm.InternalElasticServiceManager;
 import org.openspaces.admin.internal.gsa.InternalGridServiceAgent;
@@ -420,5 +421,15 @@ public class NullMockAdmin implements Admin, InternalAdmin {
     public boolean isSingleThreadedEventListeners() {
         // TODO Auto-generated method stub
         return false;
+    }
+
+    /* (non-Javadoc)
+     * @see org.openspaces.admin.internal.admin.InternalAdmin#scheduleWithFixedDelayUntilLeaseExpires(java.lang.Runnable, long, long, java.util.concurrent.TimeUnit, long, java.util.concurrent.TimeUnit)
+     */
+    @Override
+    public ScheduledLeasedCommand scheduleWithFixedDelayUntilLeaseExpires(Runnable command, long initialDelay,
+            long delay, TimeUnit delayUnit, long lease, TimeUnit leaseUnit) {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

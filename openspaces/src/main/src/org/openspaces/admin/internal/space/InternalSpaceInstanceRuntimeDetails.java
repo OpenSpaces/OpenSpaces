@@ -15,30 +15,15 @@
  *******************************************************************************/
 package org.openspaces.admin.internal.space;
 
-import org.openspaces.admin.space.SpaceInstanceTransactionDetails;
-
-import com.j_spaces.core.admin.SpaceRuntimeInfo;
+import org.openspaces.admin.space.SpaceInstance;
+import org.openspaces.admin.space.SpaceInstanceRuntimeDetails;
 
 /**
  * @author moran
+ *
  */
-public class DefaultSpaceInstanceTransactionDetails implements SpaceInstanceTransactionDetails {
+public interface InternalSpaceInstanceRuntimeDetails extends SpaceInstanceRuntimeDetails {
 
-    private final SpaceRuntimeInfo spaceRuntimeInfo;
-    
-    /**
-     * @param spaceRuntimeInfo
-     */
-    public DefaultSpaceInstanceTransactionDetails(SpaceRuntimeInfo spaceRuntimeInfo) {
-        this.spaceRuntimeInfo = spaceRuntimeInfo;
-    }
+    SpaceInstance getSpaceInstance();
 
-    @Override
-    public int getActiveTransactionCount() {
-        int count = 0;
-        if (spaceRuntimeInfo != null) {
-            count = spaceRuntimeInfo.getActiveTransactionCount();
-        }
-        return count;
-    }
 }
