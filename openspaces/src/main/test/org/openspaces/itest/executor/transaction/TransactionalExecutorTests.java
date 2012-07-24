@@ -17,9 +17,11 @@
  ******************************************************************************/
 package org.openspaces.itest.executor.transaction;
 
-import com.gigaspaces.async.AsyncFuture;
-import com.gigaspaces.async.AsyncFutureListener;
-import com.gigaspaces.async.AsyncResult;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import javax.annotation.Resource;
+
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.executor.AutowireTask;
 import org.openspaces.core.executor.DistributedTask;
@@ -31,9 +33,9 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.Resource;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
+import com.gigaspaces.async.AsyncFuture;
+import com.gigaspaces.async.AsyncFutureListener;
+import com.gigaspaces.async.AsyncResult;
 
 /**
  * @author kimchy
@@ -59,7 +61,7 @@ public class TransactionalExecutorTests extends AbstractDependencyInjectionSprin
     protected String[] getConfigLocations() {
         return new String[]{"/org/openspaces/itest/executor/transaction/context.xml"};
     }
-
+    
     protected void onSetUp() throws Exception {
         localGigaSpace1.clear(null);
         localGigaSpace2.clear(null);
@@ -178,6 +180,11 @@ public class TransactionalExecutorTests extends AbstractDependencyInjectionSprin
             protected void doInTransactionWithoutResult(TransactionStatus status) {
                 AsyncFuture<Integer> value = localGigaSpace1.execute(new DelayedSimpleTask1(), 0);
                 value.setListener(listener);
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 status.setRollbackOnly();
             }
         });
@@ -196,6 +203,11 @@ public class TransactionalExecutorTests extends AbstractDependencyInjectionSprin
         txTemplate.execute(new TransactionCallbackWithoutResult() {
             protected void doInTransactionWithoutResult(TransactionStatus status) {
                 AsyncFuture<Integer> value = localGigaSpace1.execute(new DelayedSimpleTask1(), 0, listener);
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 status.setRollbackOnly();
             }
         });
@@ -215,6 +227,11 @@ public class TransactionalExecutorTests extends AbstractDependencyInjectionSprin
             protected void doInTransactionWithoutResult(TransactionStatus status) {
                 AsyncFuture<Integer> value = localGigaSpace1.execute(new DelayedSimpleTask1(), 0);
                 value.setListener(listener);
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 status.setRollbackOnly();
             }
         });
