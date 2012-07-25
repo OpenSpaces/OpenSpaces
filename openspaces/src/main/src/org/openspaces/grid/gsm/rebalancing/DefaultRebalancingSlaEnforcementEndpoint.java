@@ -308,9 +308,11 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
                     catch (AdminException e) {
                         logger.info(
                                 "Failed to remove instance " + RebalancingUtils.puInstanceToString(instance),e);
+                        state.removeRemovedStatelessProcessingUnitInstance(instance);
                     }
                     catch (Throwable t) {
                         logger.warn("Unexpected exception when removing "+ RebalancingUtils.puInstanceToString(instance),t);
+                        state.removeRemovedStatelessProcessingUnitInstance(instance);
                     }
                 }});
         }
