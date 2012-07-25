@@ -17,12 +17,9 @@
  ******************************************************************************/
 package org.openspaces.admin.internal.space;
 
-import java.util.concurrent.TimeUnit;
-
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.space.Space;
 import org.openspaces.admin.space.SpaceInstance;
-import org.openspaces.admin.space.SpaceRuntimeDetails;
 
 /**
  * @author kimchy
@@ -36,6 +33,4 @@ public interface InternalSpace extends Space, InternalSpaceInstancesAware {
     void refreshScheduledSpaceMonitors();
 
     Admin getAdmin();
-    
-    SpaceRuntimeDetails waitForRuntimeDetails(long timeout, TimeUnit timeUnit);
 }

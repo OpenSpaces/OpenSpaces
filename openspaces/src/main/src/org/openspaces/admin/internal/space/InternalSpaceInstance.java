@@ -18,7 +18,6 @@
 package org.openspaces.admin.internal.space;
 
 import java.rmi.RemoteException;
-import java.util.concurrent.TimeUnit;
 
 import net.jini.core.lookup.ServiceID;
 
@@ -26,7 +25,6 @@ import org.openspaces.admin.internal.support.InternalGridComponent;
 import org.openspaces.admin.space.ReplicationTarget;
 import org.openspaces.admin.space.Space;
 import org.openspaces.admin.space.SpaceInstance;
-import org.openspaces.admin.space.SpaceInstanceRuntimeDetails;
 import org.openspaces.admin.space.SpacePartition;
 
 import com.gigaspaces.cluster.activeelection.SpaceMode;
@@ -55,6 +53,7 @@ public interface InternalSpaceInstance extends SpaceInstance, InternalGridCompon
 
     void setPartition(SpacePartition spacePartition);
 
+    RuntimeHolder getRuntimeHolder() throws RemoteException;
 
     IJSpace getIJSpace();
 
@@ -64,12 +63,7 @@ public interface InternalSpaceInstance extends SpaceInstance, InternalGridCompon
 
     void setReplicationTargets(ReplicationTarget[] replicationTargets);
 
-    PlatformLogicalVersion getPlatformLogicalVersion();
-
-    
-    RuntimeHolder getRuntimeHolder() throws RemoteException;
-    
     StatisticsHolder getStatisticsHolder() throws RemoteException;
 
-    SpaceInstanceRuntimeDetails waitForRuntimeDetails(long timeout, TimeUnit timeUnit);
+    PlatformLogicalVersion getPlatformLogicalVersion();
 }

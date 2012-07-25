@@ -15,29 +15,43 @@
  *******************************************************************************/
 package org.openspaces.admin.internal.space;
 
+import java.rmi.RemoteException;
+import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.openspaces.admin.internal.admin.DefaultAdmin;
 import org.openspaces.admin.space.SpaceInstanceConnectionDetails;
 
-import com.j_spaces.core.admin.SpaceRuntimeInfo;
+import com.gigaspaces.management.transport.ITransportConnection;
+import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
 
 /**
  * @author moran
  */
 public class DefaultSpaceInstanceConnectionDetails implements SpaceInstanceConnectionDetails {
 
-    private final SpaceRuntimeInfo spaceRuntimeInfo;
-    
-    /**
-     * @param spaceRuntimeInfo
-     */
-    public DefaultSpaceInstanceConnectionDetails(SpaceRuntimeInfo spaceRuntimeInfo) {
-        this.spaceRuntimeInfo = spaceRuntimeInfo;
-    }
+    private static final Log logger = LogFactory.getLog(DefaultAdmin.class);
+    private final DefaultSpaceInstance defaultSpaceInstance;
 
+    public DefaultSpaceInstanceConnectionDetails(DefaultSpaceInstance defaultSpaceInstance) {
+        this.defaultSpaceInstance = defaultSpaceInstance;
+    }
+    
     @Override
     public int getActiveConnectionCount() {
         int count = 0;
-        if (spaceRuntimeInfo != null) {
-            count = spaceRuntimeInfo.getActiveConnectionCount();
+        IInternalRemoteJSpaceAdmin spaceAdmin = defaultSpaceInstance.getSpaceAdmin();
+        if (spaceAdmin != null) {
+            try {
+                List<ITransportConnection> connectionsInfo = spaceAdmin.getConnectionsInfo();
+                if( connectionsInfo != null ){
+                    count = connectionsInfo.size();
+                }
+            } catch (RemoteException e) {
+                logger.debug("RemoteException caught while trying to get Space connection information from "
+                        + defaultSpaceInstance.getSpaceName(), e);
+            }
         }
         return count;
     }

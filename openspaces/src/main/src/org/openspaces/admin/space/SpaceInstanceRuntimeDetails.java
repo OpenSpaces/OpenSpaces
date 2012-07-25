@@ -36,14 +36,7 @@ import org.openspaces.core.GigaSpace;
  * @since 8.0.3
  */
 public interface SpaceInstanceRuntimeDetails {
-    
-    /**
-     * Returns <code>true</code> if this details are not yet available.
-     * Should be called before accessing one of the other methods.
-     * @since 9.1.0
-     */
-    boolean isNA();
-    
+
     /**
      * A count of any null-template matching entry/object in the Space.
      * <p>
@@ -72,18 +65,16 @@ public interface SpaceInstanceRuntimeDetails {
      * @return a mapping of class name to template count.
      */
     Map<String, Integer> getNotifyTemplateCountPerClassName();
-
+    
     /**
      * @return the transaction details of this Space instance.
      * @since 9.0.0
      */
-    @Deprecated
     SpaceInstanceTransactionDetails getTransactionDetails();
-
+    
     /**
      * @return the connection details of this Space instance.
      * @since 9.0.0
      */
-    @Deprecated
     SpaceInstanceConnectionDetails getConnectionDetails();
 }

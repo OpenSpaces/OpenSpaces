@@ -15,29 +15,42 @@
  *******************************************************************************/
 package org.openspaces.admin.internal.space;
 
+import java.rmi.RemoteException;
+
+import net.jini.core.transaction.server.TransactionConstants;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.openspaces.admin.internal.admin.DefaultAdmin;
 import org.openspaces.admin.space.SpaceInstanceTransactionDetails;
 
-import com.j_spaces.core.admin.SpaceRuntimeInfo;
+import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
+import com.j_spaces.core.client.TransactionInfo;
 
 /**
  * @author moran
  */
 public class DefaultSpaceInstanceTransactionDetails implements SpaceInstanceTransactionDetails {
 
-    private final SpaceRuntimeInfo spaceRuntimeInfo;
-    
-    /**
-     * @param spaceRuntimeInfo
-     */
-    public DefaultSpaceInstanceTransactionDetails(SpaceRuntimeInfo spaceRuntimeInfo) {
-        this.spaceRuntimeInfo = spaceRuntimeInfo;
-    }
+    private static final Log logger = LogFactory.getLog(DefaultAdmin.class);
+    private final DefaultSpaceInstance defaultSpaceInstance;
 
+    public DefaultSpaceInstanceTransactionDetails(DefaultSpaceInstance defaultSpaceInstance) {
+        this.defaultSpaceInstance = defaultSpaceInstance;
+    }
+    
     @Override
     public int getActiveTransactionCount() {
         int count = 0;
-        if (spaceRuntimeInfo != null) {
-            count = spaceRuntimeInfo.getActiveTransactionCount();
+        IInternalRemoteJSpaceAdmin spaceAdmin = defaultSpaceInstance.getSpaceAdmin();
+        if (spaceAdmin != null) {
+            try {
+                TransactionInfo[] transactionsInfo = spaceAdmin.getTransactionsInfo(TransactionInfo.Types.ALL, TransactionConstants.ACTIVE);
+                count = transactionsInfo.length;
+            } catch (RemoteException e) {
+                logger.debug("RemoteException caught while trying to get Space transaction information from "
+                        + defaultSpaceInstance.getSpaceName(), e);
+            }
         }
         return count;
     }

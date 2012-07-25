@@ -33,13 +33,6 @@ import org.openspaces.core.GigaSpace;
 public interface SpaceRuntimeDetails {
 
     /**
-     * Returns <code>true</code> if this details are not yet available.
-     * Should be called before accessing one of the other methods.
-     * @since 9.1.0
-     */
-    boolean isNA();
-    
-    /**
      * An aggregated count of any null-template matching entry/object in the Space.
      * <p>
      * Count could also be gained by establishing a proxy to the Space.
