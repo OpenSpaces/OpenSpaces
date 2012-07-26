@@ -16,15 +16,14 @@
 
 package org.openspaces.hibernate.cache;
 
-import com.j_spaces.core.client.LocalTransactionManager;
+import java.util.Properties;
+
+import javax.transaction.TransactionManager;
+
 import org.hibernate.cache.Cache;
 import org.hibernate.cache.CacheException;
 import org.hibernate.transaction.TransactionManagerLookup;
 import org.hibernate.transaction.TransactionManagerLookupFactory;
-
-import javax.transaction.TransactionManager;
-import java.rmi.RemoteException;
-import java.util.Properties;
 
 /**
  * Transactional Map cache provider allowing to use GigaSpaces as a second level
@@ -38,8 +37,6 @@ public class TransactionalMapCacheProvider extends AbstractMapCacheProvider {
 
     private TransactionManager transactionManager;
 
-    private net.jini.core.transaction.server.TransactionManager distributedTransactionManager;
-
     /**
      * Finds JTA transaction manager.
      */
@@ -49,13 +46,6 @@ public class TransactionalMapCacheProvider extends AbstractMapCacheProvider {
             throw new CacheException("Transaction Cache Provider must work with JTA");
         }
         transactionManager = transactionManagerLookup.getTransactionManager(properties);
-
-        try {
-            // TODO LTM: change to distributed transaction manager
-            distributedTransactionManager = LocalTransactionManager.getInstance(getMap().getMasterSpace());
-        } catch (RemoteException e) {
-            throw new CacheException("Failed to create local transaction manager", e);
-        }
     }
 
     /**
@@ -63,6 +53,6 @@ public class TransactionalMapCacheProvider extends AbstractMapCacheProvider {
      */
     public Cache buildCache(String regionName, Properties properties) throws CacheException {
         return new TransactionalMapCache(regionName, getMap(), getTimeToLive(), getWaitForResponse(),
-                transactionManager, distributedTransactionManager);
+                transactionManager);
     }
 }

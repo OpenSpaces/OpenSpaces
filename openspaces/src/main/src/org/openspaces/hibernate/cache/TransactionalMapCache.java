@@ -16,6 +16,7 @@
 
 package org.openspaces.hibernate.cache;
 
+import java.rmi.RemoteException;
 import java.util.Map;
 
 import javax.transaction.TransactionManager;
@@ -30,6 +31,7 @@ import org.hibernate.cache.Cache;
 import org.hibernate.cache.CacheException;
 import org.hibernate.cache.Timestamper;
 
+import com.gigaspaces.client.transaction.DistributedTransactionManagerProvider;
 import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
 import com.j_spaces.core.client.XAResourceImpl;
 import com.j_spaces.core.client.cache.map.MapCache;
@@ -44,31 +46,35 @@ import com.j_spaces.map.MapEntryFactory;
  */
 public class TransactionalMapCache implements Cache {
 
-    private Log logger = LogFactory.getLog(getClass());
+    private final static Log logger = LogFactory.getLog(TransactionalMapCache.class);
     
-    private String regionName;
+    private final String regionName;
 
-    private IMap map;
+    private final IMap map;
 
-    private long timeToLive;
+    private final long timeToLive;
 
-    private long waitForResponse;
+    private final long waitForResponse;
 
-    private TransactionManager transactionManager;
+    private final TransactionManager transactionManager;
 
-    private net.jini.core.transaction.server.TransactionManager distributedTransactionManager;
+    private final DistributedTransactionManagerProvider distributedTransactionManagerProvider;
 
-    private ISpaceProxy masterSpace;
+    private final ISpaceProxy masterSpace;
 
     public TransactionalMapCache(String regionName, IMap map, long timeToLive, long waitForResponse,
-                                 TransactionManager transactionManager, net.jini.core.transaction.server.TransactionManager distributedTransactionManager) {
+                                 TransactionManager transactionManager) throws CacheException {
         this.regionName = regionName;
         this.map = map;
         this.timeToLive = timeToLive;
         this.waitForResponse = waitForResponse;
         this.transactionManager = transactionManager;
-        this.distributedTransactionManager = distributedTransactionManager;
         this.masterSpace = (ISpaceProxy) map.getMasterSpace();
+        try {
+            this.distributedTransactionManagerProvider = new DistributedTransactionManagerProvider();
+        } catch (net.jini.core.transaction.TransactionException e) {
+            throw new CacheException("error creating distributed transaction manager", e);
+        }
     }
 
     /**
@@ -164,7 +170,11 @@ public class TransactionalMapCache implements Cache {
      * Clean up
      */
     public void destroy() throws CacheException {
-
+        try {
+            distributedTransactionManagerProvider.destroy();
+        } catch (RemoteException e) {
+            throw new CacheException("error while destroying distributed transaction manager", e);
+        }
     }
 
     /**
@@ -240,7 +250,7 @@ public class TransactionalMapCache implements Cache {
 
     private void verifyTransaction() {
         if (masterSpace.getContextTransaction() == null) {
-            XAResource xaResourceSpace = new XAResourceImpl(distributedTransactionManager, masterSpace);
+            XAResource xaResourceSpace = new XAResourceImpl(distributedTransactionManagerProvider.getTransactionManager(), masterSpace);
             try {
                 transactionManager.getTransaction().enlistResource(xaResourceSpace);
             } catch (Exception e) {
