@@ -211,4 +211,24 @@ public class DefaultSpaceInstanceStatistics implements SpaceInstanceStatistics {
     public int getNotifierQueueSize() {
         return statisticsHolder.getNotifierQueueSize();
     }
+
+    @Override
+    public long getObjectCount() {
+        return statisticsHolder.getRuntimeStatisticsHolder().getObjectCount();
+    }
+
+    @Override
+    public long getNotifyTemplateCount() {
+        return statisticsHolder.getRuntimeStatisticsHolder().getNotifyTemplateCount();
+    }
+
+    @Override
+    public long getActiveConnectionCount() {
+        return statisticsHolder.getRuntimeStatisticsHolder().getActiveConnectionCount();
+    }
+
+    @Override
+    public long getActiveTransactionCount() {
+        return statisticsHolder.getRuntimeStatisticsHolder().getActiveTransactionCount();
+    }
 }

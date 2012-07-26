@@ -28,7 +28,7 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
     private final long timestamp;
 
     private final SpaceInstanceStatistics[] stats;
-
+    
     private volatile SpaceStatistics previous;
 
     public DefaultSpaceStatistics(SpaceInstanceStatistics[] stats, SpaceStatistics previous, int historySize) {
@@ -263,6 +263,50 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
         for (SpaceInstanceStatistics stat : stats) {
             if (!stat.isNA()) {
                 total += stat.getRemovePerSecond();
+            }
+        }
+        return total;
+    }
+    
+    @Override
+    public long getObjectCount() {
+        long total = 0;
+        for (SpaceInstanceStatistics stat : stats) {
+            if (!stat.isNA()) {
+                total += stat.getObjectCount();
+            }
+        }
+        return total;
+    }
+
+    @Override
+    public long getNotifyTemplateCount() {
+        long total = 0;
+        for (SpaceInstanceStatistics stat : stats) {
+            if (!stat.isNA()) {
+                total += stat.getNotifyTemplateCount();
+            }
+        }
+        return total;
+    }
+
+    @Override
+    public long getActiveConnectionCount() {
+        long total = 0;
+        for (SpaceInstanceStatistics stat : stats) {
+            if (!stat.isNA()) {
+                total += stat.getActiveConnectionCount();
+            }
+        }
+        return total;
+    }
+
+    @Override
+    public long getActiveTransactionCount() {
+        long total = 0;
+        for (SpaceInstanceStatistics stat : stats) {
+            if (!stat.isNA()) {
+                total += stat.getActiveTransactionCount();
             }
         }
         return total;

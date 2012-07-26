@@ -103,4 +103,28 @@ public interface SpaceStatistics {
     long getRemoveCount();
 
     double getRemovePerSecond();
+    
+    /**
+     * @since 9.1.0
+     * @return count of all the objects in this Space instance.
+     */
+    long getObjectCount();
+
+    /**
+     * @since 9.1.0
+     * @return count of all the notify templates this Space instance.
+     */
+    long getNotifyTemplateCount();
+    
+    /**
+     * @since 9.1.0
+     * @return count of all the active connections to this Space instance.
+     */
+    long getActiveConnectionCount();
+    
+    /**
+     * @since 9.1.0
+     * @return count of all the active transactions (of all types) in this Space instance.
+     */
+    long getActiveTransactionCount();
 }

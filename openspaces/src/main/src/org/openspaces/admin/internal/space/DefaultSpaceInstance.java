@@ -424,13 +424,9 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
         }
         lastStatisticsTimestamp = currentTime;
         try {
-            StatisticsHolder holder;
-            if (spaceAdmin != null) {
-                holder = ((StatisticsAdmin) spaceAdmin).getHolder();
-            } else {
-                holder = puService.getSpaceStatisticsHolder(serviceID);
-            }
             if (getVirtualMachine().getMachine() == null) return NA_STATISTICS; //machine has not yet been set
+
+            StatisticsHolder holder = getStatisticsHolder();
             lastStatistics = new DefaultSpaceInstanceStatistics(holder, lastStatistics, statisticsHistorySize, getVirtualMachine().getMachine().getOperatingSystem().getTimeDelta());
         } catch (RemoteException e) {
             lastStatistics = NA_STATISTICS;

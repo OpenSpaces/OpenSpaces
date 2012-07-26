@@ -40,7 +40,10 @@ public interface SpaceRuntimeDetails {
      * @see GigaSpace#count(Object)
      * @see GigaSpace#count(Object, int)
      * @return a count (gathered periodically).
+     * 
+     * @deprecated @see SpaceInstanceStatistics#getObjectCount()
      */
+    @Deprecated
     int getCount();
     
     /**
@@ -64,12 +67,16 @@ public interface SpaceRuntimeDetails {
     /**
      * @return the aggregated transaction details of all the Space instances.
      * @since 9.0.0
+     * @deprecated use {@link SpaceInstanceStatistics#getActiveTransactionCount()}
      */
+    @Deprecated
     SpaceTransactionDetails getTransactionDetails();
     
     /**
      * @return the aggregated connection details of all the Space instances.
      * @since 9.0.0
+     * @deprecated use {@link SpaceInstanceStatistics#getActiveConnectionCount()}
      */
+    @Deprecated
     SpaceConnectionDetails getConnectionDetails();
 }
