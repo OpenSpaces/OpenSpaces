@@ -70,7 +70,7 @@ import com.gigaspaces.log.CompoundLogEntries;
 import com.gigaspaces.log.LogEntries;
 import com.gigaspaces.log.LogEntryMatcher;
 import com.gigaspaces.log.LogProcessType;
-import com.gigaspaces.lrmi.nio.LRMIServiceMonitoringDetails;
+import com.gigaspaces.lrmi.LRMIServiceMonitoringDetails;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOStatistics;
 import com.gigaspaces.security.SecurityException;

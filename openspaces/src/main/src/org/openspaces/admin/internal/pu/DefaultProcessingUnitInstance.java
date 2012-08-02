@@ -78,7 +78,7 @@ import com.gigaspaces.internal.jvm.JVMDetails;
 import com.gigaspaces.internal.jvm.JVMStatistics;
 import com.gigaspaces.internal.os.OSDetails;
 import com.gigaspaces.internal.os.OSStatistics;
-import com.gigaspaces.lrmi.nio.LRMIServiceMonitoringDetails;
+import com.gigaspaces.lrmi.LRMIServiceMonitoringDetails;
 import com.gigaspaces.lrmi.nio.async.FutureContext;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOStatistics;

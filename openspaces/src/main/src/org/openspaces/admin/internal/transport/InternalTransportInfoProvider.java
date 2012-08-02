@@ -17,7 +17,7 @@
  ******************************************************************************/
 package org.openspaces.admin.internal.transport;
 
-import com.gigaspaces.lrmi.nio.LRMIServiceMonitoringDetails;
+import com.gigaspaces.lrmi.LRMIServiceMonitoringDetails;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOStatistics;
 

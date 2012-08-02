@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.openspaces.admin.transport;
 
-import com.gigaspaces.lrmi.nio.LRMIServiceMonitoringDetails;
+import com.gigaspaces.lrmi.LRMIServiceMonitoringDetails;
 
 /**
  * Provide low level monitoring capabilities of the transport layer
