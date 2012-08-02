@@ -80,6 +80,7 @@ import com.gigaspaces.internal.os.OSStatistics;
 import com.gigaspaces.log.LogEntries;
 import com.gigaspaces.log.LogEntryMatcher;
 import com.gigaspaces.log.LogProcessType;
+import com.gigaspaces.lrmi.nio.LRMIServiceMonitoringDetails;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOInfoHelper;
 import com.gigaspaces.lrmi.nio.info.NIOStatistics;
@@ -279,6 +280,21 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
 
     public NIOStatistics getNIOStatistics() throws RemoteException {
         return NIOInfoHelper.getNIOStatistics();
+    }
+    
+    @Override
+    public void enableLRMIMonitoring() throws RemoteException {
+        NIOInfoHelper.enableMonitoring();
+    }
+    
+    @Override
+    public void disableLRMIMonitoring() throws RemoteException {
+        NIOInfoHelper.disableMonitoring();
+    }
+    
+    @Override
+    public LRMIServiceMonitoringDetails[] fetchLRMIServicesMonitoringDetails() throws RemoteException {
+        return NIOInfoHelper.fetchMonitoringDetails();
     }
 
     public long getCurrentTimestamp() throws RemoteException {

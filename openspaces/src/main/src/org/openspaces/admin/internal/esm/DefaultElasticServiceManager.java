@@ -45,6 +45,7 @@ import com.gigaspaces.internal.os.OSStatistics;
 import com.gigaspaces.log.LogEntries;
 import com.gigaspaces.log.LogEntryMatcher;
 import com.gigaspaces.log.LogProcessType;
+import com.gigaspaces.lrmi.nio.LRMIServiceMonitoringDetails;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOStatistics;
 
@@ -119,7 +120,22 @@ public class DefaultElasticServiceManager extends AbstractAgentGridComponent imp
     public NIOStatistics getNIOStatistics() throws RemoteException {
         return esm.getNIOStatistics();
     }
-
+    
+    @Override
+    public void enableLRMIMonitoring() throws RemoteException {
+        esm.enableLRMIMonitoring();
+    }
+    
+    @Override
+    public void disableLRMIMonitoring() throws RemoteException {
+        esm.disableLRMIMonitoring();
+    }
+    
+    @Override
+    public LRMIServiceMonitoringDetails[] fetchLRMIServicesMonitoringDetails() throws RemoteException {
+        return esm.fetchLRMIServicesMonitoringDetails();
+    }
+    
     public long getCurrentTimeInMillis() throws RemoteException {
         return esm.getCurrentTimestamp();
     }

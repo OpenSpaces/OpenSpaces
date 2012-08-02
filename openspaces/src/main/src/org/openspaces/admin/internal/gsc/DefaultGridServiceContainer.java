@@ -50,6 +50,7 @@ import com.gigaspaces.internal.os.OSStatistics;
 import com.gigaspaces.log.LogEntries;
 import com.gigaspaces.log.LogEntryMatcher;
 import com.gigaspaces.log.LogProcessType;
+import com.gigaspaces.lrmi.nio.LRMIServiceMonitoringDetails;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOStatistics;
 import com.gigaspaces.security.SecurityException;
@@ -215,6 +216,21 @@ public class DefaultGridServiceContainer extends AbstractAgentGridComponent impl
 
     public NIOStatistics getNIOStatistics() throws RemoteException {
         return gsc.getNIOStatistics();
+    }
+    
+    @Override
+    public void enableLRMIMonitoring() throws RemoteException {
+        gsc.enableLRMIMonitoring();
+    }
+    
+    @Override
+    public void disableLRMIMonitoring() throws RemoteException {
+        gsc.disableLRMIMonitoring();
+    }
+    
+    @Override
+    public LRMIServiceMonitoringDetails[] fetchLRMIServicesMonitoringDetails() throws RemoteException {
+        return gsc.fetchLRMIServicesMonitoringDetails();
     }
 
     public long getCurrentTimeInMillis() throws RemoteException {

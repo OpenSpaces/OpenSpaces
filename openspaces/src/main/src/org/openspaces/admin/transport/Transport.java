@@ -74,4 +74,11 @@ public interface Transport extends VirtualMachineAware, StatisticsMonitor {
      * <p>Note, the transport needs to be in a monitoring state. See {@link #startStatisticsMonitor()}.
      */
     TransportStatisticsChangedEventManager getStatisticsChanged();
+    
+    /**
+     * Return the LRMI monitoring of this transport.
+     * 
+     * See {@link TransportLRMIMonitoring}.
+     */
+    TransportLRMIMonitoring getLRMIMonitoring();
 }

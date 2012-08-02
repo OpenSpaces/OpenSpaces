@@ -17,13 +17,17 @@
  ******************************************************************************/
 package org.openspaces.admin.internal.transport;
 
+import com.gigaspaces.lrmi.nio.LRMIServiceMonitoringDetails;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
+
+import org.openspaces.admin.AdminException;
 import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.transport.events.DefaultTransportStatisticsChangedEventManager;
 import org.openspaces.admin.internal.transport.events.InternalTransportStatisticsChangedEventManager;
 import org.openspaces.admin.transport.Transport;
 import org.openspaces.admin.transport.TransportDetails;
+import org.openspaces.admin.transport.TransportLRMIMonitoring;
 import org.openspaces.admin.transport.TransportStatistics;
 import org.openspaces.admin.transport.events.TransportStatisticsChangedEvent;
 import org.openspaces.admin.transport.events.TransportStatisticsChangedEventManager;
@@ -38,7 +42,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author kimchy
  */
-public class DefaultTransport implements InternalTransport {
+public class DefaultTransport implements InternalTransport, TransportLRMIMonitoring {
 
     private final String uid;
 
@@ -204,6 +208,73 @@ public class DefaultTransport implements InternalTransport {
     
     private void assertStateChangesPermitted() {
         admin.assertStateChangesPermitted();
+    }
+
+    /* (non-Javadoc)
+     * @see org.openspaces.admin.transport.Transport#getDetailedMonitoring()
+     */
+    @Override
+    public TransportLRMIMonitoring getLRMIMonitoring() {
+        return this;
+    }
+
+    /* (non-Javadoc)
+     * @see org.openspaces.admin.transport.TransportMonitoring#enableMonitoring()
+     */
+    @Override
+    public void enableMonitoring() {
+        RemoteException lastException = null;
+    	for (InternalTransportInfoProvider transportProvider : transportInfoProviders) {
+            try {
+            	transportProvider.enableLRMIMonitoring();
+            	lastException = null;
+                break;
+            } catch (RemoteException e) {
+                //Failure, try next one
+                lastException = e;
+            }
+        }
+    	if (lastException != null)
+            throw new AdminException(lastException.getMessage(), lastException);
+    }
+
+    /* (non-Javadoc)
+     * @see org.openspaces.admin.transport.TransportMonitoring#disableMonitoring()
+     */
+    @Override
+    public void disableMonitoring() {
+        RemoteException lastException = null;
+    	for (InternalTransportInfoProvider transportProvider : transportInfoProviders) {
+            try {
+            	transportProvider.disableLRMIMonitoring();
+            	lastException = null;
+            	break;
+            } catch (RemoteException e) {
+                //Failure, try next one
+                lastException = e;
+            }
+        }
+    	if (lastException != null)
+    	    throw new AdminException(lastException.getMessage(), lastException);
+    }
+
+    /* (non-Javadoc)
+     * @see org.openspaces.admin.transport.TransportMonitoring#fetchMonitoringDetails()
+     */
+    @Override
+    public synchronized LRMIServiceMonitoringDetails[] fetchServicesMonitoringDetails() {
+        RemoteException lastException = null;
+        for (InternalTransportInfoProvider transportProvider : transportInfoProviders) {
+            try {
+                return transportProvider.fetchLRMIServicesMonitoringDetails();
+            } catch (RemoteException e) {
+                //Failure, try next one
+                lastException = e;
+            }
+        }
+        if (lastException != null)
+            throw new AdminException(lastException.getMessage(), lastException);
+        return new LRMIServiceMonitoringDetails[0];
     }
 
 }

@@ -111,6 +111,7 @@ import com.gigaspaces.internal.jvm.JVMStatistics;
 import com.gigaspaces.internal.os.OSDetails;
 import com.gigaspaces.internal.os.OSHelper;
 import com.gigaspaces.internal.os.OSStatistics;
+import com.gigaspaces.lrmi.nio.LRMIServiceMonitoringDetails;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOInfoHelper;
 import com.gigaspaces.lrmi.nio.info.NIOStatistics;
@@ -1250,6 +1251,21 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
     public NIOStatistics getNIOStatistics() throws RemoteException {
         return NIOInfoHelper.getNIOStatistics();
+    }
+    
+    @Override
+    public void enableLRMIMonitoring() throws RemoteException {
+        NIOInfoHelper.enableMonitoring();
+    }
+    
+    @Override
+    public void disableLRMIMonitoring() throws RemoteException {
+        NIOInfoHelper.disableMonitoring();
+    }
+    
+    @Override
+    public LRMIServiceMonitoringDetails[] fetchLRMIServicesMonitoringDetails() throws RemoteException {
+        return NIOInfoHelper.fetchMonitoringDetails();
     }
 
     public long getCurrentTimestamp() throws RemoteException {

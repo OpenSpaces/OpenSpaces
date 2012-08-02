@@ -78,6 +78,7 @@ import com.gigaspaces.internal.jvm.JVMDetails;
 import com.gigaspaces.internal.jvm.JVMStatistics;
 import com.gigaspaces.internal.os.OSDetails;
 import com.gigaspaces.internal.os.OSStatistics;
+import com.gigaspaces.lrmi.nio.LRMIServiceMonitoringDetails;
 import com.gigaspaces.lrmi.nio.async.FutureContext;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOStatistics;
@@ -641,6 +642,21 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
 
     public NIOStatistics getNIOStatistics() throws RemoteException {
         return puServiceBean.getNIOStatistics();
+    }
+    
+    @Override
+    public void enableLRMIMonitoring() throws RemoteException {
+        puServiceBean.enableLRMIMonitoring();
+    }
+    
+    @Override
+    public void disableLRMIMonitoring() throws RemoteException {
+        puServiceBean.disableLRMIMonitoring();
+    }
+    
+    @Override
+    public LRMIServiceMonitoringDetails[] fetchLRMIServicesMonitoringDetails() throws RemoteException {
+        return puServiceBean.fetchLRMIServicesMonitoringDetails();
     }
 
     public long getCurrentTimeInMillis() throws RemoteException {

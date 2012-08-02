@@ -67,6 +67,7 @@ import com.gigaspaces.internal.os.OSDetails;
 import com.gigaspaces.internal.os.OSStatistics;
 import com.gigaspaces.internal.version.PlatformLogicalVersion;
 import com.gigaspaces.lrmi.LRMIUtilities;
+import com.gigaspaces.lrmi.nio.LRMIServiceMonitoringDetails;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOStatistics;
 import com.j_spaces.core.IJSpace;
@@ -515,6 +516,30 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
             return spaceAdmin.getNIOStatistics();
         }
         return puService.getNIOStatistics();
+    }
+    
+    @Override
+    public void enableLRMIMonitoring() throws RemoteException {
+        if (spaceAdmin != null) {
+            spaceAdmin.enableLRMIMonitoring();
+        }
+        puService.enableLRMIMonitoring();
+    }
+    
+    @Override
+    public void disableLRMIMonitoring() throws RemoteException {
+        if (spaceAdmin != null) {
+            spaceAdmin.disableLRMIMonitoring();
+        }
+        puService.disableLRMIMonitoring();
+    }
+    
+    @Override
+    public LRMIServiceMonitoringDetails[] fetchLRMIServicesMonitoringDetails() throws RemoteException {
+        if (spaceAdmin != null) {
+            return spaceAdmin.fetchLRMIServicesMonitoringDetails();
+        }
+        return puService.fetchLRMIServicesMonitoringDetails();
     }
 
     public long getCurrentTimeInMillis() throws RemoteException {

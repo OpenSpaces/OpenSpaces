@@ -29,6 +29,7 @@ import com.gigaspaces.internal.dump.InternalDumpProvider;
 import com.gigaspaces.log.LogEntries;
 import com.gigaspaces.log.LogEntryMatcher;
 import com.gigaspaces.log.LogProcessType;
+import com.gigaspaces.lrmi.nio.LRMIServiceMonitoringDetails;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOInfoProvider;
 import com.gigaspaces.lrmi.nio.info.NIOStatistics;
@@ -126,6 +127,21 @@ public class DefaultLookupService extends AbstractAgentGridComponent implements 
 
     public NIOStatistics getNIOStatistics() throws RemoteException {
         return ((NIOInfoProvider) registrar.getRegistrar()).getNIOStatistics();
+    }
+    
+    @Override
+    public void enableLRMIMonitoring() throws RemoteException {
+        ((NIOInfoProvider) registrar.getRegistrar()).enableLRMIMonitoring();
+    }
+    
+    @Override
+    public void disableLRMIMonitoring() throws RemoteException {
+        ((NIOInfoProvider) registrar.getRegistrar()).disableLRMIMonitoring();
+    }
+    
+    @Override
+    public LRMIServiceMonitoringDetails[] fetchLRMIServicesMonitoringDetails() throws RemoteException {
+        return ((NIOInfoProvider) registrar.getRegistrar()).fetchLRMIServicesMonitoringDetails();
     }
 
     public long getCurrentTimeInMillis() throws RemoteException {
