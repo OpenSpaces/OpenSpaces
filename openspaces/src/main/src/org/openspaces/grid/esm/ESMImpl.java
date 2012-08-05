@@ -558,6 +558,10 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
                 throw new BeanConfigurationException("Processing Unit must have exactly one container zone defined.");
             }
 
+            if (elasticProperties.size() == 0) {
+                throw new BeanConfigurationException("elasticProperties for " + pu.getName() + " cannot be empty. Could all GSMs have been restarted?");
+            }
+            
             ScaleBeanServer beanServer = scaleBeanServerPerProcessingUnit.get(pu);
 
             if (beanServer == null) {
