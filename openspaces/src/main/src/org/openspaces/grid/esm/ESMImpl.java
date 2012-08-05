@@ -381,17 +381,25 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
                 @Override
                 public Void call() {
                     Map<String, String> properties = elasticPropertiesPerProcessingUnit.get(puName);
+                    
                     if (properties == null)
                     {
+                        properties = scaleStrategyConfig.getProperties();
                         //If there are no properties yet, this is a race condition. We received scale command before the ProcessingUnitAdded
                         //event, keep the scale command for later merge
                         pendingElasticPropertiesUpdatePerProcessingUnit.put(puName, 
-                                new PendingElasticPropertiesUpdate(scaleStrategyConfig.getBeanClassName(), scaleStrategyConfig.getProperties()));
+                                new PendingElasticPropertiesUpdate(scaleStrategyConfig.getBeanClassName(), properties));
+                        if (logger.isLoggable(Level.INFO)) {
+                            logger.info("Stored elastic properties for " + puName + " (elasticProperties.size()=" + properties.size()+")");
+                        }
                     }
                     else
                     {
                         mergeScaleProperties(scaleStrategyConfig.getBeanClassName(), scaleStrategyConfig.getProperties(), properties);
                         ESMImpl.this.processingUnitElasticPropertiesChanged(puName,properties);
+                        if (logger.isLoggable(Level.INFO)) {
+                            logger.info("Merged elastic properties for " + puName + " (elasticProperties.size()=" + properties.size()+")");
+                        }
                     }
                     return null;
                 }
@@ -454,7 +462,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
         if (result instanceof RuntimeException) {
             throw (RuntimeException)result;
         }
-        
+            
         if (result instanceof Error) {
             throw (Error)result;
         }
@@ -521,12 +529,21 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
             if (pendingElasticPropertiesUpdatePerProcessingUnit.containsKey(pu.getName()))
             {
                 PendingElasticPropertiesUpdate pendingPropsUpdate = pendingElasticPropertiesUpdatePerProcessingUnit.remove(pu.getName());
-                //Pending operation is scale command, merge changes
-                if (pendingPropsUpdate.isScaleCommand())
+                
+                if (pendingPropsUpdate.isScaleCommand()) {
+                    // Pending operation is scale command, merge changes
                     mergeScaleProperties(pendingPropsUpdate.getStrategyClassName(), pendingPropsUpdate.getElasticProperties(), elasticProperties);
-                //Pending operation is override command (setElasticProperties), override with pending state.
-                else
+                    if (logger.isLoggable(Level.INFO)) {
+                        logger.info("Added " + pu.getName() + " and merged elastic properties (elasticProperties.size()=" + elasticProperties.size()+")");
+                    }
+                }
+                else {
+                    //Pending operation is override command (setElasticProperties), override with pending state.
                     elasticProperties = pendingPropsUpdate.getElasticProperties();
+                    if (logger.isLoggable(Level.INFO)) {
+                        logger.info("Added " + pu.getName() + " and overrided elastic properties (elasticProperties.size()=" + elasticProperties.size()+")");
+                    }
+                }
             }
             elasticPropertiesPerProcessingUnit.put(pu.getName(), elasticProperties);        
             refreshProcessingUnitElasticConfig(pu, elasticProperties);
