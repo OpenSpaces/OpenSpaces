@@ -170,17 +170,17 @@
         <delete dir="${target.javadoc.dir}" failonerror="false"/>
         <mkdir dir="${target.javadoc.dir}"/>
 
-        <javadoc sourcepath="${main.src.dir}" destdir="${target.javadoc.dir}" windowtitle="GigaSpaces XAP 9.0 API"
+        <javadoc sourcepath="${main.src.dir}" destdir="${target.javadoc.dir}" windowtitle="GigaSpaces XAP 9.1 API"
                  source="1.6" access="protected" author="true" version="true" use="true"
                  useexternalfile="yes"
                  defaultexcludes="true"
-                 header='&lt;a href="index.html" target=\"_top\"&gt;GigaSpaces XAP 9.0 API&lt;/a&gt;'
+                 header='&lt;a href="index.html" target=\"_top\"&gt;GigaSpaces XAP 9.1 API&lt;/a&gt;'
         		packagenames="org.openspaces.**.*"
         		excludepackagenames="org.openspaces.admin.internal.**.*, org.openspaces.core.executor.internal.**.*, org.openspaces.core.internal.**.*, org.openspaces.core.transaction.internal.**.*">
             <arg value="-breakiterator"/>
             <arg value="-J-Xmx256m"/>
             <arg value="-J-XX:MaxPermSize=256m"/>
-            <doctitle><![CDATA[<h1>GigaSpaces XAP 9.0 API</h1>]]></doctitle>
+            <doctitle><![CDATA[<h1>GigaSpaces XAP 9.1 API</h1>]]></doctitle>
             <bottom><![CDATA[<i>Copyright &copy; <a href="http://www.gigaspaces.com/" target="_top">GigaSpaces</a>.</i>]]></bottom>
             <classpath refid="all-libs"/>
         	<fileset dir="${basedir}/../gigaspaces/src/java" defaultexcludes="yes">
