@@ -260,7 +260,7 @@ public class DefaultOperatingSystemsStatistics implements OperatingSystemsStatis
     private double calculateOSUsedMemoryPerc( OperatingSystemStatistics stat ) {
         OperatingSystemDetails osDetails = stat.getDetails();
         //os details can be null if OperatingSystemStatistics is NA
-        if( osDetails != null ){
+        if( osDetails != null && !osDetails.isNA()){
             long totalPhysicalMemorySize = osDetails.getTotalPhysicalMemorySizeInBytes();
             double usedMemory = totalPhysicalMemorySize - 
             stat.getFreePhysicalMemorySizeInBytes();

@@ -184,9 +184,11 @@ public class DefaultOperatingSystem implements InternalOperatingSystem {
         scheduledStatisticsMonitor = admin.scheduleWithFixedDelay(new Runnable() {
             public void run() {
                 OperatingSystemStatistics stats = operatingSystem.getStatistics();
-                OperatingSystemStatisticsChangedEvent event = new OperatingSystemStatisticsChangedEvent(operatingSystem, stats);
-                statisticsChangedEventManager.operatingSystemStatisticsChanged(event);
-                ((InternalOperatingSystemStatisticsChangedEventManager) operatingSystems.getOperatingSystemStatisticsChanged()).operatingSystemStatisticsChanged(event);
+                if (!stats.isNA()) {
+                    OperatingSystemStatisticsChangedEvent event = new OperatingSystemStatisticsChangedEvent(operatingSystem, stats);
+                    statisticsChangedEventManager.operatingSystemStatisticsChanged(event);
+                    ((InternalOperatingSystemStatisticsChangedEventManager) operatingSystems.getOperatingSystemStatisticsChanged()).operatingSystemStatisticsChanged(event);
+                }
             }
         }, 0, statisticsInterval, TimeUnit.MILLISECONDS);
     }

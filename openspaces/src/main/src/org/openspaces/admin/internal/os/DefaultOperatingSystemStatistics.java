@@ -116,6 +116,9 @@ public class DefaultOperatingSystemStatistics implements OperatingSystemStatisti
     }
 
     public double getSwapSpaceUsedPerc() {
+        if (isNA()) {
+            return -1;
+        }
         return StatisticsUtils.computePerc(getDetails().getTotalSwapSpaceSizeInBytes() - getFreeSwapSpaceSizeInBytes(), getDetails().getTotalSwapSpaceSizeInBytes());
     }
 
@@ -144,10 +147,16 @@ public class DefaultOperatingSystemStatistics implements OperatingSystemStatisti
     }
 
     public double getPhysicalMemoryUsedPerc() {
+        if (isNA()) {
+            return -1;
+        }
         return StatisticsUtils.computePerc(getDetails().getTotalPhysicalMemorySizeInBytes() - getFreePhysicalMemorySizeInBytes(), getDetails().getTotalPhysicalMemorySizeInBytes());
     }
 
     public double getActualPhysicalMemoryUsedPerc() {
+        if (isNA()) {
+            return -1;
+        }
         return StatisticsUtils.computePerc(getDetails().getTotalPhysicalMemorySizeInBytes() - getActualFreePhysicalMemorySizeInBytes(), getDetails().getTotalPhysicalMemorySizeInBytes());
     }
 
