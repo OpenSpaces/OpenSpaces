@@ -16,6 +16,11 @@
 
 package org.openspaces.events.polling;
 
+import java.io.PrintWriter;
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.openspaces.events.SpaceDataEventListener;
 import org.openspaces.pu.service.ServiceDetails;
 import org.openspaces.pu.service.ServiceMonitors;
@@ -27,14 +32,8 @@ import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
-import java.io.Serializable;
-import java.io.PrintWriter;
-import java.rmi.RemoteException;
-import java.util.HashSet;
-import java.util.Set;
-
-import com.gigaspaces.internal.dump.InternalDumpProcessor;
 import com.gigaspaces.internal.dump.InternalDump;
+import com.gigaspaces.internal.dump.InternalDumpProcessor;
 import com.gigaspaces.internal.dump.InternalDumpProcessorFailedException;
 
 /**
@@ -535,18 +534,7 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
      * @see #setRecoveryInterval
      */
     protected void refreshConnectionUntilSuccessful() {
-        while (isActive()) {
-            try {
-                getGigaSpace().getSpace().ping();
-                logger.info(message("Successfully refreshed Space Connection"));
-                break;
-            } catch (RemoteException ex) {
-                if (logger.isInfoEnabled()) {
-                    logger.info(message("Could not refresh Space Connection - retrying in " + this.recoveryInterval + " ms"), ex);
-                }
-            }
-            sleepInbetweenRecoveryAttempts();
-        }
+        sleepInbetweenRecoveryAttempts();
     }
 
     /**
