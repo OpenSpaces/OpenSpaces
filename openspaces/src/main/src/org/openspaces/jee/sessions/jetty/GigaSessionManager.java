@@ -470,7 +470,7 @@ public class GigaSessionManager extends AbstractSessionManager {
             super(manager, request);
             _data = new SessionData(getClusterId());
             _data.setMaxIdleMs(_dftMaxIdleSecs * 1000L);
-            _data.setExpiryTime(getMaxInactiveInterval() < 0 ? Long.MAX_VALUE : (System.currentTimeMillis() + getMaxInactiveInterval()));
+            _data.setExpiryTime(getMaxInactiveIntervalMs());
             _data.setCookieSet(0);
 
             Enumeration<String> attributeNames = getAttributeNames();
@@ -533,7 +533,7 @@ public class GigaSessionManager extends AbstractSessionManager {
             boolean access = super.access(time);
             _data.setLastAccessed(_data.getAccessed());
             _data.setAccessed(time);
-            _data.setExpiryTime(getMaxInactiveInterval() < 0 ? Long.MAX_VALUE : (time + getMaxInactiveInterval()));
+            _data.setExpiryTime(getMaxInactiveIntervalMs());
             return access;
         }
 
@@ -543,7 +543,14 @@ public class GigaSessionManager extends AbstractSessionManager {
         @Override
         public void setMaxInactiveInterval(int seconds) {
             super.setMaxInactiveInterval(seconds);
-            _data.setExpiryTime(getMaxInactiveInterval() < 0 ? Long.MAX_VALUE : (System.currentTimeMillis() + getMaxInactiveInterval()));
+            _data.setExpiryTime(getMaxInactiveIntervalMs());
+        }
+        
+        /**
+         * @return getMaxInactiveInterval() in ms
+         */
+        private long getMaxInactiveIntervalMs(){
+            return getMaxInactiveInterval() < 0 ? Long.MAX_VALUE : (System.currentTimeMillis() + getMaxInactiveInterval()*1000L);
         }
 
         /**
