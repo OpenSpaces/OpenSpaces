@@ -30,10 +30,10 @@ import net.jini.core.lookup.ServiceRegistrar;
 import net.jini.core.lookup.ServiceTemplate;
 import net.jini.discovery.DiscoveryEvent;
 import net.jini.discovery.DiscoveryListener;
-import net.jini.lookup.BackwardsServiceDiscoveryManager;
 import net.jini.lookup.LookupCache;
 import net.jini.lookup.ServiceDiscoveryEvent;
 import net.jini.lookup.ServiceDiscoveryListener;
+import net.jini.lookup.ServiceDiscoveryManager;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -96,7 +96,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
 
     private volatile boolean started = false;
 
-    private BackwardsServiceDiscoveryManager sdm;
+    private ServiceDiscoveryManager sdm;
     private LookupCache serviceCache;
     private LookupCache spaceCache;
 
@@ -129,7 +129,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
         }
         started = true;
         try {
-            sdm = SharedDiscoveryManagement.getBackwardsServiceDiscoveryManager(getGroups(), getLocators(), this);
+            sdm = SharedDiscoveryManagement.getServiceDiscoveryManager(getGroups(), getLocators(), this);
         } catch (Exception e) {
             throw new AdminException("Failed to start discovery service, Service Discovery Manager failed to start", e);
         }
