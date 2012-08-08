@@ -72,11 +72,11 @@ public class GigaSessionManager extends AbstractSessionManager {
 
     private long lease = Lease.FOREVER;
 
-    protected int _scavengePeriodMs = 1000 * 60 * 5; //5mins
+    protected long _scavengePeriodMs = TimeUnit.MINUTES.toMillis(5); //5mins
 
     protected int _scavengeCount = 0;
 
-    protected int _savePeriodMs = 60 * 1000; //60 sec
+    protected long _savePeriodMs = TimeUnit.MINUTES.toMillis(1); //1mins
 
     private volatile static ScheduledExecutorService executorService;
 
@@ -91,7 +91,7 @@ public class GigaSessionManager extends AbstractSessionManager {
 
     private volatile long lastCountSessionsTime = System.currentTimeMillis();
 
-    private int countSessionPeriod = 1000 * 60 * 5; // every 5 minutes do the sessions count
+    private long countSessionPeriod = TimeUnit.MINUTES.toMillis(5); // every 5 minutes do the sessions count
 
     /**
      * Start the session manager.
@@ -158,22 +158,22 @@ public class GigaSessionManager extends AbstractSessionManager {
     }
 
     /**
-     * How often an actual update of the session will be perfomed to the Space. Set in <b>seconds</b>
+     * How often an actual update of the session will be performed to the Space. Set in <b>seconds</b>
      * and defaults to <code>60</code> seconds.
      */
     public int getSavePeriod() {
-        return _savePeriodMs / 1000;
+        return (int)TimeUnit.MILLISECONDS.toSeconds( _savePeriodMs);
     }
 
     /**
-     * How often an actual update of the session will be perfomed to the Space. Set in <b>seconds</b>
+     * How often an actual update of the session will be performed to the Space. Set in <b>seconds</b>
      * and defaults to <code>60</code> seconds.
      */
     public void setSavePeriod(int seconds) {
         if (seconds <= 0)
             seconds = 60;
 
-        _savePeriodMs = seconds * 1000;
+        _savePeriodMs = TimeUnit.SECONDS.toMillis(seconds);
     }
 
 
@@ -182,7 +182,7 @@ public class GigaSessionManager extends AbstractSessionManager {
      * <b>seconds</b> and defaults to <code>60 * 5</code> seconds (5 minutes).
      */
     public int getScavengePeriod() {
-        return _scavengePeriodMs / 1000;
+        return (int)TimeUnit.MILLISECONDS.toSeconds(_scavengePeriodMs);
     }
 
     /**
@@ -194,11 +194,11 @@ public class GigaSessionManager extends AbstractSessionManager {
             seconds = 60;
         }
 
-        _scavengePeriodMs = seconds * 1000;
+        _scavengePeriodMs = TimeUnit.SECONDS.toMillis(seconds);
     }
 
     public void setCountSessionPeriod(int seconds) {
-        this.countSessionPeriod = seconds * 1000;
+        this.countSessionPeriod = TimeUnit.SECONDS.toMillis(seconds);
     }
 
     public void setSpace(IJSpace space) {
@@ -238,7 +238,7 @@ public class GigaSessionManager extends AbstractSessionManager {
      * in <b>seconds</b> and defaults to FOREVER.
      */
     public void setLease(long lease) {
-        this.lease = lease * 1000;
+        this.lease = TimeUnit.SECONDS.toMillis(lease);
     }
 
     /**
@@ -254,8 +254,7 @@ public class GigaSessionManager extends AbstractSessionManager {
         try {
             SessionData data = fetch(idInCluster);
 
-            Session session = null;
-
+            Session session;
             if (data == null) {
                 //No session in cloud with matching id and context path.
                 session = null;
@@ -469,8 +468,8 @@ public class GigaSessionManager extends AbstractSessionManager {
         protected Session(AbstractSessionManager manager, HttpServletRequest request) {
             super(manager, request);
             _data = new SessionData(getClusterId());
-            _data.setMaxIdleMs(_dftMaxIdleSecs * 1000L);
-            _data.setExpiryTime(getMaxInactiveIntervalMs());
+            _data.setMaxIdleMs(TimeUnit.SECONDS.toMillis(_dftMaxIdleSecs));
+            _data.setExpiryTime(getMaxInactiveInterval() < 0 ? Long.MAX_VALUE : (System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(getMaxInactiveInterval())));
             _data.setCookieSet(0);
 
             Enumeration<String> attributeNames = getAttributeNames();
@@ -533,7 +532,7 @@ public class GigaSessionManager extends AbstractSessionManager {
             boolean access = super.access(time);
             _data.setLastAccessed(_data.getAccessed());
             _data.setAccessed(time);
-            _data.setExpiryTime(getMaxInactiveIntervalMs());
+            _data.setExpiryTime(getMaxInactiveInterval() < 0 ? Long.MAX_VALUE : (time + TimeUnit.SECONDS.toMillis(getMaxInactiveInterval())));
             return access;
         }
 
@@ -543,14 +542,7 @@ public class GigaSessionManager extends AbstractSessionManager {
         @Override
         public void setMaxInactiveInterval(int seconds) {
             super.setMaxInactiveInterval(seconds);
-            _data.setExpiryTime(getMaxInactiveIntervalMs());
-        }
-        
-        /**
-         * @return getMaxInactiveInterval() in ms
-         */
-        private long getMaxInactiveIntervalMs(){
-            return getMaxInactiveInterval() < 0 ? Long.MAX_VALUE : (System.currentTimeMillis() + getMaxInactiveInterval()*1000L);
+            _data.setExpiryTime(getMaxInactiveInterval() < 0 ? Long.MAX_VALUE : (System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(getMaxInactiveInterval())));
         }
 
         /**
