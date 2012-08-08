@@ -33,7 +33,7 @@ import net.jini.discovery.DiscoveryListener;
 import net.jini.lookup.LookupCache;
 import net.jini.lookup.ServiceDiscoveryEvent;
 import net.jini.lookup.ServiceDiscoveryListener;
-import net.jini.lookup.ServiceDiscoveryManager;
+import net.jini.lookup.BackwardsServiceDiscoveryManager;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -96,7 +96,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
 
     private volatile boolean started = false;
 
-    private ServiceDiscoveryManager sdm;
+    private BackwardsServiceDiscoveryManager sdm;
     private LookupCache serviceCache;
     private LookupCache spaceCache;
 

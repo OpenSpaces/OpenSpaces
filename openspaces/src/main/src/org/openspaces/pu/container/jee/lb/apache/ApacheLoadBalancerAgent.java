@@ -27,7 +27,7 @@ import net.jini.discovery.LookupDiscoveryManager;
 import net.jini.lookup.LookupCache;
 import net.jini.lookup.ServiceDiscoveryEvent;
 import net.jini.lookup.ServiceDiscoveryListener;
-import net.jini.lookup.ServiceDiscoveryManager;
+import net.jini.lookup.BackwardsServiceDiscoveryManager;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 import org.jini.rio.boot.BootUtil;
@@ -72,7 +72,7 @@ public class ApacheLoadBalancerAgent implements DiscoveryListener, ServiceDiscov
     private String restartCommand;
 
     private LookupDiscoveryManager ldm;
-    private ServiceDiscoveryManager sdm;
+    private BackwardsServiceDiscoveryManager sdm;
     private LookupCache cache;
 
     private Map<String, LoadBalancerInfo> loadBalancersInfoMap = new ConcurrentHashMap<String, LoadBalancerInfo>();
@@ -201,7 +201,7 @@ public class ApacheLoadBalancerAgent implements DiscoveryListener, ServiceDiscov
 
         ldm = new LookupDiscoveryManager(getGroups(), BootUtil.toLookupLocators(getLocators()), this, ServiceConfigLoader.getConfiguration());
 
-        sdm = new ServiceDiscoveryManager(ldm, null, ServiceConfigLoader.getConfiguration());
+        sdm = new BackwardsServiceDiscoveryManager(ldm, null, ServiceConfigLoader.getConfiguration());
         ServiceTemplate template = new ServiceTemplate(null, new Class[]{PUServiceBean.class}, null);
         cache = sdm.createLookupCache(template, null, this);
 

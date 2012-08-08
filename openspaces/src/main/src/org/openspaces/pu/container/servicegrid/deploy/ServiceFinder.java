@@ -23,7 +23,7 @@ import net.jini.core.lookup.ServiceItem;
 import net.jini.core.lookup.ServiceTemplate;
 import net.jini.discovery.LookupDiscoveryManager;
 import net.jini.lease.LeaseRenewalManager;
-import net.jini.lookup.ServiceDiscoveryManager;
+import net.jini.lookup.BackwardsServiceDiscoveryManager;
 import net.jini.lookup.entry.Name;
 
 /**
@@ -35,10 +35,10 @@ public class ServiceFinder {
 
     public static ServiceItem[] find(String name, Class type, long wait, String[] groups, LookupLocator[] locators) {
         ServiceItem[] result;
-        ServiceDiscoveryManager sdm = null;
+        BackwardsServiceDiscoveryManager sdm = null;
 
         try {
-            sdm = new ServiceDiscoveryManager(
+            sdm = new BackwardsServiceDiscoveryManager(
                     new LookupDiscoveryManager(groups, locators, null, ServiceConfigLoader.getConfiguration()),
                     new LeaseRenewalManager(),
                     ServiceConfigLoader.getConfiguration()
