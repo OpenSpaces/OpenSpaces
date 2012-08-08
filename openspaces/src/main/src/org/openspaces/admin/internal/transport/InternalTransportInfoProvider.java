@@ -17,7 +17,7 @@
  ******************************************************************************/
 package org.openspaces.admin.internal.transport;
 
-import com.gigaspaces.lrmi.LRMIServiceMonitoringDetails;
+import com.gigaspaces.lrmi.LRMIMonitoringDetails;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOStatistics;
 
@@ -36,6 +36,6 @@ public interface InternalTransportInfoProvider extends InternalTransportAware {
     
     void disableLRMIMonitoring() throws RemoteException;
 
-    LRMIServiceMonitoringDetails[] fetchLRMIServicesMonitoringDetails() throws RemoteException;
+    LRMIMonitoringDetails fetchLRMIMonitoringDetails() throws RemoteException;
     
 }

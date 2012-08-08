@@ -66,7 +66,7 @@ import com.gigaspaces.internal.lookup.SpaceUrlUtils;
 import com.gigaspaces.internal.os.OSDetails;
 import com.gigaspaces.internal.os.OSStatistics;
 import com.gigaspaces.internal.version.PlatformLogicalVersion;
-import com.gigaspaces.lrmi.LRMIServiceMonitoringDetails;
+import com.gigaspaces.lrmi.LRMIMonitoringDetails;
 import com.gigaspaces.lrmi.LRMIUtilities;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOStatistics;
@@ -535,11 +535,11 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
     }
     
     @Override
-    public LRMIServiceMonitoringDetails[] fetchLRMIServicesMonitoringDetails() throws RemoteException {
+    public LRMIMonitoringDetails fetchLRMIMonitoringDetails() throws RemoteException {
         if (spaceAdmin != null) {
-            return spaceAdmin.fetchLRMIServicesMonitoringDetails();
+            return spaceAdmin.fetchLRMIMonitoringDetails();
         }
-        return puService.fetchLRMIServicesMonitoringDetails();
+        return puService.fetchLRMIMonitoringDetails();
     }
 
     public long getCurrentTimeInMillis() throws RemoteException {

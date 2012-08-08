@@ -70,7 +70,7 @@ import com.gigaspaces.log.CompoundLogEntries;
 import com.gigaspaces.log.LogEntries;
 import com.gigaspaces.log.LogEntryMatcher;
 import com.gigaspaces.log.LogProcessType;
-import com.gigaspaces.lrmi.LRMIServiceMonitoringDetails;
+import com.gigaspaces.lrmi.LRMIMonitoringDetails;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOStatistics;
 import com.gigaspaces.security.SecurityException;
@@ -489,8 +489,8 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
     }
     
     @Override
-    public LRMIServiceMonitoringDetails[] fetchLRMIServicesMonitoringDetails() throws RemoteException {
-        return gsa.fetchLRMIServicesMonitoringDetails();
+    public LRMIMonitoringDetails fetchLRMIMonitoringDetails() throws RemoteException {
+        return gsa.fetchLRMIMonitoringDetails();
     }
 
     public long getCurrentTimeInMillis() throws RemoteException {

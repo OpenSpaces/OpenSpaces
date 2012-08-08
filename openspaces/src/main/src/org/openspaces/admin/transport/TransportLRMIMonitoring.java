@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.openspaces.admin.transport;
 
-import com.gigaspaces.lrmi.LRMIServiceMonitoringDetails;
+import com.gigaspaces.lrmi.LRMIMonitoringDetails;
 
 /**
  * Provide low level monitoring capabilities of the transport layer
@@ -27,7 +27,7 @@ public interface TransportLRMIMonitoring {
 	/**
      * Enables lrmi monitoring (gigaspaces internal remoting layer), this will cause the target transport to start tracking lrmi
      * activity which can later be viewed by calling.
-     * {@link #fetchServicesMonitoringDetails()}
+     * {@link #fetchMonitoringDetails()}
      */
     void enableMonitoring();
     
@@ -38,10 +38,10 @@ public interface TransportLRMIMonitoring {
     void disableMonitoring();
     
     /**
-     * Return lrmi (gigaspaces internal remoting layer) services monitoring details. This will only work if 
+     * Return lrmi (gigaspaces internal remoting layer) monitoring details. This will only work if 
      * lrmi monitoring was previously enabled, either by admin API, Jmx or system property. This will include monitoring
-     * details of incoming invocation on hosted service within the targeted transport (Jvm).
+     * details of inbound invocation on hosted service and outbound invocation via proxies that exists within the targeted transport (Jvm).
      * {@link #enableMonitoring()}
      */
-    LRMIServiceMonitoringDetails[] fetchServicesMonitoringDetails();
+    LRMIMonitoringDetails fetchMonitoringDetails();
 }

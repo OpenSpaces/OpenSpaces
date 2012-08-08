@@ -45,7 +45,7 @@ import com.gigaspaces.internal.os.OSStatistics;
 import com.gigaspaces.log.LogEntries;
 import com.gigaspaces.log.LogEntryMatcher;
 import com.gigaspaces.log.LogProcessType;
-import com.gigaspaces.lrmi.LRMIServiceMonitoringDetails;
+import com.gigaspaces.lrmi.LRMIMonitoringDetails;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOStatistics;
 
@@ -132,8 +132,8 @@ public class DefaultElasticServiceManager extends AbstractAgentGridComponent imp
     }
     
     @Override
-    public LRMIServiceMonitoringDetails[] fetchLRMIServicesMonitoringDetails() throws RemoteException {
-        return esm.fetchLRMIServicesMonitoringDetails();
+    public LRMIMonitoringDetails fetchLRMIMonitoringDetails() throws RemoteException {
+        return esm.fetchLRMIMonitoringDetails();
     }
     
     public long getCurrentTimeInMillis() throws RemoteException {

@@ -17,8 +17,10 @@
  ******************************************************************************/
 package org.openspaces.admin.internal.transport;
 
-import com.gigaspaces.lrmi.LRMIServiceMonitoringDetails;
-import com.gigaspaces.lrmi.nio.info.NIODetails;
+import java.rmi.RemoteException;
+import java.util.Set;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.StatisticsMonitor;
@@ -34,10 +36,12 @@ import org.openspaces.admin.transport.events.TransportStatisticsChangedEventMana
 import org.openspaces.admin.vm.VirtualMachine;
 import org.openspaces.core.util.ConcurrentHashSet;
 
-import java.rmi.RemoteException;
-import java.util.Set;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
+import com.gigaspaces.lrmi.LRMIInboundMonitoringDetails;
+import com.gigaspaces.lrmi.LRMIMonitoringDetails;
+import com.gigaspaces.lrmi.LRMIOutboundMonitoringDetails;
+import com.gigaspaces.lrmi.LRMIProxyMonitoringDetails;
+import com.gigaspaces.lrmi.LRMIServiceMonitoringDetails;
+import com.gigaspaces.lrmi.nio.info.NIODetails;
 
 /**
  * @author kimchy
@@ -264,19 +268,40 @@ public class DefaultTransport implements InternalTransport, TransportLRMIMonitor
      * @see org.openspaces.admin.transport.TransportMonitoring#fetchMonitoringDetails()
      */
     @Override
-    public synchronized LRMIServiceMonitoringDetails[] fetchServicesMonitoringDetails() {
-        RemoteException lastException = null;
+    public synchronized LRMIMonitoringDetails fetchMonitoringDetails() {
+        Exception lastException = null;
         for (InternalTransportInfoProvider transportProvider : transportInfoProviders) {
             try {
-                return transportProvider.fetchLRMIServicesMonitoringDetails();
-            } catch (RemoteException e) {
+                return transportProvider.fetchLRMIMonitoringDetails();
+            } catch (Exception e) {
                 //Failure, try next one
                 lastException = e;
             }
         }
         if (lastException != null)
             throw new AdminException(lastException.getMessage(), lastException);
-        return new LRMIServiceMonitoringDetails[0];
+        //If there are no available transports, create empty monitoring.
+        return new LRMIMonitoringDetails() {
+            @Override
+            public LRMIOutboundMonitoringDetails getOutboundMonitoringDetails() {
+                return new LRMIOutboundMonitoringDetails() {
+                    @Override
+                    public LRMIProxyMonitoringDetails[] getProxiesMonitoringDetails() {
+                        return new LRMIProxyMonitoringDetails[0];
+                    }
+                };
+            }
+            
+            @Override
+            public LRMIInboundMonitoringDetails getInboundMonitoringDetails() {
+                return new LRMIInboundMonitoringDetails() {
+                    @Override
+                    public LRMIServiceMonitoringDetails[] getServicesMonitoringDetails() {
+                        return new LRMIServiceMonitoringDetails[0];
+                    }
+                };
+            }
+        };
     }
 
 }
