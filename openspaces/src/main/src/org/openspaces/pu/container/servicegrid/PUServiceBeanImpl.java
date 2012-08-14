@@ -25,6 +25,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.rmi.MarshalledObject;
 import java.rmi.RemoteException;
@@ -41,6 +43,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.jar.Manifest;
 
 import net.jini.core.lookup.ServiceID;
 
@@ -69,6 +72,8 @@ import org.openspaces.core.properties.BeanLevelPropertiesAware;
 import org.openspaces.core.space.SpaceServiceDetails;
 import org.openspaces.core.space.SpaceType;
 import org.openspaces.core.util.ClassLoaderUtils;
+import org.openspaces.core.util.PlaceholderReplacer;
+import org.openspaces.core.util.PlaceholderReplacer.PlaceholderResolutionException;
 import org.openspaces.interop.DotnetProcessingUnitContainerProvider;
 import org.openspaces.pu.container.CannotCreateContainerException;
 import org.openspaces.pu.container.ClassLoaderAwareProcessingUnitContainerProvider;
@@ -491,6 +496,8 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             sharedLibEnabled = System.getProperty("com.gs.pu.shared-lib.enable", "false").equals("true");
         }
 
+        final boolean disableManifestClassPathJars = Boolean.getBoolean("com.gs.pu.manifest.classpath.disable");
+        
         CommonClassLoader commonClassLoader = CommonClassLoader.getInstance();
         // handles class loader libraries
         if (downloadPU) {
@@ -502,6 +509,23 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                     libUrls.add(libFile.toURI().toURL());
                 }
             }
+            
+            if (!disableManifestClassPathJars) {
+                File manifestFile = new File(deployPath, "META-INF/MANIFEST.MF");
+                
+                if (manifestFile.isFile()) {
+                    try {
+                        InputStream manifestStream = new FileInputStream(manifestFile);
+                        addManifestClassPathJars(puName, libUrls, manifestStream);
+                    } catch (IOException e) {
+                        if (logger.isWarnEnabled()) {
+                            logger.warn(failedReadingManifest(puName), e);
+                        }
+                    }
+                }
+                
+            }
+            
             // add to common class loader
             List<URL> sharedlibUrls = new ArrayList<URL>();
             File sharedlibDir = new File(deployPath, "shared-lib");
@@ -562,6 +586,13 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                 libUrls.add(new URL(codeserver + puPath + "/lib/" + libFiles[i].getName()));
             }
 
+            if (!disableManifestClassPathJars) {
+                InputStream manifestStream = readManifestFromCodeServer(puName, puPath, codeserver, workLocation);
+                if (manifestStream != null) {
+                    addManifestClassPathJars(puName, libUrls, manifestStream);
+                }
+            }
+            
             // add to common class loader
             WebsterFile sharedlibDir = new WebsterFile(new URL(codeserver + puPath + "/shared-lib"));
             File[] sharedlibFiles = sharedlibDir.listFiles();
@@ -682,6 +713,107 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                 executorService.scheduleAtFixedRate(watchTask, watchTask.getMonitor().getPeriod(), watchTask.getMonitor().getPeriod(), TimeUnit.MILLISECONDS);
             }
         }
+    }
+
+    private InputStream readManifestFromCodeServer(String puName, String puPath, String codeserver, File workLocation) {
+        try {
+            URL manifestURL = new URL(codeserver + puPath + "/META-INF/MANIFEST.MF");
+            return manifestURL.openStream();
+        } catch (IOException e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug(failedReadingManifest(puName), e);
+            }
+            return null;
+        }
+    }
+
+    private void addManifestClassPathJars(String puName, List<URL> libUrls, InputStream manifestStream) {
+        try {
+            
+            Manifest manifest = new Manifest(manifestStream);
+            
+            String manifestClasspathLibs = manifest.getMainAttributes().getValue("Class-Path");
+            if (manifestClasspathLibs != null) {
+                String[] manifestLibFiles = StringUtils.tokenizeToStringArray(manifestClasspathLibs, " ");
+                for (String fileName : manifestLibFiles) {
+
+                    try {
+                        fileName = PlaceholderReplacer.replacePlaceholders(System.getenv(), fileName);
+                    } catch (PlaceholderResolutionException e) {
+                        if (logger.isWarnEnabled()) {
+                            logger.warn("Could not resolve manifest classpath entry: " + fileName + 
+                                    " of processing unit " + puName, e);
+                        }
+                        continue;
+                    }
+                    
+                    URL url = null;
+                    try {
+                        url = new URL(fileName);
+                        if (!"file".equals(url.getProtocol())) {
+                            if (logger.isWarnEnabled()) {
+                                logger.warn("Only file protocol is supported in urls, found : '" + fileName +
+                                        "' in manifest classpath of processing unit " + puName);
+                            }
+                            continue;
+                        }
+                    } catch (MalformedURLException e) {
+                        // moving on, checking if file path has been provided
+                    }
+                    
+                    File file;
+                    if (url != null) {
+                        try {
+                            file = new File(url.toURI());
+                        } catch (URISyntaxException e) {
+                            if (logger.isWarnEnabled()) {
+                                logger.warn("Invalid url: " + url + " provided in pu " +
+                                        puName + " manifest classpath, ignoring entry", e);
+                            }
+                            continue;
+                        }
+                    } else {
+                        file = new File(fileName);
+                    }
+                    
+                    if (!file.isAbsolute()) {
+                        file = new File(Environment.getHomeDirectory(), fileName);
+                    }
+                    
+                    if (!file.isFile()) {
+                        if (logger.isWarnEnabled()) {
+                            logger.warn("Did not find manifest classpath entry: " + file.getAbsolutePath() + 
+                                    " for processing unit: " + puName + ", ignoring entry.");
+                        }
+                        continue;
+                    }
+                    
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Adding " + file.getAbsolutePath() + 
+                                " read from MANIFEST.MF to processing unit: " + puName + " classpath");
+                    }
+                    
+                    libUrls.add(file.toURI().toURL());
+                }
+            }
+        } catch (IOException e) {
+            if (logger.isWarnEnabled()) {
+                logger.warn(failedReadingManifest(puName), e);
+            }
+        } finally {
+            try {
+                manifestStream.close();
+            } catch (IOException e) {
+                if (logger.isWarnEnabled()) {
+                    logger.warn("Failed closing manifest input stream.", e);
+                }
+            }
+        }
+    }
+    
+    private static String failedReadingManifest(String puName) {
+        return "Could not read MANIFEST.MF in processing unit: , if you have no Class-Path defined in a MANIFEST.MF" +
+               ", you can safely ignore this message." + puName;
     }
     
     private static String readFile(String filePath) throws IOException {
