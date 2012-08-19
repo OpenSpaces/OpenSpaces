@@ -35,8 +35,6 @@ import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig;
-import org.openspaces.admin.zone.config.ExactZonesConfig;
-import org.openspaces.admin.zone.config.ExactZonesConfigurer;
 import org.openspaces.core.internal.commons.math.ConvergenceException;
 import org.openspaces.core.internal.commons.math.fraction.Fraction;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
@@ -208,13 +206,10 @@ public class MachinesSlaUtils {
      * @return true if specified agent matches the machineProvisioningConfig zone isolation criteria
      */
     private static boolean zoneFilter(GridServiceAgent agent, ElasticMachineProvisioningConfig machineProvisioningConfig) {
-        final ExactZonesConfig agentZones = new ExactZonesConfigurer().addZones(agent.getZones().keySet()).create();
-        boolean match = false;
-        if (agentZones.getZones().isEmpty() && !machineProvisioningConfig.isGridServiceAgentZoneMandatory()) {
-            match = true;
-        }
-        else if (!agentZones.getZones().isEmpty()) {
-            match = agentZones.stasfies(machineProvisioningConfig.getGridServiceAgentZones());
+        boolean match = agent.getExactZones().stasfies(machineProvisioningConfig.getGridServiceAgentZones());
+        if (agent.getExactZones().getZones().isEmpty() && 
+            machineProvisioningConfig.isGridServiceAgentZoneMandatory()) {
+            match = false;
         }
         return match;
     }

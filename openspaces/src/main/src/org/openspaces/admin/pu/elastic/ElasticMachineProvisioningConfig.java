@@ -82,9 +82,13 @@ public interface ElasticMachineProvisioningConfig extends BeanConfig {
     /**
      * By default is false, which means that Grid Service Agents without a zone can be started and discovered by this machine provisioning.
      * When true, each started or discovered agent much have one or more of the zones described in {@link #getGridServiceAgentZones()}
+     *
+     * This flag is deprecated since 9.1.0 since the zones behavior of agents and containers are the same. Meaning
+     * an elastic pu that has a zone defined will not deploy on a GSA without zone anyhow.
      * 
      * @since 8.0.1
      */
+    @Deprecated
     boolean isGridServiceAgentZoneMandatory();
 
 }

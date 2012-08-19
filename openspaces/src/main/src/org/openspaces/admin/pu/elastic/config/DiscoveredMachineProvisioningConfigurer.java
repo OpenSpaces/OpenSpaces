@@ -61,6 +61,7 @@ public class DiscoveredMachineProvisioningConfigurer {
     /**
      * @see DiscoveredMachineProvisioningConfig#setGridServiceAgentZoneMandatory(boolean)
      */
+    @Deprecated
     public DiscoveredMachineProvisioningConfigurer removeGridServiceAgentsWithoutZone() {
         config.setGridServiceAgentZoneMandatory(true);
         return this;
