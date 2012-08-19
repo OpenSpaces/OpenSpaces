@@ -58,33 +58,33 @@ public class ProcessingUnitStatisticsId {
     }
     
     public TimeWindowStatisticsConfig getTimeWindowStatistics() {
-        return (TimeWindowStatisticsConfig) properties.getMapWrapperObject(TIMEWINDOW_STATISTICS_KEY, null);
+        return (TimeWindowStatisticsConfig) properties.getConfig(TIMEWINDOW_STATISTICS_KEY, null);
     }
     
     /**
      * @see ProcessingUnitStatisticsIdConfigurer#timeWindowStatistics(TimeWindowStatisticsConfig)
      */
     public void setTimeWindowStatistics(TimeWindowStatisticsConfig timeWindowStatistics) {
-        properties.putMapWrapperObject(TIMEWINDOW_STATISTICS_KEY, timeWindowStatistics.getProperties(), timeWindowStatistics.getClass());
+        properties.putConfig(TIMEWINDOW_STATISTICS_KEY, timeWindowStatistics);
     }
 
     public InstancesStatisticsConfig getInstancesStatistics() {
-        return (InstancesStatisticsConfig) properties.getMapWrapperObject(INSTANCES_STATISTICS_KEY, null);
+        return (InstancesStatisticsConfig) properties.getConfig(INSTANCES_STATISTICS_KEY, null);
     }
     
     /**
      * @see ProcessingUnitStatisticsIdConfigurer#instancesStatistics(InstancesStatisticsConfig)
      */
     public void setInstancesStatistics(InstancesStatisticsConfig instancesStatistics) {
-        properties.putMapWrapperObject(INSTANCES_STATISTICS_KEY, instancesStatistics.getProperties(), instancesStatistics.getClass());
+        properties.putConfig(INSTANCES_STATISTICS_KEY, instancesStatistics);
     }
     
     public ZonesConfig getZoneStatistics() {
-        return (ZonesConfig) properties.getMapWrapperObject(ZONE_STATISTICS_KEY, null);
+        return (ZonesConfig) properties.getConfig(ZONE_STATISTICS_KEY, null);
     }
     
     public void setZoneStatistics(ZonesConfig zoneStatistics) {
-        properties.putMapWrapperObject(ZONE_STATISTICS_KEY, zoneStatistics.getProperties(), zoneStatistics.getClass());
+        properties.putConfig(ZONE_STATISTICS_KEY, zoneStatistics);
     }
     
 
