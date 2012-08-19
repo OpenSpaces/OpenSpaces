@@ -145,8 +145,6 @@ public class TimeWindowStatisticsCalculator implements InternalProcessingUnitSta
             throw new IllegalArgumentException("processingUnitStatistics cannot be null");
         }
 
-        ProcessingUnitStatistics statistics = processingUnitStatistics;
-
         final Map<ProcessingUnitStatisticsId, StatisticsObjectList> temporaryValues = new HashMap<ProcessingUnitStatisticsId, StatisticsObjectList>();
         for (final ProcessingUnitStatisticsId statisticsId : newStatisticsIds) {
             // initialize
@@ -155,12 +153,11 @@ public class TimeWindowStatisticsCalculator implements InternalProcessingUnitSta
 
         final Map<ProcessingUnitStatisticsId, StatisticsObjectList> returnValues = new HashMap<ProcessingUnitStatisticsId, StatisticsObjectList>();
 
-        long timeDelta = 0;
-        while (statistics != null) {
+        for(ProcessingUnitStatistics statistics = processingUnitStatistics; 
+            statistics != null; 
+            statistics=statistics.getPrevious()) {
             
-            // Itai : i don't understand this. processingUnitStatistics and statistics are the same reference. (line 148)
-            //        so the timeDelta is always zero. jump to 189 please
-            timeDelta = processingUnitStatistics.getAdminTimestamp() - statistics.getAdminTimestamp();
+            long timeDelta = processingUnitStatistics.getAdminTimestamp() - statistics.getAdminTimestamp();
 
             final Map<ProcessingUnitStatisticsId, Object> values = statistics.getStatistics();
             for (final ProcessingUnitStatisticsId statisticsId : newStatisticsIds) {
@@ -186,8 +183,6 @@ public class TimeWindowStatisticsCalculator implements InternalProcessingUnitSta
                         long timeStamp = statistics.getAdminTimestamp();
                         timeline.add(value, timeStamp);
                         
-                        // so this condition never gets satisfied...
-                        // what am i missing?
                         if (timeDelta >= minTimeWindowMilliSeconds) {
                             // valid return value
                             returnValues.put(statisticsId, timeline);
@@ -200,7 +195,6 @@ public class TimeWindowStatisticsCalculator implements InternalProcessingUnitSta
                     }
                 }
             }
-            statistics = statistics.getPrevious();
         }
         return returnValues;
     }
