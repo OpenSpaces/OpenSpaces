@@ -173,7 +173,7 @@ abstract class AbstractCapacityRequirementsPerKey {
             return new CapacityRequirements();
         }
     }
-    
+
     private void addAllInternal(AbstractCapacityRequirementsPerKey clusterCapacityRequirements) {
         for (String key : clusterCapacityRequirements.capacityPerKey.keySet()) {
             CapacityRequirements capacity = clusterCapacityRequirements.capacityPerKey.get(key);

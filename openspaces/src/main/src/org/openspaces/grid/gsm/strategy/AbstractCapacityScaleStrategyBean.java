@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.openspaces.admin.bean.BeanConfigurationException;
+import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
 import org.openspaces.admin.pu.ProcessingUnit;
@@ -246,12 +247,19 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
         
         for (CapacityMachinesSlaPolicy sla : getMachinesSlas(getAllZones())) {
             
+            ZonesConfig zones = sla.getGridServiceAgentZones();
             try {
                 enforceMachinesSla(sla);
+                if (super.getMachineProvisioning().getConfig().isGridServiceAgentZonesAffinity()) {
+                
+                    CapacityRequirementsPerAgent allocatedCapacity = 
+                            machinesEndpoint.getAllocatedCapacity(sla);
+                    replacePlannedCapacityForZones(zones, allocatedCapacity);
+                }
             }
             catch (GridServiceAgentSlaEnforcementPendingContainerDeallocationException e) {
                 // fall through to containers sla enforcement since need to scale-in containers
-                pendingAgentsExceptions.addReason(sla.getGridServiceAgentZones(),e);
+                pendingAgentsExceptions.addReason(zones,e);
             }
             catch (GridServiceAgentSlaEnforcementInProgressException e) {
                 if (getSchemaConfig().isPartitionedSync2BackupSchema()) {
@@ -260,7 +268,7 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
                     throw e;
                 }
                 // handle next zone
-                pendingAgentsExceptions.addReason(sla.getGridServiceAgentZones(),e);
+                pendingAgentsExceptions.addReason(zones,e);
             }
             catch (MachinesSlaEnforcementInProgressException e) {
                 if (getSchemaConfig().isPartitionedSync2BackupSchema()) {
@@ -269,7 +277,7 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
                     throw e;
                 }
                 // handle next zone
-                pendingMachinesExceptions.addReason(sla.getGridServiceAgentZones(),e);
+                pendingMachinesExceptions.addReason(zones,e);
             }
             CapacityRequirementsPerAgent allocatedCapacity = machinesEndpoint.getAllocatedCapacity(sla);
             totalAllocatedCapacity = totalAllocatedCapacity.add(allocatedCapacity);
@@ -309,6 +317,27 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
         }
     }
     
+    /**
+     * Replaces the planned capacity of the specified zones, with the specified new planned capacity
+     * which could be with other zones
+     */
+    private void replacePlannedCapacityForZones(ZonesConfig zonesToRemove, CapacityRequirementsPerAgent capacityToAdd) {
+        
+        CapacityRequirementsPerZones newCapacityPerZones = 
+                capacityPerZones.toCapacityRequirementsPerZone()
+                .subtractZone(zonesToRemove);
+        
+        for (String agentUid : capacityToAdd.getAgentUids()) {
+            
+            GridServiceAgent agent = getAdmin().getGridServiceAgents().getAgentByUID(agentUid);
+            CapacityRequirements agentCapacity = capacityToAdd.getAgentCapacity(agentUid);
+            ExactZonesConfig zones = agent.getExactZones();
+            newCapacityPerZones = newCapacityPerZones.add(zones, agentCapacity);
+            
+        }
+        capacityPerZones= new CapacityRequirementsPerZonesConfig(newCapacityPerZones);
+    }
+
     private Set<ZonesConfig> getAllZones()
             throws MachinesSlaEnforcementInProgressException {
         final Set<ZonesConfig> allZones = new HashSet<ZonesConfig>();
