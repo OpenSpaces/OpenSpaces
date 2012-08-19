@@ -15,10 +15,33 @@
  *******************************************************************************/
 package org.openspaces.grid.gsm.strategy;
 
+import org.openspaces.admin.pu.elastic.config.ManualCapacityPerZonesScaleConfig;
+import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementInProgressException;
+
 /**
  * @author Itai Frenkel
- *
+ * @since 9.1.0
  */
-public class ManualCapacityPerZonesScaleStrategyBean {
+public class ManualCapacityPerZonesScaleStrategyBean extends AbstractCapacityScaleStrategyBean { 
 
+    @Override
+    public void afterPropertiesSet() {
+        
+        super.afterPropertiesSet();
+        
+        ManualCapacityPerZonesScaleConfig manualCapacityPerZonesScaleConfig = getConfig();
+        
+        super.setCapacityRequirementConfig(manualCapacityPerZonesScaleConfig.getCapacityRequirementsPerZonesConfig());
+        super.setScaleStrategyConfig(manualCapacityPerZonesScaleConfig);
+        
+    }
+    
+    @Override
+    public void enforceSla() throws SlaEnforcementInProgressException {
+        super.enforceCapacityRequirement();
+    }
+    
+    public ManualCapacityPerZonesScaleConfig getConfig() {
+        return new ManualCapacityPerZonesScaleConfig(super.getProperties());
+    }
 }

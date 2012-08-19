@@ -138,7 +138,6 @@ public class EagerScaleStrategyBean extends AbstractScaleStrategyBean
         sla.setMachineIsolation(getIsolation());
         sla.setMachineProvisioning(super.getMachineProvisioning());
         sla.setDiscoveredMachinesCache(getDiscoveredMachinesCache());
-        
         try {
             machinesEndpoint.enforceSla(sla);
             

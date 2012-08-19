@@ -37,6 +37,7 @@ public class ManualCapacityScaleStrategyBean extends AbstractCapacityScaleStrate
         ManualCapacityScaleConfig manualCapacityScaleConfig = getConfig();
         
         setCapacityRequirementConfig(manualCapacityScaleConfig);
+        
         setScaleStrategyConfig(manualCapacityScaleConfig);
         
     }

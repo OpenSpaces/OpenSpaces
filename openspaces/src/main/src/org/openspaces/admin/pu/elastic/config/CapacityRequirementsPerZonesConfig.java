@@ -33,24 +33,38 @@ import com.gigaspaces.internal.utils.StringUtils;
  */
 public class CapacityRequirementsPerZonesConfig {
 
+    private static final String[] ZONES_DONT_CARE = new String[0];
     private final StringProperties properties;
     private final String keyPrefix;
+    
+    public CapacityRequirementsPerZonesConfig(CapacityRequirementsPerZones capacityRequirementsPerZones) {
+        this("",capacityRequirementsPerZones);
+    }
     
     public CapacityRequirementsPerZonesConfig(String keyPrefix, CapacityRequirementsPerZones capacityRequirementsPerZones) {
         this.keyPrefix = keyPrefix;
         this.properties = fromCapacityRequirementsPerZone(keyPrefix, capacityRequirementsPerZones);
     }
 
+    public CapacityRequirementsPerZonesConfig() {
+        this("",new HashMap<String,String>());
+    }
+    
     public CapacityRequirementsPerZonesConfig(String keyPrefix, Map<String, String> properties) {
         this.properties = new StringProperties(properties);
         this.keyPrefix = keyPrefix;
+    }
+
+    public CapacityRequirementsPerZonesConfig(ScaleStrategyCapacityRequirementConfig capacityRequirementsConfig) {
+        this();
+        addCapacity(ZONES_DONT_CARE, capacityRequirementsConfig);
     }
 
     public Map<String,String> getProperties() {
         return this.properties.getProperties();
     }
 
-    public void addCapacity(String[] zones, CapacityRequirementsConfig capacity) {
+    public void addCapacity(String[] zones, ScaleStrategyCapacityRequirementConfig capacity) {
 
         CapacityRequirementsPerZones newCapacityPerZone = 
                 toCapacityRequirementsPerZone(keyPrefix, properties)
@@ -62,6 +76,11 @@ public class CapacityRequirementsPerZonesConfig {
         setCapacityProperties(capacityProperties);
     }
 
+
+    public CapacityRequirementsPerZones toCapacityRequirementsPerZone() {
+        return toCapacityRequirementsPerZone(keyPrefix, properties);
+    }
+    
     private void setCapacityProperties(StringProperties capacityProperties) {
         for (final String key: new HashSet<String>(properties.getProperties().keySet())) {
             if (key.startsWith(keyPrefix)) {
@@ -69,10 +88,6 @@ public class CapacityRequirementsPerZonesConfig {
             }
         }
         properties.putAll(capacityProperties.getProperties());
-    }
-
-    public CapacityRequirementsPerZones toCapacityRequirementsPerZone() {
-        return toCapacityRequirementsPerZone(keyPrefix, properties);
     }
     
     private static CapacityRequirementsPerZones toCapacityRequirementsPerZone(String keyPrefix, StringProperties properties) {
@@ -86,7 +101,10 @@ public class CapacityRequirementsPerZonesConfig {
 
     private static Map<String,Map<String, String>> groupPropertiesByZone(String keyPrefix, StringProperties properties) {
         HashMap<String, String> emptyMap = new HashMap<String,String>();
-        StringProperties filteredProperties = new StringProperties(properties.getMap(keyPrefix, emptyMap));
+        StringProperties filteredProperties = properties;
+        if (keyPrefix.length() > 0) {
+            filteredProperties = new StringProperties(properties.getMap(keyPrefix, emptyMap));
+        }
         Map<String,Map<String,String>> propertiesByZone = new HashMap<String, Map<String,String>>();
         for (String key : filteredProperties.getProperties().keySet()) {
             int zoneDelimiter = key.indexOf(".");

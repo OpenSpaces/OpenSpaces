@@ -45,7 +45,7 @@ public class ContainersSlaPolicy extends ServiceLevelAgreementPolicy {
     public boolean isUndeploying() {
         return false;
     }
-
+ 
     @Override
     public void validate() throws IllegalArgumentException {
         
@@ -64,5 +64,5 @@ public class ContainersSlaPolicy extends ServiceLevelAgreementPolicy {
         if (clusterCapacityRequirements == null) {
             throw new IllegalArgumentException("clusterCapacityRequirements cannot be null");
         }
-    }
+    }    
 }

@@ -136,6 +136,7 @@ public abstract class AbstractMachinesSlaPolicy extends ServiceLevelAgreementPol
             throw new IllegalArgumentException("Provisioned agents cannot be null");
         }
     }
+    
     public abstract boolean isStopMachineSupported();
 
     public abstract String getScaleStrategyName();

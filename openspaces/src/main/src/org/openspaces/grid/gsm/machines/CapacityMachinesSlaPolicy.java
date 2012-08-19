@@ -17,11 +17,14 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.machines;
 
+import java.util.Set;
+
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 
 public class CapacityMachinesSlaPolicy extends AbstractMachinesSlaPolicy {
  
     private CapacityRequirements capacityRequirements;
+    private Set<String> zones;
     
     public CapacityRequirements getCapacityRequirements() {
         return capacityRequirements;
@@ -40,6 +43,14 @@ public class CapacityMachinesSlaPolicy extends AbstractMachinesSlaPolicy {
         return "Manual Capacity Scale Strategy";
     }
 
+    public Set<String> getZones() {
+        return zones;
+    }
+
+    public void setZones(Set<String> zones) {
+        this.zones = zones;
+    }
+
     @Override
     public void validate() throws IllegalArgumentException {
         
@@ -47,6 +58,10 @@ public class CapacityMachinesSlaPolicy extends AbstractMachinesSlaPolicy {
         
         if (this.capacityRequirements == null) {
             throw new IllegalArgumentException ("capacityRequirements cannot be null");
+        }
+        
+        if (this.zones == null) {
+            throw new IllegalArgumentException("Zones cannot be null");
         }
     }
 

@@ -19,6 +19,7 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.openspaces.admin.internal.pu.elastic.ScaleStrategyConfigUtils;
@@ -40,8 +41,12 @@ public class ManualCapacityPerZonesScaleConfig implements ScaleStrategyConfig , 
     private CapacityRequirementsPerZonesConfig capacityPerZone;
     
     public ManualCapacityPerZonesScaleConfig() {
-        properties = new StringProperties();
-        capacityPerZone = new CapacityRequirementsPerZonesConfig(ZONE_PREFIX, properties.getProperties());
+        this(new HashMap<String,String>());
+    }
+    
+    public ManualCapacityPerZonesScaleConfig(Map<String,String> properties) {
+        this.properties = new StringProperties(properties);
+        capacityPerZone = new CapacityRequirementsPerZonesConfig(ZONE_PREFIX, properties);
     }
 
     /**
@@ -107,5 +112,9 @@ public class ManualCapacityPerZonesScaleConfig implements ScaleStrategyConfig , 
     @Override
     public void setAtMostOneContainerPerMachine(boolean atMostOneContainerPerMachine) {
         ScaleStrategyConfigUtils.setAtMostOneContainerPerMachine(properties, atMostOneContainerPerMachine);
+    }
+    
+    public CapacityRequirementsPerZonesConfig getCapacityRequirementsPerZonesConfig() {
+        return capacityPerZone;
     }
 }

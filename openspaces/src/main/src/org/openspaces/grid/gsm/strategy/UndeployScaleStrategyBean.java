@@ -17,6 +17,9 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.strategy;
 
+import java.util.Set;
+
+import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
 import org.openspaces.grid.gsm.GridServiceContainerConfigAware;
@@ -96,11 +99,13 @@ public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
         
         //proceed with container udeployment. It respects the pu instance download procedure.
         enforceContainersSla();
-        
-        enforceMachinesSla();
+        for (final GridServiceAgent gsa : getDiscoveredMachinesCache().getDiscoveredAgents()) {
+            Set<String> zones = gsa.getZones().keySet();
+            enforceMachinesSla(zones);
+        }
     }
 
-    private void enforceMachinesSla() throws WaitingForDiscoveredMachinesException, MachinesSlaEnforcementInProgressException, GridServiceAgentSlaEnforcementInProgressException {
+    private void enforceMachinesSla(Set<String> zones) throws WaitingForDiscoveredMachinesException, MachinesSlaEnforcementInProgressException, GridServiceAgentSlaEnforcementInProgressException {
         
         if (getLogger().isDebugEnabled()) {
             getLogger().debug("Undeploying machines for " + getProcessingUnit().getName());
@@ -114,7 +119,7 @@ public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
         sla.setContainerMemoryCapacityInMB(containersConfig.getMaximumMemoryCapacityInMB());
         sla.setMachineIsolation(getIsolation());
         sla.setDiscoveredMachinesCache(getDiscoveredMachinesCache());
-        
+        sla.setZones(zones);
         try {
             machinesEndpoint.enforceSla(sla);
             

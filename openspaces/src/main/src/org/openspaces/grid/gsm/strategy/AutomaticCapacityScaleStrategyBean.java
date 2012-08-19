@@ -23,6 +23,7 @@ import org.openspaces.admin.internal.pu.elastic.events.DefaultElasticAutoScaling
 import org.openspaces.admin.pu.elastic.config.AutomaticCapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.config.AutomaticCapacityScaleRuleConfig;
 import org.openspaces.admin.pu.elastic.config.CapacityRequirementsConfig;
+import org.openspaces.admin.pu.elastic.config.CapacityRequirementsPerZonesConfig;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
 import org.openspaces.admin.pu.statistics.TimeWindowStatisticsConfig;
 import org.openspaces.grid.gsm.autoscaling.AutoScalingSlaEnforcementEndpoint;
@@ -32,6 +33,7 @@ import org.openspaces.grid.gsm.autoscaling.AutoScalingSlaUtils;
 import org.openspaces.grid.gsm.autoscaling.AutomaticCapacityCooldownValidator;
 import org.openspaces.grid.gsm.autoscaling.exceptions.AutoScalingSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
+import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerZones;
 import org.openspaces.grid.gsm.containers.exceptions.ContainersSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.rebalancing.exceptions.RebalancingSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementInProgressException;
@@ -59,7 +61,7 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
     
     // events state
     private ScaleStrategyProgressEventState autoScalingEventState;
-    private CapacityRequirements enforcedCapacityRequirements;
+    private CapacityRequirementsPerZones enforcedCapacityRequirementsPerZones;
     
     @Override
     public void afterPropertiesSet() {
@@ -146,11 +148,11 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
     protected void enforceSla() throws SlaEnforcementInProgressException {
         
         SlaEnforcementInProgressException pendingException=null;
-        final CapacityRequirements capacityRequirements = super.getCapacityRequirementConfig().toCapacityRequirements();
+        final CapacityRequirementsPerZones capacityRequirements = super.getCapacityRequirementConfig().toCapacityRequirementsPerZone();
         
         try {
             super.enforceCapacityRequirement(); //enforces the last call to #setCapacityRequirementConfig
-            enforcedCapacityRequirements = capacityRequirements;
+            enforcedCapacityRequirementsPerZones = capacityRequirements;
             // no exception means that manual scale is complete.
         }
         catch (RebalancingSlaEnforcementInProgressException e) {
@@ -163,7 +165,7 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
         }
         catch (SlaEnforcementInProgressException e) {
             
-            if (enforcedCapacityRequirements == null) {
+            if (enforcedCapacityRequirementsPerZones == null) {
                 // no prev capacityRequirements to work with
                 throw e;
             }
@@ -174,7 +176,7 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
             pendingException = e;
         }
         
-        CapacityRequirements newCapacityRequirements;
+        CapacityRequirementsPerZones newCapacityRequirementsPerZones;
         
         try {
             //make sure that we are not in the cooldown period
@@ -185,7 +187,9 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
             //enforce auto-scaling SLA
             //based on the last enforced SLA, the reason is that the monitored data reflects the last enforced SLA
             //and it could have changed since then (happens when pendingException != null)
-            newCapacityRequirements = enforceAutoScalingSla(enforcedCapacityRequirements);
+            
+            //TODO: Support multizone
+            newCapacityRequirementsPerZones = enforceAutoScalingSla(enforcedCapacityRequirementsPerZones);
         }
         catch (SlaEnforcementInProgressException e) {
             if (pendingException != null) {
@@ -196,8 +200,8 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
             throw e;
         }
         
-        if (!newCapacityRequirements.equals(capacityRequirements)) {
-            super.setCapacityRequirementConfig(new CapacityRequirementsConfig(newCapacityRequirements));
+        if (!newCapacityRequirementsPerZones.equals(capacityRequirements)) {
+            super.setCapacityRequirementConfig(new CapacityRequirementsPerZonesConfig(newCapacityRequirementsPerZones));
             if (pendingException != null) {
                 // throw pending exception of previous manual scale capacity.
                 // otherwise it could be lost when calling it again.
@@ -211,6 +215,13 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
             // throw pending exception of previous manual scale capacity, so it won't be lost.
             throw pendingException;
         }
+    }
+
+    private CapacityRequirementsPerZones enforceAutoScalingSla(final CapacityRequirementsPerZones capacityRequirementsPerZones) throws AutoScalingSlaEnforcementInProgressException {
+        final String[] dontCareZones = new String[0];
+        final CapacityRequirements capacityRequirements = capacityRequirementsPerZones.getZonesCapacityOrZero(dontCareZones);
+        final CapacityRequirements newCapacityRequirements = enforceAutoScalingSla(capacityRequirements);
+        return  new CapacityRequirementsPerZones().add(dontCareZones, newCapacityRequirements);
     }
 
     private CapacityRequirements enforceAutoScalingSla(final CapacityRequirements capacityRequirements)
