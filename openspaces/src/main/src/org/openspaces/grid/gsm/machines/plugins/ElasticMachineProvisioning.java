@@ -17,6 +17,7 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.machines.plugins;
 
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -64,12 +65,13 @@ public interface ElasticMachineProvisioning extends ElasticProcessingUnitMachine
     GridServiceAgent[] getDiscoveredMachines(long duration, TimeUnit unit) throws ElasticMachineProvisioningException, InterruptedException, TimeoutException;
 
 	/**
-	 * Starts a new machine with a new grid service agent.
+	 * Starts a new machine with a new grid service agent and injects specific zones into it.
 	 * 
 	 * This method is blocking on the current thread, or raises a TimeOutException if the timeout expired.
 	 * 
 	 * @param duration - the maximum duration after which a TimeoutException is raised.
 	 * @param unit - the time unit for the duration
+	 * @param zones - the zones to start the machine on. these zones will be injected into the GSA that is started on this machine.
 	 * @return the grid service agent
 	 * 
 	 * @throws ElasticMachineProvisioningException
@@ -78,7 +80,26 @@ public interface ElasticMachineProvisioning extends ElasticProcessingUnitMachine
 	 * 
 	 * @since 8.0
 	 */
-	GridServiceAgent startMachine(long duration, TimeUnit unit)
+	GridServiceAgent startMachine(Set<String> zones, long duration,  TimeUnit unit)
+	throws ElasticMachineProvisioningException, InterruptedException , TimeoutException ;
+
+	 /**
+     * Starts a new machine with a new grid service agent without specifying zones. the GSA will be assigned only the default zones.
+     * 
+     * This method is blocking on the current thread, or raises a TimeOutException if the timeout expired.
+     * 
+     * @param duration - the maximum duration after which a TimeoutException is raised.
+     * @param unit - the time unit for the duration
+     * @return the grid service agent
+     * 
+     * @throws ElasticMachineProvisioningException
+     * @throws InterruptedException
+     * @throws TimeoutException
+     * 
+     * @since 8.0
+     */
+	@Deprecated
+	GridServiceAgent startMachine(long duration,  TimeUnit unit)
 	throws ElasticMachineProvisioningException, InterruptedException , TimeoutException ;
 	
 	/**
@@ -109,7 +130,7 @@ public interface ElasticMachineProvisioning extends ElasticProcessingUnitMachine
 	 */
 	boolean stopMachine(GridServiceAgent agent, long duration, TimeUnit unit) throws ElasticMachineProvisioningException, InterruptedException, TimeoutException;
 	
-
+	
     /**
      * @return the configuration used by this object
      * @since 8.0.1

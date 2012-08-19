@@ -18,6 +18,8 @@
 package org.openspaces.grid.gsm.machines.plugins;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -68,97 +70,100 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
 		this.executorService = executorService;
 		this.scheduledExecutorService = scheduledExecutorService;
 	}
+	
+	
+    public FutureGridServiceAgent[] startMachinesAsync(
+            final CapacityRequirements capacityRequirements,
+            final Set<String> zones, 
+            final long duration, final TimeUnit unit) {
 
-	public FutureGridServiceAgent[] startMachinesAsync(
-			final CapacityRequirements capacityRequirements,
-			final long duration, final TimeUnit unit) {
-		
-	    if (!isStartMachineSupported()) {
+        if (!isStartMachineSupported()) {
             throw new UnsupportedOperationException();
         }
-	    
-	    final CapacityRequirements singleMachineCapacity = machineProvisioning.getCapacityOfSingleMachine();
-	    int numberOfMachines = calcNumberOfMachines(capacityRequirements, machineProvisioning);
-	    FutureGridServiceAgent[] futureAgents = new FutureGridServiceAgent[numberOfMachines];
-	    
-	    for (int i = 0 ; i < futureAgents.length ; i++) {
-    		final AtomicReference<Object> ref = new AtomicReference<Object>(null);
-    		
-    		final int throttlingDelay = i*THROTTLING_DELAY_SECONDS;
-    		final long start = System.currentTimeMillis();
-    		final long end = start+ throttlingDelay*1000+unit.toMillis(duration);
-    		submit(new Runnable() {
-    			public void run() {
-    				try {
-   			            logger.info("Starting a new machine");
-    					GridServiceAgent agent = machineProvisioning.startMachine(duration, unit);
-    					ref.set(agent);
-    					logger.info("New machine started");
-    				} catch (ElasticMachineProvisioningException e) {
-    					ref.set(e);
-    				} catch (InterruptedException e) {
-    					ref.set(e);
-    				} catch (TimeoutException e) {
+        
+        final CapacityRequirements singleMachineCapacity = machineProvisioning.getCapacityOfSingleMachine();
+        int numberOfMachines = calcNumberOfMachines(capacityRequirements, machineProvisioning);
+        FutureGridServiceAgent[] futureAgents = new FutureGridServiceAgent[numberOfMachines];
+        
+        for (int i = 0 ; i < futureAgents.length ; i++) {
+            final AtomicReference<Object> ref = new AtomicReference<Object>(null);
+            
+            final int throttlingDelay = i*THROTTLING_DELAY_SECONDS;
+            final long start = System.currentTimeMillis();
+            final long end = start+ throttlingDelay*1000+unit.toMillis(duration);
+            submit(new Runnable() {
+                public void run() {
+                    try {
+                        logger.info("Starting a new machine");
+                        
+                        GridServiceAgent agent = machineProvisioning.startMachine(zones, duration, unit);
+                        ref.set(agent);
+                        logger.info("New machine started");
+                    } catch (ElasticMachineProvisioningException e) {
                         ref.set(e);
-    				} catch (NoClassDefFoundError e) {
+                    } catch (InterruptedException e) {
+                        ref.set(e);
+                    } catch (TimeoutException e) {
+                        ref.set(e);
+                    } catch (NoClassDefFoundError e) {
                         ref.set((new NoClassDefFoundElasticMachineProvisioningException(pu,e)));
-    				} catch (Throwable e) {
-    					logger.error("Unexpected exception:" + e.getMessage(), e);
-    					ref.set(e);
-    				}
-    			}
+                    } catch (Throwable e) {
+                        logger.error("Unexpected exception:" + e.getMessage(), e);
+                        ref.set(e);
+                    }
+                }
     
-    		},throttlingDelay,TimeUnit.SECONDS);
+            },throttlingDelay,TimeUnit.SECONDS);
 
-    		futureAgents[i] = new FutureGridServiceAgent() {
+            futureAgents[i] = new FutureGridServiceAgent() {
     
-    			public boolean isDone() {
-    				return  System.currentTimeMillis() > end || ref.get() != null;
-    			}
-    			
-    			public ExecutionException getException() {
-    				Object result = ref.get();
-    				if (result != null && result instanceof Throwable) {
-    					return new ExecutionException((Throwable)result);
-    				}
-    				return null;
-    			}
+                public boolean isDone() {
+                    return  System.currentTimeMillis() > end || ref.get() != null;
+                }
+                
+                public ExecutionException getException() {
+                    Object result = ref.get();
+                    if (result != null && result instanceof Throwable) {
+                        return new ExecutionException((Throwable)result);
+                    }
+                    return null;
+                }
     
-    			public boolean isTimedOut() {
-    				Object result = ref.get();
-    				return System.currentTimeMillis() > end || 
-    					   (result != null && result instanceof TimeoutException);
-    			}
+                public boolean isTimedOut() {
+                    Object result = ref.get();
+                    return System.currentTimeMillis() > end || 
+                           (result != null && result instanceof TimeoutException);
+                }
     
     
-    			public Date getTimestamp() {
-    				return new Date(start);
-    			}
+                public Date getTimestamp() {
+                    return new Date(start);
+                }
     
-    			public GridServiceAgent get()
-    					throws ExecutionException, IllegalStateException,TimeoutException {
+                public GridServiceAgent get()
+                        throws ExecutionException, IllegalStateException,TimeoutException {
     
-    			    Object result = ref.get();
-    			    
-    			    if (result == null) {
-        				if (System.currentTimeMillis() > end) {
-        					throw new TimeoutException(
-        							"Starting a new machine took more than "
-        									+ unit.toSeconds(duration)
-        									+ " seconds to complete.");
-        				}
-    				
-    					throw new IllegalStateException(
-    							"Async operation is not done yet.");
-    				}
+                    Object result = ref.get();
+                    
+                    if (result == null) {
+                        if (System.currentTimeMillis() > end) {
+                            throw new TimeoutException(
+                                    "Starting a new machine took more than "
+                                            + unit.toSeconds(duration)
+                                            + " seconds to complete.");
+                        }
+                    
+                        throw new IllegalStateException(
+                                "Async operation is not done yet.");
+                    }
     
-    			    if (getException() != null) {
-    			        throw getException();
-    			    }
+                    if (getException() != null) {
+                        throw getException();
+                    }
     
-    				return (GridServiceAgent) result;
-    			}
-    			
+                    return (GridServiceAgent) result;
+                }
+                
                 public NonBlockingElasticMachineProvisioning getMachineProvisioning() {
                     return NonBlockingElasticMachineProvisioningAdapter.this;
                 }
@@ -166,9 +171,17 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
                 public CapacityRequirements getFutureCapacity() {
                     return singleMachineCapacity;
                 }
-    		};
-	    }
-		return futureAgents;
+            };
+        }
+        return futureAgents;
+
+        
+    }	
+	public FutureGridServiceAgent[] startMachinesAsync(
+			final CapacityRequirements capacityRequirements,
+			final long duration, final TimeUnit unit) {
+	    return startMachinesAsync(capacityRequirements, new HashSet<String>(), duration, unit);
+		
 	}
 
 	public void stopMachineAsync(final GridServiceAgent agent, final long duration,
