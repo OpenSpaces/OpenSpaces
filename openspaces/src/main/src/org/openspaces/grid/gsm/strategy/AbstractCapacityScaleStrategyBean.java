@@ -104,15 +104,15 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
         
     
     /**
-     * Call once in order to modify the behavior of {@link #enforceCapacityRequirement()}
+     * Call once in order to modify the behavior of {@link #enforcePlannedCapacity()}
      * Uses the default machine provisioning zone as the zone to start machines in.
      */   
-    protected void setCapacityRequirementConfig(ScaleStrategyCapacityRequirementConfig capacity) {
+    protected void setPlannedCapacity(ScaleStrategyCapacityRequirementConfig capacity) {
         
         final CapacityRequirementsPerZonesConfig capacityPerZones = new CapacityRequirementsPerZonesConfig();
         capacityPerZones.addCapacity(getDefaultZones(), capacity);
         
-        setCapacityRequirementConfig(capacityPerZones);     
+        setPlannedCapacity(capacityPerZones);     
     }
 
     protected ZonesConfig getDefaultZones() {
@@ -120,9 +120,9 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
     }
     
     /**
-     * Call once in order to modify the behavior of {@link #enforceCapacityRequirement()}
+     * Call once in order to modify the behavior of {@link #enforcePlannedCapacity()}
      */   
-    protected void setCapacityRequirementConfig(CapacityRequirementsPerZonesConfig capacityPerZones) {
+    protected void setPlannedCapacity(CapacityRequirementsPerZonesConfig capacityPerZones) {
         
         if (capacityPerZones == null) {
             throw new IllegalArgumentException("capacityRequirement cannot be null");
@@ -132,17 +132,6 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
             return;
         }
 
-        //TODO: Update GSM
-        //Consider making sure capacityPerZones is final, and only properties are modified
-        //if (anyGsmUpdateInProgress) {
-        //    throw new InProgressException();
-        //}                
-        
-        //if (!gsmIsUpdated(capacityPerZones)) { 
-        //    esm.updateGsmInAnotherThread(capacityPerZones);
-        //    throw new InProgressException();
-        //}
-        
         this.capacityPerZones = capacityPerZones;
         
         // round up memory
@@ -239,7 +228,7 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
         
     }
 
-    protected void enforceCapacityRequirement() throws SlaEnforcementInProgressException {
+    protected void enforcePlannedCapacity() throws SlaEnforcementInProgressException {
         
         if (this.capacityPerZones == null) {
             throw new IllegalStateException("capacityPerZones cannot be null");

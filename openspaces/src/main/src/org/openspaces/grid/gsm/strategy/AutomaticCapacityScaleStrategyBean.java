@@ -91,7 +91,7 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
                 DefaultElasticAutoScalingFailureEvent.class);
 
         //inject initial manual scale capacity
-        super.setCapacityRequirementConfig(initialCapacity);
+        super.setPlannedCapacity(initialCapacity);
         super.setScaleStrategyConfig(config);
         
         enablePuStatistics();
@@ -143,7 +143,6 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
         return config;
     }
 
-    
     @Override
     protected void enforceSla() throws SlaEnforcementInProgressException {
         
@@ -151,7 +150,7 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
         final CapacityRequirementsPerZones capacityRequirements = super.getCapacityRequirementConfig().toCapacityRequirementsPerZone();
         
         try {
-            super.enforceCapacityRequirement(); //enforces the last call to #setCapacityRequirementConfig
+            super.enforcePlannedCapacity();
             enforcedCapacityRequirementsPerZones = capacityRequirements;
             // no exception means that manual scale is complete.
         }
@@ -201,14 +200,14 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
         }
         
         if (!newCapacityRequirementsPerZones.equals(capacityRequirements)) {
-            super.setCapacityRequirementConfig(new CapacityRequirementsPerZonesConfig(newCapacityRequirementsPerZones));
+            super.setPlannedCapacity(new CapacityRequirementsPerZonesConfig(newCapacityRequirementsPerZones));
             if (pendingException != null) {
                 // throw pending exception of previous manual scale capacity.
                 // otherwise it could be lost when calling it again.
                 throw pendingException;
             }
             // enforce new capacity requirements as soon as possible.
-            super.enforceCapacityRequirement();
+            super.enforcePlannedCapacity();
         }
         
         if (pendingException != null) {
