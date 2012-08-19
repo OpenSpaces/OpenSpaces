@@ -19,7 +19,7 @@ package org.openspaces.grid.gsm.capacity;
 
 import java.util.Collection;
 
-public class CapacityRequirementsPerAgent extends AbstractCapacityRequirementsPerKey<CapacityRequirementsPerAgent> {
+public class CapacityRequirementsPerAgent extends AbstractCapacityRequirementsPerKey {
 
     public CapacityRequirementsPerAgent() {
     }
@@ -27,36 +27,47 @@ public class CapacityRequirementsPerAgent extends AbstractCapacityRequirementsPe
     public Collection<String> getAgentUids() {
         return super.getKeys();
     }
-        
-    public CapacityRequirementsPerAgent set(String agentUid, CapacityRequirements capacity) {
-        return super.set(agentUid, capacity);
-    }
     
+    @Override
+    public CapacityRequirementsPerAgent set(String agentUid, CapacityRequirements capacity) {
+        return (CapacityRequirementsPerAgent) super.set(agentUid, capacity);
+    }
+
+    @Override
     public CapacityRequirementsPerAgent add(
             String agentUid, 
             CapacityRequirements capacity) {
         
-      return super.add(agentUid, capacity);
+      return (CapacityRequirementsPerAgent) super.add(agentUid, capacity);
     }
-    
+
+    @Override
     public CapacityRequirementsPerAgent subtract(
             String agentUid, 
             CapacityRequirements capacity) {
         
-        return super.subtract(agentUid, capacity);
+        return (CapacityRequirementsPerAgent) super.subtract(agentUid, capacity);
+    }
+
+    public CapacityRequirementsPerAgent add(CapacityRequirementsPerAgent other) {
+        return (CapacityRequirementsPerAgent) super.add(other);
     }
 
 
-
-    public CapacityRequirementsPerAgent subtractAgent(
-            String agentUid) {
-        return super.subtractKey(agentUid);
+    public CapacityRequirementsPerAgent subtract(CapacityRequirementsPerAgent other) {
+        return (CapacityRequirementsPerAgent) super.subtract(other);
     }
     
+    public CapacityRequirementsPerAgent subtractAgent(
+            String agentUid) {
+        return (CapacityRequirementsPerAgent) super.subtractKey(agentUid);
+    }
+    
+    @Override
     public CapacityRequirementsPerAgent subtractOrZero(
            String agentUid, CapacityRequirements capacity) {
         
-        return super.subtractOrZero(agentUid, capacity);
+        return (CapacityRequirementsPerAgent) super.subtractOrZero(agentUid, capacity);
     }
 
 

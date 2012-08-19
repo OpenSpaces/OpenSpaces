@@ -26,7 +26,7 @@ import com.gigaspaces.internal.utils.StringUtils;
  * @since 9.1.0
  */
 
-public class CapacityRequirementsPerZones extends AbstractCapacityRequirementsPerKey<CapacityRequirementsPerZones> {
+public class CapacityRequirementsPerZones extends AbstractCapacityRequirementsPerKey {
 
     public CapacityRequirementsPerZones() {
     }
@@ -40,34 +40,41 @@ public class CapacityRequirementsPerZones extends AbstractCapacityRequirementsPe
     }
         
     public CapacityRequirementsPerZones set(String[] zones, CapacityRequirements capacity) {
-        return super.set(zonesToString(zones), capacity);
+        return (CapacityRequirementsPerZones) super.set(zonesToString(zones), capacity);
     }
     
     public CapacityRequirementsPerZones add(
             String[] zones, 
             CapacityRequirements capacity) {
         
-      return super.add(zonesToString(zones), capacity);
+      return (CapacityRequirementsPerZones) super.add(zonesToString(zones), capacity);
     }
     
     public CapacityRequirementsPerZones subtract(
             String[] zones, 
             CapacityRequirements capacity) {
         
-        return super.subtract(zonesToString(zones), capacity);
+        return (CapacityRequirementsPerZones) super.subtract(zonesToString(zones), capacity);
     }
 
     public CapacityRequirementsPerZones subtractZone(
             String[] zones) {
-        return super.subtractKey(zonesToString(zones));
+        return (CapacityRequirementsPerZones) super.subtractKey(zonesToString(zones));
     }
-    
+
     public CapacityRequirementsPerZones subtractOrZero(
            String[] zones, CapacityRequirements capacity) {
         
-        return super.subtractOrZero(zonesToString(zones), capacity);
+        return (CapacityRequirementsPerZones) super.subtractOrZero(zonesToString(zones), capacity);
+    }
+    
+    public CapacityRequirementsPerZones subtract(CapacityRequirementsPerZones other) {
+        return (CapacityRequirementsPerZones) super.subtract(other);
     }
 
+    public CapacityRequirementsPerZones add(CapacityRequirementsPerZones other) {
+        return (CapacityRequirementsPerZones) super.add(other);
+    }
 
     public CapacityRequirements getZonesCapacity(String[] zones) {
         return super.getKeyCapacity(zonesToString(zones));

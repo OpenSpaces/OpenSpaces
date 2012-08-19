@@ -10,7 +10,7 @@
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * WITHOUAbstractCapacityRequirementsPerKey WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *  
@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-abstract class AbstractCapacityRequirementsPerKey<T extends AbstractCapacityRequirementsPerKey<?>> {
+abstract class AbstractCapacityRequirementsPerKey {
 
     // allocated capacity per key
     private final Map<String,CapacityRequirements> capacityPerKey;
@@ -90,52 +90,51 @@ abstract class AbstractCapacityRequirementsPerKey<T extends AbstractCapacityRequ
         return builder.toString();
     }
     
-    @SuppressWarnings("unchecked")
-    public T add(T other) {
+    protected AbstractCapacityRequirementsPerKey add(AbstractCapacityRequirementsPerKey other) {
         if (other.equalsZero()) {
-            return (T) this;
+            return this;
         }
         
-        T sum = newZeroInstance();
+        AbstractCapacityRequirementsPerKey sum = newZeroInstance();
         sum.addAllInternal(this);
         sum.addAllInternal(other);
         return sum;
     }
 
-    public T subtract(
-            T other) {
+    protected AbstractCapacityRequirementsPerKey subtract(
+            AbstractCapacityRequirementsPerKey other) {
 
-        T diff = newZeroInstance();
+        AbstractCapacityRequirementsPerKey diff = newZeroInstance();
         diff.addAllInternal(this);
         diff.subtractAllInternal(other);
         return diff;
     }
 
-    protected abstract T newZeroInstance();
+    protected abstract AbstractCapacityRequirementsPerKey newZeroInstance();
     
-    protected T set(String key, CapacityRequirements capacity) {
-        T sum = newZeroInstance();
+    protected AbstractCapacityRequirementsPerKey set(String key, CapacityRequirements capacity) {
+        AbstractCapacityRequirementsPerKey sum = newZeroInstance();
         sum.addAllInternal(this);
         sum.setInternal(key,capacity);
         return sum;
     }
     
-    protected T add(
+    protected AbstractCapacityRequirementsPerKey add(
             String key, 
             CapacityRequirements capacity) {
         
-        T sum = newZeroInstance();
+        AbstractCapacityRequirementsPerKey sum = newZeroInstance();
         sum.addAllInternal(this);
         sum.addInternal(key,capacity);
         return sum;
         
     }
     
-    protected T subtract(
+    protected AbstractCapacityRequirementsPerKey subtract(
             String key, 
             CapacityRequirements capacity) {
         
-        T remaining = newZeroInstance();
+        AbstractCapacityRequirementsPerKey remaining = newZeroInstance();
         remaining.addAllInternal(this);
         remaining.subtractInternal(key,capacity);
         return remaining;
@@ -143,15 +142,15 @@ abstract class AbstractCapacityRequirementsPerKey<T extends AbstractCapacityRequ
 
 
 
-    protected T subtractKey(
+    protected AbstractCapacityRequirementsPerKey subtractKey(
             String key) {
         return subtract(key, this.getKeyCapacity(key));
     }
     
-    protected T subtractOrZero(
+    protected AbstractCapacityRequirementsPerKey subtractOrZero(
            String key, CapacityRequirements capacity) {
         
-        T remaining = newZeroInstance();
+        AbstractCapacityRequirementsPerKey remaining = newZeroInstance();
         remaining.addAllInternal(this);
         remaining.subtractOrZeroInternal(key,capacity);
         return remaining;
@@ -175,14 +174,14 @@ abstract class AbstractCapacityRequirementsPerKey<T extends AbstractCapacityRequ
         }
     }
     
-    private void addAllInternal(AbstractCapacityRequirementsPerKey <?> clusterCapacityRequirements) {
+    private void addAllInternal(AbstractCapacityRequirementsPerKey clusterCapacityRequirements) {
         for (String key : clusterCapacityRequirements.capacityPerKey.keySet()) {
             CapacityRequirements capacity = clusterCapacityRequirements.capacityPerKey.get(key);
             addInternal(key,capacity);
         }
     }
     
-    private void subtractAllInternal(AbstractCapacityRequirementsPerKey<?> aggregatedCapacity) {
+    private void subtractAllInternal(AbstractCapacityRequirementsPerKey aggregatedCapacity) {
         for (String key : aggregatedCapacity.capacityPerKey.keySet()) {
             CapacityRequirements capacity = aggregatedCapacity.capacityPerKey.get(key);
             subtractInternal(key,capacity);
