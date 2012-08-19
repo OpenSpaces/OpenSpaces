@@ -43,9 +43,12 @@ import org.openspaces.admin.zone.config.ExactZonesStatisticsConfigurer;
 public class ZoneStatisticsCalculatorTest extends TestCase {
 
     private static final int TIME_WINDOW_SECONDS = 5;
-    private static final int METRIC_VALUE = 5;
+    private static final double EXPECTED_METRIC_VALUE = 5;
+    private static final double METRIC_VALUE_UID0 = EXPECTED_METRIC_VALUE + 1;
+    private static final double METRIC_VALUE_UID1 = EXPECTED_METRIC_VALUE - 1;
 
     private static final String INSTANCE_UID0 = "instanceUid0";
+    private static final String INSTANCE_UID1 = "instanceUid1";
 
     private static final String MONITOR = "monitor";
     private static final String METRIC = "metric";
@@ -65,17 +68,23 @@ public class ZoneStatisticsCalculatorTest extends TestCase {
                 new DefaultProcessingUnitStatistics(prev, prevPrevProcessingUnitStatistics , historySize);
         prevProcessingUnitStatistics.addStatistics(
                 lastTimeSampleStatisticsId(INSTANCE_UID0), 
-                METRIC_VALUE);
+                METRIC_VALUE_UID0);
+        prevProcessingUnitStatistics.addStatistics(
+                lastTimeSampleStatisticsId(INSTANCE_UID1), 
+                METRIC_VALUE_UID1);
         
         InternalProcessingUnitStatistics processingUnitStatistics = 
                 new DefaultProcessingUnitStatistics(now , prevProcessingUnitStatistics , historySize);
         processingUnitStatistics.addStatistics(
                 lastTimeSampleStatisticsId(INSTANCE_UID0), 
-                METRIC_VALUE);
+                METRIC_VALUE_UID0);
+        processingUnitStatistics.addStatistics(
+                lastTimeSampleStatisticsId(INSTANCE_UID1), 
+                METRIC_VALUE_UID1);
         
         processingUnitStatistics.calculateStatistics(getTestStatisticsCalculations());
         
-        Assert.assertEquals((double)METRIC_VALUE, processingUnitStatistics.getStatistics().get(zoneStatisticsId()));
+        Assert.assertEquals(EXPECTED_METRIC_VALUE, processingUnitStatistics.getStatistics().get(zoneStatisticsId()));
 
     }
     
