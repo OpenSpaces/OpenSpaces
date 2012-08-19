@@ -391,6 +391,19 @@ public class MachinesSlaEnforcementState {
             }        
         }
         
+        if (key.gridServiceAgentZones != null) {
+            //add all agents that do not have this specific zone
+            //notice that unlike MachinesSlaUtils#zoneFilter that only validates MachineProvisioning.getGSAZones()
+            //this check is more restrictive. The machine is ok, just we cannot deploy on it with the given key
+            for (GridServiceAgent agent : admin.getGridServiceAgents()) {
+                if (!agent.getExactZones().isStasfies(key.gridServiceAgentZones)) {
+                    String agentUid = agent.getUid();
+                    initValue(restrictedAgentUidsWithReason, agentUid);
+                    restrictedAgentUidsWithReason.get(agentUid).add("Agent zones=" + agent.getExactZones().getZones() +" does not match " + key.gridServiceAgentZones);
+                }
+            }
+        }
+        
         return restrictedAgentUidsWithReason;
    }
 
