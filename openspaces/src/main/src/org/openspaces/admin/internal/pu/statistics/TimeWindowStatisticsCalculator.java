@@ -39,28 +39,28 @@ import org.openspaces.admin.pu.statistics.TimeWindowStatisticsConfig;
  * @since 9.0.0
  */
 public class TimeWindowStatisticsCalculator implements InternalProcessingUnitStatisticsCalculator {
-    
+
     private final Log logger = LogFactory.getLog(this.getClass());
-    
+
     @Override
     public void calculateNewStatistics(
             final InternalProcessingUnitStatistics processingUnitStatistics,
             final Collection<ProcessingUnitStatisticsId> statisticsIds) {
-        
+
         if (logger.isTraceEnabled()) {
             logger.trace("calculateNewStatistics(processingUnitStatistics="+processingUnitStatistics+" , statisticsIds="+ statisticsIds);
         }
         Map<ProcessingUnitStatisticsId, Set<TimeWindowStatisticsConfig>> timeWindowStatisticsPerErasedStatisticsId = eraseTimeWindowStatistics(statisticsIds);
         Set<ProcessingUnitStatisticsId> erasedStatisticsIds = timeWindowStatisticsPerErasedStatisticsId.keySet();
         Map<ProcessingUnitStatisticsId, StatisticsObjectList> valuesPerErasedStatisticsId = getValues(processingUnitStatistics, erasedStatisticsIds);
-        
+
         for (Map.Entry<ProcessingUnitStatisticsId, StatisticsObjectList> pair : valuesPerErasedStatisticsId.entrySet()) {
-            
+
             ProcessingUnitStatisticsId erasedStatisticsId = pair.getKey();
             StatisticsObjectList values = pair.getValue();
-            
+
             for (TimeWindowStatisticsConfig timeWindowStatistics : timeWindowStatisticsPerErasedStatisticsId.get(erasedStatisticsId)) {
-                
+
                 if (timeWindowStatistics instanceof StatisticsObjectListFunction) {
                     StatisticsObjectListFunction statisticsFunc = (StatisticsObjectListFunction) timeWindowStatistics;
                     Object value = statisticsFunc.calc(values);
@@ -69,7 +69,7 @@ public class TimeWindowStatisticsCalculator implements InternalProcessingUnitSta
                 }
             }
         }
-        
+
     }
 
     /**
@@ -82,11 +82,11 @@ public class TimeWindowStatisticsCalculator implements InternalProcessingUnitSta
 
             if (statisticsId.getTimeWindowStatistics() instanceof AbstractTimeWindowStatisticsConfig) {
                 ProcessingUnitStatisticsId key = erase(statisticsId);
-    
+
                 if (!groupBy.containsKey(key)) {
                     groupBy.put(key, new HashSet<TimeWindowStatisticsConfig>());
                 }
-    
+
                 groupBy.get(key).add(statisticsId.getTimeWindowStatistics());
             }
         }
@@ -97,13 +97,13 @@ public class TimeWindowStatisticsCalculator implements InternalProcessingUnitSta
      * Erases the TimeWindowStatistics from the specified statisticsId
      */
     private ProcessingUnitStatisticsId erase(ProcessingUnitStatisticsId statisticsId) {
-        
+
         statisticsId.validate();
-        
+
         if (!(statisticsId.getInstancesStatistics() instanceof SingleInstanceStatisticsConfig)) {
             throw new IllegalArgumentException("Unsupported statisticsId. Only "+SingleInstanceStatisticsConfig.class.getName() +" is supported. Offending id="+statisticsId);
         }
-                
+
         ProcessingUnitStatisticsId erased = clone(statisticsId);
         // erase statistics function from hashmap key
         erased.setTimeWindowStatistics(
@@ -113,24 +113,25 @@ public class TimeWindowStatisticsCalculator implements InternalProcessingUnitSta
 
     private ProcessingUnitStatisticsId clone(ProcessingUnitStatisticsId statisticsId) {
         return  new ProcessingUnitStatisticsIdConfigurer()
-                .metric(statisticsId.getMetric())
-                .monitor(statisticsId.getMonitor())
-                .instancesStatistics(statisticsId.getInstancesStatistics())
-                .timeWindowStatistics(statisticsId.getTimeWindowStatistics())
-                .create();
+        .metric(statisticsId.getMetric())
+        .monitor(statisticsId.getMonitor())
+        .instancesStatistics(statisticsId.getInstancesStatistics())
+        .timeWindowStatistics(statisticsId.getTimeWindowStatistics())
+        .zoneStatistics(statisticsId.getZoneStatistics())
+        .create();
     }
-    
+
     /**
      * restores the specified timeWindowStatistics to the statisticsId
      */
     private ProcessingUnitStatisticsId unerase(
             ProcessingUnitStatisticsId erasedStatisticsId,
             TimeWindowStatisticsConfig timeWindowStatistics) {
-        
+
         if (!(erasedStatisticsId.getTimeWindowStatistics() instanceof ErasedTimeWindowStatisticsConfig)) {
             return erasedStatisticsId;
         }
-        
+
         ProcessingUnitStatisticsId unerased = clone(erasedStatisticsId);
         unerased.setTimeWindowStatistics(timeWindowStatistics);
         return unerased;
@@ -139,42 +140,44 @@ public class TimeWindowStatisticsCalculator implements InternalProcessingUnitSta
     private Map<ProcessingUnitStatisticsId, StatisticsObjectList> getValues(
             final InternalProcessingUnitStatistics processingUnitStatistics,
             final Set<ProcessingUnitStatisticsId> newStatisticsIds) {
-        
+
         if (processingUnitStatistics == null) {
             throw new IllegalArgumentException("processingUnitStatistics cannot be null");
         }
-        
+
         ProcessingUnitStatistics statistics = processingUnitStatistics;
-        
+
         final Map<ProcessingUnitStatisticsId, StatisticsObjectList> temporaryValues = new HashMap<ProcessingUnitStatisticsId, StatisticsObjectList>();
         for (final ProcessingUnitStatisticsId statisticsId : newStatisticsIds) {
             // initialize
             temporaryValues.put(statisticsId, new StatisticsObjectList());
         }
-        
+
         final Map<ProcessingUnitStatisticsId, StatisticsObjectList> returnValues = new HashMap<ProcessingUnitStatisticsId, StatisticsObjectList>();
-        
+
         long timeDelta = 0;
         while (statistics != null) {
             
+            // Itai : i don't understand this. processingUnitStatistics and statistics are the same reference. (line 148)
+            //        so the timeDelta is always zero. jump to 189 please
             timeDelta = processingUnitStatistics.getAdminTimestamp() - statistics.getAdminTimestamp();
-            
+
             final Map<ProcessingUnitStatisticsId, Object> values = statistics.getStatistics();
             for (final ProcessingUnitStatisticsId statisticsId : newStatisticsIds) {
-                
+
                 final StatisticsObjectList timeline = temporaryValues.get(statisticsId);
-                
+
                 ErasedTimeWindowStatisticsConfig timeWindowStatistics = (ErasedTimeWindowStatisticsConfig) statisticsId.getTimeWindowStatistics();
                 timeWindowStatistics.validate();
                 final long timeWindowMilliSeconds = TimeUnit.SECONDS.toMillis(timeWindowStatistics.getTimeWindowSeconds());
                 final long minTimeWindowMilliSeconds = TimeUnit.SECONDS.toMillis(timeWindowStatistics.getMinimumTimeWindowSeconds());
                 final long maxTimeWindowMilliSeconds = TimeUnit.SECONDS.toMillis(timeWindowStatistics.getMaximumTimeWindowSeconds());
-                                
+
                 if (timeline != null) {
-                    
+
                     final Object value = getValue(values, statisticsId);
                     if (timeDelta > maxTimeWindowMilliSeconds || value == null) {
-                        
+
                         // invalid sample. Don't collect any more values.
                         temporaryValues.remove(statisticsId);
                     }
@@ -183,11 +186,13 @@ public class TimeWindowStatisticsCalculator implements InternalProcessingUnitSta
                         long timeStamp = statistics.getAdminTimestamp();
                         timeline.add(value, timeStamp);
                         
+                        // so this condition never gets satisfied...
+                        // what am i missing?
                         if (timeDelta >= minTimeWindowMilliSeconds) {
                             // valid return value
                             returnValues.put(statisticsId, timeline);
                         }
-                        
+
                         if (timeDelta >= timeWindowMilliSeconds) {
                             // Don't collect any more values.
                             temporaryValues.remove(statisticsId);

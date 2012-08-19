@@ -54,6 +54,12 @@ public class ProcessingUnitStatisticsIdConfigurer {
         return this;
     }
     
+    public ProcessingUnitStatisticsIdConfigurer zoneStatistics(ZoneStatisticsConfig zoneStatistics) {
+        config.setZoneStatistics(zoneStatistics);
+        return this;
+    }
+    
+    
     public ProcessingUnitStatisticsId create() {
         return config;
     }

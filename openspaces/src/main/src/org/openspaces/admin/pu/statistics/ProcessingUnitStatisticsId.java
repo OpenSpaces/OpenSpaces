@@ -19,6 +19,7 @@ public class ProcessingUnitStatisticsId {
 
     private static final String TIMEWINDOW_STATISTICS_KEY = "timewindow-statistics";
     private static final String INSTANCES_STATISTICS_KEY = "instances-statistics";
+    private static final String ZONE_STATISTICS_KEY = "zone-statistics";
 
     StringProperties properties;
     
@@ -77,6 +78,14 @@ public class ProcessingUnitStatisticsId {
         properties.putMapWrapperObject(INSTANCES_STATISTICS_KEY, instancesStatistics.getProperties(), instancesStatistics.getClass());
     }
     
+    public ZoneStatisticsConfig getZoneStatistics() {
+        return (ZoneStatisticsConfig) properties.getMapWrapperObject(ZONE_STATISTICS_KEY, null);
+    }
+    
+    public void setZoneStatistics(ZoneStatisticsConfig zoneStatistics) {
+        properties.putMapWrapperObject(ZONE_STATISTICS_KEY, zoneStatistics.getProperties(), zoneStatistics.getClass());
+    }
+    
 
     /* (non-Javadoc)
      * @see java.lang.Object#hashCode()
@@ -119,7 +128,9 @@ public class ProcessingUnitStatisticsId {
      * @throws IllegalStateException - if state is found to be illegal
      */
     public void validate() throws IllegalStateException {
-        if (getTimeWindowStatistics() == null) {
+        
+        TimeWindowStatisticsConfig timeWindowStatistics = (TimeWindowStatisticsConfig) getTimeWindowStatistics();
+        if (timeWindowStatistics == null) {
             throw new IllegalStateException("timeWindowStatistics cannot be null");
         }
         getTimeWindowStatistics().validate();
@@ -129,6 +140,12 @@ public class ProcessingUnitStatisticsId {
             throw new IllegalStateException("instancesStatistics cannot be null");
         }
         instancesStatistics.validate();
+        
+        ZoneStatisticsConfig zoneStatistics = (ZoneStatisticsConfig) getZoneStatistics();
+        if (zoneStatistics == null) {
+            throw new IllegalStateException("zoneStatistics cannot be null");
+        }
+        zoneStatistics.validate();
         
         if (getMetric() == null || getMonitor().isEmpty()) {
             throw new IllegalStateException("metric name cannot be null or empty");

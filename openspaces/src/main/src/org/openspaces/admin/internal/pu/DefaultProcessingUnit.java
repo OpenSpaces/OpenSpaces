@@ -21,9 +21,11 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CountDownLatch;
@@ -40,6 +42,8 @@ import org.openspaces.admin.AdminException;
 import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.application.Application;
 import org.openspaces.admin.esm.ElasticServiceManager;
+import org.openspaces.admin.gsa.GridServiceAgent;
+import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.application.InternalApplication;
@@ -99,6 +103,7 @@ import org.openspaces.admin.pu.events.ProcessingUnitSpaceCorrelatedEventListener
 import org.openspaces.admin.pu.events.ProcessingUnitSpaceCorrelatedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEvent;
 import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEventManager;
+import org.openspaces.admin.pu.statistics.ExactZonesStatisticsConfigurer;
 import org.openspaces.admin.pu.statistics.InstancesStatisticsConfig;
 import org.openspaces.admin.pu.statistics.LastSampleTimeWindowStatisticsConfig;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
@@ -1096,8 +1101,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
             injectInstanceStatisticsIfAvailable(instancesSnapshot, statistics, statisticsId);
         }
 
-        //TODO: No need to pass instancesSnapshot since it can be deduced from the injected samples above
-        statistics.calculateStatistics(statisticsIdsSnapshot,instancesSnapshot.keySet());
+        statistics.calculateStatistics(statisticsIdsSnapshot);
 
         lastStatistics = statistics;
         return lastStatistics;
@@ -1163,20 +1167,50 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
                    }
                }
                else {
-                   //the original statisticsId may contain time or instances aggregation 
-                   //we want to inject to the pu statistics the raw metric data
-                   final ProcessingUnitStatisticsId newStatisticsId =
-                           new ProcessingUnitStatisticsIdConfigurer()
-                           .metric(statisticsId.getMetric())
-                           .monitor(statisticsId.getMonitor())
-                           .timeWindowStatistics(new LastSampleTimeWindowStatisticsConfig())
-                           .instancesStatistics(new SingleInstanceStatisticsConfigurer().instance(instance).create())
-                           .create();
-                   puStatistics.addStatistics(newStatisticsId,value);
+                   
+                   try {
+                       Set<String> zones = getProcessingUnitInstanceGridServiceAgentZones(instance);
+
+                       //the original statisticsId may contain time or instances aggregation 
+                       //we want to inject to the pu statistics the raw metric data
+                       final ProcessingUnitStatisticsId newStatisticsId =
+                               new ProcessingUnitStatisticsIdConfigurer()
+                       .metric(statisticsId.getMetric())
+                       .monitor(statisticsId.getMonitor())
+                       .timeWindowStatistics(new LastSampleTimeWindowStatisticsConfig())
+                       .zoneStatistics(new ExactZonesStatisticsConfigurer().zones(zones).create())
+                       .instancesStatistics(new SingleInstanceStatisticsConfigurer().instance(instance).create())
+                       .create();
+                       puStatistics.addStatistics(newStatisticsId,value);
+                   } catch (AdminException e) {
+                       if (logger.isDebugEnabled()) {
+                           logger.debug("Failed retrieving zones for processing unit instance " + this.getName() + " : " + e.getMessage());
+                       }
+                   }
                }
            }
        }
     }
+    
+    /**
+     * @param processingUnitInstance
+     * @return
+     */
+    private Set<String> getProcessingUnitInstanceGridServiceAgentZones(ProcessingUnitInstance processingUnitInstance) 
+            throws AdminException {
+        
+        GridServiceContainer gridServiceContainer = processingUnitInstance.getGridServiceContainer();
+        if (gridServiceContainer.getAgentId() != -1) { // an agent started this GSC
+            GridServiceAgent agent = gridServiceContainer.getGridServiceAgent();
+            if (agent == null) {
+                throw new AdminException("Not yet discovered GSA that started container " + gridServiceContainer.getAgentId());
+            } else {
+                return agent.getZones().keySet();
+            }
+        }
+        return new HashSet<String>(); // GSC was not started by a GSA
+    }
+
 
  
     @Override

@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.openspaces.admin.internal.pu.statistics;
 
-import java.util.Set;
-
 import org.openspaces.admin.internal.pu.ProcessingUnitStatistics;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
 
@@ -35,6 +33,6 @@ public interface InternalProcessingUnitStatistics extends ProcessingUnitStatisti
      * Calculates new statistics based on previously added statistics
      * and the specified statistics calculations and the list of instance UIDs
      */
-    void calculateStatistics(Iterable<ProcessingUnitStatisticsId> statisticsIds, Set<String> instancesUid);
+    void calculateStatistics(Iterable<ProcessingUnitStatisticsId> statisticsIds);
     
 }

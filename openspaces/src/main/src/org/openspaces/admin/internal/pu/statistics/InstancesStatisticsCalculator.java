@@ -141,6 +141,7 @@ public class InstancesStatisticsCalculator implements InternalProcessingUnitStat
                 .monitor(statisticsId.getMonitor())
                 .instancesStatistics(statisticsId.getInstancesStatistics())
                 .timeWindowStatistics(statisticsId.getTimeWindowStatistics())
+                .zoneStatistics(statisticsId.getZoneStatistics())
                 .create();
     }
 
