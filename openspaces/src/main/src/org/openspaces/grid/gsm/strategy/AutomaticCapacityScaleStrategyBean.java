@@ -35,6 +35,9 @@ import org.openspaces.grid.gsm.autoscaling.exceptions.AutoScalingSlaEnforcementI
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerZones;
 import org.openspaces.grid.gsm.containers.exceptions.ContainersSlaEnforcementInProgressException;
+import org.openspaces.grid.gsm.machines.exceptions.MachinesSlaEnforcementInProgressException;
+import org.openspaces.grid.gsm.machines.exceptions.NeedToWaitUntilAllGridServiceAgentsDiscoveredException;
+import org.openspaces.grid.gsm.machines.exceptions.SomeProcessingUnitsHaveNotCompletedStateRecoveryException;
 import org.openspaces.grid.gsm.rebalancing.exceptions.RebalancingSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementInProgressException;
 
@@ -143,6 +146,17 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
         return config;
     }
 
+    @Override
+    protected void recoverStateOnEsmStart() throws SomeProcessingUnitsHaveNotCompletedStateRecoveryException, NeedToWaitUntilAllGridServiceAgentsDiscoveredException, MachinesSlaEnforcementInProgressException {
+        super.recoverStateOnEsmStart();
+        CapacityRequirementsPerZones recoveredCapacity = super.getAllocatedCapacity();
+        if (!recoveredCapacity.equalsZero()) {
+            // the ESM was restarted, as evident by the recovered capacity
+            // in which case we need to overwrite the initial capacity with the recovered capacity
+            super.setPlannedCapacity(recoveredCapacity);
+        }
+    }
+    
     @Override
     protected void enforceSla() throws SlaEnforcementInProgressException {
         

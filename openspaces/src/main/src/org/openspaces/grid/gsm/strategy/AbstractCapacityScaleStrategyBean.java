@@ -102,7 +102,14 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
     private CapacityRequirementsPerZonesConfig capacityPerZones;
     private ScaleStrategyConfig scaleStrategy;
         
+    protected ZonesConfig getDefaultZones() {
+        return getMachineProvisioning().getConfig().getGridServiceAgentZones();
+    }
     
+    protected void setPlannedCapacity(CapacityRequirementsPerZones plannedCapacity) {
+        setPlannedCapacity(new CapacityRequirementsPerZonesConfig(plannedCapacity));
+    }    
+
     /**
      * Call once in order to modify the behavior of {@link #enforcePlannedCapacity()}
      * Uses the default machine provisioning zone as the zone to start machines in.
@@ -115,10 +122,6 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
         setPlannedCapacity(capacityPerZones);     
     }
 
-    protected ZonesConfig getDefaultZones() {
-        return getMachineProvisioning().getConfig().getGridServiceAgentZones();
-    }
-    
     /**
      * Call once in order to modify the behavior of {@link #enforcePlannedCapacity()}
      */   
@@ -594,5 +597,22 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
     @Override
     protected boolean isRecoveredStateOnEsmStart(ProcessingUnit otherPu) {
         return machinesEndpoint.isRecoveredStateOnEsmStart(otherPu);
-    }    
+    }
+
+    public CapacityRequirementsPerZones getAllocatedCapacity() throws MachinesSlaEnforcementInProgressException {
+        CapacityRequirementsPerZones allocatedCapacityPerZones = new CapacityRequirementsPerZones(); 
+        Map<ZonesConfig,Integer> minimumNumberOfMachinesPerZone = calcMinimumNumberOfMachinesPerZones();
+        final CapacityRequirementsPerZones capacityRequirementsPerZone = this.capacityPerZones.toCapacityRequirementsPerZone();
+        
+        for (ZonesConfig zones : getPlannedZones()) {
+
+            Integer minimumNumberOfMachines = minimumNumberOfMachinesPerZone.get(zones);
+            //could be zero due to requirements change but machines still running
+            CapacityRequirements capacityRequirements = capacityRequirementsPerZone.getZonesCapacityOrZero(zones);
+            final CapacityMachinesSlaPolicy sla = getMachinesSla(zones, minimumNumberOfMachines, capacityRequirements);
+            CapacityRequirements allocatedCapacity = machinesEndpoint.getAllocatedCapacity(sla).getTotalAllocatedCapacity();
+            allocatedCapacityPerZones.add(zones, allocatedCapacity);
+        }
+        return allocatedCapacityPerZones;
+    }
 }
