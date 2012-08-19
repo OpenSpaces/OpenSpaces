@@ -110,10 +110,12 @@ public class CapacityRequirementsPerZonesConfig {
     }
 
     private static StringProperties fromCapacityRequirementsPerZone(String keyPrefix, CapacityRequirementsPerZones capacityPerZone) {
-        StringProperties capacityProperties = new StringProperties();
+        final StringProperties capacityProperties = new StringProperties();
         for (ZonesConfig zones : capacityPerZone.getZones()) {
-            final Map<String, String> zoneCapacityProperties = new CapacityRequirementsConfig(capacityPerZone.getZonesCapacity(zones)).getProperties();
-            capacityProperties.putMap(keyPrefix + zonesToString(zones) + ".", zoneCapacityProperties);
+            final CapacityRequirements zonesCapacity = capacityPerZone.getZonesCapacity(zones);
+            final Map<String, String> properties = new CapacityRequirementsConfig(zonesCapacity).getProperties();
+            final String key = keyPrefix + zonesToString(zones) + ".";
+            capacityProperties.putMap(key, properties);
         }
         return capacityProperties;
     }
