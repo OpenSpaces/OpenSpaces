@@ -145,6 +145,10 @@ public abstract class AbstractMachinesSlaPolicy extends ServiceLevelAgreementPol
         if (this.machinesCache == null) {
             throw new IllegalArgumentException("Provisioned agents cannot be null");
         }
+        
+        if (this.getGridServiceAgentZones() == null) {
+            throw new IllegalArgumentException("Exact Zones cannot be null in Capacity Machines Sla Policy");
+        }
     }
     
     public abstract boolean isStopMachineSupported();

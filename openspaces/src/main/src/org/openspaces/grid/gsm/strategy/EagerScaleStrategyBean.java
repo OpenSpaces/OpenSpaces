@@ -21,6 +21,7 @@ import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
+import org.openspaces.admin.zone.config.AnyZonesConfig;
 import org.openspaces.grid.gsm.GridServiceContainerConfigAware;
 import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerAgent;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpoint;
@@ -162,6 +163,7 @@ public class EagerScaleStrategyBean extends AbstractScaleStrategyBean
         sla.setMachineIsolation(getIsolation());
         sla.setMachineProvisioning(super.getMachineProvisioning());
         sla.setDiscoveredMachinesCache(getDiscoveredMachinesCache());
+        sla.setGridServiceAgentZones(new AnyZonesConfig());
         return sla;
     }
 
@@ -219,7 +221,7 @@ public class EagerScaleStrategyBean extends AbstractScaleStrategyBean
     }
     
     private int getMaximumNumberOfContainersPerMachine() {
-        return slaConfig.isAtMostOneContainersPerMachine()?1:getMaximumNumberOfInstances();
+        return slaConfig.isAtMostOneContainerPerMachine()?1:getMaximumNumberOfInstances();
     }
 
     @Override
