@@ -1248,7 +1248,9 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         for (String agentUid : capacityToAllocate.getAgentUids()) {
             state.allocateCapacity(getKey(sla), agentUid, capacityToAllocate.getAgentCapacity(agentUid));
             if (logger.isInfoEnabled()) {
-                logger.info("allocating capacity "+capacityToAllocate.getAgentCapacity(agentUid) + " on " + MachinesSlaUtils.agentToString(pu.getAdmin(), agentUid));
+                logger.info("allocating capacity "+capacityToAllocate.getAgentCapacity(agentUid) + " "+
+                            "on " + MachinesSlaUtils.agentToString(pu.getAdmin(), agentUid) + " "+
+                            "for " + pu.getName() + " requiredAgentZones"+sla.getGridServiceAgentZones());
             }
         }
     }

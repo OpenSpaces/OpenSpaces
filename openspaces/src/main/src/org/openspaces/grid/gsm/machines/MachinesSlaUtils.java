@@ -85,7 +85,7 @@ public class MachinesSlaUtils {
     public static String agentToString(Admin admin, String agentUid) {
         GridServiceAgent agent = admin.getGridServiceAgents().getAgentByUID(agentUid);
         if (agent != null) {
-            return machineToString(agent.getMachine());
+            return machineToString(agent.getMachine()) +"zones"+agent.getExactZones();
         }
         return "agent uid " + agentUid;
     }
