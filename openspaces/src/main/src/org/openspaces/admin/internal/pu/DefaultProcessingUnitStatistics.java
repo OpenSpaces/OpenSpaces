@@ -34,7 +34,6 @@ import org.openspaces.admin.internal.pu.statistics.ZoneStatisticsCalculator;
 import org.openspaces.admin.pu.statistics.ExactZonesStatisticsConfig;
 import org.openspaces.admin.pu.statistics.InstancesStatisticsConfig;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
-import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsIdConfigurer;
 import org.openspaces.admin.pu.statistics.SingleInstanceStatisticsConfig;
 import org.openspaces.admin.pu.statistics.ZoneStatisticsConfig;
 
@@ -152,14 +151,15 @@ public class DefaultProcessingUnitStatistics implements InternalProcessingUnitSt
                     ExactZonesStatisticsConfig zoneStatistics = instances.get(instancesStatistics);
                     if (statisticsId.getZoneStatistics().satisfiedBy(zoneStatistics)) {
                         // fix zone statistics for timewindow calculator so it finds the instance
-                        statisticsId.setZoneStatistics(zoneStatistics);
+                        ProcessingUnitStatisticsId fixedStatisticsId = statisticsId.shallowClone();
+                        fixedStatisticsId.setZoneStatistics(zoneStatistics);
+                        singleInstanceCalculatedStatistics.add(fixedStatisticsId);
                     }
                     else {
                         if (logger.isDebugEnabled()) {
                             logger.debug("Failed to find instance UID " + instancesStatistics.getInstanceUid() + " with zones " + zoneStatistics.getZones() + " which satisfies zones " + statisticsId.getZoneStatistics());
                         }
                     }
-                    singleInstanceCalculatedStatistics.add(statisticsId);
                 }
                 else {
                     if (logger.isDebugEnabled()) {
@@ -170,19 +170,12 @@ public class DefaultProcessingUnitStatistics implements InternalProcessingUnitSt
             else {
                 //expand to all instance UIDs
                 for (Entry<SingleInstanceStatisticsConfig, ExactZonesStatisticsConfig>  pair : instances.entrySet()) {
-                    singleInstanceCalculatedStatistics.add(
-                            new ProcessingUnitStatisticsIdConfigurer()
-                            .monitor(statisticsId.getMonitor())
-                            .metric(statisticsId.getMetric())
-                            .timeWindowStatistics(statisticsId.getTimeWindowStatistics())
-                            .instancesStatistics(pair.getKey())
-                            .zoneStatistics(pair.getValue())
-                            .create());
+                    ProcessingUnitStatisticsId fixedStatisticsId = statisticsId.shallowClone();
+                    fixedStatisticsId.setInstancesStatistics(pair.getKey());
+                    fixedStatisticsId.setZoneStatistics(pair.getValue());
+                    singleInstanceCalculatedStatistics.add(fixedStatisticsId);
                 }
             }
-
-
-            
         }
         
         
