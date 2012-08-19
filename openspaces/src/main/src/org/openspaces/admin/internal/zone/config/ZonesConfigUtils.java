@@ -14,7 +14,8 @@ import com.gigaspaces.internal.utils.StringUtils;
 
 public class ZonesConfigUtils {
 
-    private static final String UNIQUE_ZONES_DELIMITER = "__&__";
+    private static final String UNIQUE_ZONES_DELIMITER = "__ZONE__";
+    private static final CharSequence UNIQUE_DOT_DELIMITER = "__DOT__";
     
     /**
      * Serializes ZonesConfig into a single string. Sample Input: new
@@ -30,7 +31,7 @@ public class ZonesConfigUtils {
                         + " sequence");
             }
         }
-        sortedZones.add(0, zones.getClass().getName());
+        sortedZones.add(0, zones.getClass().getName().replace(".", UNIQUE_DOT_DELIMITER));
         return StringUtils.collectionToDelimitedString(sortedZones, UNIQUE_ZONES_DELIMITER);
     }
 
@@ -43,7 +44,7 @@ public class ZonesConfigUtils {
     public static ZonesConfig zonesFromString(String key) {
         List<String> sortedZones = new ArrayList<String>(Arrays.asList(StringUtils.delimitedListToStringArray(key,
                 UNIQUE_ZONES_DELIMITER)));
-        String className = sortedZones.remove(0);
+        String className = sortedZones.remove(0).replace(UNIQUE_DOT_DELIMITER, ".");
         Class<? extends ZonesConfig> clazz;
         try {
             clazz = (Class<? extends ZonesConfig>) Class.forName(className);
