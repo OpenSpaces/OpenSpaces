@@ -18,21 +18,13 @@
 package org.openspaces.grid.gsm.machines.exceptions;
 
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
+import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementLogStackTrace;
 
-public class FailedToStartNewMachineException extends MachinesSlaEnforcementInProgressException implements SlaEnforcementFailure {
+public class FailedToStartNewMachineException extends MachinesSlaEnforcementInProgressException implements SlaEnforcementFailure , SlaEnforcementLogStackTrace{
 
     private static final long serialVersionUID = 1L;
     
     public FailedToStartNewMachineException(String[] affectedProcessingUnits, Exception cause) {
         super(affectedProcessingUnits, "Machine provisioning failed to start a new machine. Cause:" + cause.getMessage(), cause);
-    }
-    
-    /**
-     * Override the method to show stack trace for cloud specific exceptions.
-     */
-    @Override
-    public Throwable fillInStackTrace()
-    {
-        return ((Throwable)this).fillInStackTrace();
     }
 }

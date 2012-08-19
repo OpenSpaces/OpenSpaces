@@ -17,6 +17,10 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.strategy;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.Arrays;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jini.rio.monitor.event.EventsStore;
@@ -26,8 +30,9 @@ import org.openspaces.admin.internal.pu.elastic.events.DefaultElasticProcessingU
 import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementInProgressException;
+import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementLogStackTrace;
 
-import java.util.Arrays;
+import com.gigaspaces.logger.GSSimpleFormatter;
 
 /**
  * Triggers events based on exceptions raised by {@link AbstractScaleStrategyBean}
@@ -73,7 +78,16 @@ public class ScaleStrategyProgressEventState {
             SlaEnforcementFailure failure = (SlaEnforcementFailure) e;
             if (this.lastFailure == null || !this.lastFailure.equals(failure)) {
                 if (logger.isWarnEnabled()) {
-                    logger.warn("SLA failure in " + Arrays.asList(e.getAffectedProcessingUnits()),e);
+                    StringBuilder message = new StringBuilder();
+                    appendPuPrefix(message, e);
+                    message.append("SLA Failure");
+                    if (e instanceof SlaEnforcementLogStackTrace) {
+                        appendStackTrace(message, e);
+                        logger.warn(message);
+                    }
+                    else {
+                        logger.warn(message,e);
+                    }
                 }
                 
                 this.lastFailure = failure;
@@ -91,7 +105,16 @@ public class ScaleStrategyProgressEventState {
             }
         }
         else if (logger.isDebugEnabled()) {
-            filteredLogger.debug("SLA in progress " +  Arrays.asList(e.getAffectedProcessingUnits()), e);
+            StringBuilder message = new StringBuilder();
+            appendPuPrefix(message, e);
+            message.append("SLA in progress");
+            if (e instanceof SlaEnforcementLogStackTrace) {
+                appendStackTrace(message, e);
+                filteredLogger.debug(message);
+            }
+            else {
+                filteredLogger.debug(message, e);
+            }
         }
     }
 
@@ -162,5 +185,26 @@ public class ScaleStrategyProgressEventState {
         newEvent.setFailureDescription(ex.getMessage());
         newEvent.setProcessingUnitNames(((SlaEnforcementFailure)ex).getAffectedProcessingUnits());
         return newEvent;
+    }
+    
+    /**
+     * copied from {@link GSSimpleFormatter#format(java.util.logging.LogRecord)}
+     */
+    private void appendStackTrace(StringBuilder message, Throwable e) {
+        try {
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            e.printStackTrace(pw);
+            pw.close();
+            message.append("; Caused by: " ).append(sw.toString());
+        } catch (Exception ex)
+        {
+            message.append("; Caused by: " ).append( e.toString());
+            message.append(" - Unable to parse stack trace; Caught: ").append( ex);
+        }
+    }
+    
+    private void appendPuPrefix(StringBuilder message, SlaEnforcementInProgressException e) {
+        message.append(Arrays.asList(e.getAffectedProcessingUnits()).toString()).append(" ");
     }
 }

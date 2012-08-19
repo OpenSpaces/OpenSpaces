@@ -42,6 +42,9 @@ public class SlaEnforcementInProgressException extends Exception {
     @Override
     public Throwable fillInStackTrace()
     {
+        if (this instanceof SlaEnforcementLogStackTrace) {
+            return super.fillInStackTrace();
+        }
         return this;
     }
 
