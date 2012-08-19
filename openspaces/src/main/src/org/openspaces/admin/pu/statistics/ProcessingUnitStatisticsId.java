@@ -160,4 +160,13 @@ public class ProcessingUnitStatisticsId {
         return properties.getProperties();
     }
 
+    public ProcessingUnitStatisticsId shallowClone() {
+        return  new ProcessingUnitStatisticsIdConfigurer()
+                .metric(getMetric())
+                .monitor(getMonitor())
+                .instancesStatistics(getInstancesStatistics())
+                .timeWindowStatistics(getTimeWindowStatistics())
+                .zoneStatistics(getZoneStatistics())
+                .create();
+    }
 }

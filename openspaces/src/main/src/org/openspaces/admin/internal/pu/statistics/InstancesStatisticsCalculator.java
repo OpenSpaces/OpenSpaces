@@ -27,7 +27,6 @@ import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.pu.statistics.EachSingleInstanceStatisticsConfig;
 import org.openspaces.admin.pu.statistics.InstancesStatisticsConfig;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
-import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsIdConfigurer;
 import org.openspaces.admin.pu.statistics.SingleInstanceStatisticsConfig;
 
 /**
@@ -128,24 +127,13 @@ public class InstancesStatisticsCalculator implements InternalProcessingUnitStat
         
         statisticsId.validate();
                 
-        ProcessingUnitStatisticsId erased = clone(statisticsId);
+        ProcessingUnitStatisticsId erased = statisticsId.shallowClone();
         // erase statistics function from hashmap key
         erased.setInstancesStatistics(
                 new ErasedInstancesStatisticsConfig());
         return erased;
     }
     
-    private ProcessingUnitStatisticsId clone(ProcessingUnitStatisticsId statisticsId) {
-        return  new ProcessingUnitStatisticsIdConfigurer()
-                .metric(statisticsId.getMetric())
-                .monitor(statisticsId.getMonitor())
-                .instancesStatistics(statisticsId.getInstancesStatistics())
-                .timeWindowStatistics(statisticsId.getTimeWindowStatistics())
-                .zoneStatistics(statisticsId.getZoneStatistics())
-                .create();
-    }
-
-
     /**
      * restores the specified instancesStatistics to the statisticsId
      */
@@ -157,7 +145,7 @@ public class InstancesStatisticsCalculator implements InternalProcessingUnitStat
             return erasedStatisticsId;
         }
         
-        ProcessingUnitStatisticsId unerased = clone(erasedStatisticsId);
+        ProcessingUnitStatisticsId unerased = erasedStatisticsId.shallowClone();
         unerased.setInstancesStatistics(instancesStatistics);
         return unerased;
     }

@@ -172,7 +172,8 @@ public class TimeWindowStatisticsCalculator implements InternalProcessingUnitSta
 
                 if (timeline != null) {
 
-                    final Object value = getValue(values, statisticsId);
+                    final ProcessingUnitStatisticsId fixedStatisticsId = getStatisticsIdWithLastTimestamp(statisticsId);
+                    final Object value = values.get(fixedStatisticsId);
                     if (timeDelta > maxTimeWindowMilliSeconds || value == null) {
 
                         // invalid sample. Don't collect any more values.
@@ -199,18 +200,10 @@ public class TimeWindowStatisticsCalculator implements InternalProcessingUnitSta
         return returnValues;
     }
 
-    private Object getValue(
-            final Map<ProcessingUnitStatisticsId, Object> values,
-            final ProcessingUnitStatisticsId statisticsId) {
-        
-        return values.get(
-                new ProcessingUnitStatisticsIdConfigurer()
-                .metric(statisticsId.getMetric())
-                .monitor(statisticsId.getMonitor())
-                .instancesStatistics(statisticsId.getInstancesStatistics())
-                .timeWindowStatistics(new LastSampleTimeWindowStatisticsConfig())
-                .create()
-        );
+    private ProcessingUnitStatisticsId getStatisticsIdWithLastTimestamp(final ProcessingUnitStatisticsId statisticsId) {
+        final ProcessingUnitStatisticsId fixedStatisticsId = statisticsId.shallowClone();
+        fixedStatisticsId.setTimeWindowStatistics(new LastSampleTimeWindowStatisticsConfig());
+        return fixedStatisticsId;
     }
 
 }
