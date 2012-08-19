@@ -17,11 +17,10 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.strategy;
 
-import java.util.Set;
-
 import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
+import org.openspaces.admin.zone.config.ExactZonesConfig;
 import org.openspaces.grid.gsm.GridServiceContainerConfigAware;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpointAware;
@@ -101,7 +100,7 @@ public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
         
         //proceed with container udeployment. It respects the pu instance download procedure.
         enforceContainersSla();
-        for (final Set<String> zones : machinesEndpoint.getGridServiceAgentsZones()) {
+        for (final ExactZonesConfig zones : machinesEndpoint.getGridServiceAgentsZones()) {
             final CapacityMachinesSlaPolicy sla = getMachinesSlaPolicy(zones);
             enforceMachinesSla(sla);
         }
@@ -129,7 +128,7 @@ public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
         }
     }
 
-    private CapacityMachinesSlaPolicy getMachinesSlaPolicy(Set<String> zones) {
+    private CapacityMachinesSlaPolicy getMachinesSlaPolicy(ExactZonesConfig zones) {
         final CapacityMachinesSlaPolicy sla = new UndeployMachinesSlaPolicy(getAdmin());
         final NonBlockingElasticMachineProvisioning machineProvisioning = super.getMachineProvisioning();
         sla.setMachineProvisioning(machineProvisioning);
@@ -174,7 +173,7 @@ public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
     @Override
     protected void recoverStateOnEsmStart() throws MachinesSlaEnforcementInProgressException, SomeProcessingUnitsHaveNotCompletedStateRecoveryException, NeedToWaitUntilAllGridServiceAgentsDiscoveredException {
         
-        for (Set<String> zones : machinesEndpoint.getGridServiceAgentsZones()) {
+        for (ExactZonesConfig zones : machinesEndpoint.getGridServiceAgentsZones()) {
             final CapacityMachinesSlaPolicy sla = getMachinesSlaPolicy(zones);
             machinesEndpoint.recoverStateOnEsmStart(sla);
         }

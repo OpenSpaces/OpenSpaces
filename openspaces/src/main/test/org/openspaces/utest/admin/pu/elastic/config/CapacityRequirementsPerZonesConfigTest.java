@@ -25,6 +25,8 @@ import org.junit.Test;
 import org.openspaces.admin.pu.elastic.config.CapacityRequirementsConfig;
 import org.openspaces.admin.pu.elastic.config.CapacityRequirementsConfigurer;
 import org.openspaces.admin.pu.elastic.config.CapacityRequirementsPerZonesConfig;
+import org.openspaces.admin.zone.config.ExactZonesConfig;
+import org.openspaces.admin.zone.config.ExactZonesConfigurer;
 import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerZones;
 
 /**
@@ -34,9 +36,9 @@ import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerZones;
  */
 public class CapacityRequirementsPerZonesConfigTest extends TestCase {
     
-    private static final String[] ZONES1 = new String[] {"zone1"};
-    private static final String[] ZONES2 = new String[] {"zone2"};
-    private static final String[] ZONES3 = new String[] {"zone1,zone2"};
+    private static final ExactZonesConfig ZONES1 = new ExactZonesConfigurer().addZone("zone1").create();
+    private static final ExactZonesConfig ZONES2 = new ExactZonesConfigurer().addZone("zone2").create();
+    private static final ExactZonesConfig ZONES3 = new ExactZonesConfigurer().addZones("zone1","zone2").create();
     private static final CapacityRequirementsConfig ZONES1_CAPACITY = new CapacityRequirementsConfigurer().memoryCapacity("100m").create();
     private static final CapacityRequirementsConfig ZONES2_CAPACITY = new CapacityRequirementsConfigurer().memoryCapacity("100m").create();
     private static final CapacityRequirementsConfig ZONES3_CAPACITY = new CapacityRequirementsConfigurer().memoryCapacity("300m").create();

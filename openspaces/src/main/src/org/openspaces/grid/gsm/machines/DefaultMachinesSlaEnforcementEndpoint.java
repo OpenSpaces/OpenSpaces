@@ -36,6 +36,7 @@ import org.openspaces.admin.gsa.GridServiceAgents;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
+import org.openspaces.admin.zone.config.ExactZonesConfig;
 import org.openspaces.grid.gsm.LogPerProcessingUnit;
 import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.capacity.CapacityRequirement;
@@ -1278,7 +1279,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
     }
 
     @Override
-    public Set<Set<String>> getGridServiceAgentsZones() {
+    public Set<ExactZonesConfig> getGridServiceAgentsZones() {
         return state.getGridServiceAgentsZones(pu);
     }
 }

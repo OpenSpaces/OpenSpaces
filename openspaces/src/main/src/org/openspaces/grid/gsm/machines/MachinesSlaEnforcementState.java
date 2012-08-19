@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -35,21 +36,20 @@ import org.openspaces.admin.Admin;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.pu.ProcessingUnit;
+import org.openspaces.admin.zone.config.ExactZonesConfig;
 import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerAgent;
 import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIsolation;
-
-import java.util.LinkedList;
 
 public class MachinesSlaEnforcementState {
     
     public static class StateKey {
         
         ProcessingUnit pu;
-        Set<String> exactGridServiceAgentZones;
+        ExactZonesConfig exactGridServiceAgentZones;
         
-        public StateKey (ProcessingUnit pu, Set<String> exactGridServiceAgentZones) {
+        public StateKey (ProcessingUnit pu, ExactZonesConfig exactGridServiceAgentZones) {
             this.pu = pu;
             this.exactGridServiceAgentZones = exactGridServiceAgentZones;
         }
@@ -388,7 +388,7 @@ public class MachinesSlaEnforcementState {
         if (key.exactGridServiceAgentZones != null) {
             //add all agents that do not have this specific zone
             for (GridServiceAgent agent : admin.getGridServiceAgents()) {
-                if (!agent.getZones().keySet().equals(key.exactGridServiceAgentZones)) {
+                if (!agent.getZones().keySet().equals(key.exactGridServiceAgentZones.getZones())) {
                     String agentUid = agent.getUid();
                     initValue(restrictedAgentUidsWithReason, agentUid);
                     restrictedAgentUidsWithReason.get(agentUid).add("Agent zones=" + agent.getZones().keySet() +" does not match " + key.exactGridServiceAgentZones);
@@ -468,8 +468,8 @@ public class MachinesSlaEnforcementState {
         return recoveredStatePerProcessingUnit.contains(pu);
     }
 
-    public Set<Set<String>> getGridServiceAgentsZones(ProcessingUnit pu) {
-        Set<Set<String>> zones = new HashSet<Set<String>>();
+    public Set<ExactZonesConfig> getGridServiceAgentsZones(ProcessingUnit pu) {
+        Set<ExactZonesConfig> zones = new HashSet<ExactZonesConfig>();
         for (StateKey key : state.keySet()) {
             if (key.pu.equals(pu)) {
                 zones.add(key.exactGridServiceAgentZones);

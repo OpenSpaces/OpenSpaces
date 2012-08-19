@@ -17,7 +17,6 @@ package org.openspaces.utest.admin.internal.pu.statistics;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -33,8 +32,8 @@ import org.openspaces.admin.pu.statistics.LastSampleTimeWindowStatisticsConfig;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsIdConfigurer;
 import org.openspaces.admin.pu.statistics.SingleInstanceStatisticsConfigurer;
-import org.openspaces.admin.zone.config.AtLeastOneZoneStatisticsConfigurer;
-import org.openspaces.admin.zone.config.ExactZonesStatisticsConfigurer;
+import org.openspaces.admin.zone.config.AtLeastOneZoneConfigurer;
+import org.openspaces.admin.zone.config.ExactZonesConfigurer;
 
 /**
  * @author elip
@@ -90,16 +89,12 @@ public class ZoneStatisticsCalculatorTest extends TestCase {
     
     private ProcessingUnitStatisticsId lastTimeSampleStatisticsId(String instanceUid) {
 
-        HashSet<String> zones = new HashSet<String>();
-        zones.add(ZONE_1);
-        zones.add(ZONE_2);
-        
         return new ProcessingUnitStatisticsIdConfigurer()
             .metric(METRIC)
             .monitor(MONITOR)
             .instancesStatistics(new SingleInstanceStatisticsConfigurer().instanceUid(instanceUid).create())
             .timeWindowStatistics(new LastSampleTimeWindowStatisticsConfig())
-            .zoneStatistics(new ExactZonesStatisticsConfigurer().zones(zones).create())
+            .zoneStatistics(new ExactZonesConfigurer().addZones(ZONE_1,ZONE_2).create())
             .create();
 
         
@@ -120,7 +115,7 @@ public class ZoneStatisticsCalculatorTest extends TestCase {
             .metric(METRIC)
             .timeWindowStatistics(new AverageTimeWindowStatisticsConfigurer().timeWindow(TIME_WINDOW_SECONDS, TimeUnit.SECONDS).create())
             .instancesStatistics(new AverageInstancesStatisticsConfig())
-            .zoneStatistics(new AtLeastOneZoneStatisticsConfigurer().zone(ZONE_1).create())
+            .zoneStatistics(new AtLeastOneZoneConfigurer().addZone(ZONE_1).create())
             .create();
     }
 }

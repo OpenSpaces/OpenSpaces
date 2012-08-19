@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.openspaces.admin.internal.pu.elastic.ScaleStrategyConfigUtils;
+import org.openspaces.admin.zone.config.ExactZonesConfig;
 import org.openspaces.core.util.StringProperties;
 import org.openspaces.grid.gsm.strategy.ManualCapacityPerZonesScaleStrategyBean;
 
@@ -53,7 +54,7 @@ public class ManualCapacityPerZonesScaleConfig implements ScaleStrategyConfig , 
      * @param zone - the location (expressed as a GridServiceAgent zone) in which the capacity is allocated 
      * @param capacityRequirements - the capacity to allocate
      */
-    public void addCapacity(String[] zones, CapacityRequirementsConfig capacity) {
+    public void addCapacity(ExactZonesConfig zones, CapacityRequirementsConfig capacity) {
         capacityPerZone.addCapacity(zones, capacity);
     }
 

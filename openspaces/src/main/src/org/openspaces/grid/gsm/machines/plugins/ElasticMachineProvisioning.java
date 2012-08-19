@@ -17,12 +17,12 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.machines.plugins;
 
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig;
+import org.openspaces.admin.zone.config.ExactZonesConfig;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIsolationAware;
 
@@ -80,7 +80,7 @@ public interface ElasticMachineProvisioning extends ElasticProcessingUnitMachine
 	 * 
 	 * @since 8.0
 	 */
-	GridServiceAgent startMachine(Set<String> zones, long duration,  TimeUnit unit)
+	GridServiceAgent startMachine(ExactZonesConfig zones, long duration,  TimeUnit unit)
 	throws ElasticMachineProvisioningException, InterruptedException , TimeoutException ;
 
 	 /**

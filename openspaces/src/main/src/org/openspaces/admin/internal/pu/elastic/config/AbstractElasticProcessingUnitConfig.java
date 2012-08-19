@@ -207,7 +207,7 @@ public class AbstractElasticProcessingUnitConfig {
 
     @XmlTransient
     public void setMachineProvisioning(ElasticMachineProvisioningConfig machineProvisioningConfig) {
-        if ((machineProvisioningConfig.getGridServiceAgentZones() == null || machineProvisioningConfig.getGridServiceAgentZones().length == 0) && machineProvisioningConfig.isGridServiceAgentZoneMandatory()) {
+        if ((machineProvisioningConfig.getGridServiceAgentZones() == null || machineProvisioningConfig.getGridServiceAgentZones().getZones().isEmpty()) && machineProvisioningConfig.isGridServiceAgentZoneMandatory()) {
             throw new IllegalArgumentException("isGridServiceAgentZoneMandatory returns true, but no Grid Service Agent zone is specified.");
         }
         this.machineProvisioning = machineProvisioningConfig;

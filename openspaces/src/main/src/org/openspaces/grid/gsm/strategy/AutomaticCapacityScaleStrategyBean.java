@@ -218,10 +218,10 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
     }
 
     private CapacityRequirementsPerZones enforceAutoScalingSla(final CapacityRequirementsPerZones capacityRequirementsPerZones) throws AutoScalingSlaEnforcementInProgressException {
-        final String[] dontCareZones = new String[0];
-        final CapacityRequirements capacityRequirements = capacityRequirementsPerZones.getZonesCapacityOrZero(dontCareZones);
+        //TODO: Support multi-zone
+        final CapacityRequirements capacityRequirements = capacityRequirementsPerZones.getZonesCapacityOrZero(super.getDefaultZones());
         final CapacityRequirements newCapacityRequirements = enforceAutoScalingSla(capacityRequirements);
-        return  new CapacityRequirementsPerZones().add(dontCareZones, newCapacityRequirements);
+        return  new CapacityRequirementsPerZones().add(super.getDefaultZones(), newCapacityRequirements);
     }
 
     private CapacityRequirements enforceAutoScalingSla(final CapacityRequirements capacityRequirements)

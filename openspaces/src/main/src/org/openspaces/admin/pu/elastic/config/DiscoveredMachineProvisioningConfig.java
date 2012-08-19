@@ -28,6 +28,8 @@ import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig;
 import org.openspaces.admin.pu.elastic.topology.ElasticDeploymentTopology;
+import org.openspaces.admin.zone.config.AtLeastOneZoneConfig;
+import org.openspaces.admin.zone.config.AtLeastOneZoneConfigurer;
 import org.openspaces.core.util.StringProperties;
 import org.openspaces.grid.gsm.capacity.CapacityRequirement;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
@@ -101,8 +103,9 @@ public class DiscoveredMachineProvisioningConfig implements ElasticMachineProvis
         this.properties.putDouble(MINIMUM_NUMBER_OF_CPU_CORES_PER_MACHINE_KEY, minimumNumberOfCpuCoresPerMachine);       
     }
     
-    public String[] getGridServiceAgentZones() {
-        return this.properties.getArray(MACHINE_AGENT_ZONES_KEY, RESREVED_DRIVES_CAPACITY_MEGABYTES_PER_MACHINE_PAIR_SEPERATOR, MACHINE_AGENT_ZONES_DEFAULT);
+    public AtLeastOneZoneConfig getGridServiceAgentZones() {
+        String[] zones = this.properties.getArray(MACHINE_AGENT_ZONES_KEY, RESREVED_DRIVES_CAPACITY_MEGABYTES_PER_MACHINE_PAIR_SEPERATOR, MACHINE_AGENT_ZONES_DEFAULT);
+        return new AtLeastOneZoneConfigurer().addZones(zones).create();
     }
     
     

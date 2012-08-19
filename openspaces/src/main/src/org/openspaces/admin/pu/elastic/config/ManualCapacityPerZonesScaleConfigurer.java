@@ -17,6 +17,8 @@ package org.openspaces.admin.pu.elastic.config;
 
 import java.util.concurrent.TimeUnit;
 
+import org.openspaces.admin.zone.config.ExactZonesConfig;
+
 /**
  * @author Itai Frenkel
  * @since 9.1.0
@@ -25,7 +27,7 @@ public class ManualCapacityPerZonesScaleConfigurer implements ScaleStrategyConfi
 
     ManualCapacityPerZonesScaleConfig config = new ManualCapacityPerZonesScaleConfig();
     
-    public ManualCapacityPerZonesScaleConfigurer addZone(String[] zones, CapacityRequirementsConfig capacity) {
+    public ManualCapacityPerZonesScaleConfigurer addZone(ExactZonesConfig zones, CapacityRequirementsConfig capacity) {
         config.addCapacity(zones, capacity);
         return this;
     }

@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.openspaces.admin.zone.config.ExactZonesConfig;
 import org.openspaces.grid.gsm.machines.exceptions.MachinesSlaEnforcementInProgressException;
 
 /**
@@ -34,8 +35,8 @@ public class PerZonesMachinesSlaEnforcementInProgressException extends MachinesS
         reasons = new HashMap<Set<String>, MachinesSlaEnforcementInProgressException>();
     }
 
-    public void addReason(Set<String> zones, MachinesSlaEnforcementInProgressException reason) {
-        reasons.put(zones, reason);
+    public void addReason(ExactZonesConfig zones, MachinesSlaEnforcementInProgressException reason) {
+        reasons.put(zones.getZones(), reason);
     }
 
     @Override

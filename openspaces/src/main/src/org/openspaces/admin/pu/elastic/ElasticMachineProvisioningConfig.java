@@ -18,6 +18,7 @@
 package org.openspaces.admin.pu.elastic;
 
 import org.openspaces.admin.bean.BeanConfig;
+import org.openspaces.admin.zone.config.AtLeastOneZoneConfig;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 
 /**
@@ -62,7 +63,7 @@ public interface ElasticMachineProvisioningConfig extends BeanConfig {
      * @since 8.0.1
      * 
      */
-    public String[] getGridServiceAgentZones();
+    public AtLeastOneZoneConfig getGridServiceAgentZones();
     
     /**
      * By default is false, which means that a Grid Service Agents may run a management process. 

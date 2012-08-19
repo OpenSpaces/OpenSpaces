@@ -19,6 +19,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.openspaces.admin.zone.config.ExactZonesConfig;
+
 /**
  * @author Itai Frenkel
  * @since 9.1.0
@@ -32,8 +34,8 @@ public class PerZonesGridServiceAgentSlaEnforcementInProgressException extends G
         reasons = new HashMap<Set<String>, GridServiceAgentSlaEnforcementInProgressException>();
     }
 
-    public void addReason(Set<String> zones, GridServiceAgentSlaEnforcementInProgressException reason) {
-        reasons.put(zones, reason);
+    public void addReason(ExactZonesConfig zones, GridServiceAgentSlaEnforcementInProgressException reason) {
+        reasons.put(zones.getZones(), reason);
     }
 
     @Override

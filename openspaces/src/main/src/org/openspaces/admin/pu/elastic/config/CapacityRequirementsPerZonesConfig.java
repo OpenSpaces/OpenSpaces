@@ -20,6 +20,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.openspaces.admin.zone.config.ExactZonesConfig;
+import org.openspaces.admin.zone.config.ExactZonesConfigurer;
 import org.openspaces.core.util.StringProperties;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerZones;
@@ -58,7 +60,7 @@ public class CapacityRequirementsPerZonesConfig {
         return this.properties.getProperties();
     }
 
-    public void addCapacity(String[] zones, ScaleStrategyCapacityRequirementConfig capacity) {
+    public void addCapacity(ExactZonesConfig zones, ScaleStrategyCapacityRequirementConfig capacity) {
 
         CapacityRequirementsPerZones newCapacityPerZone = 
                 toCapacityRequirementsPerZone()
@@ -84,7 +86,11 @@ public class CapacityRequirementsPerZonesConfig {
         CapacityRequirementsPerZones capacityPerZone = new CapacityRequirementsPerZones();
         for (Entry<String, Map<String,String>> pair : groupPropertiesByZone(keyPrefix, properties).entrySet()) {
             CapacityRequirements capacity = new CapacityRequirementsConfig(pair.getValue()).toCapacityRequirements();
-            capacityPerZone = capacityPerZone.add(StringUtils.commaDelimitedListToStringArray(pair.getKey()), capacity);
+            ExactZonesConfig zones = 
+                new ExactZonesConfigurer()
+                .addZones(StringUtils.commaDelimitedListToStringArray(pair.getKey()))
+                .create();
+            capacityPerZone = capacityPerZone.add(zones, capacity);
         }
         return capacityPerZone;
     }
@@ -108,9 +114,9 @@ public class CapacityRequirementsPerZonesConfig {
 
     private static StringProperties fromCapacityRequirementsPerZone(String keyPrefix, CapacityRequirementsPerZones capacityPerZone) {
         StringProperties capacityProperties = new StringProperties();
-        for (String[] zones : capacityPerZone.getZones()) {
+        for (ExactZonesConfig zones : capacityPerZone.getZones()) {
             Map<String, String> zoneCapacityProperties = new CapacityRequirementsConfig(capacityPerZone.getZonesCapacity(zones)).getProperties();
-            String zonesList = StringUtils.arrayToCommaDelimitedString(zones);
+            String zonesList = StringUtils.collectionToCommaDelimitedString(zones.getZones());
             capacityProperties.putMap(keyPrefix + zonesList + ".", zoneCapacityProperties);
         }
         return capacityProperties;

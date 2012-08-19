@@ -18,7 +18,6 @@
 package org.openspaces.grid.gsm.machines.plugins;
 
 import java.util.Date;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -30,6 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig;
+import org.openspaces.admin.zone.config.ExactZonesConfig;
 import org.openspaces.grid.gsm.capacity.CapacityRequirement;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.NumberOfMachinesCapacityRequirement;
@@ -69,7 +69,7 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
 	@Override
     public FutureGridServiceAgent[] startMachinesAsync(
             final CapacityRequirements capacityRequirements,
-            final Set<String> zones, 
+            final ExactZonesConfig zones, 
             final long duration, final TimeUnit unit) {
 
         if (!isStartMachineSupported()) {
