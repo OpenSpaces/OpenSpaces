@@ -63,7 +63,7 @@ public class CapacityRequirementsPerZonesConfig {
     public void addCapacity(ZonesConfig zones, ScaleStrategyCapacityRequirementConfig capacity) {
 
         CapacityRequirementsPerZones newCapacityPerZone = 
-                toCapacityRequirementsPerZone()
+                toCapacityRequirementsPerZones()
                 .add(zones, capacity.toCapacityRequirements());
         
         StringProperties capacityProperties = 
@@ -82,7 +82,7 @@ public class CapacityRequirementsPerZonesConfig {
         properties.putAll(capacityProperties.getProperties());
     }
     
-    public CapacityRequirementsPerZones toCapacityRequirementsPerZone() {
+    public CapacityRequirementsPerZones toCapacityRequirementsPerZones() {
         CapacityRequirementsPerZones capacityPerZone = new CapacityRequirementsPerZones();
         for (Entry<String, Map<String,String>> pair : groupPropertiesByZone(keyPrefix, properties).entrySet()) {
             CapacityRequirements capacity = new CapacityRequirementsConfig(pair.getValue()).toCapacityRequirements();

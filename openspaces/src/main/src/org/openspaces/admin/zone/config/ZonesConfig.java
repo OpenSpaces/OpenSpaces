@@ -49,6 +49,6 @@ public interface ZonesConfig {
     /**
      * @return true iff the specified zones satisfies or equals this zones requirement
      */
-    boolean satisfiedBy(ExactZonesConfig zoneStatisticsConfig);
+    boolean isSatisfiedBy(ExactZonesConfig zoneStatisticsConfig);
 
 }

@@ -161,7 +161,7 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
     protected void enforceSla() throws SlaEnforcementInProgressException {
         
         SlaEnforcementInProgressException pendingException=null;
-        final CapacityRequirementsPerZones capacityRequirements = super.getCapacityRequirementConfig().toCapacityRequirementsPerZone();
+        final CapacityRequirementsPerZones capacityRequirements = super.getCapacityRequirementConfig().toCapacityRequirementsPerZones();
         
         try {
             super.enforcePlannedCapacity();

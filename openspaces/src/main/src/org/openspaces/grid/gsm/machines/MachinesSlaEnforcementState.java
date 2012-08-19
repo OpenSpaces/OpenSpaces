@@ -368,7 +368,7 @@ public class MachinesSlaEnforcementState {
             }
             boolean allowed = false;
             for (ZonesConfig allowedContainerZones : allowedContainerZoness) {
-                if (container.getExactZones().stasfies(allowedContainerZones)) {
+                if (container.getExactZones().isStasfies(allowedContainerZones)) {
                     allowed = true;
                     break;
                 }

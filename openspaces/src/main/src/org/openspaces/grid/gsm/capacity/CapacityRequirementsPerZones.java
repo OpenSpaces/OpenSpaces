@@ -62,7 +62,7 @@ public class CapacityRequirementsPerZones extends AbstractCapacityRequirementsPe
         return (CapacityRequirementsPerZones) super.subtract(zonesToString(zones), capacity);
     }
 
-    public CapacityRequirementsPerZones subtractZone(
+    public CapacityRequirementsPerZones subtractZones(
             ZonesConfig zones) {
         return (CapacityRequirementsPerZones) super.subtractKey(zonesToString(zones));
     }

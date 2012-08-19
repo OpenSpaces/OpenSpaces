@@ -57,7 +57,7 @@ public class CapacityRequirementsPerZonesConfigTest extends TestCase {
                 .add(ZONES1, ZONES1_CAPACITY.toCapacityRequirements())
                 .add(ZONES2, ZONES2_CAPACITY.toCapacityRequirements().multiply(2))
                 .add(ZONES3, ZONES3_CAPACITY.toCapacityRequirements());
-        Assert.assertEquals(expected, config.toCapacityRequirementsPerZone());
+        Assert.assertEquals(expected, config.toCapacityRequirementsPerZones());
         Assert.assertEquals("world", properties.get("hello"));
     }
 }

@@ -153,7 +153,7 @@ public class DefaultProcessingUnitStatistics implements InternalProcessingUnitSt
                 }
                 
                 ExactZonesConfig zoneStatistics = instances.get(instancesStatistics);
-                if (!statisticsId.getZoneStatistics().satisfiedBy(zoneStatistics)) {
+                if (!statisticsId.getZoneStatistics().isSatisfiedBy(zoneStatistics)) {
                     if (logger.isDebugEnabled()) {
                         logger.debug("Failed to find instance UID " + instancesStatistics.getInstanceUid() + " with zones " + zoneStatistics.getZones() + " which satisfies zones " + statisticsId.getZoneStatistics());
                     }

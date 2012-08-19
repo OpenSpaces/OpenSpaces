@@ -206,7 +206,7 @@ public class MachinesSlaUtils {
      * @return true if specified agent matches the machineProvisioningConfig zone isolation criteria
      */
     private static boolean zoneFilter(GridServiceAgent agent, ElasticMachineProvisioningConfig machineProvisioningConfig) {
-        boolean match = agent.getExactZones().stasfies(machineProvisioningConfig.getGridServiceAgentZones());
+        boolean match = agent.getExactZones().isStasfies(machineProvisioningConfig.getGridServiceAgentZones());
         if (agent.getExactZones().getZones().isEmpty() && 
             machineProvisioningConfig.isGridServiceAgentZoneMandatory()) {
             match = false;

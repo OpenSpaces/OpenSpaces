@@ -42,27 +42,27 @@ public class ZonesConfigTest extends TestCase {
     
     @Test
     public void testAnyZoneConfig() {
-        assertTrue(ANY_ZONE.satisfiedBy(EXACT_ZONE1));
-        assertTrue(ANY_ZONE.satisfiedBy(EXACT_ZONE2));
-        assertTrue(ANY_ZONE.satisfiedBy(EXACT_ZONE1_ZONE2));
-        assertTrue(ANY_ZONE.satisfiedBy(NO_ZONE));
+        assertTrue(ANY_ZONE.isSatisfiedBy(EXACT_ZONE1));
+        assertTrue(ANY_ZONE.isSatisfiedBy(EXACT_ZONE2));
+        assertTrue(ANY_ZONE.isSatisfiedBy(EXACT_ZONE1_ZONE2));
+        assertTrue(ANY_ZONE.isSatisfiedBy(NO_ZONE));
     }
     
     @Test
     public void testAtLeastOneZoneConfig() {
-        assertTrue(AT_LEAST_ZONE1.satisfiedBy(EXACT_ZONE1));
-        assertFalse(AT_LEAST_ZONE1.satisfiedBy(EXACT_ZONE2));
-        assertTrue(AT_LEAST_ZONE1.satisfiedBy(EXACT_ZONE1_ZONE2));
-        assertFalse(AT_LEAST_ZONE1.satisfiedBy(NO_ZONE));
+        assertTrue(AT_LEAST_ZONE1.isSatisfiedBy(EXACT_ZONE1));
+        assertFalse(AT_LEAST_ZONE1.isSatisfiedBy(EXACT_ZONE2));
+        assertTrue(AT_LEAST_ZONE1.isSatisfiedBy(EXACT_ZONE1_ZONE2));
+        assertFalse(AT_LEAST_ZONE1.isSatisfiedBy(NO_ZONE));
         
-        assertFalse(AT_LEAST_ZONE3.satisfiedBy(EXACT_ZONE1));
-        assertFalse(AT_LEAST_ZONE3.satisfiedBy(EXACT_ZONE2));
-        assertFalse(AT_LEAST_ZONE3.satisfiedBy(EXACT_ZONE1_ZONE2));
-        assertFalse(AT_LEAST_ZONE3.satisfiedBy(NO_ZONE));
+        assertFalse(AT_LEAST_ZONE3.isSatisfiedBy(EXACT_ZONE1));
+        assertFalse(AT_LEAST_ZONE3.isSatisfiedBy(EXACT_ZONE2));
+        assertFalse(AT_LEAST_ZONE3.isSatisfiedBy(EXACT_ZONE1_ZONE2));
+        assertFalse(AT_LEAST_ZONE3.isSatisfiedBy(NO_ZONE));
         
-        assertTrue(AT_LEAST_ZONE1_OR_ZONE3.satisfiedBy(EXACT_ZONE1));
-        assertFalse(AT_LEAST_ZONE1_OR_ZONE3.satisfiedBy(EXACT_ZONE2));
-        assertTrue(AT_LEAST_ZONE1_OR_ZONE3.satisfiedBy(EXACT_ZONE1_ZONE2));
-        assertFalse(AT_LEAST_ZONE1_OR_ZONE3.satisfiedBy(NO_ZONE));
+        assertTrue(AT_LEAST_ZONE1_OR_ZONE3.isSatisfiedBy(EXACT_ZONE1));
+        assertFalse(AT_LEAST_ZONE1_OR_ZONE3.isSatisfiedBy(EXACT_ZONE2));
+        assertTrue(AT_LEAST_ZONE1_OR_ZONE3.isSatisfiedBy(EXACT_ZONE1_ZONE2));
+        assertFalse(AT_LEAST_ZONE1_OR_ZONE3.isSatisfiedBy(NO_ZONE));
     }
 }

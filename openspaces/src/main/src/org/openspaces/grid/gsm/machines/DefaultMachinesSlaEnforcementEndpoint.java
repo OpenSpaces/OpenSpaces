@@ -168,7 +168,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             // Recover the endpoint state based on running containers.
             CapacityRequirementsPerAgent allocatedCapacityForPu = state.getAllocatedCapacity(pu);
             for (GridServiceAgent agent: admin.getGridServiceAgents()) {
-                if (!sla.getGridServiceAgentZones().satisfiedBy(agent.getExactZones())) {
+                if (!sla.getGridServiceAgentZones().isSatisfiedBy(agent.getExactZones())) {
                     continue;
                 }
                 String agentUid = agent.getUid();

@@ -42,7 +42,7 @@ public class AtLeastOneZoneConfig
     }
 
     @Override
-    public boolean satisfiedBy(ExactZonesConfig existingZoneStatisticsConfig) {
+    public boolean isSatisfiedBy(ExactZonesConfig existingZoneStatisticsConfig) {
 
         if (this.getZones().isEmpty()) {
             throw new IllegalStateException("No zones defined");
