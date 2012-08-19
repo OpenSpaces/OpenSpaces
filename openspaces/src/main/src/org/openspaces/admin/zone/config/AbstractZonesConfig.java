@@ -43,8 +43,17 @@ public abstract class AbstractZonesConfig
      */
     @Override
     public void validate() throws IllegalStateException {
-        if (getZones() == null) {
+        Set<String> zones = getZones();
+        if (zones == null) {
             throw new IllegalStateException("zones cannot be null");
+        }
+        for (String zone : zones) {
+            if (zone == null) {
+                throw new IllegalStateException("zone cannot be null");
+            }
+            if (zone.isEmpty()) {
+                throw new IllegalStateException("zone cannot be empty");
+            }
         }
     }
     
@@ -56,5 +65,6 @@ public abstract class AbstractZonesConfig
     
     public void setZones(Set<String> zones) {
         super.getStringProperties().putSet(ZONES_KEY, zones, ",");
+        validate();
     }
 }

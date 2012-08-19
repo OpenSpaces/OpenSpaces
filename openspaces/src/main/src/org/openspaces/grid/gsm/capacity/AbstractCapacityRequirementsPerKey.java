@@ -20,9 +20,9 @@ package org.openspaces.grid.gsm.capacity;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 abstract class AbstractCapacityRequirementsPerKey {
 
@@ -32,7 +32,7 @@ abstract class AbstractCapacityRequirementsPerKey {
     
     protected AbstractCapacityRequirementsPerKey() {
         // use consistent ordering of machines so unit tests and bugs will have consistent iterator behavior.
-        this.capacityPerKey = new TreeMap<String, CapacityRequirements>();
+        this.capacityPerKey = new HashMap<String, CapacityRequirements>();
         totalCapacity = new CapacityRequirements();
     }
         
@@ -122,6 +122,14 @@ abstract class AbstractCapacityRequirementsPerKey {
     protected AbstractCapacityRequirementsPerKey add(
             String key, 
             CapacityRequirements capacity) {
+        
+        if (key == null) {
+            throw new IllegalArgumentException("key cannot be null");
+        }
+        
+        if (key.length() == 0) {
+            throw new IllegalArgumentException("key cannot be empty");
+        }
         
         AbstractCapacityRequirementsPerKey sum = newZeroInstance();
         sum.addAllInternal(this);

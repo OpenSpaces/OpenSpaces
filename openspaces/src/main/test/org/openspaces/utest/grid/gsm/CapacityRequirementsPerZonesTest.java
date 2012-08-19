@@ -74,8 +74,12 @@ public class CapacityRequirementsPerZonesTest extends TestCase {
     }
     
     private void validateToConfig(CapacityRequirementsPerZones capacityPerZones) {
+        for (ZonesConfig zones : capacityPerZones.getZones()) {
+            Assert.assertFalse(capacityPerZones.getZonesCapacity(zones).equalsZero());
+        }
+        CapacityRequirementsPerZonesConfig config = new CapacityRequirementsPerZonesConfig(capacityPerZones);
         Assert.assertEquals(
                 capacityPerZones,
-                new CapacityRequirementsPerZonesConfig(capacityPerZones).toCapacityRequirementsPerZones());
+                config.toCapacityRequirementsPerZones());
     }
 }
