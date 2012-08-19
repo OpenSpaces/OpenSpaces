@@ -17,6 +17,7 @@
  ******************************************************************************/
 package org.openspaces.admin.zone.config;
 
+import java.util.Collection;
 import java.util.Set;
 
 public interface ZonesConfigurer<T extends ZonesConfig> {
@@ -24,7 +25,7 @@ public interface ZonesConfigurer<T extends ZonesConfig> {
     /**
      * @see ZonesConfig#setZones(Set)
      */
-    ZonesConfigurer<T> addZones(Set<String> zones);
+    ZonesConfigurer<T> addZones(Collection<String> zones);
     
     /**
      * @see ZonesConfig#setZones(Set)

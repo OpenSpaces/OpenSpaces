@@ -16,6 +16,7 @@
 package org.openspaces.admin.zone.config;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -33,21 +34,25 @@ public class AtLeastOneZoneConfigurer implements ZonesConfigurer<AtLeastOneZoneC
         config = new AtLeastOneZoneConfig();
     }
     
-    public AtLeastOneZoneConfigurer addZones(Set<String> zones) {
+    @Override
+    public AtLeastOneZoneConfigurer addZones(Collection<String> zones) {
         this.zones.addAll(zones);
         return this;
     }
     
+    @Override
     public AtLeastOneZoneConfigurer addZones(String... zones) {
         this.zones.addAll(Arrays.asList(zones));
         return this;
     }
     
+    @Override
     public AtLeastOneZoneConfigurer addZone(String zone) {
         this.zones.add(zone);
         return this;
     }
     
+    @Override
     public AtLeastOneZoneConfig create() {
         if (zones.isEmpty()) {
             throw new IllegalArgumentException("No Zones Defined");

@@ -16,6 +16,7 @@
 package org.openspaces.admin.zone.config;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -32,21 +33,25 @@ public class ExactZonesConfigurer implements ZonesConfigurer<ExactZonesConfig>{
         config = new ExactZonesConfig();
     }
     
-    public ExactZonesConfigurer addZones(Set<String> zones) {
+    @Override
+    public ExactZonesConfigurer addZones(Collection<String> zones) {
         this.zones.addAll(zones);
         return this;
     }
     
+    @Override
     public ExactZonesConfigurer addZones(String... zones) {
         this.zones.addAll(Arrays.asList(zones));
         return this;
     }
     
+    @Override
     public ExactZonesConfigurer addZone(String zone) {
         this.zones.add(zone);
         return this;
     }
     
+    @Override
     public ExactZonesConfig create() {
         config.setZones(zones);
         config.validate();
