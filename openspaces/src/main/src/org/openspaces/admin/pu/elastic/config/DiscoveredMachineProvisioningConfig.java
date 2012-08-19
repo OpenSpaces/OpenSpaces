@@ -313,16 +313,4 @@ public class DiscoveredMachineProvisioningConfig implements ElasticMachineProvis
     private static double getNumberOfCpuCores(Machine machine) {
         return machine.getOperatingSystem().getDetails().getAvailableProcessors();
     }
-
-    @Override
-    public boolean isGridServiceAgentZonesAffinity() {
-        return this.properties.getBoolean(MACHINE_AGENT_ZONES_AFFINITY_KEY, MACHINE_AGENT_ZONES_AFFINITY_DEFAULT);
-    }
-
-    /**
-     * @see ElasticMachineProvisioningConfig#isGridServiceAgentZonesAffinity()
-     */
-    public void setGridServiceAgentZonesAffinity(boolean enableAgentZonesAffinity) {
-        this.properties.putBoolean(MACHINE_AGENT_ZONES_AFFINITY_KEY, enableAgentZonesAffinity);       
-    }
 }

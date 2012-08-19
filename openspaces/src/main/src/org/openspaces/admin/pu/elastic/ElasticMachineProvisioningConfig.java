@@ -18,8 +18,6 @@
 package org.openspaces.admin.pu.elastic;
 
 import org.openspaces.admin.bean.BeanConfig;
-import org.openspaces.admin.pu.elastic.config.AutomaticCapacityScaleRuleConfig;
-import org.openspaces.admin.zone.config.ExactZonesConfig;
 import org.openspaces.admin.zone.config.ZonesConfig;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 
@@ -99,18 +97,4 @@ public interface ElasticMachineProvisioningConfig extends BeanConfig {
      */
     @Deprecated
     boolean isGridServiceAgentZoneMandatory();
-
-    /**
-     * By default is false, which means that the following machines:
-     * - Machines started due to failover of another machine.
-     * - Machines started by {@link AutomaticCapacityScaleRuleConfig} sue to threshold breach 
-     * are started with a Grid Service Agent zones as described in {@link #getGridServiceAgentZones()}
-     * 
-     * When true, these machines are started with the same {@link ExactZonesConfig} as the failed machine, 
-     * or the same {@link ExactZonesConfig} as the machines whose threshold was breached.
-     *   
-     * @since 9.1.0
-     */
-    boolean isGridServiceAgentZonesAffinity();
-
 }

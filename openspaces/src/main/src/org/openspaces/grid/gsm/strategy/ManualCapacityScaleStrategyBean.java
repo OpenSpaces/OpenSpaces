@@ -45,8 +45,12 @@ public class ManualCapacityScaleStrategyBean extends AbstractCapacityScaleStrate
         super.enforcePlannedCapacity();
     }
     
+    @Override
+    protected boolean isGridServiceAgentZonesAffinity() {
+        return false;
+    }
+    
     public ManualCapacityScaleConfig getConfig() {
         return new ManualCapacityScaleConfig(super.getProperties());
     }
-
 }

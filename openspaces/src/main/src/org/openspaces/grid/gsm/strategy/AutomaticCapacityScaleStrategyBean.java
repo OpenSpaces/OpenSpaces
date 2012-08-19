@@ -313,4 +313,9 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
     private void autoScalingInProgressEvent(AutoScalingSlaEnforcementInProgressException e) {
         autoScalingEventState.enqueuProvisioningInProgressEvent(e);
     }
+
+    @Override
+    protected boolean isGridServiceAgentZonesAffinity() {
+        return config.isGridServiceAgentZonesAffinity();
+    }
 }

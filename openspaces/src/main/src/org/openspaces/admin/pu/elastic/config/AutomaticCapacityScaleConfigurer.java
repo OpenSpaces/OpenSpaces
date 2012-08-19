@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
  * @since 9.0
  * @see AutomaticCapacityScaleConfig
  */
-public class AutomaticCapacityScaleConfigurer implements ScaleStrategyConfigurer<AutomaticCapacityScaleConfig>{
+public class AutomaticCapacityScaleConfigurer implements ScaleStrategyConfigurer<AutomaticCapacityScaleConfig> , ScaleStrategyAgentZonesAffinityConfigurer {
 
     private final AutomaticCapacityScaleConfig config;
     private final List<AutomaticCapacityScaleRuleConfig> rules = new ArrayList<AutomaticCapacityScaleRuleConfig>();
@@ -59,6 +59,12 @@ public class AutomaticCapacityScaleConfigurer implements ScaleStrategyConfigurer
         return this;
     }
     
+    @Override
+    public AutomaticCapacityScaleConfigurer enableGridServiceAgentZonesAffinity() {
+        config.setGridServiceAgentZonesAffinity(true);
+        return this;
+    }
+        
     public AutomaticCapacityScaleConfigurer cooldownAfterScaleOut(long cooldown, TimeUnit timeUnit) {
         config.setCooldownAfterScaleOutSeconds(timeUnit.toSeconds(cooldown));
         return this;
@@ -93,9 +99,9 @@ public class AutomaticCapacityScaleConfigurer implements ScaleStrategyConfigurer
         rules.add(rule);
         return this;
     }
-    
     public AutomaticCapacityScaleConfig create() {
         config.setRules(rules.toArray(new AutomaticCapacityScaleRuleConfig[rules.size()]));
         return config;
     }
+
 }

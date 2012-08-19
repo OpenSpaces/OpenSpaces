@@ -35,6 +35,8 @@ public class ScaleStrategyConfigUtils {
     private static final int MAX_NUMBER_OF_CONCURRENT_RELOCATIONS_PER_MACHINE_DEFAULT = 1;
     private static final boolean AT_MOST_ONE_CONTAINER_PER_MACHINE_DEFAULT = false;
     private static final String AT_MOST_ONE_CONTAINER_PER_MACHINE_KEY = "at-most-one-container-per-machine";
+    private static final String ENABLE_AGENT_ZONES_AFFINITY_KEY = "enable-agent-zones-affinity";
+    private static final boolean ENABLE_AGENT_ZONES_AFFINITY_DEFAULT = false;
     
     public static void setMaxNumberOfContainersPerMachine(
             StringProperties properties,
@@ -113,6 +115,14 @@ public class ScaleStrategyConfigUtils {
     
     public static boolean isSingleContainerPerMachine(StringProperties properties) {
         return properties.getBoolean(AT_MOST_ONE_CONTAINER_PER_MACHINE_KEY,AT_MOST_ONE_CONTAINER_PER_MACHINE_DEFAULT);
+    }
+
+    public static boolean isGridServiceAgentZonesAffinity(StringProperties properties) {
+        return properties.getBoolean(ENABLE_AGENT_ZONES_AFFINITY_KEY,ENABLE_AGENT_ZONES_AFFINITY_DEFAULT);
+    }
+
+    public static void setGridServiceAgentZonesAffinity(StringProperties properties, boolean enableAgentZonesAffinity) {
+        properties.putBoolean(ENABLE_AGENT_ZONES_AFFINITY_KEY,enableAgentZonesAffinity);
     }
 
 }
