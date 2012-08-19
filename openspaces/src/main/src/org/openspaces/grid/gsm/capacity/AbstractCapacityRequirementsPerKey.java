@@ -1,0 +1,267 @@
+/*******************************************************************************
+ * 
+ * Copyright (c) 2012 GigaSpaces Technologies Ltd. All rights reserved
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *  
+ ******************************************************************************/
+package org.openspaces.grid.gsm.capacity;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
+abstract class AbstractCapacityRequirementsPerKey<T extends AbstractCapacityRequirementsPerKey<?>> {
+
+    // allocated capacity per key
+    private final Map<String,CapacityRequirements> capacityPerKey;
+    private CapacityRequirements totalCapacity;
+    
+    protected AbstractCapacityRequirementsPerKey() {
+        // use consistent ordering of machines so unit tests and bugs will have consistent iterator behavior.
+        this.capacityPerKey = new TreeMap<String, CapacityRequirements>();
+        totalCapacity = new CapacityRequirements();
+    }
+        
+    public CapacityRequirements getTotalAllocatedCapacity() {
+        return totalCapacity;
+    }
+    
+    public boolean equalsZero() {
+        return capacityPerKey.isEmpty();
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((capacityPerKey == null) ? 0 : capacityPerKey.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        AbstractCapacityRequirementsPerKey other = (AbstractCapacityRequirementsPerKey) obj;
+        if (capacityPerKey == null) {
+            if (other.capacityPerKey != null)
+                return false;
+        } else if (!capacityPerKey.equals(other.capacityPerKey))
+            return false;
+        return true;
+    }
+
+    protected Collection<String> getKeys() {
+        return capacityPerKey.keySet();
+    }
+    
+    @Override
+    public String toString() {
+        return capacityPerKey.size() + " machines with total capacity of " + getTotalAllocatedCapacity();
+    }
+    
+    public String toDetailedString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("totalNumberOfMachines:" + capacityPerKey.size() + " , totalCapacity:" + getTotalAllocatedCapacity()+", details:{");
+        List<String> keySet = new ArrayList<String>(capacityPerKey.keySet());
+        Collections.sort(keySet);
+        for (String key : keySet) {
+            builder.append(key + ":" + capacityPerKey.get(key)+" , ");
+        }
+        builder.append("}");
+        return builder.toString();
+    }
+    
+    @SuppressWarnings("unchecked")
+    public T add(T other) {
+        if (other.equalsZero()) {
+            return (T) this;
+        }
+        
+        T sum = newZeroInstance();
+        sum.addAllInternal(this);
+        sum.addAllInternal(other);
+        return sum;
+    }
+
+    public T subtract(
+            T other) {
+
+        T diff = newZeroInstance();
+        diff.addAllInternal(this);
+        diff.subtractAllInternal(other);
+        return diff;
+    }
+
+    protected abstract T newZeroInstance();
+    
+    protected T set(String key, CapacityRequirements capacity) {
+        T sum = newZeroInstance();
+        sum.addAllInternal(this);
+        sum.setInternal(key,capacity);
+        return sum;
+    }
+    
+    protected T add(
+            String key, 
+            CapacityRequirements capacity) {
+        
+        T sum = newZeroInstance();
+        sum.addAllInternal(this);
+        sum.addInternal(key,capacity);
+        return sum;
+        
+    }
+    
+    protected T subtract(
+            String key, 
+            CapacityRequirements capacity) {
+        
+        T remaining = newZeroInstance();
+        remaining.addAllInternal(this);
+        remaining.subtractInternal(key,capacity);
+        return remaining;
+    }
+
+
+
+    protected T subtractKey(
+            String key) {
+        return subtract(key, this.getKeyCapacity(key));
+    }
+    
+    protected T subtractOrZero(
+           String key, CapacityRequirements capacity) {
+        
+        T remaining = newZeroInstance();
+        remaining.addAllInternal(this);
+        remaining.subtractOrZeroInternal(key,capacity);
+        return remaining;
+    }
+
+
+    protected CapacityRequirements getKeyCapacity(String key) {
+        if (!capacityPerKey.containsKey(key)) {
+            throw new IllegalArgumentException(key);
+        }
+        return this.capacityPerKey.get(key);
+    }
+    
+    protected CapacityRequirements getKeyCapacityOrZero(String key) {
+        
+        if (capacityPerKey.containsKey(key)) {
+            return this.capacityPerKey.get(key);
+        }
+        else {
+            return new CapacityRequirements();
+        }
+    }
+    
+    private void addAllInternal(AbstractCapacityRequirementsPerKey <?> clusterCapacityRequirements) {
+        for (String key : clusterCapacityRequirements.capacityPerKey.keySet()) {
+            CapacityRequirements capacity = clusterCapacityRequirements.capacityPerKey.get(key);
+            addInternal(key,capacity);
+        }
+    }
+    
+    private void subtractAllInternal(AbstractCapacityRequirementsPerKey<?> aggregatedCapacity) {
+        for (String key : aggregatedCapacity.capacityPerKey.keySet()) {
+            CapacityRequirements capacity = aggregatedCapacity.capacityPerKey.get(key);
+            subtractInternal(key,capacity);
+        }
+    }
+    
+    private void setInternal(String key, CapacityRequirements newCapacity) {
+
+        CapacityRequirements oldCapacity = capacityPerKey.get(key);
+        
+        if (newCapacity.equalsZero()) {
+            capacityPerKey.remove(key);
+        }
+        else {
+            capacityPerKey.put(key,newCapacity);
+        }
+        
+        totalCapacity = totalCapacity.subtract(oldCapacity).add(newCapacity);
+    
+    }
+
+    private void addInternal(String key, CapacityRequirements capacityToAdd) {
+        
+        validateAllocation(capacityToAdd);
+        CapacityRequirements sumCapacity = capacityToAdd;
+        if (capacityPerKey.containsKey(key)) {
+            
+            sumCapacity = sumCapacity.add(capacityPerKey.get(key));
+        }
+        
+        capacityPerKey.put(key,sumCapacity);
+        totalCapacity = totalCapacity.add(capacityToAdd);
+    }
+
+  
+    private void subtractInternal(String key, CapacityRequirements capacity) {
+        
+        validateAllocation(capacity);
+        
+        if (!capacityPerKey.containsKey(key)) {
+            throw new IllegalArgumentException("Agent UID " + key + " no found");
+        }
+        
+        CapacityRequirements newAllocation = 
+            capacityPerKey.get(key).subtract(capacity);
+        
+        updateKeyCapacity(key, newAllocation);
+        
+        totalCapacity = totalCapacity.subtract(capacity);
+    }
+    
+
+    private void subtractOrZeroInternal(String key, CapacityRequirements capacity) {
+   validateAllocation(capacity);
+        
+        if (!capacityPerKey.containsKey(key)) {
+            throw new IllegalArgumentException("Agent UID " + key + " no found");
+        }
+        
+        CapacityRequirements newAllocation = 
+            capacityPerKey.get(key).subtractOrZero(capacity);
+        
+        updateKeyCapacity(key, newAllocation);
+        totalCapacity = totalCapacity.subtract(capacity);
+        
+    }
+
+    private void updateKeyCapacity(String key, CapacityRequirements newAllocation) {
+        if (newAllocation.equalsZero()) {
+            capacityPerKey.remove(key);
+        }
+        else {
+            capacityPerKey.put(key,newAllocation);
+        }
+    }
+    
+    private void validateAllocation(CapacityRequirements allocation) {
+        if (allocation.equalsZero()) {
+            throw new IllegalArgumentException(allocation + " equals zero");
+        }
+    }
+}
