@@ -58,32 +58,6 @@ public class ManualCapacityPerZonesScaleConfig implements ScaleStrategyConfig , 
         capacityPerZone.addCapacity(zones, capacity);
     }
 
-    @Override
-    public String getBeanClassName() {
-        return ManualCapacityPerZonesScaleStrategyBean.class.getName();
-    }
-
-    @Override
-    public void setProperties(Map<String, String> properties) {
-        this.properties = new StringProperties(properties);
-        capacityPerZone = new CapacityRequirementsPerZonesConfig(ZONE_PREFIX, properties);
-    }
-
-    @Override
-    public Map<String, String> getProperties() {
-        return properties.getProperties();
-    }
-
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        out.writeObject(this.properties.getProperties());
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        this.properties = new StringProperties((Map<String,String>)in.readObject());
-    }
 
     @Override
     public void setPollingIntervalSeconds(int seconds) {
@@ -127,5 +101,57 @@ public class ManualCapacityPerZonesScaleConfig implements ScaleStrategyConfig , 
     
     public CapacityRequirementsPerZonesConfig getCapacityRequirementsPerZonesConfig() {
         return capacityPerZone;
+    }
+    
+    @Override
+    public String getBeanClassName() {
+        return ManualCapacityPerZonesScaleStrategyBean.class.getName();
+    }
+
+    @Override
+    public void setProperties(Map<String, String> properties) {
+        this.properties = new StringProperties(properties);
+        capacityPerZone = new CapacityRequirementsPerZonesConfig(ZONE_PREFIX, properties);
+    }
+
+    @Override
+    public Map<String, String> getProperties() {
+        return properties.getProperties();
+    }
+
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeObject(this.properties.getProperties());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        this.properties = new StringProperties((Map<String,String>)in.readObject());
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((properties == null) ? 0 : properties.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ManualCapacityPerZonesScaleConfig other = (ManualCapacityPerZonesScaleConfig) obj;
+        if (properties == null) {
+            if (other.properties != null)
+                return false;
+        } else if (!properties.equals(other.properties))
+            return false;
+        return true;
     }
 }
