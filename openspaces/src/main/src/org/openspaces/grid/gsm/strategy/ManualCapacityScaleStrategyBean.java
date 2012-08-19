@@ -46,7 +46,7 @@ public class ManualCapacityScaleStrategyBean extends AbstractCapacityScaleStrate
     }
     
     @Override
-    protected boolean isGridServiceAgentZonesAffinity() {
+    protected boolean isGridServiceAgentZonesAware() {
         return false;
     }
     

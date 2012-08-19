@@ -31,7 +31,7 @@ import org.openspaces.core.util.MemoryUnit;
  * @since 8.0
  * @see ManualCapacityScaleConfig
  */
-public class ManualCapacityScaleConfigurer implements ScaleStrategyConfigurer<ManualCapacityScaleConfig> , ScaleStrategyCapacityRequirementConfigurer , ScaleStrategyAgentZonesAffinityConfigurer {
+public class ManualCapacityScaleConfigurer implements ScaleStrategyConfigurer<ManualCapacityScaleConfig> , ScaleStrategyCapacityRequirementConfigurer , ScaleStrategyAgentZonesAwareConfigurer {
 
     private final ManualCapacityScaleConfig config;
     
@@ -99,8 +99,8 @@ public class ManualCapacityScaleConfigurer implements ScaleStrategyConfigurer<Ma
     }
     
     @Override
-    public ManualCapacityScaleConfigurer enableGridServiceAgentZonesAffinity() {
-        config.setGridServiceAgentZonesAffinity(true);
+    public ManualCapacityScaleConfigurer enableGridServiceAgentZonesAware() {
+        config.setGridServiceAgentZonesAware(true);
         return this;
     }
     

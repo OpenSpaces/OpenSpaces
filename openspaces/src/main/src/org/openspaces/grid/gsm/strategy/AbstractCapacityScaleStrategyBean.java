@@ -249,7 +249,7 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
             ZonesConfig zones = sla.getGridServiceAgentZones();
             try {
                 enforceMachinesSla(sla);
-                if (isGridServiceAgentZonesAffinity()) {
+                if (isGridServiceAgentZonesAware()) {
                 
                     CapacityRequirementsPerAgent allocatedCapacity = 
                             machinesEndpoint.getAllocatedCapacity(sla);
@@ -316,7 +316,7 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
         }
     }
     
-    protected abstract boolean isGridServiceAgentZonesAffinity();
+    protected abstract boolean isGridServiceAgentZonesAware();
 
     /**
      * Replaces the planned capacity of the specified zones, with the specified new planned capacity

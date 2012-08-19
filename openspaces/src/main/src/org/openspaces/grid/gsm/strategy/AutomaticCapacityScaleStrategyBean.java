@@ -315,7 +315,7 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
     }
 
     @Override
-    protected boolean isGridServiceAgentZonesAffinity() {
-        return config.isGridServiceAgentZonesAffinity();
+    protected boolean isGridServiceAgentZonesAware() {
+        return config.isGridServiceAgentZonesAware();
     }
 }

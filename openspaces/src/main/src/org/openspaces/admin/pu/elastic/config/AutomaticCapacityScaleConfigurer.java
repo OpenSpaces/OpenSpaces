@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
  * @since 9.0
  * @see AutomaticCapacityScaleConfig
  */
-public class AutomaticCapacityScaleConfigurer implements ScaleStrategyConfigurer<AutomaticCapacityScaleConfig> , ScaleStrategyAgentZonesAffinityConfigurer {
+public class AutomaticCapacityScaleConfigurer implements ScaleStrategyConfigurer<AutomaticCapacityScaleConfig> , ScaleStrategyAgentZonesAwareConfigurer {
 
     private final AutomaticCapacityScaleConfig config;
     private final List<AutomaticCapacityScaleRuleConfig> rules = new ArrayList<AutomaticCapacityScaleRuleConfig>();
@@ -60,8 +60,8 @@ public class AutomaticCapacityScaleConfigurer implements ScaleStrategyConfigurer
     }
     
     @Override
-    public AutomaticCapacityScaleConfigurer enableGridServiceAgentZonesAffinity() {
-        config.setGridServiceAgentZonesAffinity(true);
+    public AutomaticCapacityScaleConfigurer enableGridServiceAgentZonesAware() {
+        config.setGridServiceAgentZonesAware(true);
         return this;
     }
         

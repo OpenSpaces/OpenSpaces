@@ -21,7 +21,7 @@ import org.openspaces.admin.zone.config.ExactZonesConfig;
  * @author Itai Frenkel
  * @since 9.1.0
  */
-public interface ScaleStrategyAgentZonesAffinityConfigurer {
+public interface ScaleStrategyAgentZonesAwareConfigurer {
 
     /**
      * By default disabled, which means that the following machines:
@@ -34,5 +34,5 @@ public interface ScaleStrategyAgentZonesAffinityConfigurer {
      *   
      * @since 9.1.0
      */
-    ScaleStrategyAgentZonesAffinityConfigurer enableGridServiceAgentZonesAffinity();
+    ScaleStrategyAgentZonesAwareConfigurer enableGridServiceAgentZonesAware();
 }

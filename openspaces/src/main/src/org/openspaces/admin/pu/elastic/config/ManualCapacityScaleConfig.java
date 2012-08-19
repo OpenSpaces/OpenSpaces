@@ -41,7 +41,7 @@ import org.openspaces.grid.gsm.strategy.ManualCapacityScaleStrategyBean;
  * @author itaif
  */
 public class ManualCapacityScaleConfig 
-    implements ScaleStrategyConfig , ScaleStrategyCapacityRequirementConfig, ScaleStrategyAgentZonesAffinityConfig, Externalizable {
+    implements ScaleStrategyConfig , ScaleStrategyCapacityRequirementConfig, ScaleStrategyAgentZonesAwareConfig, Externalizable {
 
     private static final long serialVersionUID = 1L;
 
@@ -150,13 +150,13 @@ public class ManualCapacityScaleConfig
     }
 
     @Override
-    public boolean isGridServiceAgentZonesAffinity() {
-        return ScaleStrategyConfigUtils.isGridServiceAgentZonesAffinity(properties);
+    public boolean isGridServiceAgentZonesAware() {
+        return ScaleStrategyConfigUtils.isGridServiceAgentZonesAware(properties);
     }
     
     @Override
-    public void setGridServiceAgentZonesAffinity(boolean enableAgentZonesAffinity) {
-        ScaleStrategyConfigUtils.setGridServiceAgentZonesAffinity(properties, enableAgentZonesAffinity);
+    public void setGridServiceAgentZonesAware(boolean enableAgentZonesAware) {
+        ScaleStrategyConfigUtils.setGridServiceAgentZonesAware(properties, enableAgentZonesAware);
     }
 
     @Override

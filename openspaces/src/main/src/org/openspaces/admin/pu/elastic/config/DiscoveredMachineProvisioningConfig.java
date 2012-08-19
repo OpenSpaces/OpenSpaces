@@ -64,8 +64,6 @@ public class DiscoveredMachineProvisioningConfig implements ElasticMachineProvis
     private static final String RESREVED_DRIVES_CAPACITY_MEGABYTES_PER_MACHINE_PAIR_SEPERATOR = ",";
     private static final String RESERVED_CPU_PER_MACHINE_KEY = "reserved-cpu-cores-per-machine";
     private static final double RESERVED_CPU_PER_MACHINE_DEFAULT = 0.0;
-    private static final String MACHINE_AGENT_ZONES_AFFINITY_KEY = "machine-agent-zones-affinity";
-    private static final boolean MACHINE_AGENT_ZONES_AFFINITY_DEFAULT = false;
     
     StringProperties properties = new StringProperties();
     

@@ -24,7 +24,7 @@ import org.openspaces.admin.zone.config.ExactZonesConfigurer;
  * @author Itai Frenkel
  * @since 9.1.0
  */
-public class ManualCapacityPerZonesScaleConfigurer implements ScaleStrategyConfigurer<ManualCapacityPerZonesScaleConfig> , ScaleStrategyAgentZonesAffinityConfigurer {
+public class ManualCapacityPerZonesScaleConfigurer implements ScaleStrategyConfigurer<ManualCapacityPerZonesScaleConfig> , ScaleStrategyAgentZonesAwareConfigurer {
 
     ManualCapacityPerZonesScaleConfig config = new ManualCapacityPerZonesScaleConfig();
     
@@ -66,8 +66,8 @@ public class ManualCapacityPerZonesScaleConfigurer implements ScaleStrategyConfi
     }
     
     @Override
-    public ManualCapacityPerZonesScaleConfigurer enableGridServiceAgentZonesAffinity() {
-        config.setGridServiceAgentZonesAffinity(true);
+    public ManualCapacityPerZonesScaleConfigurer enableGridServiceAgentZonesAware() {
+        config.setGridServiceAgentZonesAware(true);
         return this;
     }
 
