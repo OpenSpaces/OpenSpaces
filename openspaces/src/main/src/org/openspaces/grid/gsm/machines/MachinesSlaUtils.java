@@ -85,7 +85,7 @@ public class MachinesSlaUtils {
     public static String agentToString(Admin admin, String agentUid) {
         GridServiceAgent agent = admin.getGridServiceAgents().getAgentByUID(agentUid);
         if (agent != null) {
-            return machineToString(agent.getMachine()) +"zones"+agent.getExactZones();
+            return machineToString(agent.getMachine()) +" "+agent.getExactZones();
         }
         return "agent uid " + agentUid;
     }
@@ -239,6 +239,9 @@ public class MachinesSlaUtils {
                 }
             }
             else {
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Agent " + MachinesSlaUtils.machineToString(agent.getMachine()) + " conforms to machine provisioning SLA.");
+                }
                 filteredAgents.add(agent);
             }
         }
