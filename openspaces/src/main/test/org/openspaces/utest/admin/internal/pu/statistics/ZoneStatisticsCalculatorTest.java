@@ -42,6 +42,9 @@ import org.openspaces.admin.pu.statistics.SingleInstanceStatisticsConfigurer;
  */
 public class ZoneStatisticsCalculatorTest extends TestCase {
 
+    private static final int TIME_WINDOW_SECONDS = 5;
+    private static final int METRIC_VALUE = 5;
+
     private static final String INSTANCE_UID0 = "instanceUid0";
 
     private static final String MONITOR = "monitor";
@@ -52,20 +55,27 @@ public class ZoneStatisticsCalculatorTest extends TestCase {
 
     public void test() {
 
-        ProcessingUnitStatistics lastStatistics = null;
+        int historySize = 2;
         long now = System.currentTimeMillis();
-
-        int historySize = 1;
+        long prev = now - TimeUnit.SECONDS.toMillis(TIME_WINDOW_SECONDS);
+        
+        ProcessingUnitStatistics prevPrevProcessingUnitStatistics = null;
+        
+        InternalProcessingUnitStatistics prevProcessingUnitStatistics = 
+                new DefaultProcessingUnitStatistics(prev, prevPrevProcessingUnitStatistics , historySize);
+        prevProcessingUnitStatistics.addStatistics(
+                lastTimeSampleStatisticsId(INSTANCE_UID0), 
+                METRIC_VALUE);
+        
         InternalProcessingUnitStatistics processingUnitStatistics = 
-                new DefaultProcessingUnitStatistics(now , lastStatistics , historySize);
-
+                new DefaultProcessingUnitStatistics(now , prevProcessingUnitStatistics , historySize);
         processingUnitStatistics.addStatistics(
                 lastTimeSampleStatisticsId(INSTANCE_UID0), 
-                5);
+                METRIC_VALUE);
         
         processingUnitStatistics.calculateStatistics(getTestStatisticsCalculations());
         
-        Assert.assertEquals(5, processingUnitStatistics.getStatistics().get(zoneStatisticsId()));
+        Assert.assertEquals((double)METRIC_VALUE, processingUnitStatistics.getStatistics().get(zoneStatisticsId()));
 
     }
     
@@ -99,7 +109,7 @@ public class ZoneStatisticsCalculatorTest extends TestCase {
         return new ProcessingUnitStatisticsIdConfigurer()
             .monitor(MONITOR)
             .metric(METRIC)
-            .timeWindowStatistics(new AverageTimeWindowStatisticsConfigurer().timeWindow(5, TimeUnit.SECONDS).create())
+            .timeWindowStatistics(new AverageTimeWindowStatisticsConfigurer().timeWindow(TIME_WINDOW_SECONDS, TimeUnit.SECONDS).create())
             .instancesStatistics(new AverageInstancesStatisticsConfig())
             .zoneStatistics(new AtLeastOneZoneStatisticsConfigurer().zone(ZONE_1).create())
             .create();
