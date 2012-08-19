@@ -29,8 +29,8 @@ public class PerZonesMachinesSlaEnforcementInProgressException extends MachinesS
 
     private static final long serialVersionUID = 1L;
     Map<Set<String>,MachinesSlaEnforcementInProgressException> reasons;
-    public PerZonesMachinesSlaEnforcementInProgressException() {
-        super("Multiple Exceptions");
+    public PerZonesMachinesSlaEnforcementInProgressException(String[] puNames) {
+        super(puNames, "Multiple Exceptions");
         reasons = new HashMap<Set<String>, MachinesSlaEnforcementInProgressException>();
     }
 

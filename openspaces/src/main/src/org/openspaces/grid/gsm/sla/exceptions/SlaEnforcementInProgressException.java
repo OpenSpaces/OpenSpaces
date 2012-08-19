@@ -17,16 +17,22 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.sla.exceptions;
 
+import java.util.Arrays;
+
 public class SlaEnforcementInProgressException extends Exception {
 
     private static final long serialVersionUID = 1L;
 
-    public SlaEnforcementInProgressException(String message) {
+    private final String[] puNames;
+    
+    public SlaEnforcementInProgressException(String[] puNames, String message) {
         super(message);
+        this.puNames = puNames;
     }
 
-    public SlaEnforcementInProgressException(String message, Throwable cause) {
+    public SlaEnforcementInProgressException(String[] puNames, String message, Throwable cause) {
         super(message, cause);
+        this.puNames = puNames;
     }
     
     /**
@@ -36,7 +42,46 @@ public class SlaEnforcementInProgressException extends Exception {
     @Override
     public Throwable fillInStackTrace()
     {
-        return null;
+        return this;
     }
 
+    public String[] getAffectedProcessingUnits() {
+        return puNames;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + Arrays.hashCode(puNames);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        SlaEnforcementInProgressException other = (SlaEnforcementInProgressException) obj;
+        if (!Arrays.equals(puNames, other.puNames))
+            return false;
+        
+        //custom code
+        
+        if (other.getCause() == null && this.getCause() != null) {
+            return false;
+        }
+        
+        if (other.getCause() != null && this.getCause() == null) {
+            return false;
+        }
+        
+        if (other.getCause() != null && this.getCause() != null && !other.getCause().getMessage().equals(this.getCause().getMessage())) {
+            return false;
+        }
+        return true;
+    }
 }

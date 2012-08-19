@@ -23,12 +23,12 @@ public class GridServiceAgentSlaEnforcementInProgressException extends SlaEnforc
 
     private static final long serialVersionUID = 1L;
     
-    public GridServiceAgentSlaEnforcementInProgressException(String message) {
-        super(message);
+    public GridServiceAgentSlaEnforcementInProgressException(String[] puNames, String message) {
+        super(puNames, message);
     }
     
-    public GridServiceAgentSlaEnforcementInProgressException(String message, Exception cause) {
-        super(message,cause);
+    public GridServiceAgentSlaEnforcementInProgressException(String[] puNames, String message, Exception cause) {
+        super(puNames, message,cause);
     }
 
 }

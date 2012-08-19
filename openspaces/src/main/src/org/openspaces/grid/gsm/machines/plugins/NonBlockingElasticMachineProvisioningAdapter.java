@@ -106,7 +106,7 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
                     } catch (TimeoutException e) {
                         ref.set(e);
                     } catch (NoClassDefFoundError e) {
-                        ref.set((new NoClassDefFoundElasticMachineProvisioningException(pu,e)));
+                        ref.set((new NoClassDefFoundElasticMachineProvisioningException(e)));
                     } catch (Throwable e) {
                         logger.error("Unexpected exception:" + e.getMessage(), e);
                         ref.set(e);
@@ -242,7 +242,7 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
                 } catch (TimeoutException e) {
                     ref.set(e);
                 } catch (NoClassDefFoundError e) {
-                    ref.set((new NoClassDefFoundElasticMachineProvisioningException(pu, e)));
+                    ref.set((new NoClassDefFoundElasticMachineProvisioningException(e)));
                 } catch (Throwable e) {
                     logger.error("Unexpected exception", e);
                     ref.set(e);

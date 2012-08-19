@@ -18,6 +18,7 @@
 package org.openspaces.grid.gsm.capacity;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -128,6 +129,14 @@ public class CapacityRequirements {
     }
     
     
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + Arrays.hashCode(requirements);
+        return result;
+    }
+
     public boolean equals(Object otherRequirements) {
         
         boolean eq = true;
@@ -156,7 +165,7 @@ public class CapacityRequirements {
         
         return eq;
     }
-    
+  
     public boolean equalsZero() {
 
         boolean eq = true;

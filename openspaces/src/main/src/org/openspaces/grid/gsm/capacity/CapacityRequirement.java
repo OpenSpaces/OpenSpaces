@@ -31,6 +31,8 @@ public interface CapacityRequirement extends Comparable<CapacityRequirement> {
     String toString();
     
     boolean equals(Object otherCapacityRequirement);
+    
+    int hashCode();
 
     boolean equalsZero();
     

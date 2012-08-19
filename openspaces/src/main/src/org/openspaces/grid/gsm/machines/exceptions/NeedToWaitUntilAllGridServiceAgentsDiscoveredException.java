@@ -22,12 +22,12 @@ import org.openspaces.admin.pu.ProcessingUnit;
  * @author itaif
  *
  */
-public class NeedToWaitUntilAllGridServiceAgentsDiscovered extends
+public class NeedToWaitUntilAllGridServiceAgentsDiscoveredException extends
 GridServiceAgentSlaEnforcementInProgressException {
 
  private static final long serialVersionUID = 1L;
     
-    public NeedToWaitUntilAllGridServiceAgentsDiscovered(ProcessingUnit pu, GridServiceContainer container) {
-        super("Waiting for the Grid Service Agent that started Grid Service Container " + container.getUid() + " to be discovered. It hosts an instance of pu " + pu.getName() + ".");
+    public NeedToWaitUntilAllGridServiceAgentsDiscoveredException(ProcessingUnit pu, GridServiceContainer container) {
+        super(new String[] {pu.getName()}, "Waiting for the Grid Service Agent that started Grid Service Container " + container.getUid() + " to be discovered. It hosts an instance of pu " + pu.getName() + ".");
     }
 }

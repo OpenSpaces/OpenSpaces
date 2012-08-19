@@ -23,7 +23,7 @@ public class GridServiceAgentSlaEnforcementPendingContainerDeallocationException
 
     private static final long serialVersionUID = 1L;
     
-    public GridServiceAgentSlaEnforcementPendingContainerDeallocationException(CapacityRequirementsPerAgent clusterCapacityRequirements) {
-        super("Cannot terminate the following machines, since they are still running containers:" + clusterCapacityRequirements.toDetailedString());
+    public GridServiceAgentSlaEnforcementPendingContainerDeallocationException(String[] puNames, CapacityRequirementsPerAgent clusterCapacityRequirements) {
+        super(puNames, "Cannot terminate the following machines, since they are still running containers:" + clusterCapacityRequirements.toDetailedString());
     }
 }

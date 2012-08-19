@@ -27,12 +27,12 @@ public class InconsistentMachineProvisioningException extends GridServiceAgentSl
     
     private static final long serialVersionUID = 1L;
 
-    public InconsistentMachineProvisioningException(Collection<GridServiceAgent> undiscoveredAgents) {
-        super("Machines " + MachinesSlaUtils.machinesToString(undiscoveredAgents)+ " have not been discoved yet by the machine provisioning.");
+    public InconsistentMachineProvisioningException(String[] puNames, Collection<GridServiceAgent> undiscoveredAgents) {
+        super(puNames, "Machines " + MachinesSlaUtils.machinesToString(undiscoveredAgents)+ " have not been discoved yet by the machine provisioning.");
     }
     
-    public InconsistentMachineProvisioningException(GridServiceAgent undiscoveredAgents) {
-        this(Arrays.asList(new GridServiceAgent[] {undiscoveredAgents}));
+    public InconsistentMachineProvisioningException(String[] puNames, GridServiceAgent undiscoveredAgents) {
+        this(puNames, Arrays.asList(new GridServiceAgent[] {undiscoveredAgents}));
     }
     
 }

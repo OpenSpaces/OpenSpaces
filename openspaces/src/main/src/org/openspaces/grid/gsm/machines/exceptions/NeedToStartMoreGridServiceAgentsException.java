@@ -17,7 +17,6 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.machines.exceptions;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,29 +35,16 @@ import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
 public class NeedToStartMoreGridServiceAgentsException extends GridServiceAgentSlaEnforcementInProgressException implements SlaEnforcementFailure {
     
     private static final long serialVersionUID = 1L;
-    private final String[] affectedProcessingUnits;
     private final CapacityRequirements capacityShortage;
 
     public NeedToStartMoreGridServiceAgentsException(AbstractMachinesSlaPolicy sla, MachinesSlaEnforcementState state, CapacityRequirements capacityShortage, ProcessingUnit pu) {
-        super(createMessage(sla, state, capacityShortage, pu));
-        this.affectedProcessingUnits  = new String[] {pu.getName()};
+        super(new String[] { pu.getName()}, createMessage(sla, state, capacityShortage, pu));
         this.capacityShortage = capacityShortage;
     }
 
     public NeedToStartMoreGridServiceAgentsException(CapacityRequirements capacityShortage, ProcessingUnit pu) {
-        super(createBasicMessage(capacityShortage));
-        this.affectedProcessingUnits  = new String[] {pu.getName()};
+        super(new String[] { pu.getName()}, createBasicMessage(capacityShortage));
         this.capacityShortage = capacityShortage;
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        boolean same = false;
-        if (other instanceof NeedToStartMoreGridServiceAgentsException) {
-            NeedToStartMoreGridServiceAgentsException otherEx = (NeedToStartMoreGridServiceAgentsException)other;
-            same = Arrays.equals(otherEx.affectedProcessingUnits,this.affectedProcessingUnits) && otherEx.capacityShortage.equals(capacityShortage);
-        }
-        return same;  
     }
     
     private static String createBasicMessage(CapacityRequirements capacityShortage) {
@@ -129,7 +115,27 @@ public class NeedToStartMoreGridServiceAgentsException extends GridServiceAgentS
     }
 
     @Override
-    public String[] getAffectedProcessingUnits() {
-        return affectedProcessingUnits;
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((capacityShortage == null) ? 0 : capacityShortage.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        NeedToStartMoreGridServiceAgentsException other = (NeedToStartMoreGridServiceAgentsException) obj;
+        if (capacityShortage == null) {
+            if (other.capacityShortage != null)
+                return false;
+        } else if (!capacityShortage.equals(other.capacityShortage))
+            return false;
+        return true;
     }
 }

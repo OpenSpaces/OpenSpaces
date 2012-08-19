@@ -26,19 +26,12 @@ public class NumberOfInstancesIsBelowMinimumException extends RebalancingSlaEnfo
 
     private static final long serialVersionUID = 1L;
     
-    private final String puName;
     public NumberOfInstancesIsBelowMinimumException(ProcessingUnit pu, int minimumNumberOfInstances) {
         super(pu, message(pu,minimumNumberOfInstances));
-        puName = pu.getName();
     }
 
     private static String message(ProcessingUnit pu, int minimumNumberOfInstances) {
         return "Number of " + pu.getName() + " instances ("+ pu.getInstances().length+") is below the minimum of " + minimumNumberOfInstances +" instances.";
-    }
-
-    @Override
-    public String[] getAffectedProcessingUnits() {
-        return new String[] {puName};
     }
 
 }

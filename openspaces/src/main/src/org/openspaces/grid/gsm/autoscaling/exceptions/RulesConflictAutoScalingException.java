@@ -36,7 +36,6 @@ public class RulesConflictAutoScalingException  extends AutoScalingSlaEnforcemen
     implements SlaEnforcementFailure{
 
     private static final long serialVersionUID = 1L;
-    private final String puName;
     private final Set<AutomaticCapacityScaleRuleConfig> valuesBelowLowThresholdPerRule;
     private final Set<AutomaticCapacityScaleRuleConfig> valuesAboveHighThresholdPerRule;
     
@@ -44,15 +43,11 @@ public class RulesConflictAutoScalingException  extends AutoScalingSlaEnforcemen
             Map<AutomaticCapacityScaleRuleConfig, Object> valuesBelowLowThresholdPerRule,
             Map<AutomaticCapacityScaleRuleConfig, Object> valuesAboveHighThresholdPerRule) {
         
-        super(message(valuesBelowLowThresholdPerRule, valuesAboveHighThresholdPerRule));
+        super(pu,
+              message(valuesBelowLowThresholdPerRule, valuesAboveHighThresholdPerRule));
+        
         this.valuesBelowLowThresholdPerRule = valuesBelowLowThresholdPerRule.keySet();
         this.valuesAboveHighThresholdPerRule = valuesAboveHighThresholdPerRule.keySet();
-        puName = pu.getName();
-    }
-    
-    @Override
-    public String[] getAffectedProcessingUnits() {
-        return new String[] { puName};
     }
     
     private static String message(
@@ -74,14 +69,10 @@ public class RulesConflictAutoScalingException  extends AutoScalingSlaEnforcemen
         return "Rule conflict, taking no automatic action. " + message;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
-        int result = 1;
-        result = prime * result + ((puName == null) ? 0 : puName.hashCode());
+        int result = super.hashCode();
         result = prime * result
                 + ((valuesAboveHighThresholdPerRule == null) ? 0 : valuesAboveHighThresholdPerRule.hashCode());
         result = prime * result
@@ -89,23 +80,15 @@ public class RulesConflictAutoScalingException  extends AutoScalingSlaEnforcemen
         return result;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
             return true;
-        if (obj == null)
+        if (!super.equals(obj))
             return false;
         if (getClass() != obj.getClass())
             return false;
         RulesConflictAutoScalingException other = (RulesConflictAutoScalingException) obj;
-        if (puName == null) {
-            if (other.puName != null)
-                return false;
-        } else if (!puName.equals(other.puName))
-            return false;
         if (valuesAboveHighThresholdPerRule == null) {
             if (other.valuesAboveHighThresholdPerRule != null)
                 return false;

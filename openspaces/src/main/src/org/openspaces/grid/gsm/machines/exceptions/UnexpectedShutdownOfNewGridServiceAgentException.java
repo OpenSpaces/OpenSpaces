@@ -17,8 +17,6 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.machines.exceptions;
 
-import java.util.Arrays;
-
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.grid.gsm.machines.MachinesSlaUtils;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
@@ -27,29 +25,36 @@ import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
 public class UnexpectedShutdownOfNewGridServiceAgentException extends GridServiceAgentSlaEnforcementInProgressException implements SlaEnforcementFailure {
     
     private static final long serialVersionUID = 1L;
-    private final String[] affectedProcessingUnits;
     private final String machineUid;
     
     public UnexpectedShutdownOfNewGridServiceAgentException(Machine machine, String[] affectedProcessingUnits) {
-        super("New machine " + MachinesSlaUtils.machineToString(machine) +
+        super(affectedProcessingUnits, "New machine " + MachinesSlaUtils.machineToString(machine) +
                 " was started and the agent was also started, but then it was shutdown unexpectedly.");
-        this.affectedProcessingUnits = affectedProcessingUnits;
         this.machineUid = machine.getUid();
     }
-    
+
     @Override
-    public String[] getAffectedProcessingUnits() {
-        return affectedProcessingUnits;
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((machineUid == null) ? 0 : machineUid.hashCode());
+        return result;
     }
-    
+
     @Override
-    public boolean equals(Object other) {
-        boolean same = false;
-        if (other instanceof UnexpectedShutdownOfNewGridServiceAgentException) {
-            UnexpectedShutdownOfNewGridServiceAgentException otherEx = (UnexpectedShutdownOfNewGridServiceAgentException)other;
-            same = Arrays.equals(otherEx.affectedProcessingUnits, this.affectedProcessingUnits) &&
-                   otherEx.machineUid.equals(this.machineUid);
-        }
-        return same;  
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        UnexpectedShutdownOfNewGridServiceAgentException other = (UnexpectedShutdownOfNewGridServiceAgentException) obj;
+        if (machineUid == null) {
+            if (other.machineUid != null)
+                return false;
+        } else if (!machineUid.equals(other.machineUid))
+            return false;
+        return true;
     }
 }

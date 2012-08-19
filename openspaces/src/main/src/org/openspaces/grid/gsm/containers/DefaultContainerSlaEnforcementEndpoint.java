@@ -129,15 +129,15 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
         startContainersOnMachineWithAllocatedCapacitySurplus(sla);
 
         if (!state.getContainersMarkedForDeallocation(pu).isEmpty()) {
-            throw new ContainersSlaEnforcementPendingProcessingUnitDeallocationException(state.getContainersMarkedForDeallocation(pu)); 
+            throw new ContainersSlaEnforcementPendingProcessingUnitDeallocationException(new String[]{getProcessingUnit().getName()}, state.getContainersMarkedForDeallocation(pu)); 
         }
         
         if (state.getNumberOfContainersMarkedForShutdown(pu) > 0) {
-            throw new ContainersSlaEnforcementInProgressException(state.getNumberOfContainersMarkedForShutdown(pu) + " containers are pending shutdown.");
+            throw new ContainersSlaEnforcementInProgressException(new String[]{pu.getName()}, state.getNumberOfContainersMarkedForShutdown(pu) + " containers are pending shutdown.");
         }
         
         if (state.getNumberOfFutureContainers(pu) > 0) {
-            throw new ContainersSlaEnforcementInProgressException("Containers still being started.");
+            throw new ContainersSlaEnforcementInProgressException(new String[]{pu.getName()}, "Containers still being started.");
         }
     }
 
@@ -220,7 +220,7 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
                 if (component instanceof GridServiceContainer) {
                     GridServiceContainer container = (GridServiceContainer) component;
                     if (ContainersSlaUtils.isContainerMatchesZone(container, zone)) {
-                        ContainerNotDiscoveredException exception = new ContainerNotDiscoveredException(container);
+                        ContainerNotDiscoveredException exception = new ContainerNotDiscoveredException(new String[]{getProcessingUnit().getName()}, container);
                         if (logger.isDebugEnabled()) {
                             logger.debug("Admin API undiscovered container validation failed", exception);
                         }

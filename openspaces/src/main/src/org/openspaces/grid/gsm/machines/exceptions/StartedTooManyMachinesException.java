@@ -28,29 +28,11 @@ import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
 public class StartedTooManyMachinesException extends MachinesSlaEnforcementInProgressException implements SlaEnforcementFailure {
 
     private static final long serialVersionUID = 1L;
-    private final String[] affectedProcessingUnits;
     private final String[] agentUids;
     
     public StartedTooManyMachinesException(ProcessingUnit pu, Collection<GridServiceAgent> agents) {
-        super("Started too many machines " + MachinesSlaUtils.machinesToString(agents)+". They are not needed by " + pu.getName());
-        this.affectedProcessingUnits = new String[] { pu.getName()};
+        super(new String[]{pu.getName()}, "Started too many machines " + MachinesSlaUtils.machinesToString(agents)+". They are not needed by " + pu.getName());
         agentUids = createAgentUids(agents);
-    }
-
-    @Override
-    public String[] getAffectedProcessingUnits() {
-        return affectedProcessingUnits;
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        boolean same = false;
-        if (other instanceof StartedTooManyMachinesException) {
-            StartedTooManyMachinesException otherEx = (StartedTooManyMachinesException)other;
-            same = Arrays.equals(otherEx.affectedProcessingUnits, this.affectedProcessingUnits) &&
-                   Arrays.equals(otherEx.agentUids, this.agentUids);
-        }
-        return same;  
     }
 
     private static String[] createAgentUids(Collection<GridServiceAgent> agents) {
@@ -62,4 +44,28 @@ public class StartedTooManyMachinesException extends MachinesSlaEnforcementInPro
         }
         return agentUids;
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + Arrays.hashCode(agentUids);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        StartedTooManyMachinesException other = (StartedTooManyMachinesException) obj;
+        if (!Arrays.equals(agentUids, other.agentUids))
+            return false;
+        return true;
+    }
+    
+    
 }

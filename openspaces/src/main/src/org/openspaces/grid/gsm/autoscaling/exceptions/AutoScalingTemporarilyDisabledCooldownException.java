@@ -17,6 +17,8 @@ package org.openspaces.grid.gsm.autoscaling.exceptions;
 
 import java.util.concurrent.TimeUnit;
 
+import org.openspaces.admin.pu.ProcessingUnit;
+
 /**
  * Indicates that auto scaling rules are disabled due to cooldown period after instance
  * added or instance removed.
@@ -28,8 +30,8 @@ public class AutoScalingTemporarilyDisabledCooldownException extends AutoScaling
     
     private static final long serialVersionUID = 1L;
 
-    public AutoScalingTemporarilyDisabledCooldownException(long timeLeftMillis) {
-        super(message(timeLeftMillis));
+    public AutoScalingTemporarilyDisabledCooldownException(ProcessingUnit pu, long timeLeftMillis) {
+        super(pu, message(timeLeftMillis));
     }
 
     private static String message(long timeLeftMillis) {

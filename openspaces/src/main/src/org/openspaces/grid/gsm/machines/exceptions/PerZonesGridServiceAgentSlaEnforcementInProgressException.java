@@ -27,8 +27,8 @@ public class PerZonesGridServiceAgentSlaEnforcementInProgressException extends G
 
     private static final long serialVersionUID = 1L;
     Map<Set<String>,GridServiceAgentSlaEnforcementInProgressException> reasons;
-    public PerZonesGridServiceAgentSlaEnforcementInProgressException() {
-        super("Multiple Exceptions");
+    public PerZonesGridServiceAgentSlaEnforcementInProgressException(String[] puNames) {
+        super(puNames, "Multiple Exceptions");
         reasons = new HashMap<Set<String>, GridServiceAgentSlaEnforcementInProgressException>();
     }
 

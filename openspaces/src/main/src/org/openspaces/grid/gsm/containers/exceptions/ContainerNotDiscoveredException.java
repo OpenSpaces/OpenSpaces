@@ -26,8 +26,8 @@ public class ContainerNotDiscoveredException extends ContainersSlaEnforcementInP
 
     private static final long serialVersionUID = 1L;
     
-    public ContainerNotDiscoveredException(GridServiceContainer container) {
-        super(message(container));
+    public ContainerNotDiscoveredException(String[] puNames, GridServiceContainer container) {
+        super(puNames, message(container));
     }
 
     private static String message(GridServiceContainer container) {

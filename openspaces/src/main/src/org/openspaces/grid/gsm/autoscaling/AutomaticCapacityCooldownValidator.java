@@ -80,7 +80,7 @@ public class AutomaticCapacityCooldownValidator {
         updateCooldownTimestamp(deploymentStatus, existingInstancesUids, currentTimeMillis);
 
         if (cooldownExpiredTimestamp >= currentTimeMillis) {
-            throw new AutoScalingTemporarilyDisabledCooldownException(cooldownExpiredTimestamp -currentTimeMillis);
+            throw new AutoScalingTemporarilyDisabledCooldownException(processingUnit, cooldownExpiredTimestamp -currentTimeMillis);
         }
     }
 

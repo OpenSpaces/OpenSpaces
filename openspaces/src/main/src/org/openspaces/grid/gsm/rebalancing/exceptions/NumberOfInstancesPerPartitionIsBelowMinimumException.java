@@ -26,19 +26,11 @@ public class NumberOfInstancesPerPartitionIsBelowMinimumException extends Rebala
 
     private static final long serialVersionUID = 1L;
     
-    private final String puName;
-    
     public NumberOfInstancesPerPartitionIsBelowMinimumException(ProcessingUnit pu, int minimumNumberOfInstancesPerPartition) {
         super(pu,message(pu,minimumNumberOfInstancesPerPartition));
-        this.puName = pu.getName();
     }
 
     private static String message(ProcessingUnit pu, int minimumNumberOfInstancesPerPartition) {
         return "Number of " + pu.getName() + " instances per partition is below the minimum of " + minimumNumberOfInstancesPerPartition +" instances.";
-    }
-    
-    @Override
-    public String[] getAffectedProcessingUnits() {
-        return new String[] {puName};
     }
 }

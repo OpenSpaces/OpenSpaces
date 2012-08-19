@@ -23,15 +23,15 @@ public class MachinesSlaEnforcementInProgressException extends SlaEnforcementInP
 
     private static final long serialVersionUID = 1L;
     
-    public MachinesSlaEnforcementInProgressException() {
-        super("Machines SLA Enforcement is in progress");
+    public MachinesSlaEnforcementInProgressException(String[] puNames) {
+        super(puNames, "Machines SLA Enforcement is in progress");
     }
     
-    public MachinesSlaEnforcementInProgressException(String message) {
-        super("Machines SLA Enforcement is in progress: " + message);
+    public MachinesSlaEnforcementInProgressException(String[] puNames, String message) {
+        super(puNames, "Machines SLA Enforcement is in progress: " + message);
     }
     
-    public MachinesSlaEnforcementInProgressException(String message, Exception cause) {
-        super("Machines SLA Enforcement is in progress: " + message, cause);
+    public MachinesSlaEnforcementInProgressException(String[] puNames, String message, Exception cause) {
+        super(puNames, "Machines SLA Enforcement is in progress: " + message, cause);
     }
 }

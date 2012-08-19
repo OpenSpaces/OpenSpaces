@@ -212,8 +212,8 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
         }
         
         CapacityRequirementsPerAgent totalAllocatedCapacity = new CapacityRequirementsPerAgent();
-        PerZonesMachinesSlaEnforcementInProgressException pendingMachinesExceptions = new PerZonesMachinesSlaEnforcementInProgressException();
-        PerZonesGridServiceAgentSlaEnforcementInProgressException pendingAgentsExceptions = new PerZonesGridServiceAgentSlaEnforcementInProgressException();
+        PerZonesMachinesSlaEnforcementInProgressException pendingMachinesExceptions = new PerZonesMachinesSlaEnforcementInProgressException(new String[]{getProcessingUnit().getName()});
+        PerZonesGridServiceAgentSlaEnforcementInProgressException pendingAgentsExceptions = new PerZonesGridServiceAgentSlaEnforcementInProgressException(new String[]{getProcessingUnit().getName()});
         Set<Set<String>> allZones = getAllZones();
         //     * TODO: Add numberOfMachines to CapacityRequirements and CapacityRequirementsPerZones
         Map<Set<String>,Integer> minimumNumberOfMachinesPerZone = calcMinimumNumberOfMachinesPerZone();

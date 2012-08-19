@@ -23,11 +23,11 @@ public class ContainersSlaEnforcementInProgressException extends SlaEnforcementI
 
     private static final long serialVersionUID = 1L;
 
-    public ContainersSlaEnforcementInProgressException(String message) {
-        super(message);
+    public ContainersSlaEnforcementInProgressException(String[] puNames, String message) {
+        super(puNames, message);
     }
     
-    public ContainersSlaEnforcementInProgressException(String message, Exception reason) {
-        super(message, reason);
+    public ContainersSlaEnforcementInProgressException(String[] puNames, String message, Exception reason) {
+        super(puNames, message, reason);
     }
 }

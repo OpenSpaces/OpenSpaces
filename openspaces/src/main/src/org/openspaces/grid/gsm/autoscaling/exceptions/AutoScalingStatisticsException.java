@@ -24,16 +24,14 @@ import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
  */
 public class AutoScalingStatisticsException extends AutoScalingSlaEnforcementInProgressException {
 
-    private final String puName;
-
+    private static final long serialVersionUID = 1L;
+    
     protected AutoScalingStatisticsException(ProcessingUnit pu, String message) {
-        super(message);
-        this.puName = pu.getName();
+        super(pu, message);
     }
     
     protected AutoScalingStatisticsException(ProcessingUnit pu, String message, Throwable reason) {
-        super(message, reason);
-        this.puName = pu.getName();
+        super(pu, message, reason);
     }
     
     public AutoScalingStatisticsException(ProcessingUnit pu, ProcessingUnitStatisticsId statisticsId) {
@@ -48,49 +46,4 @@ public class AutoScalingStatisticsException extends AutoScalingSlaEnforcementInP
         return "No " + pu.getName() + " statistics for " + statisticsId;
     }
 
-    private static final long serialVersionUID = 1L;
-
-    public String[] getAffectedProcessingUnits() {
-        return new String[] { puName};
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((puName == null) ? 0 : puName.hashCode());
-        return result;
-    }
-
-    /**
-     * Compares also cause.getMessage()
-     */
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        AutoScalingStatisticsException other = (AutoScalingStatisticsException) obj;
-        if (puName == null) {
-            if (other.puName != null)
-                return false;
-        } else if (!puName.equals(other.puName))
-            return false;
-        
-        if (getMessage() != null && !getMessage().endsWith(other.getMessage())) {
-            return false;
-        }
-        
-        if (getCause() != null && getCause().getMessage() != null && 
-            !getCause().getMessage().equals(other.getCause().getMessage())) {
-            return false;
-        }
-        
-        return true;
-    }
-
-    
 }

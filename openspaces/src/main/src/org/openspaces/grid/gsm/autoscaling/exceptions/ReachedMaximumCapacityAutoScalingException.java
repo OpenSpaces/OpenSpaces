@@ -33,8 +33,6 @@ public class ReachedMaximumCapacityAutoScalingException
     private final CapacityRequirements existingCapacity;
     private final CapacityRequirements newCapacity;
     private final CapacityRequirements maxCapacity;
-    
-    private final String puName;
 
     public ReachedMaximumCapacityAutoScalingException(
             ProcessingUnit pu,
@@ -42,27 +40,20 @@ public class ReachedMaximumCapacityAutoScalingException
             CapacityRequirements newCapacity, 
             CapacityRequirements maxCapacity) {
     
-        super("Cannot increase capacity from " + existingCapacity + " to " + newCapacity
+        super(pu, "Cannot increase capacity from " + existingCapacity + " to " + newCapacity
                 + " since it breaches maximum capacity " + maxCapacity);
         this.existingCapacity = existingCapacity;
         this.newCapacity = newCapacity;
         this.maxCapacity = maxCapacity;
-        this.puName = pu.getName();
-    }
-    
-    @Override
-    public String[] getAffectedProcessingUnits() {
-        return new String[] { puName};
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
-        int result = 1;
+        int result = super.hashCode();
         result = prime * result + ((existingCapacity == null) ? 0 : existingCapacity.hashCode());
         result = prime * result + ((maxCapacity == null) ? 0 : maxCapacity.hashCode());
         result = prime * result + ((newCapacity == null) ? 0 : newCapacity.hashCode());
-        result = prime * result + ((puName == null) ? 0 : puName.hashCode());
         return result;
     }
 
@@ -70,7 +61,7 @@ public class ReachedMaximumCapacityAutoScalingException
     public boolean equals(Object obj) {
         if (this == obj)
             return true;
-        if (obj == null)
+        if (!super.equals(obj))
             return false;
         if (getClass() != obj.getClass())
             return false;
@@ -90,12 +81,6 @@ public class ReachedMaximumCapacityAutoScalingException
                 return false;
         } else if (!newCapacity.equals(other.newCapacity))
             return false;
-        if (puName == null) {
-            if (other.puName != null)
-                return false;
-        } else if (!puName.equals(other.puName))
-            return false;
         return true;
     }
-    
 }

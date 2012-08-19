@@ -17,17 +17,18 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.autoscaling.exceptions;
 
+import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementInProgressException;
 
 public class AutoScalingSlaEnforcementInProgressException extends SlaEnforcementInProgressException {
 
     private static final long serialVersionUID = 1L;
 
-    public AutoScalingSlaEnforcementInProgressException(String message) {
-        super(message);
+    public AutoScalingSlaEnforcementInProgressException(ProcessingUnit pu, String message) {
+        super(new String[] {pu.getName()}, message);
     }
     
-    public AutoScalingSlaEnforcementInProgressException(String message, Throwable reason) {
-        super(message, reason);
+    public AutoScalingSlaEnforcementInProgressException(ProcessingUnit pu, String message, Throwable reason) {
+        super(new String[] {pu.getName()}, message, reason);
     }
 }

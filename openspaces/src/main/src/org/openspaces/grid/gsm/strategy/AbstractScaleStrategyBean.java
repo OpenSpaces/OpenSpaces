@@ -57,7 +57,6 @@ import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIs
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
 import org.openspaces.grid.gsm.rebalancing.exceptions.RebalancingSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.sla.exceptions.DisconnectedFromLookupServiceException;
-import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.sla.exceptions.WrongNumberOfESMComponentsException;
 
@@ -328,13 +327,7 @@ public abstract class AbstractScaleStrategyBean implements
             isScaleInProgress = false;
         }
         catch (SlaEnforcementInProgressException e) {
-            if (e instanceof SlaEnforcementFailure) {
-                getLogger().warn("SLA has not been reached",e);
-            }
-            else if (getLogger().isDebugEnabled()) {
-                getLogger().debug("SLA has not been reached",e);
-            }
-        
+            
             // we do not pass the exception into the event since there are other fine grained events that report failures.
             scaleEventState.enqueuProvisioningInProgressEvent();    
             

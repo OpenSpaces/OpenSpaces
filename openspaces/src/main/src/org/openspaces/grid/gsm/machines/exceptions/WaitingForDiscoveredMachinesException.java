@@ -22,7 +22,7 @@ public class WaitingForDiscoveredMachinesException extends MachinesSlaEnforcemen
     
     private static final long serialVersionUID = 1L;
         
-    public WaitingForDiscoveredMachinesException(String message) {
-        super(message);
+    public WaitingForDiscoveredMachinesException(String[] puNames, String message) {
+        super(puNames, message);
     }   
 }

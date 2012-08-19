@@ -23,8 +23,11 @@ import org.jini.rio.monitor.event.EventsStore;
 import org.openspaces.admin.internal.pu.elastic.events.AbstractElasticProcessingUnitFailureEvent;
 import org.openspaces.admin.internal.pu.elastic.events.AbstractElasticProcessingUnitProgressChangedEvent;
 import org.openspaces.admin.internal.pu.elastic.events.DefaultElasticProcessingUnitScaleProgressChangedEvent;
+import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementInProgressException;
+
+import java.util.Arrays;
 
 /**
  * Triggers events based on exceptions raised by {@link AbstractScaleStrategyBean}
@@ -43,6 +46,7 @@ public class ScaleStrategyProgressEventState {
     private Class<? extends AbstractElasticProcessingUnitFailureEvent> failureEventClass;
 
     private final Log logger = LogFactory.getLog(ScaleStrategyProgressEventState.class);
+    private final Log filteredLogger= new SingleThreadedPollingLog(logger);
     
     public ScaleStrategyProgressEventState(
             EventsStore eventStore, 
@@ -66,9 +70,14 @@ public class ScaleStrategyProgressEventState {
     public void enqueuProvisioningInProgressEvent(SlaEnforcementInProgressException e) {
         enqueuProvisioningInProgressEvent();
         if (e instanceof SlaEnforcementFailure) {
-            if (this.lastFailure == null || !this.lastFailure.equals(e)) {
-                this.lastFailure = (SlaEnforcementFailure)e;
+            SlaEnforcementFailure failure = (SlaEnforcementFailure) e;
+            if (this.lastFailure == null || !this.lastFailure.equals(failure)) {
+                if (logger.isWarnEnabled()) {
+                    logger.warn("SLA failure in " + Arrays.asList(e.getAffectedProcessingUnits()),e);
+                }
                 
+                this.lastFailure = failure;
+            
                 AbstractElasticProcessingUnitFailureEvent event = createFailureEvent(e);
                 eventStore.addEvent(event);
                 if (logger.isDebugEnabled()) {
@@ -80,6 +89,9 @@ public class ScaleStrategyProgressEventState {
                     logger.trace("Ignoring event: " + failureEventClass + " " + e.getMessage());
                 }
             }
+        }
+        else if (logger.isDebugEnabled()) {
+            filteredLogger.debug("SLA in progress " +  Arrays.asList(e.getAffectedProcessingUnits()), e);
         }
     }
 

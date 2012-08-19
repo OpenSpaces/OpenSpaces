@@ -17,8 +17,6 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.containers.exceptions;
 
-import java.util.Arrays;
-
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.grid.gsm.containers.ContainersSlaUtils;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
@@ -27,13 +25,11 @@ import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
 public class FailedToStartNewGridServiceContainersException extends ContainersSlaEnforcementInProgressException implements SlaEnforcementFailure {
 
     private static final long serialVersionUID = 1L;
-    private final String[] affectedProcessingUnits;
     private final String machineUid;
     
     public FailedToStartNewGridServiceContainersException(Machine machine, String[] affectedProcessingUnits, Exception reason) {
-        super(createMessage(machine, reason),reason);
+        super(affectedProcessingUnits, createMessage(machine, reason),reason);
         this.machineUid = machine.getUid();
-        this.affectedProcessingUnits = affectedProcessingUnits;
     }
 
     private static String createMessage(Machine machine, Exception reason) {
@@ -43,19 +39,29 @@ public class FailedToStartNewGridServiceContainersException extends ContainersSl
     }
 
     @Override
-    public String[] getAffectedProcessingUnits() {
-        return affectedProcessingUnits;
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((machineUid == null) ? 0 : machineUid.hashCode());
+        return result;
     }
-    
+
     @Override
-    public boolean equals(Object other) {
-        boolean same = false;
-        if (other instanceof FailedToStartNewGridServiceContainersException) {
-            FailedToStartNewGridServiceContainersException otherEx = (FailedToStartNewGridServiceContainersException)other;
-            same = Arrays.equals(otherEx.affectedProcessingUnits,this.affectedProcessingUnits) && 
-                    otherEx.getCause().getMessage().equals(getCause().getMessage()) &&
-                    otherEx.machineUid.equals(machineUid);
-        }
-        return same;  
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        FailedToStartNewGridServiceContainersException other = (FailedToStartNewGridServiceContainersException) obj;
+        if (machineUid == null) {
+            if (other.machineUid != null)
+                return false;
+        } else if (!machineUid.equals(other.machineUid))
+            return false;
+        return true;
     }
+
+    
 }

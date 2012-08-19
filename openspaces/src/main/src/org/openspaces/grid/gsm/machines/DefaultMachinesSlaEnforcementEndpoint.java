@@ -45,7 +45,7 @@ import org.openspaces.grid.gsm.capacity.MemoryCapacityRequirement;
 import org.openspaces.grid.gsm.capacity.NumberOfMachinesCapacityRequirement;
 import org.openspaces.grid.gsm.containers.ContainersSlaUtils;
 import org.openspaces.grid.gsm.machines.exceptions.CannotDetermineIfNeedToStartMoreMachinesException;
-import org.openspaces.grid.gsm.machines.exceptions.DelayingScaleInUntilAllMachinesHaveStarted;
+import org.openspaces.grid.gsm.machines.exceptions.DelayingScaleInUntilAllMachinesHaveStartedException;
 import org.openspaces.grid.gsm.machines.exceptions.FailedToDiscoverMachinesException;
 import org.openspaces.grid.gsm.machines.exceptions.FailedToStartNewMachineException;
 import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcementInProgressException;
@@ -53,7 +53,7 @@ import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcemen
 import org.openspaces.grid.gsm.machines.exceptions.InconsistentMachineProvisioningException;
 import org.openspaces.grid.gsm.machines.exceptions.MachinesSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.machines.exceptions.NeedToStartMoreGridServiceAgentsException;
-import org.openspaces.grid.gsm.machines.exceptions.NeedToWaitUntilAllGridServiceAgentsDiscovered;
+import org.openspaces.grid.gsm.machines.exceptions.NeedToWaitUntilAllGridServiceAgentsDiscoveredException;
 import org.openspaces.grid.gsm.machines.exceptions.SomeProcessingUnitsHaveNotCompletedStateRecoveryException;
 import org.openspaces.grid.gsm.machines.exceptions.StartedTooManyMachinesException;
 import org.openspaces.grid.gsm.machines.exceptions.UnexpectedShutdownOfNewGridServiceAgentException;
@@ -137,7 +137,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             
     }
 
-    private void recoverStateAfterRestart(AbstractMachinesSlaPolicy sla) throws SomeProcessingUnitsHaveNotCompletedStateRecoveryException, NeedToWaitUntilAllGridServiceAgentsDiscovered {
+    private void recoverStateAfterRestart(AbstractMachinesSlaPolicy sla) throws SomeProcessingUnitsHaveNotCompletedStateRecoveryException, NeedToWaitUntilAllGridServiceAgentsDiscoveredException {
 
         if (!state.isCompletedStateRecovery(pu)) {
                 
@@ -153,7 +153,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             for (ProcessingUnitInstance instance : pu.getInstances()) {
                 GridServiceContainer container = instance.getGridServiceContainer();
                 if (container.isDiscovered() && container.getAgentId() != -1 && container.getGridServiceAgent() == null) {
-                    throw new NeedToWaitUntilAllGridServiceAgentsDiscovered(pu, container);
+                    throw new NeedToWaitUntilAllGridServiceAgentsDiscoveredException(pu, container);
                 }
             }
         
@@ -224,7 +224,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
            }
         }
         if (undiscoveredAgents.size() > 0) {
-            throw new InconsistentMachineProvisioningException(undiscoveredAgents);
+            throw new InconsistentMachineProvisioningException(new String[]{getProcessingUnit().getName()}, undiscoveredAgents);
         }
     }
 
@@ -284,7 +284,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         
         if (!state.getCapacityMarkedForDeallocation(pu).equalsZero()) {
             // containers need to be removed (required when number of containers per machine changes)
-            throw new GridServiceAgentSlaEnforcementPendingContainerDeallocationException(state.getCapacityMarkedForDeallocation(pu));
+            throw new GridServiceAgentSlaEnforcementPendingContainerDeallocationException(new String[]{getProcessingUnit().getName()}, state.getCapacityMarkedForDeallocation(pu));
         }
     }
 
@@ -319,7 +319,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             machineShortage == 0) {
             
             if (state.getNumberOfFutureAgents(pu) > 0) {
-                throw new DelayingScaleInUntilAllMachinesHaveStarted();
+                throw new DelayingScaleInUntilAllMachinesHaveStartedException(new String[]{getProcessingUnit().getName()});
             }
             
             logger.debug("Considering scale in: "+
@@ -462,7 +462,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             
             // even if machineShortage is 0, we still need to come back to this method 
             // to check the capacity is satisfied (scale out)
-            throw new MachinesSlaEnforcementInProgressException();
+            throw new MachinesSlaEnforcementInProgressException(new String[] {getProcessingUnit().getName()});
         }
         else {
             logger.debug("No action required in order to enforce machines sla. "+
@@ -476,17 +476,17 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
 
         if (!state.getCapacityMarkedForDeallocation(pu).equalsZero()) {
             // containers need to move to another machine
-            throw new GridServiceAgentSlaEnforcementPendingContainerDeallocationException(state.getCapacityMarkedForDeallocation(pu));
+            throw new GridServiceAgentSlaEnforcementPendingContainerDeallocationException(new String[]{getProcessingUnit().getName()}, state.getCapacityMarkedForDeallocation(pu));
         }
         
         if (state.getNumberOfFutureAgents(pu) > 0) {
             // new machines need to be started
-            throw new MachinesSlaEnforcementInProgressException();
+            throw new MachinesSlaEnforcementInProgressException(new String[] {getProcessingUnit().getName()});
         }
         
         if (!state.getAgentUidsGoingDown(pu).isEmpty()) {
             // old machines need to complete shutdown
-            throw new MachinesSlaEnforcementInProgressException();
+            throw new MachinesSlaEnforcementInProgressException(new String[] {getProcessingUnit().getName()});
         }
     }
 
@@ -504,7 +504,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                 if (!shortageCapacityRequirement.equalsZero() && expectedCapacityRequirement.equalsZero()) {
                     // cannot determine expected capacity, it could be enough to satisfy shortage 
                     // and if that is the case, there is no point in declaring there is shortage.
-                    throw new MachinesSlaEnforcementInProgressException();
+                    throw new MachinesSlaEnforcementInProgressException(new String[] {getProcessingUnit().getName()});
                 }
             }
             
@@ -576,7 +576,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         }
         
         if (machineShortage > 0 && cannotDetermineExpectedNumberOfMachines) {
-            throw new CannotDetermineIfNeedToStartMoreMachinesException(machineShortage);
+            throw new CannotDetermineIfNeedToStartMoreMachinesException(new String[]{getProcessingUnit().getName()}, machineShortage);
         }
         
         if (machineShortage < 0) {
@@ -970,7 +970,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
            }
            
            // providing a grace period for provisionedAgents to update.
-           throw new InconsistentMachineProvisioningException(newAgent);
+           throw new InconsistentMachineProvisioningException(new String[]{getProcessingUnit().getName()}, newAgent);
         }
     }
 

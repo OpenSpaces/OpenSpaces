@@ -19,11 +19,11 @@ package org.openspaces.grid.gsm.machines.exceptions;
  * @author itaif
  *
  */
-public class DelayingScaleInUntilAllMachinesHaveStarted extends GridServiceAgentSlaEnforcementInProgressException {
+public class DelayingScaleInUntilAllMachinesHaveStartedException extends GridServiceAgentSlaEnforcementInProgressException {
     
     private static final long serialVersionUID = 1L;
 
-    public DelayingScaleInUntilAllMachinesHaveStarted() {
-        super("Delaying scale in of existing machines since new machines are being started");
+    public DelayingScaleInUntilAllMachinesHaveStartedException(String[] puNames) {
+        super(puNames, "Delaying scale in of existing machines since new machines are being started");
     }
 }

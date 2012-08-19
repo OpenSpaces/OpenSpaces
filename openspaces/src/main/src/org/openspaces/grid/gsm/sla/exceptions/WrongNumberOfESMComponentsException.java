@@ -23,21 +23,12 @@ package org.openspaces.grid.gsm.sla.exceptions;
 public class WrongNumberOfESMComponentsException extends SlaEnforcementInProgressException implements SlaEnforcementFailure {
 
     private static final long serialVersionUID = 1L;
-    
-    String puName;
-    
+        
     public WrongNumberOfESMComponentsException(int numberOfEsms, String puName) {
-        super(message(numberOfEsms));
-        this.puName = puName;
+        super(new String[]{puName}, message(numberOfEsms));
     }
     
     private static String message(int numberOfEsms) {
         return "Number of ESMs must be 1. Currently " + numberOfEsms + " running.";
     }
-
-    @Override
-    public String[] getAffectedProcessingUnits() {
-        return new String[] {puName};
-    }
-
 }

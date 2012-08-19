@@ -28,11 +28,8 @@ public class DisconnectedFromLookupServiceException extends SlaEnforcementInProg
 
     private static final long serialVersionUID = 1L;
     
-    String puName;
-    
     public DisconnectedFromLookupServiceException(String puName, LookupLocator[] locators, String[] groups) {
-        super(message(locators, groups));
-        this.puName = puName;
+        super(new String[] {puName}, message(locators, groups));
     }
     
     private static String message(LookupLocator[] locators, String[] groups) {
@@ -50,10 +47,4 @@ public class DisconnectedFromLookupServiceException extends SlaEnforcementInProg
         }
         return toString(locatorsToString);
     }
-
-    @Override
-    public String[] getAffectedProcessingUnits() {
-        return new String[] {puName};
-    }
-
 }
