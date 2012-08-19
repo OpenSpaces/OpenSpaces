@@ -24,7 +24,6 @@ import java.util.Map.Entry;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.openspaces.admin.internal.pu.statistics.ErasedZonesStatisticsConfig;
 import org.openspaces.admin.internal.pu.statistics.InstancesStatisticsCalculator;
 import org.openspaces.admin.internal.pu.statistics.InternalProcessingUnitStatistics;
 import org.openspaces.admin.internal.pu.statistics.InternalProcessingUnitStatisticsCalculator;
@@ -89,6 +88,7 @@ public class DefaultProcessingUnitStatistics implements InternalProcessingUnitSt
 
     @Override
     public void addStatistics(ProcessingUnitStatisticsId statisticsId, Object statisticsValue) {
+        statisticsId.validate();
         statistics.put(statisticsId, statisticsValue);
         
     }
@@ -117,9 +117,7 @@ public class DefaultProcessingUnitStatistics implements InternalProcessingUnitSt
         
         List<ProcessingUnitStatisticsId> zoneCalculatedStatistics = new ArrayList<ProcessingUnitStatisticsId>();
         for (final ProcessingUnitStatisticsId statisticsId : statisticIds) {
-            if (!(statisticsId.getZoneStatistics() instanceof ErasedZonesStatisticsConfig)) {
-                zoneCalculatedStatistics.add(statisticsId);
-            }
+            zoneCalculatedStatistics.add(statisticsId);
         }
         zoneStatisticsCalculator.calculateNewStatistics(this, zoneCalculatedStatistics);
         

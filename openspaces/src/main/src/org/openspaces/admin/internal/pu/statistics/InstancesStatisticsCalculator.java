@@ -129,8 +129,7 @@ public class InstancesStatisticsCalculator implements InternalProcessingUnitStat
                 
         ProcessingUnitStatisticsId erased = statisticsId.shallowClone();
         // erase statistics function from hashmap key
-        erased.setInstancesStatistics(
-                new ErasedInstancesStatisticsConfig());
+        erased.setInstancesStatistics(null);
         return erased;
     }
     
@@ -141,12 +140,15 @@ public class InstancesStatisticsCalculator implements InternalProcessingUnitStat
             ProcessingUnitStatisticsId erasedStatisticsId,
             InstancesStatisticsConfig instancesStatistics) {
         
-        if (!(erasedStatisticsId.getInstancesStatistics() instanceof ErasedInstancesStatisticsConfig)) {
-            return erasedStatisticsId;
+        ProcessingUnitStatisticsId unerased;
+        if (erasedStatisticsId.getInstancesStatistics() != null) {
+            unerased = erasedStatisticsId;
         }
-        
-        ProcessingUnitStatisticsId unerased = erasedStatisticsId.shallowClone();
-        unerased.setInstancesStatistics(instancesStatistics);
+        else {
+            unerased = erasedStatisticsId.shallowClone();
+            unerased.setInstancesStatistics(instancesStatistics);
+        }
+        unerased.validate();
         return unerased;
     }
 }

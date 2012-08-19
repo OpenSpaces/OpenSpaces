@@ -43,6 +43,7 @@ public class ZoneStatisticsCalculator implements InternalProcessingUnitStatistic
     } 
     
     private void calculateNewStatistics(InternalProcessingUnitStatistics processingUnitStatistics, ProcessingUnitStatisticsId processingUnitStatisticsId) {
+        processingUnitStatisticsId.validate();
         //copy to avoid conc. modification exception on statistics
         Map<ProcessingUnitStatisticsId, Object> statistics = new HashMap<ProcessingUnitStatisticsId, Object>(processingUnitStatistics.getStatistics());
         // compare each request id with all current statistics entries.
@@ -77,8 +78,8 @@ public class ZoneStatisticsCalculator implements InternalProcessingUnitStatistic
     private ProcessingUnitStatisticsId erase(ProcessingUnitStatisticsId processingUnitStatisticsId) {
         processingUnitStatisticsId.validate();
         ProcessingUnitStatisticsId erased = processingUnitStatisticsId.shallowClone();
-        erased.setZoneStatistics(new ErasedZonesStatisticsConfig());
-        erased.setInstancesStatistics(new ErasedInstancesStatisticsConfig());
+        erased.setZoneStatistics(null);
+        erased.setInstancesStatistics(null);
         return erased;
         
     }
