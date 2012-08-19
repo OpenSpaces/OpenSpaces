@@ -42,6 +42,11 @@ public interface ZonesConfig {
     Set<String> getZones();
     
     /**
+     * @param zones A unique list of labels(tags) that represent different zones 
+     */
+    void setZones(Set<String> zones);
+    
+    /**
      * @return true iff the specified zones satisfies or equals this zones requirement
      */
     boolean satisfiedBy(ExactZonesConfig zoneStatisticsConfig);

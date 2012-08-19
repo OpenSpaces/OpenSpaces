@@ -15,30 +15,42 @@
  *******************************************************************************/
 package org.openspaces.admin.zone.config;
 
+import java.util.Arrays;
 import java.util.HashSet;
-
+import java.util.Set;
 
 /**
  * @author elip
  * @since 9.1.0
  */
-public class AtLeastOneZoneStatisticsConfigurer {
+public class ExactZonesConfigurer implements ZonesConfigurer<ExactZonesConfig>{
     
-    AtLeastOneZoneConfig config;
+    ExactZonesConfig config;
+    Set<String> zones = new HashSet<String>();
     
-    public AtLeastOneZoneStatisticsConfigurer() {
-        config = new AtLeastOneZoneConfig();
+    public ExactZonesConfigurer() {
+        config = new ExactZonesConfig();
     }
     
-    public AtLeastOneZoneStatisticsConfigurer zone(String zone) {
-        HashSet<String> zones = new HashSet<String>();
-        zones.add(zone);
-        config.setZones(zones);
+    public ExactZonesConfigurer addZones(Set<String> zones) {
+        this.zones.addAll(zones);
         return this;
     }
     
-    public AtLeastOneZoneConfig create() {
+    public ExactZonesConfigurer addZones(String... zones) {
+        this.zones.addAll(Arrays.asList(zones));
+        return this;
+    }
+    
+    public ExactZonesConfigurer addZone(String zone) {
+        this.zones.add(zone);
+        return this;
+    }
+    
+    public ExactZonesConfig create() {
+        config.setZones(zones);
         config.validate();
         return config;
     }
+
 }
