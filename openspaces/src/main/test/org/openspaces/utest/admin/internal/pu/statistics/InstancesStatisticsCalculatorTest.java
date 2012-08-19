@@ -34,6 +34,7 @@ import org.openspaces.admin.pu.statistics.PercentileInstancesStatisticsConfigure
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsIdConfigurer;
 import org.openspaces.admin.pu.statistics.SingleInstanceStatisticsConfigurer;
+import org.openspaces.admin.zone.config.ExactZonesConfig;
 
 /**
  * Unit Tests for {@link InstancesStatisticsCalculator}
@@ -82,6 +83,7 @@ public class InstancesStatisticsCalculatorTest extends TestCase {
                 .monitor(MONITOR)
                 .instancesStatistics(new SingleInstanceStatisticsConfigurer().instanceUid(instanceUid).create())
                 .timeWindowStatistics(new LastSampleTimeWindowStatisticsConfig())
+                .agentZones(new ExactZonesConfig())
                 .create();
     }
 
@@ -105,6 +107,7 @@ public class InstancesStatisticsCalculatorTest extends TestCase {
                .metric(METRIC)
                .timeWindowStatistics(new LastSampleTimeWindowStatisticsConfig())
                .instancesStatistics(new PercentileInstancesStatisticsConfigurer().percentile(percentile).create())
+               .agentZones(new ExactZonesConfig())
                .create();
 
     }
@@ -115,6 +118,7 @@ public class InstancesStatisticsCalculatorTest extends TestCase {
                .metric(METRIC)
                .timeWindowStatistics(new LastSampleTimeWindowStatisticsConfig())
                .instancesStatistics(new AverageInstancesStatisticsConfig())
+               .agentZones(new ExactZonesConfig())
                .create();
     }
     
@@ -124,6 +128,7 @@ public class InstancesStatisticsCalculatorTest extends TestCase {
                .metric(METRIC)
                .timeWindowStatistics(new LastSampleTimeWindowStatisticsConfig())
                .instancesStatistics(new MinimumInstancesStatisticsConfig())
+               .agentZones(new ExactZonesConfig())
                .create();
     }
     
@@ -133,6 +138,7 @@ public class InstancesStatisticsCalculatorTest extends TestCase {
                .metric(METRIC)
                .timeWindowStatistics(new LastSampleTimeWindowStatisticsConfig())
                .instancesStatistics(new MaximumInstancesStatisticsConfig())
+               .agentZones(new ExactZonesConfig())
                .create();
     }
     

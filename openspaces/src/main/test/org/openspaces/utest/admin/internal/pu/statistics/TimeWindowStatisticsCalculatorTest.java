@@ -37,6 +37,7 @@ import org.openspaces.admin.pu.statistics.PercentileTimeWindowStatisticsConfigur
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsIdConfigurer;
 import org.openspaces.admin.pu.statistics.SingleInstanceStatisticsConfigurer;
+import org.openspaces.admin.zone.config.ExactZonesConfig;
 
 /**
  * Unit Tests for {@link TimeWindowStatisticsCalculator}
@@ -137,6 +138,7 @@ public class TimeWindowStatisticsCalculatorTest extends TestCase {
         .monitor(MONITOR)
         .instancesStatistics(new SingleInstanceStatisticsConfigurer().instanceUid(INSTANCE_UID).create())
         .timeWindowStatistics(new AverageTimeWindowStatisticsConfigurer().timeWindow(SLEEP_MILLISECONDS, TimeUnit.MILLISECONDS).create())
+        .agentZones(new ExactZonesConfig())
         .create();
         calculator.calculateNewStatistics(pStatistics, toList(averageStatisticsId));            
         
@@ -194,6 +196,7 @@ public class TimeWindowStatisticsCalculatorTest extends TestCase {
                 .monitor(MONITOR)
                 .instancesStatistics(new SingleInstanceStatisticsConfigurer().instanceUid(INSTANCE_UID).create())
                 .timeWindowStatistics(defaultAverageStatisticsId)
+                .agentZones(new ExactZonesConfig())
                  .create());
             
         calculator.calculateNewStatistics(processingUnitStatistics, calculatedStatistics);
@@ -279,7 +282,8 @@ public class TimeWindowStatisticsCalculatorTest extends TestCase {
                 .maximumTimeWindow(MAXIMUM_TIMEWINDOW_SECONDS, TimeUnit.SECONDS)
                 .timeWindow(TIMEWINDOW_SECONDS, TimeUnit.SECONDS)
                 .create())
-                .create();
+        .agentZones(new ExactZonesConfig())
+        .create();
     }
     
     private ProcessingUnitStatisticsId averageStatisticsId() {
@@ -293,7 +297,8 @@ public class TimeWindowStatisticsCalculatorTest extends TestCase {
                         .maximumTimeWindow(MAXIMUM_TIMEWINDOW_SECONDS, TimeUnit.SECONDS)
                         .timeWindow(TIMEWINDOW_SECONDS, TimeUnit.SECONDS)
                         .create())
-                 .create();
+                .agentZones(new ExactZonesConfig())
+                .create();
     }
     
     private ProcessingUnitStatisticsId minimumStatisticsId() {
@@ -307,7 +312,8 @@ public class TimeWindowStatisticsCalculatorTest extends TestCase {
                         .maximumTimeWindow(MAXIMUM_TIMEWINDOW_SECONDS, TimeUnit.SECONDS)
                         .timeWindow(TIMEWINDOW_SECONDS, TimeUnit.SECONDS)
                         .create())
-                 .create();
+                .agentZones(new ExactZonesConfig())
+                .create();
     }
 
     private ProcessingUnitStatisticsId maximumStatisticsId() {
@@ -321,7 +327,8 @@ public class TimeWindowStatisticsCalculatorTest extends TestCase {
                         .maximumTimeWindow(MAXIMUM_TIMEWINDOW_SECONDS, TimeUnit.SECONDS)
                         .timeWindow(TIMEWINDOW_SECONDS, TimeUnit.SECONDS)
                         .create())
-                 .create();
+                .agentZones(new ExactZonesConfig())
+                .create();
     }
 
     private ProcessingUnitStatisticsId lastSampleStatisticsId() {
@@ -330,6 +337,7 @@ public class TimeWindowStatisticsCalculatorTest extends TestCase {
                 .monitor(MONITOR)
                 .instancesStatistics(new SingleInstanceStatisticsConfigurer().instanceUid(INSTANCE_UID).create())
                 .timeWindowStatistics(new LastSampleTimeWindowStatisticsConfig())
+                .agentZones(new ExactZonesConfig())
                 .create();
     }
     
