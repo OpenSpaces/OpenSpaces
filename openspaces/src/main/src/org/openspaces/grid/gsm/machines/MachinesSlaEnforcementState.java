@@ -18,7 +18,6 @@
 package org.openspaces.grid.gsm.machines;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -40,6 +39,7 @@ import org.openspaces.admin.zone.config.ZonesConfig;
 import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerAgent;
+import org.openspaces.grid.gsm.containers.ContainersSlaUtils;
 import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIsolation;
 
 public class MachinesSlaEnforcementState {
@@ -356,21 +356,27 @@ public class MachinesSlaEnforcementState {
         }
             
         // add all agents that started containers that are not with the same isolation
-        Set<String> allowedContainerZones = new HashSet<String>();
+        Set<ZonesConfig> allowedContainerZoness = new HashSet<ZonesConfig>();
         for (StateKey otherKey : keysWithSameIsolation) {
-            allowedContainerZones.addAll(Arrays.asList(otherKey.pu.getRequiredZones()));
+            allowedContainerZoness.add(otherKey.pu.getRequiredContainerZones());
         }
         Admin admin = key.pu.getAdmin();
         for (GridServiceContainer container : admin.getGridServiceContainers()) {
-            
-            Set<String> containerZones = container.getZones().keySet();
-            Set<String> disallowedContainerZones = subtract(containerZones,allowedContainerZones);
-            if ( disallowedContainerZones.size() > 0 && 
-                container.getGridServiceAgent() != null) {
-                
+            if (container.getGridServiceAgent() == null) {
+                // ignore manually started containers using gsc.bat
+                continue;
+            }
+            boolean allowed = false;
+            for (ZonesConfig allowedContainerZones : allowedContainerZoness) {
+                if (container.getExactZones().stasfies(allowedContainerZones)) {
+                    allowed = true;
+                    break;
+                }
+            }
+            if (!allowed) {
                 String agentUid = container.getGridServiceAgent().getUid();
                 initValue(restrictedAgentUidsWithReason, agentUid);
-                restrictedAgentUidsWithReason.get(agentUid).add("Machine has containers with restricted zones " + disallowedContainerZones);
+                restrictedAgentUidsWithReason.get(agentUid).add("Machine has a container with restricted zones " + ContainersSlaUtils.gscToString(container));
             }
         }
         
@@ -383,17 +389,6 @@ public class MachinesSlaEnforcementState {
                     restrictedAgentUidsWithReason.get(agentUid).add("Agent has been started by " + pair.getKey() +" but not allocated yet");
                 }
             }        
-        }
-        
-        if (key.gridServiceAgentZones != null) {
-            //add all agents that do not have this specific zone
-            for (GridServiceAgent agent : admin.getGridServiceAgents()) {
-                if (!agent.getZones().keySet().equals(key.gridServiceAgentZones.getZones())) {
-                    String agentUid = agent.getUid();
-                    initValue(restrictedAgentUidsWithReason, agentUid);
-                    restrictedAgentUidsWithReason.get(agentUid).add("Agent zones=" + agent.getZones().keySet() +" does not match " + key.gridServiceAgentZones);
-                }
-            }
         }
         
         return restrictedAgentUidsWithReason;
@@ -414,18 +409,6 @@ public class MachinesSlaEnforcementState {
         return new String[] {pu.getName()};
     }
     
-    /**
-     * @return false only if a disjoints b (a and b have nothing in common) 
-     * @param keySet
-     * @param restrictedContainerZones
-     * @return
-     */
-    private Set<String> subtract(Set<String> a, Set<String> b) {
-        Set<String> copyA = new HashSet<String>(a);
-        copyA.removeAll(b);
-        return copyA;
-    }
-
     public void removeFutureAgents(StateKey key, GridServiceAgentFutures futureAgents) {
         getState(key).removeFutureAgents(futureAgents);
     }
