@@ -17,6 +17,7 @@ package org.openspaces.grid.gsm.strategy;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -36,6 +37,7 @@ import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
 import org.openspaces.admin.zone.config.AtLeastOneZoneConfig;
 import org.openspaces.admin.zone.config.ExactZonesConfig;
 import org.openspaces.admin.zone.config.ExactZonesConfigurer;
+import org.openspaces.admin.zone.config.ZonesConfig;
 import org.openspaces.core.util.MemoryUnit;
 import org.openspaces.grid.gsm.GridServiceContainerConfigAware;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
@@ -62,6 +64,8 @@ import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcementEndpointAwar
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaPolicy;
 import org.openspaces.grid.gsm.rebalancing.exceptions.RebalancingSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementInProgressException;
+
+import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * A class for code reuse between {@link ManualCapacityScaleStrategyBean}
@@ -168,18 +172,18 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
      * Based on number of zones and total minimum number of machines
      * @throws MachinesSlaEnforcementInProgressException 
      */
-    private Map<ExactZonesConfig, Integer> calcMinimumNumberOfMachinesPerZones() throws MachinesSlaEnforcementInProgressException {
+    private Map<ZonesConfig, Integer> calcMinimumNumberOfMachinesPerZones() throws MachinesSlaEnforcementInProgressException {
 
-        Map<ExactZonesConfig, Integer> minimumNumberOfMachinesPerZone = new HashMap<ExactZonesConfig,Integer>();
+        Map<ZonesConfig, Integer> minimumNumberOfMachinesPerZone = new HashMap<ZonesConfig,Integer>();
         
         final int minimumTotalNumberOfMachines = getMinimumNumberOfMachines();
         
-        final Collection<ExactZonesConfig> plannedZones = getPlannedZones();
+        final Collection<ZonesConfig> plannedZones = getPlannedZones();
         
         int defaultNumberOfMachines = (int) Math.ceil(1.0*minimumTotalNumberOfMachines/plannedZones.size());
         
         int remainingNumberOfMachines = minimumTotalNumberOfMachines;
-        for (ExactZonesConfig zones : plannedZones) {
+        for (ZonesConfig zones : plannedZones) {
             
             int numberOfMachines = 0;
             if (plannedZones.contains(zones)) {
@@ -189,7 +193,7 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
             remainingNumberOfMachines -= numberOfMachines;
         }
         
-        for (ExactZonesConfig zones : machinesEndpoint.getGridServiceAgentsZones()) {
+        for (ZonesConfig zones : machinesEndpoint.getGridServiceAgentsZones()) {
             if (!plannedZones.contains(zones)) {
                 minimumNumberOfMachinesPerZone.put(zones, 0);
             }
@@ -253,10 +257,10 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
         PerZonesMachinesSlaEnforcementInProgressException pendingMachinesExceptions = new PerZonesMachinesSlaEnforcementInProgressException(new String[]{getProcessingUnit().getName()});
         PerZonesGridServiceAgentSlaEnforcementInProgressException pendingAgentsExceptions = new PerZonesGridServiceAgentSlaEnforcementInProgressException(new String[]{getProcessingUnit().getName()});
         //     * TODO: Add numberOfMachines to CapacityRequirements and CapacityRequirementsPerZones
-        Map<ExactZonesConfig,Integer> minimumNumberOfMachinesPerZone = calcMinimumNumberOfMachinesPerZones();
+        Map<ZonesConfig,Integer> minimumNumberOfMachinesPerZone = calcMinimumNumberOfMachinesPerZones();
         final CapacityRequirementsPerZones capacityRequirementsPerZone = this.capacityPerZones.toCapacityRequirementsPerZone();
         
-        for (ExactZonesConfig zones : getAllZones()) {
+        for (ZonesConfig zones : getAllZones()) {
             
             Integer minimumNumberOfMachines = minimumNumberOfMachinesPerZone.get(zones);
             //could be zero due to requirements change but machines still running
@@ -325,22 +329,16 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
             throw pendingMachinesExceptions;
         }
     }
-
-    private List<ExactZonesConfig> getPlannedZonesSorted() throws MachinesSlaEnforcementInProgressException {
-        List<ExactZonesConfig> sorted = new ArrayList<ExactZonesConfig>(getPlannedZones());
-        //TODO: sort all zones with AtLeastOneOfTheseZones last and ExactZones first -this is for state recovery
-        return sorted;
-    }
     
-    private Set<ExactZonesConfig> getAllZones()
+    private Set<ZonesConfig> getAllZones()
             throws MachinesSlaEnforcementInProgressException {
-        final Set<ExactZonesConfig> allZones = new HashSet<ExactZonesConfig>();
+        final Set<ZonesConfig> allZones = new HashSet<ZonesConfig>();
         allZones.addAll(machinesEndpoint.getGridServiceAgentsZones());
         allZones.addAll(getPlannedZones());
         return allZones;
     }
 
-    private Set<ExactZonesConfig> getPlannedZones() {
+    private Set<ZonesConfig> getPlannedZones() {
         return this.capacityPerZones.toCapacityRequirementsPerZone().getZones();
     }
  
@@ -370,7 +368,7 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
         }
     }
 
-    private CapacityMachinesSlaPolicy getMachinesSla(ExactZonesConfig zones, int minimumNumberOfMachines,
+    private CapacityMachinesSlaPolicy getMachinesSla(ZonesConfig zones, int minimumNumberOfMachines,
             CapacityRequirements capacityRequirements) {
         final CapacityMachinesSlaPolicy sla = new CapacityMachinesSlaPolicy();
         sla.setMachineProvisioning(super.getMachineProvisioning());
@@ -381,7 +379,7 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
         sla.setContainerMemoryCapacityInMB(containersConfig.getMaximumMemoryCapacityInMB());
         sla.setMachineIsolation(getIsolation());
         sla.setDiscoveredMachinesCache(getDiscoveredMachinesCache());
-        sla.setExactZones(zones);
+        sla.setGridServiceAgentZones(zones);
         return sla;
     }
     
@@ -573,10 +571,10 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
     @Override
     protected void recoverStateOnEsmStart() throws MachinesSlaEnforcementInProgressException, SomeProcessingUnitsHaveNotCompletedStateRecoveryException, NeedToWaitUntilAllGridServiceAgentsDiscoveredException {
         
-        Map<ExactZonesConfig,Integer> minimumNumberOfMachinesPerZone = calcMinimumNumberOfMachinesPerZones();
+        Map<ZonesConfig,Integer> minimumNumberOfMachinesPerZone = calcMinimumNumberOfMachinesPerZones();
         final CapacityRequirementsPerZones capacityRequirementsPerZone = this.capacityPerZones.toCapacityRequirementsPerZone();
         
-        for (ExactZonesConfig zones : getPlannedZonesSorted()) {
+        for (ZonesConfig zones : getPlannedZonesByRecoveryOrder()) {
 
             Integer minimumNumberOfMachines = minimumNumberOfMachinesPerZone.get(zones);
             //could be zero due to requirements change but machines still running
@@ -586,6 +584,26 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
         }
         
         machinesEndpoint.recoveredStateOnEsmStart(getProcessingUnit());
+    }
+
+    private List<ZonesConfig> getPlannedZonesByRecoveryOrder() throws MachinesSlaEnforcementInProgressException {
+        List<ZonesConfig> sortedZones = new ArrayList<ZonesConfig>(getPlannedZones());
+        Collections.sort(sortedZones,new Comparator<ZonesConfig>() {
+
+            @Override
+            public int compare(ZonesConfig z1, ZonesConfig z2) {
+                return rank(z1.getClass()) - rank(z2.getClass());
+            }
+
+            private int rank(Class<? extends ZonesConfig> clazz) {
+                if (ExactZonesConfig.class.isAssignableFrom(clazz)) {
+                    // max priority for exact zones definitions during ESM start recovery
+                    return 0;
+                }
+                return 1;
+            }
+        });
+        return sortedZones;
     }
 
     @Override

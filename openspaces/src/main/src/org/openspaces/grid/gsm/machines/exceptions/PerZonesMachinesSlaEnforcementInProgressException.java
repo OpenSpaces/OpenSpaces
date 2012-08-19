@@ -17,10 +17,8 @@ package org.openspaces.grid.gsm.machines.exceptions;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
-import org.openspaces.admin.zone.config.ExactZonesConfig;
-import org.openspaces.grid.gsm.machines.exceptions.MachinesSlaEnforcementInProgressException;
+import org.openspaces.admin.zone.config.ZonesConfig;
 
 /**
  * @author Itai Frenkel
@@ -29,14 +27,14 @@ import org.openspaces.grid.gsm.machines.exceptions.MachinesSlaEnforcementInProgr
 public class PerZonesMachinesSlaEnforcementInProgressException extends MachinesSlaEnforcementInProgressException {
 
     private static final long serialVersionUID = 1L;
-    Map<Set<String>,MachinesSlaEnforcementInProgressException> reasons;
+    Map<ZonesConfig, MachinesSlaEnforcementInProgressException> reasons;
     public PerZonesMachinesSlaEnforcementInProgressException(String[] puNames) {
         super(puNames, "Multiple Exceptions");
-        reasons = new HashMap<Set<String>, MachinesSlaEnforcementInProgressException>();
+        reasons = new HashMap<ZonesConfig, MachinesSlaEnforcementInProgressException>();
     }
 
-    public void addReason(ExactZonesConfig zones, MachinesSlaEnforcementInProgressException reason) {
-        reasons.put(zones.getZones(), reason);
+    public void addReason(ZonesConfig zones, MachinesSlaEnforcementInProgressException reason) {
+        reasons.put(zones, reason);
     }
 
     @Override

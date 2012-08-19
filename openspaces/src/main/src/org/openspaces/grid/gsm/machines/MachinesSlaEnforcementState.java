@@ -36,7 +36,7 @@ import org.openspaces.admin.Admin;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.pu.ProcessingUnit;
-import org.openspaces.admin.zone.config.ExactZonesConfig;
+import org.openspaces.admin.zone.config.ZonesConfig;
 import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerAgent;
@@ -47,11 +47,11 @@ public class MachinesSlaEnforcementState {
     public static class StateKey {
         
         ProcessingUnit pu;
-        ExactZonesConfig exactGridServiceAgentZones;
+        ZonesConfig gridServiceAgentZones;
         
-        public StateKey (ProcessingUnit pu, ExactZonesConfig exactGridServiceAgentZones) {
+        public StateKey (ProcessingUnit pu, ZonesConfig gridServiceAgentZones) {
             this.pu = pu;
-            this.exactGridServiceAgentZones = exactGridServiceAgentZones;
+            this.gridServiceAgentZones = gridServiceAgentZones;
         }
         
         @Override
@@ -59,7 +59,7 @@ public class MachinesSlaEnforcementState {
             final int prime = 31;
             int result = 1;
             result = prime * result
-                    + ((exactGridServiceAgentZones == null) ? 0 : exactGridServiceAgentZones.hashCode());
+                    + ((gridServiceAgentZones == null) ? 0 : gridServiceAgentZones.hashCode());
             result = prime * result + ((pu == null) ? 0 : pu.hashCode());
             return result;
         }
@@ -73,10 +73,10 @@ public class MachinesSlaEnforcementState {
             if (getClass() != obj.getClass())
                 return false;
             StateKey other = (StateKey) obj;
-            if (exactGridServiceAgentZones == null) {
-                if (other.exactGridServiceAgentZones != null)
+            if (gridServiceAgentZones == null) {
+                if (other.gridServiceAgentZones != null)
                     return false;
-            } else if (!exactGridServiceAgentZones.equals(other.exactGridServiceAgentZones))
+            } else if (!gridServiceAgentZones.equals(other.gridServiceAgentZones))
                 return false;
             if (pu == null) {
                 if (other.pu != null)
@@ -90,7 +90,7 @@ public class MachinesSlaEnforcementState {
         public String toString() {
             return "StateKey ["
                     + (pu != null ? "pu=" + pu + ", " : "")
-                    + (exactGridServiceAgentZones != null ? "exactGridServiceAgentZones=" + exactGridServiceAgentZones : "")
+                    + (gridServiceAgentZones != null ? "exactGridServiceAgentZones=" + gridServiceAgentZones : "")
                     + "]";
         }
     }
@@ -385,13 +385,13 @@ public class MachinesSlaEnforcementState {
             }        
         }
         
-        if (key.exactGridServiceAgentZones != null) {
+        if (key.gridServiceAgentZones != null) {
             //add all agents that do not have this specific zone
             for (GridServiceAgent agent : admin.getGridServiceAgents()) {
-                if (!agent.getZones().keySet().equals(key.exactGridServiceAgentZones.getZones())) {
+                if (!agent.getZones().keySet().equals(key.gridServiceAgentZones.getZones())) {
                     String agentUid = agent.getUid();
                     initValue(restrictedAgentUidsWithReason, agentUid);
-                    restrictedAgentUidsWithReason.get(agentUid).add("Agent zones=" + agent.getZones().keySet() +" does not match " + key.exactGridServiceAgentZones);
+                    restrictedAgentUidsWithReason.get(agentUid).add("Agent zones=" + agent.getZones().keySet() +" does not match " + key.gridServiceAgentZones);
                 }
             }
         }
@@ -468,11 +468,11 @@ public class MachinesSlaEnforcementState {
         return recoveredStatePerProcessingUnit.contains(pu);
     }
 
-    public Set<ExactZonesConfig> getGridServiceAgentsZones(ProcessingUnit pu) {
-        Set<ExactZonesConfig> zones = new HashSet<ExactZonesConfig>();
+    public Set<ZonesConfig> getGridServiceAgentsZones(ProcessingUnit pu) {
+        Set<ZonesConfig> zones = new HashSet<ZonesConfig>();
         for (StateKey key : state.keySet()) {
             if (key.pu.equals(pu)) {
-                zones.add(key.exactGridServiceAgentZones);
+                zones.add(key.gridServiceAgentZones);
             }
         }
         return zones;
@@ -504,5 +504,13 @@ public class MachinesSlaEnforcementState {
             }
         }
         return capacityPerPuPerAgent;
+    }
+    
+    public CapacityRequirementsPerAgent getAllocatedCapacity(ProcessingUnit otherPu) {
+        CapacityRequirementsPerAgent capacityRequirementsPerAgent =  new CapacityRequirementsPerAgent();
+        for (ZonesConfig  zones : getGridServiceAgentsZones(otherPu)) {
+            capacityRequirementsPerAgent = capacityRequirementsPerAgent.add(getAllocatedCapacity(new StateKey(otherPu,zones)));
+        }
+        return capacityRequirementsPerAgent;
     }
 }

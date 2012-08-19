@@ -37,6 +37,8 @@ import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.zone.config.ExactZonesConfig;
+import org.openspaces.admin.zone.config.ExactZonesConfigurer;
+import org.openspaces.admin.zone.config.ZonesConfig;
 import org.openspaces.grid.gsm.LogPerProcessingUnit;
 import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.capacity.CapacityRequirement;
@@ -137,7 +139,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
     }
 
     private StateKey getKey(AbstractMachinesSlaPolicy sla) {
-        return new MachinesSlaEnforcementState.StateKey(pu, sla.getExactGridServiceAgentZones());
+        return new MachinesSlaEnforcementState.StateKey(pu, sla.getGridServiceAgentZones());
     }
 
     @Override
@@ -145,12 +147,14 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
     
         if (!isCompletedStateRecovery(sla)) {
                 
+            Set<String> puZones = pu.getRequiredContainerZones().getZones();
+            
             // check pu zone matches container zones.
-            if (pu.getRequiredZones().length != 1) {
+            if (puZones.size() != 1) {
                 throw new IllegalStateException("PU has to have exactly 1 zone defined");
             }
     
-            String containerZone = pu.getRequiredZones()[0];
+            String containerZone = puZones.iterator().next();
             Admin admin = pu.getAdmin();
 
             // Validate all Agents have been discovered.
@@ -162,11 +166,9 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             }
         
             // Recover the endpoint state based on running containers.
+            CapacityRequirementsPerAgent allocatedCapacityForPu = state.getAllocatedCapacity(pu);
             for (GridServiceAgent agent: admin.getGridServiceAgents()) {
-                if (!sla.getExactGridServiceAgentZones().equals(agent.getZones().keySet())) {
-                    //this step makes sure that only one exactZones will pass, otherwise both will allocate the same agent 
-                    //TODO: replace with zones.satisfiedby(agent.getZones().keySet())
-                    //      and make sure no other zones has already allocated this machine
+                if (!sla.getGridServiceAgentZones().satisfiedBy(agent.getExactZones())) {
                     continue;
                 }
                 String agentUid = agent.getUid();
@@ -175,7 +177,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                 // we cannot assume allocatedMemoryOnAgent == 0 since this method
                 // must be idempotent.
                 long allocatedMemoryOnAgentInMB = MachinesSlaUtils.getMemoryInMB(
-                      getAllocatedCapacity(sla).getAgentCapacityOrZero(agentUid));
+                      allocatedCapacityForPu.getAgentCapacityOrZero(agentUid));
                 
                 int numberOfContainersForPuOnAgent = 
                         ContainersSlaUtils.getContainersByZoneOnAgentUid(admin,containerZone,agentUid).size();
@@ -400,9 +402,10 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                    throw new NeedToStartMoreGridServiceAgentsException(sla, state,shortageCapacity,pu);
                }
                
+                ExactZonesConfig exactZones = new ExactZonesConfigurer().addZones(sla.getGridServiceAgentZones().getZones()).create();
                 FutureGridServiceAgent[] futureAgents = sla.getMachineProvisioning().startMachinesAsync(
                     shortageCapacity, 
-                    sla.getExactGridServiceAgentZones(),
+                    exactZones,
                     START_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
                 addFutureAgents(sla, futureAgents, shortageCapacity);
                 
@@ -445,9 +448,10 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                     throw new NeedToStartMoreGridServiceAgentsException(capacityRequirements, pu);
                 }
                 
+                ExactZonesConfig exactZones = new ExactZonesConfigurer().addZones(sla.getGridServiceAgentZones().getZones()).create();
                 FutureGridServiceAgent[] futureAgents = sla.getMachineProvisioning().startMachinesAsync(
                         capacityRequirements,
-                        sla.getExactGridServiceAgentZones(),
+                        exactZones,
                         START_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
                 
                 addFutureAgents(sla, futureAgents, capacityRequirements);
@@ -1279,7 +1283,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
     }
 
     @Override
-    public Set<ExactZonesConfig> getGridServiceAgentsZones() {
+    public Set<ZonesConfig> getGridServiceAgentsZones() {
         return state.getGridServiceAgentsZones(pu);
     }
 }

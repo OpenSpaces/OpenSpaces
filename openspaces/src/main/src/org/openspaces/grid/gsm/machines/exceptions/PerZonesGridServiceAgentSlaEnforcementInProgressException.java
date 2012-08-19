@@ -17,9 +17,8 @@ package org.openspaces.grid.gsm.machines.exceptions;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
-import org.openspaces.admin.zone.config.ExactZonesConfig;
+import org.openspaces.admin.zone.config.ZonesConfig;
 
 /**
  * @author Itai Frenkel
@@ -28,14 +27,14 @@ import org.openspaces.admin.zone.config.ExactZonesConfig;
 public class PerZonesGridServiceAgentSlaEnforcementInProgressException extends GridServiceAgentSlaEnforcementInProgressException {
 
     private static final long serialVersionUID = 1L;
-    Map<Set<String>,GridServiceAgentSlaEnforcementInProgressException> reasons;
+    Map<ZonesConfig,GridServiceAgentSlaEnforcementInProgressException> reasons;
     public PerZonesGridServiceAgentSlaEnforcementInProgressException(String[] puNames) {
         super(puNames, "Multiple Exceptions");
-        reasons = new HashMap<Set<String>, GridServiceAgentSlaEnforcementInProgressException>();
+        reasons = new HashMap<ZonesConfig, GridServiceAgentSlaEnforcementInProgressException>();
     }
 
-    public void addReason(ExactZonesConfig zones, GridServiceAgentSlaEnforcementInProgressException reason) {
-        reasons.put(zones.getZones(), reason);
+    public void addReason(ZonesConfig zones, GridServiceAgentSlaEnforcementInProgressException reason) {
+        reasons.put(zones, reason);
     }
 
     @Override

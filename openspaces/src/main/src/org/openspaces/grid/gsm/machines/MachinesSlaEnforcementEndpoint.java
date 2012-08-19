@@ -20,7 +20,7 @@ package org.openspaces.grid.gsm.machines;
 import java.util.Set;
 
 import org.openspaces.admin.pu.ProcessingUnit;
-import org.openspaces.admin.zone.config.ExactZonesConfig;
+import org.openspaces.admin.zone.config.ZonesConfig;
 import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerAgent;
 import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.machines.exceptions.MachinesSlaEnforcementInProgressException;
@@ -68,5 +68,5 @@ public interface MachinesSlaEnforcementEndpoint extends ServiceLevelAgreementEnf
     /**
      * @return a list of zones that are being tracked for the specified processing unit
      */
-    Set<ExactZonesConfig> getGridServiceAgentsZones();
+    Set<ZonesConfig> getGridServiceAgentsZones();
 }

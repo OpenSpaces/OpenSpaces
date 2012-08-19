@@ -49,7 +49,7 @@ public class CapacityMachinesSlaPolicy extends AbstractMachinesSlaPolicy {
             throw new IllegalArgumentException ("capacityRequirements cannot be null");
         }
         
-        if (this.getExactGridServiceAgentZones() == null) {
+        if (this.getGridServiceAgentZones() == null) {
             throw new IllegalArgumentException("Exact Zones cannot be null in Capacity Machines Sla Policy");
         }
     }

@@ -113,9 +113,8 @@ public class NeedToStartMoreGridServiceAgentsException extends GridServiceAgentS
             return false;
         return true;
     }
-    
 
     private static StateKey getKey(ProcessingUnit pu, AbstractMachinesSlaPolicy sla) {
-        return new MachinesSlaEnforcementState.StateKey(pu, sla.getExactGridServiceAgentZones());
+        return new MachinesSlaEnforcementState.StateKey(pu, sla.getGridServiceAgentZones());
     }
 }
