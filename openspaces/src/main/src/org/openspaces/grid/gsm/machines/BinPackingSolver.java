@@ -334,6 +334,8 @@ public class BinPackingSolver {
                             }
                         }
                     }
+                    //found a solution
+                    break;
                 }
             }
         }
