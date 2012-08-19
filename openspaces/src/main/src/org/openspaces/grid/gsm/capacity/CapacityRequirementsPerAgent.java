@@ -45,10 +45,28 @@ public class CapacityRequirementsPerAgent {
     }
 
     @Override
-    public boolean equals(Object other) {
-        return 
-            other instanceof CapacityRequirementsPerAgent &&
-            ((CapacityRequirementsPerAgent)other).capacityPerAgent.equals(capacityPerAgent);
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((capacityPerAgent == null) ? 0 : capacityPerAgent.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        CapacityRequirementsPerAgent other = (CapacityRequirementsPerAgent) obj;
+        if (capacityPerAgent == null) {
+            if (other.capacityPerAgent != null)
+                return false;
+        } else if (!capacityPerAgent.equals(other.capacityPerAgent))
+            return false;
+        return true;
     }
 
     public Collection<String> getAgentUids() {
