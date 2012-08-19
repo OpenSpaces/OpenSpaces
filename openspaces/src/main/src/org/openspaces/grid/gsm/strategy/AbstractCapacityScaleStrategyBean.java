@@ -34,9 +34,7 @@ import org.openspaces.admin.pu.elastic.config.CapacityRequirementsConfigurer;
 import org.openspaces.admin.pu.elastic.config.CapacityRequirementsPerZonesConfig;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyCapacityRequirementConfig;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
-import org.openspaces.admin.zone.config.AtLeastOneZoneConfig;
 import org.openspaces.admin.zone.config.ExactZonesConfig;
-import org.openspaces.admin.zone.config.ExactZonesConfigurer;
 import org.openspaces.admin.zone.config.ZonesConfig;
 import org.openspaces.core.util.MemoryUnit;
 import org.openspaces.grid.gsm.GridServiceContainerConfigAware;
@@ -117,10 +115,8 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
         setCapacityRequirementConfig(capacityPerZones);     
     }
 
-    //TODO: Support ZonesConfig abstraction without exactzones
-    protected ExactZonesConfig getDefaultZones() {
-        final AtLeastOneZoneConfig defaultZones = getMachineProvisioning().getConfig().getGridServiceAgentZones();
-        return new ExactZonesConfigurer().addZones(defaultZones.getZones()).create();
+    protected ZonesConfig getDefaultZones() {
+        return getMachineProvisioning().getConfig().getGridServiceAgentZones();
     }
     
     /**

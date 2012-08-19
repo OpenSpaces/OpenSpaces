@@ -18,7 +18,7 @@
 package org.openspaces.admin.pu.elastic;
 
 import org.openspaces.admin.bean.BeanConfig;
-import org.openspaces.admin.zone.config.AtLeastOneZoneConfig;
+import org.openspaces.admin.zone.config.ZonesConfig;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 
 /**
@@ -56,14 +56,21 @@ public interface ElasticMachineProvisioningConfig extends BeanConfig {
      * By default returns an empty array.
      * 
      * For example:
-     * String[] {}                  - Grid Service Agents are started without -Dcom.gs.zones (requires that {@link #isGridServiceAgentZoneMandatory()} is false)
-     * String[] {"zoneA"}           - Grid Service Agents are started with -Dcom.gs.zones=zoneA (or without -Dcom.gs.zones if {@link #isGridServiceAgentZoneMandatory()} is false)
-     * String[] {"zoneA","zoneB"}   - Grid Service Agents are started with -Dcom.gs.zones=zoneA or -Dcom.gs.zones=zoneB or -Dcom.gs.zones=zoneA,zoneB (or without -Dcom.gs.zones if {@link #isGridServiceAgentZoneMandatory()} is false)
+     * If Grid Service Agents can be with/without any zone
+     * return new AnyZonesConfig()
+     *  
+     * If Grid Service Agents must have at least "zoneA" (started with -Dcom.gs.zones=zoneA)
+     * return new AtLeastOneZoneConfigurer().addZone("zoneA").create()
+     * 
+     * If Grid Service Agents must have at least "zoneA" or "zoneB" (or both)
+     * return new AtLeastOneZoneConfigurer().addZones("zoneA","zoneB").create()
+     * 
+     * If Grid Service Agents must have exactly "zoneA" and "zoneB" (and no other zone)
+     * return new ExactOneZoneConfigurer().addZones("zoneA","zoneB").create()
      * 
      * @since 8.0.1
-     * 
      */
-    public AtLeastOneZoneConfig getGridServiceAgentZones();
+    public ZonesConfig getGridServiceAgentZones();
     
     /**
      * By default is false, which means that a Grid Service Agents may run a management process. 
