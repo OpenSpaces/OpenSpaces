@@ -276,7 +276,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         if (machineShortage > 0) {
             CapacityRequirements capacityRequirements = new CapacityRequirements(
                     new NumberOfMachinesCapacityRequirement(machineShortage));
-            throw new NeedToStartMoreGridServiceAgentsException(capacityRequirements, pu);
+            throw new NeedToStartMoreGridServiceAgentsException(sla, state, capacityRequirements, pu);
         }
         
         if (!getCapacityMarkedForDeallocation(sla).equalsZero()) {
@@ -443,7 +443,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                         new NumberOfMachinesCapacityRequirement(machineShortage));
                 
                 if (!sla.getMachineProvisioning().isStartMachineSupported()) {
-                    throw new NeedToStartMoreGridServiceAgentsException(capacityRequirements, pu);
+                    throw new NeedToStartMoreGridServiceAgentsException(sla, state, capacityRequirements, pu);
                 }
                 
                 ExactZonesConfig exactZones = new ExactZonesConfigurer().addZones(sla.getGridServiceAgentZones().getZones()).create();

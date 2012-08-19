@@ -17,6 +17,8 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.machines.exceptions;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -26,9 +28,10 @@ import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.MachineCapacityRequirements;
 import org.openspaces.grid.gsm.machines.AbstractMachinesSlaPolicy;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementState;
-import org.openspaces.grid.gsm.machines.MachinesSlaUtils;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementState.StateKey;
+import org.openspaces.grid.gsm.machines.MachinesSlaUtils;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
+import org.springframework.util.StringUtils;
 
 public class NeedToStartMoreGridServiceAgentsException extends GridServiceAgentSlaEnforcementInProgressException implements SlaEnforcementFailure {
     
@@ -39,23 +42,35 @@ public class NeedToStartMoreGridServiceAgentsException extends GridServiceAgentS
         super(new String[] { pu.getName()}, createMessage(sla, state, capacityShortage, pu));
         this.capacityShortage = capacityShortage;
     }
-
-    public NeedToStartMoreGridServiceAgentsException(CapacityRequirements capacityShortage, ProcessingUnit pu) {
-        super(new String[] { pu.getName()}, createBasicMessage(capacityShortage));
-        this.capacityShortage = capacityShortage;
+    
+    
+    private static String createMessage(AbstractMachinesSlaPolicy sla, MachinesSlaEnforcementState state, CapacityRequirements capacityShortage, ProcessingUnit pu) {
+        return createBasicMessage(capacityShortage) + ". " + 
+                otherPusOnSameMachinesReport(sla, state, pu) + ". "+
+                restrictedMachinesReport(sla,state,pu);
     }
     
     private static String createBasicMessage(CapacityRequirements capacityShortage) {
         return "Cannot enforce Machines SLA since there are not enough machines available. "+
                 "Need more capacity: " + capacityShortage;
     }
-    
-    private static String createMessage(AbstractMachinesSlaPolicy sla, MachinesSlaEnforcementState state, CapacityRequirements capacityShortage, ProcessingUnit pu) {
-        return createBasicMessage(capacityShortage) + ". " + reportToString(sla, state.groupCapacityPerProcessingUnitPerAgent(getKey(pu,sla)));
+
+    private static String restrictedMachinesReport(AbstractMachinesSlaPolicy sla, MachinesSlaEnforcementState state, ProcessingUnit pu) {
+        Map<String,String> restrictedMachinesWithReasons = new HashMap<String,String>();
+        Map<String, List<String>> restrictedAgentUidsWithReasons = state.getRestrictedAgentUids(getKey(pu,sla));
+        for (Entry<String, List<String>> pair : restrictedAgentUidsWithReasons.entrySet()) {
+            String agentUid = pair.getKey();
+            String ipAddress = MachinesSlaUtils.agentToString(pu.getAdmin(), agentUid);
+            String reason = StringUtils.collectionToCommaDelimitedString(pair.getValue());
+            restrictedMachinesWithReasons.put(ipAddress, reason);
+        }
+        return "restricted machines:"+restrictedMachinesWithReasons;
     }
 
-    private static String reportToString(
-            AbstractMachinesSlaPolicy sla, Map<GridServiceAgent, Map<ProcessingUnit, CapacityRequirements>> createReportOfAllMachines) {
+    private static String otherPusOnSameMachinesReport(
+            AbstractMachinesSlaPolicy sla, MachinesSlaEnforcementState state, ProcessingUnit pu) {
+        Map<GridServiceAgent, Map<ProcessingUnit, CapacityRequirements>> createReportOfAllMachines = 
+                state.groupCapacityPerProcessingUnitPerAgent(getKey(pu,sla));
         StringBuilder message = new StringBuilder("Capacity Report of all relevant machines:");
         for (Entry<GridServiceAgent, Map<ProcessingUnit, CapacityRequirements>> agentpair : createReportOfAllMachines.entrySet()) {
             
