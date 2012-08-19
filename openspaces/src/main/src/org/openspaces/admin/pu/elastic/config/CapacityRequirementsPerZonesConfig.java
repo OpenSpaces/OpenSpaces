@@ -15,18 +15,18 @@
  *******************************************************************************/
 package org.openspaces.admin.pu.elastic.config;
 
+import static org.openspaces.admin.internal.zone.config.ZonesConfigUtils.zonesFromString;
+import static org.openspaces.admin.internal.zone.config.ZonesConfigUtils.zonesToString;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.openspaces.admin.zone.config.ExactZonesConfig;
-import org.openspaces.admin.zone.config.ExactZonesConfigurer;
+import org.openspaces.admin.zone.config.ZonesConfig;
 import org.openspaces.core.util.StringProperties;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerZones;
-
-import com.gigaspaces.internal.utils.StringUtils;
 
 /**
  * A key/value alternative to {@link CapacityRequirementsPerZone}
@@ -60,7 +60,7 @@ public class CapacityRequirementsPerZonesConfig {
         return this.properties.getProperties();
     }
 
-    public void addCapacity(ExactZonesConfig zones, ScaleStrategyCapacityRequirementConfig capacity) {
+    public void addCapacity(ZonesConfig zones, ScaleStrategyCapacityRequirementConfig capacity) {
 
         CapacityRequirementsPerZones newCapacityPerZone = 
                 toCapacityRequirementsPerZone()
@@ -86,10 +86,7 @@ public class CapacityRequirementsPerZonesConfig {
         CapacityRequirementsPerZones capacityPerZone = new CapacityRequirementsPerZones();
         for (Entry<String, Map<String,String>> pair : groupPropertiesByZone(keyPrefix, properties).entrySet()) {
             CapacityRequirements capacity = new CapacityRequirementsConfig(pair.getValue()).toCapacityRequirements();
-            ExactZonesConfig zones = 
-                new ExactZonesConfigurer()
-                .addZones(StringUtils.commaDelimitedListToStringArray(pair.getKey()))
-                .create();
+            ZonesConfig zones =  zonesFromString(pair.getKey());
             capacityPerZone = capacityPerZone.add(zones, capacity);
         }
         return capacityPerZone;
@@ -114,14 +111,13 @@ public class CapacityRequirementsPerZonesConfig {
 
     private static StringProperties fromCapacityRequirementsPerZone(String keyPrefix, CapacityRequirementsPerZones capacityPerZone) {
         StringProperties capacityProperties = new StringProperties();
-        for (ExactZonesConfig zones : capacityPerZone.getZones()) {
-            Map<String, String> zoneCapacityProperties = new CapacityRequirementsConfig(capacityPerZone.getZonesCapacity(zones)).getProperties();
-            String zonesList = StringUtils.collectionToCommaDelimitedString(zones.getZones());
-            capacityProperties.putMap(keyPrefix + zonesList + ".", zoneCapacityProperties);
+        for (ZonesConfig zones : capacityPerZone.getZones()) {
+            final Map<String, String> zoneCapacityProperties = new CapacityRequirementsConfig(capacityPerZone.getZonesCapacity(zones)).getProperties();
+            capacityProperties.putMap(keyPrefix + zonesToString(zones) + ".", zoneCapacityProperties);
         }
         return capacityProperties;
     }
-    
+
     @Override
     public String toString() {
         return getPropertiesByZone().toString();

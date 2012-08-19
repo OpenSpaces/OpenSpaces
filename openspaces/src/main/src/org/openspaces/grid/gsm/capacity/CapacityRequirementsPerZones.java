@@ -17,13 +17,14 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.capacity;
 
+import static org.openspaces.admin.internal.zone.config.ZonesConfigUtils.zonesFromString;
+import static org.openspaces.admin.internal.zone.config.ZonesConfigUtils.zonesToString;
+
 import java.util.HashSet;
 import java.util.Set;
 
-import org.openspaces.admin.zone.config.ExactZonesConfig;
-import org.openspaces.admin.zone.config.ExactZonesConfigurer;
+import org.openspaces.admin.zone.config.ZonesConfig;
 
-import com.gigaspaces.internal.utils.StringUtils;
 /**
  * 
  * @author Itai Frenkel
@@ -35,39 +36,39 @@ public class CapacityRequirementsPerZones extends AbstractCapacityRequirementsPe
     public CapacityRequirementsPerZones() {
     }
         
-    public Set<ExactZonesConfig> getZones() {
-        Set<ExactZonesConfig> zonesList = new HashSet<ExactZonesConfig>(); 
+    public Set<ZonesConfig> getZones() {
+        Set<ZonesConfig> zonesList = new HashSet<ZonesConfig>(); 
         for (String key : super.getKeys()) {
             zonesList.add(zonesFromString(key));
         }
         return zonesList;
     }
         
-    public CapacityRequirementsPerZones set(ExactZonesConfig zones, CapacityRequirements capacity) {
+    public CapacityRequirementsPerZones set(ZonesConfig zones, CapacityRequirements capacity) {
         return (CapacityRequirementsPerZones) super.set(zonesToString(zones), capacity);
     }
     
     public CapacityRequirementsPerZones add(
-            ExactZonesConfig zones, 
+            ZonesConfig zones, 
             CapacityRequirements capacity) {
         
       return (CapacityRequirementsPerZones) super.add(zonesToString(zones), capacity);
     }
     
     public CapacityRequirementsPerZones subtract(
-            ExactZonesConfig zones, 
+            ZonesConfig zones, 
             CapacityRequirements capacity) {
         
         return (CapacityRequirementsPerZones) super.subtract(zonesToString(zones), capacity);
     }
 
     public CapacityRequirementsPerZones subtractZone(
-            ExactZonesConfig zones) {
+            ZonesConfig zones) {
         return (CapacityRequirementsPerZones) super.subtractKey(zonesToString(zones));
     }
 
     public CapacityRequirementsPerZones subtractOrZero(
-            ExactZonesConfig zones, CapacityRequirements capacity) {
+            ZonesConfig zones, CapacityRequirements capacity) {
         
         return (CapacityRequirementsPerZones) super.subtractOrZero(zonesToString(zones), capacity);
     }
@@ -80,19 +81,13 @@ public class CapacityRequirementsPerZones extends AbstractCapacityRequirementsPe
         return (CapacityRequirementsPerZones) super.add(other);
     }
 
-    public CapacityRequirements getZonesCapacity(ExactZonesConfig zones) {
+    public CapacityRequirements getZonesCapacity(ZonesConfig zones) {
         return super.getKeyCapacity(zonesToString(zones));
     }
 
-    private String zonesToString(ExactZonesConfig zones) {
-        return StringUtils.collectionToCommaDelimitedString(zones.getZones());
-    }
-
-    private ExactZonesConfig zonesFromString(String key) {
-        return new ExactZonesConfigurer().addZones(StringUtils.commaDelimitedListToStringArray(key)).create();
-    }
     
-    public CapacityRequirements getZonesCapacityOrZero(ExactZonesConfig zones) {
+    
+    public CapacityRequirements getZonesCapacityOrZero(ZonesConfig zones) {
         return super.getKeyCapacityOrZero(zonesToString(zones));
     }
 
