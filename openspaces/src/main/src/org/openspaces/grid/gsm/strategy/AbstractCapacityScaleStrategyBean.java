@@ -17,6 +17,7 @@ package org.openspaces.grid.gsm.strategy;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -63,8 +64,6 @@ import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcementEndpointAwar
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaPolicy;
 import org.openspaces.grid.gsm.rebalancing.exceptions.RebalancingSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementInProgressException;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * A class for code reuse between {@link ManualCapacityScaleStrategyBean}
