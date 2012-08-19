@@ -55,6 +55,7 @@ import org.openspaces.admin.pu.events.ProcessingUnitInstanceStatisticsChangedEve
 import org.openspaces.admin.pu.events.ProcessingUnitSpaceCorrelatedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEventManager;
 import org.openspaces.admin.space.Space;
+import org.openspaces.admin.zone.config.RequiredZonesConfig;
 import org.openspaces.core.properties.BeanLevelProperties;
 
 /**
@@ -132,9 +133,20 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
     /**
      * Returns the list of zones this processing units are required to run on. If there is more than
      * one zone, the processing unit can run on either of the zones.
+     * 
+     * This method is deprecated in favor of {@link #getRequiredContainerZones()} 
      */
+    @Deprecated
     String[] getRequiredZones();
 
+    /**
+     * @return the @{link GridServiceContainer} zones that can satisfy this processing unit.
+     * 
+     * For example:
+     * boolean gscMatch = pu.getRequiredContainerZones().isStatisfiedBy(gsc.getExactZones());
+     */
+    RequiredZonesConfig getRequiredContainerZones();
+    
     /**
      * Returns the deployment status of the processing unit.
      */

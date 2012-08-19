@@ -108,8 +108,10 @@ import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsIdConfigurer;
 import org.openspaces.admin.pu.statistics.SingleInstanceStatisticsConfig;
 import org.openspaces.admin.pu.statistics.SingleInstanceStatisticsConfigurer;
 import org.openspaces.admin.space.Space;
+import org.openspaces.admin.zone.config.AnyZonesConfig;
+import org.openspaces.admin.zone.config.AtLeastOneZoneConfigurer;
 import org.openspaces.admin.zone.config.ExactZonesConfig;
-import org.openspaces.admin.zone.config.ExactZonesConfigurer;
+import org.openspaces.admin.zone.config.RequiredZonesConfig;
 import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.core.util.ConcurrentHashSet;
 import org.openspaces.pu.container.support.RequiredDependenciesCommandLineParser;
@@ -1168,7 +1170,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
                else {
                    
                    try {
-                       ExactZonesConfig zones = getProcessingUnitInstanceGridServiceAgentZones(instance);
+                       ExactZonesConfig zones = getHostingGridServiceAgentZones(instance);
 
                        //the original statisticsId may contain time or instances aggregation 
                        //we want to inject to the pu statistics the raw metric data
@@ -1177,7 +1179,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
                        .metric(statisticsId.getMetric())
                        .monitor(statisticsId.getMonitor())
                        .timeWindowStatistics(new LastSampleTimeWindowStatisticsConfig())
-                       .zoneStatistics(zones)
+                       .agentZones(zones)
                        .instancesStatistics(new SingleInstanceStatisticsConfigurer().instance(instance).create())
                        .create();
                        puStatistics.addStatistics(newStatisticsId,value);
@@ -1195,7 +1197,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
      * @param processingUnitInstance
      * @return
      */
-    private ExactZonesConfig getProcessingUnitInstanceGridServiceAgentZones(ProcessingUnitInstance processingUnitInstance) 
+    private ExactZonesConfig getHostingGridServiceAgentZones(ProcessingUnitInstance processingUnitInstance) 
             throws AdminException {
         
         GridServiceContainer gridServiceContainer = processingUnitInstance.getGridServiceContainer();
@@ -1204,7 +1206,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
             if (agent == null) {
                 throw new AdminException("Not yet discovered GSA that started container " + gridServiceContainer.getAgentId());
             } else {
-                return new ExactZonesConfigurer().addZones(agent.getZones().keySet()).create();
+                return agent.getExactZones();
             }
         }
         return new ExactZonesConfig(); // GSC was not started by a GSA
@@ -1226,5 +1228,14 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     @Override
     public ProcessingUnitStatisticsId[] getStatisticsCalculations() {
        return statisticsIds.toArray(new ProcessingUnitStatisticsId[statisticsIds.size()]);
+    }
+
+    @Override
+    public RequiredZonesConfig getRequiredContainerZones() {
+        String[] requiredZones = getRequiredZones();
+        if (requiredZones.length == 0) {
+            return new AnyZonesConfig();
+        }
+        return new AtLeastOneZoneConfigurer().addZones(requiredZones).create();
     }
 }

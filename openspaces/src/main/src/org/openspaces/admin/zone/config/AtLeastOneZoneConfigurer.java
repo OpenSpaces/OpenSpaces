@@ -49,6 +49,9 @@ public class AtLeastOneZoneConfigurer implements ZonesConfigurer<AtLeastOneZoneC
     }
     
     public AtLeastOneZoneConfig create() {
+        if (zones.isEmpty()) {
+            throw new IllegalArgumentException("No Zones Defined");
+        }
         config.setZones(zones);
         config.validate();
         return config;

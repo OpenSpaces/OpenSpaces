@@ -58,6 +58,8 @@ import org.openspaces.admin.internal.support.InternalAgentGridComponent;
 import org.openspaces.admin.internal.support.NetworkExceptionHelper;
 import org.openspaces.admin.lus.LookupService;
 import org.openspaces.admin.lus.events.LookupServiceAddedEventListener;
+import org.openspaces.admin.zone.config.ExactZonesConfig;
+import org.openspaces.admin.zone.config.ExactZonesConfigurer;
 
 import com.gigaspaces.grid.gsa.AgentProcessDetails;
 import com.gigaspaces.grid.gsa.AgentProcessesDetails;
@@ -533,5 +535,10 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
     public InternalAgentGridComponent[] getUnconfirmedRemovedAgentGridComponents() {
         Collection<InternalAgentGridComponent> values = new ArrayList<InternalAgentGridComponent>(removedAgentGridComponents.values());
         return values.toArray(new InternalAgentGridComponent[values.size()]);
+    }
+
+    @Override
+    public ExactZonesConfig getExactZones() {
+        return new ExactZonesConfigurer().addZones(getZones().keySet()).create();
     }
 }

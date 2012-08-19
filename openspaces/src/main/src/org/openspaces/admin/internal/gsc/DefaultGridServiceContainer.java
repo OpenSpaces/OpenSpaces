@@ -41,6 +41,8 @@ import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventManager;
+import org.openspaces.admin.zone.config.ExactZonesConfig;
+import org.openspaces.admin.zone.config.ExactZonesConfigurer;
 
 import com.gigaspaces.grid.gsc.GSC;
 import com.gigaspaces.internal.jvm.JVMDetails;
@@ -299,5 +301,8 @@ public class DefaultGridServiceContainer extends AbstractAgentGridComponent impl
         return serviceID.hashCode();
     }
     
-    
+    @Override
+    public ExactZonesConfig getExactZones() {
+        return new ExactZonesConfigurer().addZones(getZones().keySet()).create();
+    }    
 }

@@ -25,6 +25,8 @@ import org.openspaces.admin.esm.ElasticServiceManager;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.lus.LookupService;
+import org.openspaces.admin.pu.ProcessingUnit;
+import org.openspaces.admin.zone.config.ExactZonesConfig;
 
 import com.gigaspaces.grid.gsa.AgentProcessesDetails;
 import com.gigaspaces.log.CompoundLogEntries;
@@ -148,4 +150,11 @@ public interface GridServiceAgent extends GridComponent, LogProviderGridComponen
      * @since 7.1.2
      */
     void shutdown();
+    
+    /**
+     * @return the list of zones that the GSA satisfies
+     * @see {@link ProcessingUnit#getRequiredAgentZones()}
+     * @since 9.1.0 
+     */
+    ExactZonesConfig getExactZones();
 }

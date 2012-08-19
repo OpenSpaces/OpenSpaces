@@ -15,35 +15,39 @@
  *******************************************************************************/
 package org.openspaces.admin.zone.config;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * Satisfied if at least one of the zones exist
+ * 
+ * PU[A,B] is statisfied by GSC[A,B]  
+ * PU[A,B] is statisfied by GSC[A]
+ * PU[A,B] is statisfied by GSC[B]
+ * PU[A]   is statisfied by GSC[A,B]
+ * PU[A]   is statisfied by GSC[A]
+ * PU[A]   is NOT statisfied by GSC[]
+ * 
  * @author elip
  * @since 9.1.0
  */
 public class AtLeastOneZoneConfig 
-    extends AbstractZonesConfig {
+    extends RequiredZonesConfig {
 
     public AtLeastOneZoneConfig(Map<String, String> properties) {
         super(properties);
     }
  
     public AtLeastOneZoneConfig() {
-        this(new HashMap<String,String>());
+        super();
     }
 
-    /* (non-Javadoc)
-     * @see org.openspaces.admin.pu.statistics.ZoneStatisticsConfig#satisfiedBy(org.openspaces.admin.pu.statistics.ZoneStatisticsConfig)
-     */
     @Override
     public boolean satisfiedBy(ExactZonesConfig existingZoneStatisticsConfig) {
-        
-        for (String zone : this.getZones()) {
-            if (existingZoneStatisticsConfig.getZones().contains(zone)) {
-                return true;
-            }
+
+        if (this.getZones().isEmpty()) {
+            throw new IllegalStateException("No zones defined");
         }
-        return false;
+        
+        return this.getZones().removeAll(existingZoneStatisticsConfig.getZones());
     }
 }

@@ -19,10 +19,12 @@ package org.openspaces.admin.gsc;
 import org.openspaces.admin.AgentGridComponent;
 import org.openspaces.admin.LogProviderGridComponent;
 import org.openspaces.admin.dump.DumpProvider;
+import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventManager;
+import org.openspaces.admin.zone.config.ExactZonesConfig;
 
 import java.util.concurrent.TimeUnit;
 
@@ -99,5 +101,12 @@ public interface GridServiceContainer extends AgentGridComponent, Iterable<Proce
      * Removes a processing unit lifecycle listener to the container.
      */
     void removeProcessingUnitInstanceLifecycleEventListener(ProcessingUnitInstanceLifecycleEventListener eventListener);
+
+    /**
+     * @return the list of zones that the GSC satisfies
+     * @see {@link ProcessingUnit#getRequiredContainerZones()}
+     * @since 9.1.0 
+     */
+    ExactZonesConfig getExactZones();
     
 }
