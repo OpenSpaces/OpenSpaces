@@ -27,14 +27,14 @@ import junit.framework.TestCase;
 import org.openspaces.admin.internal.pu.DefaultProcessingUnitStatistics;
 import org.openspaces.admin.internal.pu.ProcessingUnitStatistics;
 import org.openspaces.admin.internal.pu.statistics.InternalProcessingUnitStatistics;
-import org.openspaces.admin.pu.statistics.AtLeastOneZoneStatisticsConfigurer;
 import org.openspaces.admin.pu.statistics.AverageInstancesStatisticsConfig;
 import org.openspaces.admin.pu.statistics.AverageTimeWindowStatisticsConfigurer;
-import org.openspaces.admin.pu.statistics.ExactZonesStatisticsConfigurer;
 import org.openspaces.admin.pu.statistics.LastSampleTimeWindowStatisticsConfig;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsIdConfigurer;
 import org.openspaces.admin.pu.statistics.SingleInstanceStatisticsConfigurer;
+import org.openspaces.admin.zone.config.AtLeastOneZoneStatisticsConfigurer;
+import org.openspaces.admin.zone.config.ExactZonesStatisticsConfigurer;
 
 /**
  * @author elip

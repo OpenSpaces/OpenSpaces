@@ -17,7 +17,7 @@ package org.openspaces.admin.zone.config;
 
 import java.util.Set;
 
-import org.openspaces.admin.zone.config.ExactZonesStatisticsConfig;
+import org.openspaces.admin.zone.config.ExactZonesConfig;
 
 /**
  * @author elip
@@ -25,10 +25,10 @@ import org.openspaces.admin.zone.config.ExactZonesStatisticsConfig;
  */
 public class ExactZonesStatisticsConfigurer {
     
-    ExactZonesStatisticsConfig config;
+    ExactZonesConfig config;
     
     public ExactZonesStatisticsConfigurer() {
-        config = new ExactZonesStatisticsConfig();
+        config = new ExactZonesConfig();
     }
     
     public ExactZonesStatisticsConfigurer zones(Set<String> zones) {
@@ -36,7 +36,7 @@ public class ExactZonesStatisticsConfigurer {
         return this;
     }
     
-    public ExactZonesStatisticsConfig create() {
+    public ExactZonesConfig create() {
         config.validate();
         return config;
     }

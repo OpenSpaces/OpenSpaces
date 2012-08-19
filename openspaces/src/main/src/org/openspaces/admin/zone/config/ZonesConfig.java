@@ -22,7 +22,7 @@ import java.util.Set;
  * @author elip
  * @since 9.1.0
  */
-public interface ZoneStatisticsConfig {
+public interface ZonesConfig {
     
     /**
      * @return the internal key/value string representation
@@ -41,6 +41,6 @@ public interface ZoneStatisticsConfig {
      */
     Set<String> getZones();
     
-    boolean satisfiedBy(ZoneStatisticsConfig zoneStatisticsConfig);
+    boolean satisfiedBy(ZonesConfig zoneStatisticsConfig);
 
 }

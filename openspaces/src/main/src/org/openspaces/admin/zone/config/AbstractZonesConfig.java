@@ -15,35 +15,46 @@
  *******************************************************************************/
 package org.openspaces.admin.zone.config;
 
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+
+import org.openspaces.admin.pu.elastic.config.AbstractStatisticsConfig;
 
 /**
  * @author elip
  * @since 9.1.0
  */
-public class AtLeastOneZoneStatisticsConfig 
-    extends AbstractZoneStatisticsConfig {
-
-    public AtLeastOneZoneStatisticsConfig(Map<String, String> properties) {
+public abstract class AbstractZonesConfig 
+    extends AbstractStatisticsConfig 
+    implements ZonesConfig {    
+    
+    private static final String ZONES_KEY = "zones";
+    
+    /**
+     * @param properties
+     */
+    protected AbstractZonesConfig(Map<String, String> properties) {
         super(properties);
-    }
- 
-    public AtLeastOneZoneStatisticsConfig() {
-        this(new HashMap<String,String>());
     }
 
     /* (non-Javadoc)
-     * @see org.openspaces.admin.pu.statistics.ZoneStatisticsConfig#satisfiedBy(org.openspaces.admin.pu.statistics.ZoneStatisticsConfig)
+     * @see org.openspaces.admin.pu.statistics.ZoneStatisticsConfig#validate()
      */
     @Override
-    public boolean satisfiedBy(ZoneStatisticsConfig existingZoneStatisticsConfig) {
-        
-        for (String zone : this.getZones()) {
-            if (existingZoneStatisticsConfig.getZones().contains(zone)) {
-                return true;
-            }
+    public void validate() throws IllegalStateException {
+        if (getZones() == null) {
+            throw new IllegalStateException("zones cannot be null");
         }
-        return false;
+    }
+    
+    @Override
+    public Set<String> getZones() {
+        return super.getStringProperties().getSet(ZONES_KEY, ",", new HashSet<String>());
+        
+    }
+    
+    public void setZones(Set<String> zones) {
+        super.getStringProperties().putSet(ZONES_KEY, zones, ",");
     }
 }

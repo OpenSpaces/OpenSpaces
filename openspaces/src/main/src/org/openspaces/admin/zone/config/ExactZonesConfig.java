@@ -22,19 +22,19 @@ import java.util.Map;
  * @author elip
  * @since 9.1.0
  */
-public class ExactZonesStatisticsConfig 
-    extends AbstractZoneStatisticsConfig {
+public class ExactZonesConfig 
+    extends AbstractZonesConfig {
 
-    public ExactZonesStatisticsConfig(Map<String, String> properties) {
+    public ExactZonesConfig(Map<String, String> properties) {
         super(properties);
     }
     
-    public ExactZonesStatisticsConfig() {
+    public ExactZonesConfig() {
         this(new HashMap<String,String>());
     }
 
     @Override
-    public boolean satisfiedBy(ZoneStatisticsConfig existingZoneStatisticsConfig) {
+    public boolean satisfiedBy(ZonesConfig existingZoneStatisticsConfig) {
         return this.getZones().equals(existingZoneStatisticsConfig.getZones());
     } 
 }

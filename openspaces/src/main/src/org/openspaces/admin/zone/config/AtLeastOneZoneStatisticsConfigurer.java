@@ -24,10 +24,10 @@ import java.util.HashSet;
  */
 public class AtLeastOneZoneStatisticsConfigurer {
     
-    AtLeastOneZoneStatisticsConfig config;
+    AtLeastOneZoneConfig config;
     
     public AtLeastOneZoneStatisticsConfigurer() {
-        config = new AtLeastOneZoneStatisticsConfig();
+        config = new AtLeastOneZoneConfig();
     }
     
     public AtLeastOneZoneStatisticsConfigurer zone(String zone) {
@@ -37,7 +37,7 @@ public class AtLeastOneZoneStatisticsConfigurer {
         return this;
     }
     
-    public AtLeastOneZoneStatisticsConfig create() {
+    public AtLeastOneZoneConfig create() {
         config.validate();
         return config;
     }

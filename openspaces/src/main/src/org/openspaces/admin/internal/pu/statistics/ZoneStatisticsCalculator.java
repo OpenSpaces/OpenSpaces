@@ -20,7 +20,7 @@ import java.util.Map;
 
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsIdConfigurer;
-import org.openspaces.admin.zone.config.ZoneStatisticsConfig;
+import org.openspaces.admin.zone.config.ZonesConfig;
 
 /**
  * @author elip
@@ -57,8 +57,8 @@ public class ZoneStatisticsCalculator implements InternalProcessingUnitStatistic
         Object value = statisticsEntry.getValue();
         
         // zones to compare
-        ZoneStatisticsConfig requestedZoneStatisticsConfig = requestedProcessingUnitStatisticsId.getZoneStatistics();
-        ZoneStatisticsConfig existingZoneStatisticsConfig = existingProcessingUnitStatisticsId.getZoneStatistics();
+        ZonesConfig requestedZoneStatisticsConfig = requestedProcessingUnitStatisticsId.getZoneStatistics();
+        ZonesConfig existingZoneStatisticsConfig = existingProcessingUnitStatisticsId.getZoneStatistics();
         
         // keys without zones to compare
         ProcessingUnitStatisticsId erasedExistingProcessingUnitStatisticsId = erase(existingProcessingUnitStatisticsId);

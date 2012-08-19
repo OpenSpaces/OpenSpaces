@@ -18,14 +18,14 @@ package org.openspaces.admin.internal.pu.statistics;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.openspaces.admin.zone.config.AbstractZoneStatisticsConfig;
-import org.openspaces.admin.zone.config.ZoneStatisticsConfig;
+import org.openspaces.admin.zone.config.AbstractZonesConfig;
+import org.openspaces.admin.zone.config.ZonesConfig;
 
 /**
  * @author elip
  *
  */
-public class ErasedZonesStatisticsConfig extends AbstractZoneStatisticsConfig {
+public class ErasedZonesStatisticsConfig extends AbstractZonesConfig {
     
     public ErasedZonesStatisticsConfig(Map<String,String> properties) {
         super(properties);
@@ -44,7 +44,7 @@ public class ErasedZonesStatisticsConfig extends AbstractZoneStatisticsConfig {
      * @see org.openspaces.admin.pu.statistics.ZoneStatisticsConfig#satisfiedBy(org.openspaces.admin.pu.statistics.ZoneStatisticsConfig)
      */
     @Override
-    public boolean satisfiedBy(ZoneStatisticsConfig zoneStatisticsConfig) {
+    public boolean satisfiedBy(ZonesConfig zoneStatisticsConfig) {
         return true;
     }
 }

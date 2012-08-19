@@ -34,8 +34,8 @@ import org.openspaces.admin.internal.pu.statistics.ZoneStatisticsCalculator;
 import org.openspaces.admin.pu.statistics.InstancesStatisticsConfig;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
 import org.openspaces.admin.pu.statistics.SingleInstanceStatisticsConfig;
-import org.openspaces.admin.zone.config.ExactZonesStatisticsConfig;
-import org.openspaces.admin.zone.config.ZoneStatisticsConfig;
+import org.openspaces.admin.zone.config.ExactZonesConfig;
+import org.openspaces.admin.zone.config.ZonesConfig;
 
 public class DefaultProcessingUnitStatistics implements InternalProcessingUnitStatistics {
 
@@ -126,17 +126,17 @@ public class DefaultProcessingUnitStatistics implements InternalProcessingUnitSt
     }
     private void calculateTimeWindowStatistics(Iterable<ProcessingUnitStatisticsId> statisticsIdsToCalculate) {
         
-        Map<SingleInstanceStatisticsConfig,ExactZonesStatisticsConfig> instances = new HashMap<SingleInstanceStatisticsConfig, ExactZonesStatisticsConfig>();
+        Map<SingleInstanceStatisticsConfig,ExactZonesConfig> instances = new HashMap<SingleInstanceStatisticsConfig, ExactZonesConfig>();
         
         // construct a set containing all instances UIDS for the current processing unit
         for (ProcessingUnitStatisticsId processingUnitStatisticsId : statistics.keySet()) {
             InstancesStatisticsConfig instancesStatistics = processingUnitStatisticsId.getInstancesStatistics();
-            ZoneStatisticsConfig zoneStatistics = processingUnitStatisticsId.getZoneStatistics();
+            ZonesConfig zoneStatistics = processingUnitStatisticsId.getZoneStatistics();
             if (instancesStatistics instanceof SingleInstanceStatisticsConfig &&
-                zoneStatistics instanceof ExactZonesStatisticsConfig) {
+                zoneStatistics instanceof ExactZonesConfig) {
                 instances.put(
                         (SingleInstanceStatisticsConfig) instancesStatistics,
-                        (ExactZonesStatisticsConfig) processingUnitStatisticsId.getZoneStatistics());
+                        (ExactZonesConfig) processingUnitStatisticsId.getZoneStatistics());
             } 
         }
         
@@ -154,7 +154,7 @@ public class DefaultProcessingUnitStatistics implements InternalProcessingUnitSt
                     continue;
                 }
                 
-                ExactZonesStatisticsConfig zoneStatistics = instances.get(instancesStatistics);
+                ExactZonesConfig zoneStatistics = instances.get(instancesStatistics);
                 if (!statisticsId.getZoneStatistics().satisfiedBy(zoneStatistics)) {
                     if (logger.isDebugEnabled()) {
                         logger.debug("Failed to find instance UID " + instancesStatistics.getInstanceUid() + " with zones " + zoneStatistics.getZones() + " which satisfies zones " + statisticsId.getZoneStatistics());
@@ -170,7 +170,7 @@ public class DefaultProcessingUnitStatistics implements InternalProcessingUnitSt
             }
             else {
                 //expand to all instance UIDs
-                for (Entry<SingleInstanceStatisticsConfig, ExactZonesStatisticsConfig>  pair : instances.entrySet()) {
+                for (Entry<SingleInstanceStatisticsConfig, ExactZonesConfig>  pair : instances.entrySet()) {
                     ProcessingUnitStatisticsId fixedStatisticsId = statisticsId.shallowClone();
                     fixedStatisticsId.setInstancesStatistics(pair.getKey());
                     fixedStatisticsId.setZoneStatistics(pair.getValue());

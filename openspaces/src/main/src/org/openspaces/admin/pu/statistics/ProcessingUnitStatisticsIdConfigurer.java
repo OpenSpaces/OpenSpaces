@@ -1,6 +1,6 @@
 package org.openspaces.admin.pu.statistics;
 
-import org.openspaces.admin.zone.config.ZoneStatisticsConfig;
+import org.openspaces.admin.zone.config.ZonesConfig;
 
 
 /**
@@ -56,7 +56,7 @@ public class ProcessingUnitStatisticsIdConfigurer {
         return this;
     }
     
-    public ProcessingUnitStatisticsIdConfigurer zoneStatistics(ZoneStatisticsConfig zoneStatistics) {
+    public ProcessingUnitStatisticsIdConfigurer zoneStatistics(ZonesConfig zoneStatistics) {
         config.setZoneStatistics(zoneStatistics);
         return this;
     }

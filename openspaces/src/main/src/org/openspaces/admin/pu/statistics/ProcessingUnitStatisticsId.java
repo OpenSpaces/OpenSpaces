@@ -2,7 +2,7 @@ package org.openspaces.admin.pu.statistics;
 
 import java.util.Map;
 
-import org.openspaces.admin.zone.config.ZoneStatisticsConfig;
+import org.openspaces.admin.zone.config.ZonesConfig;
 import org.openspaces.core.util.StringProperties;
 
 
@@ -79,11 +79,11 @@ public class ProcessingUnitStatisticsId {
         properties.putMapWrapperObject(INSTANCES_STATISTICS_KEY, instancesStatistics.getProperties(), instancesStatistics.getClass());
     }
     
-    public ZoneStatisticsConfig getZoneStatistics() {
-        return (ZoneStatisticsConfig) properties.getMapWrapperObject(ZONE_STATISTICS_KEY, null);
+    public ZonesConfig getZoneStatistics() {
+        return (ZonesConfig) properties.getMapWrapperObject(ZONE_STATISTICS_KEY, null);
     }
     
-    public void setZoneStatistics(ZoneStatisticsConfig zoneStatistics) {
+    public void setZoneStatistics(ZonesConfig zoneStatistics) {
         properties.putMapWrapperObject(ZONE_STATISTICS_KEY, zoneStatistics.getProperties(), zoneStatistics.getClass());
     }
     
@@ -142,7 +142,7 @@ public class ProcessingUnitStatisticsId {
         }
         instancesStatistics.validate();
         
-        ZoneStatisticsConfig zoneStatistics = (ZoneStatisticsConfig) getZoneStatistics();
+        ZonesConfig zoneStatistics = (ZonesConfig) getZoneStatistics();
         if (zoneStatistics == null) {
             throw new IllegalStateException("zoneStatistics cannot be null");
         }
