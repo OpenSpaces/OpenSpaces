@@ -22,6 +22,7 @@ import java.util.List;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
+import org.junit.Test;
 import org.openspaces.admin.internal.pu.DefaultProcessingUnitStatistics;
 import org.openspaces.admin.internal.pu.ProcessingUnitStatistics;
 import org.openspaces.admin.internal.pu.statistics.InstancesStatisticsCalculator;
@@ -48,7 +49,7 @@ public class InstancesStatisticsCalculatorTest extends TestCase {
     private static final String MONITOR = "monitor";
     private static final String METRIC = "metric";
     
-
+    @Test
     public void test() {
         InstancesStatisticsCalculator calculator = new InstancesStatisticsCalculator();
 

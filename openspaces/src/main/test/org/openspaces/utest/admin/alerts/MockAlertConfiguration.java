@@ -15,7 +15,7 @@
  * limitations under the License.
  *  
  ******************************************************************************/
-package org.openspaces.utest.admin.internal.alerts;
+package org.openspaces.utest.admin.alerts;
 
 import java.util.HashMap;
 import java.util.Map;

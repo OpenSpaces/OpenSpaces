@@ -15,15 +15,16 @@
  * limitations under the License.
  *  
  ******************************************************************************/
-package org.openspaces.utest.admin.internal.alerts;
+package org.openspaces.utest.admin.alerts;
 
+import junit.framework.TestCase;
+
+import org.junit.Test;
 import org.openspaces.admin.alert.Alert;
 import org.openspaces.admin.alert.AlertFactory;
 import org.openspaces.admin.alert.AlertSeverity;
 import org.openspaces.admin.alert.AlertStatus;
 import org.openspaces.admin.internal.alert.DefaultAlertRepository;
-
-import junit.framework.TestCase;
 
 
 
@@ -36,6 +37,7 @@ public class DefaultAlertRepositoryTest extends TestCase {
     final DefaultAlertRepository repository = new DefaultAlertRepository();
 
     /** adding an {@link AlertStatus#RESOLVED} alert with a non-existing group UID should open an entry in the repository */
+    @Test
     public void test1() {
         Alert alert = new AlertFactory()
         .severity(AlertSeverity.WARNING)
@@ -52,6 +54,7 @@ public class DefaultAlertRepositoryTest extends TestCase {
     }
     
     /** adding an {@link AlertStatus#NA} alert with a non-existing group UID should open an entry in the repository */
+    @Test
     public void test2() {
         Alert alert = new AlertFactory()
         .severity(AlertSeverity.WARNING)
@@ -71,6 +74,7 @@ public class DefaultAlertRepositoryTest extends TestCase {
      * adding an {@link AlertStatus#RAISED} alert should open an entry in the repository.
      * adding an {@link AlertStatus#RESOLVED} alert should resolve the alert group. 
      */
+    @Test
     public void test3() {
         
         for (int i=0; i<3; ++i) {
@@ -113,6 +117,7 @@ public class DefaultAlertRepositoryTest extends TestCase {
      * adding an {@link AlertStatus#NA} alert should behave as any raised alert in the group.
      * adding another {@link AlertStatus#RAISED} alert should keep adding to the same group.
      */
+    @Test
     public void test4() {
         
         for (int i=0; i<7; ++i) {
@@ -156,6 +161,7 @@ public class DefaultAlertRepositoryTest extends TestCase {
      * adding an {@link AlertStatus#RESOLVED} alert should resolve the alert group.
      * adding another {@link AlertStatus#RESOLVED} alert should not affect the resolved alert group.
      */
+    @Test
     public void test5() {
         
         for (int i=0; i<3; ++i) {
@@ -205,6 +211,7 @@ public class DefaultAlertRepositoryTest extends TestCase {
      * adding an {@link AlertStatus#RESOLVED} alert should resolve the alert group.
      * repeat, should always add the new raised alert belonging to the same group.
      */
+    @Test
     public void test6() {
         
         for (int repeat=0; repeat<2; ++repeat) {
@@ -241,6 +248,7 @@ public class DefaultAlertRepositoryTest extends TestCase {
     
     
     /** limit repository size */
+    @Test
     public void test7() {
 
         final int LIMIT = 200;
@@ -322,6 +330,7 @@ public class DefaultAlertRepositoryTest extends TestCase {
     
     
     /** history is ordered by timestamp of last alert */
+    @Test
     public void test8() {
         
         /* 

@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
+import org.junit.Test;
 import org.openspaces.admin.internal.pu.DefaultProcessingUnitStatistics;
 import org.openspaces.admin.internal.pu.ProcessingUnitStatistics;
 import org.openspaces.admin.internal.pu.statistics.InternalProcessingUnitStatistics;
@@ -57,16 +58,19 @@ public class TimeWindowStatisticsCalculatorTest extends TestCase {
     private static final long MAXIMUM_TIMEWINDOW_SECONDS = (long)(3*SLEEP_MILLISECONDS/1000.0);
     private static final long MINIMUM_TIMEWINDOW_SECONDS = 0;
 
+    @Test
     public void testSlidingWindowAverage() throws InterruptedException {
         boolean tooMuchJitter = false;
         slidingWindowAverage(SLEEP_MILLISECONDS, tooMuchJitter);
     }
     
+    @Test
     public void testSlidingWindowAverageWithSamplingJitter() throws InterruptedException {
         boolean tooMuchJitter = false;
         slidingWindowAverage(SLEEP_MILLISECONDS_WITH_JITTER, tooMuchJitter);
     }
     
+    @Test
     public void testSlidingWindowAverageWithSamplingTooMuchJitter() throws InterruptedException {
         boolean tooMuchJitter = true;
         slidingWindowAverage(SLEEP_MILLISECONDS_WITH_TOO_MUCH_JITTER, tooMuchJitter);
@@ -117,6 +121,7 @@ public class TimeWindowStatisticsCalculatorTest extends TestCase {
         }
     }
 
+    @Test
     public void testAverageTwoSamples() throws InterruptedException {
         
         TimeWindowStatisticsCalculator calculator = new TimeWindowStatisticsCalculator();
@@ -156,6 +161,7 @@ public class TimeWindowStatisticsCalculatorTest extends TestCase {
             statistics.getStatistics().get(averageStatisticsId));
     }
 
+    @Test
     public void testNoSamples() {
         
         TimeWindowStatisticsCalculator calculator = new TimeWindowStatisticsCalculator();
@@ -171,6 +177,7 @@ public class TimeWindowStatisticsCalculatorTest extends TestCase {
         Assert.assertTrue(statistics.isEmpty());
     }
 
+    @Test
     public void testOneSampleMinimumTimeWindow() {
         
         TimeWindowStatisticsCalculator calculator = new TimeWindowStatisticsCalculator();
@@ -341,6 +348,7 @@ public class TimeWindowStatisticsCalculatorTest extends TestCase {
                 .create();
     }
     
+    @Test
     public void testLastSample() {
         
         TimeWindowStatisticsCalculator calculator = new TimeWindowStatisticsCalculator();

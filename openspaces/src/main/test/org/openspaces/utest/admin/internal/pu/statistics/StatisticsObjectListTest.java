@@ -18,6 +18,7 @@ package org.openspaces.utest.admin.internal.pu.statistics;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
+import org.junit.Test;
 import org.openspaces.admin.internal.pu.statistics.StatisticsObjectList;
 
 /**
@@ -29,6 +30,7 @@ public class StatisticsObjectListTest extends TestCase {
 
     private long dummyTimeStamp = 0;
     
+    @Test
     public void testEmptyList() {
         StatisticsObjectList list = new StatisticsObjectList();
         Assert.assertNull(list.getMinimum());
@@ -37,6 +39,7 @@ public class StatisticsObjectListTest extends TestCase {
         Assert.assertNull(list.getPercentile(0));
     }
     
+    @Test
     public void testSimpleList2() {
         StatisticsObjectList list = new StatisticsObjectList();
         list.add(0 ,dummyTimeStamp);
@@ -53,6 +56,7 @@ public class StatisticsObjectListTest extends TestCase {
         Assert.assertEquals(1, list.getPercentile(100));
     }
     
+    @Test
     public void testSimpleList3() {
         StatisticsObjectList list = new StatisticsObjectList();
         list.add(2, dummyTimeStamp);
@@ -70,6 +74,7 @@ public class StatisticsObjectListTest extends TestCase {
         Assert.assertEquals(2, list.getPercentile(100));
     }
     
+    @Test
     public void testComparable() {
         StatisticsObjectList list = new StatisticsObjectList();
         list.add("c", dummyTimeStamp);
@@ -86,6 +91,7 @@ public class StatisticsObjectListTest extends TestCase {
         }
     }
     
+    @Test
     public void testDeltaPerTimeunit() {
         StatisticsObjectList list = new StatisticsObjectList();
         
@@ -100,6 +106,7 @@ public class StatisticsObjectListTest extends TestCase {
         Assert.assertEquals(Math.pow(10, -9), list.getDeltaValuePerNanoSecond());
     }
     
+    @Test
     public void testThroughput2() {
         StatisticsObjectList list = new StatisticsObjectList();
         int value=0;
@@ -111,10 +118,8 @@ public class StatisticsObjectListTest extends TestCase {
         Assert.assertEquals(0.001, list.getDeltaValuePerMilliSecond());
         Assert.assertEquals(Math.pow(10, -9), list.getDeltaValuePerNanoSecond());
     }
-    
    
-    
-    
+    @Test
     public void testAverageNotComparable() {
         StatisticsObjectList list = new StatisticsObjectList();
         list.add(new Object(), dummyTimeStamp);

@@ -15,7 +15,7 @@
  * limitations under the License.
  *  
  ******************************************************************************/
-package org.openspaces.utest.admin.internal.admin;
+package org.openspaces.utest.admin;
 
 import java.util.Map;
 import java.util.Set;

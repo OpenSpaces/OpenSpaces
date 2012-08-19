@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
+import org.junit.Test;
 import org.openspaces.admin.internal.pu.DefaultProcessingUnitStatistics;
 import org.openspaces.admin.internal.pu.ProcessingUnitStatistics;
 import org.openspaces.admin.internal.pu.statistics.InternalProcessingUnitStatistics;
@@ -55,6 +56,7 @@ public class ZoneStatisticsCalculatorTest extends TestCase {
     private static final String ZONE_1 = "zone1";
     private static final String ZONE_2 = "zone2";
 
+    @Test
     public void test() {
 
         int historySize = 2;

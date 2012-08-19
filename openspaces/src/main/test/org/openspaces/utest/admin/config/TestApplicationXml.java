@@ -18,6 +18,7 @@ package org.openspaces.utest.admin.config;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
+import org.junit.Test;
 import org.openspaces.admin.application.ApplicationDeployment;
 import org.openspaces.admin.application.config.ApplicationConfig;
 import org.openspaces.admin.memcached.MemcachedDeployment;
@@ -38,10 +39,12 @@ public class TestApplicationXml extends TestCase {
     private final String TEST_APPLICATION_RAW_XML = "/org/openspaces/utest/admin/config/test-application-raw.xml";
     private final String TEST_APPLICATION_XML = "/org/openspaces/utest/admin/config/test-application.xml";
     
+    @Test
     public void testRawXml() {
         Assert.assertEquals(createApplicationWithAdminApi(), createApplicationFromXml(TEST_APPLICATION_RAW_XML));
     }
 
+    @Test
     public void testOsAdminXml() {
         Assert.assertEquals(createApplicationWithAdminApi(), createApplicationFromXml(TEST_APPLICATION_XML));
     }
