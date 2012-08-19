@@ -26,6 +26,7 @@ import org.openspaces.admin.pu.dependency.ProcessingUnitDeploymentDependenciesCo
 import org.openspaces.admin.pu.elastic.config.AutomaticCapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ElasticStatelessProcessingUnitConfig;
+import org.openspaces.admin.pu.elastic.config.ManualCapacityPerZonesScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.topology.ElasticStatelessDeploymentTopology;
 import org.openspaces.core.util.MemoryUnit;
@@ -58,6 +59,11 @@ public class ElasticStatelessProcessingUnitDeployment
         this(processingUnit.getAbsolutePath());
     }
 
+    @Override
+    public ElasticStatelessProcessingUnitDeployment scale(ManualCapacityPerZonesScaleConfig strategy) {
+        return (ElasticStatelessProcessingUnitDeployment) super.scale(strategy);
+    }
+    
     @Override
     public ElasticStatelessProcessingUnitDeployment scale(ManualCapacityScaleConfig strategy) {
         return (ElasticStatelessProcessingUnitDeployment) super.scale(strategy);
