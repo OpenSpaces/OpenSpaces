@@ -121,8 +121,6 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                     "is more than the maximum of " + sla.getMaximumNumberOfMachines() + " "+
                     "containers with " + sla.getContainerMemoryCapacityInMB() + "MB each.");
         }
-        
-        setMachineIsolation(sla);
     
         validateCompletedStateRecovery(sla);
         
@@ -146,7 +144,9 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
     public void recoverStateOnEsmStart(AbstractMachinesSlaPolicy sla) throws SomeProcessingUnitsHaveNotCompletedStateRecoveryException, NeedToWaitUntilAllGridServiceAgentsDiscoveredException {
     
         if (!isCompletedStateRecovery(sla)) {
-                
+            
+            setMachineIsolation(sla);
+            
             Set<String> puZones = pu.getRequiredContainerZones().getZones();
             
             // check pu zone matches container zones.
@@ -242,8 +242,6 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             throws GridServiceAgentSlaEnforcementInProgressException {
         
         validateSla(sla);
-       
-        setMachineIsolation(sla);
         
         validateCompletedStateRecovery(sla);
         
