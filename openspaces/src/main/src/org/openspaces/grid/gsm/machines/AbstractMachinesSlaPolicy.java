@@ -103,19 +103,6 @@ public abstract class AbstractMachinesSlaPolicy extends ServiceLevelAgreementPol
     }
 
     @Override
-    public boolean equals(Object other) {
-        return other instanceof AbstractMachinesSlaPolicy &&
-        ((AbstractMachinesSlaPolicy)other).getReservedMemoryCapacityPerMachineInMB() == this.getReservedMemoryCapacityPerMachineInMB() &&
-        ((AbstractMachinesSlaPolicy)other).containerMemoryCapacityInMB == this.containerMemoryCapacityInMB &&
-        ((AbstractMachinesSlaPolicy)other).minimumNumberOfMachines == this.minimumNumberOfMachines &&
-        ((AbstractMachinesSlaPolicy)other).machineIsolation.equals(this.machineIsolation) &&
-        ((AbstractMachinesSlaPolicy)other).maxNumberOfMachines == maxNumberOfMachines &&
-        ((AbstractMachinesSlaPolicy)other).maxNumberOfContainersPerMachine == this.maxNumberOfContainersPerMachine &&
-        ((AbstractMachinesSlaPolicy)other).isStopMachineSupported() == isStopMachineSupported() &&
-        ((AbstractMachinesSlaPolicy)other).machinesCache.equals(machinesCache);
-    }
-
-    @Override
     public void validate() {
         
         if (this.containerMemoryCapacityInMB <= 0) {

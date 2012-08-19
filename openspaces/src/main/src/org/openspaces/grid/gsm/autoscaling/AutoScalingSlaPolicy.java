@@ -69,52 +69,6 @@ public class AutoScalingSlaPolicy extends ServiceLevelAgreementPolicy {
         this.minCapacity = minCapacity;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((capacityRequirements == null) ? 0 : capacityRequirements.hashCode());
-        result = prime * result + ((maxCapacity == null) ? 0 : maxCapacity.hashCode());
-        result = prime * result + ((minCapacity == null) ? 0 : minCapacity.hashCode());
-        result = prime * result + Arrays.hashCode(rules);
-        return result;
-    }
-
-    /* (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        AutoScalingSlaPolicy other = (AutoScalingSlaPolicy) obj;
-        if (capacityRequirements == null) {
-            if (other.capacityRequirements != null)
-                return false;
-        } else if (!capacityRequirements.equals(other.capacityRequirements))
-            return false;
-        if (maxCapacity == null) {
-            if (other.maxCapacity != null)
-                return false;
-        } else if (!maxCapacity.equals(other.maxCapacity))
-            return false;
-        if (minCapacity == null) {
-            if (other.minCapacity != null)
-                return false;
-        } else if (!minCapacity.equals(other.minCapacity))
-            return false;
-        if (!Arrays.equals(rules, other.rules))
-            return false;
-        return true;
-    }
-
     @Override
     public void validate() throws IllegalArgumentException {
 

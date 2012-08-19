@@ -17,8 +17,6 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.rebalancing;
 
-import java.util.Arrays;
-
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.pu.elastic.ProcessingUnitSchemaConfig;
 import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerAgent;
@@ -62,46 +60,6 @@ public class RebalancingSlaPolicy extends ServiceLevelAgreementPolicy {
     
     public void setAllocatedCapacity(CapacityRequirementsPerAgent allocatedCapacity) {
         this.allocatedCapacity = allocatedCapacity;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((allocatedCapacity == null) ? 0 : allocatedCapacity.hashCode());
-        result = prime * result + Arrays.hashCode(containers);
-        result = prime * result + maxNumberOfConcurrentRelocationsPerMachine;
-        result = prime * result + minimumNumberOfInstancesPerPartition;
-        result = prime * result + ((schema == null) ? 0 : schema.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        RebalancingSlaPolicy other = (RebalancingSlaPolicy) obj;
-        if (allocatedCapacity == null) {
-            if (other.allocatedCapacity != null)
-                return false;
-        } else if (!allocatedCapacity.equals(other.allocatedCapacity))
-            return false;
-        if (!Arrays.equals(containers, other.containers))
-            return false;
-        if (maxNumberOfConcurrentRelocationsPerMachine != other.maxNumberOfConcurrentRelocationsPerMachine)
-            return false;
-        if (minimumNumberOfInstancesPerPartition != other.minimumNumberOfInstancesPerPartition)
-            return false;
-        if (schema == null) {
-            if (other.schema != null)
-                return false;
-        } else if (!schema.equals(other.schema))
-            return false;
-        return true;
     }
 
     @Override
