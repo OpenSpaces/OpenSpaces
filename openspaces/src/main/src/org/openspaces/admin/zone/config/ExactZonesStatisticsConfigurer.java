@@ -13,32 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.openspaces.admin.pu.statistics;
+package org.openspaces.admin.zone.config;
 
-import java.util.HashSet;
+import java.util.Set;
 
+import org.openspaces.admin.zone.config.ExactZonesStatisticsConfig;
 
 /**
  * @author elip
- *
+ * @since 9.1.0
  */
-public class AtLeastOneZoneStatisticsConfigurer {
+public class ExactZonesStatisticsConfigurer {
     
-    AtLeastOneZoneStatisticsConfig config;
+    ExactZonesStatisticsConfig config;
     
-    public AtLeastOneZoneStatisticsConfigurer() {
-        config = new AtLeastOneZoneStatisticsConfig();
+    public ExactZonesStatisticsConfigurer() {
+        config = new ExactZonesStatisticsConfig();
     }
     
-    public AtLeastOneZoneStatisticsConfigurer zone(String zone) {
-        HashSet<String> zones = new HashSet<String>();
-        zones.add(zone);
+    public ExactZonesStatisticsConfigurer zones(Set<String> zones) {
         config.setZones(zones);
         return this;
     }
     
-    public AtLeastOneZoneStatisticsConfig create() {
+    public ExactZonesStatisticsConfig create() {
         config.validate();
         return config;
     }
+
 }

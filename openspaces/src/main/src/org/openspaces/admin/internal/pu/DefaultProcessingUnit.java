@@ -103,7 +103,6 @@ import org.openspaces.admin.pu.events.ProcessingUnitSpaceCorrelatedEventListener
 import org.openspaces.admin.pu.events.ProcessingUnitSpaceCorrelatedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEvent;
 import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEventManager;
-import org.openspaces.admin.pu.statistics.ExactZonesStatisticsConfigurer;
 import org.openspaces.admin.pu.statistics.InstancesStatisticsConfig;
 import org.openspaces.admin.pu.statistics.LastSampleTimeWindowStatisticsConfig;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
@@ -111,6 +110,7 @@ import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsIdConfigurer;
 import org.openspaces.admin.pu.statistics.SingleInstanceStatisticsConfig;
 import org.openspaces.admin.pu.statistics.SingleInstanceStatisticsConfigurer;
 import org.openspaces.admin.space.Space;
+import org.openspaces.admin.zone.config.ExactZonesStatisticsConfigurer;
 import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.core.util.ConcurrentHashSet;
 import org.openspaces.pu.container.support.RequiredDependenciesCommandLineParser;

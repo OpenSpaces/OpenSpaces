@@ -20,7 +20,7 @@ import java.util.Map;
 
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsIdConfigurer;
-import org.openspaces.admin.pu.statistics.ZoneStatisticsConfig;
+import org.openspaces.admin.zone.config.ZoneStatisticsConfig;
 
 /**
  * @author elip

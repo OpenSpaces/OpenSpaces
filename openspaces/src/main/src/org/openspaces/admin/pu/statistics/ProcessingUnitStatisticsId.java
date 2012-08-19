@@ -2,6 +2,7 @@ package org.openspaces.admin.pu.statistics;
 
 import java.util.Map;
 
+import org.openspaces.admin.zone.config.ZoneStatisticsConfig;
 import org.openspaces.core.util.StringProperties;
 
 

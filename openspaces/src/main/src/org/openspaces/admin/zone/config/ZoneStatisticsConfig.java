@@ -13,30 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.openspaces.admin.pu.statistics;
+package org.openspaces.admin.zone.config;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
  * @author elip
- *
+ * @since 9.1.0
  */
-public class ExactZonesStatisticsConfigurer {
+public interface ZoneStatisticsConfig {
     
-    ExactZonesStatisticsConfig config;
+    /**
+     * @return the internal key/value string representation
+     */
+    Map<String, String> getProperties();
     
-    public ExactZonesStatisticsConfigurer() {
-        config = new ExactZonesStatisticsConfig();
-    }
+    /**
+     * Checks the content of this config is valid.
+     * @throws IllegalStateException - if state is found to be illegal
+     */
+    void validate() throws IllegalStateException;
     
-    public ExactZonesStatisticsConfigurer zones(Set<String> zones) {
-        config.setZones(zones);
-        return this;
-    }
+    /**
+     * returns the zones attached to this config.
+     * @return
+     */
+    Set<String> getZones();
     
-    public ExactZonesStatisticsConfig create() {
-        config.validate();
-        return config;
-    }
+    boolean satisfiedBy(ZoneStatisticsConfig zoneStatisticsConfig);
 
 }

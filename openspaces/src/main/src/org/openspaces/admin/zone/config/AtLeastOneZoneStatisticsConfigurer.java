@@ -13,32 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.openspaces.admin.pu.statistics;
+package org.openspaces.admin.zone.config;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+
 
 /**
  * @author elip
- *
+ * @since 9.1.0
  */
-public class ExactZonesStatisticsConfig 
-    extends AbstractZoneStatisticsConfig {
-
-    public ExactZonesStatisticsConfig(Map<String, String> properties) {
-        super(properties);
-        // TODO Auto-generated constructor stub
+public class AtLeastOneZoneStatisticsConfigurer {
+    
+    AtLeastOneZoneStatisticsConfig config;
+    
+    public AtLeastOneZoneStatisticsConfigurer() {
+        config = new AtLeastOneZoneStatisticsConfig();
     }
     
-    public ExactZonesStatisticsConfig() {
-        this(new HashMap<String,String>());
+    public AtLeastOneZoneStatisticsConfigurer zone(String zone) {
+        HashSet<String> zones = new HashSet<String>();
+        zones.add(zone);
+        config.setZones(zones);
+        return this;
     }
-
-    /* (non-Javadoc)
-     * @see org.openspaces.admin.pu.statistics.ZoneStatisticsConfig#satisfiedBy(org.openspaces.admin.pu.statistics.ZoneStatisticsConfig)
-     */
-    @Override
-    public boolean satisfiedBy(ZoneStatisticsConfig existingZoneStatisticsConfig) {
-        return this.getZones().equals(existingZoneStatisticsConfig.getZones());
-    } 
+    
+    public AtLeastOneZoneStatisticsConfig create() {
+        config.validate();
+        return config;
+    }
 }

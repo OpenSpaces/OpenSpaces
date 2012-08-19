@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.openspaces.admin.pu.statistics;
+package org.openspaces.admin.zone.config;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * @author elip
- * 
+ * @since 9.1.0
  */
 public class AtLeastOneZoneStatisticsConfig 
     extends AbstractZoneStatisticsConfig {

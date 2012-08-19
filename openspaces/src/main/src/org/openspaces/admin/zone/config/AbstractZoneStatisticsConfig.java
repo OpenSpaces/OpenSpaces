@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.openspaces.admin.pu.statistics;
+package org.openspaces.admin.zone.config;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -23,7 +23,7 @@ import org.openspaces.admin.pu.elastic.config.AbstractStatisticsConfig;
 
 /**
  * @author elip
- *
+ * @since 9.1.0
  */
 public abstract class AbstractZoneStatisticsConfig 
     extends AbstractStatisticsConfig 

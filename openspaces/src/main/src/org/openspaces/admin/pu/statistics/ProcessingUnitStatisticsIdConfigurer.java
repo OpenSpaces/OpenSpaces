@@ -1,5 +1,7 @@
 package org.openspaces.admin.pu.statistics;
 
+import org.openspaces.admin.zone.config.ZoneStatisticsConfig;
+
 
 /**
  * Provides fluent API for creating a new {@link ProcessingUnitStatisticsId} object.

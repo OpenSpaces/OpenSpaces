@@ -493,11 +493,12 @@ public class MachinesSlaEnforcementState {
                     if (!capacityPerPuPerAgent.containsKey(agent)) {
                         //lazy init
                         capacityPerPuPerAgent.put(agent, new HashMap<ProcessingUnit, CapacityRequirements>());
+                        capacityPerPuPerAgent.get(agent).put(otherPu, new CapacityRequirements());
                     }
-                    if (capacityPerPuPerAgent.get(agent).containsKey(otherPu)) {
-                        throw new IllegalStateException("Does not expect two allocations from the same pu on the same machine but having different zones");
-                    }
-                    CapacityRequirements otherPuCapacityOnAgent = otherPuCapacityPerAgents.getAgentCapacity(agentUid);
+                     
+                    CapacityRequirements otherPuCapacityOnAgent = capacityPerPuPerAgent.get(agent).get(otherPu);
+                    CapacityRequirements otherPuCapacityOnAgentIncrease = otherPuCapacityPerAgents.getAgentCapacity(agentUid);
+                    otherPuCapacityOnAgent = otherPuCapacityOnAgent.add(otherPuCapacityOnAgentIncrease);
                     capacityPerPuPerAgent.get(agent).put(otherPu, otherPuCapacityOnAgent);
                 }
             }

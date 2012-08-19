@@ -18,8 +18,8 @@ package org.openspaces.admin.internal.pu.statistics;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.openspaces.admin.pu.statistics.AbstractZoneStatisticsConfig;
-import org.openspaces.admin.pu.statistics.ZoneStatisticsConfig;
+import org.openspaces.admin.zone.config.AbstractZoneStatisticsConfig;
+import org.openspaces.admin.zone.config.ZoneStatisticsConfig;
 
 /**
  * @author elip

@@ -31,11 +31,11 @@ import org.openspaces.admin.internal.pu.statistics.InternalProcessingUnitStatist
 import org.openspaces.admin.internal.pu.statistics.StatisticsObjectListFunction;
 import org.openspaces.admin.internal.pu.statistics.TimeWindowStatisticsCalculator;
 import org.openspaces.admin.internal.pu.statistics.ZoneStatisticsCalculator;
-import org.openspaces.admin.pu.statistics.ExactZonesStatisticsConfig;
 import org.openspaces.admin.pu.statistics.InstancesStatisticsConfig;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
 import org.openspaces.admin.pu.statistics.SingleInstanceStatisticsConfig;
-import org.openspaces.admin.pu.statistics.ZoneStatisticsConfig;
+import org.openspaces.admin.zone.config.ExactZonesStatisticsConfig;
+import org.openspaces.admin.zone.config.ZoneStatisticsConfig;
 
 public class DefaultProcessingUnitStatistics implements InternalProcessingUnitStatistics {
 
