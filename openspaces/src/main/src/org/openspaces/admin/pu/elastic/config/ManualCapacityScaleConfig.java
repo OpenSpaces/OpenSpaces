@@ -41,7 +41,7 @@ import org.openspaces.grid.gsm.strategy.ManualCapacityScaleStrategyBean;
  * @author itaif
  */
 public class ManualCapacityScaleConfig 
-    implements ScaleStrategyConfig , ScaleStrategyCapacityRequirementConfig, Externalizable {
+    implements ScaleStrategyConfig , ScaleStrategyCapacityRequirementConfig, ScaleStrategyAgentZonesAffinityConfig, Externalizable {
 
     private static final long serialVersionUID = 1L;
 
@@ -148,7 +148,17 @@ public class ManualCapacityScaleConfig
     public Map<String,Long> getDrivesCapacityInMB() throws NumberFormatException{
         return capacityRequirementConfig.getDrivesCapacityInMB();
     }
+
+    @Override
+    public boolean isGridServiceAgentZonesAffinity() {
+        return ScaleStrategyConfigUtils.isGridServiceAgentZonesAffinity(properties);
+    }
     
+    @Override
+    public void setGridServiceAgentZonesAffinity(boolean enableAgentZonesAffinity) {
+        ScaleStrategyConfigUtils.setGridServiceAgentZonesAffinity(properties, enableAgentZonesAffinity);
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;

@@ -31,7 +31,7 @@ import org.openspaces.core.util.MemoryUnit;
  * @since 8.0
  * @see ManualCapacityScaleConfig
  */
-public class ManualCapacityScaleConfigurer implements ScaleStrategyConfigurer<ManualCapacityScaleConfig> , ScaleStrategyCapacityRequirementConfigurer {
+public class ManualCapacityScaleConfigurer implements ScaleStrategyConfigurer<ManualCapacityScaleConfig> , ScaleStrategyCapacityRequirementConfigurer , ScaleStrategyAgentZonesAffinityConfigurer {
 
     private final ManualCapacityScaleConfig config;
     
@@ -97,6 +97,13 @@ public class ManualCapacityScaleConfigurer implements ScaleStrategyConfigurer<Ma
         config.setPollingIntervalSeconds((int)timeUnit.toSeconds(pollingInterval));
         return this;
     }
+    
+    @Override
+    public ManualCapacityScaleConfigurer enableGridServiceAgentZonesAffinity() {
+        config.setGridServiceAgentZonesAffinity(true);
+        return this;
+    }
+    
     public ManualCapacityScaleConfig create() {
         return config;
     }
