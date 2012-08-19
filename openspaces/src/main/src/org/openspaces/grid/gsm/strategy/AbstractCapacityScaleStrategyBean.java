@@ -153,7 +153,6 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
             );
         }
     }
-
     
     /**
      * Calculates the minimum number of machines per zone
@@ -244,23 +243,15 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
         CapacityRequirementsPerAgent totalAllocatedCapacity = new CapacityRequirementsPerAgent();
         PerZonesMachinesSlaEnforcementInProgressException pendingMachinesExceptions = new PerZonesMachinesSlaEnforcementInProgressException(new String[]{getProcessingUnit().getName()});
         PerZonesGridServiceAgentSlaEnforcementInProgressException pendingAgentsExceptions = new PerZonesGridServiceAgentSlaEnforcementInProgressException(new String[]{getProcessingUnit().getName()});
-        //     * TODO: Add numberOfMachines to CapacityRequirements and CapacityRequirementsPerZones
-        Map<ZonesConfig,Integer> minimumNumberOfMachinesPerZone = calcMinimumNumberOfMachinesPerZones();
-        final CapacityRequirementsPerZones capacityRequirementsPerZone = this.capacityPerZones.toCapacityRequirementsPerZone();
         
-        for (ZonesConfig zones : getAllZones()) {
-            
-            Integer minimumNumberOfMachines = minimumNumberOfMachinesPerZone.get(zones);
-            //could be zero due to requirements change but machines still running
-            CapacityRequirements capacityRequirements = capacityRequirementsPerZone.getZonesCapacityOrZero(zones);
-            final CapacityMachinesSlaPolicy sla = getMachinesSla(zones, minimumNumberOfMachines, capacityRequirements);
+        for (CapacityMachinesSlaPolicy sla : getMachinesSlas(getAllZones())) {
             
             try {
                 enforceMachinesSla(sla);
             }
             catch (GridServiceAgentSlaEnforcementPendingContainerDeallocationException e) {
                 // fall through to containers sla enforcement since need to scale-in containers
-                pendingAgentsExceptions.addReason(zones,e);
+                pendingAgentsExceptions.addReason(sla.getGridServiceAgentZones(),e);
             }
             catch (GridServiceAgentSlaEnforcementInProgressException e) {
                 if (getSchemaConfig().isPartitionedSync2BackupSchema()) {
@@ -269,7 +260,7 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
                     throw e;
                 }
                 // handle next zone
-                pendingAgentsExceptions.addReason(zones,e);
+                pendingAgentsExceptions.addReason(sla.getGridServiceAgentZones(),e);
             }
             catch (MachinesSlaEnforcementInProgressException e) {
                 if (getSchemaConfig().isPartitionedSync2BackupSchema()) {
@@ -278,7 +269,7 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
                     throw e;
                 }
                 // handle next zone
-                pendingMachinesExceptions.addReason(zones,e);
+                pendingMachinesExceptions.addReason(sla.getGridServiceAgentZones(),e);
             }
             CapacityRequirementsPerAgent allocatedCapacity = machinesEndpoint.getAllocatedCapacity(sla);
             totalAllocatedCapacity = totalAllocatedCapacity.add(allocatedCapacity);
@@ -559,23 +550,15 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
     @Override
     protected void recoverStateOnEsmStart() throws MachinesSlaEnforcementInProgressException, SomeProcessingUnitsHaveNotCompletedStateRecoveryException, NeedToWaitUntilAllGridServiceAgentsDiscoveredException {
         
-        Map<ZonesConfig,Integer> minimumNumberOfMachinesPerZone = calcMinimumNumberOfMachinesPerZones();
-        final CapacityRequirementsPerZones capacityRequirementsPerZone = this.capacityPerZones.toCapacityRequirementsPerZone();
-        
-        for (ZonesConfig zones : getPlannedZonesByRecoveryOrder()) {
-
-            Integer minimumNumberOfMachines = minimumNumberOfMachinesPerZone.get(zones);
-            //could be zero due to requirements change but machines still running
-            CapacityRequirements capacityRequirements = capacityRequirementsPerZone.getZonesCapacityOrZero(zones);
-            final CapacityMachinesSlaPolicy sla = getMachinesSla(zones, minimumNumberOfMachines, capacityRequirements);
+        for (CapacityMachinesSlaPolicy sla : getMachinesSlas(getPlannedZones())) {
             machinesEndpoint.recoverStateOnEsmStart(sla);
         }
         
         machinesEndpoint.recoveredStateOnEsmStart(getProcessingUnit());
     }
 
-    private List<ZonesConfig> getPlannedZonesByRecoveryOrder() throws MachinesSlaEnforcementInProgressException {
-        List<ZonesConfig> sortedZones = new ArrayList<ZonesConfig>(getPlannedZones());
+    private List<ZonesConfig> sortZonesByRecoveryOrder(Set<ZonesConfig> zoness) throws MachinesSlaEnforcementInProgressException {
+        List<ZonesConfig> sortedZones = new ArrayList<ZonesConfig>(zoness);
         Collections.sort(sortedZones,new Comparator<ZonesConfig>() {
 
             @Override
@@ -601,18 +584,29 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
 
     public CapacityRequirementsPerZones getAllocatedCapacity() throws MachinesSlaEnforcementInProgressException {
         CapacityRequirementsPerZones allocatedCapacityPerZones = new CapacityRequirementsPerZones(); 
-        Map<ZonesConfig,Integer> minimumNumberOfMachinesPerZone = calcMinimumNumberOfMachinesPerZones();
-        final CapacityRequirementsPerZones capacityRequirementsPerZone = this.capacityPerZones.toCapacityRequirementsPerZone();
         
-        for (ZonesConfig zones : getPlannedZones()) {
-
-            Integer minimumNumberOfMachines = minimumNumberOfMachinesPerZone.get(zones);
-            //could be zero due to requirements change but machines still running
-            CapacityRequirements capacityRequirements = capacityRequirementsPerZone.getZonesCapacityOrZero(zones);
-            final CapacityMachinesSlaPolicy sla = getMachinesSla(zones, minimumNumberOfMachines, capacityRequirements);
+        for (CapacityMachinesSlaPolicy sla : getMachinesSlas(machinesEndpoint.getGridServiceAgentsZones())) {
             CapacityRequirements allocatedCapacity = machinesEndpoint.getAllocatedCapacity(sla).getTotalAllocatedCapacity();
-            allocatedCapacityPerZones.add(zones, allocatedCapacity);
+            allocatedCapacityPerZones.add(sla.getGridServiceAgentZones(), allocatedCapacity);
         }
         return allocatedCapacityPerZones;
+    }
+    
+    private List<CapacityMachinesSlaPolicy> getMachinesSlas(final Set<ZonesConfig> zoness) throws MachinesSlaEnforcementInProgressException {
+        
+        final List<CapacityMachinesSlaPolicy> machinesSlas = new ArrayList<CapacityMachinesSlaPolicy>();
+        
+        final Map<ZonesConfig,Integer> minimumNumberOfMachinesPerZone = calcMinimumNumberOfMachinesPerZones();
+        final CapacityRequirementsPerZones capacityRequirementsPerZone = this.capacityPerZones.toCapacityRequirementsPerZone();
+        final List<ZonesConfig> sortedZoness = sortZonesByRecoveryOrder(zoness);
+        for (ZonesConfig zones : sortedZoness) {
+            //TODO: Use NumberOfMachinesCapacityRequirement in capacityRequirements instead of minimumNumberOfMachines
+            final Integer minimumNumberOfMachines = minimumNumberOfMachinesPerZone.get(zones);
+            //could be zero due to requirements change but machines still running
+            final CapacityRequirements capacityRequirements = capacityRequirementsPerZone.getZonesCapacityOrZero(zones);
+            final CapacityMachinesSlaPolicy sla = getMachinesSla(zones, minimumNumberOfMachines, capacityRequirements);
+            machinesSlas.add(sla);
+        }        
+        return machinesSlas;
     }
 }
