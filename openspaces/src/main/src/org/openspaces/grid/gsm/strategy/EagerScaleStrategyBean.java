@@ -19,6 +19,7 @@ package org.openspaces.grid.gsm.strategy;
 
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
+import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
 import org.openspaces.grid.gsm.GridServiceContainerConfigAware;
 import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerAgent;
@@ -33,6 +34,9 @@ import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpointAware;
 import org.openspaces.grid.gsm.machines.exceptions.FailedToDiscoverMachinesException;
 import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcementPendingContainerDeallocationException;
+import org.openspaces.grid.gsm.machines.exceptions.MachinesSlaEnforcementInProgressException;
+import org.openspaces.grid.gsm.machines.exceptions.NeedToWaitUntilAllGridServiceAgentsDiscoveredException;
+import org.openspaces.grid.gsm.machines.exceptions.SomeProcessingUnitsHaveNotCompletedStateRecoveryException;
 import org.openspaces.grid.gsm.machines.exceptions.WaitingForDiscoveredMachinesException;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcementEndpointAware;
@@ -101,43 +105,38 @@ public class EagerScaleStrategyBean extends AbstractScaleStrategyBean
     public void enforceSla() throws SlaEnforcementInProgressException {
         
         SlaEnforcementInProgressException pendingException = null;
-        
+
+        final EagerMachinesSlaPolicy machinesSla = getMachinesSlaPolicy();
         try {
-            enforceMachinesSla();
+            enforceMachinesSla(machinesSla);
         }
         catch (GridServiceAgentSlaEnforcementPendingContainerDeallocationException e) {
             // fall through to containers sla enforcement since need to deallocate containers
             pendingException = e;
         }
+
         
+        CapacityRequirementsPerAgent allocatedCapacity = machinesEndpoint.getAllocatedCapacity(machinesSla);
         try {
-            enforceContainersSla();
+            enforceContainersSla(allocatedCapacity);
         }
         catch (ContainersSlaEnforcementPendingProcessingUnitDeallocationException e) {
             // fall through to rebalacing sla enforcement since need to deallocate pu instances
             pendingException = e;    
         }
         
-        enforceRebalancingSla(containersEndpoint.getContainers());
+        enforceRebalancingSla(allocatedCapacity, containersEndpoint.getContainers());
         
         if (pendingException != null) {
             throw pendingException;
         }
     }
 
-    private void enforceMachinesSla() throws WaitingForDiscoveredMachinesException, GridServiceAgentSlaEnforcementInProgressException, FailedToDiscoverMachinesException {
+    private void enforceMachinesSla(final EagerMachinesSlaPolicy sla) throws WaitingForDiscoveredMachinesException, GridServiceAgentSlaEnforcementInProgressException, FailedToDiscoverMachinesException {
         if (getLogger().isDebugEnabled()) {
             getLogger().debug("Enforcing machines SLA.");
         }
-        
-        final EagerMachinesSlaPolicy sla = new EagerMachinesSlaPolicy();      
-        sla.setMaximumNumberOfMachines(getMaximumNumberOfInstances());
-        sla.setMinimumNumberOfMachines(getMinimumNumberOfMachines());
-        sla.setMaximumNumberOfContainersPerMachine(getMaximumNumberOfContainersPerMachine());
-        sla.setContainerMemoryCapacityInMB(containersConfig.getMaximumMemoryCapacityInMB());
-        sla.setMachineIsolation(getIsolation());
-        sla.setMachineProvisioning(super.getMachineProvisioning());
-        sla.setDiscoveredMachinesCache(getDiscoveredMachinesCache());
+
         try {
             machinesEndpoint.enforceSla(sla);
             
@@ -154,13 +153,23 @@ public class EagerScaleStrategyBean extends AbstractScaleStrategyBean
 
     }
 
-    private void enforceContainersSla() throws ContainersSlaEnforcementInProgressException {
+    private EagerMachinesSlaPolicy getMachinesSlaPolicy() {
+        final EagerMachinesSlaPolicy sla = new EagerMachinesSlaPolicy();      
+        sla.setMaximumNumberOfMachines(getMaximumNumberOfInstances());
+        sla.setMinimumNumberOfMachines(getMinimumNumberOfMachines());
+        sla.setMaximumNumberOfContainersPerMachine(getMaximumNumberOfContainersPerMachine());
+        sla.setContainerMemoryCapacityInMB(containersConfig.getMaximumMemoryCapacityInMB());
+        sla.setMachineIsolation(getIsolation());
+        sla.setMachineProvisioning(super.getMachineProvisioning());
+        sla.setDiscoveredMachinesCache(getDiscoveredMachinesCache());
+        return sla;
+    }
+
+    private void enforceContainersSla(CapacityRequirementsPerAgent allocatedCapacity) throws ContainersSlaEnforcementInProgressException {
         
         if (getLogger().isDebugEnabled()) {
             getLogger().debug("Enforcing containers SLA.");
         }
-        
-        CapacityRequirementsPerAgent allocatedCapacity = machinesEndpoint.getAllocatedCapacity();
         
         final ContainersSlaPolicy sla = new ContainersSlaPolicy();
         sla.setNewContainerConfig(containersConfig);
@@ -182,7 +191,7 @@ public class EagerScaleStrategyBean extends AbstractScaleStrategyBean
         }
     }
     
-    private void enforceRebalancingSla(GridServiceContainer[] containers) 
+    private void enforceRebalancingSla(CapacityRequirementsPerAgent allocatedCapacity, GridServiceContainer[] containers) 
         throws RebalancingSlaEnforcementInProgressException 
     {
         if (getLogger().isDebugEnabled()) {
@@ -192,7 +201,7 @@ public class EagerScaleStrategyBean extends AbstractScaleStrategyBean
         sla.setContainers(containers);
         sla.setMaximumNumberOfConcurrentRelocationsPerMachine(slaConfig.getMaxConcurrentRelocationsPerMachine());
         sla.setSchemaConfig(getSchemaConfig());
-        sla.setAllocatedCapacity(machinesEndpoint.getAllocatedCapacity());
+        sla.setAllocatedCapacity(allocatedCapacity);
         sla.setMinimumNumberOfInstancesPerPartition(1);
         try {
             rebalancingEndpoint.enforceSla(sla);
@@ -217,4 +226,17 @@ public class EagerScaleStrategyBean extends AbstractScaleStrategyBean
     protected boolean isUndeploying() {
         return false;
     }
+
+    @Override
+    protected void recoverStateOnEsmStart() throws MachinesSlaEnforcementInProgressException, SomeProcessingUnitsHaveNotCompletedStateRecoveryException, NeedToWaitUntilAllGridServiceAgentsDiscoveredException {
+        
+        final EagerMachinesSlaPolicy sla = getMachinesSlaPolicy();
+        machinesEndpoint.recoverStateOnEsmStart(sla);
+        machinesEndpoint.recoveredStateOnEsmStart(getProcessingUnit());
+    }
+
+    @Override
+    protected boolean isRecoveredStateOnEsmStart(ProcessingUnit otherPu) {
+        return machinesEndpoint.isRecoveredStateOnEsmStart(otherPu);
+    }    
 }

@@ -142,7 +142,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
                     }
                 }
                 , 0, delay, TimeUnit.MILLISECONDS);
-        machinesSlaEnforcement = new MachinesSlaEnforcement(admin);
+        machinesSlaEnforcement = new MachinesSlaEnforcement();
         containersSlaEnforcement = new ContainersSlaEnforcement(admin);
         rebalancingSlaEnforcement = new RebalancingSlaEnforcement();
         autoScalingSlaEnforcement = new AutoScalingSlaEnforcement(admin);
@@ -584,6 +584,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
         elasticPropertiesPerProcessingUnit.put(puName,elasticProperties);
         ProcessingUnit pu = admin.getProcessingUnits().getProcessingUnit(puName);
         if (pu != null) {
+            //todo: move gsm update inside bean
             InternalGridServiceManager managinGsm = (InternalGridServiceManager)pu.getManagingGridServiceManager();
             managinGsm.updateProcessingUnitElasticPropertiesOnGsm(pu, elasticProperties);
             refreshProcessingUnitElasticConfig(pu,elasticProperties);

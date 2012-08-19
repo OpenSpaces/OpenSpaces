@@ -17,6 +17,8 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.strategy;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -52,6 +54,8 @@ import org.openspaces.grid.gsm.containers.exceptions.ContainersSlaEnforcementInP
 import org.openspaces.grid.gsm.machines.MachinesSlaUtils;
 import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.machines.exceptions.MachinesSlaEnforcementInProgressException;
+import org.openspaces.grid.gsm.machines.exceptions.NeedToWaitUntilAllGridServiceAgentsDiscoveredException;
+import org.openspaces.grid.gsm.machines.exceptions.SomeProcessingUnitsHaveNotCompletedStateRecoveryException;
 import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIsolation;
 import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIsolationAware;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
@@ -174,7 +178,6 @@ public abstract class AbstractScaleStrategyBean implements
     
     public void afterPropertiesSet() {
         
-        ((InternalAdmin)admin).assertStateChangesPermitted();
         
         if (pu == null) {
             throw new IllegalStateException("pu cannot be null");
@@ -187,6 +190,8 @@ public abstract class AbstractScaleStrategyBean implements
         if (admin == null) {
             throw new IllegalStateException("admin cannot be null.");
         }
+        
+        ((InternalAdmin)admin).assertStateChangesPermitted();
         
         if (machineProvisioning == null) {
             throw new IllegalStateException("machine provisioning cannot be null.");
@@ -311,6 +316,19 @@ public abstract class AbstractScaleStrategyBean implements
             validateAtLeastOneLookupServiceDiscovered();
             validateOnlyOneESMRunning();
 
+            if (!isRecoveredStateOnEsmStart()) {
+                if (getLogger().isInfoEnabled()) {
+                    getLogger().info("recovering state on ESM start.");
+                }
+                
+                recoverStateOnEsmStart();
+                
+                if (getLogger().isInfoEnabled()) {
+                    getLogger().info("recovered state on ESM start.");
+                }
+            }
+            validateAllProcessingUnitsRecoveredStateOnEsmStart();
+            
             if (getLogger().isDebugEnabled()) {
                 getLogger().debug("enforcing SLA.");
             }
@@ -338,6 +356,39 @@ public abstract class AbstractScaleStrategyBean implements
             scaleEventState.enqueuProvisioningInProgressEvent();
             isScaleInProgress = true;
         }
+    }
+
+    private boolean isRecoveredStateOnEsmStart() {
+        return isRecoveredStateOnEsmStart(pu);
+    }
+
+    protected abstract boolean isRecoveredStateOnEsmStart(ProcessingUnit otherPu);
+    protected abstract void recoverStateOnEsmStart() throws MachinesSlaEnforcementInProgressException, SomeProcessingUnitsHaveNotCompletedStateRecoveryException, NeedToWaitUntilAllGridServiceAgentsDiscoveredException;
+    
+        
+    /**
+     * Make sure the other PUs have updated their state, so their won't be race condition
+     * on allocating discovered agents when enforcing sla.
+     * @throws SomeProcessingUnitsHaveNotCompletedStateRecoveryException 
+     */
+    protected void validateAllProcessingUnitsRecoveredStateOnEsmStart() throws SomeProcessingUnitsHaveNotCompletedStateRecoveryException {
+        
+        List<ProcessingUnit> pusNotCompletedStateRecovery = new ArrayList<ProcessingUnit>();
+                
+        Admin admin = pu.getAdmin();
+        
+        for (ProcessingUnit otherPu : admin.getProcessingUnits()) {
+            Map<String, String> elasticProperties = ((InternalProcessingUnit)otherPu).getElasticProperties();
+            if (!elasticProperties.isEmpty() &&
+                !isRecoveredStateOnEsmStart(otherPu)){   
+                  // found an elastic PU that has not completed state recovery
+                  pusNotCompletedStateRecovery.add(otherPu);
+            }
+        }
+
+        if (!pusNotCompletedStateRecovery.isEmpty()) {
+            throw new SomeProcessingUnitsHaveNotCompletedStateRecoveryException(pusNotCompletedStateRecovery);
+        }   
     }
 
     private void validateAtLeastOneLookupServiceDiscovered() throws DisconnectedFromLookupServiceException {

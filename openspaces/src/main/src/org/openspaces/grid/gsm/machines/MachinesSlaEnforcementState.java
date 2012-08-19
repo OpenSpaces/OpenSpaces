@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -33,169 +34,195 @@ import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsc.GridServiceContainer;
-import org.openspaces.admin.internal.pu.InternalProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerAgent;
 import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIsolation;
 
+import java.util.LinkedList;
+
 public class MachinesSlaEnforcementState {
+    
+    public static class StateKey {
+        
+        ProcessingUnit pu;
+        Set<String> exactGridServiceAgentZones;
+        
+        public StateKey (ProcessingUnit pu, Set<String> exactGridServiceAgentZones) {
+            this.pu = pu;
+            this.exactGridServiceAgentZones = exactGridServiceAgentZones;
+        }
+        
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result
+                    + ((exactGridServiceAgentZones == null) ? 0 : exactGridServiceAgentZones.hashCode());
+            result = prime * result + ((pu == null) ? 0 : pu.hashCode());
+            return result;
+        }
+        
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            StateKey other = (StateKey) obj;
+            if (exactGridServiceAgentZones == null) {
+                if (other.exactGridServiceAgentZones != null)
+                    return false;
+            } else if (!exactGridServiceAgentZones.equals(other.exactGridServiceAgentZones))
+                return false;
+            if (pu == null) {
+                if (other.pu != null)
+                    return false;
+            } else if (!pu.equals(other.pu))
+                return false;
+            return true;
+        }
+
+        @Override
+        public String toString() {
+            return "StateKey ["
+                    + (pu != null ? "pu=" + pu + ", " : "")
+                    + (exactGridServiceAgentZones != null ? "exactGridServiceAgentZones=" + exactGridServiceAgentZones : "")
+                    + "]";
+        }
+    }
+    
+    class StateValue {
+        
+        private CapacityRequirementsPerAgent allocatedCapacity = new CapacityRequirementsPerAgent();
+        private final List<GridServiceAgentFutures> futureAgents = new ArrayList<GridServiceAgentFutures>();
+        private CapacityRequirementsPerAgent markedForDeallocationCapacity = new CapacityRequirementsPerAgent();
+        private ElasticProcessingUnitMachineIsolation machineIsolation;
+        private Map<String,Long> timeoutTimestampPerAgentUidGoingDown = new HashMap<String,Long>();
+        private boolean completedStateRecoveryAfterRestart;
+        
+        public void addFutureAgents(FutureGridServiceAgent[] newFutureAgents, CapacityRequirements capacityRequirements) {
+            futureAgents.add(new GridServiceAgentFutures(newFutureAgents,capacityRequirements));
+        }
+
+        public void allocatedCapacity(String agentUid, CapacityRequirements capacity) {
+            allocatedCapacity = allocatedCapacity.add(agentUid,capacity);
+        }
+
+        public void markCapacityForDeallocation(String agentUid, CapacityRequirements capacity) {
+            allocatedCapacity = allocatedCapacity.subtract(agentUid,capacity);
+            markedForDeallocationCapacity = markedForDeallocationCapacity.add(agentUid, capacity);
+        }
+
+        public void unmarkCapacityForDeallocation(String agentUid, CapacityRequirements capacity) {
+
+            markedForDeallocationCapacity = markedForDeallocationCapacity.subtract(agentUid, capacity);
+            allocatedCapacity = allocatedCapacity.add(agentUid,capacity);
+        }
+
+        public void deallocateCapacity(String agentUid, CapacityRequirements capacity) {
+            markedForDeallocationCapacity = markedForDeallocationCapacity.subtract(agentUid, capacity);
+        }
+
+        public Collection<GridServiceAgentFutures> getAllDoneFutureAgents() {
+            final List<GridServiceAgentFutures> doneFutures = new ArrayList<GridServiceAgentFutures>();
+            
+            for (GridServiceAgentFutures future : futureAgents) {
+                
+                if (future.isDone()) {
+                    doneFutures.add(future);
+                }
+            }
+            
+            return doneFutures;
+        }
+
+        public void agentGoingDown(String agentUid, long timeout, TimeUnit unit) {
+            timeoutTimestampPerAgentUidGoingDown.put(agentUid, System.currentTimeMillis() + TimeUnit.MILLISECONDS.convert(timeout, unit));
+        }
+
+        public Collection<String> getAgentUidsGoingDown() {
+            return Collections.unmodifiableCollection(new ArrayList<String>(this.timeoutTimestampPerAgentUidGoingDown.keySet()));
+        }
+
+        public void removeFutureAgents(GridServiceAgentFutures futureAgentsToRemove) {
+            futureAgents.remove(futureAgentsToRemove);
+        }
+
+        public void completedStateRecoveryAfterRestart() {
+            completedStateRecoveryAfterRestart = true;
+        }
+    }
     
     private final Log logger;
     
-    // state that tracks managed grid service agents, agents to be started and agents marked for shutdown.
-    private final Map<ProcessingUnit,CapacityRequirementsPerAgent> allocatedCapacityPerProcessingUnit;
-    private final Map<ProcessingUnit,List<GridServiceAgentFutures>> futureAgentsPerProcessingUnit;
-    private final Map<ProcessingUnit,CapacityRequirementsPerAgent> markedForDeallocationCapacityPerProcessingUnit;
-    private final Map<ProcessingUnit, ElasticProcessingUnitMachineIsolation> machineIsolationPerProcessingUnit;
-    private final Map<ProcessingUnit,Map<String,Long>> timeoutTimestampPerAgentUidGoingDownPerProcessingUnit;
-    private final Set<ProcessingUnit> completedStateRecoveryAfterRestartPerProcessingUnit;
-    private final Set<ProcessingUnit> isSlaEnforcementCompletePerProcessingUnit;
+    private final Map<StateKey,StateValue> state;
+
+    private final Set<ProcessingUnit> recoveredStatePerProcessingUnit;
     
     public MachinesSlaEnforcementState() {
         this.logger = 
                 new SingleThreadedPollingLog( 
                         LogFactory.getLog(DefaultMachinesSlaEnforcementEndpoint.class));
-                        
-        allocatedCapacityPerProcessingUnit = new HashMap<ProcessingUnit, CapacityRequirementsPerAgent>();
-        futureAgentsPerProcessingUnit = new HashMap<ProcessingUnit, List<GridServiceAgentFutures>>();
-        markedForDeallocationCapacityPerProcessingUnit = new HashMap<ProcessingUnit, CapacityRequirementsPerAgent>();
-        machineIsolationPerProcessingUnit = new HashMap<ProcessingUnit, ElasticProcessingUnitMachineIsolation>();
-        timeoutTimestampPerAgentUidGoingDownPerProcessingUnit = new HashMap<ProcessingUnit,Map<String,Long>>();
-        completedStateRecoveryAfterRestartPerProcessingUnit = new HashSet<ProcessingUnit>();
-        isSlaEnforcementCompletePerProcessingUnit = new HashSet<ProcessingUnit>();
-    }
-
-    public void initProcessingUnit(ProcessingUnit pu) {
         
-        allocatedCapacityPerProcessingUnit.put(pu,new CapacityRequirementsPerAgent());
-        markedForDeallocationCapacityPerProcessingUnit.put(pu, new CapacityRequirementsPerAgent());
-        timeoutTimestampPerAgentUidGoingDownPerProcessingUnit.put(pu,new HashMap<String,Long>());
-        futureAgentsPerProcessingUnit.put(pu, new ArrayList<GridServiceAgentFutures>());
+        state = new HashMap<StateKey,StateValue>();
+        recoveredStatePerProcessingUnit = new HashSet<ProcessingUnit>();
     }
 
-    public void destroyProcessingUnit(ProcessingUnit pu) {
-        machineIsolationPerProcessingUnit.remove(pu);
-        allocatedCapacityPerProcessingUnit.remove(pu);
-        futureAgentsPerProcessingUnit.remove(pu);
-        markedForDeallocationCapacityPerProcessingUnit.remove(pu);
-        timeoutTimestampPerAgentUidGoingDownPerProcessingUnit.remove(pu);
-        isSlaEnforcementCompletePerProcessingUnit.remove(pu);
+    public boolean isHoldingStateForProcessingUnit(ProcessingUnit pu) {
+        return !getGridServiceAgentsZones(pu).isEmpty();
     }
 
-    public boolean isProcessingUnitDestroyed(ProcessingUnit pu) {
-        return 
-            allocatedCapacityPerProcessingUnit.get(pu) == null ||
-            futureAgentsPerProcessingUnit.get(pu) == null ||
-            markedForDeallocationCapacityPerProcessingUnit.get(pu) == null;
-    }
-
-    public void futureAgents(ProcessingUnit pu, FutureGridServiceAgent[] futureAgents, CapacityRequirements capacityRequirements) {
-        this.futureAgentsPerProcessingUnit.get(pu).add(new GridServiceAgentFutures(futureAgents,capacityRequirements));
+    private StateValue getState(StateKey key) {
+        if (!state.containsKey(key)) {
+            state.put(key, new StateValue());
+        }
+        return state.get(key);
     }
     
-    public void allocateCapacity(ProcessingUnit pu, String agentUid, CapacityRequirements capacity) {
-        
-        CapacityRequirementsPerAgent CapacityRequirements = allocatedCapacityPerProcessingUnit.get(pu);
-        if (CapacityRequirements == null) {
-            throw new IllegalArgumentException("pu");
-        }
-        
-        allocatedCapacityPerProcessingUnit.put(
-                pu,
-                CapacityRequirements.add(agentUid,capacity));
-        
-    }
-
-    public void markCapacityForDeallocation(ProcessingUnit pu, String agentUid, CapacityRequirements capacity) {
-        
-        CapacityRequirementsPerAgent CapacityRequirements = 
-            allocatedCapacityPerProcessingUnit.get(pu);
-        
-        if (CapacityRequirements == null) {
-            throw new IllegalArgumentException("pu");
-        }
-        
-        CapacityRequirementsPerAgent deallocatedCapacity = 
-            markedForDeallocationCapacityPerProcessingUnit.get(pu);
-        
-        if (deallocatedCapacity == null) {
-            throw new IllegalArgumentException("pu");
-        }
-            
-        allocatedCapacityPerProcessingUnit.put(pu,
-                CapacityRequirements.subtract(agentUid,capacity));
-        
-        markedForDeallocationCapacityPerProcessingUnit.put(pu,
-                deallocatedCapacity.add(agentUid, capacity));
+    public void addFutureAgents(StateKey key, FutureGridServiceAgent[] futureAgents, CapacityRequirements capacityRequirements) {
+        getState(key).addFutureAgents(futureAgents, capacityRequirements);
     }
     
-    public void unmarkCapacityForDeallocation(ProcessingUnit pu, String agentUid, CapacityRequirements capacity) {
-        CapacityRequirementsPerAgent CapacityRequirements = 
-            allocatedCapacityPerProcessingUnit.get(pu);
-        
-        if (CapacityRequirements == null) {
-            throw new IllegalArgumentException("pu");
-        }
-        
-        CapacityRequirementsPerAgent deallocatedCapacity = 
-            markedForDeallocationCapacityPerProcessingUnit.get(pu);
-        
-        if (deallocatedCapacity == null) {
-            throw new IllegalArgumentException("pu");
-        }
-        
-        markedForDeallocationCapacityPerProcessingUnit.put(pu,
-                deallocatedCapacity.subtract(agentUid, capacity));
-        
-        allocatedCapacityPerProcessingUnit.put(pu,
-                CapacityRequirements.add(agentUid,capacity));
-        
+
+    public void allocateCapacity(StateKey key, String agentUid, CapacityRequirements capacity) {
+        getState(key).allocatedCapacity(agentUid, capacity);        
+    }
+
+    public void markCapacityForDeallocation(StateKey key, String agentUid, CapacityRequirements capacity) {
+        getState(key).markCapacityForDeallocation(agentUid, capacity);
+    }
+    
+    public void unmarkCapacityForDeallocation(StateKey key, String agentUid, CapacityRequirements capacity) {
+        getState(key).unmarkCapacityForDeallocation(agentUid, capacity);        
     }
 
     
-    public void deallocateCapacity(ProcessingUnit pu, String agentUid, CapacityRequirements capacity) {
-        
-        CapacityRequirementsPerAgent deallocatedCapacity = 
-            markedForDeallocationCapacityPerProcessingUnit.get(pu);
-        
-        if (deallocatedCapacity == null) {
-            throw new IllegalArgumentException("pu");
-        }
-        
-        markedForDeallocationCapacityPerProcessingUnit.put(pu,
-                deallocatedCapacity.subtract(agentUid, capacity));
+    public void deallocateCapacity(StateKey key, String agentUid, CapacityRequirements capacity) {
+        getState(key).deallocateCapacity(agentUid, capacity);
     }
 
-    public CapacityRequirementsPerAgent getCapacityMarkedForDeallocation(ProcessingUnit pu) {
-       return markedForDeallocationCapacityPerProcessingUnit.get(pu);
+    public CapacityRequirementsPerAgent getCapacityMarkedForDeallocation(StateKey key) {
+       return getState(key).markedForDeallocationCapacity;
     }
 
-    public CapacityRequirementsPerAgent getAllocatedCapacity(ProcessingUnit pu) {
-        return allocatedCapacityPerProcessingUnit.get(pu);
+    public CapacityRequirementsPerAgent getAllocatedCapacity(StateKey key) {
+        return getState(key).allocatedCapacity;
     }
     
-    public int getNumberOfFutureAgents(ProcessingUnit pu) {
-        return this.futureAgentsPerProcessingUnit.get(pu).size();
+    public int getNumberOfFutureAgents(StateKey key) {
+        return getState(key).futureAgents.size();
     }
 
-    public Collection<GridServiceAgentFutures> getFutureAgents(ProcessingUnit pu) {
-        return Collections.unmodifiableCollection(this.futureAgentsPerProcessingUnit.get(pu));
+    public Collection<GridServiceAgentFutures> getFutureAgents(StateKey key) {
+        return Collections.unmodifiableCollection(getState(key).futureAgents);
     }
 
-    public Collection<GridServiceAgentFutures> getAllDoneFutureAgents(ProcessingUnit pu) {
-        
-        final List<GridServiceAgentFutures> doneFutures = new ArrayList<GridServiceAgentFutures>();
-        
-        for (GridServiceAgentFutures future : futureAgentsPerProcessingUnit.get(pu)) {
-            
-            if (future.isDone()) {
-                doneFutures.add(future);
-            }
-        }
-        
-        return doneFutures;        
+    public Collection<GridServiceAgentFutures> getAllDoneFutureAgents(StateKey key) {
+        return getState(key).getAllDoneFutureAgents();
     }
     
     /**
@@ -213,12 +240,8 @@ public class MachinesSlaEnforcementState {
         
         CapacityRequirementsPerAgent allUsedCapacity = new CapacityRequirementsPerAgent();
         
-        for (CapacityRequirementsPerAgent capacityRequirements : this.allocatedCapacityPerProcessingUnit.values()) {
-            allUsedCapacity = allUsedCapacity.add(capacityRequirements);
-        }
-        
-        for (CapacityRequirementsPerAgent markedForDeallocationCapacity : this.markedForDeallocationCapacityPerProcessingUnit.values()) {
-            allUsedCapacity = allUsedCapacity.add(markedForDeallocationCapacity);
+        for (StateValue value : state.values()) {
+            allUsedCapacity = allUsedCapacity.add(value.allocatedCapacity).add(value.markedForDeallocationCapacity);
         }
         
         return allUsedCapacity;
@@ -229,135 +252,158 @@ public class MachinesSlaEnforcementState {
      */
     public boolean isAgentSharedWithOtherProcessingUnits(ProcessingUnit pu, String agentUid) {
         
-        for (ProcessingUnit otherPu : allocatedCapacityPerProcessingUnit.keySet()) {
-            if (!otherPu.equals(pu) &&
-                allocatedCapacityPerProcessingUnit.get(otherPu).getAgentUids().contains(agentUid)) {
-                return true;
+        for (Entry<StateKey, StateValue>  pair : state.entrySet()) {
+            if (pair.getKey().pu.equals(pu)) {
+                continue;
             }
-        }
-        
-        for (ProcessingUnit otherPu : markedForDeallocationCapacityPerProcessingUnit.keySet()) {
-            if (!otherPu.equals(pu) &&
-                markedForDeallocationCapacityPerProcessingUnit.get(otherPu).getAgentUids().contains(agentUid)) {
+
+            StateValue value = pair.getValue();
+            if (!value.allocatedCapacity.getAgentCapacityOrZero(agentUid).equalsZero() ||
+                !value.markedForDeallocationCapacity.getAgentCapacityOrZero(agentUid).equalsZero()) {
                 return true;
             }
         }
         return false;
     }
 
-    public void agentGoingDown(ProcessingUnit pu, String agentUid, long timeout, TimeUnit unit) {
-        timeoutTimestampPerAgentUidGoingDownPerProcessingUnit.get(pu).put(agentUid, System.currentTimeMillis() + TimeUnit.MILLISECONDS.convert(timeout, unit));
+    public void agentGoingDown(StateKey key, String agentUid, long timeout, TimeUnit unit) {
+        getState(key).agentGoingDown(agentUid, timeout, unit);
     }
 
     public void agentShutdownComplete(String agentUid) {
-        for (Map<String, Long> agentsGoingDown : timeoutTimestampPerAgentUidGoingDownPerProcessingUnit.values()) {
-            if (agentsGoingDown.containsKey(agentUid)) {
-                agentsGoingDown.remove(agentUid);
+        for (StateValue value : state.values()) {
+            if (value.timeoutTimestampPerAgentUidGoingDown.containsKey(agentUid)) {
+                value.timeoutTimestampPerAgentUidGoingDown.remove(agentUid);
                 return;
             }
         }
-        
         throw new IllegalArgumentException("agentUid");
     }
 
-    public Collection<String> getAgentUidsGoingDown(ProcessingUnit pu) {
-        return Collections.unmodifiableCollection(new ArrayList<String>(this.timeoutTimestampPerAgentUidGoingDownPerProcessingUnit.get(pu).keySet()));
+    public Collection<String> getAgentUidsGoingDown(StateKey key) {
+        return getState(key).getAgentUidsGoingDown();
     }
     
     public boolean isAgentUidGoingDownTimedOut(String agentUid) {
         
-        for (Map<String, Long> agentsGoingDown : timeoutTimestampPerAgentUidGoingDownPerProcessingUnit.values()) {
-            if (agentsGoingDown.containsKey(agentUid)) {
-                return agentsGoingDown.get(agentUid) < System.currentTimeMillis();
+        for (StateValue value : state.values()) {
+            if (value.timeoutTimestampPerAgentUidGoingDown.containsKey(agentUid)) {
+                return value.timeoutTimestampPerAgentUidGoingDown.get(agentUid) < System.currentTimeMillis();
             }
         }
         
         throw new IllegalArgumentException("agentUid");
     }
 
-    public void markAgentCapacityForDeallocation(ProcessingUnit pu, String uid) {
-        CapacityRequirements agentCapacity = getAllocatedCapacity(pu).getAgentCapacity(uid);
-        markCapacityForDeallocation(pu, uid,agentCapacity);
+    public void markAgentCapacityForDeallocation(StateKey key, String uid) {
+        CapacityRequirements agentCapacity = getAllocatedCapacity(key).getAgentCapacity(uid);
+        markCapacityForDeallocation(key, uid,agentCapacity);
     }
 
-    public void deallocateAgentCapacity(ProcessingUnit pu, String agentUid) {
-        CapacityRequirements agentCapacity = getCapacityMarkedForDeallocation(pu).getAgentCapacity(agentUid);
-        deallocateCapacity(pu, agentUid , agentCapacity);
-        
+    public void deallocateAgentCapacity(StateKey key, String agentUid) {
+        CapacityRequirements agentCapacity = getCapacityMarkedForDeallocation(key).getAgentCapacity(agentUid);
+        deallocateCapacity(key, agentUid , agentCapacity);
     }
 
     /**
+     * @param exactZones - the exact zones that the grid service agent should have
      * @return all Grid Service Agent UIDs that the specified PU cannot be deploy on due to machine isolation restrictions
      * or due to the fact that the machine is about to be deployed by another PU that started it.
+     * The map keys contain the agent UIDs, and the map values contains the reasons for the restriction.
      */
-    public Collection<String> getRestrictedAgentUidsForPu(ProcessingUnit pu) {
+    public Map<String,List<String>> getRestrictedAgentUids(StateKey key) {
         
         //find all PUs with different machine isolation, and same machine isolation
-        Collection<ProcessingUnit> pusWithDifferentIsolation = new HashSet<ProcessingUnit>();
-        Collection<ProcessingUnit> pusWithSameIsolation = new HashSet<ProcessingUnit>();
-        ElasticProcessingUnitMachineIsolation puIsolation = machineIsolationPerProcessingUnit.get(pu);
+        Collection<StateKey> keysWithDifferentIsolation = new HashSet<StateKey>();
+        Collection<StateKey> keysWithSameIsolation = new HashSet<StateKey>();
+        ElasticProcessingUnitMachineIsolation puIsolation = getState(key).machineIsolation;
         
-        for (ProcessingUnit otherPu : machineIsolationPerProcessingUnit.keySet()) {
-            
-            ElasticProcessingUnitMachineIsolation otherPuIsolation = machineIsolationPerProcessingUnit.get(otherPu);
+        for (Entry<StateKey, StateValue> pair : state.entrySet()) {
+            ElasticProcessingUnitMachineIsolation otherPuIsolation = pair.getValue().machineIsolation;
             if (otherPuIsolation.equals(puIsolation)) {
-                pusWithSameIsolation.add(otherPu);
+                keysWithSameIsolation.add(pair.getKey());
             }
             else {
-                pusWithDifferentIsolation.add(otherPu);
+                keysWithDifferentIsolation.add(pair.getKey());
             }
         }
 
         if (logger.isDebugEnabled()) {
-            List<String> puNamesWithDifferentIsolation = new ArrayList<String>();
-            for (ProcessingUnit puDifferentIsolation : pusWithDifferentIsolation) {
-                puNamesWithDifferentIsolation.add(puDifferentIsolation.getName());
-            }
-            logger.debug("PUs with different isolation than pu " + pu.getName() +": "+ puNamesWithDifferentIsolation);
-            
-            List<String> puNamesWithSameIsolation = new ArrayList<String>();
-            for (ProcessingUnit puSameIsolation : pusWithSameIsolation) {
-                puNamesWithSameIsolation.add(puSameIsolation.getName());
-            }
-            logger.debug("PUs with same isolation of pu " + pu.getName() + ": " + puNamesWithSameIsolation);
+            logger.debug("PUs with different isolation than pu " + key.pu.getName() +": "+ keysWithDifferentIsolation);
+            logger.debug("PUs with same isolation of pu " + key.pu.getName() + ": " + keysWithSameIsolation);
         }
         
         // add all agent uids used by conflicting pus
-        Set<String> restrictedAgentUids = new HashSet<String>();
-        
-        for (ProcessingUnit otherPu : pusWithDifferentIsolation) {
-            restrictedAgentUids.addAll(allocatedCapacityPerProcessingUnit.get(otherPu).getAgentUids());
-            restrictedAgentUids.addAll(markedForDeallocationCapacityPerProcessingUnit.get(otherPu).getAgentUids());
-            restrictedAgentUids.addAll(timeoutTimestampPerAgentUidGoingDownPerProcessingUnit.get(otherPu).keySet());
+        Map<String,List<String>> restrictedAgentUidsWithReason = new HashMap<String,List<String>>();
+        for (StateKey otherKey: keysWithDifferentIsolation) {
+            
+            StateValue otherValue = getState(otherKey);
+            
+            for (String agentUid : otherValue.allocatedCapacity.getAgentUids()) {
+                initValue(restrictedAgentUidsWithReason, agentUid);
+                restrictedAgentUidsWithReason.get(agentUid).add(otherKey.pu + "machineIsolation=" + getState(otherKey).machineIsolation + " allocated on machine which restricts  " + key.pu + " machineIsolation="+getState(key).machineIsolation);
+            }
+            
+            for (String agentUid : otherValue.markedForDeallocationCapacity.getAgentUids()) {
+                initValue(restrictedAgentUidsWithReason, agentUid);
+                restrictedAgentUidsWithReason.get(agentUid).add(otherKey.pu + "machineIsolation=" + getState(otherKey).machineIsolation + " marked for deallocation on machine which restricts  " + key.pu + " machineIsolation="+getState(key).machineIsolation);
+            }
+            
+            for (String agentUid : otherValue.timeoutTimestampPerAgentUidGoingDown.keySet()) {
+                initValue(restrictedAgentUidsWithReason, agentUid);
+                restrictedAgentUidsWithReason.get(agentUid).add(otherKey.pu + "machineIsolation=" + getState(otherKey).machineIsolation + " is shutting down the agent which restricts  " + key.pu + " machineIsolation="+getState(key).machineIsolation);
+            }
         }
-        
+            
         // add all agents that started containers that are not with the same isolation
         Set<String> allowedContainerZones = new HashSet<String>();
-        for (ProcessingUnit otherPu : pusWithSameIsolation) {
-            allowedContainerZones.addAll(Arrays.asList(otherPu.getRequiredZones()));
+        for (StateKey otherKey : keysWithSameIsolation) {
+            allowedContainerZones.addAll(Arrays.asList(otherKey.pu.getRequiredZones()));
         }
-        for (GridServiceContainer container : pu.getAdmin().getGridServiceContainers()) {
+        Admin admin = key.pu.getAdmin();
+        for (GridServiceContainer container : admin.getGridServiceContainers()) {
             
             Set<String> containerZones = container.getZones().keySet();
-            
-            if (disjoint(containerZones,allowedContainerZones) && 
+            Set<String> disallowedContainerZones = subtract(containerZones,allowedContainerZones);
+            if ( disallowedContainerZones.size() > 0 && 
                 container.getGridServiceAgent() != null) {
                 
-                restrictedAgentUids.add(container.getGridServiceAgent().getUid());
+                String agentUid = container.getGridServiceAgent().getUid();
+                initValue(restrictedAgentUidsWithReason, agentUid);
+                restrictedAgentUidsWithReason.get(agentUid).add("Machine has containers with restricted zones " + disallowedContainerZones);
             }
         }
         
         // add all future grid service agents that have been started but not allocated yet
-        for (List<GridServiceAgentFutures> futureAgentss : this.futureAgentsPerProcessingUnit.values()) {
-            for (GridServiceAgentFutures futureAgents: futureAgentss) {
+        for (Entry<StateKey, StateValue> pair : state.entrySet()) {
+            for (GridServiceAgentFutures futureAgents: pair.getValue().futureAgents) {
                 for (GridServiceAgent agent : futureAgents.getGridServiceAgents()) {
-                    restrictedAgentUids.add(agent.getUid());
+                    String agentUid = agent.getUid();
+                    initValue(restrictedAgentUidsWithReason, agentUid);
+                    restrictedAgentUidsWithReason.get(agentUid).add("Agent has been started by " + pair.getKey() +" but not allocated yet");
+                }
+            }        
+        }
+        
+        if (key.exactGridServiceAgentZones != null) {
+            //add all agents that do not have this specific zone
+            for (GridServiceAgent agent : admin.getGridServiceAgents()) {
+                if (!agent.getZones().keySet().equals(key.exactGridServiceAgentZones)) {
+                    String agentUid = agent.getUid();
+                    initValue(restrictedAgentUidsWithReason, agentUid);
+                    restrictedAgentUidsWithReason.get(agentUid).add("Agent zones=" + agent.getZones().keySet() +" does not match " + key.exactGridServiceAgentZones);
                 }
             }
         }
         
-        return restrictedAgentUids;
+        return restrictedAgentUidsWithReason;
    }
+
+    private void initValue(Map<String, List<String>> mapOfLists, String key) {
+        if (!mapOfLists.containsKey(key)) {
+            mapOfLists.put(key, new LinkedList<String>());
+        }
+    }
 
     /**
      * @return all processing units that have a share of the specified future machine
@@ -368,79 +414,94 @@ public class MachinesSlaEnforcementState {
         return new String[] {pu.getName()};
     }
     
-    public void slaEnforcementComplete(ProcessingUnit pu) {
-        this.isSlaEnforcementCompletePerProcessingUnit.add(pu);
-    }
-    
-    public void slaEnforcementInProgress(ProcessingUnit pu) {
-        this.isSlaEnforcementCompletePerProcessingUnit.remove(pu);
-    }
-    
     /**
      * @return false only if a disjoints b (a and b have nothing in common) 
      * @param keySet
      * @param restrictedContainerZones
      * @return
      */
-    private boolean disjoint(Set<String> a, Set<String> b) {
-        Set<String> common = new HashSet<String>(a);
-        common.retainAll(b);
-        return common.size() == 0;
+    private Set<String> subtract(Set<String> a, Set<String> b) {
+        Set<String> copyA = new HashSet<String>(a);
+        copyA.removeAll(b);
+        return copyA;
     }
 
-    public void removeFutureAgents(ProcessingUnit pu, GridServiceAgentFutures futureAgents) {
-        futureAgentsPerProcessingUnit.get(pu).remove(futureAgents);
+    public void removeFutureAgents(StateKey key, GridServiceAgentFutures futureAgents) {
+        getState(key).removeFutureAgents(futureAgents);
     }
     
-    
-
-    public Collection<String> getAllUsedAgentUidsForPu(ProcessingUnit pu) {
-        return allocatedCapacityPerProcessingUnit.get(pu).add(markedForDeallocationCapacityPerProcessingUnit.get(pu)).getAgentUids();
+    public Collection<String> getUsedAgentUids(StateKey key) {
+        StateValue stateValue = getState(key);
+        return stateValue.allocatedCapacity.add(stateValue.markedForDeallocationCapacity)
+               .getAgentUids();
     }
     
-    
-    public void setMachineIsolation(ProcessingUnit pu, ElasticProcessingUnitMachineIsolation isolation) {
+    public void setMachineIsolation(StateKey key, ElasticProcessingUnitMachineIsolation isolation) {
         
         if (logger.isDebugEnabled()) {
-            logger.debug("PU " + pu.getName() + " machine isolation is " + isolation);
+            logger.debug(key + " machine isolation is " + isolation);
         }
-        
-        this.machineIsolationPerProcessingUnit.put(pu,isolation);
+        getState(key).machineIsolation = isolation;
     }
     
-    public ElasticProcessingUnitMachineIsolation getMachineIsolation(ProcessingUnit pu) {
-        if (this.machineIsolationPerProcessingUnit.get(pu) == null) {
-            throw new IllegalStateException("PU machine isolation has not been defined");
+    public ElasticProcessingUnitMachineIsolation getMachineIsolation(StateKey key) {
+        ElasticProcessingUnitMachineIsolation machineIsolation = getState(key).machineIsolation;
+        if (machineIsolation == null) {
+            throw new IllegalStateException(key + " machine isolation has not been defined");
         }
-        return this.machineIsolationPerProcessingUnit.get(pu);
+        return machineIsolation;
     }
 
-    public boolean isCompletedStateRecovery(ProcessingUnit pu) {
-        return completedStateRecoveryAfterRestartPerProcessingUnit.contains(pu);
+    public boolean isCompletedStateRecovery(StateKey key) {
+        return getState(key).completedStateRecoveryAfterRestart;
     }
 
-    public void completedStateRecovery(ProcessingUnit pu) {
-        completedStateRecoveryAfterRestartPerProcessingUnit.add(pu);
-        
+    public void completedStateRecovery(StateKey key) {
+        getState(key).completedStateRecoveryAfterRestart();      
     }
 
-    public List<ProcessingUnit> getAllProcessingUnitsNotCompletedStateRecovery(Admin admin) {
-        
-        List<ProcessingUnit> processingUnits = new ArrayList<ProcessingUnit>();
-                
-        for (ProcessingUnit pu : admin.getProcessingUnits()) {
-            Map<String, String> elasticProperties = ((InternalProcessingUnit)pu).getElasticProperties();
-            if (!elasticProperties.isEmpty() &&
-                !isCompletedStateRecovery(pu)) {
-                
-                // found an elastic PU that has not completed state recovery
-                processingUnits.add(pu);
+    public void recoveredStateOnEsmStart(ProcessingUnit otherPu) {
+        recoveredStatePerProcessingUnit.add(otherPu);
+    }
+
+    public boolean isRecoveredStateOnEsmStart(ProcessingUnit pu) {
+        return recoveredStatePerProcessingUnit.contains(pu);
+    }
+
+    public Set<Set<String>> getGridServiceAgentsZones(ProcessingUnit pu) {
+        Set<Set<String>> zones = new HashSet<Set<String>>();
+        for (StateKey key : state.keySet()) {
+            if (key.pu.equals(pu)) {
+                zones.add(key.exactGridServiceAgentZones);
             }
         }
-        return processingUnits;
+        return zones;
     }
-
-    public Map<ProcessingUnit,CapacityRequirementsPerAgent> getAllocatedCapacityPerProcessingUnit() {
-        return allocatedCapacityPerProcessingUnit;
+    
+    public Map<GridServiceAgent, Map<ProcessingUnit, CapacityRequirements>> groupCapacityPerProcessingUnitPerAgent(StateKey key) {
+        
+        // create a report for each relevant agent - which pus are installed on it and how much capacity they are using
+        Map<GridServiceAgent,Map<ProcessingUnit,CapacityRequirements>> capacityPerPuPerAgent = new HashMap<GridServiceAgent,Map<ProcessingUnit,CapacityRequirements>>();
+        Admin admin = key.pu.getAdmin();
+        Collection<String> restrictedAgentUids = getRestrictedAgentUids(key).keySet();
+        for (Entry<StateKey, StateValue> pair : state.entrySet()) {
+            ProcessingUnit otherPu = pair.getKey().pu;
+            CapacityRequirementsPerAgent otherPuCapacityPerAgents = pair.getValue().allocatedCapacity;
+            for (String agentUid : otherPuCapacityPerAgents.getAgentUids()) {
+                GridServiceAgent agent = admin.getGridServiceAgents().getAgentByUID(agentUid);
+                if (!restrictedAgentUids.contains(agentUid) && agent != null) {
+                    if (!capacityPerPuPerAgent.containsKey(agent)) {
+                        //lazy init
+                        capacityPerPuPerAgent.put(agent, new HashMap<ProcessingUnit, CapacityRequirements>());
+                    }
+                    if (capacityPerPuPerAgent.get(agent).containsKey(otherPu)) {
+                        throw new IllegalStateException("Does not expect two allocations from the same pu on the same machine but having different zones");
+                    }
+                    CapacityRequirements otherPuCapacityOnAgent = otherPuCapacityPerAgents.getAgentCapacity(agentUid);
+                    capacityPerPuPerAgent.get(agent).put(otherPu, otherPuCapacityOnAgent);
+                }
+            }
+        }
+        return capacityPerPuPerAgent;
     }
 }

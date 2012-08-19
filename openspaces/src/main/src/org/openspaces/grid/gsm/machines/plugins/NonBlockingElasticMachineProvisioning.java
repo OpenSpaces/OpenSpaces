@@ -17,6 +17,7 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.machines.plugins;
 
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -72,27 +73,26 @@ public interface NonBlockingElasticMachineProvisioning extends ElasticProcessing
      */
     ElasticMachineProvisioningConfig getConfig();
 
-	/**
-	 * Starts a new machine with a new grid service agent with the specified zone.
-     * All started machines must have Grid Service Agents with zones as defined by {@link ElasticMachineProvisioningConfig#getGridServiceAgentZones()} and 
-     * {@link ElasticMachineProvisioningConfig#isGridServiceAgentZoneMandatory()}
-	 * 
-	 * This method is non blocking and returns a future object with the new grid service agent.
-	 * 
-	 * @param duration - the maximum duration after which a TimeoutException is raised.
-	 * @param unit - the time unit for the duration
-	 * @return the grid service agent futures
-	 * 
-	 * @throws ElasticMachineProvisioningException
-	 * @throws InterruptedException
-	 * @throws TimeoutException
-	 * 
-	 * @since 8.0
-	 */
-	FutureGridServiceAgent[] startMachinesAsync(
-			CapacityRequirements capacityRequirements,
-			long duration, TimeUnit unit);
-	
+    /**
+     * Starts a new machine with a new grid service agent with the specified grid service agent zones.
+     * 
+     * This method is non blocking and returns a future object with the new grid service agent.
+     * 
+     * @param duration - the maximum duration after which a TimeoutException is raised.
+     * @param unit - the time unit for the duration
+     * @return the grid service agent futures
+     * 
+     * @throws ElasticMachineProvisioningException
+     * @throws InterruptedException
+     * @throws TimeoutException
+     * 
+     * @since 9.1.0
+     */
+    public FutureGridServiceAgent[] startMachinesAsync(
+            final CapacityRequirements capacityRequirements,
+            final Set<String> zones, 
+            final long duration, final TimeUnit unit);
+    
 	/**
 	 * Shuts down the grid service agent and the machine.
 	 * The implementation should be able to close machines that it has not started, but rather an older instance of this object started perhaps with different configuration.

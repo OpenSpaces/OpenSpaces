@@ -18,7 +18,6 @@
 package org.openspaces.grid.gsm.machines.plugins;
 
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -30,7 +29,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.gsa.GridServiceAgent;
-import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig;
 import org.openspaces.grid.gsm.capacity.CapacityRequirement;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
@@ -57,21 +55,18 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
 
     private final ScheduledThreadPoolExecutor scheduledExecutorService;
 
-    private final ProcessingUnit pu;
-
 	private static final Log logger = LogFactory
 			.getLog(NonBlockingElasticMachineProvisioningAdapter.class);
 
     private static final int THROTTLING_DELAY_SECONDS = 0;
     
-	public NonBlockingElasticMachineProvisioningAdapter(ProcessingUnit pu, ElasticMachineProvisioning machineProvisioning, ExecutorService executorService, ScheduledThreadPoolExecutor scheduledExecutorService) {
-		this.pu = pu;
+	public NonBlockingElasticMachineProvisioningAdapter(ElasticMachineProvisioning machineProvisioning, ExecutorService executorService, ScheduledThreadPoolExecutor scheduledExecutorService) {
 	    this.machineProvisioning = machineProvisioning;
 		this.executorService = executorService;
 		this.scheduledExecutorService = scheduledExecutorService;
 	}
 	
-	
+	@Override
     public FutureGridServiceAgent[] startMachinesAsync(
             final CapacityRequirements capacityRequirements,
             final Set<String> zones, 
@@ -177,13 +172,8 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
 
         
     }	
-	public FutureGridServiceAgent[] startMachinesAsync(
-			final CapacityRequirements capacityRequirements,
-			final long duration, final TimeUnit unit) {
-	    return startMachinesAsync(capacityRequirements, new HashSet<String>(), duration, unit);
-		
-	}
-
+	
+    @Override
 	public void stopMachineAsync(final GridServiceAgent agent, final long duration,
 			final TimeUnit unit) {
 
@@ -224,6 +214,7 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
 	    ,delay,unit);
     }
 	
+	@Override
     public FutureGridServiceAgents getDiscoveredMachinesAsync(final long duration, final TimeUnit unit) {
 
         final AtomicReference<Object> ref = new AtomicReference<Object>(null);
@@ -304,10 +295,12 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
         };
     }
 
+	@Override
     public ElasticMachineProvisioningConfig getConfig() {
         return machineProvisioning.getConfig();
     }
 
+	@Override
     public boolean isStartMachineSupported() {
         return machineProvisioning.isStartMachineSupported();
     }

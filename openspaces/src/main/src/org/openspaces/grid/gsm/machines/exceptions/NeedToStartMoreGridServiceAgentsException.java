@@ -17,19 +17,17 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.machines.exceptions;
 
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
-import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerAgent;
 import org.openspaces.grid.gsm.capacity.MachineCapacityRequirements;
 import org.openspaces.grid.gsm.machines.AbstractMachinesSlaPolicy;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementState;
 import org.openspaces.grid.gsm.machines.MachinesSlaUtils;
+import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementState.StateKey;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
 
 public class NeedToStartMoreGridServiceAgentsException extends GridServiceAgentSlaEnforcementInProgressException implements SlaEnforcementFailure {
@@ -53,7 +51,7 @@ public class NeedToStartMoreGridServiceAgentsException extends GridServiceAgentS
     }
     
     private static String createMessage(AbstractMachinesSlaPolicy sla, MachinesSlaEnforcementState state, CapacityRequirements capacityShortage, ProcessingUnit pu) {
-        return createBasicMessage(capacityShortage) + ". " + reportToString(sla, createReportOfAllMachines(state, pu));
+        return createBasicMessage(capacityShortage) + ". " + reportToString(sla, state.groupCapacityPerProcessingUnitPerAgent(getKey(pu,sla)));
     }
 
     private static String reportToString(
@@ -90,29 +88,6 @@ public class NeedToStartMoreGridServiceAgentsException extends GridServiceAgentS
         return message.toString();
     }
 
-    private static Map<GridServiceAgent, Map<ProcessingUnit, CapacityRequirements>> createReportOfAllMachines(MachinesSlaEnforcementState state, ProcessingUnit pu) {
-        
-        // create a report for each relevant agent - which pus are installed on it and how much capacity they are using
-        Map<GridServiceAgent,Map<ProcessingUnit,CapacityRequirements>> capacityPerProcessingUnitPerAgentUid = new HashMap<GridServiceAgent,Map<ProcessingUnit,CapacityRequirements>>();
-        Collection<String> restrictedAgentUids = state.getRestrictedAgentUidsForPu(pu);
-        Map<ProcessingUnit, CapacityRequirementsPerAgent> allocatedCapacityPerProcessingUnit = state.getAllocatedCapacityPerProcessingUnit();
-        for (Entry<ProcessingUnit, CapacityRequirementsPerAgent> pair : allocatedCapacityPerProcessingUnit.entrySet()) {
-            ProcessingUnit otherPu = pair.getKey();
-            for (String agentUid : pair.getValue().getAgentUids()) {
-                if (!restrictedAgentUids.contains(agentUid)) {
-                    GridServiceAgent agent = pu.getAdmin().getGridServiceAgents().getAgentByUID(agentUid);
-                    if (agent != null) {
-                        CapacityRequirements otherPUCapacityOnAgent = pair.getValue().getAgentCapacityOrZero(agentUid);
-                        if (!capacityPerProcessingUnitPerAgentUid.containsKey(agent)) {
-                            capacityPerProcessingUnitPerAgentUid.put(agent, new HashMap<ProcessingUnit, CapacityRequirements>());
-                        }
-                        capacityPerProcessingUnitPerAgentUid.get(agent).put(otherPu, otherPUCapacityOnAgent);
-                    }
-                }
-            }
-        }
-        return capacityPerProcessingUnitPerAgentUid;
-    }
 
     @Override
     public int hashCode() {
@@ -137,5 +112,10 @@ public class NeedToStartMoreGridServiceAgentsException extends GridServiceAgentS
         } else if (!capacityShortage.equals(other.capacityShortage))
             return false;
         return true;
+    }
+    
+
+    private static StateKey getKey(ProcessingUnit pu, AbstractMachinesSlaPolicy sla) {
+        return new MachinesSlaEnforcementState.StateKey(pu, sla.getExactGridServiceAgentZones());
     }
 }

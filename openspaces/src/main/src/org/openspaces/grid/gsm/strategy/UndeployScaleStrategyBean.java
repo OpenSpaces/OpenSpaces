@@ -19,8 +19,8 @@ package org.openspaces.grid.gsm.strategy;
 
 import java.util.Set;
 
-import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
+import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
 import org.openspaces.grid.gsm.GridServiceContainerConfigAware;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpoint;
@@ -34,6 +34,8 @@ import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpointAware;
 import org.openspaces.grid.gsm.machines.UndeployMachinesSlaPolicy;
 import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.machines.exceptions.MachinesSlaEnforcementInProgressException;
+import org.openspaces.grid.gsm.machines.exceptions.NeedToWaitUntilAllGridServiceAgentsDiscoveredException;
+import org.openspaces.grid.gsm.machines.exceptions.SomeProcessingUnitsHaveNotCompletedStateRecoveryException;
 import org.openspaces.grid.gsm.machines.exceptions.WaitingForDiscoveredMachinesException;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
 import org.openspaces.grid.gsm.rebalancing.exceptions.ElasticProcessingUnitInstanceUndeployInProgress;
@@ -99,27 +101,18 @@ public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
         
         //proceed with container udeployment. It respects the pu instance download procedure.
         enforceContainersSla();
-        for (final GridServiceAgent gsa : getDiscoveredMachinesCache().getDiscoveredAgents()) {
-            Set<String> zones = gsa.getZones().keySet();
-            enforceMachinesSla(zones);
+        for (final Set<String> zones : machinesEndpoint.getGridServiceAgentsZones()) {
+            final CapacityMachinesSlaPolicy sla = getMachinesSlaPolicy(zones);
+            enforceMachinesSla(sla);
         }
     }
 
-    private void enforceMachinesSla(Set<String> zones) throws WaitingForDiscoveredMachinesException, MachinesSlaEnforcementInProgressException, GridServiceAgentSlaEnforcementInProgressException {
+    private void enforceMachinesSla(final CapacityMachinesSlaPolicy sla) throws WaitingForDiscoveredMachinesException, MachinesSlaEnforcementInProgressException, GridServiceAgentSlaEnforcementInProgressException {
         
         if (getLogger().isDebugEnabled()) {
             getLogger().debug("Undeploying machines for " + getProcessingUnit().getName());
         }
         
-        final CapacityMachinesSlaPolicy sla = new UndeployMachinesSlaPolicy(getAdmin());
-        NonBlockingElasticMachineProvisioning machineProvisioning = super.getMachineProvisioning();
-        sla.setMachineProvisioning(machineProvisioning);
-        sla.setMaximumNumberOfMachines(getMaximumNumberOfInstances());
-        sla.setMaximumNumberOfContainersPerMachine(getMaximumNumberOfInstances());
-        sla.setContainerMemoryCapacityInMB(containersConfig.getMaximumMemoryCapacityInMB());
-        sla.setMachineIsolation(getIsolation());
-        sla.setDiscoveredMachinesCache(getDiscoveredMachinesCache());
-        sla.setZones(zones);
         try {
             machinesEndpoint.enforceSla(sla);
             
@@ -134,6 +127,19 @@ public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
             agentProvisioningInProgressEvent(e);
             throw e;
         }
+    }
+
+    private CapacityMachinesSlaPolicy getMachinesSlaPolicy(Set<String> zones) {
+        final CapacityMachinesSlaPolicy sla = new UndeployMachinesSlaPolicy(getAdmin());
+        final NonBlockingElasticMachineProvisioning machineProvisioning = super.getMachineProvisioning();
+        sla.setMachineProvisioning(machineProvisioning);
+        sla.setMaximumNumberOfMachines(getMaximumNumberOfInstances());
+        sla.setMaximumNumberOfContainersPerMachine(getMaximumNumberOfInstances());
+        sla.setContainerMemoryCapacityInMB(containersConfig.getMaximumMemoryCapacityInMB());
+        sla.setMachineIsolation(getIsolation());
+        sla.setDiscoveredMachinesCache(getDiscoveredMachinesCache());
+        sla.setExactZones(zones);
+        return sla;
     }
 
     private void enforceContainersSla() throws ContainersSlaEnforcementInProgressException {
@@ -164,5 +170,20 @@ public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
     protected boolean isUndeploying() {
         return true;
     }
+
+    @Override
+    protected void recoverStateOnEsmStart() throws MachinesSlaEnforcementInProgressException, SomeProcessingUnitsHaveNotCompletedStateRecoveryException, NeedToWaitUntilAllGridServiceAgentsDiscoveredException {
+        
+        for (Set<String> zones : machinesEndpoint.getGridServiceAgentsZones()) {
+            final CapacityMachinesSlaPolicy sla = getMachinesSlaPolicy(zones);
+            machinesEndpoint.recoverStateOnEsmStart(sla);
+        }
+        machinesEndpoint.recoveredStateOnEsmStart(getProcessingUnit());
+    }
+
+    @Override
+    protected boolean isRecoveredStateOnEsmStart(ProcessingUnit otherPu) {
+        return machinesEndpoint.isRecoveredStateOnEsmStart(otherPu);
+    }    
 
 }

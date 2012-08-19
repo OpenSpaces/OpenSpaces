@@ -17,9 +17,14 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.machines;
 
+import java.util.Set;
+
+import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerAgent;
 import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.machines.exceptions.MachinesSlaEnforcementInProgressException;
+import org.openspaces.grid.gsm.machines.exceptions.NeedToWaitUntilAllGridServiceAgentsDiscoveredException;
+import org.openspaces.grid.gsm.machines.exceptions.SomeProcessingUnitsHaveNotCompletedStateRecoveryException;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpoint;
 
 
@@ -39,6 +44,28 @@ public interface MachinesSlaEnforcementEndpoint extends ServiceLevelAgreementEnf
     /**
      * @return a list of agents for this pu including memory/cpu for each.
      */
-    CapacityRequirementsPerAgent getAllocatedCapacity();
+    CapacityRequirementsPerAgent getAllocatedCapacity(AbstractMachinesSlaPolicy sla);
 
+    /**
+     * Recover state for the specified SLA.
+     * @since 9.1.0
+     */
+    void recoverStateOnEsmStart(AbstractMachinesSlaPolicy sla) throws SomeProcessingUnitsHaveNotCompletedStateRecoveryException, NeedToWaitUntilAllGridServiceAgentsDiscoveredException;
+    
+    /**
+     * Mark that the specified processing unit has recovered state.
+     * @since 9.1.0
+     */
+    void recoveredStateOnEsmStart(ProcessingUnit processingUnit);
+
+    /**
+     * @return true if the specified processing unit has recovered state
+     * @since 9.1.0
+     */
+    boolean isRecoveredStateOnEsmStart(ProcessingUnit processingUnit);
+
+    /**
+     * @return a list of zones that are being tracked for the specified processing unit
+     */
+    Set<Set<String>> getGridServiceAgentsZones();
 }

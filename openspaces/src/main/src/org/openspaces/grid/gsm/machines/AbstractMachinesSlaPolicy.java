@@ -17,6 +17,8 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.machines;
 
+import java.util.Set;
+
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIsolation;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
@@ -32,6 +34,15 @@ public abstract class AbstractMachinesSlaPolicy extends ServiceLevelAgreementPol
     private ElasticProcessingUnitMachineIsolation machineIsolation;
     private int maxNumberOfContainersPerMachine;
     private DiscoveredMachinesCache machinesCache;
+    private Set<String> exactZones;
+
+    public Set<String> getExactGridServiceAgentZones() {
+        return exactZones;
+    }
+
+    public void setExactZones(Set<String> zones) {
+        this.exactZones = zones;
+    }
     
     public DiscoveredMachinesCache getDiscoveredMachinesCache() {
         return this.machinesCache;

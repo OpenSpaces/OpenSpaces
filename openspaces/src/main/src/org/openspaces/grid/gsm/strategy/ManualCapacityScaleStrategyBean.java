@@ -35,13 +35,11 @@ public class ManualCapacityScaleStrategyBean extends AbstractCapacityScaleStrate
         super.afterPropertiesSet();
         
         ManualCapacityScaleConfig manualCapacityScaleConfig = getConfig();
-        
         setCapacityRequirementConfig(manualCapacityScaleConfig);
-        
         setScaleStrategyConfig(manualCapacityScaleConfig);
         
     }
-    
+
     @Override
     public void enforceSla() throws SlaEnforcementInProgressException {
         super.enforceCapacityRequirement();

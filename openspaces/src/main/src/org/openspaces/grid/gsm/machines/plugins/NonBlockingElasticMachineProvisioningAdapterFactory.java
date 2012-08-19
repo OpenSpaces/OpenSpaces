@@ -21,8 +21,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
-import org.openspaces.admin.pu.ProcessingUnit;
-
 import com.gigaspaces.internal.utils.concurrent.GSThreadFactory;
 
 public class NonBlockingElasticMachineProvisioningAdapterFactory {
@@ -35,8 +33,8 @@ public class NonBlockingElasticMachineProvisioningAdapterFactory {
                 1,
                 new GSThreadFactory(this.getClass().getName(),true));
     
-    public NonBlockingElasticMachineProvisioningAdapter create(ProcessingUnit pu, ElasticMachineProvisioning machineProvisioning) {
-        return new NonBlockingElasticMachineProvisioningAdapter(pu, machineProvisioning, service, scheduledExecutorService);
+    public NonBlockingElasticMachineProvisioningAdapter create(ElasticMachineProvisioning machineProvisioning) {
+        return new NonBlockingElasticMachineProvisioningAdapter(machineProvisioning, service, scheduledExecutorService);
     }
     
     public void destroy() {

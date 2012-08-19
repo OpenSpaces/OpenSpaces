@@ -153,7 +153,7 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
         
         for (Bean injectedInstance : injectedInstances) {
             if (injectedInstance instanceof ElasticMachineProvisioning) {
-                machineProvisioning = nonBlockingAdapterFactory.create(pu, (ElasticMachineProvisioning)injectedInstance);
+                machineProvisioning = nonBlockingAdapterFactory.create((ElasticMachineProvisioning)injectedInstance);
                 break;
             }
             else if (injectedInstance instanceof NonBlockingElasticMachineProvisioning){

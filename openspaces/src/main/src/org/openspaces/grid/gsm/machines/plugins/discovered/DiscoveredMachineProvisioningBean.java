@@ -19,6 +19,7 @@ package org.openspaces.grid.gsm.machines.plugins.discovered;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -112,5 +113,11 @@ public class DiscoveredMachineProvisioningBean implements NonBlockingElasticMach
     @Override
     public void setElasticProcessingUnitMachineIsolation(ElasticProcessingUnitMachineIsolation isolation) {
         // not required
+    }
+
+    @Override
+    public FutureGridServiceAgent[] startMachinesAsync(CapacityRequirements capacityRequirements, Set<String> zones,
+            long duration, TimeUnit unit) {
+        throw new UnsupportedOperationException();
     }
 }

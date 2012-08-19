@@ -20,7 +20,6 @@ package org.openspaces.grid.gsm.machines;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.openspaces.admin.Admin;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcement;
 import org.openspaces.grid.gsm.sla.exceptions.ServiceLevelAgreementEnforcementEndpointAlreadyExistsException;
@@ -37,13 +36,9 @@ public class MachinesSlaEnforcement implements
     private final MachinesSlaEnforcementState state;
     private final Map<ProcessingUnit, MachinesSlaEnforcementEndpoint> endpoints;
 
-    private final Admin admin;
-
-    public MachinesSlaEnforcement(Admin admin) {
-
+    public MachinesSlaEnforcement() {
         this.endpoints = new HashMap<ProcessingUnit, MachinesSlaEnforcementEndpoint>();
         this.state = new MachinesSlaEnforcementState();
-        this.admin = admin;
     }
 
     public MachinesSlaEnforcementEndpoint createEndpoint(ProcessingUnit pu)
@@ -52,8 +47,6 @@ public class MachinesSlaEnforcement implements
         if (!isEndpointDestroyed(pu)) {
             throw new ServiceLevelAgreementEnforcementEndpointAlreadyExistsException();
         }
-
-        state.initProcessingUnit(pu);
         
         MachinesSlaEnforcementEndpoint endpoint = new DefaultMachinesSlaEnforcementEndpoint(pu, state);
         endpoints.put(pu, endpoint);
@@ -61,10 +54,7 @@ public class MachinesSlaEnforcement implements
     }
 
     public void destroyEndpoint(ProcessingUnit pu) {
-
         endpoints.remove(pu);
-        state.destroyProcessingUnit(pu);
-        
     }
 
     public void destroy() throws Exception {
@@ -74,9 +64,7 @@ public class MachinesSlaEnforcement implements
     }
     
     private boolean isEndpointDestroyed(ProcessingUnit pu) {
-        return 
-            endpoints.get(pu) == null ||
-            state.isProcessingUnitDestroyed(pu);
+        return endpoints.get(pu) == null;
     }
 
    
