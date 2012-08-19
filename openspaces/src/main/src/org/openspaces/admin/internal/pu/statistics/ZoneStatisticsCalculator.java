@@ -16,6 +16,7 @@
 package org.openspaces.admin.internal.pu.statistics;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
@@ -42,9 +43,9 @@ public class ZoneStatisticsCalculator implements InternalProcessingUnitStatistic
     } 
     
     private void calculateNewStatistics(InternalProcessingUnitStatistics processingUnitStatistics, ProcessingUnitStatisticsId processingUnitStatisticsId) {
-        
+        //copy to avoid conc. modification exception on statistics
+        Map<ProcessingUnitStatisticsId, Object> statistics = new HashMap<ProcessingUnitStatisticsId, Object>(processingUnitStatistics.getStatistics());
         // compare each request id with all current statistics entries.
-        Map<ProcessingUnitStatisticsId, Object> statistics = processingUnitStatistics.getStatistics();
         for (Map.Entry<ProcessingUnitStatisticsId, Object> entry : statistics.entrySet()) {
             calculateNewStatistics(processingUnitStatistics, entry, processingUnitStatisticsId);
         }
@@ -66,7 +67,9 @@ public class ZoneStatisticsCalculator implements InternalProcessingUnitStatistic
         
         if (requestedZoneStatisticsConfig.satisfiedBy(existingZoneStatisticsConfig)) {
             if (erasedRequestedProcessingUnitStatisticsId.equals(erasedExistingProcessingUnitStatisticsId)) {
-                internalProcessingUnitStatistics.addStatistics(requestedProcessingUnitStatisticsId, value);
+                ProcessingUnitStatisticsId newProcessingUnitStatisticsId = existingProcessingUnitStatisticsId.shallowClone();
+                newProcessingUnitStatisticsId.setZoneStatistics(requestedZoneStatisticsConfig);
+                internalProcessingUnitStatistics.addStatistics(newProcessingUnitStatisticsId, value);
             }   
         }
     }
