@@ -18,10 +18,9 @@ package org.openspaces.admin.internal.pu;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Map.Entry;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,12 +31,12 @@ import org.openspaces.admin.internal.pu.statistics.InternalProcessingUnitStatist
 import org.openspaces.admin.internal.pu.statistics.StatisticsObjectListFunction;
 import org.openspaces.admin.internal.pu.statistics.TimeWindowStatisticsCalculator;
 import org.openspaces.admin.internal.pu.statistics.ZoneStatisticsCalculator;
-import org.openspaces.admin.pu.statistics.ExactZonesStatisticsConfigurer;
+import org.openspaces.admin.pu.statistics.ExactZonesStatisticsConfig;
 import org.openspaces.admin.pu.statistics.InstancesStatisticsConfig;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsIdConfigurer;
 import org.openspaces.admin.pu.statistics.SingleInstanceStatisticsConfig;
-import org.openspaces.admin.pu.statistics.SingleInstanceStatisticsConfigurer;
+import org.openspaces.admin.pu.statistics.ZoneStatisticsConfig;
 
 public class DefaultProcessingUnitStatistics implements InternalProcessingUnitStatistics {
 
@@ -126,52 +125,62 @@ public class DefaultProcessingUnitStatistics implements InternalProcessingUnitSt
         zoneStatisticsCalculator.calculateNewStatistics(this, zoneCalculatedStatistics);
         
     }
-    private void calculateTimeWindowStatistics(Iterable<ProcessingUnitStatisticsId> statisticsIds) {
+    private void calculateTimeWindowStatistics(Iterable<ProcessingUnitStatisticsId> statisticsIdsToCalculate) {
         
-        Set<String> instancesUid = new HashSet<String>();
+        Map<SingleInstanceStatisticsConfig,ExactZonesStatisticsConfig> instances = new HashMap<SingleInstanceStatisticsConfig, ExactZonesStatisticsConfig>();
         
         // construct a set containing all instances UIDS for the current processing unit
         for (ProcessingUnitStatisticsId processingUnitStatisticsId : statistics.keySet()) {
             InstancesStatisticsConfig instancesStatistics = processingUnitStatisticsId.getInstancesStatistics();
-            if (instancesStatistics instanceof SingleInstanceStatisticsConfig) {
-                instancesUid.add(((SingleInstanceStatisticsConfig) instancesStatistics).getInstanceUid());
+            ZoneStatisticsConfig zoneStatistics = processingUnitStatisticsId.getZoneStatistics();
+            if (instancesStatistics instanceof SingleInstanceStatisticsConfig &&
+                zoneStatistics instanceof ExactZonesStatisticsConfig) {
+                instances.put(
+                        (SingleInstanceStatisticsConfig) instancesStatistics,
+                        (ExactZonesStatisticsConfig) processingUnitStatisticsId.getZoneStatistics());
             } 
         }
         
         final List<ProcessingUnitStatisticsId> singleInstanceCalculatedStatistics = new ArrayList<ProcessingUnitStatisticsId>();
 
         // iterate over every existing processingUnitStatisticsId to create requests that have matching zone statistics id's. 
-        for (ProcessingUnitStatisticsId processingUnitStatisticsId : statistics.keySet()) {
-            
-            for (final ProcessingUnitStatisticsId statisticsId : statisticsIds) {
-                if (statisticsId.getInstancesStatistics() instanceof SingleInstanceStatisticsConfig) {
-                    // instance UID is already specified. Just check that it is still discovered
-                    final String instanceUid = ((SingleInstanceStatisticsConfig)(statisticsId.getInstancesStatistics())).getInstanceUid();
-                    if (instancesUid.contains(instanceUid)) {
-                        statisticsId.setZoneStatistics(new ExactZonesStatisticsConfigurer().zones(processingUnitStatisticsId.getZoneStatistics().getZones()).create());
-                        singleInstanceCalculatedStatistics.add(statisticsId);
+        for (final ProcessingUnitStatisticsId statisticsId : statisticsIdsToCalculate) {
+            if (statisticsId.getInstancesStatistics() instanceof SingleInstanceStatisticsConfig) {
+                // instance UID is already specified. Just check that it is still discovered and has correct zones
+                SingleInstanceStatisticsConfig instancesStatistics = (SingleInstanceStatisticsConfig)(statisticsId.getInstancesStatistics());
+                if (instances.containsKey(instancesStatistics)) {
+                    ExactZonesStatisticsConfig zoneStatistics = instances.get(instancesStatistics);
+                    if (statisticsId.getZoneStatistics().satisfiedBy(zoneStatistics)) {
+                        // fix zone statistics for timewindow calculator so it finds the instance
+                        statisticsId.setZoneStatistics(zoneStatistics);
                     }
                     else {
-                        if (logger .isDebugEnabled()) {
-                            logger.debug("Failed to find instance UID " + instanceUid);
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Failed to find instance UID " + instancesStatistics.getInstanceUid() + " with zones " + zoneStatistics.getZones() + " which satisfies zones " + statisticsId.getZoneStatistics());
                         }
                     }
+                    singleInstanceCalculatedStatistics.add(statisticsId);
                 }
                 else {
-                    //expand to all instance UIDs
-                    for (final String instanceUid : instancesUid) {
-                        singleInstanceCalculatedStatistics.add(
-                                new ProcessingUnitStatisticsIdConfigurer()
-                                .monitor(statisticsId.getMonitor())
-                                .metric(statisticsId.getMetric())
-                                .timeWindowStatistics(statisticsId.getTimeWindowStatistics())
-                                .instancesStatistics(new SingleInstanceStatisticsConfigurer().instanceUid(instanceUid).create())
-                                // create a request with exact zones that match an already existing exact zone config
-                                .zoneStatistics(new ExactZonesStatisticsConfigurer().zones(processingUnitStatisticsId.getZoneStatistics().getZones()).create())
-                                .create());
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Failed to find instance UID " + instancesStatistics.getInstanceUid());
                     }
                 }
             }
+            else {
+                //expand to all instance UIDs
+                for (Entry<SingleInstanceStatisticsConfig, ExactZonesStatisticsConfig>  pair : instances.entrySet()) {
+                    singleInstanceCalculatedStatistics.add(
+                            new ProcessingUnitStatisticsIdConfigurer()
+                            .monitor(statisticsId.getMonitor())
+                            .metric(statisticsId.getMetric())
+                            .timeWindowStatistics(statisticsId.getTimeWindowStatistics())
+                            .instancesStatistics(pair.getKey())
+                            .zoneStatistics(pair.getValue())
+                            .create());
+                }
+            }
+
 
             
         }
