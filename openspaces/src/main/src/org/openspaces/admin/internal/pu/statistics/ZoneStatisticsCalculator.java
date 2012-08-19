@@ -19,7 +19,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
-import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsIdConfigurer;
+import org.openspaces.admin.zone.config.ExactZonesConfig;
 import org.openspaces.admin.zone.config.ZonesConfig;
 
 /**
@@ -58,7 +58,7 @@ public class ZoneStatisticsCalculator implements InternalProcessingUnitStatistic
         
         // zones to compare
         ZonesConfig requestedZoneStatisticsConfig = requestedProcessingUnitStatisticsId.getZoneStatistics();
-        ZonesConfig existingZoneStatisticsConfig = existingProcessingUnitStatisticsId.getZoneStatistics();
+        ExactZonesConfig existingZoneStatisticsConfig = (ExactZonesConfig) existingProcessingUnitStatisticsId.getZoneStatistics();
         
         // keys without zones to compare
         ProcessingUnitStatisticsId erasedExistingProcessingUnitStatisticsId = erase(existingProcessingUnitStatisticsId);
@@ -73,19 +73,10 @@ public class ZoneStatisticsCalculator implements InternalProcessingUnitStatistic
     
     private ProcessingUnitStatisticsId erase(ProcessingUnitStatisticsId processingUnitStatisticsId) {
         processingUnitStatisticsId.validate();
-        ProcessingUnitStatisticsId erased = clone(processingUnitStatisticsId);
+        ProcessingUnitStatisticsId erased = processingUnitStatisticsId.shallowClone();
         erased.setZoneStatistics(new ErasedZonesStatisticsConfig());
         erased.setInstancesStatistics(new ErasedInstancesStatisticsConfig());
         return erased;
         
     }
-    
-    private ProcessingUnitStatisticsId clone(ProcessingUnitStatisticsId processingUnitStatisticsId) {
-        return  new ProcessingUnitStatisticsIdConfigurer()
-            .metric(processingUnitStatisticsId.getMetric())
-            .monitor(processingUnitStatisticsId.getMonitor())
-            .instancesStatistics(processingUnitStatisticsId.getInstancesStatistics())
-            .timeWindowStatistics(processingUnitStatisticsId.getTimeWindowStatistics())
-            .create();
-    }    
 }

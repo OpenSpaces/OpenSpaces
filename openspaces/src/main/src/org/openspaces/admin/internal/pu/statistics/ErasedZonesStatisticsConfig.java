@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.openspaces.admin.zone.config.AbstractZonesConfig;
-import org.openspaces.admin.zone.config.ZonesConfig;
+import org.openspaces.admin.zone.config.ExactZonesConfig;
 
 /**
  * @author elip
@@ -44,7 +44,7 @@ public class ErasedZonesStatisticsConfig extends AbstractZonesConfig {
      * @see org.openspaces.admin.pu.statistics.ZoneStatisticsConfig#satisfiedBy(org.openspaces.admin.pu.statistics.ZoneStatisticsConfig)
      */
     @Override
-    public boolean satisfiedBy(ZonesConfig zoneStatisticsConfig) {
+    public boolean satisfiedBy(ExactZonesConfig zoneStatisticsConfig) {
         return true;
     }
 }

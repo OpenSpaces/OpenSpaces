@@ -41,6 +41,9 @@ public interface ZonesConfig {
      */
     Set<String> getZones();
     
-    boolean satisfiedBy(ZonesConfig zoneStatisticsConfig);
+    /**
+     * @return true iff the specified zones satisfies or equals this zones requirement
+     */
+    boolean satisfiedBy(ExactZonesConfig zoneStatisticsConfig);
 
 }

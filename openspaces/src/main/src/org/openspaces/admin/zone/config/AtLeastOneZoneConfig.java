@@ -37,7 +37,7 @@ public class AtLeastOneZoneConfig
      * @see org.openspaces.admin.pu.statistics.ZoneStatisticsConfig#satisfiedBy(org.openspaces.admin.pu.statistics.ZoneStatisticsConfig)
      */
     @Override
-    public boolean satisfiedBy(ZonesConfig existingZoneStatisticsConfig) {
+    public boolean satisfiedBy(ExactZonesConfig existingZoneStatisticsConfig) {
         
         for (String zone : this.getZones()) {
             if (existingZoneStatisticsConfig.getZones().contains(zone)) {

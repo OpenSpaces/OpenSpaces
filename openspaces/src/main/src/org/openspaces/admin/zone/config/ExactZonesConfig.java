@@ -34,7 +34,11 @@ public class ExactZonesConfig
     }
 
     @Override
-    public boolean satisfiedBy(ZonesConfig existingZoneStatisticsConfig) {
+    public boolean satisfiedBy(ExactZonesConfig existingZoneStatisticsConfig) {
         return this.getZones().equals(existingZoneStatisticsConfig.getZones());
     } 
+    
+    public boolean stasfies(ZonesConfig otherZoneConfig) {
+        return otherZoneConfig.satisfiedBy(this);
+    }
 }
