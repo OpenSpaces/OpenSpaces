@@ -117,7 +117,7 @@ public class TimeWindowStatisticsCalculator implements InternalProcessingUnitSta
         .monitor(statisticsId.getMonitor())
         .instancesStatistics(statisticsId.getInstancesStatistics())
         .timeWindowStatistics(statisticsId.getTimeWindowStatistics())
-        .zoneStatistics(statisticsId.getZoneStatistics())
+        .agentZones(statisticsId.getZoneStatistics())
         .create();
     }
 

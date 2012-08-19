@@ -162,7 +162,7 @@ public class DefaultProcessingUnitStatistics implements InternalProcessingUnitSt
                 
                 // fix zone statistics for timewindow calculator so it finds the instance
                 ProcessingUnitStatisticsId fixedStatisticsId = statisticsId.shallowClone();
-                fixedStatisticsId.setZoneStatistics(zoneStatistics);
+                fixedStatisticsId.setAgentZones(zoneStatistics);
                 singleInstanceCalculatedStatistics.add(fixedStatisticsId);
             
             }
@@ -171,7 +171,7 @@ public class DefaultProcessingUnitStatistics implements InternalProcessingUnitSt
                 for (Entry<SingleInstanceStatisticsConfig, ExactZonesConfig>  pair : instances.entrySet()) {
                     ProcessingUnitStatisticsId fixedStatisticsId = statisticsId.shallowClone();
                     fixedStatisticsId.setInstancesStatistics(pair.getKey());
-                    fixedStatisticsId.setZoneStatistics(pair.getValue());
+                    fixedStatisticsId.setAgentZones(pair.getValue());
                     singleInstanceCalculatedStatistics.add(fixedStatisticsId);
                 }
             }

@@ -69,7 +69,7 @@ public class ZoneStatisticsCalculator implements InternalProcessingUnitStatistic
         if (requestedZoneStatisticsConfig.satisfiedBy(existingZoneStatisticsConfig)) {
             if (erasedRequestedProcessingUnitStatisticsId.equals(erasedExistingProcessingUnitStatisticsId)) {
                 ProcessingUnitStatisticsId newProcessingUnitStatisticsId = existingProcessingUnitStatisticsId.shallowClone();
-                newProcessingUnitStatisticsId.setZoneStatistics(requestedZoneStatisticsConfig);
+                newProcessingUnitStatisticsId.setAgentZones(requestedZoneStatisticsConfig);
                 internalProcessingUnitStatistics.addStatistics(newProcessingUnitStatisticsId, value);
             }   
         }
@@ -78,7 +78,7 @@ public class ZoneStatisticsCalculator implements InternalProcessingUnitStatistic
     private ProcessingUnitStatisticsId erase(ProcessingUnitStatisticsId processingUnitStatisticsId) {
         processingUnitStatisticsId.validate();
         ProcessingUnitStatisticsId erased = processingUnitStatisticsId.shallowClone();
-        erased.setZoneStatistics(null);
+        erased.setAgentZones(null);
         erased.setInstancesStatistics(null);
         return erased;
         

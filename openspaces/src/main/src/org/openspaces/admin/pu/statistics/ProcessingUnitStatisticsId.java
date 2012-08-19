@@ -83,7 +83,7 @@ public class ProcessingUnitStatisticsId {
         return (ZonesConfig) properties.getConfig(ZONE_STATISTICS_KEY, null);
     }
     
-    public void setZoneStatistics(ZonesConfig zoneStatistics) {
+    public void setAgentZones(ZonesConfig zoneStatistics) {
         properties.putConfig(ZONE_STATISTICS_KEY, zoneStatistics);
     }
     
@@ -167,7 +167,7 @@ public class ProcessingUnitStatisticsId {
                 .monitor(getMonitor())
                 .instancesStatistics(getInstancesStatistics())
                 .timeWindowStatistics(getTimeWindowStatistics())
-                .zoneStatistics(getZoneStatistics())
+                .agentZones(getZoneStatistics())
                 .create();
     }
 }

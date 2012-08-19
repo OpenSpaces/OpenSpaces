@@ -94,7 +94,7 @@ public class ZoneStatisticsCalculatorTest extends TestCase {
             .monitor(MONITOR)
             .instancesStatistics(new SingleInstanceStatisticsConfigurer().instanceUid(instanceUid).create())
             .timeWindowStatistics(new LastSampleTimeWindowStatisticsConfig())
-            .zoneStatistics(new ExactZonesConfigurer().addZones(ZONE_1,ZONE_2).create())
+            .agentZones(new ExactZonesConfigurer().addZones(ZONE_1,ZONE_2).create())
             .create();
 
         
@@ -115,7 +115,7 @@ public class ZoneStatisticsCalculatorTest extends TestCase {
             .metric(METRIC)
             .timeWindowStatistics(new AverageTimeWindowStatisticsConfigurer().timeWindow(TIME_WINDOW_SECONDS, TimeUnit.SECONDS).create())
             .instancesStatistics(new AverageInstancesStatisticsConfig())
-            .zoneStatistics(new AtLeastOneZoneConfigurer().addZone(ZONE_1).create())
+            .agentZones(new AtLeastOneZoneConfigurer().addZone(ZONE_1).create())
             .create();
     }
 }
