@@ -147,25 +147,26 @@ public class DefaultProcessingUnitStatistics implements InternalProcessingUnitSt
             if (statisticsId.getInstancesStatistics() instanceof SingleInstanceStatisticsConfig) {
                 // instance UID is already specified. Just check that it is still discovered and has correct zones
                 SingleInstanceStatisticsConfig instancesStatistics = (SingleInstanceStatisticsConfig)(statisticsId.getInstancesStatistics());
-                if (instances.containsKey(instancesStatistics)) {
-                    ExactZonesStatisticsConfig zoneStatistics = instances.get(instancesStatistics);
-                    if (statisticsId.getZoneStatistics().satisfiedBy(zoneStatistics)) {
-                        // fix zone statistics for timewindow calculator so it finds the instance
-                        ProcessingUnitStatisticsId fixedStatisticsId = statisticsId.shallowClone();
-                        fixedStatisticsId.setZoneStatistics(zoneStatistics);
-                        singleInstanceCalculatedStatistics.add(fixedStatisticsId);
-                    }
-                    else {
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("Failed to find instance UID " + instancesStatistics.getInstanceUid() + " with zones " + zoneStatistics.getZones() + " which satisfies zones " + statisticsId.getZoneStatistics());
-                        }
-                    }
-                }
-                else {
+                if (!instances.containsKey(instancesStatistics)) {
                     if (logger.isDebugEnabled()) {
                         logger.debug("Failed to find instance UID " + instancesStatistics.getInstanceUid());
                     }
+                    continue;
                 }
+                
+                ExactZonesStatisticsConfig zoneStatistics = instances.get(instancesStatistics);
+                if (!statisticsId.getZoneStatistics().satisfiedBy(zoneStatistics)) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Failed to find instance UID " + instancesStatistics.getInstanceUid() + " with zones " + zoneStatistics.getZones() + " which satisfies zones " + statisticsId.getZoneStatistics());
+                    }
+                    continue;
+                }
+                
+                // fix zone statistics for timewindow calculator so it finds the instance
+                ProcessingUnitStatisticsId fixedStatisticsId = statisticsId.shallowClone();
+                fixedStatisticsId.setZoneStatistics(zoneStatistics);
+                singleInstanceCalculatedStatistics.add(fixedStatisticsId);
+            
             }
             else {
                 //expand to all instance UIDs
