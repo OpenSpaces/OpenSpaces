@@ -26,7 +26,7 @@ import java.util.Map.Entry;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
-import org.openspaces.grid.gsm.capacity.ClusterCapacityRequirements;
+import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerAgent;
 import org.openspaces.grid.gsm.capacity.MachineCapacityRequirements;
 import org.openspaces.grid.gsm.machines.AbstractMachinesSlaPolicy;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementState;
@@ -109,8 +109,8 @@ public class NeedToStartMoreGridServiceAgentsException extends GridServiceAgentS
         // create a report for each relevant agent - which pus are installed on it and how much capacity they are using
         Map<GridServiceAgent,Map<ProcessingUnit,CapacityRequirements>> capacityPerProcessingUnitPerAgentUid = new HashMap<GridServiceAgent,Map<ProcessingUnit,CapacityRequirements>>();
         Collection<String> restrictedAgentUids = state.getRestrictedAgentUidsForPu(pu);
-        Map<ProcessingUnit, ClusterCapacityRequirements> allocatedCapacityPerProcessingUnit = state.getAllocatedCapacityPerProcessingUnit();
-        for (Entry<ProcessingUnit, ClusterCapacityRequirements> pair : allocatedCapacityPerProcessingUnit.entrySet()) {
+        Map<ProcessingUnit, CapacityRequirementsPerAgent> allocatedCapacityPerProcessingUnit = state.getAllocatedCapacityPerProcessingUnit();
+        for (Entry<ProcessingUnit, CapacityRequirementsPerAgent> pair : allocatedCapacityPerProcessingUnit.entrySet()) {
             ProcessingUnit otherPu = pair.getKey();
             for (String agentUid : pair.getValue().getAgentUids()) {
                 if (!restrictedAgentUids.contains(agentUid)) {

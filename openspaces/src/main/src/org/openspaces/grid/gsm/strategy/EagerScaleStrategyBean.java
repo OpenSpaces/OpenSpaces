@@ -21,7 +21,7 @@ import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
 import org.openspaces.grid.gsm.GridServiceContainerConfigAware;
-import org.openspaces.grid.gsm.capacity.ClusterCapacityRequirements;
+import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerAgent;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpointAware;
 import org.openspaces.grid.gsm.containers.ContainersSlaPolicy;
@@ -161,7 +161,7 @@ public class EagerScaleStrategyBean extends AbstractScaleStrategyBean
             getLogger().debug("Enforcing containers SLA.");
         }
         
-        ClusterCapacityRequirements allocatedCapacity = machinesEndpoint.getAllocatedCapacity();
+        CapacityRequirementsPerAgent allocatedCapacity = machinesEndpoint.getAllocatedCapacity();
         
         final ContainersSlaPolicy sla = new ContainersSlaPolicy();
         sla.setNewContainerConfig(containersConfig);

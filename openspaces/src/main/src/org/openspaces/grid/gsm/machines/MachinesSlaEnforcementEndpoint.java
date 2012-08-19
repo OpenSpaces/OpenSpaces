@@ -17,7 +17,7 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.machines;
 
-import org.openspaces.grid.gsm.capacity.ClusterCapacityRequirements;
+import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerAgent;
 import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.machines.exceptions.MachinesSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpoint;
@@ -39,6 +39,6 @@ public interface MachinesSlaEnforcementEndpoint extends ServiceLevelAgreementEnf
     /**
      * @return a list of agents for this pu including memory/cpu for each.
      */
-    ClusterCapacityRequirements getAllocatedCapacity();
+    CapacityRequirementsPerAgent getAllocatedCapacity();
 
 }

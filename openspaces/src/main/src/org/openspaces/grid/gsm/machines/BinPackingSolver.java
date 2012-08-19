@@ -30,7 +30,7 @@ import org.apache.commons.logging.Log;
 import org.openspaces.grid.gsm.capacity.CapacityRequirement;
 import org.openspaces.grid.gsm.capacity.CapacityRequirementType;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
-import org.openspaces.grid.gsm.capacity.ClusterCapacityRequirements;
+import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerAgent;
 import org.openspaces.grid.gsm.capacity.MemoryCapacityRequirement;
 
 /**
@@ -42,10 +42,10 @@ public class BinPackingSolver {
 
     private Log logger;
     private long containerMemoryCapacityInMB;
-    private ClusterCapacityRequirements unallocatedCapacity;
-    private ClusterCapacityRequirements allocatedCapacityForPu;
-    private ClusterCapacityRequirements allocatedCapacityResult;
-    private ClusterCapacityRequirements deallocatedCapacityResult;
+    private CapacityRequirementsPerAgent unallocatedCapacity;
+    private CapacityRequirementsPerAgent allocatedCapacityForPu;
+    private CapacityRequirementsPerAgent allocatedCapacityResult;
+    private CapacityRequirementsPerAgent deallocatedCapacityResult;
     private String debugTrace = "";
     
     private long maxMemoryCapacityInMB;
@@ -56,8 +56,8 @@ public class BinPackingSolver {
     public BinPackingSolver() {
         debugTrace ="";
         agentPriority = new HashMap<String,Integer>();
-        allocatedCapacityResult = new ClusterCapacityRequirements();
-        deallocatedCapacityResult = new ClusterCapacityRequirements();
+        allocatedCapacityResult = new CapacityRequirementsPerAgent();
+        deallocatedCapacityResult = new CapacityRequirementsPerAgent();
     }
     
     /**
@@ -86,7 +86,7 @@ public class BinPackingSolver {
     /**
      * Sets the remaining unallocated capacity on existing agents.
      */
-    public void setUnallocatedCapacity(ClusterCapacityRequirements unallocatedCapacity) {
+    public void setUnallocatedCapacity(CapacityRequirementsPerAgent unallocatedCapacity) {
         this.unallocatedCapacity = unallocatedCapacity;
     }
     
@@ -101,7 +101,7 @@ public class BinPackingSolver {
     /**
      * Sets the currently allocated capacity of PU
      */
-    public void setAllocatedCapacityForPu(ClusterCapacityRequirements allocatedCapacityForPu) {
+    public void setAllocatedCapacityForPu(CapacityRequirementsPerAgent allocatedCapacityForPu) {
         this.allocatedCapacityForPu = allocatedCapacityForPu;
     }
 
@@ -516,7 +516,7 @@ public class BinPackingSolver {
         return retry;
     }
     
-    private ClusterCapacityRequirements roundFloorMemoryToContainerMemory(ClusterCapacityRequirements clusterCapacityRequirements) {
+    private CapacityRequirementsPerAgent roundFloorMemoryToContainerMemory(CapacityRequirementsPerAgent clusterCapacityRequirements) {
         for (String agent : clusterCapacityRequirements.getAgentUids()) {
             CapacityRequirements agentCapacity = clusterCapacityRequirements.getAgentCapacity(agent);
             CapacityRequirements fixedAgentCapacity = roundFloorMemoryToContainerMemory(agentCapacity);
@@ -537,7 +537,7 @@ public class BinPackingSolver {
             memoryToAllocateOnMachine = 0;
             
             //filter agents that have unallocated capacity but not unallocated memory.
-            ClusterCapacityRequirements unallocatedMemory = unallocatedCapacity;
+            CapacityRequirementsPerAgent unallocatedMemory = unallocatedCapacity;
             for (String agentUid: unallocatedMemory.getAgentUids()) {
                 if (getMemoryInMB(unallocatedMemory.getAgentCapacity(agentUid)) == 0) {
                     unallocatedMemory = unallocatedMemory.subtractAgent(agentUid);
@@ -1322,19 +1322,19 @@ public class BinPackingSolver {
         return chosenAgentUid;
     }
 
-    public ClusterCapacityRequirements getAllocatedCapacityResult() {
+    public CapacityRequirementsPerAgent getAllocatedCapacityResult() {
         return allocatedCapacityResult;
     }
     
-    public ClusterCapacityRequirements getDeallocatedCapacityResult() {
+    public CapacityRequirementsPerAgent getDeallocatedCapacityResult() {
         return deallocatedCapacityResult;
     }
 
-    public ClusterCapacityRequirements getAllocatedCapacityForPu() {
+    public CapacityRequirementsPerAgent getAllocatedCapacityForPu() {
         return allocatedCapacityForPu;
     }
     
-    public ClusterCapacityRequirements getUnallocatedCapacity() {
+    public CapacityRequirementsPerAgent getUnallocatedCapacity() {
         return unallocatedCapacity;
     }
 
@@ -1344,11 +1344,11 @@ public class BinPackingSolver {
      */
     public void reset() {
         debugTrace = "";
-        this.deallocatedCapacityResult = new ClusterCapacityRequirements();
-        this.allocatedCapacityResult = new ClusterCapacityRequirements();
+        this.deallocatedCapacityResult = new CapacityRequirementsPerAgent();
+        this.allocatedCapacityResult = new CapacityRequirementsPerAgent();
     }
     
-    private long getMemoryInMB(ClusterCapacityRequirements clusterCapacity) {
+    private long getMemoryInMB(CapacityRequirementsPerAgent clusterCapacity) {
         return getMemoryInMB(clusterCapacity.getTotalAllocatedCapacity());
     }
     

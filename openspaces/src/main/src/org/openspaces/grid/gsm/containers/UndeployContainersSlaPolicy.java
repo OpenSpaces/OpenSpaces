@@ -17,13 +17,13 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.containers;
 
-import org.openspaces.grid.gsm.capacity.ClusterCapacityRequirements;
+import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerAgent;
 
 public class UndeployContainersSlaPolicy extends ContainersSlaPolicy {
     
     public UndeployContainersSlaPolicy() {
         super();
-        super.setClusterCapacityRequirements(new ClusterCapacityRequirements());
+        super.setClusterCapacityRequirements(new CapacityRequirementsPerAgent());
     }
     
     public boolean isUndeploying() {

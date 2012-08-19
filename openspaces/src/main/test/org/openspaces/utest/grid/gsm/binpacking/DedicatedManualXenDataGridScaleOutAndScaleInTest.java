@@ -26,7 +26,7 @@ import org.junit.Test;
 import org.openspaces.core.internal.commons.math.fraction.Fraction;
 import org.openspaces.core.util.MemoryUnit;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
-import org.openspaces.grid.gsm.capacity.ClusterCapacityRequirements;
+import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerAgent;
 import org.openspaces.grid.gsm.capacity.CpuCapacityRequirement;
 import org.openspaces.grid.gsm.capacity.MemoryCapacityRequirement;
 import org.openspaces.grid.gsm.machines.BinPackingSolver;
@@ -55,9 +55,9 @@ public class DedicatedManualXenDataGridScaleOutAndScaleInTest extends TestCase {
         solver.setMaxAllocatedMemoryCapacityOfPuPerMachineInMB(_3072_MB_); // dummy
         solver.setMinimumNumberOfMachines(2);
         
-        solver.setAllocatedCapacityForPu(new ClusterCapacityRequirements());
+        solver.setAllocatedCapacityForPu(new CapacityRequirementsPerAgent());
         
-        solver.setUnallocatedCapacity(new ClusterCapacityRequirements()
+        solver.setUnallocatedCapacity(new CapacityRequirementsPerAgent()
             .add("AGENT_A",cpuMemory(new Fraction(2), _1372_MB_))
             .add("AGENT_B",cpuMemory(new Fraction(2), _1372_MB_))
             .add("AGENT_C",cpuMemory(new Fraction(2), _1372_MB_))

@@ -51,7 +51,7 @@ import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.core.internal.commons.math.fraction.Fraction;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
-import org.openspaces.grid.gsm.capacity.ClusterCapacityRequirements;
+import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerAgent;
 import org.openspaces.grid.gsm.capacity.CpuCapacityRequirement;
 import org.openspaces.grid.gsm.containers.ContainersSlaUtils;
 import org.openspaces.grid.gsm.rebalancing.exceptions.RemovedContainerProcessingUnitDeploymentException;
@@ -622,7 +622,7 @@ public class RebalancingUtils {
         return puInstancesFromSamePartition;
     }
     
-    public static boolean isEvenlyDistributedAcrossMachines(ProcessingUnit pu, ClusterCapacityRequirements aggregatedAllocatedCapacity) {
+    public static boolean isEvenlyDistributedAcrossMachines(ProcessingUnit pu, CapacityRequirementsPerAgent aggregatedAllocatedCapacity) {
 
         boolean isEvenlyDistributedAcrossMachines = true;
         final Machine[] machines = getMachinesFromAgentUids(pu, aggregatedAllocatedCapacity.getAgentUids());
@@ -664,7 +664,7 @@ public class RebalancingUtils {
         return machines.toArray(new Machine[machines.size()]);
     }
     
-    public static boolean isRestartRecommended(ProcessingUnit pu, Machine source, Machine target, Fraction optimalCpuCoresPerPrimary, ClusterCapacityRequirements allocatedCapacity) {       
+    public static boolean isRestartRecommended(ProcessingUnit pu, Machine source, Machine target, Fraction optimalCpuCoresPerPrimary, CapacityRequirementsPerAgent allocatedCapacity) {       
 
         boolean isRestartRecommended = false;
         final int numberOfPrimaryInstancesOnSource = getNumberOfPrimaryInstancesOnMachine(pu, source);
@@ -889,7 +889,7 @@ public class RebalancingUtils {
     public static List<Machine> sortMachinesByNumberOfPrimaryInstancesPerCpuCore(
             final ProcessingUnit pu,
             final Machine[] machines,
-            final ClusterCapacityRequirements allocatedCapacity) {
+            final CapacityRequirementsPerAgent allocatedCapacity) {
         
         final List<Machine> sortedMachines = 
                 new ArrayList<Machine>(Arrays.asList(machines));
@@ -913,7 +913,7 @@ public class RebalancingUtils {
             return sortedMachines;
         }
 
-    public static Fraction getNumberOfPrimaryInstancesPerCpuCore(ProcessingUnit pu, Machine machine, ClusterCapacityRequirements allocatedCapacity) {
+    public static Fraction getNumberOfPrimaryInstancesPerCpuCore(ProcessingUnit pu, Machine machine, CapacityRequirementsPerAgent allocatedCapacity) {
         return new Fraction(getNumberOfPrimaryInstancesOnMachine(pu, machine))
                .divide(getNumberOfCpuCores(machine,allocatedCapacity));
     }
@@ -944,7 +944,7 @@ public class RebalancingUtils {
 
 
     public static Fraction getAverageCpuCoresPerPrimary(
-            ProcessingUnit pu, ClusterCapacityRequirements aggregatedAllocatedCapacity) {
+            ProcessingUnit pu, CapacityRequirementsPerAgent aggregatedAllocatedCapacity) {
         
         CapacityRequirements totalAllocatedCapacity = aggregatedAllocatedCapacity.getTotalAllocatedCapacity();
         
@@ -959,7 +959,7 @@ public class RebalancingUtils {
         return totalAllocatedCapacity.getRequirement(new CpuCapacityRequirement().getType()).getCpu();
     }
 
-    public static Fraction getNumberOfCpuCores(Machine machine, ClusterCapacityRequirements allocatedCapacity) {
+    public static Fraction getNumberOfCpuCores(Machine machine, CapacityRequirementsPerAgent allocatedCapacity) {
         if (machine.getGridServiceAgents().getSize() != 1) {
             throw new IllegalStateException("Machine must have at least one agent");
         }

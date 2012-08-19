@@ -24,13 +24,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class ClusterCapacityRequirements {
+public class CapacityRequirementsPerAgent {
 
     // allocated capacity per grid service agent (UUID)
     private final Map<String,CapacityRequirements> capacityPerAgent;
     private CapacityRequirements totalCapacity;
     
-    public ClusterCapacityRequirements() {
+    public CapacityRequirementsPerAgent() {
         // use consistent ordering of machines so unit tests and bugs will have consistent iterator behavior.
         this.capacityPerAgent = new TreeMap<String, CapacityRequirements>();
         totalCapacity = new CapacityRequirements();
@@ -47,8 +47,8 @@ public class ClusterCapacityRequirements {
     @Override
     public boolean equals(Object other) {
         return 
-            other instanceof ClusterCapacityRequirements &&
-            ((ClusterCapacityRequirements)other).capacityPerAgent.equals(capacityPerAgent);
+            other instanceof CapacityRequirementsPerAgent &&
+            ((CapacityRequirementsPerAgent)other).capacityPerAgent.equals(capacityPerAgent);
     }
 
     public Collection<String> getAgentUids() {
@@ -72,49 +72,49 @@ public class ClusterCapacityRequirements {
         return builder.toString();
     }
     
-    public ClusterCapacityRequirements add(ClusterCapacityRequirements other) {
+    public CapacityRequirementsPerAgent add(CapacityRequirementsPerAgent other) {
         if (other.equalsZero()) {
             return this;
         }
         
-        ClusterCapacityRequirements sum = new ClusterCapacityRequirements();
+        CapacityRequirementsPerAgent sum = new CapacityRequirementsPerAgent();
         sum.addAllInternal(this);
         sum.addAllInternal(other);
         return sum;
     }
 
-    public ClusterCapacityRequirements subtract(
-            ClusterCapacityRequirements other) {
+    public CapacityRequirementsPerAgent subtract(
+            CapacityRequirementsPerAgent other) {
 
-        ClusterCapacityRequirements diff = new ClusterCapacityRequirements();
+        CapacityRequirementsPerAgent diff = new CapacityRequirementsPerAgent();
         diff.addAllInternal(this);
         diff.subtractAllInternal(other);
         return diff;
     }
     
-    public ClusterCapacityRequirements set(String agentUid, CapacityRequirements capacity) {
-        ClusterCapacityRequirements sum = new ClusterCapacityRequirements();
+    public CapacityRequirementsPerAgent set(String agentUid, CapacityRequirements capacity) {
+        CapacityRequirementsPerAgent sum = new CapacityRequirementsPerAgent();
         sum.addAllInternal(this);
         sum.setInternal(agentUid,capacity);
         return sum;
     }
     
-    public ClusterCapacityRequirements add(
+    public CapacityRequirementsPerAgent add(
             String agentUid, 
             CapacityRequirements capacity) {
         
-        ClusterCapacityRequirements sum = new ClusterCapacityRequirements();
+        CapacityRequirementsPerAgent sum = new CapacityRequirementsPerAgent();
         sum.addAllInternal(this);
         sum.addInternal(agentUid,capacity);
         return sum;
         
     }
     
-    public ClusterCapacityRequirements subtract(
+    public CapacityRequirementsPerAgent subtract(
             String agentUid, 
             CapacityRequirements capacity) {
         
-        ClusterCapacityRequirements remaining = new ClusterCapacityRequirements();
+        CapacityRequirementsPerAgent remaining = new CapacityRequirementsPerAgent();
         remaining.addAllInternal(this);
         remaining.subtractInternal(agentUid,capacity);
         return remaining;
@@ -122,15 +122,15 @@ public class ClusterCapacityRequirements {
 
 
 
-    public ClusterCapacityRequirements subtractAgent(
+    public CapacityRequirementsPerAgent subtractAgent(
             String agentUid) {
         return subtract(agentUid, this.getAgentCapacity(agentUid));
     }
     
-    public ClusterCapacityRequirements subtractOrZero(
+    public CapacityRequirementsPerAgent subtractOrZero(
            String agentUid, CapacityRequirements capacity) {
         
-        ClusterCapacityRequirements remaining = new ClusterCapacityRequirements();
+        CapacityRequirementsPerAgent remaining = new CapacityRequirementsPerAgent();
         remaining.addAllInternal(this);
         remaining.subtractOrZeroInternal(agentUid,capacity);
         return remaining;
@@ -154,14 +154,14 @@ public class ClusterCapacityRequirements {
         }
     }
     
-    private void addAllInternal(ClusterCapacityRequirements clusterCapacityRequirements) {
+    private void addAllInternal(CapacityRequirementsPerAgent clusterCapacityRequirements) {
         for (String agentUid : clusterCapacityRequirements.capacityPerAgent.keySet()) {
             CapacityRequirements capacity = clusterCapacityRequirements.capacityPerAgent.get(agentUid);
             addInternal(agentUid,capacity);
         }
     }
     
-    private void subtractAllInternal(ClusterCapacityRequirements aggregatedCapacity) {
+    private void subtractAllInternal(CapacityRequirementsPerAgent aggregatedCapacity) {
         for (String agentUid : aggregatedCapacity.capacityPerAgent.keySet()) {
             CapacityRequirements capacity = aggregatedCapacity.capacityPerAgent.get(agentUid);
             subtractInternal(agentUid,capacity);

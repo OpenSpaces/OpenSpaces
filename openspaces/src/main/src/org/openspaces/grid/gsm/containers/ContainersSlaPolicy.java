@@ -18,13 +18,13 @@
 package org.openspaces.grid.gsm.containers;
 
 import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
-import org.openspaces.grid.gsm.capacity.ClusterCapacityRequirements;
+import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerAgent;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementPolicy;
 
 public class ContainersSlaPolicy extends ServiceLevelAgreementPolicy {
 
     private GridServiceContainerConfig newContainerConfig;
-    private ClusterCapacityRequirements clusterCapacityRequirements;
+    private CapacityRequirementsPerAgent clusterCapacityRequirements;
     
     public void setNewContainerConfig(GridServiceContainerConfig config) {
         this.newContainerConfig = config;
@@ -34,11 +34,11 @@ public class ContainersSlaPolicy extends ServiceLevelAgreementPolicy {
         return this.newContainerConfig;
     }
     
-    public ClusterCapacityRequirements getClusterCapacityRequirements() {
+    public CapacityRequirementsPerAgent getClusterCapacityRequirements() {
         return this.clusterCapacityRequirements;
     }
     
-    public void setClusterCapacityRequirements(ClusterCapacityRequirements clusterCapacityRequirements) {
+    public void setClusterCapacityRequirements(CapacityRequirementsPerAgent clusterCapacityRequirements) {
         this.clusterCapacityRequirements = clusterCapacityRequirements;
     }
 

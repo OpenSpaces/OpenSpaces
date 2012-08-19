@@ -41,7 +41,7 @@ import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.LogPerProcessingUnit;
 import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
-import org.openspaces.grid.gsm.capacity.ClusterCapacityRequirements;
+import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerAgent;
 import org.openspaces.grid.gsm.capacity.MemoryCapacityRequirement;
 import org.openspaces.grid.gsm.containers.exceptions.ContainerNotDiscoveredException;
 import org.openspaces.grid.gsm.containers.exceptions.ContainersSlaEnforcementInProgressException;
@@ -205,7 +205,7 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
      * @throws ContainerNotDiscoveredException 
      */
     private void checkAllUndiscoveredContainersAreNotRunning(final ContainersSlaPolicy sla) throws ContainerNotDiscoveredException {
-        ClusterCapacityRequirements requirements = sla.getClusterCapacityRequirements();
+        CapacityRequirementsPerAgent requirements = sla.getClusterCapacityRequirements();
         final Collection<String> allocatedAgentUids = requirements.getAgentUids();
         final String zone = ContainersSlaUtils.getContainerZone(pu);
         Admin admin = pu.getAdmin();

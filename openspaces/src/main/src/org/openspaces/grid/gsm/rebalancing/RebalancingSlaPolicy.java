@@ -21,7 +21,7 @@ import java.util.Arrays;
 
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.pu.elastic.ProcessingUnitSchemaConfig;
-import org.openspaces.grid.gsm.capacity.ClusterCapacityRequirements;
+import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerAgent;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementPolicy;
 
 public class RebalancingSlaPolicy extends ServiceLevelAgreementPolicy {
@@ -29,7 +29,7 @@ public class RebalancingSlaPolicy extends ServiceLevelAgreementPolicy {
     private GridServiceContainer[] containers;
     private int maxNumberOfConcurrentRelocationsPerMachine;
     private ProcessingUnitSchemaConfig schema;
-    private ClusterCapacityRequirements allocatedCapacity;
+    private CapacityRequirementsPerAgent allocatedCapacity;
     private int minimumNumberOfInstancesPerPartition;
     
     public void setContainers(GridServiceContainer[] containers) {
@@ -56,11 +56,11 @@ public class RebalancingSlaPolicy extends ServiceLevelAgreementPolicy {
         this.schema = schemaConfig;
     }
     
-    public ClusterCapacityRequirements getAllocatedCapacity() {
+    public CapacityRequirementsPerAgent getAllocatedCapacity() {
         return allocatedCapacity;
     }
     
-    public void setAllocatedCapacity(ClusterCapacityRequirements allocatedCapacity) {
+    public void setAllocatedCapacity(CapacityRequirementsPerAgent allocatedCapacity) {
         this.allocatedCapacity = allocatedCapacity;
     }
 

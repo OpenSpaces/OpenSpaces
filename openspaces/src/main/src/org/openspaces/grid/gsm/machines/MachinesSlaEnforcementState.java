@@ -37,7 +37,7 @@ import org.openspaces.admin.internal.pu.InternalProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
-import org.openspaces.grid.gsm.capacity.ClusterCapacityRequirements;
+import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerAgent;
 import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIsolation;
 
 public class MachinesSlaEnforcementState {
@@ -45,9 +45,9 @@ public class MachinesSlaEnforcementState {
     private final Log logger;
     
     // state that tracks managed grid service agents, agents to be started and agents marked for shutdown.
-    private final Map<ProcessingUnit,ClusterCapacityRequirements> allocatedCapacityPerProcessingUnit;
+    private final Map<ProcessingUnit,CapacityRequirementsPerAgent> allocatedCapacityPerProcessingUnit;
     private final Map<ProcessingUnit,List<GridServiceAgentFutures>> futureAgentsPerProcessingUnit;
-    private final Map<ProcessingUnit,ClusterCapacityRequirements> markedForDeallocationCapacityPerProcessingUnit;
+    private final Map<ProcessingUnit,CapacityRequirementsPerAgent> markedForDeallocationCapacityPerProcessingUnit;
     private final Map<ProcessingUnit, ElasticProcessingUnitMachineIsolation> machineIsolationPerProcessingUnit;
     private final Map<ProcessingUnit,Map<String,Long>> timeoutTimestampPerAgentUidGoingDownPerProcessingUnit;
     private final Set<ProcessingUnit> completedStateRecoveryAfterRestartPerProcessingUnit;
@@ -58,9 +58,9 @@ public class MachinesSlaEnforcementState {
                 new SingleThreadedPollingLog( 
                         LogFactory.getLog(DefaultMachinesSlaEnforcementEndpoint.class));
                         
-        allocatedCapacityPerProcessingUnit = new HashMap<ProcessingUnit, ClusterCapacityRequirements>();
+        allocatedCapacityPerProcessingUnit = new HashMap<ProcessingUnit, CapacityRequirementsPerAgent>();
         futureAgentsPerProcessingUnit = new HashMap<ProcessingUnit, List<GridServiceAgentFutures>>();
-        markedForDeallocationCapacityPerProcessingUnit = new HashMap<ProcessingUnit, ClusterCapacityRequirements>();
+        markedForDeallocationCapacityPerProcessingUnit = new HashMap<ProcessingUnit, CapacityRequirementsPerAgent>();
         machineIsolationPerProcessingUnit = new HashMap<ProcessingUnit, ElasticProcessingUnitMachineIsolation>();
         timeoutTimestampPerAgentUidGoingDownPerProcessingUnit = new HashMap<ProcessingUnit,Map<String,Long>>();
         completedStateRecoveryAfterRestartPerProcessingUnit = new HashSet<ProcessingUnit>();
@@ -69,8 +69,8 @@ public class MachinesSlaEnforcementState {
 
     public void initProcessingUnit(ProcessingUnit pu) {
         
-        allocatedCapacityPerProcessingUnit.put(pu,new ClusterCapacityRequirements());
-        markedForDeallocationCapacityPerProcessingUnit.put(pu, new ClusterCapacityRequirements());
+        allocatedCapacityPerProcessingUnit.put(pu,new CapacityRequirementsPerAgent());
+        markedForDeallocationCapacityPerProcessingUnit.put(pu, new CapacityRequirementsPerAgent());
         timeoutTimestampPerAgentUidGoingDownPerProcessingUnit.put(pu,new HashMap<String,Long>());
         futureAgentsPerProcessingUnit.put(pu, new ArrayList<GridServiceAgentFutures>());
     }
@@ -97,7 +97,7 @@ public class MachinesSlaEnforcementState {
     
     public void allocateCapacity(ProcessingUnit pu, String agentUid, CapacityRequirements capacity) {
         
-        ClusterCapacityRequirements CapacityRequirements = allocatedCapacityPerProcessingUnit.get(pu);
+        CapacityRequirementsPerAgent CapacityRequirements = allocatedCapacityPerProcessingUnit.get(pu);
         if (CapacityRequirements == null) {
             throw new IllegalArgumentException("pu");
         }
@@ -110,14 +110,14 @@ public class MachinesSlaEnforcementState {
 
     public void markCapacityForDeallocation(ProcessingUnit pu, String agentUid, CapacityRequirements capacity) {
         
-        ClusterCapacityRequirements CapacityRequirements = 
+        CapacityRequirementsPerAgent CapacityRequirements = 
             allocatedCapacityPerProcessingUnit.get(pu);
         
         if (CapacityRequirements == null) {
             throw new IllegalArgumentException("pu");
         }
         
-        ClusterCapacityRequirements deallocatedCapacity = 
+        CapacityRequirementsPerAgent deallocatedCapacity = 
             markedForDeallocationCapacityPerProcessingUnit.get(pu);
         
         if (deallocatedCapacity == null) {
@@ -132,14 +132,14 @@ public class MachinesSlaEnforcementState {
     }
     
     public void unmarkCapacityForDeallocation(ProcessingUnit pu, String agentUid, CapacityRequirements capacity) {
-        ClusterCapacityRequirements CapacityRequirements = 
+        CapacityRequirementsPerAgent CapacityRequirements = 
             allocatedCapacityPerProcessingUnit.get(pu);
         
         if (CapacityRequirements == null) {
             throw new IllegalArgumentException("pu");
         }
         
-        ClusterCapacityRequirements deallocatedCapacity = 
+        CapacityRequirementsPerAgent deallocatedCapacity = 
             markedForDeallocationCapacityPerProcessingUnit.get(pu);
         
         if (deallocatedCapacity == null) {
@@ -157,7 +157,7 @@ public class MachinesSlaEnforcementState {
     
     public void deallocateCapacity(ProcessingUnit pu, String agentUid, CapacityRequirements capacity) {
         
-        ClusterCapacityRequirements deallocatedCapacity = 
+        CapacityRequirementsPerAgent deallocatedCapacity = 
             markedForDeallocationCapacityPerProcessingUnit.get(pu);
         
         if (deallocatedCapacity == null) {
@@ -168,11 +168,11 @@ public class MachinesSlaEnforcementState {
                 deallocatedCapacity.subtract(agentUid, capacity));
     }
 
-    public ClusterCapacityRequirements getCapacityMarkedForDeallocation(ProcessingUnit pu) {
+    public CapacityRequirementsPerAgent getCapacityMarkedForDeallocation(ProcessingUnit pu) {
        return markedForDeallocationCapacityPerProcessingUnit.get(pu);
     }
 
-    public ClusterCapacityRequirements getAllocatedCapacity(ProcessingUnit pu) {
+    public CapacityRequirementsPerAgent getAllocatedCapacity(ProcessingUnit pu) {
         return allocatedCapacityPerProcessingUnit.get(pu);
     }
     
@@ -209,15 +209,15 @@ public class MachinesSlaEnforcementState {
     /**
      * Lists all capacity from all processing units including those that are marked for deallocation.
      */
-    public ClusterCapacityRequirements getAllUsedCapacity() {
+    public CapacityRequirementsPerAgent getAllUsedCapacity() {
         
-        ClusterCapacityRequirements allUsedCapacity = new ClusterCapacityRequirements();
+        CapacityRequirementsPerAgent allUsedCapacity = new CapacityRequirementsPerAgent();
         
-        for (ClusterCapacityRequirements capacityRequirements : this.allocatedCapacityPerProcessingUnit.values()) {
+        for (CapacityRequirementsPerAgent capacityRequirements : this.allocatedCapacityPerProcessingUnit.values()) {
             allUsedCapacity = allUsedCapacity.add(capacityRequirements);
         }
         
-        for (ClusterCapacityRequirements markedForDeallocationCapacity : this.markedForDeallocationCapacityPerProcessingUnit.values()) {
+        for (CapacityRequirementsPerAgent markedForDeallocationCapacity : this.markedForDeallocationCapacityPerProcessingUnit.values()) {
             allUsedCapacity = allUsedCapacity.add(markedForDeallocationCapacity);
         }
         
@@ -440,7 +440,7 @@ public class MachinesSlaEnforcementState {
         return processingUnits;
     }
 
-    public Map<ProcessingUnit,ClusterCapacityRequirements> getAllocatedCapacityPerProcessingUnit() {
+    public Map<ProcessingUnit,CapacityRequirementsPerAgent> getAllocatedCapacityPerProcessingUnit() {
         return allocatedCapacityPerProcessingUnit;
     }
 }
