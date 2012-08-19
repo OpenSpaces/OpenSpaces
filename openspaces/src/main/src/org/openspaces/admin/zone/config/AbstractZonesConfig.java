@@ -19,14 +19,14 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.openspaces.admin.pu.elastic.config.AbstractStatisticsConfig;
+import org.openspaces.admin.config.AbstractConfig;
 
 /**
  * @author elip
  * @since 9.1.0
  */
 public abstract class AbstractZonesConfig 
-    extends AbstractStatisticsConfig 
+    extends AbstractConfig 
     implements ZonesConfig {    
     
     private static final String ZONES_KEY = "zones";

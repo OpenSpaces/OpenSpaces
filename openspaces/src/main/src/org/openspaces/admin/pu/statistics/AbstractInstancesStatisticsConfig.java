@@ -19,10 +19,10 @@ package org.openspaces.admin.pu.statistics;
 
 import java.util.Map;
 
-import org.openspaces.admin.pu.elastic.config.AbstractStatisticsConfig;
+import org.openspaces.admin.config.AbstractConfig;
 
 public abstract class AbstractInstancesStatisticsConfig 
-    extends AbstractStatisticsConfig {
+    extends AbstractConfig {
 
     protected AbstractInstancesStatisticsConfig(Map<String,String> properties) {
         super(properties);

@@ -13,22 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.openspaces.admin.pu.elastic.config;
+package org.openspaces.admin.config;
 
 import java.util.Map;
 
 import org.openspaces.core.util.StringProperties;
 
 /**
- * Base class for Statistics configurations
+ * Base class for configurations
  * @author itaif
  * @since 9.0.0
  */
-public abstract class AbstractStatisticsConfig {
+public abstract class AbstractConfig {
 
     private StringProperties properties;
 
-    protected AbstractStatisticsConfig(Map<String,String> properties) {
+    protected AbstractConfig(Map<String,String> properties) {
         this.setProperties(properties);
     }
 
@@ -60,7 +60,7 @@ public abstract class AbstractStatisticsConfig {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        AbstractStatisticsConfig other = (AbstractStatisticsConfig) obj;
+        AbstractConfig other = (AbstractConfig) obj;
         if (properties == null) {
             if (other.properties != null)
                 return false;

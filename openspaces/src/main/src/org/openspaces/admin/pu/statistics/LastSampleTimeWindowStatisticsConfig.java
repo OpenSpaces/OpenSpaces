@@ -4,12 +4,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.openspaces.admin.config.AbstractConfig;
 import org.openspaces.admin.internal.pu.statistics.StatisticsObjectList;
 import org.openspaces.admin.internal.pu.statistics.StatisticsObjectListFunction;
-import org.openspaces.admin.pu.elastic.config.AbstractStatisticsConfig;
 
 public class LastSampleTimeWindowStatisticsConfig
-        extends AbstractStatisticsConfig
+        extends AbstractConfig
         implements TimeWindowStatisticsConfig , StatisticsObjectListFunction {
    
     public LastSampleTimeWindowStatisticsConfig() {

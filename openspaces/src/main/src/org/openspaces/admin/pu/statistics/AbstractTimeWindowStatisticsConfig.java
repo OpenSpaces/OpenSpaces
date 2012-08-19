@@ -20,7 +20,7 @@ package org.openspaces.admin.pu.statistics;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.openspaces.admin.pu.elastic.config.AbstractStatisticsConfig;
+import org.openspaces.admin.config.AbstractConfig;
 
 /**
  * Base class for statistics configurations that aggregate samples based on a specified time window
@@ -28,7 +28,7 @@ import org.openspaces.admin.pu.elastic.config.AbstractStatisticsConfig;
  * @since 9.0.0
  */
 public abstract class AbstractTimeWindowStatisticsConfig 
-    extends AbstractStatisticsConfig
+    extends AbstractConfig
     implements TimeWindowStatisticsConfig {
 
     protected AbstractTimeWindowStatisticsConfig(Map<String, String> properties) {
