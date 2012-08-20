@@ -117,7 +117,9 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
     protected void setPlannedCapacity(ScaleStrategyCapacityRequirementConfig capacity) {
         
         final CapacityRequirementsPerZonesConfig capacityPerZones = new CapacityRequirementsPerZonesConfig();
-        capacityPerZones.addCapacity(getDefaultZones(), capacity);
+        if (!capacityPerZones.toCapacityRequirementsPerZones().equalsZero()) {
+            capacityPerZones.addCapacity(getDefaultZones(), capacity);
+        }
         
         setPlannedCapacity(capacityPerZones);     
     }
