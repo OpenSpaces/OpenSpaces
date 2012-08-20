@@ -30,6 +30,7 @@ import org.openspaces.admin.pu.statistics.AverageInstancesStatisticsConfig;
 import org.openspaces.admin.pu.statistics.AverageTimeWindowStatisticsConfigurer;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsIdConfigurer;
+import org.openspaces.admin.zone.config.AnyZonesConfig;
 import org.openspaces.core.util.MemoryUnit;
 
 /**
@@ -43,17 +44,21 @@ public class AutomaticCapacityScaleConfigurerTest extends TestCase {
 
         ProcessingUnitStatisticsId statisticsId = 
              new ProcessingUnitStatisticsIdConfigurer()
-            .monitor("")
-            .metric("")
+            .monitor("monitor")
+            .metric("metric")
             .timeWindowStatistics(new AverageTimeWindowStatisticsConfigurer().timeWindow(1, TimeUnit.MINUTES).create())
             .instancesStatistics(new AverageInstancesStatisticsConfig())
+            .agentZones(new AnyZonesConfig())
             .create();
         
-        ProcessingUnitStatisticsId dupStatisticsId = new ProcessingUnitStatisticsId(statisticsId.getProperties());
+        ProcessingUnitStatisticsId dupStatisticsId = statisticsId.shallowClone();
+        Assert.assertNotSame(statisticsId.getProperties(), dupStatisticsId.getProperties());
+        Assert.assertEquals(statisticsId.getProperties(), dupStatisticsId.getProperties());
         Assert.assertEquals(statisticsId.getMonitor(), dupStatisticsId.getMonitor());
         Assert.assertEquals(statisticsId.getMetric(), dupStatisticsId.getMetric());
         Assert.assertEquals(statisticsId.getTimeWindowStatistics(), dupStatisticsId.getTimeWindowStatistics());
         Assert.assertEquals(statisticsId.getInstancesStatistics(), dupStatisticsId.getInstancesStatistics());
+        Assert.assertEquals(statisticsId.getAgentZones(), dupStatisticsId.getAgentZones());
         Assert.assertEquals(statisticsId, dupStatisticsId);
         
                 

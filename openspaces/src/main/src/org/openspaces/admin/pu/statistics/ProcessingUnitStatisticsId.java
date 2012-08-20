@@ -1,5 +1,6 @@
 package org.openspaces.admin.pu.statistics;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.openspaces.admin.zone.config.ZonesConfig;
@@ -20,7 +21,7 @@ public class ProcessingUnitStatisticsId {
 
     private static final String TIMEWINDOW_STATISTICS_KEY = "timewindow-statistics";
     private static final String INSTANCES_STATISTICS_KEY = "instances-statistics";
-    private static final String ZONE_STATISTICS_KEY = "zone-statistics";
+    private static final String AGENT_ZONES_KEY = "agent-zones";
 
     StringProperties properties;
     
@@ -79,12 +80,12 @@ public class ProcessingUnitStatisticsId {
         properties.putConfig(INSTANCES_STATISTICS_KEY, instancesStatistics);
     }
     
-    public ZonesConfig getZoneStatistics() {
-        return (ZonesConfig) properties.getConfig(ZONE_STATISTICS_KEY, null);
+    public ZonesConfig getAgentZones() {
+        return (ZonesConfig) properties.getConfig(AGENT_ZONES_KEY, null);
     }
     
     public void setAgentZones(ZonesConfig zoneStatistics) {
-        properties.putConfig(ZONE_STATISTICS_KEY, zoneStatistics);
+        properties.putConfig(AGENT_ZONES_KEY, zoneStatistics);
     }
     
 
@@ -142,7 +143,7 @@ public class ProcessingUnitStatisticsId {
         }
         instancesStatistics.validate();
         
-        ZonesConfig zoneStatistics = (ZonesConfig) getZoneStatistics();
+        ZonesConfig zoneStatistics = (ZonesConfig) getAgentZones();
         if (zoneStatistics == null) {
             throw new IllegalStateException("zoneStatistics cannot be null");
         }
@@ -162,12 +163,6 @@ public class ProcessingUnitStatisticsId {
     }
 
     public ProcessingUnitStatisticsId shallowClone() {
-        return  new ProcessingUnitStatisticsIdConfigurer()
-                .metric(getMetric())
-                .monitor(getMonitor())
-                .instancesStatistics(getInstancesStatistics())
-                .timeWindowStatistics(getTimeWindowStatistics())
-                .agentZones(getZoneStatistics())
-                .create();
+        return  new ProcessingUnitStatisticsId(new HashMap<String,String>(this.getProperties()));
     }
 }
