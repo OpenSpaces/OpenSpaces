@@ -26,6 +26,7 @@ import org.openspaces.admin.pu.elastic.config.CapacityRequirementsConfig;
 import org.openspaces.admin.pu.elastic.config.CapacityRequirementsPerZonesConfig;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
 import org.openspaces.admin.pu.statistics.TimeWindowStatisticsConfig;
+import org.openspaces.admin.zone.config.AnyZonesConfig;
 import org.openspaces.grid.gsm.autoscaling.AutoScalingSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.autoscaling.AutoScalingSlaEnforcementEndpointAware;
 import org.openspaces.grid.gsm.autoscaling.AutoScalingSlaPolicy;
@@ -240,9 +241,9 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
 
     private CapacityRequirementsPerZones enforceAutoScalingSla(final CapacityRequirementsPerZones capacityRequirementsPerZones) throws AutoScalingSlaEnforcementInProgressException {
         //TODO: Support multi-zone
-        final CapacityRequirements capacityRequirements = capacityRequirementsPerZones.getZonesCapacityOrZero(super.getDefaultZones());
+        final CapacityRequirements capacityRequirements = capacityRequirementsPerZones.getZonesCapacityOrZero(new AnyZonesConfig());
         final CapacityRequirements newCapacityRequirements = enforceAutoScalingSla(capacityRequirements);
-        return  new CapacityRequirementsPerZones().add(super.getDefaultZones(), newCapacityRequirements);
+        return  new CapacityRequirementsPerZones().add(new AnyZonesConfig(), newCapacityRequirements);
     }
 
     private CapacityRequirements enforceAutoScalingSla(final CapacityRequirements capacityRequirements)
