@@ -59,8 +59,8 @@ public class ZoneStatisticsCalculator implements InternalProcessingUnitStatistic
         Object value = statisticsEntry.getValue();
         
         // zones to compare
-        ZonesConfig requestedZoneStatisticsConfig = requestedProcessingUnitStatisticsId.getZoneStatistics();
-        ExactZonesConfig existingZoneStatisticsConfig = (ExactZonesConfig) existingProcessingUnitStatisticsId.getZoneStatistics();
+        ZonesConfig requestedZoneStatisticsConfig = requestedProcessingUnitStatisticsId.getAgentZones();
+        ExactZonesConfig existingZoneStatisticsConfig = (ExactZonesConfig) existingProcessingUnitStatisticsId.getAgentZones();
         
         // keys without zones to compare
         ProcessingUnitStatisticsId erasedExistingProcessingUnitStatisticsId = erase(existingProcessingUnitStatisticsId);
