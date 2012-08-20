@@ -61,6 +61,7 @@ public class AutomaticCapacityScaleRuleConfig
      * Defines the statistics that is compared against the high and low thresholds
      */
     public void setStatistics(ProcessingUnitStatisticsId statisticsId) {
+        statisticsId.validate();
         properties.putMap(STATISTICS_KEY_PREFIX, statisticsId.getProperties());
     }
     

@@ -619,7 +619,9 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
         
         for (CapacityMachinesSlaPolicy sla : getMachinesSlas(machinesEndpoint.getGridServiceAgentsZones())) {
             CapacityRequirements allocatedCapacity = machinesEndpoint.getAllocatedCapacity(sla).getTotalAllocatedCapacity();
-            allocatedCapacityPerZones.add(sla.getGridServiceAgentZones(), allocatedCapacity);
+            if (!allocatedCapacity.equalsZero()) {
+                allocatedCapacityPerZones.add(sla.getGridServiceAgentZones(), allocatedCapacity);
+            }
         }
         return allocatedCapacityPerZones;
     }
