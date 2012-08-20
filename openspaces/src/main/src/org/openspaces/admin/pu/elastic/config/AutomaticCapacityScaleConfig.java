@@ -54,7 +54,7 @@ public class AutomaticCapacityScaleConfig
     private static final long COOLDOWN_AFTER_SCALEIN_SECONDS_DEFAULT = 60;
     
     private static final String MIN_CAPACITY_KEY_PREFIX = "min-capacity.";
-    private static final String INITIAL_CAPACITY_KEY_PREFIX = "initial-capacity";
+    private static final String INITIAL_CAPACITY_KEY_PREFIX = "initial-capacity.";
     private static final String MAX_CAPACITY_KEY_PREFIX = "max-capacity.";
     private static final HashMap<String, String> EMPTY_CAPACITY = new HashMap<String, String>();
 
