@@ -15,6 +15,9 @@
  *******************************************************************************/
 package org.openspaces.utest.admin.zones.config;
 
+import java.util.HashMap;
+
+import junit.framework.Assert;
 import junit.framework.TestCase;
 
 import org.junit.Test;
@@ -23,6 +26,7 @@ import org.openspaces.admin.zone.config.AtLeastOneZoneConfig;
 import org.openspaces.admin.zone.config.AtLeastOneZoneConfigurer;
 import org.openspaces.admin.zone.config.ExactZonesConfig;
 import org.openspaces.admin.zone.config.ExactZonesConfigurer;
+import org.openspaces.core.util.StringProperties;
 
 /**
  * Tests {@link CapacityRequirementsPerZoneConfig}
@@ -64,5 +68,32 @@ public class ZonesConfigTest extends TestCase {
         assertFalse(AT_LEAST_ZONE1_OR_ZONE3.isSatisfiedBy(EXACT_ZONE2));
         assertTrue(AT_LEAST_ZONE1_OR_ZONE3.isSatisfiedBy(EXACT_ZONE1_ZONE2));
         assertFalse(AT_LEAST_ZONE1_OR_ZONE3.isSatisfiedBy(NO_ZONE));
+    }
+    
+    @Test
+    public void testEmptyAnyZonesConfig() {
+        AnyZonesConfig zones = new AnyZonesConfig();
+        StringProperties s = new StringProperties();
+        String key = "instances-statistics";
+        s.putConfig(key, zones);
+        AnyZonesConfig actual = (AnyZonesConfig) s.getConfig(key, null);
+        assertEquals(zones, actual);
+    }
+    
+    @Test
+    public void testEmptyZonesConfig() {
+        try {
+            ExactZonesConfig zones1 = new ExactZonesConfigurer().addZone("").create();
+            Assert.fail("expected exception");
+        }
+        catch (IllegalArgumentException e) {
+            //expected
+        }
+    }
+    
+    @Test
+    public void testEmptySetZonesConfig() {
+        ExactZonesConfig zones2 = new ExactZonesConfigurer().create();
+        assertEquals(new HashMap<String,String>(),zones2.getProperties());
     }
 }

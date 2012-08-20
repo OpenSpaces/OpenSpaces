@@ -64,6 +64,11 @@ public abstract class AbstractZonesConfig
     }
     
     public void setZones(Set<String> zones) {
+        for (String zone : zones) {
+            if (zone.isEmpty()) {
+                throw new IllegalArgumentException("zone cannot be empty");
+            }
+        }
         super.getStringProperties().putSet(ZONES_KEY, zones, ",");
         validate();
     }
