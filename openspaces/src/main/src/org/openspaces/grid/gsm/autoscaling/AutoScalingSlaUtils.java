@@ -21,7 +21,6 @@ import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.statistics.LastSampleTimeWindowStatisticsConfig;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
-import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsIdConfigurer;
 import org.openspaces.admin.pu.statistics.SingleInstanceStatisticsConfig;
 import org.openspaces.admin.pu.statistics.SingleInstanceStatisticsConfigurer;
 import org.openspaces.grid.gsm.autoscaling.exceptions.AutoScalingInstanceStatisticsException;
@@ -60,7 +59,7 @@ public class AutoScalingSlaUtils {
             ProcessingUnitStatisticsId ruleStatisticsId) 
                     throws AutoScalingSlaEnforcementInProgressException {
         
-        
+        ruleStatisticsId.validate();
         for (final ProcessingUnitInstance instance : pu) {
             
             SingleInstanceStatisticsConfig singleInstanceStatistics = 
@@ -69,25 +68,19 @@ public class AutoScalingSlaUtils {
                 .create();
             
             final ProcessingUnitStatisticsId singleInstanceLastSampleStatisticsId = 
-                new ProcessingUnitStatisticsIdConfigurer()
-                .metric(ruleStatisticsId.getMetric())
-                .monitor(ruleStatisticsId.getMonitor())
-                .timeWindowStatistics(new LastSampleTimeWindowStatisticsConfig())
-                .instancesStatistics(singleInstanceStatistics)
-                .create();
-            
+                    ruleStatisticsId.shallowClone();
+            singleInstanceLastSampleStatisticsId.setTimeWindowStatistics(new LastSampleTimeWindowStatisticsConfig());
+            singleInstanceLastSampleStatisticsId.setInstancesStatistics(singleInstanceStatistics);
+            singleInstanceLastSampleStatisticsId.validate();
             if (!statistics.containsKey(singleInstanceLastSampleStatisticsId)) {
                 throw new AutoScalingInstanceStatisticsException(instance, singleInstanceLastSampleStatisticsId.getMetric());    
             }
             
-            final ProcessingUnitStatisticsId singleInstanceStatisticsId = 
-                new ProcessingUnitStatisticsIdConfigurer()
-                .metric(ruleStatisticsId.getMetric())
-                .monitor(ruleStatisticsId.getMonitor())
-                .timeWindowStatistics(ruleStatisticsId.getTimeWindowStatistics())
-                .instancesStatistics(singleInstanceStatistics)
-                .create();
-            
+            final ProcessingUnitStatisticsId singleInstanceStatisticsId =
+                    ruleStatisticsId.shallowClone();
+            singleInstanceStatisticsId.setTimeWindowStatistics(ruleStatisticsId.getTimeWindowStatistics());
+            singleInstanceStatisticsId.setInstancesStatistics(singleInstanceStatistics);
+            singleInstanceStatisticsId.validate();
             if (!statistics.containsKey(singleInstanceStatisticsId)) {
                 throw new AutoScalingStatisticsException(pu, singleInstanceStatisticsId);
             }
