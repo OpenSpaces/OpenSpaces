@@ -90,7 +90,7 @@ public class MachinesSlaEnforcementState {
         public String toString() {
             return "StateKey ["
                     + (pu != null ? "pu=" + pu + ", " : "")
-                    + (gridServiceAgentZones != null ? "exactGridServiceAgentZones=" + gridServiceAgentZones : "")
+                    + (gridServiceAgentZones != null ? "agentZones=" + gridServiceAgentZones : "")
                     + "]";
         }
     }
