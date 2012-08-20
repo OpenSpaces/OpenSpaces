@@ -83,6 +83,14 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
         CapacityRequirementsConfig initialCapacity = config.getInitialCapacity();
         if (initialCapacity == null) {   
             initialCapacity = config.getMinCapacity();
+            if (getLogger().isInfoEnabled()) {
+                getLogger().info("Initial capacity is not set. defaulting to minimum capacity:"+ config.getMinCapacity());
+            }
+        }
+        else {
+            if (getLogger().isInfoEnabled()) {
+                getLogger().info("Initial capacity is set to :"+ initialCapacity);
+            }
         }
         
         autoScalingEventState = 
