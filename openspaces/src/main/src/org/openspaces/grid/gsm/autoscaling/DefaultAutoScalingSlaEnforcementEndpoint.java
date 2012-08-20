@@ -77,11 +77,25 @@ public class DefaultAutoScalingSlaEnforcementEndpoint implements AutoScalingSlaE
         Map<AutomaticCapacityScaleRuleConfig,Object> valuesBelowLowThresholdPerRule = new HashMap<AutomaticCapacityScaleRuleConfig, Object>();
         Map<AutomaticCapacityScaleRuleConfig,Object> valuesAboveHighThresholdPerRule = new HashMap<AutomaticCapacityScaleRuleConfig, Object>();
          
+        if (logger.isTraceEnabled()) {
+            int numberOfRules = sla.getRules().length;
+            if (numberOfRules == 0) {
+                logger.trace("No scaling rules defined");
+            }
+            else {
+                logger.trace(numberOfRules + " scaling rules defined");
+            }
+        }
+        
         for (AutomaticCapacityScaleRuleConfig rule: sla.getRules()) {
 
             ProcessingUnitStatisticsId statisticsId = rule.getStatistics();
             Object value = AutoScalingSlaUtils.getStatisticsValue(pu, statistics, statisticsId);
-                        
+            
+            if (logger.isTraceEnabled()) {
+                logger.trace("Checking value " + value + " against thresholds of scaling rule " + rule);
+            }
+            
             boolean belowLowThreshold = isBelowLowThreshold(rule, value);
             boolean aboveHighThreshold =isAboveHighThreshold(rule, value);
             
