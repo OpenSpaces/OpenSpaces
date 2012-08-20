@@ -117,7 +117,7 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
     protected void setPlannedCapacity(ScaleStrategyCapacityRequirementConfig capacity) {
         
         final CapacityRequirementsPerZonesConfig capacityPerZones = new CapacityRequirementsPerZonesConfig();
-        if (!capacityPerZones.toCapacityRequirementsPerZones().equalsZero()) {
+        if (!capacity.toCapacityRequirements().equalsZero()) {
             capacityPerZones.addCapacity(getDefaultZones(), capacity);
         }
         
@@ -137,6 +137,9 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
             return;
         }
 
+        if (getLogger().isDebugEnabled()) {
+            getLogger().debug("Setting planned capacity to " + capacityPerZones + " (old planned capacity = " + this.capacityPerZones + ")");
+        }
         this.capacityPerZones = capacityPerZones;
         
         // round up memory
@@ -147,11 +150,15 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
         }
         if (totalMemoryInMB < roundedMemoryInMB) {
             long memoryShortage = roundedMemoryInMB - totalMemoryInMB;
+            CapacityRequirementsConfig increase = new CapacityRequirementsConfigurer()
+            .memoryCapacity((int)memoryShortage, MemoryUnit.MEGABYTES)
+            .create();
+            if (getLogger().isDebugEnabled()) {
+                getLogger().debug("Increasing planned capacity by " + increase + " to round up memory to nearest number of containers.");
+            }
             capacityPerZones.addCapacity(
                     getDefaultZones(), 
-                    new CapacityRequirementsConfigurer()
-                    .memoryCapacity((int)memoryShortage, MemoryUnit.MEGABYTES)
-                    .create()
+                    increase
             );
         }
     }
