@@ -106,6 +106,10 @@ public class AutomaticCapacityScaleStrategyBean extends AbstractCapacityScaleStr
         super.setPlannedCapacity(initialCapacity);
         super.setScaleStrategyConfig(config);
         
+        if (getLogger().isDebugEnabled()) {
+            getLogger().debug("isGridServiceAgentZonesAware="+isGridServiceAgentZonesAware());
+        }
+        
         enablePuStatistics();
     }
 

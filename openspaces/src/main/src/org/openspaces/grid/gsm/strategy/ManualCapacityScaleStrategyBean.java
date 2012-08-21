@@ -38,6 +38,9 @@ public class ManualCapacityScaleStrategyBean extends AbstractCapacityScaleStrate
         setPlannedCapacity(manualCapacityScaleConfig);
         setScaleStrategyConfig(manualCapacityScaleConfig);
         
+        if (getLogger().isDebugEnabled()) {
+            getLogger().debug("isGridServiceAgentZonesAware="+isGridServiceAgentZonesAware());
+        }
     }
 
     @Override

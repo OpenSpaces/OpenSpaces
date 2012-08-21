@@ -37,6 +37,7 @@ import org.openspaces.admin.pu.elastic.config.CapacityRequirementsPerZonesConfig
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyCapacityRequirementConfig;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
 import org.openspaces.admin.zone.config.ExactZonesConfig;
+import org.openspaces.admin.zone.config.RequiredZonesConfig;
 import org.openspaces.admin.zone.config.ZonesConfig;
 import org.openspaces.core.util.MemoryUnit;
 import org.openspaces.grid.gsm.GridServiceContainerConfigAware;
@@ -235,8 +236,6 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
         }
         
         super.afterPropertiesSet();
-        
-        
     }
 
     protected void enforcePlannedCapacity() throws SlaEnforcementInProgressException {
@@ -252,14 +251,16 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
         CapacityRequirementsPerAgent totalAllocatedCapacity = new CapacityRequirementsPerAgent();
         PerZonesMachinesSlaEnforcementInProgressException pendingMachinesExceptions = new PerZonesMachinesSlaEnforcementInProgressException(new String[]{getProcessingUnit().getName()});
         PerZonesGridServiceAgentSlaEnforcementInProgressException pendingAgentsExceptions = new PerZonesGridServiceAgentSlaEnforcementInProgressException(new String[]{getProcessingUnit().getName()});
+        ContainersSlaEnforcementInProgressException pendingContainersException = null;
+        RebalancingSlaEnforcementInProgressException pendingRebalancingException = null;
         
+        try {
         for (CapacityMachinesSlaPolicy sla : getMachinesSlas(getAllZones())) {
             
             ZonesConfig zones = sla.getGridServiceAgentZones();
             try {
                 enforceMachinesSla(sla);
                 if (isGridServiceAgentZonesAware()) {
-                
                     CapacityRequirementsPerAgent allocatedCapacity = 
                             machinesEndpoint.getAllocatedCapacity(sla);
                     replacePlannedCapacityForZones(zones, allocatedCapacity);
@@ -291,7 +292,6 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
             totalAllocatedCapacity = totalAllocatedCapacity.add(allocatedCapacity);
         }//for
         
-        ContainersSlaEnforcementInProgressException pendingContainersException = null;
         try {
             enforceContainersSla(totalAllocatedCapacity);
         }
@@ -300,7 +300,6 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
             pendingContainersException = e;
         }
 
-        RebalancingSlaEnforcementInProgressException pendingRebalancingException = null;
         try {
             enforceRebalancingSla(containersEndpoint.getContainers(), totalAllocatedCapacity);
         }
@@ -309,22 +308,75 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
         }
         
         if (pendingRebalancingException != null) {
+            logSwallowedExceptions(pendingMachinesExceptions,pendingAgentsExceptions,pendingContainersException);
             throw pendingRebalancingException;
         }
         
         if (pendingContainersException != null) {
+            logSwallowedExceptions(pendingMachinesExceptions,pendingAgentsExceptions);
             throw pendingContainersException;
         }
         
         if (pendingAgentsExceptions.hasReason()) {
+            logSwallowedExceptions(pendingMachinesExceptions);
             throw pendingAgentsExceptions;
         }
         
         if (pendingMachinesExceptions.hasReason()) {
             throw pendingMachinesExceptions;
         }
+        }
+        catch (RuntimeException e) {
+            logSwallowedExceptions(pendingMachinesExceptions,pendingAgentsExceptions,pendingContainersException,pendingRebalancingException);
+            throw e;
+        }
+        catch (Error e) {
+            logSwallowedExceptions(pendingMachinesExceptions,pendingAgentsExceptions,pendingContainersException,pendingRebalancingException);
+            throw e;
+        }
     }
     
+    private void logSwallowedExceptions(
+            PerZonesMachinesSlaEnforcementInProgressException pendingMachinesExceptions,
+            PerZonesGridServiceAgentSlaEnforcementInProgressException pendingAgentsExceptions) {
+        logSwallowedExceptions(pendingMachinesExceptions, pendingAgentsExceptions, null);
+        
+    }
+
+    private void logSwallowedExceptions(
+            PerZonesMachinesSlaEnforcementInProgressException pendingMachinesExceptions,
+            PerZonesGridServiceAgentSlaEnforcementInProgressException pendingAgentsExceptions,
+            ContainersSlaEnforcementInProgressException pendingContainersException) {
+        logSwallowedExceptions(pendingMachinesExceptions,pendingAgentsExceptions,pendingContainersException,null);
+    }
+
+    private void logSwallowedExceptions(PerZonesMachinesSlaEnforcementInProgressException pendingMachinesExceptions) {
+        logSwallowedExceptions(pendingMachinesExceptions,null);
+    }
+
+    private void logSwallowedExceptions(
+            PerZonesMachinesSlaEnforcementInProgressException pendingMachinesExceptions,
+            PerZonesGridServiceAgentSlaEnforcementInProgressException pendingAgentsExceptions,
+            ContainersSlaEnforcementInProgressException pendingContainersException,
+            RebalancingSlaEnforcementInProgressException pendingRebalancingException) {
+        
+        if (getLogger().isInfoEnabled()) {
+            if (pendingMachinesExceptions.hasReason()) {
+                getLogger().info("Swallowed exception",pendingMachinesExceptions);
+            }
+            if (pendingAgentsExceptions.hasReason()) {
+                getLogger().info("Swallowed exception",pendingAgentsExceptions);
+            }
+            if (pendingContainersException != null) {
+                getLogger().info("Swallowed exception",pendingContainersException);
+            }
+            if (pendingRebalancingException != null) {
+                getLogger().info("Swallowed exception",pendingRebalancingException);
+            }
+        }
+        
+    }
+
     protected abstract boolean isGridServiceAgentZonesAware();
 
     /**
@@ -332,7 +384,13 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
      * which could be with other zones
      */
     private void replacePlannedCapacityForZones(ZonesConfig zonesToRemove, CapacityRequirementsPerAgent capacityToAdd) {
-        
+
+        if (getLogger().isDebugEnabled()) {
+            if (zonesToRemove instanceof RequiredZonesConfig) {
+                //most likely first time this happened
+                getLogger().debug("Replacing zones " + zonesToRemove + " with " + capacityToAdd);
+            }
+        }
         CapacityRequirementsPerZones newCapacityPerZones = 
                 capacityPerZones.toCapacityRequirementsPerZones()
                 .subtractZones(zonesToRemove);
@@ -343,9 +401,8 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
             CapacityRequirements agentCapacity = capacityToAdd.getAgentCapacity(agentUid);
             ExactZonesConfig zones = agent.getExactZones();
             newCapacityPerZones = newCapacityPerZones.add(zones, agentCapacity);
-            
         }
-        capacityPerZones= new CapacityRequirementsPerZonesConfig(newCapacityPerZones);
+        setPlannedCapacity(new CapacityRequirementsPerZonesConfig(newCapacityPerZones));
     }
 
     private Set<ZonesConfig> getAllZones()

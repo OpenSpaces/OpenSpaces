@@ -34,6 +34,10 @@ public class ManualCapacityPerZonesScaleStrategyBean extends AbstractCapacitySca
         super.setPlannedCapacity(manualCapacityPerZonesScaleConfig.getCapacityRequirementsPerZonesConfig());
         super.setScaleStrategyConfig(manualCapacityPerZonesScaleConfig);
         
+        if (getLogger().isDebugEnabled()) {
+            getLogger().debug("isGridServiceAgentZonesAware="+isGridServiceAgentZonesAware());
+        }
+        
     }
     
     @Override
