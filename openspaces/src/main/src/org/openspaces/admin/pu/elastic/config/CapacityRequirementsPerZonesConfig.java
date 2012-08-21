@@ -62,14 +62,17 @@ public class CapacityRequirementsPerZonesConfig {
 
     public void addCapacity(ZonesConfig zones, ScaleStrategyCapacityRequirementConfig capacity) {
 
-        CapacityRequirementsPerZones newCapacityPerZone = 
-                toCapacityRequirementsPerZones()
-                .add(zones, capacity.toCapacityRequirements());
-        
-        StringProperties capacityProperties = 
-                fromCapacityRequirementsPerZone(keyPrefix,newCapacityPerZone);
-        
-        setCapacityProperties(capacityProperties);
+        CapacityRequirements capacityRequirements = capacity.toCapacityRequirements();
+        if (!capacityRequirements.equalsZero()) {
+            CapacityRequirementsPerZones newCapacityPerZone = 
+                    toCapacityRequirementsPerZones()
+                    .add(zones, capacityRequirements);
+            
+            StringProperties capacityProperties = 
+                    fromCapacityRequirementsPerZone(keyPrefix,newCapacityPerZone);
+            
+            setCapacityProperties(capacityProperties);
+        }
     }
 
     
@@ -86,6 +89,9 @@ public class CapacityRequirementsPerZonesConfig {
         CapacityRequirementsPerZones capacityPerZone = new CapacityRequirementsPerZones();
         for (Entry<String, Map<String,String>> pair : groupPropertiesByZone(keyPrefix, properties).entrySet()) {
             CapacityRequirements capacity = new CapacityRequirementsConfig(pair.getValue()).toCapacityRequirements();
+            if (capacity.equalsZero()) {
+                throw new IllegalStateException("Zone " + pair.getKey() + " cannot have zero capacity:"+ capacity);
+            }
             ZonesConfig zones =  zonesFromString(pair.getKey());
             capacityPerZone = capacityPerZone.add(zones, capacity);
         }
@@ -93,17 +99,22 @@ public class CapacityRequirementsPerZonesConfig {
     }
 
     private static Map<String,Map<String, String>> groupPropertiesByZone(String keyPrefix, StringProperties properties) {
-        HashMap<String, String> emptyMap = new HashMap<String,String>();
         StringProperties filteredProperties = properties;
         if (keyPrefix.length() > 0) {
-            filteredProperties = new StringProperties(properties.getMap(keyPrefix, emptyMap));
+            filteredProperties = new StringProperties(properties.getMap(keyPrefix, new HashMap<String,String>()));
         }
         Map<String,Map<String,String>> propertiesByZone = new HashMap<String, Map<String,String>>();
         for (String key : filteredProperties.getProperties().keySet()) {
             int zoneDelimiter = key.indexOf(".");
             String zonesList = key.substring(0,zoneDelimiter);
+            //zonesList is a prefix, so we could meet it multiple times that's why this if clause
+            //makes sure we add it only once
             if (!propertiesByZone.containsKey(zonesList)) {
-                propertiesByZone.put(zonesList, filteredProperties.getMap(zonesList+".", emptyMap));
+                Map<String, String> map = filteredProperties.getMap(zonesList+".", null);
+                if (map == null) {
+                    throw new IllegalStateException("empty map for zones:" + zonesList +" properties=" + properties + " keyPrefix="+keyPrefix);
+                }
+                propertiesByZone.put(zonesList, map);
             }
         }
         return propertiesByZone;
