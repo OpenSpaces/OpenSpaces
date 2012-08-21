@@ -781,19 +781,23 @@ public class RebalancingUtils {
         boolean evenlyDistributed = true;
         int numberOfInstances = pu.getTotalNumberOfInstances();
         int numberOfContainers = containers.length;
-        
-        double expectedAverageNumberOfInstancesPerContainer = 1.0 * numberOfInstances / numberOfContainers;
-        int numberOfServicesPerContainerUpperBound = (int) Math.ceil(expectedAverageNumberOfInstancesPerContainer);
-        int numberOfServicesPerContainerLowerBound = (int) Math.floor(expectedAverageNumberOfInstancesPerContainer);
-        
-        for (GridServiceContainer container : containers) {
+        if (numberOfInstances < numberOfContainers) {
+            evenlyDistributed = false;
+        }
+        else {
+            double expectedAverageNumberOfInstancesPerContainer = 1.0 * numberOfInstances / numberOfContainers;
+            int numberOfServicesPerContainerUpperBound = (int) Math.ceil(expectedAverageNumberOfInstancesPerContainer);
+            int numberOfServicesPerContainerLowerBound = (int) Math.floor(expectedAverageNumberOfInstancesPerContainer);
             
-            int puNumberOfInstances = container.getProcessingUnitInstances(pu.getName()).length;
-            
-            if (puNumberOfInstances < numberOfServicesPerContainerLowerBound ||
-                puNumberOfInstances > numberOfServicesPerContainerUpperBound) {
-                evenlyDistributed = false;
-                break;
+            for (GridServiceContainer container : containers) {
+                
+                int puNumberOfInstances = container.getProcessingUnitInstances(pu.getName()).length;
+                
+                if (puNumberOfInstances < numberOfServicesPerContainerLowerBound ||
+                    puNumberOfInstances > numberOfServicesPerContainerUpperBound) {
+                    evenlyDistributed = false;
+                    break;
+                }
             }
         }
         return evenlyDistributed;
