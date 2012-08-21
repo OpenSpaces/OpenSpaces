@@ -424,7 +424,7 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
         sla.setClusterCapacityRequirements(allocatedCapacity);
         if (getLogger().isDebugEnabled()) {
             getLogger().debug("Containers Manual SLA Policy: "+
-                    "#gridServiceAgents=" + sla.getClusterCapacityRequirements().getAgentUids().size() + " "+
+                    "#requirements=" + sla.getClusterCapacityRequirements().toDetailedString() + " "+
                     "newContainerConfig.maximumMemoryCapacityInMB="+sla.getNewContainerConfig().getMaximumMemoryCapacityInMB());
         }
         try {

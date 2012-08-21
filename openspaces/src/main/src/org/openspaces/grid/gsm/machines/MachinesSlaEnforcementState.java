@@ -89,7 +89,7 @@ public class MachinesSlaEnforcementState {
         @Override
         public String toString() {
             return "StateKey ["
-                    + (pu != null ? "pu=" + pu + ", " : "")
+                    + (pu != null ? "pu=" + pu.getName() + ", " : "")
                     + (gridServiceAgentZones != null ? "agentZones=" + gridServiceAgentZones : "")
                     + "]";
         }
@@ -329,8 +329,8 @@ public class MachinesSlaEnforcementState {
         }
 
         if (logger.isDebugEnabled()) {
-            logger.debug("PUs with different isolation than pu " + key.pu.getName() +": "+ keysWithDifferentIsolation);
-            logger.debug("PUs with same isolation of pu " + key.pu.getName() + ": " + keysWithSameIsolation);
+            logger.debug("PUs with different isolation than pu " + key +" are: "+ keysWithDifferentIsolation);
+            logger.debug("PUs with same isolation of " + key + " are: " + keysWithSameIsolation);
         }
         
         // add all agent uids used by conflicting pus
