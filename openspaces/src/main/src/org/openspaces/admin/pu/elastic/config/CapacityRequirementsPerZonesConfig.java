@@ -90,7 +90,7 @@ public class CapacityRequirementsPerZonesConfig {
         for (Entry<String, Map<String,String>> pair : groupPropertiesByZone(keyPrefix, properties).entrySet()) {
             CapacityRequirements capacity = new CapacityRequirementsConfig(pair.getValue()).toCapacityRequirements();
             if (capacity.equalsZero()) {
-                throw new IllegalStateException("Zone " + pair.getKey() + " cannot have zero capacity:"+ capacity);
+                throw new IllegalStateException("Zone " + pair.getKey() + " cannot have zero capacity:"+ capacity +" original properties:"+pair.getValue());
             }
             ZonesConfig zones =  zonesFromString(pair.getKey());
             capacityPerZone = capacityPerZone.add(zones, capacity);

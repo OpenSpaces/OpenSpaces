@@ -31,8 +31,10 @@ public class ZonesConfigUtils {
                         + " sequence");
             }
         }
-        sortedZones.add(0, zones.getClass().getName().replace(".", UNIQUE_DOT_DELIMITER));
-        return StringUtils.collectionToDelimitedString(sortedZones, UNIQUE_ZONES_DELIMITER);
+        sortedZones.add(0, zones.getClass().getName());
+        String key = StringUtils.collectionToDelimitedString(sortedZones, UNIQUE_ZONES_DELIMITER);
+        String encodedKey = key.replace(".",UNIQUE_DOT_DELIMITER);
+        return encodedKey;
     }
 
     /**
@@ -42,9 +44,10 @@ public class ZonesConfigUtils {
      */
     @SuppressWarnings("unchecked")
     public static ZonesConfig zonesFromString(String key) {
-        List<String> sortedZones = new ArrayList<String>(Arrays.asList(StringUtils.delimitedListToStringArray(key,
+        String decodedKey = key.replace(UNIQUE_DOT_DELIMITER, ".");
+        List<String> sortedZones = new ArrayList<String>(Arrays.asList(StringUtils.delimitedListToStringArray(decodedKey,
                 UNIQUE_ZONES_DELIMITER)));
-        String className = sortedZones.remove(0).replace(UNIQUE_DOT_DELIMITER, ".");
+        String className = sortedZones.remove(0);
         Class<? extends ZonesConfig> clazz;
         try {
             clazz = (Class<? extends ZonesConfig>) Class.forName(className);

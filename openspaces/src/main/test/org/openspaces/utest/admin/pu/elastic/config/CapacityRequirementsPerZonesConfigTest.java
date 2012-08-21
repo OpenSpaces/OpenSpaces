@@ -25,6 +25,8 @@ import org.junit.Test;
 import org.openspaces.admin.pu.elastic.config.CapacityRequirementsConfig;
 import org.openspaces.admin.pu.elastic.config.CapacityRequirementsConfigurer;
 import org.openspaces.admin.pu.elastic.config.CapacityRequirementsPerZonesConfig;
+import org.openspaces.admin.zone.config.AtLeastOneZoneConfig;
+import org.openspaces.admin.zone.config.AtLeastOneZoneConfigurer;
 import org.openspaces.admin.zone.config.ExactZonesConfig;
 import org.openspaces.admin.zone.config.ExactZonesConfigurer;
 import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerZones;
@@ -43,6 +45,9 @@ public class CapacityRequirementsPerZonesConfigTest extends TestCase {
     private static final CapacityRequirementsConfig ZONES2_CAPACITY = new CapacityRequirementsConfigurer().memoryCapacity("100m").create();
     private static final CapacityRequirementsConfig ZONES3_CAPACITY = new CapacityRequirementsConfigurer().memoryCapacity("300m").create();
 
+    private static final AtLeastOneZoneConfig CLOUDIFY_SERVICE_ZONES=new AtLeastOneZoneConfigurer().addZone("petclinic.tomcat").create();
+    private static final CapacityRequirementsConfig CLOUDIFY_SERVICE_CAPACITY = new CapacityRequirementsConfigurer().memoryCapacity("476m").create();
+    
     @Test
     public void testAdd() {
         Map<String, String> properties = new HashMap<String,String>();
@@ -60,4 +65,15 @@ public class CapacityRequirementsPerZonesConfigTest extends TestCase {
         Assert.assertEquals(expected, config.toCapacityRequirementsPerZones());
         Assert.assertEquals("world", properties.get("hello"));
     }
+    
+    @Test
+    public void testCloudifyZoneWithDot() {
+        CapacityRequirementsPerZonesConfig config = new CapacityRequirementsPerZonesConfig("zones.", new HashMap<String,String>());
+        config.addCapacity(CLOUDIFY_SERVICE_ZONES, CLOUDIFY_SERVICE_CAPACITY);
+        CapacityRequirementsPerZones expected = 
+                new CapacityRequirementsPerZones()
+                .add(CLOUDIFY_SERVICE_ZONES, CLOUDIFY_SERVICE_CAPACITY.toCapacityRequirements());
+        Assert.assertEquals(expected, config.toCapacityRequirementsPerZones());
+    }
+    
 }
