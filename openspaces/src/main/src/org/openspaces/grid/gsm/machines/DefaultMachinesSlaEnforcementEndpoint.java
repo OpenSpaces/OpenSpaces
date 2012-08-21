@@ -99,6 +99,18 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
     }
 
     public CapacityRequirementsPerAgent getAllocatedCapacity(AbstractMachinesSlaPolicy sla) {
+        CapacityRequirementsPerAgent allocatedCapacity = getAllocatedCapacityUnchecked(sla);
+        // validate all agents have been discovered
+        for (String agentUid : allocatedCapacity.getAgentUids()) {
+            GridServiceAgent agent = pu.getAdmin().getGridServiceAgents().getAgentByUID(agentUid);
+            if (agent == null) {
+                throw new IllegalStateException("agent " + agentUid +" is not discovered");
+            }
+        }
+        return allocatedCapacity;
+     }
+
+    public CapacityRequirementsPerAgent getAllocatedCapacityUnchecked(AbstractMachinesSlaPolicy sla) {
        return state.getAllocatedCapacity(getKey(sla));
     }
 
@@ -680,7 +692,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         GridServiceAgents agents = pu.getAdmin().getGridServiceAgents();
         
         // mark for deallocation all failed machines
-        for(String agentUid: getAllocatedCapacity(sla).getAgentUids()) {
+        for(String agentUid: getAllocatedCapacityUnchecked(sla).getAgentUids()) {
             if (agents.getAgentByUID(agentUid) == null) {
                 logger.warn("Agent " + agentUid + " was killed unexpectedly.");
                 markAgentCapacityForDeallocation(sla, agentUid);
@@ -1245,7 +1257,11 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
     }
 
     private void allocateCapacity(AbstractMachinesSlaPolicy sla, CapacityRequirementsPerAgent capacityToAllocate) {
+        GridServiceAgents gridServiceAgents = pu.getAdmin().getGridServiceAgents();
         for (String agentUid : capacityToAllocate.getAgentUids()) {
+            if (gridServiceAgents.getAgentByUID(agentUid) == null) {
+                throw new IllegalArgumentException("Cannot allocate capacity on a removed agent " + agentUid);
+            }
             state.allocateCapacity(getKey(sla), agentUid, capacityToAllocate.getAgentCapacity(agentUid));
             if (logger.isInfoEnabled()) {
                 logger.info("allocating capacity "+capacityToAllocate.getAgentCapacity(agentUid) + " "+
