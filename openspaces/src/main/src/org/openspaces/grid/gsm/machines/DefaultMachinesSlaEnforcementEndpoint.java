@@ -250,7 +250,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
 
         Collection<GridServiceAgent> discoveredAgents =sla.getDiscoveredMachinesCache().getDiscoveredAgents();
         Collection<GridServiceAgent> undiscoveredAgents = new HashSet<GridServiceAgent>();
-        for(GridServiceAgent agent : MachinesSlaUtils.convertAgentUidsToAgentsIfDiscovered(getAllocatedCapacity(sla).getAgentUids(),pu.getAdmin())) {
+        for(GridServiceAgent agent : MachinesSlaUtils.convertAgentUidsToAgentsIfDiscovered(getAllocatedCapacityUnfiltered(sla).getAgentUids(),pu.getAdmin())) {
            
             if (!discoveredAgents.contains(agent)) {
                 undiscoveredAgents.add(agent);
