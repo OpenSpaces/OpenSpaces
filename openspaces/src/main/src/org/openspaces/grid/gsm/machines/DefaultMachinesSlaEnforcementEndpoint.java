@@ -98,8 +98,9 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                 pu);
     }
 
+    @Override
     public CapacityRequirementsPerAgent getAllocatedCapacity(AbstractMachinesSlaPolicy sla) {
-        CapacityRequirementsPerAgent allocatedCapacity = getAllocatedCapacityUnchecked(sla);
+        CapacityRequirementsPerAgent allocatedCapacity = getAllocatedCapacityUnfiltered(sla);
         // validate all agents have been discovered
         for (String agentUid : allocatedCapacity.getAgentUids()) {
             GridServiceAgent agent = pu.getAdmin().getGridServiceAgents().getAgentByUID(agentUid);
@@ -110,10 +111,25 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         return allocatedCapacity;
      }
 
-    public CapacityRequirementsPerAgent getAllocatedCapacityUnchecked(AbstractMachinesSlaPolicy sla) {
+    public CapacityRequirementsPerAgent getAllocatedCapacityUnfiltered(AbstractMachinesSlaPolicy sla) {
        return state.getAllocatedCapacity(getKey(sla));
     }
 
+    @Override
+    public CapacityRequirementsPerAgent getAllocatedCapacityFilterUndiscoveredAgents(AbstractMachinesSlaPolicy sla) {
+        CapacityRequirementsPerAgent checkedAllocatedCapacity = new CapacityRequirementsPerAgent(); 
+        CapacityRequirementsPerAgent allocatedCapacity = getAllocatedCapacityUnfiltered(sla);
+        // validate all agents have been discovered
+        for (String agentUid : allocatedCapacity.getAgentUids()) {
+            GridServiceAgent agent = pu.getAdmin().getGridServiceAgents().getAgentByUID(agentUid);
+            if (agent != null) {
+                CapacityRequirements capacity = allocatedCapacity.getAgentCapacity(agentUid);
+                checkedAllocatedCapacity.add(agentUid,capacity);
+            }
+        }
+        return checkedAllocatedCapacity;
+     }
+    
     public void enforceSla(CapacityMachinesSlaPolicy sla) throws MachinesSlaEnforcementInProgressException, GridServiceAgentSlaEnforcementInProgressException {
         
         validateSla(sla);
@@ -692,7 +708,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         GridServiceAgents agents = pu.getAdmin().getGridServiceAgents();
         
         // mark for deallocation all failed machines
-        for(String agentUid: getAllocatedCapacityUnchecked(sla).getAgentUids()) {
+        for(String agentUid: getAllocatedCapacityUnfiltered(sla).getAgentUids()) {
             if (agents.getAgentByUID(agentUid) == null) {
                 logger.warn("Agent " + agentUid + " was killed unexpectedly.");
                 markAgentCapacityForDeallocation(sla, agentUid);

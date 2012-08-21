@@ -127,15 +127,17 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
 
     /**
      * Call once in order to modify the behavior of {@link #enforcePlannedCapacity()}
+     * @return false if planned has not changed, true if plan changed
      */   
-    protected void setPlannedCapacity(CapacityRequirementsPerZonesConfig capacityPerZones) {
+    //TODO: rename method to replacePlannedCapacity
+    protected boolean setPlannedCapacity(CapacityRequirementsPerZonesConfig capacityPerZones) {
         
         if (capacityPerZones == null) {
             throw new IllegalArgumentException("capacityRequirement cannot be null");
         }
         
         if (this.capacityPerZones != null && capacityPerZones.toCapacityRequirementsPerZones().equals(this.capacityPerZones.toCapacityRequirementsPerZones())) {
-            return;
+            return false;
         }
 
         if (getLogger().isDebugEnabled()) {
@@ -162,6 +164,7 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
                     increase
             );
         }
+        return true;
     }
     
     /**
@@ -325,8 +328,9 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
     /**
      * Replaces the planned capacity of the specified zones, with the specified new planned capacity
      * which could be with other zones
+     * @return 
      */
-    private void replacePlannedCapacityForZones(ZonesConfig zonesToRemove, CapacityRequirementsPerAgent capacityToAdd) {
+    private boolean replacePlannedCapacityForZones(ZonesConfig zonesToRemove, CapacityRequirementsPerAgent capacityToAdd) {
 
         if (getLogger().isDebugEnabled()) {
             if (zonesToRemove instanceof RequiredZonesConfig) {
@@ -345,7 +349,7 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
             ExactZonesConfig zones = agent.getExactZones();
             newCapacityPerZones = newCapacityPerZones.add(zones, agentCapacity);
         }
-        setPlannedCapacity(new CapacityRequirementsPerZonesConfig(newCapacityPerZones));
+        return setPlannedCapacity(new CapacityRequirementsPerZonesConfig(newCapacityPerZones));
     }
 
     private Set<ZonesConfig> getAllZones()
@@ -373,7 +377,10 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
             if (isGridServiceAgentZonesAware()) {
                 CapacityRequirementsPerAgent allocatedCapacity = 
                         machinesEndpoint.getAllocatedCapacity(sla);
-                replacePlannedCapacityForZones(sla.getGridServiceAgentZones(), allocatedCapacity);
+                boolean replaced = replacePlannedCapacityForZones(sla.getGridServiceAgentZones(), allocatedCapacity);
+                if (replaced) {
+                    throw new MachinesSlaEnforcementInProgressException(new String[] {getProcessingUnit().getName()}, "Capacity changed since zone aware");
+                }
             }
             machineProvisioningCompletedEvent();
             agentProvisioningCompletedEvent();

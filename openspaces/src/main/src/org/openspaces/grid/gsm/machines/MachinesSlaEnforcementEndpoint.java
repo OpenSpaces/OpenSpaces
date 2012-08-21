@@ -43,10 +43,17 @@ public interface MachinesSlaEnforcementEndpoint extends ServiceLevelAgreementEnf
     void enforceSla(CapacityMachinesSlaPolicy sla) throws MachinesSlaEnforcementInProgressException, GridServiceAgentSlaEnforcementInProgressException;
     
     /**
-     * @return a list of agents for this pu including memory/cpu for each.
+     * @return a list of agents for this pu including memory/cpu for each. 
+     * Non-discovered agents are removed from returned capacity
+     */
+    CapacityRequirementsPerAgent getAllocatedCapacityFilterUndiscoveredAgents(AbstractMachinesSlaPolicy sla);
+
+    /**
+     * @return a list of agents for this pu including memory/cpu for each. 
+     * Non-discovered agents throw IllegalStateException
      */
     CapacityRequirementsPerAgent getAllocatedCapacity(AbstractMachinesSlaPolicy sla);
-
+    
     /**
      * Recover state for the specified SLA.
      * @since 9.1.0
