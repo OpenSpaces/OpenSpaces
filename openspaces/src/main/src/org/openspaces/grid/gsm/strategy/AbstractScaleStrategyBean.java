@@ -191,7 +191,7 @@ public abstract class AbstractScaleStrategyBean implements
             throw new IllegalStateException("admin cannot be null.");
         }
         
-        ((InternalAdmin)admin).assertStateChangesPermitted();
+        validateCorrectThread();
         
         if (machineProvisioning == null) {
             throw new IllegalStateException("machine provisioning cannot be null.");
@@ -225,7 +225,7 @@ public abstract class AbstractScaleStrategyBean implements
         // This is ok as long as #afterPropertiesSet is called on the same thread
         // as #run() would be called (which is the single thread admin)
         // InternalAdmin#assertStateChangesPermitted() validates just that
-        ((InternalAdmin)admin).assertStateChangesPermitted();
+        validateCorrectThread();
         
         scheduledTask = 
             admin.scheduleWithFixedDelayNonBlockingStateChange(
@@ -312,28 +312,12 @@ public abstract class AbstractScaleStrategyBean implements
     public void run() {
 
         try {
+            recoverOnStartBeforeEnforceSLA();
 
-            validateAtLeastOneLookupServiceDiscovered();
-            validateOnlyOneESMRunning();
-
-            if (!isRecoveredStateOnEsmStart()) {
-                if (getLogger().isInfoEnabled()) {
-                    getLogger().info("recovering state on ESM start.");
-                }
-                
-                recoverStateOnEsmStart();
-                
-                if (getLogger().isInfoEnabled()) {
-                    getLogger().info("recovered state on ESM start.");
-                }
-            }
-            validateAllProcessingUnitsRecoveredStateOnEsmStart();
-            
             if (getLogger().isDebugEnabled()) {
                 getLogger().debug("enforcing SLA.");
             }
             
-            ((InternalAdmin)admin).assertStateChangesPermitted();
             
             enforceSla();
             
@@ -356,6 +340,35 @@ public abstract class AbstractScaleStrategyBean implements
             scaleEventState.enqueuProvisioningInProgressEvent();
             isScaleInProgress = true;
         }
+    }
+
+    private void recoverOnStartBeforeEnforceSLA() throws SlaEnforcementInProgressException {
+        try {
+            validateCorrectThread();
+            validateAtLeastOneLookupServiceDiscovered();
+            validateOnlyOneESMRunning();
+    
+            if (!isRecoveredStateOnEsmStart()) {
+                if (getLogger().isInfoEnabled()) {
+                    getLogger().info("recovering state on ESM start.");
+                }
+                
+                recoverStateOnEsmStart();
+                
+                if (getLogger().isInfoEnabled()) {
+                    getLogger().info("recovered state on ESM start.");
+                }
+            }
+            validateAllProcessingUnitsRecoveredStateOnEsmStart();
+        } catch (final SlaEnforcementInProgressException e) {
+            //TODO: Fire event
+            getLogger().info("SLA is not enforced",e);
+            throw e;
+        }
+    }
+
+    private void validateCorrectThread() {
+        ((InternalAdmin)admin).assertStateChangesPermitted();
     }
 
     private boolean isRecoveredStateOnEsmStart() {
