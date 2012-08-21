@@ -477,7 +477,7 @@ public class MachinesSlaEnforcementState {
     public Map<GridServiceAgent, Map<ProcessingUnit, CapacityRequirements>> groupCapacityPerProcessingUnitPerAgent(StateKey key) {
         
         // create a report for each relevant agent - which pus are installed on it and how much capacity they are using
-        Map<GridServiceAgent,Map<ProcessingUnit,CapacityRequirements>> capacityPerPuPerAgent = new HashMap<GridServiceAgent,Map<ProcessingUnit,CapacityRequirements>>();
+        final Map<GridServiceAgent,Map<ProcessingUnit,CapacityRequirements>> capacityPerPuPerAgent = new HashMap<GridServiceAgent,Map<ProcessingUnit,CapacityRequirements>>();
         Admin admin = key.pu.getAdmin();
         Collection<String> restrictedAgentUids = getRestrictedAgentUids(key).keySet();
         for (Entry<StateKey, StateValue> pair : state.entrySet()) {
@@ -486,9 +486,13 @@ public class MachinesSlaEnforcementState {
             for (String agentUid : otherPuCapacityPerAgents.getAgentUids()) {
                 GridServiceAgent agent = admin.getGridServiceAgents().getAgentByUID(agentUid);
                 if (!restrictedAgentUids.contains(agentUid) && agent != null) {
+                    
                     if (!capacityPerPuPerAgent.containsKey(agent)) {
                         //lazy init
                         capacityPerPuPerAgent.put(agent, new HashMap<ProcessingUnit, CapacityRequirements>());
+                    }
+                    
+                    if (!capacityPerPuPerAgent.get(agent).containsKey(otherPu)) {
                         capacityPerPuPerAgent.get(agent).put(otherPu, new CapacityRequirements());
                     }
                      
