@@ -155,18 +155,10 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                     "containers with " + sla.getContainerMemoryCapacityInMB() + "MB each.");
         }
     
-        validateCompletedStateRecovery(sla);
-        
         validateProvisionedMachines(sla);
         
         enforceSlaInternal(sla);
             
-    }
-
-    private void validateCompletedStateRecovery(AbstractMachinesSlaPolicy sla) {
-        if (!isCompletedStateRecovery(sla)) {
-            throw new IllegalStateException("Call recoverStateOnEsmStart before calling enforceSla");
-        }
     }
 
     private StateKey getKey(AbstractMachinesSlaPolicy sla) {
@@ -275,8 +267,6 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             throws GridServiceAgentSlaEnforcementInProgressException {
         
         validateSla(sla);
-        
-        validateCompletedStateRecovery(sla);
         
         try {
             validateProvisionedMachines(sla);
