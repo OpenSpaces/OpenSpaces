@@ -156,7 +156,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         }
     
         validateProvisionedMachines(sla);
-        
+        setMachineIsolation(sla);
         enforceSlaInternal(sla);
             
     }
@@ -274,6 +274,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             logger.warn("Ignoring failure to related to new machines, since now in eager mode", e);
         }
         
+        setMachineIsolation(sla);
         enforceSlaInternal(sla);
     }
 
