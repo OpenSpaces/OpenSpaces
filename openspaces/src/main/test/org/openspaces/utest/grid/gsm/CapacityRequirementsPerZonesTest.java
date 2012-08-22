@@ -49,7 +49,7 @@ public class CapacityRequirementsPerZonesTest extends TestCase {
     public void testNoZones() {
         runTestForZones(NO_ZONE);
     }
-/*
+
     @Test
     public void testExactZones() {
         runTestForZones(EXACT_ZONE1);
@@ -66,7 +66,20 @@ public class CapacityRequirementsPerZonesTest extends TestCase {
         runTestForZones(AT_LEAST_ZONE1);
         runTestForZones(AT_LEAST_ZONE1_OR_ZONE2);
     }
-  */  
+  
+    @Test
+    public void testSet() {
+        
+        CapacityRequirementsPerZones capacityPerZones = new CapacityRequirementsPerZones();
+        capacityPerZones = capacityPerZones.set(ANY_ZONE, capacity);
+        assertEquals(capacity, capacityPerZones.getZonesCapacity(ANY_ZONE));
+        validateToConfig(capacityPerZones);
+        
+        capacityPerZones = capacityPerZones.set(ANY_ZONE, capacity.multiply(2));
+        assertEquals(capacity.multiply(2), capacityPerZones.getZonesCapacity(ANY_ZONE));
+        validateToConfig(capacityPerZones);
+    }
+    
     private void runTestForZones(ZonesConfig zones) {
         CapacityRequirementsPerZones capacityPerZones = new CapacityRequirementsPerZones();
         capacityPerZones = capacityPerZones.add(zones, capacity);

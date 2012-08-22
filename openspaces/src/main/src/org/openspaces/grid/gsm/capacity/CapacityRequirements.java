@@ -88,7 +88,9 @@ public class CapacityRequirements {
     }
     
     public CapacityRequirements subtract(CapacityRequirements otherRequirements) {
-        
+        if (otherRequirements == null) {
+            throw new IllegalArgumentException("otherRequirements cannot be null");
+        }
         List<CapacityRequirement> newRequirements = new ArrayList<CapacityRequirement>();
         if (!this.greaterOrEquals(otherRequirements)) {
                 throw new IllegalArgumentException("Cannot subtract " + otherRequirements + " from " + this +" since it would result in a negative capacity");

@@ -207,7 +207,11 @@ abstract class AbstractCapacityRequirementsPerKey {
             capacityPerKey.put(key,newCapacity);
         }
         
-        totalCapacity = totalCapacity.subtract(oldCapacity).add(newCapacity);
+        if (oldCapacity != null) {
+            totalCapacity = totalCapacity.subtract(oldCapacity);
+        }
+        
+        totalCapacity = totalCapacity.add(newCapacity);
     
     }
 
