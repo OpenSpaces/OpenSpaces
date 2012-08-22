@@ -96,9 +96,17 @@ public class DefaultProcessingUnitStatistics implements InternalProcessingUnitSt
     @Override
     public void calculateStatistics(Iterable<ProcessingUnitStatisticsId> statisticsIds) {
         
+        if (logger.isTraceEnabled()) {
+            logger.trace("statisticsIds before calculating new statistics is = "+ statistics);
+        }
+        
         calculateTimeWindowStatistics(statisticsIds);
         calculateZoneStatistics(statisticsIds);
         calculateInstancesStatistics(statisticsIds);
+        
+        if (logger.isTraceEnabled()) {
+            logger.trace("statisticsIds after calculation finished = "+ statistics);
+        }
     }
 
     private void calculateInstancesStatistics(Iterable<ProcessingUnitStatisticsId> statisticsIds) {
@@ -117,6 +125,7 @@ public class DefaultProcessingUnitStatistics implements InternalProcessingUnitSt
         
         List<ProcessingUnitStatisticsId> zoneCalculatedStatistics = new ArrayList<ProcessingUnitStatisticsId>();
         for (final ProcessingUnitStatisticsId statisticsId : statisticIds) {
+            statisticsId.validate();
             zoneCalculatedStatistics.add(statisticsId);
         }
         zoneStatisticsCalculator.calculateNewStatistics(this, zoneCalculatedStatistics);
@@ -162,6 +171,7 @@ public class DefaultProcessingUnitStatistics implements InternalProcessingUnitSt
                 
                 // fix zone statistics for timewindow calculator so it finds the instance
                 ProcessingUnitStatisticsId fixedStatisticsId = statisticsId.shallowClone();
+                zoneStatistics.validate();
                 fixedStatisticsId.setAgentZones(zoneStatistics);
                 singleInstanceCalculatedStatistics.add(fixedStatisticsId);
             

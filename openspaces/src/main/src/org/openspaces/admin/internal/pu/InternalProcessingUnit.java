@@ -20,6 +20,7 @@ package org.openspaces.admin.internal.pu;
 import java.util.Map;
 
 import org.jini.rio.monitor.ProvisionLifeCycleEvent;
+import org.openspaces.admin.AdminException;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.internal.application.InternalApplicationAware;
 import org.openspaces.admin.pu.ProcessingUnit;
@@ -27,6 +28,7 @@ import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
 import org.openspaces.admin.space.Space;
+import org.openspaces.admin.zone.config.ExactZonesConfig;
 
 /**
  * @author kimchy
@@ -131,4 +133,11 @@ public interface InternalProcessingUnit extends ProcessingUnit, InternalProcessi
      * @since 9.0.0
      */
     ProcessingUnitStatisticsId[] getStatisticsCalculations();
+    
+    /**
+     * return the exact zones of the agent that belongs to processing unit instance
+     * @author elip
+     * @since 9.1.0
+     */
+    ExactZonesConfig getHostingGridServiceAgentZones(ProcessingUnitInstance processingUnitInstance) throws AdminException;
 }

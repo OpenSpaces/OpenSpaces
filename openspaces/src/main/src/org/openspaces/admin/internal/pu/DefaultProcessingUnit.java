@@ -1164,7 +1164,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
                final Object value = serviceMonitors.getMonitors().get(statisticsId.getMetric());
                if (value == null) {
                    if (logger.isDebugEnabled()) {
-                       logger.debug("No statistics is available for metric " + statisticsId.getMetric() + " in serviceMonitors " + statisticsId.getMonitor() +" for processing unit " + this.getName());
+                       logger.debug("No statistics is available for metric " + statisticsId.getMetric() + " in serviceMonitors " + statisticsId.getMonitor() + " for processing unit " + this.getName() + " serviceMonitors keys are : " + serviceMonitors.getMonitors().keySet());
                    }
                }
                else {
@@ -1182,6 +1182,11 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
                        .agentZones(zones)
                        .instancesStatistics(new SingleInstanceStatisticsConfigurer().instance(instance).create())
                        .create();
+                       
+                       if (logger.isTraceEnabled()) {
+                           logger.trace("adding statistics id " + newStatisticsId + " with value " + value + " to processing unit statistics of " + getName() );
+                       }
+                       
                        puStatistics.addStatistics(newStatisticsId,value);
                    } catch (AdminException e) {
                        if (logger.isDebugEnabled()) {
@@ -1197,7 +1202,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
      * @param processingUnitInstance
      * @return
      */
-    private ExactZonesConfig getHostingGridServiceAgentZones(ProcessingUnitInstance processingUnitInstance) 
+    public ExactZonesConfig getHostingGridServiceAgentZones(ProcessingUnitInstance processingUnitInstance) 
             throws AdminException {
         
         GridServiceContainer gridServiceContainer = processingUnitInstance.getGridServiceContainer();
@@ -1216,6 +1221,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
  
     @Override
     public void addStatisticsCalculation(ProcessingUnitStatisticsId statisticsId) {
+        statisticsId.validate();
         this.statisticsIds.add(statisticsId);
     }
 
