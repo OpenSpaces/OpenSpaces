@@ -337,9 +337,11 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
                 getLogger().debug("Replacing zones " + zonesToRemove + " with " + capacityToAdd);
             }
         }
-        CapacityRequirementsPerZones newCapacityPerZones = 
-                capacityPerZones.toCapacityRequirementsPerZones()
-                .subtractZones(zonesToRemove);
+        
+        CapacityRequirementsPerZones newCapacityPerZones = capacityPerZones.toCapacityRequirementsPerZones();
+        if (newCapacityPerZones.getZones().contains(zonesToRemove)) {
+            newCapacityPerZones = newCapacityPerZones.subtractZones(zonesToRemove);
+        }
         
         for (String agentUid : capacityToAdd.getAgentUids()) {
             
