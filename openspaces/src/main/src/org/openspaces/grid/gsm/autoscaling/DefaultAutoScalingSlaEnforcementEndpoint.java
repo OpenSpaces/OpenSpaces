@@ -26,6 +26,7 @@ import org.openspaces.admin.internal.pu.InternalProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.elastic.config.AutomaticCapacityScaleRuleConfig;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
+import org.openspaces.admin.zone.config.ZonesConfig;
 import org.openspaces.grid.gsm.LogPerProcessingUnit;
 import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.autoscaling.exceptions.AutoScalingSlaEnforcementInProgressException;
@@ -76,7 +77,8 @@ public class DefaultAutoScalingSlaEnforcementEndpoint implements AutoScalingSlaE
                 
         Map<AutomaticCapacityScaleRuleConfig,Object> valuesBelowLowThresholdPerRule = new HashMap<AutomaticCapacityScaleRuleConfig, Object>();
         Map<AutomaticCapacityScaleRuleConfig,Object> valuesAboveHighThresholdPerRule = new HashMap<AutomaticCapacityScaleRuleConfig, Object>();
-         
+        
+        // check thresholds for every rule in the sla
         if (logger.isTraceEnabled()) {
             int numberOfRules = sla.getRules().length;
             if (numberOfRules == 0) {
@@ -89,7 +91,12 @@ public class DefaultAutoScalingSlaEnforcementEndpoint implements AutoScalingSlaE
         
         for (AutomaticCapacityScaleRuleConfig rule: sla.getRules()) {
 
+            // desired statistics to calculate for this rule
             ProcessingUnitStatisticsId statisticsId = rule.getStatistics();
+            
+            ZonesConfig zonesConfig = sla.getZonesConfig();
+            zonesConfig.validate();
+            statisticsId.setAgentZones(zonesConfig);
             Object value = AutoScalingSlaUtils.getStatisticsValue(pu, statistics, statisticsId);
             
             if (logger.isTraceEnabled()) {
@@ -97,7 +104,7 @@ public class DefaultAutoScalingSlaEnforcementEndpoint implements AutoScalingSlaE
             }
             
             boolean belowLowThreshold = isBelowLowThreshold(rule, value);
-            boolean aboveHighThreshold =isAboveHighThreshold(rule, value);
+            boolean aboveHighThreshold = isAboveHighThreshold(rule, value);
             
             if (belowLowThreshold) {
                 if (logger.isInfoEnabled()) {

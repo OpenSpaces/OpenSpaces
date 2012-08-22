@@ -361,7 +361,7 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
         return allZones;
     }
 
-    private Set<ZonesConfig> getPlannedZones() {
+    protected Set<ZonesConfig> getPlannedZones() {
         return this.capacityPerZones.toCapacityRequirementsPerZones().getZones();
     }
  

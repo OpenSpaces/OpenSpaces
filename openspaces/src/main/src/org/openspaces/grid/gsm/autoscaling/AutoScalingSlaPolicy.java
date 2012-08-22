@@ -18,6 +18,7 @@ package org.openspaces.grid.gsm.autoscaling;
 import java.util.Arrays;
 
 import org.openspaces.admin.pu.elastic.config.AutomaticCapacityScaleRuleConfig;
+import org.openspaces.admin.zone.config.ZonesConfig;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementPolicy;
 
@@ -36,7 +37,22 @@ public class AutoScalingSlaPolicy extends ServiceLevelAgreementPolicy {
     private AutomaticCapacityScaleRuleConfig[] rules;
     private CapacityRequirements maxCapacity;
     private CapacityRequirements minCapacity;
+    private ZonesConfig zonesConfig;
     
+    /**
+     * @return the zonesConfig
+     */
+    public ZonesConfig getZonesConfig() {
+        return zonesConfig;
+    }
+
+    /**
+     * @param zonesConfig the zonesConfig to set
+     */
+    public void setZonesConfig(ZonesConfig zonesConfig) {
+        this.zonesConfig = zonesConfig;
+    }
+
     public CapacityRequirements getCapacityRequirements() {
         return capacityRequirements;
     }
@@ -99,12 +115,20 @@ public class AutoScalingSlaPolicy extends ServiceLevelAgreementPolicy {
         if (minCapacity.equalsZero()) {
             throw new IllegalArgumentException("minCapacity cannot be zero");
         }
+        
+        if (zonesConfig == null) {
+            throw new IllegalArgumentException("zonesConfig cannot be null");
+        }
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
     @Override
     public String toString() {
         return "AutoScalingSlaPolicy [capacityRequirements=" + capacityRequirements + ", rules="
-                + Arrays.toString(rules) + ", maxCapacity=" + maxCapacity + ", minCapacity=" + minCapacity + "]";
+                + Arrays.toString(rules) + ", maxCapacity=" + maxCapacity + ", minCapacity=" + minCapacity
+                + ", zonesConfig=" + zonesConfig + "]";
     }
 
 
