@@ -65,7 +65,7 @@ implements AutoScalingSlaEnforcementEndpointAware {
 
     // events state
     private ScaleStrategyProgressEventState autoScalingEventState;
-    private CapacityRequirementsPerZones enforcedCapacityRequirementsPerZones;
+    private CapacityRequirementsPerZones lastEnforcedPlannedCapacity;
 
     @Override
     public void setAutoScalingSlaEnforcementEndpoint(AutoScalingSlaEnforcementEndpoint endpoint) {
@@ -174,11 +174,11 @@ implements AutoScalingSlaEnforcementEndpointAware {
     protected void enforceSla() throws SlaEnforcementInProgressException {
 
         SlaEnforcementInProgressException pendingException = null;
-        final CapacityRequirementsPerZones capacityRequirementsPerZones = super.getCapacityRequirementConfig().toCapacityRequirementsPerZones();
+        final CapacityRequirementsPerZones capacityRequirementsPerZones = super.getPlannedCapacity().toCapacityRequirementsPerZones();
 
         try {
             super.enforcePlannedCapacity();
-            enforcedCapacityRequirementsPerZones = capacityRequirementsPerZones;
+            lastEnforcedPlannedCapacity = capacityRequirementsPerZones;
             logger.fine("enforcedCapacityRequirementsPerZones = " + capacityRequirementsPerZones);
             // no exception means that manual scale is complete.
         }
@@ -192,7 +192,7 @@ implements AutoScalingSlaEnforcementEndpointAware {
         }
         catch (SlaEnforcementInProgressException e) {
 
-            if (enforcedCapacityRequirementsPerZones == null) {
+            if (lastEnforcedPlannedCapacity == null) {
                 // no prev capacityRequirements to work with
                 throw e;
             }
@@ -205,7 +205,7 @@ implements AutoScalingSlaEnforcementEndpointAware {
 
 
 
-        CapacityRequirementsPerZones newCapacityRequirementsPerZones = new CapacityRequirementsPerZones();
+        CapacityRequirementsPerZones newPlannedCapacity = new CapacityRequirementsPerZones();
         boolean capacityChanged = false;
 
         // make sure that we are not in the cooldown period
@@ -215,51 +215,50 @@ implements AutoScalingSlaEnforcementEndpointAware {
 
         try {
 
-            Set<ZonesConfig> zoness = enforcedCapacityRequirementsPerZones.getZones();
+            Set<ZonesConfig> zoness = lastEnforcedPlannedCapacity.getZones();
             logger.fine("enforcedCapacityRequirementsPerZones.getZones() = " + zoness);
 
             if (!isGridServiceAgentZonesAware()) {
 
-                final ZonesConfig defaultZonesConfig = getDefaultZones();
+                final ZonesConfig defaultZones = getDefaultZones();
 
-                final CapacityRequirements capacityRequirements = enforcedCapacityRequirementsPerZones.getZonesCapacityOrZero(defaultZonesConfig);
-                final CapacityRequirements newCapacityRequirements = enforceAutoScalingSla(capacityRequirements, defaultZonesConfig);
+                final CapacityRequirements capacityForDefaultZone = lastEnforcedPlannedCapacity.getZonesCapacityOrZero(defaultZones);
+                final CapacityRequirements newCapacityForDefaultZone = enforceAutoScalingSla(capacityForDefaultZone, defaultZones);
                 if (getLogger().isDebugEnabled()) {
-                    getLogger().debug("newCapacityRequirements = " + newCapacityRequirements);
+                    getLogger().debug("newCapacityForDefaultZone = " + newCapacityForDefaultZone);
                 }
-                if (!newCapacityRequirements.equals(capacityRequirements)) { // new capacity may zero if minimum capacity is zero
+                if (!newCapacityForDefaultZone.equals(capacityForDefaultZone)) { // new capacity may zero if minimum capacity is zero
                     if (getLogger().isDebugEnabled()) {
-                        getLogger().debug("newCapacityRequirements = " + newCapacityRequirements + " is not zero and is different from old capacity requirements = " + capacityRequirements + " adding capcity requirement = " + newCapacityRequirements + " to newCapacityRequirementsPerZones = " + newCapacityRequirementsPerZones);           
+                        getLogger().debug("newCapacityForDefaultZone = " + newCapacityForDefaultZone + " is not zero and is different from old capacity requirements = " + capacityForDefaultZone + " adding capcity requirement = " + newCapacityForDefaultZone + " to newCapacityRequirementsPerZones = " + newPlannedCapacity);           
                     }
-                    newCapacityRequirementsPerZones = newCapacityRequirementsPerZones.set(defaultZonesConfig, newCapacityRequirements);
+                    newPlannedCapacity = newPlannedCapacity.set(defaultZones, newCapacityForDefaultZone);
                     capacityChanged = true;
                     if (getLogger().isDebugEnabled()) {
-                        getLogger().debug("newCapacityRequirementsPerZones = " + newCapacityRequirementsPerZones);
+                        getLogger().debug("newPlannedCapacity = " + newPlannedCapacity);
                     }
-
                 }
             } else {
 
                 // enforce SLA for each zone separately.
                 for (ZonesConfig zones : zoness) {
 
-                    final CapacityRequirements capacityRequirements = enforcedCapacityRequirementsPerZones.getZonesCapacityOrZero(zones);
+                    final CapacityRequirements capacityForZones = lastEnforcedPlannedCapacity.getZonesCapacityOrZero(zones);
 
                     // enforce auto-scaling SLA for a specific zone
                     // based on the last enforced SLA, the reason is that the monitored data reflects the last enforced SLA
                     // and it could have changed since then (happens when pendingException != null)
-                    final CapacityRequirements newCapacityRequirements = enforceAutoScalingSla(capacityRequirements, zones);
+                    final CapacityRequirements newCapacityForZones = enforceAutoScalingSla(capacityForZones, zones);
 
-                    if (!newCapacityRequirements.equals(capacityRequirements)) {
+                    if (!newCapacityForZones.equals(capacityForZones)) {
                         capacityChanged = true;
                         // new capacity may zero if minimum capacity per zone is zero
-                        newCapacityRequirementsPerZones = newCapacityRequirementsPerZones.set(zones, newCapacityRequirements);
+                        newPlannedCapacity = newPlannedCapacity.set(zones, newCapacityForZones);
                     }
 
                 }  
             }
             if (getLogger().isDebugEnabled()) {
-                getLogger().debug("newCapacityRequirementsPerZones = " + newCapacityRequirementsPerZones);
+                getLogger().debug("newCapacityRequirementsPerZones = " + newPlannedCapacity);
             }          
         } catch (SlaEnforcementInProgressException e) {
             if (pendingException != null) {
@@ -272,9 +271,9 @@ implements AutoScalingSlaEnforcementEndpointAware {
         // no need to call AbstractCapacityScaleStrategyBean#enforePlannedCapacity if no capcity change is needed.
         if (capacityChanged) {
             if (getLogger().isDebugEnabled()) {
-                getLogger().debug("capacity requirments have changed to = " + newCapacityRequirementsPerZones);
+                getLogger().debug("planned capacity has changed to " + newPlannedCapacity);
             } 
-            setPlannedCapacity(new CapacityRequirementsPerZonesConfig(newCapacityRequirementsPerZones));
+            setPlannedCapacity(new CapacityRequirementsPerZonesConfig(newPlannedCapacity));
             if (pendingException != null) {
                 // throw pending exception of previous manual scale capacity.
                 // otherwise it could be lost when calling it again.
@@ -291,13 +290,13 @@ implements AutoScalingSlaEnforcementEndpointAware {
     }
 
     @Override
-    protected boolean setPlannedCapacity(CapacityRequirementsPerZonesConfig capacityRequirementsPerZonesConfig) {
-        boolean hasChanged = super.setPlannedCapacity(capacityRequirementsPerZonesConfig);
+    protected boolean setPlannedCapacity(CapacityRequirementsPerZonesConfig newPlannedCapacity) {
+        boolean hasChanged = super.setPlannedCapacity(newPlannedCapacity);
         enablePuStatistics();
         return hasChanged;
     }
 
-    private CapacityRequirements enforceAutoScalingSla(final CapacityRequirements capacityRequirements , ZonesConfig zonesConfig)
+    private CapacityRequirements enforceAutoScalingSla(final CapacityRequirements capacity , ZonesConfig zones)
             throws AutoScalingSlaEnforcementInProgressException {
 
         if (getLogger().isDebugEnabled()) {
@@ -305,13 +304,13 @@ implements AutoScalingSlaEnforcementEndpointAware {
         }
 
         final AutoScalingSlaPolicy sla = new AutoScalingSlaPolicy();
-        sla.setCapacityRequirements(capacityRequirements);
+        sla.setCapacityRequirements(capacity);
 
         // for now we assume these values are already given as per zone.
         sla.setMaxCapacity(config.getMaxCapacity().toCapacityRequirements());
         sla.setMinCapacity(config.getMinCapacity().toCapacityRequirements());
         sla.setRules(config.getRules());
-        sla.setZonesConfig(zonesConfig);
+        sla.setZonesConfig(zones);
         if (getLogger().isDebugEnabled()) {
             getLogger().debug("Automatic Scaling SLA Policy: " + sla);
         }
@@ -370,9 +369,9 @@ implements AutoScalingSlaEnforcementEndpointAware {
             } else {
                 Set<ZonesConfig> plannedZones = super.getPlannedZones();
                 getLogger().info("plannedZones = " + plannedZones);
-                for (ZonesConfig zonesConfig : plannedZones) {
-                    zonesConfig.validate();
-                    statisticsId.setAgentZones(zonesConfig);
+                for (ZonesConfig zones : plannedZones) {
+                    zones.validate();
+                    statisticsId.setAgentZones(zones);
                     getLogger().info("adding statistics calculation : " + statisticsId);
                     getProcessingUnit().addStatisticsCalculation(statisticsId);                                                    
                     maxNumberOfSamples = 

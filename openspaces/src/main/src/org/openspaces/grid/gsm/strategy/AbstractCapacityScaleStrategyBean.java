@@ -101,7 +101,7 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
     }
 
     // created by afterPropertiesSet()
-    private CapacityRequirementsPerZonesConfig capacityPerZones;
+    private CapacityRequirementsPerZonesConfig plannedCapacity;
     private ScaleStrategyConfig scaleStrategy;
         
     protected ZonesConfig getDefaultZones() {
@@ -116,14 +116,14 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
      * Call once in order to modify the behavior of {@link #enforcePlannedCapacity()}
      * Uses the default machine provisioning zone as the zone to start machines in.
      */   
-    protected void setPlannedCapacity(ScaleStrategyCapacityRequirementConfig capacity) {
+    protected void setPlannedCapacity(ScaleStrategyCapacityRequirementConfig newPlannedCapacityForDefaultZone) {
         
-        final CapacityRequirementsPerZonesConfig capacityPerZones = new CapacityRequirementsPerZonesConfig();
-        if (!capacity.toCapacityRequirements().equalsZero()) {
-            capacityPerZones.addCapacity(getDefaultZones(), capacity);
+        final CapacityRequirementsPerZonesConfig newPlannedCapacity = new CapacityRequirementsPerZonesConfig();
+        if (!newPlannedCapacityForDefaultZone.toCapacityRequirements().equalsZero()) {
+            newPlannedCapacity.addCapacity(getDefaultZones(), newPlannedCapacityForDefaultZone);
         }
         
-        setPlannedCapacity(capacityPerZones);     
+        setPlannedCapacity(newPlannedCapacity);     
     }
 
     /**
@@ -131,20 +131,20 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
      * @return false if planned has not changed, true if plan changed
      */   
     //TODO: rename method to replacePlannedCapacity
-    protected boolean setPlannedCapacity(CapacityRequirementsPerZonesConfig capacityPerZones) {
+    protected boolean setPlannedCapacity(CapacityRequirementsPerZonesConfig newPlannedCapacity) {
         
-        if (capacityPerZones == null) {
+        if (newPlannedCapacity == null) {
             throw new IllegalArgumentException("capacityRequirement cannot be null");
         }
         
-        if (this.capacityPerZones != null && capacityPerZones.toCapacityRequirementsPerZones().equals(this.capacityPerZones.toCapacityRequirementsPerZones())) {
+        if (this.plannedCapacity != null && newPlannedCapacity.toCapacityRequirementsPerZones().equals(this.plannedCapacity.toCapacityRequirementsPerZones())) {
             return false;
         }
 
         if (getLogger().isDebugEnabled()) {
-            getLogger().debug("Setting planned capacity to " + capacityPerZones + " (old planned capacity = " + this.capacityPerZones + ")");
+            getLogger().debug("Setting planned capacity to " + newPlannedCapacity + " (old planned capacity = " + this.plannedCapacity + ")");
         }
-        this.capacityPerZones = capacityPerZones;
+        this.plannedCapacity = newPlannedCapacity;
         
         // round up memory
         long roundedMemoryInMB = calcRoundedTotalMemoryInMB();
@@ -160,7 +160,7 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
             if (getLogger().isDebugEnabled()) {
                 getLogger().debug("Increasing planned capacity by " + increase + " to round up memory to nearest number of containers.");
             }
-            capacityPerZones.addCapacity(
+            newPlannedCapacity.addCapacity(
                     getDefaultZones(), 
                     increase
             );
@@ -203,8 +203,8 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
         return minimumNumberOfMachinesPerZone;
     }
 
-    protected CapacityRequirementsPerZonesConfig getCapacityRequirementConfig() {
-        return capacityPerZones;
+    protected CapacityRequirementsPerZonesConfig getPlannedCapacity() {
+        return plannedCapacity;
     }
     
     protected void setScaleStrategyConfig(ScaleStrategyConfig scaleStrategy) {
@@ -244,7 +244,7 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
 
     protected void enforcePlannedCapacity() throws SlaEnforcementInProgressException {
         
-        if (this.capacityPerZones == null) {
+        if (this.plannedCapacity == null) {
             throw new IllegalStateException("capacityPerZones cannot be null");
         }
         
@@ -338,7 +338,7 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
             }
         }
         
-        CapacityRequirementsPerZones newCapacityPerZones = capacityPerZones.toCapacityRequirementsPerZones();
+        CapacityRequirementsPerZones newCapacityPerZones = plannedCapacity.toCapacityRequirementsPerZones();
         if (newCapacityPerZones.getZones().contains(zonesToRemove)) {
             newCapacityPerZones = newCapacityPerZones.subtractZones(zonesToRemove);
         }
@@ -362,7 +362,7 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
     }
 
     protected Set<ZonesConfig> getPlannedZones() {
-        return this.capacityPerZones.toCapacityRequirementsPerZones().getZones();
+        return this.plannedCapacity.toCapacityRequirementsPerZones().getZones();
     }
  
     private void enforceMachinesSla(CapacityMachinesSlaPolicy sla)  
@@ -487,7 +487,7 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
     }
 
     private long getTotalMemoryInMB() {
-        CapacityRequirementsConfig totalCapacity = new CapacityRequirementsConfig(capacityPerZones.toCapacityRequirementsPerZones().getTotalAllocatedCapacity());
+        CapacityRequirementsConfig totalCapacity = new CapacityRequirementsConfig(plannedCapacity.toCapacityRequirementsPerZones().getTotalAllocatedCapacity());
         return totalCapacity.getMemoryCapacityInMB();
     }
 
@@ -651,7 +651,7 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
         final List<CapacityMachinesSlaPolicy> machinesSlas = new ArrayList<CapacityMachinesSlaPolicy>();
         
         final Map<ZonesConfig,Integer> minimumNumberOfMachinesPerZone = calcMinimumNumberOfMachinesPerZones();
-        final CapacityRequirementsPerZones capacityRequirementsPerZone = this.capacityPerZones.toCapacityRequirementsPerZones();
+        final CapacityRequirementsPerZones capacityRequirementsPerZone = this.plannedCapacity.toCapacityRequirementsPerZones();
         final List<ZonesConfig> sortedZoness = sortZonesByRecoveryOrder(zoness);
         for (ZonesConfig zones : sortedZoness) {
             //TODO: Use NumberOfMachinesCapacityRequirement in capacityRequirements instead of minimumNumberOfMachines
