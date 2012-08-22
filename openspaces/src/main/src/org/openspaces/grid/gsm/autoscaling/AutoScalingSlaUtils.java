@@ -17,12 +17,14 @@ package org.openspaces.grid.gsm.autoscaling;
 
 import java.util.Map;
 
+import org.openspaces.admin.internal.pu.InternalProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.statistics.LastSampleTimeWindowStatisticsConfig;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
 import org.openspaces.admin.pu.statistics.SingleInstanceStatisticsConfig;
 import org.openspaces.admin.pu.statistics.SingleInstanceStatisticsConfigurer;
+import org.openspaces.admin.zone.config.ExactZonesConfig;
 import org.openspaces.grid.gsm.autoscaling.exceptions.AutoScalingInstanceStatisticsException;
 import org.openspaces.grid.gsm.autoscaling.exceptions.AutoScalingSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.autoscaling.exceptions.AutoScalingStatisticsException;
@@ -69,11 +71,15 @@ public class AutoScalingSlaUtils {
             
             final ProcessingUnitStatisticsId singleInstanceLastSampleStatisticsId = 
                     ruleStatisticsId.shallowClone();
+            ExactZonesConfig zones = ((InternalProcessingUnit) pu).getHostingGridServiceAgentZones(instance);
             singleInstanceLastSampleStatisticsId.setTimeWindowStatistics(new LastSampleTimeWindowStatisticsConfig());
             singleInstanceLastSampleStatisticsId.setInstancesStatistics(singleInstanceStatistics);
+            zones.validate();
+            singleInstanceLastSampleStatisticsId.setAgentZones(zones);
             singleInstanceLastSampleStatisticsId.validate();
+            
             if (!statistics.containsKey(singleInstanceLastSampleStatisticsId)) {
-                throw new AutoScalingInstanceStatisticsException(instance, singleInstanceLastSampleStatisticsId.getMetric());    
+                throw new AutoScalingInstanceStatisticsException(instance, singleInstanceLastSampleStatisticsId.toString());    
             }
             
             final ProcessingUnitStatisticsId singleInstanceStatisticsId =
