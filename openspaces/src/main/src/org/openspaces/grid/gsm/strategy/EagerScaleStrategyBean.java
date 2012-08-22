@@ -216,6 +216,7 @@ public class EagerScaleStrategyBean extends AbstractScaleStrategyBean
         }
     }
     
+    @Override
     public EagerScaleConfig getConfig() {
         return slaConfig;
     }

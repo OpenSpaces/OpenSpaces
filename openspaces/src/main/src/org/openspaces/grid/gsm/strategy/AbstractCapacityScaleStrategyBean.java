@@ -34,6 +34,7 @@ import org.openspaces.admin.pu.elastic.config.AutomaticCapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.config.CapacityRequirementsConfig;
 import org.openspaces.admin.pu.elastic.config.CapacityRequirementsConfigurer;
 import org.openspaces.admin.pu.elastic.config.CapacityRequirementsPerZonesConfig;
+import org.openspaces.admin.pu.elastic.config.ScaleStrategyAgentZonesAwareConfig;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyCapacityRequirementConfig;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
 import org.openspaces.admin.zone.config.ExactZonesConfig;
@@ -322,8 +323,6 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
             throw pendingMachinesExceptions;
         }
     }
-    
-    protected abstract boolean isGridServiceAgentZonesAware();
 
     /**
      * Replaces the planned capacity of the specified zones, with the specified new planned capacity
@@ -661,5 +660,14 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
             machinesSlas.add(sla);
         }        
         return machinesSlas;
+    }
+    
+    protected boolean isGridServiceAgentZonesAware() {
+        boolean isGridServiceAgentZonesAware = false;
+        ScaleStrategyConfig config = getConfig();
+        if (config instanceof ScaleStrategyAgentZonesAwareConfig) {
+            isGridServiceAgentZonesAware = ((ScaleStrategyAgentZonesAwareConfig)config).isGridServiceAgentZonesAware();
+        }
+        return isGridServiceAgentZonesAware;
     }
 }

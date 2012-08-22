@@ -49,10 +49,6 @@ public class ManualCapacityScaleStrategyBean extends AbstractCapacityScaleStrate
     }
     
     @Override
-    protected boolean isGridServiceAgentZonesAware() {
-        return false;
-    }
-    
     public ManualCapacityScaleConfig getConfig() {
         return new ManualCapacityScaleConfig(super.getProperties());
     }

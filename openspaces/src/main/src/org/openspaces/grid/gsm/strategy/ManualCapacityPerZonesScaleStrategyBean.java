@@ -44,15 +44,9 @@ public class ManualCapacityPerZonesScaleStrategyBean extends AbstractCapacitySca
     public void enforceSla() throws SlaEnforcementInProgressException {
         super.enforcePlannedCapacity();
     }
-    
+
     @Override
-    protected boolean isGridServiceAgentZonesAware() {
-        return getConfig().isGridServiceAgentZonesAware();
-    }
-    
     public ManualCapacityPerZonesScaleConfig getConfig() {
         return new ManualCapacityPerZonesScaleConfig(super.getProperties());
     }
-    
-
 }
