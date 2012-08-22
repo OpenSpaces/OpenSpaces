@@ -35,6 +35,7 @@ import org.openspaces.admin.Admin;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.pu.ProcessingUnit;
+import org.openspaces.admin.zone.config.ExactZonesConfig;
 import org.openspaces.admin.zone.config.ZonesConfig;
 import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
@@ -154,6 +155,26 @@ public class MachinesSlaEnforcementState {
 
         public void completedStateRecoveryAfterRestart() {
             completedStateRecoveryAfterRestart = true;
+        }
+
+        @Override
+        public String toString() {
+            return "StateValue ["
+                    + (allocatedCapacity != null ? "allocatedCapacity=" + allocatedCapacity + ", " : "")
+                    + (futureAgents != null ? "futureAgents=" + futureAgents + ", " : "")
+                    + (markedForDeallocationCapacity != null ? "markedForDeallocationCapacity="
+                            + markedForDeallocationCapacity + ", " : "")
+                    + (machineIsolation != null ? "machineIsolation=" + machineIsolation + ", " : "")
+                    + (timeoutTimestampPerAgentUidGoingDown != null ? "timeoutTimestampPerAgentUidGoingDown="
+                            + timeoutTimestampPerAgentUidGoingDown + ", " : "") + "completedStateRecoveryAfterRestart="
+                    + completedStateRecoveryAfterRestart + "]";
+        }
+
+        public boolean equalsZero() {
+            return allocatedCapacity.equalsZero() 
+                   && markedForDeallocationCapacity.equalsZero() 
+                   && futureAgents.isEmpty() 
+                   && timeoutTimestampPerAgentUidGoingDown.isEmpty();
         }
     }
     
@@ -320,6 +341,9 @@ public class MachinesSlaEnforcementState {
         
         for (Entry<StateKey, StateValue> pair : state.entrySet()) {
             ElasticProcessingUnitMachineIsolation otherPuIsolation = pair.getValue().machineIsolation;
+            if (otherPuIsolation == null) {
+                throw new IllegalStateException(pair.getKey() + " should have set machine isolation");
+            }
             if (otherPuIsolation.equals(puIsolation)) {
                 keysWithSameIsolation.add(pair.getKey());
             }
@@ -512,5 +536,40 @@ public class MachinesSlaEnforcementState {
             capacityRequirementsPerAgent = capacityRequirementsPerAgent.add(getAllocatedCapacity(new StateKey(otherPu,zones)));
         }
         return capacityRequirementsPerAgent;
+    }
+
+    /**
+     * Changes the key.zone of the allocated capacity to match the exact zone of the agent
+     * @return false if nothing changed, true if replace occurred
+     */
+    public boolean replaceAllocatedCapacity(StateKey key, Admin admin) {
+        boolean changed = false;
+        final CapacityRequirementsPerAgent allocatedCapacityPerAgent  = getState(key).allocatedCapacity;
+        Collection<String> agentUids = new ArrayList<String>(allocatedCapacityPerAgent.getAgentUids()); //copy before iteration
+        for (String agentUid : agentUids) {
+            final ExactZonesConfig agentZones = admin.getGridServiceAgents().getAgentByUID(agentUid).getExactZones();
+            if (!key.gridServiceAgentZones.equals(agentZones)) {
+                // the key.agentZones is different than agentZones
+                // move allocation from key.agentZones to agentZones
+                final CapacityRequirements capacity = allocatedCapacityPerAgent.getAgentCapacity(agentUid);
+                markCapacityForDeallocation(key, agentUid, capacity);
+                deallocateCapacity(key, agentUid, capacity);
+                final StateKey newKey = new StateKey(key.pu, agentZones);
+                allocateCapacity(newKey, agentUid, capacity);
+                setMachineIsolation(newKey, getMachineIsolation(key));
+                changed = true;
+            }
+        }
+        if (getState(key).allocatedCapacity.equalsZero()) {
+            removeKey(key);
+        }
+        return changed;
+    }
+
+    private void removeKey(StateKey key) {
+        if (!getState(key).equalsZero()) {
+            throw new IllegalStateException("Cannot remove " + key + " since it does not equal zero " + getState(key));
+        }
+        state.remove(key);
     }
 }

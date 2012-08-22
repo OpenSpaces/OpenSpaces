@@ -56,6 +56,7 @@ import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpointAware;
 import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcementPendingContainerDeallocationException;
 import org.openspaces.grid.gsm.machines.exceptions.MachinesSlaEnforcementInProgressException;
+import org.openspaces.grid.gsm.machines.exceptions.MachinesSlaHasChangedException;
 import org.openspaces.grid.gsm.machines.exceptions.NeedToWaitUntilAllGridServiceAgentsDiscoveredException;
 import org.openspaces.grid.gsm.machines.exceptions.PerZonesGridServiceAgentSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.machines.exceptions.PerZonesMachinesSlaEnforcementInProgressException;
@@ -130,7 +131,6 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
      * Call once in order to modify the behavior of {@link #enforcePlannedCapacity()}
      * @return false if planned has not changed, true if plan changed
      */   
-    //TODO: rename method to replacePlannedCapacity
     protected boolean setPlannedCapacity(CapacityRequirementsPerZonesConfig newPlannedCapacity) {
         
         if (newPlannedCapacity == null) {
@@ -264,6 +264,10 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
             try {
                 enforceMachinesSla(sla);
             }
+            catch (MachinesSlaHasChangedException e) {
+                // need to start over again since plan has changed
+                throw e;
+            }
             catch (GridServiceAgentSlaEnforcementPendingContainerDeallocationException e) {
                 // fall through to containers sla enforcement since need to scale-in containers
                 pendingAgentsExceptions.addReason(zones,e);
@@ -327,9 +331,9 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
     /**
      * Replaces the planned capacity of the specified zones, with the specified new planned capacity
      * which could be with other zones
-     * @return 
+     * @return true if actually changed anything in the plan 
      */
-    private boolean replacePlannedCapacityForZones(ZonesConfig zonesToRemove, CapacityRequirementsPerAgent capacityToAdd) {
+    private boolean replacePlannedCapacity(ZonesConfig zonesToRemove, CapacityRequirementsPerAgent capacityToAdd) {
 
         if (getLogger().isDebugEnabled()) {
             if (zonesToRemove instanceof RequiredZonesConfig) {
@@ -378,9 +382,10 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
             if (isGridServiceAgentZonesAware()) {
                 CapacityRequirementsPerAgent allocatedCapacity = 
                         machinesEndpoint.getAllocatedCapacity(sla);
-                boolean replaced = replacePlannedCapacityForZones(sla.getGridServiceAgentZones(), allocatedCapacity);
-                if (replaced) {
-                    throw new MachinesSlaEnforcementInProgressException(new String[] {getProcessingUnit().getName()}, "Capacity changed since zone aware");
+                boolean replacedAllocated = machinesEndpoint.replaceAllocatedCapacity(sla);
+                boolean replacedPlanned   = replacePlannedCapacity(sla.getGridServiceAgentZones(), allocatedCapacity);
+                if (replacedPlanned || replacedAllocated) {
+                    throw new MachinesSlaHasChangedException(getProcessingUnit(),sla.getGridServiceAgentZones(), sla.getCapacityRequirements(), allocatedCapacity);
                 }
             }
             machineProvisioningCompletedEvent();

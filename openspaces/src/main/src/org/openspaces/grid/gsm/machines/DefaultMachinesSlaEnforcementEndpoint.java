@@ -1314,6 +1314,11 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
     public Set<ZonesConfig> getGridServiceAgentsZones() {
         return state.getGridServiceAgentsZones(pu);
     }
+
+    @Override
+    public boolean replaceAllocatedCapacity(AbstractMachinesSlaPolicy sla) {
+        return state.replaceAllocatedCapacity(getKey(sla), pu.getAdmin());
+    }
 }
 
 

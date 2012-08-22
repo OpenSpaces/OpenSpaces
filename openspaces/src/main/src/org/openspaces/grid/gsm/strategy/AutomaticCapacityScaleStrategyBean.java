@@ -40,6 +40,7 @@ import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerZones;
 import org.openspaces.grid.gsm.containers.exceptions.ContainersSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.machines.exceptions.MachinesSlaEnforcementInProgressException;
+import org.openspaces.grid.gsm.machines.exceptions.MachinesSlaHasChangedException;
 import org.openspaces.grid.gsm.machines.exceptions.NeedToWaitUntilAllGridServiceAgentsDiscoveredException;
 import org.openspaces.grid.gsm.machines.exceptions.SomeProcessingUnitsHaveNotCompletedStateRecoveryException;
 import org.openspaces.grid.gsm.rebalancing.exceptions.RebalancingSlaEnforcementInProgressException;
@@ -190,6 +191,10 @@ implements AutoScalingSlaEnforcementEndpointAware {
             // do not run autoscaling algorithm since GSM may already start deploying new instances
             throw e;
         }
+        catch (MachinesSlaHasChangedException e) {
+            //start over, since the plan has changed
+            throw e;
+        }
         catch (SlaEnforcementInProgressException e) {
 
             if (lastEnforcedPlannedCapacity == null) {
@@ -268,7 +273,7 @@ implements AutoScalingSlaEnforcementEndpointAware {
             }
             throw e;
         }
-        // no need to call AbstractCapacityScaleStrategyBean#enforePlannedCapacity if no capcity change is needed.
+        // no need to call AbstractCapacityScaleStrategyBean#enforePlannedCapacity if no capacity change is needed.
         if (capacityChanged) {
             if (getLogger().isDebugEnabled()) {
                 getLogger().debug("planned capacity has changed to " + newPlannedCapacity);
