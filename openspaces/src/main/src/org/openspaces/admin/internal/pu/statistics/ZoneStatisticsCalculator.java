@@ -38,76 +38,61 @@ public class ZoneStatisticsCalculator implements InternalProcessingUnitStatistic
      */
     @Override
     public void calculateNewStatistics(InternalProcessingUnitStatistics processingUnitStatistics,
-            Collection<ProcessingUnitStatisticsId> statisticIds) {
+            Collection<ProcessingUnitStatisticsId> requestedStatisticsIds) {
         
         if (logger.isTraceEnabled()) {
-            logger.trace("calculateNewStatistics(processingUnitStatistics="+processingUnitStatistics+" , statisticsIds="+ statisticIds);
+            logger.trace("calculateNewStatistics(processingUnitStatistics="+processingUnitStatistics+" , statisticsIds="+ requestedStatisticsIds);
         }
         // calculate new statistics for each request id.
-        if (logger.isTraceEnabled()) {
-            logger.trace("calculating ZoneStatistics in ZoneStatisticsCalculator");
-        }
-        for (ProcessingUnitStatisticsId processingUnitStatisticsId : statisticIds) {
-            calculateNewStatistics(processingUnitStatistics, processingUnitStatisticsId);
+        for (ProcessingUnitStatisticsId requestedStatisticsId : requestedStatisticsIds) {
+            calculateNewStatistics(processingUnitStatistics, requestedStatisticsId);
         } 
         if (logger.isTraceEnabled()) {
-            logger.trace("calculateNewStatistics(processingUnitStatistics="+processingUnitStatistics+" , statisticsIds="+ statisticIds);
+            logger.trace("calculateNewStatistics(processingUnitStatistics="+processingUnitStatistics+" , statisticsIds="+ requestedStatisticsIds);
         }
     } 
     
-    private void calculateNewStatistics(InternalProcessingUnitStatistics processingUnitStatistics, ProcessingUnitStatisticsId processingUnitStatisticsId) {
-        processingUnitStatisticsId.validate();
+    private void calculateNewStatistics(InternalProcessingUnitStatistics processingUnitStatistics, ProcessingUnitStatisticsId requestedStatisticsId) {
+        requestedStatisticsId.validate();
         //copy to avoid conc. modification exception on statistics
         Map<ProcessingUnitStatisticsId, Object> statistics = new HashMap<ProcessingUnitStatisticsId, Object>(processingUnitStatistics.getStatistics());
         // compare each request id with all current statistics entries.
-        for (Map.Entry<ProcessingUnitStatisticsId, Object> entry : statistics.entrySet()) {
-            calculateNewStatistics(processingUnitStatistics, entry, processingUnitStatisticsId);
+        boolean statisfied = false;
+        for (Map.Entry<ProcessingUnitStatisticsId, Object> statisticsEntry : statistics.entrySet()) {
+            if (calculateNewStatistics(processingUnitStatistics, statisticsEntry, requestedStatisticsId)) {
+                statisfied = true;
+            }
+        }
+        
+        if (!statisfied && logger.isTraceEnabled()) {
+            logger.trace("requestedZoneStatisticsConfig : " + requestedStatisticsId.getAgentZones() + " is not satisfied by any existing statisitcs");
         }
         
     }
     
-    private void calculateNewStatistics(InternalProcessingUnitStatistics internalProcessingUnitStatistics, Map.Entry<ProcessingUnitStatisticsId, Object> statisticsEntry, ProcessingUnitStatisticsId requestedProcessingUnitStatisticsId) {
+    private boolean calculateNewStatistics(InternalProcessingUnitStatistics internalProcessingUnitStatistics, Map.Entry<ProcessingUnitStatisticsId, Object> statisticsEntry, ProcessingUnitStatisticsId requestedStatisticsId) {
         
         ProcessingUnitStatisticsId existingProcessingUnitStatisticsId = statisticsEntry.getKey();
         Object value = statisticsEntry.getValue();
         
         // zones to compare
-        ZonesConfig requestedZoneStatisticsConfig = requestedProcessingUnitStatisticsId.getAgentZones();
-        if (logger.isDebugEnabled()) {
-            logger.debug("requestedZoneStatisticsConfig = " + requestedZoneStatisticsConfig);
-        }
+        ZonesConfig requestedZoneStatisticsConfig = requestedStatisticsId.getAgentZones();
         ExactZonesConfig existingZoneStatisticsConfig = (ExactZonesConfig) existingProcessingUnitStatisticsId.getAgentZones();
-        if (logger.isDebugEnabled()) {
-            logger.debug("existingZoneStatisticsConfig = " + existingZoneStatisticsConfig);
-        }
         
         // keys without zones to compare
         ProcessingUnitStatisticsId erasedExistingProcessingUnitStatisticsId = erase(existingProcessingUnitStatisticsId);
-        if (logger.isDebugEnabled()) {
-            logger.debug("erasedExistingProcessingUnitStatisticsId = " + erasedExistingProcessingUnitStatisticsId);
-        }
-        ProcessingUnitStatisticsId erasedRequestedProcessingUnitStatisticsId = erase(requestedProcessingUnitStatisticsId);
-        if (logger.isDebugEnabled()) {
-            logger.debug("erasedRequestedProcessingUnitStatisticsId = " + erasedRequestedProcessingUnitStatisticsId);
-        }
-        
+        ProcessingUnitStatisticsId erasedrequestedStatisticsId = erase(requestedStatisticsId);
+                
         if (requestedZoneStatisticsConfig.isSatisfiedBy(existingZoneStatisticsConfig)) {
-            if (erasedRequestedProcessingUnitStatisticsId.equals(erasedExistingProcessingUnitStatisticsId)) {
+            if (erasedrequestedStatisticsId.equals(erasedExistingProcessingUnitStatisticsId)) {
                 ProcessingUnitStatisticsId newProcessingUnitStatisticsId = existingProcessingUnitStatisticsId.shallowClone();
                 requestedZoneStatisticsConfig.validate();
                 newProcessingUnitStatisticsId.setAgentZones(requestedZoneStatisticsConfig);
-                
-                if (logger.isDebugEnabled()) {
-                    logger.debug("adding statistics id " + newProcessingUnitStatisticsId + " with value " + value);
-                }
-                
                 internalProcessingUnitStatistics.addStatistics(newProcessingUnitStatisticsId, value);
+                return true;
             }
-        } else {
-            if (logger.isDebugEnabled()) {
-                logger.debug("requestedZoneStatisticsConfig : " + requestedZoneStatisticsConfig + " is not satisfied by existingZoneStatisticsConfig : " + existingZoneStatisticsConfig);
-            }    
-        }
+        } 
+        return false;
     }
     
     private ProcessingUnitStatisticsId erase(ProcessingUnitStatisticsId processingUnitStatisticsId) {
