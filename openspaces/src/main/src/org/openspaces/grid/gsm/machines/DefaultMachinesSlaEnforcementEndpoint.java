@@ -434,6 +434,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                 logger.info(
                         "One or more new machine(s) is started in order to "+
                         "fill capacity shortage " + shortageCapacity + " " + 
+                        "for zones " + exactZones +" "+
                         "Allocated machine agents are: " + getAllocatedCapacity(sla) +" "+
                         "Pending future machine(s) requests " + getNumberOfFutureAgents(sla));
                 
@@ -480,7 +481,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                 
                 logger.info(
                         machineShortage+ " new machine(s) is scheduled to be started in order to reach the minimum of " + 
-                        sla.getMinimumNumberOfMachines() + " machines. " +
+                        sla.getMinimumNumberOfMachines() + " machines, for zones " + exactZones + ". " +
                         "Allocated machine agents are: " + getAllocatedCapacity(sla));
                 
             }
