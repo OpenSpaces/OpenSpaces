@@ -109,22 +109,33 @@ public class MachinesSlaEnforcementState {
             futureAgents.add(new GridServiceAgentFutures(newFutureAgents,capacityRequirements));
         }
 
-        public void allocatedCapacity(String agentUid, CapacityRequirements capacity) {
+        public void allocateCapacity(String agentUid, CapacityRequirements capacity) {
+            if (machineIsolation == null) {
+                throw new IllegalStateException(this + " should have set machine isolation before allocating capacity");
+            }
             allocatedCapacity = allocatedCapacity.add(agentUid,capacity);
         }
 
         public void markCapacityForDeallocation(String agentUid, CapacityRequirements capacity) {
+            if (machineIsolation == null) {
+                throw new IllegalStateException(this + " should have set machine isolation before marking capacity for deallocation");
+            }
             allocatedCapacity = allocatedCapacity.subtract(agentUid,capacity);
             markedForDeallocationCapacity = markedForDeallocationCapacity.add(agentUid, capacity);
         }
 
         public void unmarkCapacityForDeallocation(String agentUid, CapacityRequirements capacity) {
-
+            if (machineIsolation == null) {
+                throw new IllegalStateException(this + " should have set machine isolation before unmarking capacity for deallocation");
+            }
             markedForDeallocationCapacity = markedForDeallocationCapacity.subtract(agentUid, capacity);
             allocatedCapacity = allocatedCapacity.add(agentUid,capacity);
         }
 
         public void deallocateCapacity(String agentUid, CapacityRequirements capacity) {
+            if (machineIsolation == null) {
+                throw new IllegalStateException(this + " should have set machine isolation before deallocating capacity");
+            }
             markedForDeallocationCapacity = markedForDeallocationCapacity.subtract(agentUid, capacity);
         }
 
@@ -142,6 +153,9 @@ public class MachinesSlaEnforcementState {
         }
 
         public void agentGoingDown(String agentUid, long timeout, TimeUnit unit) {
+            if (machineIsolation == null) {
+                throw new IllegalStateException(this + " should have set machine isolation before agentGoingDown");
+            }
             timeoutTimestampPerAgentUidGoingDown.put(agentUid, System.currentTimeMillis() + TimeUnit.MILLISECONDS.convert(timeout, unit));
         }
 
@@ -150,6 +164,9 @@ public class MachinesSlaEnforcementState {
         }
 
         public void removeFutureAgents(GridServiceAgentFutures futureAgentsToRemove) {
+            if (machineIsolation == null) {
+                throw new IllegalStateException(this + " should have set machine isolation before removing future agent");
+            }
             futureAgents.remove(futureAgentsToRemove);
         }
 
@@ -210,7 +227,7 @@ public class MachinesSlaEnforcementState {
     
 
     public void allocateCapacity(StateKey key, String agentUid, CapacityRequirements capacity) {
-        getState(key).allocatedCapacity(agentUid, capacity);        
+        getState(key).allocateCapacity(agentUid, capacity);        
     }
 
     public void markCapacityForDeallocation(StateKey key, String agentUid, CapacityRequirements capacity) {
