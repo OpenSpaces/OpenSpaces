@@ -3,18 +3,8 @@
 # The call to setenv.sh can be commented out if necessary.
 . `dirname $0`/setenv.sh
 
-# Function to determine if path conversion is required
-toNative() {
-    # Check for Cygwin
-    case $OS in
-        Windows*)
-           toWindows "$@";;
-        *) echo $* ;;
-    esac
-}
-
 echo Starting a Processing Unit Instance
-bootclasspath="-Xbootclasspath/p:$(toNative $XML_JARS)"
+bootclasspath="-Xbootclasspath/p:$XML_JARS"
 
 COMMAND_LINE="${JAVACMD} ${JAVA_OPTIONS} $bootclasspath ${GS_LOGGING_CONFIG_FILE_PROP} ${RMI_OPTIONS} ${LOOKUP_LOCATORS_PROP} ${LOOKUP_GROUPS_PROP} -Djava.security.policy=${POLICY} -Dcom.gs.home=${JSHOMEDIR} -classpath "${PRE_CLASSPATH}${CPS}${GS_JARS}${CPS}${SPRING_JARS}${CPS}${EXT_JARS}$CPS${JDBC_JARS}${CPS}${POST_CLASSPATH}" org.openspaces.pu.container.standalone.StandaloneProcessingUnitContainer $*"
 
