@@ -35,7 +35,26 @@ import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
 import org.openspaces.admin.pu.statistics.SingleInstanceStatisticsConfig;
 import org.openspaces.admin.zone.config.ExactZonesConfig;
 import org.openspaces.admin.zone.config.ZonesConfig;
-
+/**
+ * This class performs 3 calculations on raw statistics: timeWindow, agentZones and instances calculations
+ * in order to transform the raw statisticsId into the requested statisticsId
+ * 
+ * raw statisticsid read from pu instance (timestamp = now):
+ * ["mybean", "memory" , LastSampleTimeWindowStatisticsConfig,  SingleInstanceStatisticsConfig("instance1"), ExactZoneConfig("zone1")]
+ * 
+ * time calculated statisticsId (timestamp = now, but the calculator averaged the last 60 seconds):
+ * ["mybean", "memory" , AverageTimeWindowStatisticsConfig(60), SingleInstanceStatisticsConfig("instance1"), ExactZoneConfig("zone1")]
+ * 
+ * zone calculated statisticsId (the zone is changed to reflect the requested statisticsId):
+ * ["mybean", "memory" , AverageTimeWindowStatisticsConfig(60), SingleInstanceStatisticsConfig("instance1"), AtLeastOneZoneConfig("zone1")]
+ * 
+ * instances calculated statisticsId (the instances changed to reflect the average across all instances)
+ * This is also the requested statisticId:
+ * ["mybean", "memory" , AverageTimeWindowStatisticsConfig(60), AverageInstancesStatisticsConfig           , AtLeastOneZoneConfig("zone1")]
+ * 
+ * @author Itai Frenkel
+ *
+ */
 public class DefaultProcessingUnitStatistics implements InternalProcessingUnitStatistics {
 
     private volatile ProcessingUnitStatistics previous;
@@ -93,6 +112,9 @@ public class DefaultProcessingUnitStatistics implements InternalProcessingUnitSt
         
     }
 
+    /**
+     * @see #DefaultProcessingUnitStatistics(long, ProcessingUnitStatistics, int) documentation
+     */
     @Override
     public void calculateStatistics(Iterable<ProcessingUnitStatisticsId> statisticsIds) {
         
