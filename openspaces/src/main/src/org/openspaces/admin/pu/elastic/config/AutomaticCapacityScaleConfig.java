@@ -56,6 +56,9 @@ public class AutomaticCapacityScaleConfig
     private static final String MIN_CAPACITY_KEY_PREFIX = "min-capacity.";
     private static final String INITIAL_CAPACITY_KEY_PREFIX = "initial-capacity.";
     private static final String MAX_CAPACITY_KEY_PREFIX = "max-capacity.";
+    
+    private static final String MIN_CAPACITY_PER_ZONE_KEY_PREFIX = "min-capacity-per-zone.";
+    private static final String MAX_CAPACITY_PER_ZONE_KEY_PREFIX = "max-capacity-per-zone.";
     private static final HashMap<String, String> EMPTY_CAPACITY = new HashMap<String, String>();
 
     private static final String RULE_KEY = "rule";
@@ -188,6 +191,40 @@ public class AutomaticCapacityScaleConfig
         properties.putMap(MAX_CAPACITY_KEY_PREFIX, maxCapacity.getProperties());
     }
 
+    public CapacityRequirementsConfig getMinCapacityPerZone() {
+        return new CapacityRequirementsConfig(properties.getMap(MIN_CAPACITY_PER_ZONE_KEY_PREFIX, EMPTY_CAPACITY));
+    }
+    
+    /**
+     * Sets the minimum scale capacity per agent zone that the @{link {@link ProcessingUnit}
+     * is deployed with.
+     * 
+     * The result of a scaling rule result that increases capacity will never
+     * breach the minimum scale capacity per agent zone.
+     * 
+     * This attribute should be used together with {@link #setGridServiceAgentZonesAware(boolean)}  enabled.
+     */
+    public void setMinCapacityPerZone(CapacityRequirementsConfig minCapacityPerZone) {
+        properties.putMap(MIN_CAPACITY_PER_ZONE_KEY_PREFIX, minCapacityPerZone.getProperties());
+    }
+    
+    public CapacityRequirementsConfig getMaxCapacityPerZone() {
+        return new CapacityRequirementsConfig(properties.getMap(MAX_CAPACITY_PER_ZONE_KEY_PREFIX, EMPTY_CAPACITY));
+    }
+    
+    /**
+     * Sets the maximum scale capacity per agent zone that the @{link {@link ProcessingUnit}
+     * is deployed with.
+     * 
+     * The result of a scaling rule result that increases capacity will never
+     * breach the maximum scale capacity per agent zone.
+     * 
+     * This attribute should be used together with {@link #setGridServiceAgentZonesAware(boolean)}  enabled.
+     */
+    public void setMaxCapacityPerZone(CapacityRequirementsConfig maxCapacityPerZone) {
+        properties.putMap(MAX_CAPACITY_PER_ZONE_KEY_PREFIX, maxCapacityPerZone.getProperties());        
+    }
+    
     public void setRules(AutomaticCapacityScaleRuleConfig[] rules) {
         for (int i = 0 ; i < rules.length ; i++) {
             properties.putMap(getRulesKeyPrefix(i), rules[i].getProperties());
@@ -275,5 +312,4 @@ public class AutomaticCapacityScaleConfig
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         this.properties = new StringProperties((Map<String,String>)in.readObject());
     }
-
 }

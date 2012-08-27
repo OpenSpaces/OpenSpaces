@@ -94,6 +94,16 @@ public class AutomaticCapacityScaleConfigurer implements ScaleStrategyConfigurer
         config.setMaxCapacity(maxCapacity);
         return this;
     }
+
+    public AutomaticCapacityScaleConfigurer minCapacityPerZone(CapacityRequirementsConfig minCapacityPerZone) {
+        config.setMinCapacityPerZone(minCapacityPerZone);
+        return this;
+    }
+
+    public AutomaticCapacityScaleConfigurer maxCapacityPerZone(CapacityRequirementsConfig maxCapacityPerZone) {
+        config.setMaxCapacityPerZone(maxCapacityPerZone);
+        return this;
+    }
     
     public AutomaticCapacityScaleConfigurer addRule(AutomaticCapacityScaleRuleConfig rule) {
         rules.add(rule);
