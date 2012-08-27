@@ -15,10 +15,7 @@
  *******************************************************************************/
 package org.openspaces.grid.gsm.autoscaling.exceptions;
 
-import java.util.Map;
-
 import org.openspaces.admin.pu.ProcessingUnitInstance;
-import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
 
 /**
@@ -32,16 +29,8 @@ public class AutoScalingInstanceStatisticsException extends AutoScalingStatistic
     public AutoScalingInstanceStatisticsException(ProcessingUnitInstance instance, String metric) {
         super(instance.getProcessingUnit(), message(metric,instance));
     }
-    
-    public AutoScalingInstanceStatisticsException(ProcessingUnitInstance instance, String metric, Map<ProcessingUnitStatisticsId, Object> statistics) {
-        super(instance.getProcessingUnit(), message(metric, instance, statistics));
-    }
 
     private static String message(String metric, ProcessingUnitInstance instance) {
         return "Cannot monitor " + instance.getProcessingUnitInstanceName() + " for " + metric ;
-    }
-    
-    private static String message(String metric,ProcessingUnitInstance instance, Map<ProcessingUnitStatisticsId, Object> statistics) {
-        return "Cannot monitor " + instance.getProcessingUnitInstanceName() + " for " + metric + ". current processing unit statistics are : " + statistics ;
     }
 }
