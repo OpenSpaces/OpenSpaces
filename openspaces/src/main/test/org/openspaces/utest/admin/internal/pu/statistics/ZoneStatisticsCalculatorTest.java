@@ -16,7 +16,6 @@
 package org.openspaces.utest.admin.internal.pu.statistics;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -55,15 +54,42 @@ public class ZoneStatisticsCalculatorTest extends TestCase {
 
     private static final String ZONE_1 = "zone1";
     private static final String ZONE_2 = "zone2";
-
+    
+    private static final int historySize = 2;
+    
     @Test
     public void test() {
 
-        int historySize = 2;
-        long now = System.currentTimeMillis();
-        long prev = now - TimeUnit.SECONDS.toMillis(TIME_WINDOW_SECONDS);
+        InternalProcessingUnitStatistics processingUnitStatistics = createProcessingUnitStatistics();
         
+        List<ProcessingUnitStatisticsId> newStatisticsIds = new ArrayList<ProcessingUnitStatisticsId>();
+        newStatisticsIds.add(atLeastOneZoneStatisticsId());
+        processingUnitStatistics.calculateStatistics(newStatisticsIds);
+        
+        Assert.assertEquals(EXPECTED_METRIC_VALUE, processingUnitStatistics.getStatistics().get(atLeastOneZoneStatisticsId()));
+    }
+    
+    
+    @Test
+    public void testSimilarStatistics() {
+        
+        InternalProcessingUnitStatistics processingUnitStatistics = createProcessingUnitStatistics();
+        
+        List<ProcessingUnitStatisticsId> newStatisticsIds = new ArrayList<ProcessingUnitStatisticsId>();
+        newStatisticsIds.add(atLeastOneZoneStatisticsId());
+        newStatisticsIds.add(exactZonesStatisticsId());
+        processingUnitStatistics.calculateStatistics(newStatisticsIds);
+        
+        Assert.assertEquals(EXPECTED_METRIC_VALUE, processingUnitStatistics.getStatistics().get(atLeastOneZoneStatisticsId()));
+        Assert.assertEquals(EXPECTED_METRIC_VALUE, processingUnitStatistics.getStatistics().get(exactZonesStatisticsId()));
+        
+    }
+
+    private InternalProcessingUnitStatistics createProcessingUnitStatistics() {
         ProcessingUnitStatistics prevPrevProcessingUnitStatistics = null;
+        
+        final long now = System.currentTimeMillis();
+        final long prev = now - TimeUnit.SECONDS.toMillis(TIME_WINDOW_SECONDS);
         
         InternalProcessingUnitStatistics prevProcessingUnitStatistics = 
                 new DefaultProcessingUnitStatistics(prev, prevPrevProcessingUnitStatistics , historySize);
@@ -82,11 +108,7 @@ public class ZoneStatisticsCalculatorTest extends TestCase {
         processingUnitStatistics.addStatistics(
                 lastTimeSampleStatisticsId(INSTANCE_UID1), 
                 METRIC_VALUE_UID1);
-        
-        processingUnitStatistics.calculateStatistics(getTestStatisticsCalculations());
-        
-        Assert.assertEquals(EXPECTED_METRIC_VALUE, processingUnitStatistics.getStatistics().get(zoneStatisticsId()));
-
+        return processingUnitStatistics;
     }
     
     private ProcessingUnitStatisticsId lastTimeSampleStatisticsId(String instanceUid) {
@@ -102,15 +124,7 @@ public class ZoneStatisticsCalculatorTest extends TestCase {
         
     }
     
-    private Collection<ProcessingUnitStatisticsId> getTestStatisticsCalculations() {
-        
-        List<ProcessingUnitStatisticsId> newStatisticsIds = new ArrayList<ProcessingUnitStatisticsId>();
-        newStatisticsIds.add(zoneStatisticsId());
-        
-        return newStatisticsIds;
-    }
-    
-   private ProcessingUnitStatisticsId zoneStatisticsId() {
+   private ProcessingUnitStatisticsId atLeastOneZoneStatisticsId() {
         
         return new ProcessingUnitStatisticsIdConfigurer()
             .monitor(MONITOR)
@@ -120,4 +134,15 @@ public class ZoneStatisticsCalculatorTest extends TestCase {
             .agentZones(new AtLeastOneZoneConfigurer().addZone(ZONE_1).create())
             .create();
     }
+   
+   private ProcessingUnitStatisticsId exactZonesStatisticsId() {
+       
+       return new ProcessingUnitStatisticsIdConfigurer()
+           .monitor(MONITOR)
+           .metric(METRIC)
+           .timeWindowStatistics(new AverageTimeWindowStatisticsConfigurer().timeWindow(TIME_WINDOW_SECONDS, TimeUnit.SECONDS).create())
+           .instancesStatistics(new AverageInstancesStatisticsConfig())
+           .agentZones(new ExactZonesConfigurer().addZone(ZONE_1).create())
+           .create();
+   }
 }
