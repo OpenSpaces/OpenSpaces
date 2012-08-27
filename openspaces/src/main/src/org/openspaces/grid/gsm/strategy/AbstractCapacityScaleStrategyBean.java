@@ -16,13 +16,10 @@
 package org.openspaces.grid.gsm.strategy;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.openspaces.admin.bean.BeanConfigurationException;
@@ -166,41 +163,6 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
             );
         }
         return true;
-    }
-    
-    /**
-     * Calculates the minimum number of machines per zone
-     * Based on number of zones and total minimum number of machines
-     * @throws MachinesSlaEnforcementInProgressException 
-     */
-    private Map<ZonesConfig, Integer> calcMinimumNumberOfMachinesPerZones() throws MachinesSlaEnforcementInProgressException {
-
-        Map<ZonesConfig, Integer> minimumNumberOfMachinesPerZone = new HashMap<ZonesConfig,Integer>();
-        
-        final int minimumTotalNumberOfMachines = getMinimumNumberOfMachines();
-        
-        final Collection<ZonesConfig> plannedZones = getPlannedZones();
-        
-        int defaultNumberOfMachines = (int) Math.ceil(1.0*minimumTotalNumberOfMachines/plannedZones.size());
-        
-        int remainingNumberOfMachines = minimumTotalNumberOfMachines;
-        for (ZonesConfig zones : plannedZones) {
-            
-            int numberOfMachines = 0;
-            if (plannedZones.contains(zones)) {
-                numberOfMachines = Math.min(defaultNumberOfMachines, remainingNumberOfMachines);
-            }
-            minimumNumberOfMachinesPerZone.put(zones, numberOfMachines);
-            remainingNumberOfMachines -= numberOfMachines;
-        }
-        
-        for (ZonesConfig zones : machinesEndpoint.getGridServiceAgentsZones()) {
-            if (!plannedZones.contains(zones)) {
-                minimumNumberOfMachinesPerZone.put(zones, 0);
-            }
-        }
-        
-        return minimumNumberOfMachinesPerZone;
     }
 
     protected CapacityRequirementsPerZonesConfig getPlannedCapacity() {
@@ -655,12 +617,15 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
         
         final List<CapacityMachinesSlaPolicy> machinesSlas = new ArrayList<CapacityMachinesSlaPolicy>();
         
-        final Map<ZonesConfig,Integer> minimumNumberOfMachinesPerZone = calcMinimumNumberOfMachinesPerZones();
         final CapacityRequirementsPerZones capacityRequirementsPerZone = this.plannedCapacity.toCapacityRequirementsPerZones();
         final List<ZonesConfig> sortedZoness = sortZonesByRecoveryOrder(zoness);
+        int minimumNumberOfMachines = getMinimumNumberOfMachines();
+        if (sortedZoness.size() > 1) {
+            //if more than one zone then at least one per zone
+            minimumNumberOfMachines = 1;
+        }
         for (ZonesConfig zones : sortedZoness) {
             //TODO: Use NumberOfMachinesCapacityRequirement in capacityRequirements instead of minimumNumberOfMachines
-            final Integer minimumNumberOfMachines = minimumNumberOfMachinesPerZone.get(zones);
             //could be zero due to requirements change but machines still running
             final CapacityRequirements capacityRequirements = capacityRequirementsPerZone.getZonesCapacityOrZero(zones);
             final CapacityMachinesSlaPolicy sla = getMachinesSla(zones, minimumNumberOfMachines, capacityRequirements);
