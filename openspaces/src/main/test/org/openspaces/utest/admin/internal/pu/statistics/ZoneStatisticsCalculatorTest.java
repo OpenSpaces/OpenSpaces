@@ -16,6 +16,7 @@
 package org.openspaces.utest.admin.internal.pu.statistics;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -60,7 +61,7 @@ public class ZoneStatisticsCalculatorTest extends TestCase {
     @Test
     public void test() {
 
-        InternalProcessingUnitStatistics processingUnitStatistics = createProcessingUnitStatistics();
+        InternalProcessingUnitStatistics processingUnitStatistics = createProcessingUnitStatistics(ZONE_1, ZONE_2);
         
         List<ProcessingUnitStatisticsId> newStatisticsIds = new ArrayList<ProcessingUnitStatisticsId>();
         newStatisticsIds.add(atLeastOneZoneStatisticsId());
@@ -73,7 +74,7 @@ public class ZoneStatisticsCalculatorTest extends TestCase {
     @Test
     public void testSimilarStatistics() {
         
-        InternalProcessingUnitStatistics processingUnitStatistics = createProcessingUnitStatistics();
+        InternalProcessingUnitStatistics processingUnitStatistics = createProcessingUnitStatistics(ZONE_1);
         
         List<ProcessingUnitStatisticsId> newStatisticsIds = new ArrayList<ProcessingUnitStatisticsId>();
         newStatisticsIds.add(atLeastOneZoneStatisticsId());
@@ -85,7 +86,7 @@ public class ZoneStatisticsCalculatorTest extends TestCase {
         
     }
 
-    private InternalProcessingUnitStatistics createProcessingUnitStatistics() {
+    private InternalProcessingUnitStatistics createProcessingUnitStatistics(String... zones) {
         ProcessingUnitStatistics prevPrevProcessingUnitStatistics = null;
         
         final long now = System.currentTimeMillis();
@@ -94,31 +95,31 @@ public class ZoneStatisticsCalculatorTest extends TestCase {
         InternalProcessingUnitStatistics prevProcessingUnitStatistics = 
                 new DefaultProcessingUnitStatistics(prev, prevPrevProcessingUnitStatistics , historySize);
         prevProcessingUnitStatistics.addStatistics(
-                lastTimeSampleStatisticsId(INSTANCE_UID0), 
+                lastTimeSampleStatisticsId(INSTANCE_UID0, zones), 
                 METRIC_VALUE_UID0);
         prevProcessingUnitStatistics.addStatistics(
-                lastTimeSampleStatisticsId(INSTANCE_UID1), 
+                lastTimeSampleStatisticsId(INSTANCE_UID1, zones), 
                 METRIC_VALUE_UID1);
         
         InternalProcessingUnitStatistics processingUnitStatistics = 
                 new DefaultProcessingUnitStatistics(now , prevProcessingUnitStatistics , historySize);
         processingUnitStatistics.addStatistics(
-                lastTimeSampleStatisticsId(INSTANCE_UID0), 
+                lastTimeSampleStatisticsId(INSTANCE_UID0, zones), 
                 METRIC_VALUE_UID0);
         processingUnitStatistics.addStatistics(
-                lastTimeSampleStatisticsId(INSTANCE_UID1), 
+                lastTimeSampleStatisticsId(INSTANCE_UID1, zones), 
                 METRIC_VALUE_UID1);
         return processingUnitStatistics;
     }
     
-    private ProcessingUnitStatisticsId lastTimeSampleStatisticsId(String instanceUid) {
+    private ProcessingUnitStatisticsId lastTimeSampleStatisticsId(String instanceUid, String... zones) {
 
         return new ProcessingUnitStatisticsIdConfigurer()
             .metric(METRIC)
             .monitor(MONITOR)
             .instancesStatistics(new SingleInstanceStatisticsConfigurer().instanceUid(instanceUid).create())
             .timeWindowStatistics(new LastSampleTimeWindowStatisticsConfig())
-            .agentZones(new ExactZonesConfigurer().addZones(ZONE_1,ZONE_2).create())
+            .agentZones(new ExactZonesConfigurer().addZones(zones).create())
             .create();
 
         
