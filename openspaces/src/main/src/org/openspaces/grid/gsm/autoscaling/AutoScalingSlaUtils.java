@@ -16,7 +16,10 @@
 package org.openspaces.grid.gsm.autoscaling;
 
 import java.util.Map;
+import java.util.logging.Logger;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.internal.pu.InternalProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
@@ -34,6 +37,8 @@ import org.openspaces.grid.gsm.autoscaling.exceptions.AutoScalingStatisticsExcep
  *
  */
 public class AutoScalingSlaUtils {
+    
+    private static Log logger = LogFactory.getLog(AutoScalingSlaUtils.class.getName());
     
     @SuppressWarnings("unchecked")
     public static int compare(Comparable<?> threshold, Object value) throws NumberFormatException {
@@ -79,7 +84,11 @@ public class AutoScalingSlaUtils {
                     singleInstanceLastSampleStatisticsId.validate();
                     
                     if (!statistics.containsKey(singleInstanceLastSampleStatisticsId)) {
-                        throw new AutoScalingInstanceStatisticsException(instance, singleInstanceLastSampleStatisticsId.toString(), statistics);    
+                        AutoScalingInstanceStatisticsException exception = new AutoScalingInstanceStatisticsException(instance, singleInstanceLastSampleStatisticsId.toString());
+                        if (logger.isTraceEnabled()) {
+                            logger.trace("Failed to find statistics id = " + singleInstanceLastSampleStatisticsId + " in pu statistics. current statistics key set = " + statistics.keySet(), exception);                            
+                        }
+                        throw exception;    
                     }
                     
                     final ProcessingUnitStatisticsId singleInstanceStatisticsId =
@@ -88,14 +97,33 @@ public class AutoScalingSlaUtils {
                     singleInstanceStatisticsId.setInstancesStatistics(singleInstanceStatistics);
                     singleInstanceStatisticsId.validate();
                     if (!statistics.containsKey(singleInstanceStatisticsId)) {
-                        throw new AutoScalingStatisticsException(pu, singleInstanceStatisticsId, statistics);
+                        AutoScalingStatisticsException exception = new AutoScalingInstanceStatisticsException(instance, singleInstanceLastSampleStatisticsId.toString());
+                        if (logger.isTraceEnabled()) {
+                            logger.trace("Failed to find statistics id = " + singleInstanceLastSampleStatisticsId + " in pu statistics. current statistics key set = " + statistics.keySet(), exception);                            
+                        }
+                        throw exception;   
+                    } 
+                    
+                    final ProcessingUnitStatisticsId singleInstanceTimeWindowZoneStatisticsId =
+                            ruleStatisticsId.shallowClone();
+                    singleInstanceTimeWindowZoneStatisticsId.setTimeWindowStatistics(ruleStatisticsId.getTimeWindowStatistics());
+                    singleInstanceTimeWindowZoneStatisticsId.setAgentZones(ruleStatisticsId.getAgentZones());
+                    singleInstanceTimeWindowZoneStatisticsId.setInstancesStatistics(singleInstanceStatistics);
+                    singleInstanceStatisticsId.validate();
+                    if (!statistics.containsKey(singleInstanceStatisticsId)) {
+                        AutoScalingStatisticsException exception = new AutoScalingInstanceStatisticsException(instance, singleInstanceLastSampleStatisticsId.toString());
+                        if (logger.isTraceEnabled()) {
+                            logger.trace("Failed to find statistics id = " + singleInstanceLastSampleStatisticsId + " in pu statistics. current statistics key set = " + statistics.keySet(), exception);                            
+                        }
+                        throw exception;   
                     } 
             }
         }
         
         Object value = statistics.get(ruleStatisticsId);
         if (value == null) {
-            throw new AutoScalingStatisticsException(pu, ruleStatisticsId, statistics);
+            logger.debug("statistics value for " + ruleStatisticsId + " was null.");
+            throw new AutoScalingStatisticsException(pu, ruleStatisticsId);
         }
         
         return value;
