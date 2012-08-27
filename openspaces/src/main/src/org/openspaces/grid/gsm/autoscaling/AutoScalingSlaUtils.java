@@ -34,7 +34,7 @@ import org.openspaces.grid.gsm.autoscaling.exceptions.AutoScalingStatisticsExcep
  *
  */
 public class AutoScalingSlaUtils {
-
+    
     @SuppressWarnings("unchecked")
     public static int compare(Comparable<?> threshold, Object value) throws NumberFormatException {
         
@@ -64,37 +64,38 @@ public class AutoScalingSlaUtils {
         ruleStatisticsId.validate();
         for (final ProcessingUnitInstance instance : pu) {
             
-            SingleInstanceStatisticsConfig singleInstanceStatistics = 
-                new SingleInstanceStatisticsConfigurer()
-                .instance(instance)
-                .create();
-            
-            final ProcessingUnitStatisticsId singleInstanceLastSampleStatisticsId = 
-                    ruleStatisticsId.shallowClone();
-            ExactZonesConfig zones = ((InternalProcessingUnit) pu).getHostingGridServiceAgentZones(instance);
-            singleInstanceLastSampleStatisticsId.setTimeWindowStatistics(new LastSampleTimeWindowStatisticsConfig());
-            singleInstanceLastSampleStatisticsId.setInstancesStatistics(singleInstanceStatistics);
-            zones.validate();
-            singleInstanceLastSampleStatisticsId.setAgentZones(zones);
-            singleInstanceLastSampleStatisticsId.validate();
-            
-            if (!statistics.containsKey(singleInstanceLastSampleStatisticsId)) {
-                throw new AutoScalingInstanceStatisticsException(instance, singleInstanceLastSampleStatisticsId.toString());    
-            }
-            
-            final ProcessingUnitStatisticsId singleInstanceStatisticsId =
-                    ruleStatisticsId.shallowClone();
-            singleInstanceStatisticsId.setTimeWindowStatistics(ruleStatisticsId.getTimeWindowStatistics());
-            singleInstanceStatisticsId.setInstancesStatistics(singleInstanceStatistics);
-            singleInstanceStatisticsId.validate();
-            if (!statistics.containsKey(singleInstanceStatisticsId)) {
-                throw new AutoScalingStatisticsException(pu, singleInstanceStatisticsId);
+            ExactZonesConfig puInstanceExactZones = ((InternalProcessingUnit) pu).getHostingGridServiceAgentZones(instance);
+            if (puInstanceExactZones.isStasfies(ruleStatisticsId.getAgentZones())) {
+                
+                SingleInstanceStatisticsConfig singleInstanceStatistics = 
+                        new SingleInstanceStatisticsConfigurer()
+                        .instance(instance)
+                        .create();
+                    
+                    final ProcessingUnitStatisticsId singleInstanceLastSampleStatisticsId = 
+                            ruleStatisticsId.shallowClone();
+                    singleInstanceLastSampleStatisticsId.setTimeWindowStatistics(new LastSampleTimeWindowStatisticsConfig());
+                    singleInstanceLastSampleStatisticsId.setInstancesStatistics(singleInstanceStatistics);
+                    singleInstanceLastSampleStatisticsId.validate();
+                    
+                    if (!statistics.containsKey(singleInstanceLastSampleStatisticsId)) {
+                        throw new AutoScalingInstanceStatisticsException(instance, singleInstanceLastSampleStatisticsId.toString(), statistics);    
+                    }
+                    
+                    final ProcessingUnitStatisticsId singleInstanceStatisticsId =
+                            ruleStatisticsId.shallowClone();
+                    singleInstanceStatisticsId.setTimeWindowStatistics(ruleStatisticsId.getTimeWindowStatistics());
+                    singleInstanceStatisticsId.setInstancesStatistics(singleInstanceStatistics);
+                    singleInstanceStatisticsId.validate();
+                    if (!statistics.containsKey(singleInstanceStatisticsId)) {
+                        throw new AutoScalingStatisticsException(pu, singleInstanceStatisticsId, statistics);
+                    } 
             }
         }
         
         Object value = statistics.get(ruleStatisticsId);
         if (value == null) {
-            throw new AutoScalingStatisticsException(pu, ruleStatisticsId);
+            throw new AutoScalingStatisticsException(pu, ruleStatisticsId, statistics);
         }
         
         return value;
