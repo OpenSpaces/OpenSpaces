@@ -105,6 +105,13 @@ public interface ElasticDeploymentTopology extends ProcessingUnitDeploymentTopol
      */
     ElasticDeploymentTopology sharedMachineProvisioning(String sharingId, ElasticMachineProvisioningConfig config);
     
+    /**
+     * Configure the server side bean that starts and stops machines automatically. For example, the
+     * bean could delegate the request to a cloud provider.
+     * <p>
+     * The machines returned by the 'machine provisioner' will be shared by any other instance
+     * using publicMachineProvisioning or any non-elastic processing unit instance.
+     */
     ElasticDeploymentTopology publicMachineProvisioning(ElasticMachineProvisioningConfig config);
     
     /**
