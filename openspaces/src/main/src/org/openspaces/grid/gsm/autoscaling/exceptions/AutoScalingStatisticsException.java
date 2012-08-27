@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.openspaces.grid.gsm.autoscaling.exceptions;
 
-import java.util.Map;
-
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
 

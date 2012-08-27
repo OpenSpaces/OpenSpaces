@@ -16,7 +16,6 @@
 package org.openspaces.utest.admin.internal.pu.statistics;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 

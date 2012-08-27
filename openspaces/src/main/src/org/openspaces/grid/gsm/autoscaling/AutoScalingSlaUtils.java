@@ -16,7 +16,6 @@
 package org.openspaces.grid.gsm.autoscaling;
 
 import java.util.Map;
-import java.util.logging.Logger;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
