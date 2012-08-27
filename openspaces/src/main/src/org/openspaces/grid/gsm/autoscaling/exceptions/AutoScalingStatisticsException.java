@@ -15,6 +15,8 @@
  *******************************************************************************/
 package org.openspaces.grid.gsm.autoscaling.exceptions;
 
+import java.util.Map;
+
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
 
@@ -37,6 +39,11 @@ public class AutoScalingStatisticsException extends AutoScalingSlaEnforcementInP
     public AutoScalingStatisticsException(ProcessingUnit pu, ProcessingUnitStatisticsId statisticsId) {
         this(pu,message(statisticsId,pu));
     }
+    
+    public AutoScalingStatisticsException(ProcessingUnit pu, ProcessingUnitStatisticsId statisticsId, Map<ProcessingUnitStatisticsId, Object> statistics) {
+        this(pu,message(statisticsId,pu, statistics));
+    }
+    
 
     /**
      * Generates the default message
@@ -44,6 +51,10 @@ public class AutoScalingStatisticsException extends AutoScalingSlaEnforcementInP
      */
     private static String message(ProcessingUnitStatisticsId statisticsId, ProcessingUnit pu) {
         return "No " + pu.getName() + " statistics for " + statisticsId;
+    }
+    
+    private static String message(ProcessingUnitStatisticsId statisticsId, ProcessingUnit pu, Map<ProcessingUnitStatisticsId, Object> statistics) {
+        return "No " + pu.getName() + " statistics for " + statisticsId + ". current processing unit statistics are : " + statistics ;
     }
 
 }
