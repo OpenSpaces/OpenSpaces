@@ -41,24 +41,30 @@ public class ZoneStatisticsCalculator implements InternalProcessingUnitStatistic
             Collection<ProcessingUnitStatisticsId> requestedStatisticsIds) {
         
         if (logger.isTraceEnabled()) {
-            logger.trace("calculateNewStatistics(processingUnitStatistics="+processingUnitStatistics+" , statisticsIds="+ requestedStatisticsIds);
+            logger.trace("calculateNewStatistics(processingUnitStatistics="+processingUnitStatistics+" , statisticsIds="+ requestedStatisticsIds + " admin timestampe = " + processingUnitStatistics.getAdminTimestamp());
         }
+        
+        //copy to avoid conc. modification exception on statistics
+        Map<ProcessingUnitStatisticsId, Object> statistics = new HashMap<ProcessingUnitStatisticsId, Object>(processingUnitStatistics.getStatistics());
+        
         // calculate new statistics for each request id.
         for (ProcessingUnitStatisticsId requestedStatisticsId : requestedStatisticsIds) {
-            calculateNewStatistics(processingUnitStatistics, requestedStatisticsId);
+            calculateNewStatistics(processingUnitStatistics, statistics, requestedStatisticsId);
         } 
         if (logger.isTraceEnabled()) {
-            logger.trace("calculateNewStatistics(processingUnitStatistics="+processingUnitStatistics+" , statisticsIds="+ requestedStatisticsIds);
+            logger.trace("calculateNewStatistics(processingUnitStatistics="+processingUnitStatistics+" , statisticsIds="+ requestedStatisticsIds + " admin timestampe = " + processingUnitStatistics.getAdminTimestamp());
         }
     } 
     
-    private void calculateNewStatistics(InternalProcessingUnitStatistics processingUnitStatistics, ProcessingUnitStatisticsId requestedStatisticsId) {
+    private void calculateNewStatistics(InternalProcessingUnitStatistics processingUnitStatistics, Map<ProcessingUnitStatisticsId, Object> copyOfStatistics , ProcessingUnitStatisticsId requestedStatisticsId) {
         requestedStatisticsId.validate();
-        //copy to avoid conc. modification exception on statistics
-        Map<ProcessingUnitStatisticsId, Object> statistics = new HashMap<ProcessingUnitStatisticsId, Object>(processingUnitStatistics.getStatistics());
-        // compare each request id with all current statistics entries.
+        if (logger.isDebugEnabled()) {
+            logger.debug("statistics keys after copy = " + copyOfStatistics.keySet());
+        }
+        
+        // iterate over the copy of the original statistics
         boolean statisfied = false;
-        for (Map.Entry<ProcessingUnitStatisticsId, Object> statisticsEntry : statistics.entrySet()) {
+        for (Map.Entry<ProcessingUnitStatisticsId, Object> statisticsEntry : copyOfStatistics.entrySet()) {
             if (calculateNewStatistics(processingUnitStatistics, statisticsEntry, requestedStatisticsId)) {
                 statisfied = true;
             }
@@ -77,17 +83,25 @@ public class ZoneStatisticsCalculator implements InternalProcessingUnitStatistic
         
         // zones to compare
         ZonesConfig requestedZoneStatisticsConfig = requestedStatisticsId.getAgentZones();
-        ExactZonesConfig existingZoneStatisticsConfig = (ExactZonesConfig) existingProcessingUnitStatisticsId.getAgentZones();
-        
         // keys without zones to compare
+        
         ProcessingUnitStatisticsId erasedExistingProcessingUnitStatisticsId = erase(existingProcessingUnitStatisticsId);
         ProcessingUnitStatisticsId erasedrequestedStatisticsId = erase(requestedStatisticsId);
-                
+        
+        ExactZonesConfig existingZoneStatisticsConfig = null;
+        if (existingProcessingUnitStatisticsId.getAgentZones() instanceof ExactZonesConfig) {
+            existingZoneStatisticsConfig = (ExactZonesConfig) existingProcessingUnitStatisticsId.getAgentZones(); // there may be zones config that are not ExactZones
+        } else {
+            throw new IllegalStateException("found a map entry with key = " + existingProcessingUnitStatisticsId + " and value = " + value + " in processing unti statistics = " + internalProcessingUnitStatistics + ". ZonesConfig for this entry is not an instance of ExactZonesConfig." + "requestedStatisticsId for calculation was = " + requestedStatisticsId);
+        }
+            
         if (requestedZoneStatisticsConfig.isSatisfiedBy(existingZoneStatisticsConfig)) {
+               
             if (erasedrequestedStatisticsId.equals(erasedExistingProcessingUnitStatisticsId)) {
                 ProcessingUnitStatisticsId newProcessingUnitStatisticsId = existingProcessingUnitStatisticsId.shallowClone();
                 requestedZoneStatisticsConfig.validate();
                 newProcessingUnitStatisticsId.setAgentZones(requestedZoneStatisticsConfig);
+                // add to the actual statistics
                 internalProcessingUnitStatistics.addStatistics(newProcessingUnitStatisticsId, value);
                 return true;
             }
