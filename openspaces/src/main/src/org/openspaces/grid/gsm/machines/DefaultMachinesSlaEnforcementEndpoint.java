@@ -148,10 +148,10 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                     "containers with " + sla.getContainerMemoryCapacityInMB() + "MB each.");
         }
         
-        if (memoryInMB > sla.getMaximumNumberOfMachines()*sla.getContainerMemoryCapacityInMB()) {
+        if (memoryInMB > getMaximumNumberOfMachines(sla)*sla.getContainerMemoryCapacityInMB()) {
             throw new IllegalArgumentException(
                     "Memory capacity " + memoryInMB + "MB "+
-                    "is more than the maximum of " + sla.getMaximumNumberOfMachines() + " "+
+                    "is more than the maximum of " + getMaximumNumberOfMachines(sla) + " "+
                     "containers with " + sla.getContainerMemoryCapacityInMB() + "MB each.");
         }
     
@@ -159,6 +159,22 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         setMachineIsolation(sla);
         enforceSlaInternal(sla);
             
+    }
+
+    /**
+     * This method calculates the upper bound (suprimum) for the number of machines to be started in this zone.
+     * It is not intended to be an exact upper bound.
+     */
+    private int getMaximumNumberOfMachines(AbstractMachinesSlaPolicy sla) {
+        int numberOfMachinesFromSamePu = state.getAllocatedCapacityOfOtherKeysFromSamePu(getKey(sla)).getAgentUids().size();
+        int maxNumberOfMachines = sla.getMaximumNumberOfMachines() - numberOfMachinesFromSamePu;
+        if (maxNumberOfMachines < 0 && logger.isWarnEnabled()) {
+            logger.warn(
+                 "number of allocated machines (" + state.getAllocatedCapacity(pu).getAgentUids().size() + ") "+
+                 "is above maximum " + sla.getMaximumNumberOfMachines() + ":" + 
+                 state.getAllocatedCapacity(pu)); 
+        }
+        return Math.max(sla.getMinimumNumberOfMachines(),maxNumberOfMachines);
     }
 
     private StateKey getKey(AbstractMachinesSlaPolicy sla) {
@@ -1016,13 +1032,13 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         CapacityRequirementsPerAgent unallocatedCapacity = getUnallocatedCapacity(sla);
         
         // limit the memory to the maximum possible by this PU
-        long maxAllocatedMemoryForPu = sla.getMaximumNumberOfMachines()*sla.getContainerMemoryCapacityInMB();
+        long maxAllocatedMemoryForPu = getMaximumNumberOfMachines(sla)*sla.getContainerMemoryCapacityInMB();
         long allocatedMemoryForPu = MachinesSlaUtils.getMemoryInMB(getAllocatedCapacity(sla).getTotalAllocatedCapacity());
 
         // validate not breached max eager capacity
         if (allocatedMemoryForPu > maxAllocatedMemoryForPu) {
             throw new IllegalStateException(
-                    "maxAllocatedMemoryForPu="+sla.getMaximumNumberOfMachines()+"*"+sla.getContainerMemoryCapacityInMB()+"="+
+                    "maxAllocatedMemoryForPu="+getMaximumNumberOfMachines(sla)+"*"+sla.getContainerMemoryCapacityInMB()+"="+
                     maxAllocatedMemoryForPu+" "+
                     "cannot be smaller than allocatedMemoryForPu="+getAllocatedCapacity(sla).toDetailedString());
         }
@@ -1048,7 +1064,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         long allocatedMemoryForPuAfter = MachinesSlaUtils.getMemoryInMB(getAllocatedCapacity(sla).getTotalAllocatedCapacity());
         if ( allocatedMemoryForPuAfter > maxAllocatedMemoryForPu) {
             throw new IllegalStateException("allocatedMemoryForPuAfter="+allocatedMemoryForPuAfter+" greater than "+
-                    "maxAllocatedMemoryForPu="+sla.getMaximumNumberOfMachines()+"*"+sla.getContainerMemoryCapacityInMB()+"="+maxAllocatedMemoryForPu+
+                    "maxAllocatedMemoryForPu="+getMaximumNumberOfMachines(sla)+"*"+sla.getContainerMemoryCapacityInMB()+"="+maxAllocatedMemoryForPu+
                     "allocatedMemoryForPu="+allocatedMemoryForPu+"="+getAllocatedCapacity(sla).toDetailedString()+ " "+
                     "capacityToAllocate=" + capacityToAllocate + " "+
                     "maxAllocatedMemoryForPu="+maxAllocatedMemoryForPu + " "+
@@ -1123,7 +1139,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         solver.setContainerMemoryCapacityInMB(sla.getContainerMemoryCapacityInMB());
         solver.setUnallocatedCapacity(unallocatedCapacity);
         solver.setAllocatedCapacityForPu(getAllocatedCapacity(sla));
-        solver.setMaxAllocatedMemoryCapacityOfPuInMB(sla.getMaximumNumberOfMachines()*sla.getContainerMemoryCapacityInMB());
+        solver.setMaxAllocatedMemoryCapacityOfPuInMB(getMaximumNumberOfMachines(sla)*sla.getContainerMemoryCapacityInMB());
         solver.setMaxAllocatedMemoryCapacityOfPuPerMachineInMB(sla.getMaximumNumberOfContainersPerMachine()*sla.getContainerMemoryCapacityInMB());
         solver.setMinimumNumberOfMachines(sla.getMinimumNumberOfMachines());
         

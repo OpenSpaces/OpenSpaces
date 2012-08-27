@@ -251,6 +251,20 @@ public class MachinesSlaEnforcementState {
         return getState(key).allocatedCapacity;
     }
     
+    public CapacityRequirementsPerAgent getAllocatedCapacityOfOtherKeysFromSamePu(StateKey key) {
+        CapacityRequirementsPerAgent capacityRequirementsPerAgent =  new CapacityRequirementsPerAgent();
+        for (Entry<StateKey, StateValue> pair : state.entrySet()) {
+            StateKey otherKey = pair.getKey();
+            if (otherKey.pu.equals(key.pu) && 
+                !otherKey.gridServiceAgentZones.equals(key.gridServiceAgentZones)) {
+                //same pu, different agent zone
+                CapacityRequirementsPerAgent otherAllocatedCapacity = getAllocatedCapacity(otherKey);
+                capacityRequirementsPerAgent = capacityRequirementsPerAgent.add(otherAllocatedCapacity);
+            }
+        }
+        return capacityRequirementsPerAgent;
+    }
+    
     public int getNumberOfFutureAgents(StateKey key) {
         return getState(key).futureAgents.size();
     }
@@ -557,6 +571,10 @@ public class MachinesSlaEnforcementState {
         }
         return capacityRequirementsPerAgent;
     }
+    
+    
+    
+    
 
     /**
      * Changes the key.zone of the allocated capacity to match the exact zone of the agent
