@@ -17,6 +17,8 @@ public class ElasticProcessingUnitMachineIsolationFactory {
         }
         else if (isolationConfig.isSharedIsolation()) {
             isolation = new SharedMachineIsolation(isolationConfig.getSharingId());
+        } else if (isolationConfig.isPublicMachineIsolation()) {
+            isolation = new PublicMachineIsolation();
         }
         else {
             throw new IllegalStateException("unsupported PU isolation");

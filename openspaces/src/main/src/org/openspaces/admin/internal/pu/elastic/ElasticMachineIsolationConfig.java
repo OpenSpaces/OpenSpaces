@@ -19,6 +19,8 @@ package org.openspaces.admin.internal.pu.elastic;
 
 import java.util.Map;
 
+import org.openspaces.core.util.StringProperties;
+
 /**
  * @author Moran Avigdor
  * @since 8.0.1
@@ -26,18 +28,23 @@ import java.util.Map;
 public class ElasticMachineIsolationConfig {
     
     private static final String ELASTIC_MACHINE_ISOLATION_SHARING_ID_KEY = "elastic-machine-isolation-sharing-id";
-    private final Map<String, String> properties;
+    private static final String ELASTIC_MACHINE_ISOLATION_PUBLIC_ID_KEY = "elastic-machine-isolation-public-id";
+    private final StringProperties properties;
 
     public ElasticMachineIsolationConfig(Map<String, String> properties) {
-        this.properties = properties;
+        this.properties = new StringProperties(properties);
     }
     
     public boolean isDedicatedIsolation() {
-        return (getSharingId() == null);
+        return (!isSharedIsolation() && !isPublicMachineIsolation());
     }
     
     public boolean isSharedIsolation() {
-        return (getSharingId() != null);
+        return getSharingId() != null;
+    }
+    
+    public boolean isPublicMachineIsolation() {
+        return (properties.getBoolean(ELASTIC_MACHINE_ISOLATION_PUBLIC_ID_KEY, false));
     }
     
     public String getSharingId() {
@@ -49,9 +56,16 @@ public class ElasticMachineIsolationConfig {
             throw new IllegalArgumentException("sharingId cannot be null");
         }
         properties.put(ELASTIC_MACHINE_ISOLATION_SHARING_ID_KEY, sharingId);
+        properties.putBoolean(ELASTIC_MACHINE_ISOLATION_PUBLIC_ID_KEY, false);
     }
-
+    
+    public void setPublic() {
+        properties.remove(ELASTIC_MACHINE_ISOLATION_SHARING_ID_KEY);
+        properties.putBoolean(ELASTIC_MACHINE_ISOLATION_PUBLIC_ID_KEY, true);
+    }
+    
     public void setDedicated() {
         properties.remove(ELASTIC_MACHINE_ISOLATION_SHARING_ID_KEY);
+        properties.putBoolean(ELASTIC_MACHINE_ISOLATION_PUBLIC_ID_KEY, false);
     }
 }

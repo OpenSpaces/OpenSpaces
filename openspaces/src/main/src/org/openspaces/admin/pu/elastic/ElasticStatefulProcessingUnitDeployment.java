@@ -198,17 +198,13 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
     }
     
     @Override
-    protected ElasticStatefulProcessingUnitDeployment machineProvisioning(ElasticMachineProvisioningConfig machineProvisioningConfig, String sharingId) {
-        if (machineProvisioningConfig == null) {
-            throw new IllegalArgumentException("machineProvisioningConfig");
-        }
-        
-        return (ElasticStatefulProcessingUnitDeployment) super.machineProvisioning(machineProvisioningConfig, sharingId);
+    public ElasticStatefulProcessingUnitDeployment dedicatedMachineProvisioning(ElasticMachineProvisioningConfig config) {
+        return (ElasticStatefulProcessingUnitDeployment) super.dedicatedMachineProvisioning(config);
     }
     
     @Override
-    public ElasticStatefulProcessingUnitDeployment dedicatedMachineProvisioning(ElasticMachineProvisioningConfig config) {
-        return machineProvisioning(config, null);
+    public ElasticStatefulProcessingUnitDeployment publicMachineProvisioning(ElasticMachineProvisioningConfig config) {
+        return (ElasticStatefulProcessingUnitDeployment) super.publicMachineProvisioning(config);
     }
     
     @Override
@@ -216,7 +212,7 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
         if (sharingId == null) {
             throw new IllegalArgumentException("sharingId can't be null");
         }
-        return machineProvisioning(config, sharingId);
+        return (ElasticStatefulProcessingUnitDeployment) super.sharedMachineProvisioning(config, sharingId);
     }
     
     @Override

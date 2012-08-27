@@ -189,8 +189,16 @@ public class AbstractElasticProcessingUnitConfig {
         getElasticMachineIsolationConfig().setDedicated();
     }
     
+    public void setPublicIsolation() {
+        getElasticMachineIsolationConfig().setPublic();
+    }
+    
     public boolean getDedicatedIsolationConfig() {
         return getElasticMachineIsolationConfig().isDedicatedIsolation();
+    }
+    
+    public boolean getPublicIsolationConfig() {
+        return getElasticMachineIsolationConfig().isPublicMachineIsolation();
     }
 
     public void setSharedIsolation(String sharingId) {

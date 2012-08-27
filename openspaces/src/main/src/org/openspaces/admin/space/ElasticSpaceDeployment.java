@@ -171,7 +171,7 @@ public class ElasticSpaceDeployment extends AbstractElasticProcessingUnitDeploym
     
     @Override
     public ElasticSpaceDeployment dedicatedMachineProvisioning(ElasticMachineProvisioningConfig config) {
-        machineProvisioning(config, null);
+        super.dedicatedMachineProvisioning(config);
         return this;
     }
     
@@ -180,7 +180,13 @@ public class ElasticSpaceDeployment extends AbstractElasticProcessingUnitDeploym
         if (sharingId == null) {
             throw new IllegalArgumentException("sharingId can't be null");
         }
-        machineProvisioning(config, sharingId);
+        super.sharedMachineProvisioning(config, sharingId);
+        return this;
+    }
+    
+    @Override
+    public ElasticSpaceDeployment publicMachineProvisioning(ElasticMachineProvisioningConfig config) {
+    	super.publicMachineProvisioning(config);
         return this;
     }
 

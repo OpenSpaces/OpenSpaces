@@ -42,6 +42,7 @@ import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerAgent;
 import org.openspaces.grid.gsm.containers.ContainersSlaUtils;
 import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIsolation;
+import org.openspaces.grid.gsm.machines.isolation.PublicMachineIsolation;
 
 public class MachinesSlaEnforcementState {
     
@@ -365,74 +366,76 @@ public class MachinesSlaEnforcementState {
      */
     public Map<String,List<String>> getRestrictedAgentUids(StateKey key) {
         
-        //find all PUs with different machine isolation, and same machine isolation
-        Collection<StateKey> keysWithDifferentIsolation = new HashSet<StateKey>();
-        Collection<StateKey> keysWithSameIsolation = new HashSet<StateKey>();
-        ElasticProcessingUnitMachineIsolation puIsolation = getState(key).machineIsolation;
-        
-        for (Entry<StateKey, StateValue> pair : state.entrySet()) {
-            ElasticProcessingUnitMachineIsolation otherPuIsolation = pair.getValue().machineIsolation;
-            if (otherPuIsolation == null) {
-                throw new IllegalStateException(pair.getKey() + " should have set machine isolation");
-            }
-            if (otherPuIsolation.equals(puIsolation)) {
-                keysWithSameIsolation.add(pair.getKey());
-            }
-            else {
-                keysWithDifferentIsolation.add(pair.getKey());
-            }
-        }
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("PUs with different isolation than pu " + key +" are: "+ keysWithDifferentIsolation);
-            logger.debug("PUs with same isolation of " + key + " are: " + keysWithSameIsolation);
-        }
-        
-        // add all agent uids used by conflicting pus
-        Map<String,List<String>> restrictedAgentUidsWithReason = new HashMap<String,List<String>>();
-        for (StateKey otherKey: keysWithDifferentIsolation) {
-            
-            StateValue otherValue = getState(otherKey);
-            
-            for (String agentUid : otherValue.allocatedCapacity.getAgentUids()) {
-                initValue(restrictedAgentUidsWithReason, agentUid);
-                restrictedAgentUidsWithReason.get(agentUid).add(otherKey.pu + "machineIsolation=" + getState(otherKey).machineIsolation + " allocated on machine which restricts  " + key.pu + " machineIsolation="+getState(key).machineIsolation);
-            }
-            
-            for (String agentUid : otherValue.markedForDeallocationCapacity.getAgentUids()) {
-                initValue(restrictedAgentUidsWithReason, agentUid);
-                restrictedAgentUidsWithReason.get(agentUid).add(otherKey.pu + "machineIsolation=" + getState(otherKey).machineIsolation + " marked for deallocation on machine which restricts  " + key.pu + " machineIsolation="+getState(key).machineIsolation);
-            }
-            
-            for (String agentUid : otherValue.timeoutTimestampPerAgentUidGoingDown.keySet()) {
-                initValue(restrictedAgentUidsWithReason, agentUid);
-                restrictedAgentUidsWithReason.get(agentUid).add(otherKey.pu + "machineIsolation=" + getState(otherKey).machineIsolation + " is shutting down the agent which restricts  " + key.pu + " machineIsolation="+getState(key).machineIsolation);
-            }
-        }
-            
-        // add all agents that started containers that are not with the same isolation
-        Set<ZonesConfig> allowedContainerZoness = new HashSet<ZonesConfig>();
-        for (StateKey otherKey : keysWithSameIsolation) {
-            allowedContainerZoness.add(otherKey.pu.getRequiredContainerZones());
-        }
         Admin admin = key.pu.getAdmin();
-        for (GridServiceContainer container : admin.getGridServiceContainers()) {
-            if (container.getGridServiceAgent() == null) {
-                // ignore manually started containers using gsc.bat
-                continue;
-            }
-            boolean allowed = false;
-            for (ZonesConfig allowedContainerZones : allowedContainerZoness) {
-                if (container.getExactZones().isStasfies(allowedContainerZones)) {
-                    allowed = true;
-                    break;
-                }
-            }
-            if (!allowed) {
-                String agentUid = container.getGridServiceAgent().getUid();
-                initValue(restrictedAgentUidsWithReason, agentUid);
-                restrictedAgentUidsWithReason.get(agentUid).add("Machine has a container with restricted zones " + ContainersSlaUtils.gscToString(container));
-            }
+        ElasticProcessingUnitMachineIsolation puIsolation = getState(key).machineIsolation;
+        Map<String,List<String>> restrictedAgentUidsWithReason = new HashMap<String,List<String>>();
+         if (!(puIsolation instanceof PublicMachineIsolation)) {
+             //find all PUs with different machine isolation, and same machine isolation
+             Collection<StateKey> keysWithDifferentIsolation = new HashSet<StateKey>();
+             Collection<StateKey> keysWithSameIsolation = new HashSet<StateKey>();
+
+             for (Entry<StateKey, StateValue> pair : state.entrySet()) {
+                 ElasticProcessingUnitMachineIsolation otherPuIsolation = pair.getValue().machineIsolation;
+                 if (otherPuIsolation == null) {
+                     throw new IllegalStateException(pair.getKey() + " should have set machine isolation");
+                 }
+                 if (otherPuIsolation.equals(puIsolation)) {
+                     keysWithSameIsolation.add(pair.getKey());
+                 }
+                 else {
+                     keysWithDifferentIsolation.add(pair.getKey());
+                 }
+             }
+
+             // add all agent uids used by conflicting pus
+             if (logger.isDebugEnabled()) {
+                 logger.debug("PUs with different isolation than pu " + key +" are: "+ keysWithDifferentIsolation);
+                 logger.debug("PUs with same isolation of " + key + " are: " + keysWithSameIsolation);
+             }
+
+             for (StateKey otherKey: keysWithDifferentIsolation) {
+
+                 StateValue otherValue = getState(otherKey);
+
+                 for (String agentUid : otherValue.allocatedCapacity.getAgentUids()) {
+                     initValue(restrictedAgentUidsWithReason, agentUid);
+                     restrictedAgentUidsWithReason.get(agentUid).add(otherKey.pu + "machineIsolation=" + getState(otherKey).machineIsolation + " allocated on machine which restricts  " + key.pu + " machineIsolation="+getState(key).machineIsolation);
+                 }
+
+                 for (String agentUid : otherValue.markedForDeallocationCapacity.getAgentUids()) {
+                     initValue(restrictedAgentUidsWithReason, agentUid);
+                     restrictedAgentUidsWithReason.get(agentUid).add(otherKey.pu + "machineIsolation=" + getState(otherKey).machineIsolation + " marked for deallocation on machine which restricts  " + key.pu + " machineIsolation="+getState(key).machineIsolation);
+                 }
+
+                 for (String agentUid : otherValue.timeoutTimestampPerAgentUidGoingDown.keySet()) {
+                     initValue(restrictedAgentUidsWithReason, agentUid);
+                     restrictedAgentUidsWithReason.get(agentUid).add(otherKey.pu + "machineIsolation=" + getState(otherKey).machineIsolation + " is shutting down the agent which restricts  " + key.pu + " machineIsolation="+getState(key).machineIsolation);
+                 }
+             }
+
+             // add all agents that started containers that are not with the same isolation
+             Set<ZonesConfig> allowedContainerZoness = new HashSet<ZonesConfig>();
+             for (StateKey otherKey : keysWithSameIsolation) {
+                 allowedContainerZoness.add(otherKey.pu.getRequiredContainerZones());
+             }
+             for (GridServiceContainer container : admin.getGridServiceContainers()) {
+                 if (container.getGridServiceAgent() == null) {
+                     // ignore manually started containers using gsc.bat
+                     continue;
+                 }
+                 boolean allowed = false;
+                 for (ZonesConfig allowedContainerZones : allowedContainerZoness) {
+                     if (container.getExactZones().isStasfies(allowedContainerZones)) {
+                         allowed = true;
+                         break;
+                     }
+                 }
+                 if (!allowed) {
+                     String agentUid = container.getGridServiceAgent().getUid();
+                     initValue(restrictedAgentUidsWithReason, agentUid);
+                     restrictedAgentUidsWithReason.get(agentUid).add("Machine has a container with restricted zones " + ContainersSlaUtils.gscToString(container));
+                 }
+             }
         }
         
         // add all future grid service agents that have been started but not allocated yet

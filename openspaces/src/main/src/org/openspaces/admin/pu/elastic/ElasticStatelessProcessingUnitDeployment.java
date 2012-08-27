@@ -144,7 +144,12 @@ public class ElasticStatelessProcessingUnitDeployment
     
     @Override
     public ElasticStatelessProcessingUnitDeployment dedicatedMachineProvisioning(ElasticMachineProvisioningConfig config) {
-        return (ElasticStatelessProcessingUnitDeployment) super.machineProvisioning(config, null);
+        return (ElasticStatelessProcessingUnitDeployment) super.dedicatedMachineProvisioning(config);
+    }
+    
+    @Override
+    public ElasticStatelessProcessingUnitDeployment publicMachineProvisioning(ElasticMachineProvisioningConfig config) {
+        return (ElasticStatelessProcessingUnitDeployment) super.publicMachineProvisioning(config);
     }
     
     @Override
@@ -152,7 +157,7 @@ public class ElasticStatelessProcessingUnitDeployment
         if (sharingId == null) {
             throw new IllegalArgumentException("sharingId can't be null");
         }
-        return (ElasticStatelessProcessingUnitDeployment) super.machineProvisioning(config, sharingId);
+        return (ElasticStatelessProcessingUnitDeployment) super.sharedMachineProvisioning(config, sharingId);
     }
 
     @Override

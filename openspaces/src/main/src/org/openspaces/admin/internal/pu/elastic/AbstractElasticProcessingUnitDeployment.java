@@ -152,17 +152,24 @@ public abstract class AbstractElasticProcessingUnitDeployment {
         return this;
     }
     
-    protected AbstractElasticProcessingUnitDeployment machineProvisioning(ElasticMachineProvisioningConfig machineProvisioningConfig, String sharingId) {
+    protected AbstractElasticProcessingUnitDeployment sharedMachineProvisioning(ElasticMachineProvisioningConfig machineProvisioningConfig, String sharingId) {
         
-        if (sharingId == null) {
-            config.setDedicatedIsolation();
-        }
-        else {
-            config.setSharedIsolation(sharingId);
-        }
+        config.setSharedIsolation(sharingId);
         config.setMachineProvisioning(machineProvisioningConfig);
         return this;
-    }    
+    }
+    
+    protected AbstractElasticProcessingUnitDeployment dedicatedMachineProvisioning(ElasticMachineProvisioningConfig machineProvisioningConfig) {
+        config.setDedicatedIsolation();
+        config.setMachineProvisioning(machineProvisioningConfig);
+        return this;
+    }
+    
+    protected AbstractElasticProcessingUnitDeployment publicMachineProvisioning(ElasticMachineProvisioningConfig machineProvisioningConfig) {
+        config.setPublicIsolation();
+        config.setMachineProvisioning(machineProvisioningConfig);
+        return this;
+    } 
 
     protected AbstractElasticProcessingUnitDeployment scale(ScaleStrategyConfig scaleStrategyConfig) {
         config.setScaleStrategy(scaleStrategyConfig);

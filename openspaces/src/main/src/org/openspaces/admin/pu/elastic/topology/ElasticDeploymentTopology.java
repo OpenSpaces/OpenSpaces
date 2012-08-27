@@ -105,6 +105,8 @@ public interface ElasticDeploymentTopology extends ProcessingUnitDeploymentTopol
      */
     ElasticDeploymentTopology sharedMachineProvisioning(String sharingId, ElasticMachineProvisioningConfig config);
     
+    ElasticDeploymentTopology publicMachineProvisioning(ElasticMachineProvisioningConfig config);
+    
     /**
      * Specifies the the heap size per container (operating system process)
      * For example: 
