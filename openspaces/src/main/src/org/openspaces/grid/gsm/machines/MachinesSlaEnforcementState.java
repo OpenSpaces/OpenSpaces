@@ -475,6 +475,9 @@ public class MachinesSlaEnforcementState {
     
     public void setMachineIsolation(StateKey key, ElasticProcessingUnitMachineIsolation isolation) {
         
+        if (isolation == null) {
+            throw new IllegalArgumentException("machine isolation cannot be null");
+        }
         if (logger.isDebugEnabled()) {
             logger.debug(key + " machine isolation is " + isolation);
         }
@@ -572,8 +575,8 @@ public class MachinesSlaEnforcementState {
                 markCapacityForDeallocation(key, agentUid, capacity);
                 deallocateCapacity(key, agentUid, capacity);
                 final StateKey newKey = new StateKey(key.pu, agentZones);
-                allocateCapacity(newKey, agentUid, capacity);
                 setMachineIsolation(newKey, getMachineIsolation(key));
+                allocateCapacity(newKey, agentUid, capacity);
                 changed = true;
             }
         }
