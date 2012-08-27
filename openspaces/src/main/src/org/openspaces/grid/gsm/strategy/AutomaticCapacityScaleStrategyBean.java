@@ -172,7 +172,7 @@ implements AutoScalingSlaEnforcementEndpointAware {
     @Override
     protected void enforceSla() throws SlaEnforcementInProgressException {
 
-        PerZoneAutoScalingSlaEnforcementInProgressException pendingExceptions = new PerZoneAutoScalingSlaEnforcementInProgressException(getProcessingUnit(), "Multiple Exceptions");
+        PerZoneAutoScalingSlaEnforcementInProgressException pendingAutoscaleInProgressExceptions = new PerZoneAutoScalingSlaEnforcementInProgressException(getProcessingUnit(), "Multiple Exceptions");
         
         SlaEnforcementInProgressException pendingEnforcePlannedCapacityException = null;
         final CapacityRequirementsPerZones capacityRequirementsPerZones = super.getPlannedCapacity().toCapacityRequirementsPerZones();
@@ -258,7 +258,7 @@ implements AutoScalingSlaEnforcementEndpointAware {
 
 
 
-            } catch (SlaEnforcementInProgressException e) {
+            } catch (AutoScalingSlaEnforcementInProgressException e) {
                 if (pendingEnforcePlannedCapacityException != null) {
                     // throw pending exception of previous manual scale capacity.
                     // otherwise it could be lost when calling it again.
@@ -275,8 +275,9 @@ implements AutoScalingSlaEnforcementEndpointAware {
             // enforce SLA for each zone separately.
             for (ZonesConfig zones : zoness) {
 
+                final CapacityRequirements capacityForZones = lastEnforcedPlannedCapacity.getZonesCapacityOrZero(zones);
+
                 try {
-                    final CapacityRequirements capacityForZones = lastEnforcedPlannedCapacity.getZonesCapacityOrZero(zones);
 
                     // enforce auto-scaling SLA for a specific zone
                     // based on the last enforced SLA, the reason is that the monitored data reflects the last enforced SLA
@@ -296,14 +297,14 @@ implements AutoScalingSlaEnforcementEndpointAware {
                     }
 
                 } catch (AutoScalingSlaEnforcementInProgressException e) {
+                    // enforce last capacity for zone that threw the exception
+                    newPlannedCapacity.set(zones, capacityForZones);
                     
                     // exception in one zone should not influence running autoscaling in another zone.
                     // save exceptions for later handling
-                    pendingExceptions.addReason(zones, e);
+                    pendingAutoscaleInProgressExceptions.addReason(zones, e);
                 }
-
-
-            }  
+            }
         }        
 
         // no need to call AbstractCapacityScaleStrategyBean#enforePlannedCapacity if no capacity change is needed.
@@ -325,9 +326,9 @@ implements AutoScalingSlaEnforcementEndpointAware {
             // throw pending exception of previous manual scale capacity, so it won't be lost.
             throw pendingEnforcePlannedCapacityException;
         }
-        if (pendingExceptions.hasReason()) {
+        if (pendingAutoscaleInProgressExceptions.hasReason()) {
             // exceptions during autoscaling sla enforcement per zone
-            throw pendingExceptions;
+            throw pendingAutoscaleInProgressExceptions;
         }
     }
 
