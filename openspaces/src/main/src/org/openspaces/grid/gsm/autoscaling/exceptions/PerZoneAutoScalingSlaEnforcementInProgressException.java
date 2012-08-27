@@ -27,23 +27,13 @@ import org.openspaces.admin.zone.config.ZonesConfig;
  */
 public class PerZoneAutoScalingSlaEnforcementInProgressException extends AutoScalingSlaEnforcementInProgressException {
 
-    /**
-     * @param pu
-     * @param message
-     */
-    public PerZoneAutoScalingSlaEnforcementInProgressException(ProcessingUnit pu, String message) {
-        super(pu, message);
-        // TODO Auto-generated constructor stub
-    }
-
-    ProcessingUnit pu;
-    /**
-     * 
-     */
     private static final long serialVersionUID = 1L;
     
     private Map<ZonesConfig, AutoScalingSlaEnforcementInProgressException> reasons = new HashMap<ZonesConfig, AutoScalingSlaEnforcementInProgressException>();
-    
+
+    public PerZoneAutoScalingSlaEnforcementInProgressException(ProcessingUnit pu, String message) {
+        super(pu, message);
+    }    
     
     public void addReason(ZonesConfig zones, AutoScalingSlaEnforcementInProgressException reason) {
         reasons.put(zones, reason);
