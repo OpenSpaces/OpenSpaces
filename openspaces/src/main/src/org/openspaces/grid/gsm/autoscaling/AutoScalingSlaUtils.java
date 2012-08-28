@@ -83,7 +83,7 @@ public class AutoScalingSlaUtils {
                     singleInstanceLastSampleStatisticsId.validate();
                     
                     if (!statistics.containsKey(singleInstanceLastSampleStatisticsId)) {
-                        AutoScalingInstanceStatisticsException exception = new AutoScalingInstanceStatisticsException(instance, singleInstanceLastSampleStatisticsId.toString());
+                        AutoScalingInstanceStatisticsException exception = new AutoScalingInstanceStatisticsException(instance, singleInstanceLastSampleStatisticsId.getMetric());
                         if (logger.isTraceEnabled()) {
                             logger.trace("Failed to find statistics id = " + singleInstanceLastSampleStatisticsId + " in pu statistics. current statistics key set = " + statistics.keySet(), exception);                            
                         }
@@ -98,7 +98,7 @@ public class AutoScalingSlaUtils {
                     
                     
                     if (!statistics.containsKey(singleInstanceStatisticsId)) {
-                        AutoScalingStatisticsException exception = new AutoScalingInstanceStatisticsException(instance, singleInstanceStatisticsId.toString());
+                        AutoScalingStatisticsException exception = new AutoScalingInstanceStatisticsException(instance, singleInstanceStatisticsId.getMetric());
                         if (logger.isTraceEnabled()) {
                             logger.trace("Failed to find statistics id = " + singleInstanceStatisticsId + " in pu statistics. current statistics key set = " + statistics.keySet(), exception);                            
                         }
@@ -114,9 +114,9 @@ public class AutoScalingSlaUtils {
                     
                     
                     if (!statistics.containsKey(singleInstanceTimeWindowZoneStatisticsId)) {
-                        AutoScalingStatisticsException exception = new AutoScalingInstanceStatisticsException(instance, singleInstanceTimeWindowZoneStatisticsId.toString());
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("Failed to find statistics id = " + singleInstanceTimeWindowZoneStatisticsId + " in pu statistics. current statistics key set = " + statistics.keySet(), exception);                            
+                        AutoScalingStatisticsException exception = new AutoScalingInstanceStatisticsException(instance, singleInstanceTimeWindowZoneStatisticsId.getMetric());
+                        if (logger.isTraceEnabled()) {
+                            logger.trace("Failed to find statistics id = " + singleInstanceTimeWindowZoneStatisticsId + " in pu statistics. current statistics key set = " + statistics.keySet(), exception);                            
                         }
                         throw exception;   
                     } 
