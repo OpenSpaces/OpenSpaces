@@ -37,143 +37,143 @@ import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerZones;
 
 /**
  * @author itaif
- *
+ * 
  */
 public class AutoScalingSlaUtils {
-    
+
     private static Log logger = LogFactory.getLog(AutoScalingSlaUtils.class.getName());
-    
+
     @SuppressWarnings("unchecked")
     public static int compare(Comparable<?> threshold, Object value) throws NumberFormatException {
-        
+
         if (threshold.getClass().equals(value.getClass())) {
-            return ((Comparable<Object>)threshold).compareTo(value);
+            return ((Comparable<Object>) threshold).compareTo(value);
         }
 
-        return toDouble(threshold).compareTo(toDouble(value));       
+        return toDouble(threshold).compareTo(toDouble(value));
     }
 
-    private static Double toDouble(Object x) throws NumberFormatException{
+    private static Double toDouble(Object x) throws NumberFormatException {
         if (x instanceof Number) {
-            return ((Number)x).doubleValue();
+            return ((Number) x).doubleValue();
         }
         return Double.valueOf(x.toString());
     }
-    
-   public static CapacityRequirements getMaximumCapacity(CapacityRequirements totalMaximumCapacity, CapacityRequirements maximumCapacityRequirementsPerZone, CapacityRequirementsPerZones lastEnforcedPlannedCapacity, CapacityRequirementsPerZones newPlannedCapacityPerZones, ZonesConfig zones, Set<ZonesConfig> zoness) {
-        
-        CapacityRequirements maximumCapacity = totalMaximumCapacity; // initial
+
+    public static CapacityRequirements getMaximumCapacity(CapacityRequirements totalMax,
+            CapacityRequirements maxPerZone, CapacityRequirementsPerZones last,
+            CapacityRequirementsPerZones newPlanned, ZonesConfig zones, Set<ZonesConfig> zoness) {
+
+        CapacityRequirements maximumCapacity = totalMax; // initial
 
         for (ZonesConfig otherZone : zoness) {
             if (!zones.equals(otherZone)) {
-                CapacityRequirements otherLastEnforced = lastEnforcedPlannedCapacity.getZonesCapacityOrZero(otherZone);
-                CapacityRequirements otherNewPlanned = newPlannedCapacityPerZones.getZonesCapacityOrZero(otherZone);
-                CapacityRequirements otherMaximumCapacity = otherLastEnforced.max(otherNewPlanned).min(maximumCapacityRequirementsPerZone);
-                maximumCapacity = maximumCapacity.subtractOrZero(otherMaximumCapacity); 
-            }       
+                CapacityRequirements otherLastEnforced = last.getZonesCapacityOrZero(otherZone);
+                CapacityRequirements otherNewPlanned = newPlanned.getZonesCapacityOrZero(otherZone);
+                CapacityRequirements otherMaximumCapacity = otherLastEnforced.max(otherNewPlanned).min(maxPerZone);
+                maximumCapacity = maximumCapacity.subtractOrZero(otherMaximumCapacity);
+            }
         }
-        maximumCapacity = maximumCapacity.min(maximumCapacityRequirementsPerZone);
-        return maximumCapacity; 
+        maximumCapacity = maximumCapacity.min(maxPerZone);
+        return maximumCapacity;
     }
-   
-   
-   public static CapacityRequirements getMinimumCapacity(CapacityRequirements totalMinimumCapacityRequirements , CapacityRequirements minimumCapacityRequirementsPerZone, CapacityRequirementsPerZones lastEnforcedPlannedCapacity, CapacityRequirementsPerZones newPlannedCapacityPerZones, ZonesConfig zones, Set<ZonesConfig> zoness) {
-       
 
-       CapacityRequirements minimumRequierements = totalMinimumCapacityRequirements; // initial
+    public static CapacityRequirements getMinimumCapacity(CapacityRequirements totalMin,
+            CapacityRequirements minPerZone, CapacityRequirementsPerZones last,
+            CapacityRequirementsPerZones newPlanned, ZonesConfig zones, Set<ZonesConfig> zoness) {
 
-       for (ZonesConfig otherZone : zoness) {
-           if (!zones.equals(otherZone)) {
-               CapacityRequirements otherLastEnforced = lastEnforcedPlannedCapacity.getZonesCapacityOrZero(otherZone);
-               CapacityRequirements otherNewPlanned = newPlannedCapacityPerZones.getZonesCapacityOrZero(otherZone);
-               CapacityRequirements otherMinimumCapacity = null;
-               if (otherNewPlanned.equalsZero()) {
-                   // autoscaling did not calculate new capacity for 'otherZone' yet.
-                   otherMinimumCapacity = otherLastEnforced.max(minimumCapacityRequirementsPerZone);
-               } else { 
-                   otherMinimumCapacity = otherLastEnforced.min(otherNewPlanned).max(minimumCapacityRequirementsPerZone);
-               }
-               minimumRequierements = minimumRequierements.subtractOrZero(otherMinimumCapacity);
-           }       
-       }
-       // enforce minimum capacity per zone to be at least the pre-defince minimum capacity per zone
-       minimumRequierements = minimumRequierements.max(minimumCapacityRequirementsPerZone);
-       return minimumRequierements; 
-   }
-    
+        CapacityRequirements minimumRequierements = totalMin; // initial
+
+        for (ZonesConfig otherZone : zoness) {
+            if (!zones.equals(otherZone)) {
+                CapacityRequirements otherLastEnforced = last.getZonesCapacityOrZero(otherZone);
+                CapacityRequirements otherNewPlanned = newPlanned.getZonesCapacityOrZero(otherZone);
+                CapacityRequirements otherMinimumCapacity = null;
+                if (otherNewPlanned.equalsZero()) {
+                    // autoscaling did not calculate new capacity for 'otherZone' yet.
+                    otherMinimumCapacity = otherLastEnforced.max(minPerZone);
+                } else {
+                    otherMinimumCapacity = otherLastEnforced.min(otherNewPlanned).max(minPerZone);
+                }
+                minimumRequierements = minimumRequierements.subtractOrZero(otherMinimumCapacity);
+            }
+        }
+        // enforce minimum capacity per zone to be at least the pre-defince minimum capacity per
+        // zone
+        minimumRequierements = minimumRequierements.max(minPerZone);
+        return minimumRequierements;
+    }
+
     /**
      * Validates that the specified statisticsId defined in the rule
      */
-    public static Object getStatisticsValue(
-            ProcessingUnit pu,
-            Map<ProcessingUnitStatisticsId, Object> statistics,
-            ProcessingUnitStatisticsId ruleStatisticsId) 
-                    throws AutoScalingSlaEnforcementInProgressException {
-        
+    public static Object getStatisticsValue(ProcessingUnit pu, Map<ProcessingUnitStatisticsId, Object> statistics,
+            ProcessingUnitStatisticsId ruleStatisticsId) throws AutoScalingSlaEnforcementInProgressException {
+
         ruleStatisticsId.validate();
         for (final ProcessingUnitInstance instance : pu) {
-            
+
             ExactZonesConfig puInstanceExactZones = ((InternalProcessingUnit) pu).getHostingGridServiceAgentZones(instance);
             if (puInstanceExactZones.isStasfies(ruleStatisticsId.getAgentZones())) {
-                
-                SingleInstanceStatisticsConfig singleInstanceStatistics = 
-                        new SingleInstanceStatisticsConfigurer()
-                        .instance(instance)
-                        .create();
-                    
-                    final ProcessingUnitStatisticsId singleInstanceLastSampleStatisticsId = 
-                            ruleStatisticsId.shallowClone();
-                    singleInstanceLastSampleStatisticsId.setTimeWindowStatistics(new LastSampleTimeWindowStatisticsConfig());
-                    singleInstanceLastSampleStatisticsId.setInstancesStatistics(singleInstanceStatistics);
-                    singleInstanceLastSampleStatisticsId.validate();
-                    
-                    if (!statistics.containsKey(singleInstanceLastSampleStatisticsId)) {
-                        AutoScalingInstanceStatisticsException exception = new AutoScalingInstanceStatisticsException(instance, singleInstanceLastSampleStatisticsId.getMetric());
-                        if (logger.isTraceEnabled()) {
-                            logger.trace("Failed to find statistics id = " + singleInstanceLastSampleStatisticsId + " in pu statistics. current statistics key set = " + statistics.keySet(), exception);                            
-                        }
-                        throw exception;    
+
+                SingleInstanceStatisticsConfig singleInstanceStatistics = new SingleInstanceStatisticsConfigurer().instance(
+                        instance)
+                    .create();
+
+                final ProcessingUnitStatisticsId singleInstanceLastSampleStatisticsId = ruleStatisticsId.shallowClone();
+                singleInstanceLastSampleStatisticsId.setTimeWindowStatistics(new LastSampleTimeWindowStatisticsConfig());
+                singleInstanceLastSampleStatisticsId.setInstancesStatistics(singleInstanceStatistics);
+                singleInstanceLastSampleStatisticsId.validate();
+
+                if (!statistics.containsKey(singleInstanceLastSampleStatisticsId)) {
+                    AutoScalingInstanceStatisticsException exception = new AutoScalingInstanceStatisticsException(
+                            instance, singleInstanceLastSampleStatisticsId.getMetric());
+                    if (logger.isTraceEnabled()) {
+                        logger.trace("Failed to find statistics id = " + singleInstanceLastSampleStatisticsId
+                                + " in pu statistics. current statistics key set = " + statistics.keySet(), exception);
                     }
-                    
-                    final ProcessingUnitStatisticsId singleInstanceStatisticsId =
-                            ruleStatisticsId.shallowClone();
-                    singleInstanceStatisticsId.setTimeWindowStatistics(ruleStatisticsId.getTimeWindowStatistics());
-                    singleInstanceStatisticsId.setInstancesStatistics(singleInstanceStatistics);
-                    singleInstanceStatisticsId.validate();
-                    
-                    
-                    if (!statistics.containsKey(singleInstanceStatisticsId)) {
-                        AutoScalingStatisticsException exception = new AutoScalingInstanceStatisticsException(instance, singleInstanceStatisticsId.getMetric());
-                        if (logger.isTraceEnabled()) {
-                            logger.trace("Failed to find statistics id = " + singleInstanceStatisticsId + " in pu statistics. current statistics key set = " + statistics.keySet(), exception);                            
-                        }
-                        throw exception;   
-                    } 
-                    
-                    final ProcessingUnitStatisticsId singleInstanceTimeWindowZoneStatisticsId =
-                            ruleStatisticsId.shallowClone();
-                    singleInstanceTimeWindowZoneStatisticsId.setTimeWindowStatistics(ruleStatisticsId.getTimeWindowStatistics());
-                    singleInstanceTimeWindowZoneStatisticsId.setAgentZones(ruleStatisticsId.getAgentZones());
-                    singleInstanceTimeWindowZoneStatisticsId.setInstancesStatistics(singleInstanceStatistics);
-                    singleInstanceTimeWindowZoneStatisticsId.validate();
-                    
-                    
-                    if (!statistics.containsKey(singleInstanceTimeWindowZoneStatisticsId)) {
-                        AutoScalingStatisticsException exception = new AutoScalingInstanceStatisticsException(instance, singleInstanceTimeWindowZoneStatisticsId.getMetric());
-                        if (logger.isTraceEnabled()) {
-                            logger.trace("Failed to find statistics id = " + singleInstanceTimeWindowZoneStatisticsId + " in pu statistics. current statistics key set = " + statistics.keySet(), exception);                            
-                        }
-                        throw exception;   
-                    } 
+                    throw exception;
+                }
+
+                final ProcessingUnitStatisticsId singleInstanceStatisticsId = ruleStatisticsId.shallowClone();
+                singleInstanceStatisticsId.setTimeWindowStatistics(ruleStatisticsId.getTimeWindowStatistics());
+                singleInstanceStatisticsId.setInstancesStatistics(singleInstanceStatistics);
+                singleInstanceStatisticsId.validate();
+
+                if (!statistics.containsKey(singleInstanceStatisticsId)) {
+                    AutoScalingStatisticsException exception = new AutoScalingInstanceStatisticsException(instance,
+                            singleInstanceStatisticsId.getMetric());
+                    if (logger.isTraceEnabled()) {
+                        logger.trace("Failed to find statistics id = " + singleInstanceStatisticsId
+                                + " in pu statistics. current statistics key set = " + statistics.keySet(), exception);
+                    }
+                    throw exception;
+                }
+
+                final ProcessingUnitStatisticsId singleInstanceTimeWindowZoneStatisticsId = ruleStatisticsId.shallowClone();
+                singleInstanceTimeWindowZoneStatisticsId.setTimeWindowStatistics(ruleStatisticsId.getTimeWindowStatistics());
+                singleInstanceTimeWindowZoneStatisticsId.setAgentZones(ruleStatisticsId.getAgentZones());
+                singleInstanceTimeWindowZoneStatisticsId.setInstancesStatistics(singleInstanceStatistics);
+                singleInstanceTimeWindowZoneStatisticsId.validate();
+
+                if (!statistics.containsKey(singleInstanceTimeWindowZoneStatisticsId)) {
+                    AutoScalingStatisticsException exception = new AutoScalingInstanceStatisticsException(instance,
+                            singleInstanceTimeWindowZoneStatisticsId.getMetric());
+                    if (logger.isTraceEnabled()) {
+                        logger.trace("Failed to find statistics id = " + singleInstanceTimeWindowZoneStatisticsId
+                                + " in pu statistics. current statistics key set = " + statistics.keySet(), exception);
+                    }
+                    throw exception;
+                }
             }
         }
-        
+
         Object value = statistics.get(ruleStatisticsId);
         if (value == null) {
             logger.debug("statistics value for " + ruleStatisticsId + " was null.");
             throw new AutoScalingStatisticsException(pu, ruleStatisticsId);
         }
-        
+
         return value;
     }
 
