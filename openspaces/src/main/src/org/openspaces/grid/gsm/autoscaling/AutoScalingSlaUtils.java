@@ -89,7 +89,7 @@ public class AutoScalingSlaUtils {
                CapacityRequirements otherMinimumCapacity = null;
                if (otherNewPlanned.equalsZero()) {
                    // autoscaling did not calculate new capacity for 'otherZone' yet.
-                   otherMinimumCapacity = minimumCapacityRequirementsPerZone.max(minimumCapacityRequirementsPerZone);
+                   otherMinimumCapacity = otherLastEnforced.max(minimumCapacityRequirementsPerZone);
                } else { 
                    otherMinimumCapacity = otherLastEnforced.min(otherNewPlanned).max(minimumCapacityRequirementsPerZone);
                }
