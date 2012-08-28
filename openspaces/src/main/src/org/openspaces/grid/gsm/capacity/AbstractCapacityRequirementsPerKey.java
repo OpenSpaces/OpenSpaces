@@ -17,11 +17,8 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.capacity;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 abstract class AbstractCapacityRequirementsPerKey {
@@ -74,21 +71,10 @@ abstract class AbstractCapacityRequirementsPerKey {
     }
     
     @Override
-    public String toString() {
-        return capacityPerKey.size() + " machines with total capacity of " + getTotalAllocatedCapacity();
-    }
+    public abstract String toString();
     
-    public String toDetailedString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("totalNumberOfMachines:" + capacityPerKey.size() + " , totalCapacity:" + getTotalAllocatedCapacity()+", details:{");
-        List<String> keySet = new ArrayList<String>(capacityPerKey.keySet());
-        Collections.sort(keySet);
-        for (String key : keySet) {
-            builder.append(key + ":" + capacityPerKey.get(key)+" , ");
-        }
-        builder.append("}");
-        return builder.toString();
-    }
+    public abstract String toDetailedString();
+     
     
     protected AbstractCapacityRequirementsPerKey add(AbstractCapacityRequirementsPerKey other) {
         if (other.equalsZero()) {
