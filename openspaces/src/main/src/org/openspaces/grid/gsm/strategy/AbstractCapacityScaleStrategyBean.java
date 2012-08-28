@@ -254,7 +254,7 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
                 pendingMachinesExceptions.addReason(zones,e);
             }
             //we need to filter undiscovered agents due to the fact that an exception could have been raised, and the allocation
-            //may contain old inforamtion that was not cleaned.
+            //may contain old information that was not cleaned.
             CapacityRequirementsPerAgent allocatedCapacity = machinesEndpoint.getAllocatedCapacityFilterUndiscoveredAgents(sla);
             totalAllocatedCapacity = totalAllocatedCapacity.add(allocatedCapacity);
         }//for
