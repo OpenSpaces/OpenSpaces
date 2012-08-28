@@ -161,6 +161,7 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
                     getDefaultZones(), 
                     increase
             );
+            this.plannedCapacity = newPlannedCapacity;
         }
         return true;
     }
