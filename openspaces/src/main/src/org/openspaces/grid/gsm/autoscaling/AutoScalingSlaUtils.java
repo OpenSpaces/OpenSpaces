@@ -16,6 +16,7 @@
 package org.openspaces.grid.gsm.autoscaling;
 
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,9 +28,12 @@ import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
 import org.openspaces.admin.pu.statistics.SingleInstanceStatisticsConfig;
 import org.openspaces.admin.pu.statistics.SingleInstanceStatisticsConfigurer;
 import org.openspaces.admin.zone.config.ExactZonesConfig;
+import org.openspaces.admin.zone.config.ZonesConfig;
 import org.openspaces.grid.gsm.autoscaling.exceptions.AutoScalingInstanceStatisticsException;
 import org.openspaces.grid.gsm.autoscaling.exceptions.AutoScalingSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.autoscaling.exceptions.AutoScalingStatisticsException;
+import org.openspaces.grid.gsm.capacity.CapacityRequirements;
+import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerZones;
 
 /**
  * @author itaif
@@ -55,6 +59,47 @@ public class AutoScalingSlaUtils {
         }
         return Double.valueOf(x.toString());
     }
+    
+   public static CapacityRequirements getMaximumCapacity(CapacityRequirements totalMaximumCapacity, CapacityRequirements maximumCapacityRequirementsPerZone, CapacityRequirementsPerZones lastEnforcedPlannedCapacity, CapacityRequirementsPerZones newPlannedCapacityPerZones, ZonesConfig zones, Set<ZonesConfig> zoness) {
+        
+        CapacityRequirements maximumCapacity = totalMaximumCapacity; // initial
+
+        for (ZonesConfig otherZone : zoness) {
+            if (!zones.equals(otherZone)) {
+                CapacityRequirements otherLastEnforced = lastEnforcedPlannedCapacity.getZonesCapacityOrZero(otherZone);
+                CapacityRequirements otherNewPlanned = newPlannedCapacityPerZones.getZonesCapacityOrZero(otherZone);
+                CapacityRequirements otherMaximumCapacity = otherLastEnforced.max(otherNewPlanned).min(maximumCapacityRequirementsPerZone);
+                maximumCapacity = maximumCapacity.subtractOrZero(otherMaximumCapacity); 
+            }       
+        }
+        maximumCapacity = maximumCapacity.min(maximumCapacityRequirementsPerZone);
+        return maximumCapacity; 
+    }
+   
+   
+   public static CapacityRequirements getMinimumCapacity(CapacityRequirements totalMinimumCapacityRequirements , CapacityRequirements minimumCapacityRequirementsPerZone, CapacityRequirementsPerZones lastEnforcedPlannedCapacity, CapacityRequirementsPerZones newPlannedCapacityPerZones, ZonesConfig zones, Set<ZonesConfig> zoness) {
+       
+
+       CapacityRequirements minimumRequierements = totalMinimumCapacityRequirements; // initial
+
+       for (ZonesConfig otherZone : zoness) {
+           if (!zones.equals(otherZone)) {
+               CapacityRequirements otherLastEnforced = lastEnforcedPlannedCapacity.getZonesCapacityOrZero(otherZone);
+               CapacityRequirements otherNewPlanned = newPlannedCapacityPerZones.getZonesCapacityOrZero(otherZone);
+               CapacityRequirements otherMinimumCapacity = null;
+               if (otherNewPlanned.equalsZero()) {
+                   // autoscaling did not calculate new capacity for 'otherZone' yet.
+                   otherMinimumCapacity = minimumCapacityRequirementsPerZone.max(minimumCapacityRequirementsPerZone);
+               } else { 
+                   otherMinimumCapacity = otherLastEnforced.min(otherNewPlanned).max(minimumCapacityRequirementsPerZone);
+               }
+               minimumRequierements = minimumRequierements.subtractOrZero(otherMinimumCapacity);
+           }       
+       }
+       // enforce minimum capacity per zone to be at least the pre-defince minimum capacity per zone
+       minimumRequierements = minimumRequierements.max(minimumCapacityRequirementsPerZone);
+       return minimumRequierements; 
+   }
     
     /**
      * Validates that the specified statisticsId defined in the rule
