@@ -16,6 +16,7 @@
 package org.openspaces.utest.admin.internal.pu.statistics;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -29,11 +30,14 @@ import org.openspaces.admin.internal.pu.statistics.InternalProcessingUnitStatist
 import org.openspaces.admin.pu.statistics.AverageInstancesStatisticsConfig;
 import org.openspaces.admin.pu.statistics.AverageTimeWindowStatisticsConfigurer;
 import org.openspaces.admin.pu.statistics.LastSampleTimeWindowStatisticsConfig;
+import org.openspaces.admin.pu.statistics.MaximumInstancesStatisticsConfig;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsIdConfigurer;
 import org.openspaces.admin.pu.statistics.SingleInstanceStatisticsConfigurer;
+import org.openspaces.admin.pu.statistics.ThroughputTimeWindowStatisticsConfigurer;
 import org.openspaces.admin.zone.config.AtLeastOneZoneConfigurer;
 import org.openspaces.admin.zone.config.ExactZonesConfigurer;
+import org.openspaces.core.util.ConcurrentHashSet;
 
 /**
  * @author elip
@@ -85,6 +89,44 @@ public class ZoneStatisticsCalculatorTest extends TestCase {
         
     }
 
+    @Test
+    public void testVerySimilarStatistics() {
+        final ConcurrentHashSet<ProcessingUnitStatisticsId> statisticsIds = new ConcurrentHashSet<ProcessingUnitStatisticsId>();
+                        
+        statisticsIds.add(
+                new ProcessingUnitStatisticsIdConfigurer()
+                .agentZones(new AtLeastOneZoneConfigurer().addZones("petclinic.tomcat").create())
+                .instancesStatistics(new MaximumInstancesStatisticsConfig())
+                .metric("Total Requests Count")
+                .monitor("USM")
+                .timeWindowStatistics(new ThroughputTimeWindowStatisticsConfigurer().timeWindow(20, TimeUnit.SECONDS).create())
+                .create());
+        
+        statisticsIds.add(
+                new ProcessingUnitStatisticsIdConfigurer()
+                .agentZones(new ExactZonesConfigurer().addZones("petclinic.tomcat","__cloud.zone.us-east-1d").create())
+                .instancesStatistics(new MaximumInstancesStatisticsConfig())
+                .metric("Total Requests Count")
+                .monitor("USM")
+                .timeWindowStatistics(new ThroughputTimeWindowStatisticsConfigurer().timeWindow(20, TimeUnit.SECONDS).create())
+                .create());
+
+        statisticsIds.add(
+                new ProcessingUnitStatisticsIdConfigurer()
+                .agentZones(new ExactZonesConfigurer().addZones("petclinic.tomcat","__cloud.zone.us-east-1e").create())
+                .instancesStatistics(new MaximumInstancesStatisticsConfig())
+                .metric("Total Requests Count")
+                .monitor("USM")
+                .timeWindowStatistics(new ThroughputTimeWindowStatisticsConfigurer().timeWindow(20, TimeUnit.SECONDS).create())
+                .create());
+
+        HashSet<ProcessingUnitStatisticsId> snapshot = new HashSet<ProcessingUnitStatisticsId>(statisticsIds);
+        for (ProcessingUnitStatisticsId s : statisticsIds) {
+            System.out.println(s.toString());
+        }
+        assertEquals(3, snapshot.size());
+    }
+    
     private InternalProcessingUnitStatistics createProcessingUnitStatistics(String... zones) {
         ProcessingUnitStatistics prevPrevProcessingUnitStatistics = null;
         
