@@ -169,10 +169,21 @@ public class DefaultAutoScalingSlaEnforcementEndpoint implements AutoScalingSlaE
             CapacityRequirements newCapacity = existingCapacity.subtractOrZero(minimunLowThresholdBreachedDecrease);
             CapacityRequirements minCapacity = sla.getMinCapacity();
             
+            if (logger.isTraceEnabled()) {
+                logger.trace("valuesBelowLowThresholdPerRule=" + valuesBelowLowThresholdPerRule + " minimunLowThresholdBreachedDecrease="+minimunLowThresholdBreachedDecrease +" newCapacity="+newCapacity + " minCapacity="+minCapacity);
+            }
+            
             if (minCapacity.greaterThan(newCapacity)) {
                 // apply min capacity restriction
                 // do not throw exception
                 CapacityRequirements correctedNewCapacity = newCapacity.max(minCapacity);
+                
+                if (!correctedNewCapacity.equals(newCapacity)) {
+                    if (logger.isTraceEnabled()) {
+                        logger.trace("Cannot decrease capacity below minimum of " + minCapacity +". Otherwise would have decreased capacity to " + newCapacity);
+                    }
+                }
+                    
                 if (existingCapacity.equals(newCapacity)) {
                     // do not throw exception since this is a common use case.
                     if (logger.isDebugEnabled()) {
