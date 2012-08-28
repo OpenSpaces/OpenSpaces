@@ -28,7 +28,6 @@ import org.openspaces.admin.internal.pu.ProcessingUnitStatistics;
 import org.openspaces.admin.pu.statistics.AbstractTimeWindowStatisticsConfig;
 import org.openspaces.admin.pu.statistics.LastSampleTimeWindowStatisticsConfig;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
-import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsIdConfigurer;
 import org.openspaces.admin.pu.statistics.SingleInstanceStatisticsConfig;
 import org.openspaces.admin.pu.statistics.TimeWindowStatisticsConfig;
 
@@ -104,21 +103,11 @@ public class TimeWindowStatisticsCalculator implements InternalProcessingUnitSta
             throw new IllegalArgumentException("Unsupported statisticsId. Only "+SingleInstanceStatisticsConfig.class.getName() +" is supported. Offending id="+statisticsId);
         }
 
-        ProcessingUnitStatisticsId erased = clone(statisticsId);
+        ProcessingUnitStatisticsId erased = statisticsId.shallowClone();
         // erase statistics function from hashmap key
         erased.setTimeWindowStatistics(
                 new ErasedTimeWindowStatisticsConfig((AbstractTimeWindowStatisticsConfig)erased.getTimeWindowStatistics()));
         return erased;
-    }
-
-    private ProcessingUnitStatisticsId clone(ProcessingUnitStatisticsId statisticsId) {
-        return  new ProcessingUnitStatisticsIdConfigurer()
-        .metric(statisticsId.getMetric())
-        .monitor(statisticsId.getMonitor())
-        .instancesStatistics(statisticsId.getInstancesStatistics())
-        .timeWindowStatistics(statisticsId.getTimeWindowStatistics())
-        .agentZones(statisticsId.getAgentZones())
-        .create();
     }
 
     /**
@@ -132,7 +121,7 @@ public class TimeWindowStatisticsCalculator implements InternalProcessingUnitSta
             return erasedStatisticsId;
         }
 
-        ProcessingUnitStatisticsId unerased = clone(erasedStatisticsId);
+        ProcessingUnitStatisticsId unerased = erasedStatisticsId.shallowClone();
         unerased.setTimeWindowStatistics(timeWindowStatistics);
         return unerased;
     }
