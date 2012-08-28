@@ -30,6 +30,8 @@ import net.jini.core.lookup.ServiceRegistrar;
 import net.jini.core.lookup.ServiceTemplate;
 import net.jini.discovery.DiscoveryEvent;
 import net.jini.discovery.DiscoveryListener;
+import net.jini.discovery.DiscoveryLocatorManagement;
+import net.jini.discovery.LookupDiscoveryManager;
 import net.jini.lookup.LookupCache;
 import net.jini.lookup.ServiceDiscoveryEvent;
 import net.jini.lookup.ServiceDiscoveryListener;
@@ -78,6 +80,7 @@ import com.j_spaces.core.admin.IJSpaceContainerAdmin;
 import com.j_spaces.core.jini.SharedDiscoveryManagement;
 import com.j_spaces.jmx.util.JMXUtilities;
 import com.j_spaces.kernel.PlatformVersion;
+import com.j_spaces.kernel.SystemProperties;
 
 /**
  * @author kimchy
@@ -95,7 +98,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
     private boolean discoverUnmanagedSpaces = false;
 
     private volatile boolean started = false;
-
+    
     private ServiceDiscoveryManager sdm;
     private LookupCache serviceCache;
     private LookupCache spaceCache;
@@ -122,14 +125,14 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
     public void discoverUnmanagedSpaces() {
         this.discoverUnmanagedSpaces = true;
     }
-
+    
     public void start() {
         if (started) {
             return;
         }
         started = true;
         try {
-            sdm = SharedDiscoveryManagement.getServiceDiscoveryManager(getGroups(), getLocators(), this);
+            sdm = SharedDiscoveryManagement.getServiceDiscoveryManager(getGroups(), getInitialLocators(), this, true);
         } catch (Exception e) {
             throw new AdminException("Failed to start discovery service, Service Discovery Manager failed to start", e);
         }
@@ -505,8 +508,50 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
     }
 
     public LookupLocator[] getLocators() {
+        LookupLocator[] result;
+        if (!isDynamicLocatorsEnabled()) {
+            result = getInitialLocators();
+        } else {
+            result = getDynamicLocators();
+        }
+        return result;
+    }
+    
+    // TODO DYNAMIC : this method should be named
+    // differently because in the context of the admin
+    // it might return false, and then true when dynamic
+    // locators discovery initialization is completed
+    // and dynamic locators are enabled at one of the 
+    // discovered lookup services
+    public boolean isDynamicLocatorsEnabled()
+    {
+        if (sdm != null && sdm.getDiscoveryManager() instanceof LookupDiscoveryManager) {
+            LookupDiscoveryManager ldm = (LookupDiscoveryManager) sdm.getDiscoveryManager();
+            return ldm.getDynamicLocatorDiscovery().isEnabled();
+        }
+        
+        return false;
+    }
+    
+    /**
+     * @return If the service discovery manager is using initial locators
+     *         of lookup services with dynamic locators enabled, this will return
+     *         the currently discovered locators, otherwise, it will return the initial locators.
+     */
+    private LookupLocator[] getDynamicLocators() {
+        try {
+            return ((DiscoveryLocatorManagement)sdm.getDiscoveryManager()).getLocators();
+        } catch (Exception e) {
+            if (logger.isWarnEnabled()) {
+                logger.warn("Failed retrieving dynamic locators from admin, returning initial locators", e);
+            }
+            return getInitialLocators();
+        }
+    }
+    
+    private LookupLocator[] getInitialLocators() {
         if (locators == null) {
-            String locatorsProperty = System.getProperty("com.gs.jini_lus.locators");
+            String locatorsProperty = System.getProperty(SystemProperties.JINI_LUS_LOCATORS);
             if (locatorsProperty == null) {
                 locatorsProperty = System.getenv("LOOKUPLOCATORS");
             }
@@ -516,4 +561,5 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
         }
         return BootUtil.toLookupLocators(locators);
     }
+
 }

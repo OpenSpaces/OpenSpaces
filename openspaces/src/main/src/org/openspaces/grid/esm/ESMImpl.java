@@ -237,7 +237,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
     @Override
     public void advertise() throws IOException {
         super.advertise();
-        logger.info("ESM started successfully with groups " + Arrays.toString(admin.getGroups()) + " and locators " + Arrays.toString(admin.getLocators()) + "");
+        logger.info("ESM started successfully with groups " + Arrays.toString(super.admin.getLookupGroups()) + " and locators " + Arrays.toString(super.admin.getLookupLocators()) + "");
     }
 
     @Override

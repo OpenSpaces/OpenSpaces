@@ -79,6 +79,9 @@ public class DefaultElasticServiceManager extends AbstractAgentGridComponent imp
         return this.serviceID;
     }
     
+    public ESM getESM() {
+        return this.esm;
+    }
     
     public LogEntries logEntries(LogEntryMatcher matcher) throws AdminException {
         if (getGridServiceAgent() != null) {

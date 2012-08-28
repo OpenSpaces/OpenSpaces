@@ -18,6 +18,8 @@ package org.openspaces.pu.container.servicegrid.deploy;
 
 import com.gigaspaces.grid.gsm.GSM;
 import com.j_spaces.kernel.PlatformVersion;
+import com.j_spaces.kernel.SystemProperties;
+
 import net.jini.core.lookup.ServiceItem;
 import net.jini.core.discovery.LookupLocator;
 import org.apache.commons.logging.Log;
@@ -82,7 +84,7 @@ public class Undeploy {
 
     public LookupLocator[] getLocators() {
         if (locators == null) {
-            String locatorsProperty = java.lang.System.getProperty("com.gs.jini_lus.locators");
+            String locatorsProperty = System.getProperty(SystemProperties.JINI_LUS_LOCATORS);
             if (locatorsProperty != null) {
                 locators = BootUtil.toLookupLocators(locatorsProperty);
             }

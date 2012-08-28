@@ -45,7 +45,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import net.jini.config.Configuration;
 import net.jini.core.discovery.LookupLocator;
 import net.jini.core.lookup.ServiceItem;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jini.rio.boot.BootUtil;
@@ -99,6 +98,7 @@ import com.j_spaces.core.Constants;
 import com.j_spaces.core.client.SpaceURL;
 import com.j_spaces.core.service.ServiceConfigLoader;
 import com.j_spaces.kernel.PlatformVersion;
+import com.j_spaces.kernel.SystemProperties;
 
 /**
  */
@@ -182,11 +182,11 @@ public class Deploy {
 
     public LookupLocator[] getLocators() {
         if (locators == null) {
-            String locatorsProperty = java.lang.System.getProperty("com.gs.jini_lus.locators");
+            String locatorsProperty = System.getProperty(SystemProperties.JINI_LUS_LOCATORS);
             if (locatorsProperty != null) {
                 locators = BootUtil.toLookupLocators(locatorsProperty);
             }
-        }
+        }            
         return locators;
     }
 

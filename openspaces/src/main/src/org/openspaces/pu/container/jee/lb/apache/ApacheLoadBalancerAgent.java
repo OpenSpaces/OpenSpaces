@@ -19,6 +19,8 @@ package org.openspaces.pu.container.jee.lb.apache;
 import com.gigaspaces.logger.GSLogConfigLoader;
 import com.j_spaces.core.service.ServiceConfigLoader;
 import com.j_spaces.kernel.PlatformVersion;
+import com.j_spaces.kernel.SystemProperties;
+
 import net.jini.core.lookup.ServiceTemplate;
 import net.jini.core.lookup.ServiceID;
 import net.jini.discovery.DiscoveryEvent;
@@ -75,11 +77,11 @@ public class ApacheLoadBalancerAgent implements DiscoveryListener, ServiceDiscov
     private BackwardsServiceDiscoveryManager sdm;
     private LookupCache cache;
 
-    private Map<String, LoadBalancerInfo> loadBalancersInfoMap = new ConcurrentHashMap<String, LoadBalancerInfo>();
+    private final Map<String, LoadBalancerInfo> loadBalancersInfoMap = new ConcurrentHashMap<String, LoadBalancerInfo>();
 
-    private Map<ServiceID, ClusterInfo> clusterInfoMap = new ConcurrentHashMap<ServiceID, ClusterInfo>();
+    private final Map<ServiceID, ClusterInfo> clusterInfoMap = new ConcurrentHashMap<ServiceID, ClusterInfo>();
 
-    private Map<ServiceID, JeeServiceDetails> jeeServiceDetailsMap = new ConcurrentHashMap<ServiceID, JeeServiceDetails>();
+    private final Map<ServiceID, JeeServiceDetails> jeeServiceDetailsMap = new ConcurrentHashMap<ServiceID, JeeServiceDetails>();
 
     private volatile boolean running = false;
 
@@ -110,7 +112,7 @@ public class ApacheLoadBalancerAgent implements DiscoveryListener, ServiceDiscov
 
     public String getLocators() {
         if (locators == null) {
-            String locatorsProperty = java.lang.System.getProperty("com.gs.jini_lus.locators");
+            String locatorsProperty = System.getProperty(SystemProperties.JINI_LUS_LOCATORS);
             if (locatorsProperty != null) {
                 locators = locatorsProperty;
             }
