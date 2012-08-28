@@ -18,6 +18,7 @@
 package org.openspaces.admin.internal.pu;
 
 import java.util.Map;
+import java.util.Set;
 
 import org.jini.rio.monitor.ProvisionLifeCycleEvent;
 import org.openspaces.admin.AdminException;
@@ -132,7 +133,7 @@ public interface InternalProcessingUnit extends ProcessingUnit, InternalProcessi
      * @author itaif
      * @since 9.0.0
      */
-    ProcessingUnitStatisticsId[] getStatisticsCalculations();
+    Set<ProcessingUnitStatisticsId> getStatisticsCalculations();
     
     /**
      * return the exact zones of the agent that belongs to processing unit instance

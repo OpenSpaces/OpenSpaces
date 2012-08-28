@@ -21,9 +21,11 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CountDownLatch;
@@ -113,7 +115,6 @@ import org.openspaces.admin.zone.config.AtLeastOneZoneConfigurer;
 import org.openspaces.admin.zone.config.ExactZonesConfig;
 import org.openspaces.admin.zone.config.RequiredZonesConfig;
 import org.openspaces.core.properties.BeanLevelProperties;
-import org.openspaces.core.util.ConcurrentHashSet;
 import org.openspaces.pu.container.support.RequiredDependenciesCommandLineParser;
 import org.openspaces.pu.service.ServiceMonitors;
 import org.openspaces.pu.sla.SLA;
@@ -122,6 +123,7 @@ import org.openspaces.pu.sla.requirement.ZoneRequirement;
 
 import com.gigaspaces.grid.gsm.PUDetails;
 import com.gigaspaces.internal.utils.StringUtils;
+import com.gigaspaces.internal.utils.collections.ConcurrentHashSet;
 
 /**
  * @author kimchy
@@ -1097,11 +1099,12 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         InternalProcessingUnitStatistics statistics = 
                 new DefaultProcessingUnitStatistics(currentTime, lastStatistics, statisticsHistorySize);
         Map<String,ProcessingUnitInstance> instancesSnapshot = new HashMap<String, ProcessingUnitInstance>(processingUnitInstances);
-        List<ProcessingUnitStatisticsId> statisticsIdsSnapshot = new ArrayList<ProcessingUnitStatisticsId>(statisticsIds);
+        
+        Set<ProcessingUnitStatisticsId> statisticsIdsSnapshot = new HashSet<ProcessingUnitStatisticsId>(statisticsIds);
         for (ProcessingUnitStatisticsId statisticsId : statisticsIdsSnapshot) {
             injectInstanceStatisticsIfAvailable(instancesSnapshot, statistics, statisticsId);
         }
-
+        
         statistics.calculateStatistics(statisticsIdsSnapshot);
 
         lastStatistics = statistics;
@@ -1232,8 +1235,8 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     
 
     @Override
-    public ProcessingUnitStatisticsId[] getStatisticsCalculations() {
-       return statisticsIds.toArray(new ProcessingUnitStatisticsId[statisticsIds.size()]);
+    public Set<ProcessingUnitStatisticsId> getStatisticsCalculations() {
+       return Collections.unmodifiableSet(statisticsIds);
     }
 
     @Override
