@@ -147,4 +147,51 @@ public class MinimumCapacityPerMachineTest extends TestCase {
         CapacityRequirements newZone2Capacity = AutoScalingSlaUtils.getMinimumCapacity(totalMin, minPerZone, lastEnforcedPlannedCapacity, newPlannedCapacityPerZones, EXACT_ZONE2, ZONES);
         Assert.assertEquals(SIX_CAPACITY,newZone2Capacity);
     }
+    
+    /**
+     * minPerZone=2
+     * totalMin=6
+     * last= {Zone1:1 , Zone2:1} 
+     * expected result zone2:4
+     */
+    @Test
+    public void testMinimumPerZoneForCalculatingLast() {
+        CapacityRequirements totalMin = SIX_CAPACITY;
+        CapacityRequirements minPerZone = TWO_CAPACITY;
+        
+        CapacityRequirementsPerZones lastEnforcedPlannedCapacity = 
+                new CapacityRequirementsPerZones()
+                .add(EXACT_ZONE1, ONE_CAPACITY)
+                .add(EXACT_ZONE2, ONE_CAPACITY);
+        
+        CapacityRequirementsPerZones newPlannedCapacityPerZones = 
+                new CapacityRequirementsPerZones();
+        
+        CapacityRequirements newZone2Capacity = AutoScalingSlaUtils.getMinimumCapacity(totalMin, minPerZone, lastEnforcedPlannedCapacity, newPlannedCapacityPerZones, EXACT_ZONE2, ZONES);
+        Assert.assertEquals(FOUR_CAPACITY,newZone2Capacity);
+    }
+    
+    /**
+     * minPerZone=2
+     * totalMin=6
+     * last= {Zone1:0 , Zone2:1}
+     * new = {Zone1:1} 
+     * expected result zone2:4
+     */
+    @Test
+    public void testMinimumPerZoneForCalculatingNew() {
+        CapacityRequirements totalMin = SIX_CAPACITY;
+        CapacityRequirements minPerZone = TWO_CAPACITY;
+        
+        CapacityRequirementsPerZones lastEnforcedPlannedCapacity = 
+                new CapacityRequirementsPerZones()
+                .add(EXACT_ZONE2, ONE_CAPACITY);
+        
+        CapacityRequirementsPerZones newPlannedCapacityPerZones = 
+                new CapacityRequirementsPerZones()
+                .add(EXACT_ZONE1, ONE_CAPACITY);
+        
+        CapacityRequirements newZone2Capacity = AutoScalingSlaUtils.getMinimumCapacity(totalMin, minPerZone, lastEnforcedPlannedCapacity, newPlannedCapacityPerZones, EXACT_ZONE2, ZONES);
+        Assert.assertEquals(FOUR_CAPACITY,newZone2Capacity);
+    }
 }
