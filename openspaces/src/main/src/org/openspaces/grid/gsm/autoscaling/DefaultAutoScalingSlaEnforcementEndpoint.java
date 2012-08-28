@@ -89,12 +89,14 @@ public class DefaultAutoScalingSlaEnforcementEndpoint implements AutoScalingSlaE
             }
         }
         
+        // each rule in this sla with recieve the current sla zone
+        ZonesConfig zonesConfig = sla.getZonesConfig(); 
+        
         for (AutomaticCapacityScaleRuleConfig rule: sla.getRules()) {
 
             // desired statistics to calculate for this rule
             ProcessingUnitStatisticsId statisticsId = rule.getStatistics();
             
-            ZonesConfig zonesConfig = sla.getZonesConfig();
             zonesConfig.validate();
             statisticsId.setAgentZones(zonesConfig);
             Object value = AutoScalingSlaUtils.getStatisticsValue(pu, statistics, statisticsId);

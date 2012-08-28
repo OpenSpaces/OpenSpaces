@@ -95,10 +95,12 @@ public class AutoScalingSlaUtils {
                     singleInstanceStatisticsId.setTimeWindowStatistics(ruleStatisticsId.getTimeWindowStatistics());
                     singleInstanceStatisticsId.setInstancesStatistics(singleInstanceStatistics);
                     singleInstanceStatisticsId.validate();
+                    
+                    
                     if (!statistics.containsKey(singleInstanceStatisticsId)) {
-                        AutoScalingStatisticsException exception = new AutoScalingInstanceStatisticsException(instance, singleInstanceLastSampleStatisticsId.toString());
+                        AutoScalingStatisticsException exception = new AutoScalingInstanceStatisticsException(instance, singleInstanceStatisticsId.toString());
                         if (logger.isTraceEnabled()) {
-                            logger.trace("Failed to find statistics id = " + singleInstanceLastSampleStatisticsId + " in pu statistics. current statistics key set = " + statistics.keySet(), exception);                            
+                            logger.trace("Failed to find statistics id = " + singleInstanceStatisticsId + " in pu statistics. current statistics key set = " + statistics.keySet(), exception);                            
                         }
                         throw exception;   
                     } 
@@ -108,11 +110,13 @@ public class AutoScalingSlaUtils {
                     singleInstanceTimeWindowZoneStatisticsId.setTimeWindowStatistics(ruleStatisticsId.getTimeWindowStatistics());
                     singleInstanceTimeWindowZoneStatisticsId.setAgentZones(ruleStatisticsId.getAgentZones());
                     singleInstanceTimeWindowZoneStatisticsId.setInstancesStatistics(singleInstanceStatistics);
-                    singleInstanceStatisticsId.validate();
-                    if (!statistics.containsKey(singleInstanceStatisticsId)) {
-                        AutoScalingStatisticsException exception = new AutoScalingInstanceStatisticsException(instance, singleInstanceLastSampleStatisticsId.toString());
-                        if (logger.isTraceEnabled()) {
-                            logger.trace("Failed to find statistics id = " + singleInstanceLastSampleStatisticsId + " in pu statistics. current statistics key set = " + statistics.keySet(), exception);                            
+                    singleInstanceTimeWindowZoneStatisticsId.validate();
+                    
+                    
+                    if (!statistics.containsKey(singleInstanceTimeWindowZoneStatisticsId)) {
+                        AutoScalingStatisticsException exception = new AutoScalingInstanceStatisticsException(instance, singleInstanceTimeWindowZoneStatisticsId.toString());
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Failed to find statistics id = " + singleInstanceTimeWindowZoneStatisticsId + " in pu statistics. current statistics key set = " + statistics.keySet(), exception);                            
                         }
                         throw exception;   
                     } 
