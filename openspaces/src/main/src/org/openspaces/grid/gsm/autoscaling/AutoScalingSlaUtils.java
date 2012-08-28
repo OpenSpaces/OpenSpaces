@@ -60,6 +60,20 @@ public class AutoScalingSlaUtils {
         return Double.valueOf(x.toString());
     }
 
+    /**
+     * Calculates the maximum capacity for the specified zones.
+     * 
+     * The algorithm tries to be very conservative and may return a smaller value than maxPerZones.
+     * otherCapacity = sum (foreach otherZones!=zones --> min(maxPerZone,max(last[otherZones],newPlanned[otherZones]))
+     * return  min(maxPerZones, totalMax - otherCapacity)
+     *  
+     * @param totalMax - the maximum capacity when adding up all zones 
+     * @param maxPerZone - the maximum capacity per zone
+     * @param last - the last enforced (allocated) capacity per zone
+     * @param newPlanned - the new (planned) capacity per zone (could be zero if no plan yet)
+     * @param zones - the zone for which the maximum capacity is requested 
+     * @param zoness - the complete list of zones
+     */
     public static CapacityRequirements getMaximumCapacity(CapacityRequirements totalMax,
             CapacityRequirements maxPerZone, CapacityRequirementsPerZones last,
             CapacityRequirementsPerZones newPlanned, ZonesConfig zones, Set<ZonesConfig> zoness) {
@@ -78,6 +92,21 @@ public class AutoScalingSlaUtils {
         return maximumCapacity;
     }
 
+    /**
+     * Calculates the minimum capacity for the specified zones.
+     * 
+     * The algorithm tries to be very conservative and may return a bigger value than minPerZones.
+     * 
+     * otherCapacity = sum (foreach otherZones!=zones --> max(minPerZone,min(last[otherZones], newPlanned[otherZones]))
+     * return  min(maxPerZones, totalMin - otherCapacity)
+     *  
+     * @param totalMin - the minimum capacity when adding up all zones 
+     * @param minPerZone - the minimum capacity per zone
+     * @param last - the last enforced (allocated) capacity per zone
+     * @param newPlanned - the new (planned) capacity per zone (could be zero if no plan yet, in that case it is ignored)
+     * @param zones - the zone for which the maximum capacity is requested 
+     * @param zoness - the complete list of zones
+     */
     public static CapacityRequirements getMinimumCapacity(CapacityRequirements totalMin,
             CapacityRequirements minPerZone, CapacityRequirementsPerZones last,
             CapacityRequirementsPerZones newPlanned, ZonesConfig zones, Set<ZonesConfig> zoness) {
