@@ -292,7 +292,9 @@ implements AutoScalingSlaEnforcementEndpointAware {
                     
                     final CapacityRequirements newCapacityForZones = enforceAutoScalingSla(capacityForZones, zones, lastEnforcedPlannedCapacity, newPlannedCapacity, zoness);
 
-                    if (!newCapacityForZones.equals(capacityForZones)) {
+                    if (newCapacityForZones.equals(capacityForZones)) {
+                        newPlannedCapacity = newPlannedCapacity.set(zones, capacityForZones);
+                    } else {
                         if (getLogger().isDebugEnabled()) {
                             getLogger().debug("capacity for zones " + zones + " has changed from " + capacityForZones + " to " + newCapacityForZones);
                         }
@@ -303,7 +305,7 @@ implements AutoScalingSlaEnforcementEndpointAware {
 
                 } catch (AutoScalingSlaEnforcementInProgressException e) {
                     // enforce last capacity for zone that threw the exception
-                    newPlannedCapacity.set(zones, capacityForZones);
+                    newPlannedCapacity = newPlannedCapacity.set(zones, capacityForZones);
                     
                     // exception in one zone should not influence running autoscaling in another zone.
                     // save exceptions for later handling
@@ -417,7 +419,7 @@ implements AutoScalingSlaEnforcementEndpointAware {
                     .agentZones(getDefaultZones())
                     .instancesStatistics(statisticsId.getInstancesStatistics())
                     .metric(statisticsId.getMetric())
-                    .monitor(statisticsId.getMetric())
+                    .monitor(statisticsId.getMonitor())
                     .timeWindowStatistics(statisticsId.getTimeWindowStatistics())
                     .create();
                 
@@ -442,7 +444,7 @@ implements AutoScalingSlaEnforcementEndpointAware {
                             .agentZones(zones)
                             .instancesStatistics(statisticsId.getInstancesStatistics())
                             .metric(statisticsId.getMetric())
-                            .monitor(statisticsId.getMetric())
+                            .monitor(statisticsId.getMonitor())
                             .timeWindowStatistics(statisticsId.getTimeWindowStatistics())
                             .create();
                         getProcessingUnit().addStatisticsCalculation(id);
