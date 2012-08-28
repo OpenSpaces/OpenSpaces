@@ -30,7 +30,6 @@ import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsIdConfigurer;
 import org.openspaces.admin.pu.statistics.TimeWindowStatisticsConfig;
-import org.openspaces.admin.zone.config.ExactZonesConfig;
 import org.openspaces.admin.zone.config.ZonesConfig;
 import org.openspaces.grid.gsm.autoscaling.AutoScalingSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.autoscaling.AutoScalingSlaEnforcementEndpointAware;
@@ -372,7 +371,7 @@ implements AutoScalingSlaEnforcementEndpointAware {
             
             if (!maximumCapacity.greaterOrEquals(minimumCapacity)) {
                 throw new AutoScalingConfigConflictException(getProcessingUnit(), minimumCapacity, maximumCapacity, 
-                        (ExactZonesConfig) zones, lastEnforcedCapacityRequirementsPerZone, newCapacityRequirementsPerZone);
+                        zones.getZones(), lastEnforcedCapacityRequirementsPerZone, newCapacityRequirementsPerZone);
             }
             
             autoScalingEndpoint.enforceSla(sla);
