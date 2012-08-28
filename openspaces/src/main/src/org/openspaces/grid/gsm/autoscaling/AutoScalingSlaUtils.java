@@ -15,6 +15,7 @@
  *******************************************************************************/
 package org.openspaces.grid.gsm.autoscaling;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -69,20 +70,25 @@ public class AutoScalingSlaUtils {
      *  
      * @param totalMax - the maximum capacity when adding up all zones 
      * @param maxPerZone - the maximum capacity per zone
-     * @param last - the last enforced (allocated) capacity per zone
+     * @param enforced - the last enforced (allocated) capacity per zone
      * @param newPlanned - the new (planned) capacity per zone (could be zero if no plan yet)
      * @param zones - the zone for which the maximum capacity is requested 
      * @param zoness - the complete list of zones
      */
     public static CapacityRequirements getMaximumCapacity(CapacityRequirements totalMax,
-            CapacityRequirements maxPerZone, CapacityRequirementsPerZones last,
-            CapacityRequirementsPerZones newPlanned, ZonesConfig zones, Set<ZonesConfig> zoness) {
+            CapacityRequirements maxPerZone, CapacityRequirementsPerZones enforced,
+            CapacityRequirementsPerZones newPlanned, ZonesConfig zones) {
 
+        Set<ZonesConfig> zoness = new HashSet<ZonesConfig>();
+        zoness.addAll(enforced.getZones());
+        zoness.addAll(newPlanned.getZones());
+        zoness.add(zones);
+        
         CapacityRequirements maximumCapacity = totalMax; // initial
 
         for (ZonesConfig otherZone : zoness) {
             if (!zones.equals(otherZone)) {
-                CapacityRequirements otherLastEnforced = last.getZonesCapacityOrZero(otherZone);
+                CapacityRequirements otherLastEnforced = enforced.getZonesCapacityOrZero(otherZone);
                 CapacityRequirements otherNewPlanned = newPlanned.getZonesCapacityOrZero(otherZone);
                 CapacityRequirements otherMaximumCapacity = otherLastEnforced.max(otherNewPlanned).min(maxPerZone);
                 maximumCapacity = maximumCapacity.subtractOrZero(otherMaximumCapacity);
@@ -102,20 +108,25 @@ public class AutoScalingSlaUtils {
      *  
      * @param totalMin - the minimum capacity when adding up all zones 
      * @param minPerZone - the minimum capacity per zone
-     * @param last - the last enforced (allocated) capacity per zone
+     * @param enforced - the last enforced (allocated) capacity per zone
      * @param newPlanned - the new (planned) capacity per zone (could be zero if no plan yet, in that case it is ignored)
      * @param zones - the zone for which the maximum capacity is requested 
      * @param zoness - the complete list of zones
      */
     public static CapacityRequirements getMinimumCapacity(CapacityRequirements totalMin,
-            CapacityRequirements minPerZone, CapacityRequirementsPerZones last,
-            CapacityRequirementsPerZones newPlanned, ZonesConfig zones, Set<ZonesConfig> zoness) {
+            CapacityRequirements minPerZone, CapacityRequirementsPerZones enforced,
+            CapacityRequirementsPerZones newPlanned, ZonesConfig zones) {
 
+        Set<ZonesConfig> zoness = new HashSet<ZonesConfig>();
+        zoness.addAll(enforced.getZones());
+        zoness.addAll(newPlanned.getZones());
+        zoness.add(zones);
+        
         CapacityRequirements minimumRequierements = totalMin; // initial
 
         for (ZonesConfig otherZone : zoness) {
             if (!zones.equals(otherZone)) {
-                CapacityRequirements otherLastEnforced = last.getZonesCapacityOrZero(otherZone);
+                CapacityRequirements otherLastEnforced = enforced.getZonesCapacityOrZero(otherZone);
                 CapacityRequirements otherNewPlanned = newPlanned.getZonesCapacityOrZero(otherZone);
                 CapacityRequirements otherMinimumCapacity = null;
                 if (otherNewPlanned.equalsZero()) {

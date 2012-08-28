@@ -175,11 +175,11 @@ implements AutoScalingSlaEnforcementEndpointAware {
     
     @Override
     protected boolean setPlannedCapacity(CapacityRequirementsPerZonesConfig config) {
-        boolean hasChanged = super.setPlannedCapacity(config);
-        if (hasChanged) {
+        boolean planChanged = super.setPlannedCapacity(config);
+        if (planChanged) {
             enablePuStatistics();
         }
-        return hasChanged;
+        return planChanged;
     }
 
     @Override
@@ -226,103 +226,62 @@ implements AutoScalingSlaEnforcementEndpointAware {
 
 
         CapacityRequirementsPerZones newPlanned = new CapacityRequirementsPerZones();
-        boolean planChanged = false;
 
         // make sure that we are not in the cooldown period
         // Notice this check is performed after PU is INTACT, meaning the USM is already started
         // @see DefaultAdmin#degradeUniversalServiceManagerProcessingUnitStatus()
         cooldownValidator.validate();
  
-        if (!isGridServiceAgentZonesAware()) {
+        Set<ZonesConfig> zoness = new HashSet<ZonesConfig>();
+        
+        if (isGridServiceAgentZonesAware()) {
+            zoness.addAll(enforced.getZones());
+        }
+        else {
+            zoness.add(getDefaultZones());
+        }
 
-            ZonesConfig defaultZones = null;
+        // enforce SLA for each zone separately.
+        for (ZonesConfig zones : zoness) {
+
             try {
+                final CapacityRequirements newPlannedForZones = enforceAutoScalingSla(zones, enforced, newPlanned);
+                newPlanned = newPlanned.set(zones, newPlannedForZones);
 
-                defaultZones = getDefaultZones();
-
-                Set<ZonesConfig> zoness = new HashSet<ZonesConfig>();
-                zoness.add(getDefaultZones());
-                final CapacityRequirements newPlannedForZone = enforceAutoScalingSla(defaultZones, enforced, newPlanned, zoness);
-                                
-                newPlanned = newPlanned.set(defaultZones, newPlannedForZone);
-                final CapacityRequirements plannedForZone = planned.getZonesCapacityOrZero(defaultZones);
-                if (!newPlannedForZone.equals(plannedForZone)) { 
-                    if (getLogger().isDebugEnabled()) {
-                        getLogger().debug("plan for zone" + defaultZones + " has changed from " + newPlannedForZone + " to " + plannedForZone);           
-                    }
-                    planChanged = true;
-                }
-                
             } catch (AutoScalingSlaEnforcementInProgressException e) {
-                if (pendingEnforcePlannedCapacityException != null) {
-                    // throw pending exception of previous manual scale capacity.
-                    // otherwise it could be lost when calling it again.
-                    throw pendingEnforcePlannedCapacityException;
-                }
-                throw e;
-            }
-
-        } else {
-
-            Set<ZonesConfig> zoness = enforced.getZones();
-            // enforce SLA for each zone separately.
-            for (ZonesConfig zones : zoness) {
-
                 
-                // enforce auto-scaling SLA for a specific zone
-                // based on the last enforced SLA, the reason is that the monitored data reflects the last enforced SLA
-                // and it could have changed since then (happens when pendingException != null)
+                // do not change the plan if an exception was raised
                 final CapacityRequirements plannedForZones = planned.getZonesCapacityOrZero(zones);
+                newPlanned = newPlanned.set(zones, plannedForZones);
                 
-                try {
-                    final CapacityRequirements newPlannedForZones = enforceAutoScalingSla(zones, enforced, newPlanned, zoness);
-                    newPlanned = newPlanned.set(zones, newPlannedForZones);
-
-                    if (!newPlannedForZones.equals(plannedForZones)) {
-                        if (getLogger().isDebugEnabled()) {
-                            getLogger().debug("capacity for zones " + zones + " has changed from " + plannedForZones + " to " + newPlannedForZones);
-                        }
-                        planChanged = true;
-                    }
-
-                } catch (AutoScalingSlaEnforcementInProgressException e) {
-                    // enforce last capacity for zone that threw the exception
-                    newPlanned = newPlanned.set(zones, plannedForZones);
-                    
-                    // exception in one zone should not influence running autoscaling in another zone.
-                    // save exceptions for later handling
-                    pendingAutoscaleInProgressExceptions.addReason(zones, e);
-                }
+                // exception in one zone should not influence running autoscaling in another zone.
+                // save exceptions for later handling
+                pendingAutoscaleInProgressExceptions.addReason(zones, e);
             }
-        }        
+        }
 
         // no need to call AbstractCapacityScaleStrategyBean#enforePlannedCapacity if no capacity change is needed.
-        if (planChanged) {
-            if (getLogger().isDebugEnabled()) {
-                getLogger().debug("planned capacity has changed to " + newPlanned);
-            }  
-            setPlannedCapacity(new CapacityRequirementsPerZonesConfig(newPlanned));
-            if (pendingEnforcePlannedCapacityException != null) {
-                // throw pending exception of previous manual scale capacity.
-                // otherwise it could be lost when calling it again.
-                throw pendingEnforcePlannedCapacityException;
-            }
-            // enforce new capacity requirements as soon as possible.
-            super.enforcePlannedCapacity();
-        }
+        boolean planChanged = setPlannedCapacity(new CapacityRequirementsPerZonesConfig(newPlanned));
 
         if (pendingEnforcePlannedCapacityException != null) {
-            // throw pending exception of previous manual scale capacity, so it won't be lost.
+            // throw pending exception of previous manual scale capacity.
+            // otherwise it could be lost when calling it again.
             throw pendingEnforcePlannedCapacityException;
         }
+        
         if (pendingAutoscaleInProgressExceptions.hasReason()) {
             // exceptions during autoscaling sla enforcement per zone
             throw pendingAutoscaleInProgressExceptions;
         }
+        
+        if (planChanged) {
+            // enforce new capacity requirements as soon as possible.
+            // also exitting this method without an exception implies SLA is enforced
+            super.enforcePlannedCapacity();
+        }
     }
     
-    private CapacityRequirements enforceAutoScalingSla(ZonesConfig zones, CapacityRequirementsPerZones lastEnforcedCapacityRequirementsPerZone, 
-            CapacityRequirementsPerZones newCapacityRequirementsPerZone, Set<ZonesConfig> zoness)
+    private CapacityRequirements enforceAutoScalingSla(ZonesConfig zones, CapacityRequirementsPerZones enforced, CapacityRequirementsPerZones newPlanned)
             throws AutoScalingSlaEnforcementInProgressException {
         
         if (getLogger().isDebugEnabled()) {
@@ -333,19 +292,19 @@ implements AutoScalingSlaEnforcementEndpointAware {
         final AutoScalingSlaPolicy sla = new AutoScalingSlaPolicy();
         sla.setCapacityRequirements(enforced.getZonesCapacityOrZero(zones));
 
-        CapacityRequirements minimumCapacity = null;
-        CapacityRequirements maximumCapacity = null;
+        CapacityRequirements minimum = config.getMinCapacity().toCapacityRequirements();
+        CapacityRequirements maximum = config.getMaxCapacity().toCapacityRequirements();
+        
         if (isGridServiceAgentZonesAware()) {
-            maximumCapacity = AutoScalingSlaUtils.getMaximumCapacity(config.getMaxCapacity().toCapacityRequirements(), config.getMaxCapacityPerZone().toCapacityRequirements(), lastEnforcedCapacityRequirementsPerZone, newCapacityRequirementsPerZone, zones, zoness);
-            minimumCapacity = AutoScalingSlaUtils.getMinimumCapacity(config.getMinCapacity().toCapacityRequirements(), config.getMinCapacityPerZone().toCapacityRequirements(), enforced, newCapacityRequirementsPerZone, zones, zoness);            
-        } else {
-            maximumCapacity = config.getMaxCapacity().toCapacityRequirements();
-            minimumCapacity = config.getMinCapacity().toCapacityRequirements();
-        }
+            CapacityRequirements maximumPerZone = config.getMaxCapacityPerZone().toCapacityRequirements();
+            CapacityRequirements minimumPerZone = config.getMinCapacityPerZone().toCapacityRequirements();
+            maximum = AutoScalingSlaUtils.getMaximumCapacity(maximum, maximumPerZone, enforced, newPlanned, zones);
+            minimum = AutoScalingSlaUtils.getMinimumCapacity(minimum, minimumPerZone, enforced, newPlanned, zones);            
+        } 
         
         // for now we assume these values are already given as per zone.
-        sla.setMaxCapacity(maximumCapacity);
-        sla.setMinCapacity(minimumCapacity);
+        sla.setMaxCapacity(maximum);
+        sla.setMinCapacity(minimum);
         sla.setRules(config.getRules());
         sla.setZonesConfig(zones);
         if (getLogger().isDebugEnabled()) {
@@ -354,9 +313,9 @@ implements AutoScalingSlaEnforcementEndpointAware {
 
         try {
             
-            if (!maximumCapacity.greaterOrEquals(minimumCapacity)) {
-                throw new AutoScalingConfigConflictException(getProcessingUnit(), minimumCapacity, maximumCapacity, 
-                        zones.getZones(), lastEnforcedCapacityRequirementsPerZone, newCapacityRequirementsPerZone);
+            if (!maximum.greaterOrEquals(minimum)) {
+                throw new AutoScalingConfigConflictException(getProcessingUnit(), minimum, maximum, 
+                        zones.getZones(), enforced, newPlanned);
             }
             
             autoScalingEndpoint.enforceSla(sla);

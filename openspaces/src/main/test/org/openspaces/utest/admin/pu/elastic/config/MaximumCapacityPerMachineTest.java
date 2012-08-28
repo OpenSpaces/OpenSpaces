@@ -15,10 +15,6 @@
  *******************************************************************************/
 package org.openspaces.utest.admin.pu.elastic.config;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
@@ -26,7 +22,6 @@ import org.junit.Test;
 import org.openspaces.admin.pu.elastic.config.CapacityRequirementsConfigurer;
 import org.openspaces.admin.zone.config.ExactZonesConfig;
 import org.openspaces.admin.zone.config.ExactZonesConfigurer;
-import org.openspaces.admin.zone.config.ZonesConfig;
 import org.openspaces.grid.gsm.autoscaling.AutoScalingSlaUtils;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerZones;
@@ -39,7 +34,6 @@ public class MaximumCapacityPerMachineTest extends TestCase {
 
     private static final ExactZonesConfig EXACT_ZONE1 = new ExactZonesConfigurer().addZone("zone1").create();
     private static final ExactZonesConfig EXACT_ZONE2 = new ExactZonesConfigurer().addZone("zone2").create();
-    private static final Set<ZonesConfig> ZONES = new HashSet<ZonesConfig>(Arrays.asList(new ZonesConfig[] {EXACT_ZONE1,EXACT_ZONE2}));
 
     private static final CapacityRequirements ZERO_CAPACITY = new CapacityRequirements();
     private static final CapacityRequirements ONE_CAPACITY = new CapacityRequirementsConfigurer().memoryCapacity("100m").create().toCapacityRequirements();
@@ -68,10 +62,10 @@ public class MaximumCapacityPerMachineTest extends TestCase {
         
         CapacityRequirementsPerZones newPlannedCapacityPerZones = new CapacityRequirementsPerZones();
         
-        CapacityRequirements newZone1Capacity = AutoScalingSlaUtils.getMaximumCapacity(totalMax, maxPerZone, lastEnforcedPlannedCapacity, newPlannedCapacityPerZones, EXACT_ZONE1, ZONES);
+        CapacityRequirements newZone1Capacity = AutoScalingSlaUtils.getMaximumCapacity(totalMax, maxPerZone, lastEnforcedPlannedCapacity, newPlannedCapacityPerZones, EXACT_ZONE1);
         Assert.assertEquals(ZERO_CAPACITY,newZone1Capacity);
         
-        CapacityRequirements newZone2Capacity = AutoScalingSlaUtils.getMaximumCapacity(totalMax, maxPerZone, lastEnforcedPlannedCapacity, newPlannedCapacityPerZones, EXACT_ZONE2, ZONES);
+        CapacityRequirements newZone2Capacity = AutoScalingSlaUtils.getMaximumCapacity(totalMax, maxPerZone, lastEnforcedPlannedCapacity, newPlannedCapacityPerZones, EXACT_ZONE2);
         Assert.assertEquals(ZERO_CAPACITY,newZone2Capacity);
     }
     
@@ -95,10 +89,10 @@ public class MaximumCapacityPerMachineTest extends TestCase {
         
         CapacityRequirementsPerZones newPlannedCapacityPerZones = new CapacityRequirementsPerZones();
         
-        CapacityRequirements newZone1Capacity = AutoScalingSlaUtils.getMaximumCapacity(totalMax, maxPerZone, lastEnforcedPlannedCapacity, newPlannedCapacityPerZones, EXACT_ZONE1, ZONES);
+        CapacityRequirements newZone1Capacity = AutoScalingSlaUtils.getMaximumCapacity(totalMax, maxPerZone, lastEnforcedPlannedCapacity, newPlannedCapacityPerZones, EXACT_ZONE1);
         Assert.assertEquals(ZERO_CAPACITY,newZone1Capacity);
         
-        CapacityRequirements newZone2Capacity = AutoScalingSlaUtils.getMaximumCapacity(totalMax, maxPerZone, lastEnforcedPlannedCapacity, newPlannedCapacityPerZones, EXACT_ZONE2, ZONES);
+        CapacityRequirements newZone2Capacity = AutoScalingSlaUtils.getMaximumCapacity(totalMax, maxPerZone, lastEnforcedPlannedCapacity, newPlannedCapacityPerZones, EXACT_ZONE2);
         Assert.assertEquals(ONE_CAPACITY,newZone2Capacity);
     }
 
@@ -125,7 +119,7 @@ public class MaximumCapacityPerMachineTest extends TestCase {
                 new CapacityRequirementsPerZones()
                 .add(EXACT_ZONE1, TWO_CAPACITY);
         
-        CapacityRequirements newZone2Capacity = AutoScalingSlaUtils.getMaximumCapacity(totalMax, maxPerZone, lastEnforcedPlannedCapacity, newPlannedCapacityPerZones, EXACT_ZONE2, ZONES);
+        CapacityRequirements newZone2Capacity = AutoScalingSlaUtils.getMaximumCapacity(totalMax, maxPerZone, lastEnforcedPlannedCapacity, newPlannedCapacityPerZones, EXACT_ZONE2);
         Assert.assertEquals(ZERO_CAPACITY,newZone2Capacity);
     }
     
@@ -151,10 +145,10 @@ public class MaximumCapacityPerMachineTest extends TestCase {
                 new CapacityRequirementsPerZones()
                 .add(EXACT_ZONE1, FOUR_CAPACITY);
         
-        CapacityRequirements newZone1Capacity = AutoScalingSlaUtils.getMaximumCapacity(totalMax, maxPerZone, lastEnforcedPlannedCapacity, newPlannedCapacityPerZones, EXACT_ZONE1, ZONES);
+        CapacityRequirements newZone1Capacity = AutoScalingSlaUtils.getMaximumCapacity(totalMax, maxPerZone, lastEnforcedPlannedCapacity, newPlannedCapacityPerZones, EXACT_ZONE1);
         Assert.assertEquals(THREE_CAPACITY,newZone1Capacity);
         
-        CapacityRequirements newZone2Capacity = AutoScalingSlaUtils.getMaximumCapacity(totalMax, maxPerZone, lastEnforcedPlannedCapacity, newPlannedCapacityPerZones, EXACT_ZONE2, ZONES);
+        CapacityRequirements newZone2Capacity = AutoScalingSlaUtils.getMaximumCapacity(totalMax, maxPerZone, lastEnforcedPlannedCapacity, newPlannedCapacityPerZones, EXACT_ZONE2);
         Assert.assertEquals(THREE_CAPACITY,newZone2Capacity);
     }
 }
