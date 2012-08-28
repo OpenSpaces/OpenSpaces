@@ -58,9 +58,6 @@ public class ZoneStatisticsCalculator implements InternalProcessingUnitStatistic
     
     private void calculateNewStatistics(InternalProcessingUnitStatistics processingUnitStatistics, Map<ProcessingUnitStatisticsId, Object> copyOfStatistics , ProcessingUnitStatisticsId requestedStatisticsId) {
         requestedStatisticsId.validate();
-        if (logger.isDebugEnabled()) {
-            logger.debug("statistics keys after copy = " + copyOfStatistics.keySet());
-        }
         
         // iterate over the copy of the original statistics
         boolean statisfied = false;
@@ -69,7 +66,6 @@ public class ZoneStatisticsCalculator implements InternalProcessingUnitStatistic
                 statisfied = true;
             }
         }
-        
         if (!statisfied && logger.isTraceEnabled()) {
             logger.trace("requestedZoneStatisticsConfig : " + requestedStatisticsId.getAgentZones() + " is not satisfied by any existing statisitcs");
         }
