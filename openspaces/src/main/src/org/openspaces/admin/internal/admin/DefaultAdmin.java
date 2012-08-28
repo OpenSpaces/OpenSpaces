@@ -552,6 +552,14 @@ public class DefaultAdmin implements InternalAdmin {
                 }
             }
         }
+        //return agent if uid of operating system or machine
+        if (component == null) {
+            Machine machine = getMachines().getMachineByHostAddress(uid);
+            if (machine != null) {
+                component = machine.getGridServiceAgent();
+            }
+        }
+        
         return component;
     }
 
