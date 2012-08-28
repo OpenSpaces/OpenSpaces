@@ -15,6 +15,7 @@
  *******************************************************************************/
 package org.openspaces.grid.gsm.strategy;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -243,8 +244,10 @@ implements AutoScalingSlaEnforcementEndpointAware {
                 final CapacityRequirements capacityForDefaultZone = lastEnforcedPlannedCapacity.getZonesCapacityOrZero(defaultZones);
                 final CapacityRequirements maximumCapacityForDefaultZone = config.getMaxCapacity().toCapacityRequirements();
                 final CapacityRequirements minimumCapacityForDefaultZone = config.getMinCapacity().toCapacityRequirements();
-
-                final CapacityRequirements newCapacityForDefaultZone = enforceAutoScalingSla(capacityForDefaultZone, defaultZones, minimumCapacityForDefaultZone, maximumCapacityForDefaultZone);
+                
+                Set<ZonesConfig> defaultZonesConfigs = new HashSet<ZonesConfig>();
+                defaultZonesConfigs.add(getDefaultZones());
+                final CapacityRequirements newCapacityForDefaultZone = enforceAutoScalingSla(capacityForDefaultZone, defaultZones, lastEnforcedPlannedCapacity, newPlannedCapacity, defaultZonesConfigs);
                 if (getLogger().isDebugEnabled()) {
                     getLogger().debug("newCapacityForDefaultZone = " + newCapacityForDefaultZone);
                 }
@@ -285,13 +288,10 @@ implements AutoScalingSlaEnforcementEndpointAware {
                     getLogger().debug("enforcing auto scaling sla for zones config = " + zones + ". current allocated capacity for these zones is " + capacityForZones);
                 }
                 
-                final CapacityRequirements minimumCapacity = getMinimumCapacity(lastEnforcedPlannedCapacity, newPlannedCapacity, zones, zoness);
-                final CapacityRequirements maximumCapacity = getMaximumCapacity(lastEnforcedPlannedCapacity, newPlannedCapacity ,zones, zoness);
-
                 try {
 
                     
-                    final CapacityRequirements newCapacityForZones = enforceAutoScalingSla(capacityForZones, zones, minimumCapacity, maximumCapacity);
+                    final CapacityRequirements newCapacityForZones = enforceAutoScalingSla(capacityForZones, zones, lastEnforcedPlannedCapacity, newPlannedCapacity, zoness);
 
                     if (!newCapacityForZones.equals(capacityForZones)) {
                         if (getLogger().isDebugEnabled()) {
@@ -358,12 +358,11 @@ implements AutoScalingSlaEnforcementEndpointAware {
                 CapacityRequirements otherMinimumCapacity = null;
                 if (otherNewPlanned.equalsZero()) {
                     // autoscaling did not calculate new capacity for 'otherZone' yet.
-                    otherMinimumCapacity = minimumCapacityRequirementsPerZone;
+                    otherMinimumCapacity = minimumCapacityRequirementsPerZone.max(minimumCapacityRequirementsPerZone);
                 } else { 
                     otherMinimumCapacity = otherLastEnforced.min(otherNewPlanned).max(minimumCapacityRequirementsPerZone);
                 }
-                CapacityRequirements currentMinimumForZone = minimumRequierements.subtractOrZero(otherMinimumCapacity);
-                minimumRequierements = currentMinimumForZone;
+                minimumRequierements = minimumRequierements.subtractOrZero(otherMinimumCapacity);
             }       
         }
         // enforce minimum capacity per zone to be at least the pre-defince minimum capacity per zone
@@ -382,9 +381,6 @@ implements AutoScalingSlaEnforcementEndpointAware {
      */
     private CapacityRequirements getMaximumCapacity(CapacityRequirementsPerZones lastEnforcedPlannedCapacity, CapacityRequirementsPerZones newPlannedCapacityPerZones, ZonesConfig zones, Set<ZonesConfig> zoness) {
         
-        if (getLogger().isDebugEnabled()) {
-            getLogger().debug("calculating maximum capacity for zone = " + zones);
-        }
         CapacityRequirements maximumCapacity = config.getMaxCapacity().toCapacityRequirements(); // initial
         CapacityRequirements maximumCapacityRequirementsPerZone = config.getMaxCapacityPerZone().toCapacityRequirements();
 
@@ -393,19 +389,15 @@ implements AutoScalingSlaEnforcementEndpointAware {
                 CapacityRequirements otherLastEnforced = lastEnforcedPlannedCapacity.getZonesCapacityOrZero(otherZone);
                 CapacityRequirements otherNewPlanned = newPlannedCapacityPerZones.getZonesCapacityOrZero(otherZone);
                 CapacityRequirements otherMaximumCapacity = otherLastEnforced.max(otherNewPlanned).min(maximumCapacityRequirementsPerZone);
-                CapacityRequirements currentMaximumForZone = maximumCapacity.subtractOrZero(otherMaximumCapacity); 
-                maximumCapacity = currentMaximumForZone;
+                maximumCapacity = maximumCapacity.subtractOrZero(otherMaximumCapacity); 
             }       
         }
         maximumCapacity = maximumCapacity.min(maximumCapacityRequirementsPerZone);
-        
-        if (getLogger().isDebugEnabled()) {
-            getLogger().debug("maximum capacity for zone = " + zones + " calculation result was " + maximumCapacity);
-        }
         return maximumCapacity; 
     }
-
-    private CapacityRequirements enforceAutoScalingSla(final CapacityRequirements capacity , ZonesConfig zones, CapacityRequirements minimumCapacityRequirementsPerZone, CapacityRequirements maximumCapacityRequirementsPerZone)
+    
+    private CapacityRequirements enforceAutoScalingSla(final CapacityRequirements capacity , ZonesConfig zones, CapacityRequirementsPerZones lastEnforcedCapacityRequirementsPerZone, 
+            CapacityRequirementsPerZones newCapacityRequirementsPerZone, Set<ZonesConfig> zoness)
             throws AutoScalingSlaEnforcementInProgressException {
         
         if (getLogger().isDebugEnabled()) {
@@ -415,9 +407,19 @@ implements AutoScalingSlaEnforcementEndpointAware {
         final AutoScalingSlaPolicy sla = new AutoScalingSlaPolicy();
         sla.setCapacityRequirements(capacity);
 
+        CapacityRequirements minimumCapacity = null;
+        CapacityRequirements maximumCapacity = null;
+        if (isGridServiceAgentZonesAware()) {
+            maximumCapacity = getMaximumCapacity(lastEnforcedCapacityRequirementsPerZone, newCapacityRequirementsPerZone, zones, zoness);
+            minimumCapacity = getMinimumCapacity(lastEnforcedPlannedCapacity, newCapacityRequirementsPerZone, zones, zoness);            
+        } else {
+            maximumCapacity = config.getMaxCapacity().toCapacityRequirements();
+            minimumCapacity = config.getMinCapacity().toCapacityRequirements();
+        }
+        
         // for now we assume these values are already given as per zone.
-        sla.setMaxCapacity(maximumCapacityRequirementsPerZone);
-        sla.setMinCapacity(minimumCapacityRequirementsPerZone);
+        sla.setMaxCapacity(maximumCapacity);
+        sla.setMinCapacity(minimumCapacity);
         sla.setRules(config.getRules());
         sla.setZonesConfig(zones);
         if (getLogger().isDebugEnabled()) {
@@ -426,8 +428,9 @@ implements AutoScalingSlaEnforcementEndpointAware {
 
         try {
             
-            if (!maximumCapacityRequirementsPerZone.greaterOrEquals(minimumCapacityRequirementsPerZone)) {
-                throw new AutoScalingConfigConflictException(getProcessingUnit(), minimumCapacityRequirementsPerZone, maximumCapacityRequirementsPerZone, (ExactZonesConfig) zones);
+            if (!maximumCapacity.greaterOrEquals(minimumCapacity)) {
+                throw new AutoScalingConfigConflictException(getProcessingUnit(), minimumCapacity, maximumCapacity, 
+                        (ExactZonesConfig) zones, lastEnforcedCapacityRequirementsPerZone, newCapacityRequirementsPerZone);
             }
             
             autoScalingEndpoint.enforceSla(sla);

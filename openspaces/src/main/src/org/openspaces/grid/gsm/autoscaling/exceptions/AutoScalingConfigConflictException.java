@@ -18,6 +18,7 @@ package org.openspaces.grid.gsm.autoscaling.exceptions;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.zone.config.ExactZonesConfig;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
+import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerZones;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
 
 /**
@@ -34,15 +35,20 @@ public class AutoScalingConfigConflictException extends AutoScalingSlaEnforcemen
     private CapacityRequirements maximumCapacityRequirements;
     private ExactZonesConfig zones;
     
-    public AutoScalingConfigConflictException(ProcessingUnit pu, CapacityRequirements minimum, CapacityRequirements maximum, ExactZonesConfig zones) {
-        super(pu, message(minimum, maximum, zones));
+    public AutoScalingConfigConflictException(ProcessingUnit pu, CapacityRequirements minimum, 
+            CapacityRequirements maximum, ExactZonesConfig zones, CapacityRequirementsPerZones lastEnforcedCapacityPerZones,
+            CapacityRequirementsPerZones newCapacityRequirementsPerZones) {
+        super(pu, message(minimum, maximum, zones, lastEnforcedCapacityPerZones, newCapacityRequirementsPerZones));
         this.minimumCapacityRequirements = minimum;
         this.maximumCapacityRequirements = maximum;
         this.zones = zones;
     }
     
-    private static String message(CapacityRequirements minimum, CapacityRequirements maximum,ExactZonesConfig zones) {
-        return "Configuration Confilict. autoscaling will not continue. minimumCapacityRequirements= " + minimum + " is in conflict with maximumCapacityRequirements=" + maximum + " for zones " + zones.getZones();
+    private static String message(CapacityRequirements minimum, CapacityRequirements maximum,ExactZonesConfig zones,
+            CapacityRequirementsPerZones lastEnforcedCapacityPerZones,
+            CapacityRequirementsPerZones newCapacityRequirementsPerZones) {
+        return "Configuration Confilict. autoscaling will not continue. minimumCapacityRequirements= " + minimum + " is in conflict with maximumCapacityRequirements="
+                    + maximum + " for zones " + zones.getZones() + " : lastEnforcedCapacityPerZones=" + lastEnforcedCapacityPerZones + " , newCapacityRequirementsPerZones=" + newCapacityRequirementsPerZones;
         
         
     }
