@@ -527,7 +527,8 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
     {
         if (sdm != null && sdm.getDiscoveryManager() instanceof LookupDiscoveryManager) {
             LookupDiscoveryManager ldm = (LookupDiscoveryManager) sdm.getDiscoveryManager();
-            return ldm.getDynamicLocatorDiscovery().isEnabled();
+            return ldm.getDynamicLocatorDiscovery() != null &&
+                   ldm.getDynamicLocatorDiscovery().isEnabled();
         }
         
         return false;
