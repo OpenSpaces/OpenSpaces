@@ -372,7 +372,7 @@ implements AutoScalingSlaEnforcementEndpointAware {
                                         config.getStatisticsPollingIntervalSeconds(), 
                                         TimeUnit.SECONDS));
                 if (getLogger().isDebugEnabled()) {
-                    getLogger().debug("adding statistics calculation : " + statisticsId);                        
+                    getLogger().debug("adding statistics calculation : " + id);                        
                 }
                 
 
