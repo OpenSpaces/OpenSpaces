@@ -105,7 +105,9 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         for (String agentUid : allocatedCapacity.getAgentUids()) {
             GridServiceAgent agent = pu.getAdmin().getGridServiceAgents().getAgentByUID(agentUid);
             if (agent == null) {
-                throw new IllegalStateException("agent " + agentUid +" is not discovered");
+                throw new IllegalStateException(
+                        "agent " + agentUid +" is not discovered. "+
+                        "sla.agentZones="+sla.getGridServiceAgentZones());
             }
         }
         return allocatedCapacity;
@@ -145,14 +147,16 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             throw new IllegalArgumentException(
                     "Memory capacity " + memoryInMB + "MB "+
                     "is less than the minimum of " + sla.getMinimumNumberOfMachines() + " "+
-                    "containers with " + sla.getContainerMemoryCapacityInMB() + "MB each.");
+                    "containers with " + sla.getContainerMemoryCapacityInMB() + "MB each. "+
+                    "sla.agentZone="+sla.getGridServiceAgentZones());
         }
         
         if (memoryInMB > getMaximumNumberOfMachines(sla)*sla.getContainerMemoryCapacityInMB()) {
             throw new IllegalArgumentException(
                     "Memory capacity " + memoryInMB + "MB "+
                     "is more than the maximum of " + getMaximumNumberOfMachines(sla) + " "+
-                    "containers with " + sla.getContainerMemoryCapacityInMB() + "MB each.");
+                    "containers with " + sla.getContainerMemoryCapacityInMB() + "MB each. "+
+                    "sla.agentZone="+sla.getGridServiceAgentZones());
         }
     
         validateProvisionedMachines(sla);
@@ -341,7 +345,11 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         
         if (getNumberOfFutureAgents(sla) > 0 && 
             !capacityMarkedForDeallocation.equalsZero()) {
-            throw new IllegalStateException("Cannot have both agents pending to be started and agents pending deallocation.");
+            throw new IllegalStateException(
+            "Cannot have both agents pending to be started and agents pending deallocation. "+
+            "capacityMarkedForDeallocation="+capacityMarkedForDeallocation + " " + 
+            "getNumberOfFutureAgents(sla)="+getNumberOfFutureAgents(sla) + " " +
+            "sla.agentZones=" + sla.getGridServiceAgentZones());
         }
         
         CapacityRequirements target = sla.getCapacityRequirements();
@@ -848,8 +856,9 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                             unallocatedCapacity); 
                 }
                 else {
-                    throw new IllegalStateException("futureAgents expected capacity malformed. doneFutureAgents=" + 
-                            doneFutureAgents.getExpectedCapacity());
+                    throw new IllegalStateException(
+                            "futureAgents expected capacity malformed. "+
+                            "doneFutureAgents=" + doneFutureAgents.getExpectedCapacity());
                 }
             }
             
@@ -901,7 +910,11 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         CapacityRequirementsPerAgent unallocatedCapacity = getUnallocatedCapacity(sla);
         for (GridServiceAgent newAgent : newMachines) {
             if (unallocatedCapacity.getAgentUids().contains(newAgent.getUid())) {
-                throw new IllegalStateException("unallocated capacity cannot contain future agents");
+                throw new IllegalStateException(
+                        "unallocated capacity cannot contain future agents. "+
+                        "unallocatedCapacity="+unallocatedCapacity+
+                        "newAgent.getUid()="+newAgent.getUid()+
+                        "sla.agentZones="+sla.getGridServiceAgentZones());
             }
             
             CapacityRequirements newAgentCapacity = MachinesSlaUtils.getMachineTotalCapacity(newAgent,sla);
@@ -1014,7 +1027,9 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                oldMachineProvisioning == machineProvisioning) {
                
                throw new IllegalStateException(
-                       MachinesSlaUtils.machineToString(newAgent.getMachine()) + " has been started but with the wrong zone or management settings"); 
+                       MachinesSlaUtils.machineToString(newAgent.getMachine()) + " has been started but with the wrong zone or management settings. "+
+                       "newagent.zones="+newAgent.getExactZones() + " "+
+                       "oldMachineProvisioning.config.zones="+oldMachineProvisioning.getConfig().getGridServiceAgentZones()); 
            }
            
            // providing a grace period for provisionedAgents to update.
