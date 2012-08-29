@@ -160,9 +160,11 @@ public class AutoScalingSlaUtils {
                         instance)
                     .create();
 
+                //check original measured statistics exists
                 final ProcessingUnitStatisticsId singleInstanceLastSampleStatisticsId = ruleStatisticsId.shallowClone();
-                singleInstanceLastSampleStatisticsId.setTimeWindowStatistics(new LastSampleTimeWindowStatisticsConfig());
                 singleInstanceLastSampleStatisticsId.setInstancesStatistics(singleInstanceStatistics);
+                singleInstanceLastSampleStatisticsId.setAgentZones(puInstanceExactZones);
+                singleInstanceLastSampleStatisticsId.setTimeWindowStatistics(new LastSampleTimeWindowStatisticsConfig());
                 singleInstanceLastSampleStatisticsId.validate();
 
                 if (!statistics.containsKey(singleInstanceLastSampleStatisticsId)) {
@@ -175,9 +177,10 @@ public class AutoScalingSlaUtils {
                     throw exception;
                 }
 
+                //check time calculated statistics exists
                 final ProcessingUnitStatisticsId singleInstanceStatisticsId = ruleStatisticsId.shallowClone();
-                singleInstanceStatisticsId.setTimeWindowStatistics(ruleStatisticsId.getTimeWindowStatistics());
                 singleInstanceStatisticsId.setInstancesStatistics(singleInstanceStatistics);
+                singleInstanceLastSampleStatisticsId.setAgentZones(puInstanceExactZones);
                 singleInstanceStatisticsId.validate();
 
                 if (!statistics.containsKey(singleInstanceStatisticsId)) {
@@ -190,9 +193,8 @@ public class AutoScalingSlaUtils {
                     throw exception;
                 }
 
+                //check zone calculated statistics exists
                 final ProcessingUnitStatisticsId singleInstanceTimeWindowZoneStatisticsId = ruleStatisticsId.shallowClone();
-                singleInstanceTimeWindowZoneStatisticsId.setTimeWindowStatistics(ruleStatisticsId.getTimeWindowStatistics());
-                singleInstanceTimeWindowZoneStatisticsId.setAgentZones(ruleStatisticsId.getAgentZones());
                 singleInstanceTimeWindowZoneStatisticsId.setInstancesStatistics(singleInstanceStatistics);
                 singleInstanceTimeWindowZoneStatisticsId.validate();
 
@@ -209,6 +211,7 @@ public class AutoScalingSlaUtils {
         }
 
         Object value = statistics.get(ruleStatisticsId);
+        //check instances calculated statistics exists
         if (value == null) {
             logger.debug("statistics value for " + ruleStatisticsId + " was null.");
             throw new AutoScalingStatisticsException(pu, ruleStatisticsId);
