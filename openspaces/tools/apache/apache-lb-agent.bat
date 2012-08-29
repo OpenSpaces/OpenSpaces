@@ -14,10 +14,7 @@ set LOOKUPLOCATORS=
 )
 set LOOKUP_LOCATORS_PROP=-Dcom.gs.jini_lus.locators=%LOOKUPLOCATORS%
 
-set LCP=.
-for %%i in ("%JSHOMEDIR%\lib\platform\velocity\*.jar") do call "%JSHOMEDIR%"\bin\lcp "%%i"
-set VELOCITY_JARS=%LCP%
-
+set VELOCITY_JARS="%JSHOMEDIR%\lib\platform\velocity\*;"
 
 set COMMAND_LINE=%JAVACMD% %JAVA_OPTIONS% %bootclasspath% -Dlb.vmDir="%JSHOMEDIR%/tools/apache" %LOOKUP_LOCATORS_PROP% %LOOKUP_GROUPS_PROP% %RMI_OPTIONS% "-Dcom.gs.home=%JSHOMEDIR%" -Djava.security.policy=%POLICY% -classpath %PRE_CLASSPATH%;%GS_JARS%;%SPRING_JARS%;%JDBC_JARS%;%VELOCITY_JARS%;%POST_CLASSPATH% org.openspaces.pu.container.jee.lb.apache.ApacheLoadBalancerAgent %*
 echo %COMMAND_LINE%
