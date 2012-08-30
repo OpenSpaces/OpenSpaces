@@ -31,6 +31,6 @@ public class AutoScalingInstanceStatisticsException extends AutoScalingStatistic
     }
 
     private static String message(String metric, ProcessingUnitInstance instance) {
-        return "Cannot monitor " + instance.getProcessingUnitInstanceName() + " for " + metric ;
+        return "Cannot monitor " + instance.getProcessingUnitInstanceName() + " for " + metric + " if this alert is resolved quickly, consider increasing the scale out cood down period." ;
     }
 }
