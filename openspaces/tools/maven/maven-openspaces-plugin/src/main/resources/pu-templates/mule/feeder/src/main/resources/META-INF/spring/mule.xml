@@ -8,7 +8,7 @@
        xsi:schemaLocation="http://www.openspaces.org/schema/core http://www.openspaces.org/schema/9.1/core/openspaces-core.xsd
            http://www.openspaces.org/schema/events http://www.openspaces.org/schema/9.1/events/openspaces-events.xsd
            http://www.mulesoft.org/schema/mule/quartz http://www.mulesoft.org/schema/mule/quartz/3.3/mule-quartz.xsd
-           http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.3.xsd
+           http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
            http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/3.3/mule.xsd
            http://www.openspaces.org/schema/mule/os-eventcontainer http://www.openspaces.org/schema/9.1/mule/3.3/mule-os-eventcontainer.xsd">
 
