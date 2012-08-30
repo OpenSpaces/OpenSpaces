@@ -40,13 +40,13 @@ public abstract class AbstractTwoSpaceJtaTransactionTests extends AbstractDepend
     }
 
     protected void onSetUp() throws Exception {
-        gigaSpace1.clean();
-        gigaSpace2.clean();
+        gigaSpace1.clear(null);
+        gigaSpace2.clear(null);
     }
 
     protected void onTearDown() throws Exception {
-        gigaSpace1.clean();
-        gigaSpace2.clean();
+        gigaSpace1.clear(null);
+        gigaSpace2.clear(null);
     }
 
     public void testSimpleCommit() {
@@ -433,7 +433,7 @@ public abstract class AbstractTwoSpaceJtaTransactionTests extends AbstractDepend
         assertNull(gigaSpace1.read(new TestData2()));
         assertNotNull(gigaSpace1.read(new TestData1()));
     }
-
+    
 //    public void testPropagationNotSupportedWithRollbackTask() {
 //        TransactionTemplate txTemplate = new TransactionTemplate(transactionManager);
 //        txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
