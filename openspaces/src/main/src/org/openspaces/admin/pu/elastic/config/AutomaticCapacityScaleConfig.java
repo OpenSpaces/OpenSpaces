@@ -151,17 +151,33 @@ public class AutomaticCapacityScaleConfig
     }
 
     /**
+     * @see #setCooldownAfterScaleInSeconds(long)
+     */
+    @Deprecated
+    public void setCooldownAfterScaleSeconds(long cooldownAfterInstanceRemovedSeconds) {
+        setCooldownAfterScaleInSeconds(cooldownAfterInstanceRemovedSeconds);
+    }
+    
+    /**
      * Sets the number of seconds after a {@link ProcessingUnitInstance} is removed and the 
      * {@link ProcessingUnit#getStatus()} is {@link DeploymentStatus#INTACT} that all
      * scaling rules are disabled.
      * 
      * Must be equal or bigger than {@link #setStatisticsPollingIntervalSeconds(int)}
      */
-    public void setCooldownAfterScaleSeconds(long cooldownAfterInstanceRemovedSeconds) {
+    public void setCooldownAfterScaleInSeconds(long cooldownAfterInstanceRemovedSeconds) {
         properties.putLong(COOLDOWN_AFTER_SCALEIN_SECONDS_KEY, cooldownAfterInstanceRemovedSeconds);
     }
     
+    /**
+     * @see #getCooldownAfterScaleInSeconds()
+     */
+    @Deprecated
     public long getCooldownAfterScaleSeconds() {
+        return getCooldownAfterScaleInSeconds();
+    }
+    
+    public long getCooldownAfterScaleInSeconds() {
         return properties.getLong(COOLDOWN_AFTER_SCALEIN_SECONDS_KEY, COOLDOWN_AFTER_SCALEIN_SECONDS_DEFAULT);
     }
     
