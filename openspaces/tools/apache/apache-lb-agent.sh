@@ -8,18 +8,7 @@ bootclasspath="-Xbootclasspath/p:$XML_JARS"
 
 JAVACMD="${JAVA_HOME}/bin/java"
 
-# Check for Cygwin
-cygwin=
-case $OS in
-    Windows*)
-        cygwin=1
-esac
-# For Cygwin, ensure paths are in UNIX format before anything is touched
-if [ "$cygwin" = "1" ]; then
-    CPS=";"
-else
-    CPS=":"
-fi
+CPS=":"
 export CPS
 
 LOOKUP_GROUPS_PROP=-Dcom.gs.jini_lus.groups=${LOOKUPGROUPS}; export LOOKUP_GROUPS_PROP
