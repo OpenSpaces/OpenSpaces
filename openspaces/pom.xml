@@ -6,7 +6,7 @@
 	<version>9.0.1-SNAPSHOT</version>
 
 	<properties>
-		<springVersion>3.1.1.RELEASE</springVersion>
+		<springVersion>3.1.2.RELEASE</springVersion>
 		<springSecurityVersion>3.0.7.RELEASE</springSecurityVersion>
 		<jettyVersion>8.1.2.v20120308</jettyVersion>
 		<mavenVersion>3.0.2</mavenVersion>
