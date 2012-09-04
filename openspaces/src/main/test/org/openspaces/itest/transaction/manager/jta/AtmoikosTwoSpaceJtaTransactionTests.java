@@ -26,4 +26,20 @@ public class AtmoikosTwoSpaceJtaTransactionTests extends AbstractTwoSpaceJtaTran
         return new String[]{"/org/openspaces/itest/transaction/manager/jta/atomikos.xml"};
     }
 
+    /* (non-Javadoc)
+     * @see org.openspaces.itest.transaction.manager.jta.AbstractTwoSpaceJtaTransactionTests#testSimpleCommit()
+     */
+    @Override
+    public void testSimpleCommit() {
+        // GS-10616 
+    }
+    
+    /* (non-Javadoc)
+     * @see org.openspaces.itest.transaction.manager.jta.AbstractTwoSpaceJtaTransactionTests#testPropogationRequiresNewWithCommitWithTwoSpaces()
+     */
+    @Override
+    public void testPropogationRequiresNewWithCommitWithTwoSpaces() {
+        // GS-10616 
+    }
+    
 }
