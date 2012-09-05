@@ -104,6 +104,8 @@ public abstract class AbstractScaleStrategyBean implements
     private EventsStore eventsStore;
 
     private boolean discoveryQuiteMode;
+
+    private boolean undeployCompleted = false;
     
     protected InternalAdmin getAdmin() {
         return this.admin;
@@ -347,11 +349,15 @@ public abstract class AbstractScaleStrategyBean implements
 
     private void recoverOnStartBeforeEnforceSLA() throws SlaEnforcementInProgressException {
         try {
-            validateUndeployCompleted();
             validateCorrectThread();
             validateAtLeastOneLookupServiceDiscovered();
             validateOnlyOneESMRunning();
     
+            if (!undeployCompleted ) {
+                validateUndeployCompleted();
+                undeployCompleted = true;
+            }
+            
             if (!isRecoveredStateOnEsmStart()) {
                 if (getLogger().isInfoEnabled()) {
                     getLogger().info("recovering state on ESM start.");
