@@ -56,6 +56,7 @@ import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcemen
 import org.openspaces.grid.gsm.machines.exceptions.MachinesSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.machines.exceptions.NeedToWaitUntilAllGridServiceAgentsDiscoveredException;
 import org.openspaces.grid.gsm.machines.exceptions.SomeProcessingUnitsHaveNotCompletedStateRecoveryException;
+import org.openspaces.grid.gsm.machines.exceptions.UndeployInProgressException;
 import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIsolation;
 import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIsolationAware;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
@@ -342,8 +343,11 @@ public abstract class AbstractScaleStrategyBean implements
         }
     }
 
+    protected abstract void validateUndeployCompleted() throws UndeployInProgressException;
+
     private void recoverOnStartBeforeEnforceSLA() throws SlaEnforcementInProgressException {
         try {
+            validateUndeployCompleted();
             validateCorrectThread();
             validateAtLeastOneLookupServiceDiscovered();
             validateOnlyOneESMRunning();

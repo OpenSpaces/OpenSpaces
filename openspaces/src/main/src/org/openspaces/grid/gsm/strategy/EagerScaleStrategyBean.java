@@ -38,6 +38,7 @@ import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcemen
 import org.openspaces.grid.gsm.machines.exceptions.MachinesSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.machines.exceptions.NeedToWaitUntilAllGridServiceAgentsDiscoveredException;
 import org.openspaces.grid.gsm.machines.exceptions.SomeProcessingUnitsHaveNotCompletedStateRecoveryException;
+import org.openspaces.grid.gsm.machines.exceptions.UndeployInProgressException;
 import org.openspaces.grid.gsm.machines.exceptions.WaitingForDiscoveredMachinesException;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcementEndpointAware;
@@ -241,5 +242,12 @@ public class EagerScaleStrategyBean extends AbstractScaleStrategyBean
     @Override
     protected boolean isRecoveredStateOnEsmStart(ProcessingUnit otherPu) {
         return machinesEndpoint.isRecoveredStateOnEsmStart(otherPu);
-    }    
+    }
+
+    @Override
+    protected void validateUndeployCompleted() throws UndeployInProgressException {
+        if (!machinesEndpoint.isAllocatedCapacityRemoved(getProcessingUnit())) {
+            throw new UndeployInProgressException(getProcessingUnit());
+        }
+    }
 }

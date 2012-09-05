@@ -1351,6 +1351,16 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
     public boolean replaceAllocatedCapacity(AbstractMachinesSlaPolicy sla) {
         return state.replaceAllocatedCapacity(getKey(sla), pu.getAdmin());
     }
+
+    @Override
+    public void removeAllocatedCapacity(ProcessingUnit pu) {
+        state.removeAllocatedCapacity(pu);
+    }
+
+    @Override
+    public boolean isAllocatedCapacityRemoved(ProcessingUnit pu) {
+        return state.isAllocatedCapacityRemoved(pu);
+    }
 }
 
 

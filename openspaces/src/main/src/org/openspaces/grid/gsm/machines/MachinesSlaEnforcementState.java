@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -612,5 +613,30 @@ public class MachinesSlaEnforcementState {
             throw new IllegalStateException("Cannot remove " + key + " since it does not equal zero " + getState(key));
         }
         state.remove(key);
+    }
+
+    /**
+     * Removes all state related to the specified processing unit
+     * Call this method only if you are not going to call any other state method on this pu
+     */
+    public void removeAllocatedCapacity(ProcessingUnit pu) {
+        Iterator<StateKey> stateKeyIterator = state.keySet().iterator();
+        while(stateKeyIterator.hasNext()) {
+            ProcessingUnit statePu = stateKeyIterator.next().pu; 
+            if (statePu.equals(pu)) {
+                stateKeyIterator.remove();
+            }
+        }
+    }
+
+    public boolean isAllocatedCapacityRemoved(ProcessingUnit pu) {
+        boolean removed = true;
+        for (StateKey key : state.keySet()) {
+            if (key.pu.equals(pu)) {
+                removed = false;
+                break;
+            }
+        }
+        return removed;
     }
 }

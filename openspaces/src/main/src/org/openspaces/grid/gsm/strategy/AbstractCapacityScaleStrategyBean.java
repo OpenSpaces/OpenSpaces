@@ -58,6 +58,7 @@ import org.openspaces.grid.gsm.machines.exceptions.NeedToWaitUntilAllGridService
 import org.openspaces.grid.gsm.machines.exceptions.PerZonesGridServiceAgentSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.machines.exceptions.PerZonesMachinesSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.machines.exceptions.SomeProcessingUnitsHaveNotCompletedStateRecoveryException;
+import org.openspaces.grid.gsm.machines.exceptions.UndeployInProgressException;
 import org.openspaces.grid.gsm.machines.exceptions.WaitingForDiscoveredMachinesException;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcementEndpointAware;
@@ -642,5 +643,12 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
             isGridServiceAgentZonesAware = ((ScaleStrategyAgentZonesAwareConfig)config).isGridServiceAgentZonesAware();
         }
         return isGridServiceAgentZonesAware;
+    }
+    
+    @Override
+    protected void validateUndeployCompleted() throws UndeployInProgressException {
+        if (!machinesEndpoint.isAllocatedCapacityRemoved(getProcessingUnit())) {
+            throw new UndeployInProgressException(getProcessingUnit());
+        }
     }
 }

@@ -104,6 +104,7 @@ public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
             final CapacityMachinesSlaPolicy sla = getMachinesSlaPolicy(zones);
             enforceMachinesSla(sla);
         }
+        machinesEndpoint.removeAllocatedCapacity(getProcessingUnit());
     }
 
     private void enforceMachinesSla(final CapacityMachinesSlaPolicy sla) throws WaitingForDiscoveredMachinesException, MachinesSlaEnforcementInProgressException, GridServiceAgentSlaEnforcementInProgressException {
@@ -114,7 +115,6 @@ public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
         
         try {
             machinesEndpoint.enforceSla(sla);
-            
             machineProvisioningCompletedEvent();
             agentProvisioningCompletedEvent();
         } catch (MachinesSlaEnforcementInProgressException e) {
@@ -183,6 +183,12 @@ public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
     @Override
     protected boolean isRecoveredStateOnEsmStart(ProcessingUnit otherPu) {
         return machinesEndpoint.isRecoveredStateOnEsmStart(otherPu);
+    }
+
+    @Override
+    protected void validateUndeployCompleted() {
+        // this strategy will undeploy of the PU anyway. no need to throw exception
+        return;
     }    
 
 }
