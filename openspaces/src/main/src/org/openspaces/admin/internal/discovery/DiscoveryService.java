@@ -32,6 +32,7 @@ import net.jini.discovery.DiscoveryEvent;
 import net.jini.discovery.DiscoveryListener;
 import net.jini.discovery.DiscoveryLocatorManagement;
 import net.jini.discovery.LookupDiscoveryManager;
+import net.jini.discovery.dynamic.DynamicLookupLocatorDiscovery;
 import net.jini.lookup.LookupCache;
 import net.jini.lookup.ServiceDiscoveryEvent;
 import net.jini.lookup.ServiceDiscoveryListener;
@@ -132,7 +133,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
         }
         started = true;
         try {
-            sdm = SharedDiscoveryManagement.getServiceDiscoveryManager(getGroups(), getInitialLocators(), this, true);
+            sdm = SharedDiscoveryManagement.getServiceDiscoveryManager(getGroups(), getInitialLocators(), this);
         } catch (Exception e) {
             throw new AdminException("Failed to start discovery service, Service Discovery Manager failed to start", e);
         }
@@ -517,18 +518,12 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
         return result;
     }
     
-    // TODO DYNAMIC : this method should be named
-    // differently because in the context of the admin
-    // it might return false, and then true when dynamic
-    // locators discovery initialization is completed
-    // and dynamic locators are enabled at one of the 
-    // discovered lookup services
     public boolean isDynamicLocatorsEnabled()
     {
         if (sdm != null && sdm.getDiscoveryManager() instanceof LookupDiscoveryManager) {
             LookupDiscoveryManager ldm = (LookupDiscoveryManager) sdm.getDiscoveryManager();
-            return ldm.getDynamicLocatorDiscovery() != null &&
-                   ldm.getDynamicLocatorDiscovery().isEnabled();
+            return DynamicLookupLocatorDiscovery.dynamicLocatorsEnabled() || 
+                   ldm.getDynamicLocatorDiscovery().isInitialized();
         }
         
         return false;

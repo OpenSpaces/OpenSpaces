@@ -28,6 +28,8 @@ import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
 import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitEvent;
 
+import com.gigaspaces.grid.esm.ESM;
+
 /**
  * @author Moran Avigdor
  * @author itaif
@@ -36,6 +38,8 @@ public interface InternalElasticServiceManager extends ElasticServiceManager, In
 
     ServiceID getServiceID();
 
+    ESM getESM();
+    
     void setProcessingUnitElasticProperties(ProcessingUnit pu, Map<String,String> properties);
     
     void setProcessingUnitScaleStrategyConfig(ProcessingUnit pu, ScaleStrategyConfig scaleStrategyConfig);
