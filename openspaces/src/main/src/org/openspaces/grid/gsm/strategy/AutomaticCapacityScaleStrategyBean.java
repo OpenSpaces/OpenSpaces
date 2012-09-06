@@ -89,7 +89,7 @@ implements AutoScalingSlaEnforcementEndpointAware {
 
         this.cooldownValidator = new AutomaticCapacityCooldownValidator();
         this.cooldownValidator.setCooldownAfterInstanceAdded(config.getCooldownAfterScaleOutSeconds(), TimeUnit.SECONDS);
-        this.cooldownValidator.setCooldownAfterInstanceRemoved(config.getCooldownAfterScaleSeconds(), TimeUnit.SECONDS);
+        this.cooldownValidator.setCooldownAfterInstanceRemoved(config.getCooldownAfterScaleInSeconds(), TimeUnit.SECONDS);
         this.cooldownValidator.setProcessingUnit(getProcessingUnit());
         CapacityRequirementsConfig initialCapacity = config.getInitialCapacity();
         if (initialCapacity == null) {   

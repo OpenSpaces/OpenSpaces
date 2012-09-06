@@ -89,5 +89,5 @@ public interface MachinesSlaEnforcementEndpoint extends ServiceLevelAgreementEnf
      * Erases all Allocated (state) that is related to the specified processing unit
      * @see #isAllocatedCapacityRemoved()
      */
-    void removeAllocatedCapacity(ProcessingUnit pu);
+    void removeUndeployedProcessingUnit(ProcessingUnit pu);
 }

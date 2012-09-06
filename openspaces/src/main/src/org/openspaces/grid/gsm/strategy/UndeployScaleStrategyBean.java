@@ -105,7 +105,7 @@ public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
             final CapacityMachinesSlaPolicy sla = getMachinesSlaPolicy(zones);
             enforceMachinesSla(sla);
         }
-        machinesEndpoint.removeAllocatedCapacity(getProcessingUnit());
+        machinesEndpoint.removeUndeployedProcessingUnit(getProcessingUnit());
     }
 
     private void enforceMachinesSla(final CapacityMachinesSlaPolicy sla) throws WaitingForDiscoveredMachinesException, MachinesSlaEnforcementInProgressException, GridServiceAgentSlaEnforcementInProgressException {

@@ -1358,8 +1358,8 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
     }
 
     @Override
-    public void removeAllocatedCapacity(ProcessingUnit pu) {
-        state.removeAllocatedCapacity(pu);
+    public void removeUndeployedProcessingUnit(ProcessingUnit pu) {
+        state.removeUndeployedProcessingUnit(pu);
     }
 }
 

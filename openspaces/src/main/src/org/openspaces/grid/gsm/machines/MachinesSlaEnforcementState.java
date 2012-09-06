@@ -628,7 +628,7 @@ public class MachinesSlaEnforcementState {
      * Removes all state related to the specified processing unit
      * Call this method only if you are not going to call any other state method on this pu
      */
-    public void removeAllocatedCapacity(ProcessingUnit pu) {
+    public void removeUndeployedProcessingUnit(ProcessingUnit pu) {
         Iterator<StateKey> stateKeyIterator = state.keySet().iterator();
         while(stateKeyIterator.hasNext()) {
             ProcessingUnit statePu = stateKeyIterator.next().pu; 
