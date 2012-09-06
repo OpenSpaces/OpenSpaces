@@ -46,6 +46,7 @@ import org.openspaces.grid.gsm.machines.exceptions.MachinesSlaEnforcementInProgr
 import org.openspaces.grid.gsm.machines.exceptions.MachinesSlaHasChangedException;
 import org.openspaces.grid.gsm.machines.exceptions.NeedToWaitUntilAllGridServiceAgentsDiscoveredException;
 import org.openspaces.grid.gsm.machines.exceptions.SomeProcessingUnitsHaveNotCompletedStateRecoveryException;
+import org.openspaces.grid.gsm.machines.exceptions.UndeployInProgressException;
 import org.openspaces.grid.gsm.rebalancing.exceptions.RebalancingSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementInProgressException;
 
@@ -163,7 +164,7 @@ implements AutoScalingSlaEnforcementEndpointAware {
     }
 
     @Override
-    protected void recoverStateOnEsmStart() throws SomeProcessingUnitsHaveNotCompletedStateRecoveryException, NeedToWaitUntilAllGridServiceAgentsDiscoveredException, MachinesSlaEnforcementInProgressException {
+    protected void recoverStateOnEsmStart() throws SomeProcessingUnitsHaveNotCompletedStateRecoveryException, NeedToWaitUntilAllGridServiceAgentsDiscoveredException, MachinesSlaEnforcementInProgressException, UndeployInProgressException {
         super.recoverStateOnEsmStart();
         CapacityRequirementsPerZones recoveredCapacity = super.getAllocatedCapacity();
         if (!recoveredCapacity.equalsZero()) {

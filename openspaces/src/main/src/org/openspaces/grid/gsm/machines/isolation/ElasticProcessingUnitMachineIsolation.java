@@ -29,6 +29,8 @@ public abstract class ElasticProcessingUnitMachineIsolation {
      */
     public abstract boolean equals(Object otherProcessingUnitIsolation);
     
+    public abstract int hashCode();
+    
     /**
      * @return a unique identifier for this machine isolation
      */

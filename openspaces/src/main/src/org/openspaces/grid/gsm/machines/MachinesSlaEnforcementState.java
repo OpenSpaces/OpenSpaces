@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
@@ -42,12 +43,13 @@ import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerAgent;
 import org.openspaces.grid.gsm.containers.ContainersSlaUtils;
+import org.openspaces.grid.gsm.machines.exceptions.UndeployInProgressException;
 import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIsolation;
 import org.openspaces.grid.gsm.machines.isolation.PublicMachineIsolation;
 
 public class MachinesSlaEnforcementState {
     
-    public static class StateKey {
+    public static class StateKey implements Comparable<StateKey>{
         
         ProcessingUnit pu;
         ZonesConfig gridServiceAgentZones;
@@ -95,6 +97,11 @@ public class MachinesSlaEnforcementState {
                     + (pu != null ? "pu=" + pu.getName() + ", " : "")
                     + (gridServiceAgentZones != null ? "agentZones=" + gridServiceAgentZones : "")
                     + "]";
+        }
+
+        @Override
+        public int compareTo(StateKey o) {
+            return this.toString().compareTo(o.toString());
         }
     }
     
@@ -202,6 +209,7 @@ public class MachinesSlaEnforcementState {
     private final Map<StateKey,StateValue> state;
 
     private final Set<ProcessingUnit> recoveredStatePerProcessingUnit;
+    private final Set<ProcessingUnit> undeployCompletedPerProcessingUnit;
     
     public MachinesSlaEnforcementState() {
         this.logger = 
@@ -210,6 +218,7 @@ public class MachinesSlaEnforcementState {
         
         state = new HashMap<StateKey,StateValue>();
         recoveredStatePerProcessingUnit = new HashSet<ProcessingUnit>();
+        undeployCompletedPerProcessingUnit = new HashSet<ProcessingUnit>();
     }
 
     public boolean isHoldingStateForProcessingUnit(ProcessingUnit pu) {
@@ -627,16 +636,36 @@ public class MachinesSlaEnforcementState {
                 stateKeyIterator.remove();
             }
         }
+        undeployCompletedPerProcessingUnit.remove(pu);
+        recoveredStatePerProcessingUnit.remove(pu);
     }
 
-    public boolean isAllocatedCapacityRemoved(ProcessingUnit pu) {
-        boolean removed = true;
-        for (StateKey key : state.keySet()) {
-            if (key.pu.equals(pu)) {
-                removed = false;
-                break;
+    public Map<StateKey, StateValue> getStateForProcessingUnit(ProcessingUnit pu) {
+        //treemap is needed for deterministic toString  
+        Map<StateKey, StateValue> state = new TreeMap<StateKey,StateValue>();
+        for (Entry<StateKey, StateValue> pair : state.entrySet()) {
+            if (pair.getKey().pu.equals(pu)) {
+                state.put(pair.getKey(), pair.getValue());
             }
         }
-        return removed;
+        return state;
+    }
+
+    public void validateUndeployCompleted(ProcessingUnit pu) throws UndeployInProgressException {
+        
+        if (!undeployCompletedPerProcessingUnit.contains(pu)) {
+            
+            // undeploy of processing unit is in process somewhere else
+
+            Map<StateKey, StateValue> filteredState = getStateForProcessingUnit(pu);
+            if (!filteredState.isEmpty()) {
+                UndeployInProgressException undeployInProgressException = new UndeployInProgressException(pu);
+                logger.info(undeployInProgressException.getMessage() + " Details: "+ filteredState.toString(), undeployInProgressException);
+                throw undeployInProgressException;
+            }
+
+            // undeploy is not in progress 
+            undeployCompletedPerProcessingUnit.add(pu);
+        }
     }
 }

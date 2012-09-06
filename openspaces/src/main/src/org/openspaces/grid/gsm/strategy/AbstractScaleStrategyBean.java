@@ -105,8 +105,6 @@ public abstract class AbstractScaleStrategyBean implements
 
     private boolean discoveryQuiteMode;
 
-    private boolean undeployCompleted = false;
-    
     protected InternalAdmin getAdmin() {
         return this.admin;
     }
@@ -345,19 +343,12 @@ public abstract class AbstractScaleStrategyBean implements
         }
     }
 
-    protected abstract void validateUndeployCompleted() throws UndeployInProgressException;
-
     private void recoverOnStartBeforeEnforceSLA() throws SlaEnforcementInProgressException {
         try {
             validateCorrectThread();
             validateAtLeastOneLookupServiceDiscovered();
             validateOnlyOneESMRunning();
     
-            if (!undeployCompleted ) {
-                validateUndeployCompleted();
-                undeployCompleted = true;
-            }
-            
             if (!isRecoveredStateOnEsmStart()) {
                 if (getLogger().isInfoEnabled()) {
                     getLogger().info("recovering state on ESM start.");
@@ -386,7 +377,7 @@ public abstract class AbstractScaleStrategyBean implements
     }
 
     protected abstract boolean isRecoveredStateOnEsmStart(ProcessingUnit otherPu);
-    protected abstract void recoverStateOnEsmStart() throws MachinesSlaEnforcementInProgressException, SomeProcessingUnitsHaveNotCompletedStateRecoveryException, NeedToWaitUntilAllGridServiceAgentsDiscoveredException;
+    protected abstract void recoverStateOnEsmStart() throws MachinesSlaEnforcementInProgressException, SomeProcessingUnitsHaveNotCompletedStateRecoveryException, NeedToWaitUntilAllGridServiceAgentsDiscoveredException, UndeployInProgressException;
     
         
     /**

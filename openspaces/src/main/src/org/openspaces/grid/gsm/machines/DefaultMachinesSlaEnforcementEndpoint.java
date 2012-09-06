@@ -60,6 +60,7 @@ import org.openspaces.grid.gsm.machines.exceptions.NeedToStartMoreGridServiceAge
 import org.openspaces.grid.gsm.machines.exceptions.NeedToWaitUntilAllGridServiceAgentsDiscoveredException;
 import org.openspaces.grid.gsm.machines.exceptions.SomeProcessingUnitsHaveNotCompletedStateRecoveryException;
 import org.openspaces.grid.gsm.machines.exceptions.StartedTooManyMachinesException;
+import org.openspaces.grid.gsm.machines.exceptions.UndeployInProgressException;
 import org.openspaces.grid.gsm.machines.exceptions.UnexpectedShutdownOfNewGridServiceAgentException;
 import org.openspaces.grid.gsm.machines.exceptions.WaitingForDiscoveredMachinesException;
 import org.openspaces.grid.gsm.machines.plugins.ElasticMachineProvisioningException;
@@ -186,9 +187,13 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
     }
 
     @Override
-    public void recoverStateOnEsmStart(AbstractMachinesSlaPolicy sla) throws SomeProcessingUnitsHaveNotCompletedStateRecoveryException, NeedToWaitUntilAllGridServiceAgentsDiscoveredException {
+    public void recoverStateOnEsmStart(AbstractMachinesSlaPolicy sla) throws SomeProcessingUnitsHaveNotCompletedStateRecoveryException, NeedToWaitUntilAllGridServiceAgentsDiscoveredException, UndeployInProgressException {
     
         if (!isCompletedStateRecovery(sla)) {
+            
+            if (!sla.isUndeploying()) {
+                state.validateUndeployCompleted(pu);
+            }
             
             setMachineIsolation(sla);
             
@@ -1355,11 +1360,6 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
     @Override
     public void removeAllocatedCapacity(ProcessingUnit pu) {
         state.removeAllocatedCapacity(pu);
-    }
-
-    @Override
-    public boolean isAllocatedCapacityRemoved(ProcessingUnit pu) {
-        return state.isAllocatedCapacityRemoved(pu);
     }
 }
 

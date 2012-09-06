@@ -232,7 +232,7 @@ public class EagerScaleStrategyBean extends AbstractScaleStrategyBean
     }
 
     @Override
-    protected void recoverStateOnEsmStart() throws MachinesSlaEnforcementInProgressException, SomeProcessingUnitsHaveNotCompletedStateRecoveryException, NeedToWaitUntilAllGridServiceAgentsDiscoveredException {
+    protected void recoverStateOnEsmStart() throws MachinesSlaEnforcementInProgressException, SomeProcessingUnitsHaveNotCompletedStateRecoveryException, NeedToWaitUntilAllGridServiceAgentsDiscoveredException, UndeployInProgressException {
         
         final EagerMachinesSlaPolicy sla = getMachinesSlaPolicy();
         machinesEndpoint.recoverStateOnEsmStart(sla);
@@ -242,12 +242,5 @@ public class EagerScaleStrategyBean extends AbstractScaleStrategyBean
     @Override
     protected boolean isRecoveredStateOnEsmStart(ProcessingUnit otherPu) {
         return machinesEndpoint.isRecoveredStateOnEsmStart(otherPu);
-    }
-
-    @Override
-    protected void validateUndeployCompleted() throws UndeployInProgressException {
-        if (!machinesEndpoint.isAllocatedCapacityRemoved(getProcessingUnit())) {
-            throw new UndeployInProgressException(getProcessingUnit());
-        }
     }
 }

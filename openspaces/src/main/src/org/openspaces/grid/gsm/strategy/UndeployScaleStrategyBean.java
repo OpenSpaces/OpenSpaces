@@ -35,6 +35,7 @@ import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcemen
 import org.openspaces.grid.gsm.machines.exceptions.MachinesSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.machines.exceptions.NeedToWaitUntilAllGridServiceAgentsDiscoveredException;
 import org.openspaces.grid.gsm.machines.exceptions.SomeProcessingUnitsHaveNotCompletedStateRecoveryException;
+import org.openspaces.grid.gsm.machines.exceptions.UndeployInProgressException;
 import org.openspaces.grid.gsm.machines.exceptions.WaitingForDiscoveredMachinesException;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
 import org.openspaces.grid.gsm.rebalancing.exceptions.ElasticProcessingUnitInstanceUndeployInProgress;
@@ -171,7 +172,7 @@ public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
     }
 
     @Override
-    protected void recoverStateOnEsmStart() throws MachinesSlaEnforcementInProgressException, SomeProcessingUnitsHaveNotCompletedStateRecoveryException, NeedToWaitUntilAllGridServiceAgentsDiscoveredException {
+    protected void recoverStateOnEsmStart() throws MachinesSlaEnforcementInProgressException, SomeProcessingUnitsHaveNotCompletedStateRecoveryException, NeedToWaitUntilAllGridServiceAgentsDiscoveredException, UndeployInProgressException {
         
         for (ZonesConfig zones : machinesEndpoint.getGridServiceAgentsZones()) {
             final CapacityMachinesSlaPolicy sla = getMachinesSlaPolicy(zones);
@@ -184,11 +185,4 @@ public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
     protected boolean isRecoveredStateOnEsmStart(ProcessingUnit otherPu) {
         return machinesEndpoint.isRecoveredStateOnEsmStart(otherPu);
     }
-
-    @Override
-    protected void validateUndeployCompleted() {
-        // this strategy will undeploy of the PU anyway. no need to throw exception
-        return;
-    }    
-
 }

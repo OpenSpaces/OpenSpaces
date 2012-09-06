@@ -569,7 +569,7 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
     }
 
     @Override
-    protected void recoverStateOnEsmStart() throws MachinesSlaEnforcementInProgressException, SomeProcessingUnitsHaveNotCompletedStateRecoveryException, NeedToWaitUntilAllGridServiceAgentsDiscoveredException {
+    protected void recoverStateOnEsmStart() throws MachinesSlaEnforcementInProgressException, SomeProcessingUnitsHaveNotCompletedStateRecoveryException, NeedToWaitUntilAllGridServiceAgentsDiscoveredException, UndeployInProgressException {
         
         for (CapacityMachinesSlaPolicy sla : getMachinesSlas(getPlannedZones())) {
             machinesEndpoint.recoverStateOnEsmStart(sla);
@@ -643,12 +643,5 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
             isGridServiceAgentZonesAware = ((ScaleStrategyAgentZonesAwareConfig)config).isGridServiceAgentZonesAware();
         }
         return isGridServiceAgentZonesAware;
-    }
-    
-    @Override
-    protected void validateUndeployCompleted() throws UndeployInProgressException {
-        if (!machinesEndpoint.isAllocatedCapacityRemoved(getProcessingUnit())) {
-            throw new UndeployInProgressException(getProcessingUnit());
-        }
     }
 }

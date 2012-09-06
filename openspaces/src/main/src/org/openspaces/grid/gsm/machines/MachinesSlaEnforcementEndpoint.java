@@ -26,6 +26,7 @@ import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcemen
 import org.openspaces.grid.gsm.machines.exceptions.MachinesSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.machines.exceptions.NeedToWaitUntilAllGridServiceAgentsDiscoveredException;
 import org.openspaces.grid.gsm.machines.exceptions.SomeProcessingUnitsHaveNotCompletedStateRecoveryException;
+import org.openspaces.grid.gsm.machines.exceptions.UndeployInProgressException;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpoint;
 
 
@@ -56,9 +57,10 @@ public interface MachinesSlaEnforcementEndpoint extends ServiceLevelAgreementEnf
     
     /**
      * Recover state for the specified SLA.
+     * @throws UndeployInProgressException 
      * @since 9.1.0
      */
-    void recoverStateOnEsmStart(AbstractMachinesSlaPolicy sla) throws SomeProcessingUnitsHaveNotCompletedStateRecoveryException, NeedToWaitUntilAllGridServiceAgentsDiscoveredException;
+    void recoverStateOnEsmStart(AbstractMachinesSlaPolicy sla) throws SomeProcessingUnitsHaveNotCompletedStateRecoveryException, NeedToWaitUntilAllGridServiceAgentsDiscoveredException, UndeployInProgressException;
     
     /**
      * Mark that the specified processing unit has recovered state.
@@ -88,10 +90,4 @@ public interface MachinesSlaEnforcementEndpoint extends ServiceLevelAgreementEnf
      * @see #isAllocatedCapacityRemoved()
      */
     void removeAllocatedCapacity(ProcessingUnit pu);
-
-    /**
-     * Makes sure all Allocated (state) capacity for the specified pu is removed.
-     * @see #removeAllocatedCapacity(ProcessingUnit)
-     */
-    boolean isAllocatedCapacityRemoved(ProcessingUnit pu);
 }
