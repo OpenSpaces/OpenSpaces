@@ -192,7 +192,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         if (!isCompletedStateRecovery(sla)) {
             
             if (!sla.isUndeploying()) {
-                state.validateUndeployCompleted(pu);
+                state.validateUndeployNotInProgress(pu);
             }
             
             setMachineIsolation(sla);
@@ -1361,9 +1361,12 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
     }
 
     @Override
-    public void removeUndeployedProcessingUnit(ProcessingUnit pu) {
-        state.removeUndeployedProcessingUnit(pu);
+    public void beforeUndeployedProcessingUnit(ProcessingUnit pu) {
+        state.beforeUndeployProcessingUnit(pu);
+    }
+        
+    @Override
+    public void afterUndeployedProcessingUnit(ProcessingUnit pu) {
+        state.afterUndeployProcessingUnit(pu);
     }
 }
-
-

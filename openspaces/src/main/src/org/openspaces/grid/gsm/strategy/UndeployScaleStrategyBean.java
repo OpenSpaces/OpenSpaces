@@ -101,11 +101,12 @@ public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
         
         //proceed with container udeployment. It respects the pu instance download procedure.
         enforceContainersSla();
+        machinesEndpoint.beforeUndeployedProcessingUnit(getProcessingUnit());
         for (final ZonesConfig zones : machinesEndpoint.getGridServiceAgentsZones()) {
             final CapacityMachinesSlaPolicy sla = getMachinesSlaPolicy(zones);
             enforceMachinesSla(sla);
         }
-        machinesEndpoint.removeUndeployedProcessingUnit(getProcessingUnit());
+        machinesEndpoint.afterUndeployedProcessingUnit(getProcessingUnit());
     }
 
     private void enforceMachinesSla(final CapacityMachinesSlaPolicy sla) throws WaitingForDiscoveredMachinesException, MachinesSlaEnforcementInProgressException, GridServiceAgentSlaEnforcementInProgressException {

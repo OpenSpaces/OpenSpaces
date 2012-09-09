@@ -21,6 +21,7 @@ import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
 /**
  * @author Itai Frenkel
  * @since 9.1.0
+ * @see GS-10644
  */
 public class UndeployInProgressException extends GridServiceAgentSlaEnforcementInProgressException implements SlaEnforcementFailure {
 
@@ -31,6 +32,6 @@ public class UndeployInProgressException extends GridServiceAgentSlaEnforcementI
     }
 
     private static String message(ProcessingUnit pu) {
-        return "Undeploy is still in progress for " + pu.getName();
+        return "Undeployment of " + pu.getName() + " has not completed succesfully.";
     }
 }

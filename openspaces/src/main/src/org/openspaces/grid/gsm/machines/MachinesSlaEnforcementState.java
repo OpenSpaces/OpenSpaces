@@ -209,7 +209,7 @@ public class MachinesSlaEnforcementState {
     private final Map<StateKey,StateValue> state;
 
     private final Set<ProcessingUnit> recoveredStatePerProcessingUnit;
-    private final Set<ProcessingUnit> undeployCompletedPerProcessingUnit;
+    private final Set<ProcessingUnit> validatedUndeployNotInProgressPerProcessingUnit;
     
     public MachinesSlaEnforcementState() {
         this.logger = 
@@ -218,7 +218,7 @@ public class MachinesSlaEnforcementState {
         
         state = new HashMap<StateKey,StateValue>();
         recoveredStatePerProcessingUnit = new HashSet<ProcessingUnit>();
-        undeployCompletedPerProcessingUnit = new HashSet<ProcessingUnit>();
+        validatedUndeployNotInProgressPerProcessingUnit = new HashSet<ProcessingUnit>();
     }
 
     public boolean isHoldingStateForProcessingUnit(ProcessingUnit pu) {
@@ -537,10 +537,8 @@ public class MachinesSlaEnforcementState {
 
     public Set<ZonesConfig> getGridServiceAgentsZones(ProcessingUnit pu) {
         Set<ZonesConfig> zones = new HashSet<ZonesConfig>();
-        for (StateKey key : state.keySet()) {
-            if (key.pu.equals(pu)) {
-                zones.add(key.gridServiceAgentZones);
-            }
+        for (StateKey key : getStateForProcessingUnit(pu).keySet()) {
+            zones.add(key.gridServiceAgentZones);
         }
         return zones;
     }
@@ -585,10 +583,6 @@ public class MachinesSlaEnforcementState {
         return capacityRequirementsPerAgent;
     }
     
-    
-    
-    
-
     /**
      * Changes the key.zone of the allocated capacity to match the exact zone of the agent
      * @return false if nothing changed, true if replace occurred
@@ -624,11 +618,15 @@ public class MachinesSlaEnforcementState {
         state.remove(key);
     }
 
+    public void beforeUndeployProcessingUnit(ProcessingUnit pu) {
+        validatedUndeployNotInProgressPerProcessingUnit.remove(pu);
+    }
+    
     /**
      * Removes all state related to the specified processing unit
      * Call this method only if you are not going to call any other state method on this pu
      */
-    public void removeUndeployedProcessingUnit(ProcessingUnit pu) {
+    public void afterUndeployProcessingUnit(ProcessingUnit pu) {
         Iterator<StateKey> stateKeyIterator = state.keySet().iterator();
         while(stateKeyIterator.hasNext()) {
             ProcessingUnit statePu = stateKeyIterator.next().pu; 
@@ -636,7 +634,6 @@ public class MachinesSlaEnforcementState {
                 stateKeyIterator.remove();
             }
         }
-        undeployCompletedPerProcessingUnit.remove(pu);
         recoveredStatePerProcessingUnit.remove(pu);
     }
 
@@ -645,15 +642,17 @@ public class MachinesSlaEnforcementState {
         Map<StateKey, StateValue> pustate = new TreeMap<StateKey,StateValue>();
         for (Entry<StateKey, StateValue> pair : state.entrySet()) {
             if (pair.getKey().pu.equals(pu)) {
-                pustate.put(pair.getKey(), pair.getValue());
+                if (!pair.getValue().equalsZero()) {
+                    pustate.put(pair.getKey(), pair.getValue());
+                }
             }
         }
         return pustate;
     }
 
-    public void validateUndeployCompleted(ProcessingUnit pu) throws UndeployInProgressException {
+    public void validateUndeployNotInProgress(ProcessingUnit pu) throws UndeployInProgressException {
         
-        if (!undeployCompletedPerProcessingUnit.contains(pu)) {
+        if (!validatedUndeployNotInProgressPerProcessingUnit.contains(pu)) {
             
             // undeploy of processing unit is in process somewhere else
 
@@ -665,7 +664,7 @@ public class MachinesSlaEnforcementState {
             }
 
             // undeploy is not in progress 
-            undeployCompletedPerProcessingUnit.add(pu);
+            validatedUndeployNotInProgressPerProcessingUnit.add(pu);
         }
     }
 }

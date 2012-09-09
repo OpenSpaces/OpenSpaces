@@ -82,12 +82,20 @@ public interface MachinesSlaEnforcementEndpoint extends ServiceLevelAgreementEnf
     /**
      * Replaces the allocated capacity of the specified sla zones, with the allocated capacity
      * @return true if actually changed anything in the allocation
+     * @since 9.1.0
      */
     boolean replaceAllocatedCapacity(AbstractMachinesSlaPolicy sla);
 
     /**
-     * Erases all Allocated (state) that is related to the specified processing unit
-     * @see #isAllocatedCapacityRemoved()
+     * Marks that the processing unit is being undeployed.
+     * @since 9.1.0
      */
-    void removeUndeployedProcessingUnit(ProcessingUnit pu);
+    void beforeUndeployedProcessingUnit(ProcessingUnit pu);
+    
+    /**
+     * Erases all Allocated (state) that is related to the specified processing unit
+     * @since 9.1.0
+     */
+    void afterUndeployedProcessingUnit(ProcessingUnit pu);
+    
 }
