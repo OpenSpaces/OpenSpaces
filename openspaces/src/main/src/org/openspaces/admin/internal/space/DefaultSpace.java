@@ -223,6 +223,9 @@ public class DefaultSpace implements InternalSpace {
         return scheduledStatisticsMonitor != null;
     }
 
+    /**
+     * Must be called from a synchronized method
+     */
     private void rescheduleStatisticsMonitor() {
         if (scheduledStatisticsMonitor != null) {
             scheduledStatisticsMonitor.cancel(false);
@@ -413,11 +416,17 @@ public class DefaultSpace implements InternalSpace {
 
     public InternalSpaceInstance removeInstance(String uid) {
         assertStateChangesPermitted();
-        InternalSpaceInstance spaceInstance = (InternalSpaceInstance) spaceInstancesByUID.remove(uid);
+        final InternalSpaceInstance spaceInstance = (InternalSpaceInstance) spaceInstancesByUID.remove(uid);
         if (spaceInstance != null) {
-            while (spaceInstance.isMonitoring()) {
-                spaceInstance.stopStatisticsMonitor();
-            }
+            admin.scheduleAdminOperation(new Runnable() {
+                @Override
+                public void run() {
+                    while (spaceInstance.isMonitoring()) {
+                        spaceInstance.stopStatisticsMonitor();
+                    }
+                }
+            });
+            
             getPartition(spaceInstance).removeSpaceInstance(uid);
             String fullSpaceName = JSpaceUtilities.createFullSpaceName(spaceInstance.getSpaceUrl().getContainerName(), spaceInstance.getSpaceUrl().getSpaceName());
             spaceInstancesByMemberName.remove(fullSpaceName);

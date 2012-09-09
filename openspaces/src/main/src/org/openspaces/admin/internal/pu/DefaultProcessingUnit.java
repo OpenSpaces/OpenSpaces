@@ -776,9 +776,16 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     public void removeProcessingUnitInstance(String uid) {
         final ProcessingUnitInstance processingUnitInstance = processingUnitInstances.remove(uid);
         if (processingUnitInstance != null) {
-            while (processingUnitInstance.isMonitoring()) {
-                processingUnitInstance.stopStatisticsMonitor();        
-            }
+            admin.scheduleAdminOperation(new Runnable() {
+                
+                @Override
+                public void run() {
+                    while (processingUnitInstance.isMonitoring()) {
+                        processingUnitInstance.stopStatisticsMonitor();        
+                    }
+                }
+            });
+            
             InternalProcessingUnitPartition partition = getPartition(processingUnitInstance);
             partition.removeProcessingUnitInstance(uid);
 
