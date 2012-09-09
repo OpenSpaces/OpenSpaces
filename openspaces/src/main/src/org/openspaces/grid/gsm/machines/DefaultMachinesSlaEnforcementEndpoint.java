@@ -307,9 +307,9 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             throws GridServiceAgentSlaEnforcementInProgressException {
         
         try {
+            updateFailedMachinesState(sla);
             updateFutureAgentsState(sla);
-
-            updateFailedAndUnprovisionedMachinesState(sla);
+            updateRestrictedMachinesState(sla);
             updateAgentsMarkedForDeallocationState(sla);
             
             unmarkAgentsMarkedForDeallocationToSatisfyMinimumNumberOfMachines(sla);
@@ -341,8 +341,9 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
     private void enforceSlaInternal(CapacityMachinesSlaPolicy sla)
             throws MachinesSlaEnforcementInProgressException, GridServiceAgentSlaEnforcementInProgressException {
 
+        updateFailedMachinesState(sla);
         updateFutureAgentsState(sla);
-        updateFailedAndUnprovisionedMachinesState(sla);
+        updateRestrictedMachinesState(sla);
         updateAgentsMarkedForDeallocationState(sla);
         
         CapacityRequirementsPerAgent capacityMarkedForDeallocation = getCapacityMarkedForDeallocation(sla);
@@ -724,22 +725,9 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
     }
 
     /**
-     * mark for deallocation:
-     * failed machines ( not in lookup service )
-     * machines that are no longer in sla.getProvisionedMacines()
-     * machines that were not restricted but are now restricted for this PU
+     * mark for deallocation machines that were not restricted but are now restricted for this PU
      */
-    private void updateFailedAndUnprovisionedMachinesState(AbstractMachinesSlaPolicy sla) {
-        
-        GridServiceAgents agents = pu.getAdmin().getGridServiceAgents();
-        
-        // mark for deallocation all failed machines
-        for(String agentUid: getAllocatedCapacityUnfiltered(sla).getAgentUids()) {
-            if (agents.getAgentByUID(agentUid) == null) {
-                logger.warn("Agent " + agentUid + " was killed unexpectedly.");
-                markAgentCapacityForDeallocation(sla, agentUid);
-            }
-        }
+    private void updateRestrictedMachinesState(AbstractMachinesSlaPolicy sla) {
         
         // mark for deallocation machines that are restricted for this PU
         Map<String,List<String>> restrictedMachines = getRestrictedAgentUidsForPuWithReason(sla);
@@ -747,6 +735,21 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             String agentUid = agent.getUid();
             if (restrictedMachines.containsKey(agentUid)) {
                 logger.info("Machine " + MachinesSlaUtils.machineToString(agent.getMachine())+ " is restricted for pu " + pu.getName() + " reason:" + restrictedMachines.get(agentUid));
+                markAgentCapacityForDeallocation(sla, agentUid);
+            }
+        }
+    }
+
+    /**
+     * mark for deallocation machines that were undiscovered by the lookup service
+     */
+    private void updateFailedMachinesState(AbstractMachinesSlaPolicy sla) {
+        final GridServiceAgents agents = pu.getAdmin().getGridServiceAgents();
+        
+        // mark for deallocation all failed machines
+        for(final String agentUid: getAllocatedCapacityUnfiltered(sla).getAgentUids()) {
+            if (agents.getAgentByUID(agentUid) == null) {
+                logger.warn("Agent " + agentUid + " was killed unexpectedly.");
                 markAgentCapacityForDeallocation(sla, agentUid);
             }
         }
