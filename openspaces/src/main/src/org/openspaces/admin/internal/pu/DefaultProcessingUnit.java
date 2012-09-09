@@ -776,7 +776,9 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     public void removeProcessingUnitInstance(String uid) {
         final ProcessingUnitInstance processingUnitInstance = processingUnitInstances.remove(uid);
         if (processingUnitInstance != null) {
-            processingUnitInstance.stopStatisticsMonitor();
+            while (processingUnitInstance.isMonitoring()) {
+                processingUnitInstance.stopStatisticsMonitor();        
+            }
             InternalProcessingUnitPartition partition = getPartition(processingUnitInstance);
             partition.removeProcessingUnitInstance(uid);
 
@@ -823,11 +825,11 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     @Override
     public synchronized void startStatisticsMonitor() {
 
+        if (scheduledStatisticsRefCount++ > 0) return;
+        
         for (ProcessingUnitInstance processingUnitInstance : processingUnitInstances.values()) {
             processingUnitInstance.startStatisticsMonitor();
         }
-        
-        if (scheduledStatisticsRefCount++ > 0) return;
         
         if (scheduledStatisticsMonitor != null) {
             scheduledStatisticsMonitor.cancel(false);
@@ -852,6 +854,11 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         
         if (scheduledStatisticsMonitor != null) {
             scheduledStatisticsMonitor.cancel(false);
+
+            for (ProcessingUnitInstance processingUnitInstance : processingUnitInstances.values()) {
+                processingUnitInstance.stopStatisticsMonitor();
+            }
+            
             scheduledStatisticsMonitor = null;
         }
     }

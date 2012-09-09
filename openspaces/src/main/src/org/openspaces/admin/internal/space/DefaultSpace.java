@@ -199,6 +199,7 @@ public class DefaultSpace implements InternalSpace {
     }
 
     public synchronized void startStatisticsMonitor() {
+        if (scheduledStatisticsRefCount++ > 0) return;
         rescheduleStatisticsMonitor();
         for (SpaceInstance spaceInstance : spaceInstancesByUID.values()) {
             spaceInstance.startStatisticsMonitor();
@@ -206,19 +207,16 @@ public class DefaultSpace implements InternalSpace {
     }
 
     public synchronized void stopStatisticsMonitor() {
-        stopScheduledStatisticsMonitor();
-        for (SpaceInstance spaceInstance : spaceInstancesByUID.values()) {
-            spaceInstance.stopStatisticsMonitor();
-        }
-    }
-
-    private void stopScheduledStatisticsMonitor() {
+        
         if (scheduledStatisticsRefCount!=0 && --scheduledStatisticsRefCount > 0) return;
         
         if (scheduledStatisticsMonitor != null) {
             scheduledStatisticsMonitor.cancel(false);
+            for (SpaceInstance spaceInstance : spaceInstancesByUID.values()) {
+                spaceInstance.stopStatisticsMonitor();
+            }
             scheduledStatisticsMonitor = null;
-        }
+        }       
     }
 
     public synchronized boolean isMonitoring() {
@@ -226,8 +224,6 @@ public class DefaultSpace implements InternalSpace {
     }
 
     private void rescheduleStatisticsMonitor() {
-        if (scheduledStatisticsRefCount++ > 0) return;
-        
         if (scheduledStatisticsMonitor != null) {
             scheduledStatisticsMonitor.cancel(false);
         }
@@ -419,7 +415,9 @@ public class DefaultSpace implements InternalSpace {
         assertStateChangesPermitted();
         InternalSpaceInstance spaceInstance = (InternalSpaceInstance) spaceInstancesByUID.remove(uid);
         if (spaceInstance != null) {
-            spaceInstance.stopStatisticsMonitor();
+            while (spaceInstance.isMonitoring()) {
+                spaceInstance.stopStatisticsMonitor();
+            }
             getPartition(spaceInstance).removeSpaceInstance(uid);
             String fullSpaceName = JSpaceUtilities.createFullSpaceName(spaceInstance.getSpaceUrl().getContainerName(), spaceInstance.getSpaceUrl().getSpaceName());
             spaceInstancesByMemberName.remove(fullSpaceName);
