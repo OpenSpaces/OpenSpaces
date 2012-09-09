@@ -642,13 +642,13 @@ public class MachinesSlaEnforcementState {
 
     public Map<StateKey, StateValue> getStateForProcessingUnit(ProcessingUnit pu) {
         //treemap is needed for deterministic toString  
-        Map<StateKey, StateValue> state = new TreeMap<StateKey,StateValue>();
+        Map<StateKey, StateValue> pustate = new TreeMap<StateKey,StateValue>();
         for (Entry<StateKey, StateValue> pair : state.entrySet()) {
             if (pair.getKey().pu.equals(pu)) {
-                state.put(pair.getKey(), pair.getValue());
+                pustate.put(pair.getKey(), pair.getValue());
             }
         }
-        return state;
+        return pustate;
     }
 
     public void validateUndeployCompleted(ProcessingUnit pu) throws UndeployInProgressException {
