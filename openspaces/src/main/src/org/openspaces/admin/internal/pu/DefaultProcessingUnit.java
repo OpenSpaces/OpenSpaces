@@ -750,6 +750,9 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         assertStateChangesPermitted();
         final ProcessingUnitInstance existingProcessingUnitInstance = processingUnitInstances.put(processingUnitInstance.getUid(), processingUnitInstance);
         InternalProcessingUnitPartition partition = getPartition(processingUnitInstance);
+        if (partition == null) {
+            throw new IllegalStateException("getPartition(processingUnitInstance) returned null for processingUnitInstance.instanceId=" + processingUnitInstance.getInstanceId() + " numberOfBackups="+numberOfBackups+" processingUnitPartitions="+processingUnitPartitions);
+        }
         partition.addProcessingUnitInstance(processingUnitInstance);
         ((InternalProcessingUnitInstance) processingUnitInstance).setProcessingUnitPartition(partition);
 

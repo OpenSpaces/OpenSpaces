@@ -386,7 +386,7 @@ public class DefaultSpace implements InternalSpace {
         spaceInstancesByMemberName.put(fullSpaceName, spaceInstance);
         InternalSpacePartition spacePartition = getPartition(internalSpaceInstance);
         if (spacePartition == null) {
-            throw new IllegalStateException("getPartition(spaceInstance) returned null for spaceInstance.instanceId=" + internalSpaceInstance.getInstanceId() + " spacePartitions="+spacePartitions);
+            throw new IllegalStateException("getPartition(spaceInstance) returned null for spaceInstance.instanceId=" + internalSpaceInstance.getInstanceId() + " spaceInstance.getNumberOfBackups()="+internalSpaceInstance.getNumberOfBackups() +" spacePartitions="+spacePartitions);
         }
         internalSpaceInstance.setPartition(spacePartition);
         spacePartition.addSpaceInstance(spaceInstance);
