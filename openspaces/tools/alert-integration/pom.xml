@@ -9,7 +9,7 @@
 	<properties>
 		<gsType>PU</gsType>
 		<gsVersion>[9.0.0,9.0.1]</gsVersion>
-		<springVersion>3.1.2.RELEASE</springVersion>
+		<springVersion>3.1.1.RELEASE</springVersion>
 	</properties>
 	<repositories>
 		<repository>
