@@ -37,6 +37,8 @@ import org.openspaces.grid.gsm.autoscaling.AutoScalingSlaPolicy;
 import org.openspaces.grid.gsm.autoscaling.AutoScalingSlaUtils;
 import org.openspaces.grid.gsm.autoscaling.AutomaticCapacityCooldownValidator;
 import org.openspaces.grid.gsm.autoscaling.exceptions.AutoScalingConfigConflictException;
+import org.openspaces.grid.gsm.autoscaling.exceptions.AutoScalingHighThresholdBreachedException;
+import org.openspaces.grid.gsm.autoscaling.exceptions.AutoScalingLowThresholdBreachedException;
 import org.openspaces.grid.gsm.autoscaling.exceptions.AutoScalingSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.autoscaling.exceptions.PerZoneAutoScalingSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
@@ -246,8 +248,13 @@ implements AutoScalingSlaEnforcementEndpointAware {
         for (ZonesConfig zones : zoness) {
 
             try {
-                final CapacityRequirements newPlannedForZones = enforceAutoScalingSla(zones, enforced, newPlanned);
-                newPlanned = newPlanned.set(zones, newPlannedForZones);
+                enforceAutoScalingSla(zones, enforced, newPlanned);
+            
+            } catch (AutoScalingHighThresholdBreachedException e) {
+                newPlanned = newPlanned.set(zones, e.getNewCapacity());
+
+            } catch (AutoScalingLowThresholdBreachedException e) {
+                newPlanned = newPlanned.set(zones, e.getNewCapacity());
 
             } catch (AutoScalingSlaEnforcementInProgressException e) {
                 
@@ -282,7 +289,7 @@ implements AutoScalingSlaEnforcementEndpointAware {
         }
     }
     
-    private CapacityRequirements enforceAutoScalingSla(ZonesConfig zones, CapacityRequirementsPerZones enforced, CapacityRequirementsPerZones newPlanned)
+    private void enforceAutoScalingSla(ZonesConfig zones, CapacityRequirementsPerZones enforced, CapacityRequirementsPerZones newPlanned)
             throws AutoScalingSlaEnforcementInProgressException {
         
         if (getLogger().isDebugEnabled()) {
@@ -326,9 +333,6 @@ implements AutoScalingSlaEnforcementEndpointAware {
             autoScalingInProgressEvent(e);
             throw e;
         }
-        final CapacityRequirements newCapacityRequirements = autoScalingEndpoint.getNewCapacityRequirements();
-
-        return newCapacityRequirements;
     }
 
     private void validateRulesConfig() {

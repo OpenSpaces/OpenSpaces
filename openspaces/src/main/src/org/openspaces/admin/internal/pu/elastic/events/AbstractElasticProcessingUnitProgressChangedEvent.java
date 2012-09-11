@@ -25,6 +25,8 @@ import org.jini.rio.monitor.event.Event;
 import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitProgressChangedEvent;
 
 import com.gigaspaces.internal.io.IOUtils;
+import com.gigaspaces.internal.version.PlatformLogicalVersion;
+import com.gigaspaces.lrmi.LRMIInvocationContext;
 
 public abstract class AbstractElasticProcessingUnitProgressChangedEvent implements ElasticProcessingUnitProgressChangedEvent , Event{
     
@@ -33,6 +35,9 @@ public abstract class AbstractElasticProcessingUnitProgressChangedEvent implemen
     private boolean isComplete;
     private String processingUnitName;
     private boolean isUndeploying;
+    
+    //@since 9.0.1
+    private String message;
     
     /**
      * de-serialization/reflection constructor
@@ -58,7 +63,9 @@ public abstract class AbstractElasticProcessingUnitProgressChangedEvent implemen
         out.writeBoolean(isComplete);
         out.writeBoolean(isUndeploying);
         IOUtils.writeString(out, processingUnitName);
-        
+        if (LRMIInvocationContext.getEndpointLogicalVersion().greaterOrEquals(PlatformLogicalVersion.v9_0_1)) {
+            IOUtils.writeString(out, message);    
+        }
     }
 
     @Override
@@ -71,6 +78,9 @@ public abstract class AbstractElasticProcessingUnitProgressChangedEvent implemen
         isComplete = in.readBoolean();
         isUndeploying = in.readBoolean();
         processingUnitName = IOUtils.readString(in);
+        if (LRMIInvocationContext.getEndpointLogicalVersion().greaterOrEquals(PlatformLogicalVersion.v9_0_1)) {
+            message = IOUtils.readString(in);    
+        }
     }
 
     public void setComplete(boolean isComplete) {
@@ -83,5 +93,9 @@ public abstract class AbstractElasticProcessingUnitProgressChangedEvent implemen
 
     public void setProcessingUnitName(String processingUnitName) {
         this.processingUnitName = processingUnitName;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 }

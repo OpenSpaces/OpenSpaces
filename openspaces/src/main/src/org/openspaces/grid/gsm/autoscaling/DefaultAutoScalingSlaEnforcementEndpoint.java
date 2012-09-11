@@ -29,6 +29,8 @@ import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
 import org.openspaces.admin.zone.config.ZonesConfig;
 import org.openspaces.grid.gsm.LogPerProcessingUnit;
 import org.openspaces.grid.gsm.SingleThreadedPollingLog;
+import org.openspaces.grid.gsm.autoscaling.exceptions.AutoScalingHighThresholdBreachedException;
+import org.openspaces.grid.gsm.autoscaling.exceptions.AutoScalingLowThresholdBreachedException;
 import org.openspaces.grid.gsm.autoscaling.exceptions.AutoScalingSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.autoscaling.exceptions.AutoScalingStatisticsFormatException;
 import org.openspaces.grid.gsm.autoscaling.exceptions.ReachedMaximumCapacityAutoScalingException;
@@ -43,7 +45,6 @@ public class DefaultAutoScalingSlaEnforcementEndpoint implements AutoScalingSlaE
 
     private final Log logger;
     private InternalProcessingUnit pu;
-    private CapacityRequirements newCapacity = null;
     
     public DefaultAutoScalingSlaEnforcementEndpoint(ProcessingUnit pu) {
         this.pu = (InternalProcessingUnit)pu;
@@ -55,11 +56,6 @@ public class DefaultAutoScalingSlaEnforcementEndpoint implements AutoScalingSlaE
     }
     
     @Override
-    public CapacityRequirements getNewCapacityRequirements() {
-        return newCapacity;
-    }
-    
-    @Override
     public void enforceSla(AutoScalingSlaPolicy sla) throws AutoScalingSlaEnforcementInProgressException {
 
         if (sla == null) {
@@ -67,11 +63,11 @@ public class DefaultAutoScalingSlaEnforcementEndpoint implements AutoScalingSlaE
         }
         
         sla.validate();
-                
-        this.newCapacity = enforceSlaInternal(sla);
+        
+        enforceSlaInternal(sla);
     }
     
-    private CapacityRequirements enforceSlaInternal(AutoScalingSlaPolicy sla) throws AutoScalingSlaEnforcementInProgressException {
+    private void enforceSlaInternal(AutoScalingSlaPolicy sla) throws AutoScalingSlaEnforcementInProgressException {
         
         Map<ProcessingUnitStatisticsId, Object> statistics = pu.getStatistics().getStatistics();
                 
@@ -151,17 +147,13 @@ public class DefaultAutoScalingSlaEnforcementEndpoint implements AutoScalingSlaE
                 if (logger.isDebugEnabled()) {
                     logger.debug("Cannot increase capacity from " + existingCapacity + " to " + newCapacity + " since it breaches maximum of " + maxCapacity +".");
                 }
-                newCapacity = correctedNewCapacity;
             }
             
             if (!newCapacity.greaterThan(existingCapacity)) {
                 throw new IllegalStateException("Expected " + newCapacity + " to be bigger than " + existingCapacity +  " due to the increase by " + minimunHighThresholdBreachedIncrease);
             }
             
-            if (logger.isInfoEnabled()) {
-                logger.info("Increasing capacity from " + existingCapacity + " to " + newCapacity);
-            }
-            return newCapacity;
+            throw new AutoScalingHighThresholdBreachedException(pu, existingCapacity, newCapacity);
         }
         else if (!valuesBelowLowThresholdPerRule.isEmpty()) {
             
@@ -183,14 +175,9 @@ public class DefaultAutoScalingSlaEnforcementEndpoint implements AutoScalingSlaE
                 newCapacity = correctedNewCapacity;
             }
             if (!existingCapacity.equals(newCapacity)) {
-                if (logger.isInfoEnabled()) {
-                    logger.info("Decreasing capacity from " + existingCapacity + " to " + newCapacity);
-                }
-                return newCapacity;
+                throw new AutoScalingLowThresholdBreachedException(pu, existingCapacity, newCapacity);
             }
         }
-
-        return existingCapacity;
     }
 
     private CapacityRequirements getMinimumRuleChange(
