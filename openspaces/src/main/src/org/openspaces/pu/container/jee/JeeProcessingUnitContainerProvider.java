@@ -17,6 +17,7 @@
 package org.openspaces.pu.container.jee;
 
 import org.openspaces.pu.container.DeployableProcessingUnitContainerProvider;
+import org.openspaces.pu.container.ManifestClasspathAwareProcessingUnitContainerProvider;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainerProvider;
 
 /**
@@ -25,7 +26,10 @@ import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainer
  *
  * @author kimchy
  */
-public interface JeeProcessingUnitContainerProvider extends ApplicationContextProcessingUnitContainerProvider, DeployableProcessingUnitContainerProvider {
+public interface JeeProcessingUnitContainerProvider extends 
+    ApplicationContextProcessingUnitContainerProvider, 
+    DeployableProcessingUnitContainerProvider,
+    ManifestClasspathAwareProcessingUnitContainerProvider {
 
     /**
      * The {@link javax.servlet.ServletContext} key under which the {@link org.openspaces.core.cluster.ClusterInfo}

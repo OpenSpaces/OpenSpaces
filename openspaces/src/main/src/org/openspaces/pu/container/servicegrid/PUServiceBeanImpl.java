@@ -83,6 +83,7 @@ import org.openspaces.pu.container.ProcessingUnitContainerProvider;
 import org.openspaces.pu.container.UndeployingEventProcessingUnitContainer;
 import org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainerProvider;
 import org.openspaces.pu.container.jee.context.BootstrapWebApplicationContextListener;
+import org.openspaces.pu.container.jee.jetty.JettyJeeProcessingUnitContainerProvider;
 import org.openspaces.pu.container.servicegrid.jmxs.SecuredPUExtension;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainer;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainerProvider;
@@ -498,6 +499,9 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
         final boolean disableManifestClassPathJars = Boolean.getBoolean("com.gs.pu.manifest.classpath.disable");
         
+        // this is used to inject the manifest jars to the webapp classloader (if exists)
+        List<URL> exportedManifestUrls = new ArrayList<URL>();
+        
         CommonClassLoader commonClassLoader = CommonClassLoader.getInstance();
         // handles class loader libraries
         if (downloadPU) {
@@ -516,7 +520,8 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                 if (manifestFile.isFile()) {
                     try {
                         InputStream manifestStream = new FileInputStream(manifestFile);
-                        addManifestClassPathJars(puName, libUrls, manifestStream);
+                        List<URL> manifestClassPathJars = getManifestClassPathJars(puName, libUrls, manifestStream);
+                        libUrls.addAll(manifestClassPathJars);
                     } catch (IOException e) {
                         if (logger.isWarnEnabled()) {
                             logger.warn(failedReadingManifest(puName), e);
@@ -576,7 +581,6 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             } catch (Exception e) {
                 throw new CannotCreateContainerException("Failed to bootstrap web applciation", e);
             }
-
         } else {
             // add to service class loader
             List<URL> libUrls = new ArrayList<URL>();
@@ -589,7 +593,8 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             if (!disableManifestClassPathJars) {
                 InputStream manifestStream = readManifestFromCodeServer(puName, puPath, codeserver, workLocation);
                 if (manifestStream != null) {
-                    addManifestClassPathJars(puName, libUrls, manifestStream);
+                    List<URL> manifestClassPathJars = getManifestClassPathJars(puName, libUrls, manifestStream);
+                    libUrls.addAll(manifestClassPathJars);
                 }
             }
             
@@ -648,7 +653,10 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         if (factory instanceof ClassLoaderAwareProcessingUnitContainerProvider) {
             ((ClassLoaderAwareProcessingUnitContainerProvider) factory).setClassLoader(contextClassLoader);
         }
-
+        if (factory instanceof JettyJeeProcessingUnitContainerProvider) {
+            ((JettyJeeProcessingUnitContainerProvider) factory).setManifestUrls(exportedManifestUrls);
+        }
+        
         // only load the spring xml file if it is not a web application (if it is a web application, we will load it with the Bootstrap servlet context loader)
         if (webXml == null && factory instanceof ApplicationContextProcessingUnitContainerProvider) {
             if (StringUtils.hasText(springXml)) {
@@ -727,7 +735,8 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         }
     }
 
-    private void addManifestClassPathJars(String puName, List<URL> libUrls, InputStream manifestStream) {
+    private List<URL> getManifestClassPathJars(String puName, List<URL> libUrls, InputStream manifestStream) {
+        List<URL> exportedManifestUrls = new ArrayList<URL>();
         try {
             
             Manifest manifest = new Manifest(manifestStream);
@@ -793,7 +802,9 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                                 " read from MANIFEST.MF to processing unit: " + puName + " classpath");
                     }
                     
-                    libUrls.add(file.toURI().toURL());
+                    URL urlToAdd = file.toURI().toURL();
+                    libUrls.add(urlToAdd);
+                    exportedManifestUrls.add(urlToAdd);
                 }
             }
         } catch (IOException e) {
@@ -809,6 +820,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                 }
             }
         }
+        return exportedManifestUrls;
     }
     
     private static String failedReadingManifest(String puName) {

@@ -54,6 +54,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.BindException;
+import java.net.URL;
 import java.util.*;
 
 /**
@@ -133,6 +134,7 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
 
     private File deployPath;
 
+    private Iterable<URL> manifestURLs;
 
     private static final ThreadLocal<ApplicationContext> currentApplicationContext = new ThreadLocal<ApplicationContext>();
 
@@ -213,6 +215,13 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
         this.classLoader = classLoader;
     }
 
+    /**
+     * Sets jar file urls to be added to the web application class loader
+     */
+    public void setManifestUrls(Iterable<URL> manifestURLs) {
+        this.manifestURLs = manifestURLs;
+    }
+    
     /**
      * Adds a config location using Springs {@link org.springframework.core.io.Resource}
      * abstraction. This config location represents a Spring xml context.
@@ -485,7 +494,12 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
             String gsWebPuCommon = System.getProperty("com.gs.web-pu-common", gsLibOpt + "web-pu-common");
             webAppClassLoader.addJars(new FileResource(new File(gsPuCommon).toURL()));
             webAppClassLoader.addJars(new FileResource(new File(gsWebPuCommon).toURL()));
-
+            if (manifestURLs != null) {
+                for (URL url : manifestURLs) {
+                    webAppClassLoader.addClassPath(new FileResource(url));
+                }
+            }
+            
             webAppContext.setClassLoader(webAppClassLoader);
 
             HandlerContainer container = jettyHolder.getServer();
