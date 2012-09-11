@@ -15,6 +15,12 @@
  *******************************************************************************/
 package org.openspaces.grid.gsm.machines.plugins.events;
 
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+
+import com.gigaspaces.internal.io.IOUtils;
+
 /**
  * @author Itai Frenkel
  * @since 9.1.0
@@ -25,9 +31,15 @@ public class MachineStartedEvent extends AbstractMachineProvisioningEvent {
     
     private String hostAddress;
 
+    /**
+     * Deserialization cotr
+     */
+    public MachineStartedEvent() {
+    }
+    
     public MachineStartedEvent(String hostAddress) {
         setDecisionDescription("New machine was started. Host address " + hostAddress);
-        this.setHostAddress(hostAddress);
+        this.hostAddress = hostAddress;
     }
     
     public String getHostAddress() {
@@ -36,5 +48,17 @@ public class MachineStartedEvent extends AbstractMachineProvisioningEvent {
 
     public void setHostAddress(String hostAddress) {
         this.hostAddress = hostAddress;
+    }
+    
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        super.writeExternal(out);
+        IOUtils.writeString(out, hostAddress);    
+    }
+    
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        super.readExternal(in);
+        hostAddress = IOUtils.readString(in);    
     }
 }
