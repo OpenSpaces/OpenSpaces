@@ -25,6 +25,10 @@ import org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig;
 import org.openspaces.admin.zone.config.ExactZonesConfig;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIsolationAware;
+import org.openspaces.grid.gsm.machines.plugins.events.ElasticGridServiceAgentProvisioningProgressEventListenerAware;
+import org.openspaces.grid.gsm.machines.plugins.events.ElasticMachineProvisioningProgressChangedEventListenerAware;
+import org.openspaces.grid.gsm.machines.plugins.exceptions.ElasticGridServiceAgentProvisioningException;
+import org.openspaces.grid.gsm.machines.plugins.exceptions.ElasticMachineProvisioningException;
 
 /**
  * An Elastic Service Manager plug-in that enables starting, stopping and discovering of virtual machines.
@@ -43,7 +47,10 @@ import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIs
  * @since 8.0
  *
  */
-public interface ElasticMachineProvisioning extends ElasticProcessingUnitMachineIsolationAware {
+public interface ElasticMachineProvisioning extends 
+    ElasticProcessingUnitMachineIsolationAware, 
+    ElasticMachineProvisioningProgressChangedEventListenerAware,
+    ElasticGridServiceAgentProvisioningProgressEventListenerAware {
 
     /**
      * @return true if this object supports starting and stopping of machines. 
@@ -62,7 +69,7 @@ public interface ElasticMachineProvisioning extends ElasticProcessingUnitMachine
      * 
      * @since 8.0.1
      */
-    GridServiceAgent[] getDiscoveredMachines(long duration, TimeUnit unit) throws ElasticMachineProvisioningException, InterruptedException, TimeoutException;
+    GridServiceAgent[] getDiscoveredMachines(long duration, TimeUnit unit) throws ElasticMachineProvisioningException, ElasticGridServiceAgentProvisioningException, InterruptedException, TimeoutException;
 
 	/**
 	 * Starts a new machine with a new grid service agent and injects specific zones into it.
@@ -81,7 +88,7 @@ public interface ElasticMachineProvisioning extends ElasticProcessingUnitMachine
 	 * @since 8.0
 	 */
 	GridServiceAgent startMachine(ExactZonesConfig zones, long duration,  TimeUnit unit)
-	throws ElasticMachineProvisioningException, InterruptedException , TimeoutException ;
+	throws ElasticMachineProvisioningException, ElasticGridServiceAgentProvisioningException, InterruptedException , TimeoutException ;
 
 	 /**
      * Starts a new machine with a new grid service agent without specifying zones. the GSA will be assigned only the default zones.
@@ -100,7 +107,7 @@ public interface ElasticMachineProvisioning extends ElasticProcessingUnitMachine
      */
 	@Deprecated
 	GridServiceAgent startMachine(long duration,  TimeUnit unit)
-	throws ElasticMachineProvisioningException, InterruptedException , TimeoutException ;
+	throws ElasticMachineProvisioningException, ElasticGridServiceAgentProvisioningException, InterruptedException , TimeoutException ;
 	
 	/**
 	 * @return the capacity requirements that represent a single machine 
@@ -128,7 +135,7 @@ public interface ElasticMachineProvisioning extends ElasticProcessingUnitMachine
 	 * 
 	 * @since 8.0
 	 */
-	boolean stopMachine(GridServiceAgent agent, long duration, TimeUnit unit) throws ElasticMachineProvisioningException, InterruptedException, TimeoutException;
+	boolean stopMachine(GridServiceAgent agent, long duration, TimeUnit unit) throws ElasticMachineProvisioningException, ElasticGridServiceAgentProvisioningException, InterruptedException, TimeoutException;
 	
 	
     /**
@@ -136,6 +143,4 @@ public interface ElasticMachineProvisioning extends ElasticProcessingUnitMachine
      * @since 8.0.1
      */
     ElasticMachineProvisioningConfig getConfig();
-    
-	
 }

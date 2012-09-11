@@ -17,7 +17,7 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.machines.exceptions;
 
-import org.openspaces.grid.gsm.machines.plugins.ElasticMachineProvisioningException;
+import org.openspaces.grid.gsm.machines.plugins.exceptions.ElasticMachineProvisioningException;
 
 public class NoClassDefFoundElasticMachineProvisioningException extends ElasticMachineProvisioningException {
 

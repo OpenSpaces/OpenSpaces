@@ -22,19 +22,14 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
 import com.gigaspaces.internal.io.IOUtils;
-import com.gigaspaces.internal.version.PlatformLogicalVersion;
-import com.gigaspaces.lrmi.LRMIInvocationContext;
 
-public abstract class AbstractElasticProcessingUnitProgressChangedEvent implements InternalElasticProcessingUnitDecisionEvent {
+public abstract class AbstractElasticProcessingUnitProgressChangedEvent implements InternalElasticProcessingUnitProgressChangedEvent {
     
     private static final long serialVersionUID = -3682386855602620479L;
     
     private boolean isComplete;
     private String processingUnitName;
     private boolean isUndeploying;
-    
-    //@since 9.0.1
-    private String message;
     
     /**
      * de-serialization/reflection constructor
@@ -60,9 +55,6 @@ public abstract class AbstractElasticProcessingUnitProgressChangedEvent implemen
         out.writeBoolean(isComplete);
         out.writeBoolean(isUndeploying);
         IOUtils.writeString(out, processingUnitName);
-        if (LRMIInvocationContext.getEndpointLogicalVersion().greaterOrEquals(PlatformLogicalVersion.v9_1_0)) {
-            IOUtils.writeString(out, message);    
-        }
     }
 
     @Override
@@ -75,9 +67,6 @@ public abstract class AbstractElasticProcessingUnitProgressChangedEvent implemen
         isComplete = in.readBoolean();
         isUndeploying = in.readBoolean();
         processingUnitName = IOUtils.readString(in);
-        if (LRMIInvocationContext.getEndpointLogicalVersion().greaterOrEquals(PlatformLogicalVersion.v9_1_0)) {
-            message = IOUtils.readString(in);    
-        }
     }
 
     @Override
@@ -95,13 +84,4 @@ public abstract class AbstractElasticProcessingUnitProgressChangedEvent implemen
         this.processingUnitName = processingUnitName;
     }
 
-    @Override
-    public void setDecisionDescription(String description) {
-        this.message = description;
-    }
-    
-    @Override
-    public String getDecisionDescription() {
-        return message;
-    }
 }

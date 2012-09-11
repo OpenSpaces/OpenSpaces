@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
-import org.openspaces.admin.internal.pu.elastic.events.AbstractElasticProcessingUnitProgressChangedEvent;
+import org.openspaces.admin.internal.pu.elastic.events.AbstractElasticProcessingUnitDecisionEvent;
 import org.openspaces.admin.pu.ProcessingUnit;
 
 /**
@@ -27,8 +27,8 @@ import org.openspaces.admin.pu.ProcessingUnit;
  * @since 9.1.0
  */
 public class ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent 
-    extends AbstractElasticProcessingUnitProgressChangedEvent
-    implements ElasticAutoScalingProgressChangedEvent {
+    extends AbstractElasticProcessingUnitDecisionEvent
+    implements ElasticAutoScalingProgressChangedEvent , ElasticProcessingUnitDecisionEvent{
 
     private static final long serialVersionUID = 1L;
     private int beforePlannedNumberOfInstances;

@@ -25,7 +25,9 @@ import java.util.concurrent.TimeoutException;
 
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.gsa.GridServiceAgent;
+import org.openspaces.admin.gsa.events.ElasticGridServiceAgentProvisioningProgressChangedEventListener;
 import org.openspaces.admin.internal.pu.elastic.ProcessingUnitSchemaConfig;
+import org.openspaces.admin.machine.events.ElasticMachineProvisioningProgressChangedEventListener;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig;
 import org.openspaces.admin.pu.elastic.config.DiscoveredMachineProvisioningConfig;
@@ -119,5 +121,17 @@ public class DiscoveredMachineProvisioningBean implements NonBlockingElasticMach
     public FutureGridServiceAgent[] startMachinesAsync(CapacityRequirements capacityRequirements, ExactZonesConfig zones,
             long duration, TimeUnit unit) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setElasticMachineProvisioningProgressChangedEventListener(
+            ElasticMachineProvisioningProgressChangedEventListener machineEventListener) {
+      //not used
+    }
+
+    @Override
+    public void setElasticGridServiceAgentProvisioningProgressEventListener(
+            ElasticGridServiceAgentProvisioningProgressChangedEventListener agentEventListener) {
+        //not used
     }
 }

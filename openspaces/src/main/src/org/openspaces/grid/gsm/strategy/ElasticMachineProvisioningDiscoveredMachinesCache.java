@@ -37,8 +37,9 @@ import org.openspaces.grid.gsm.machines.FutureGridServiceAgents;
 import org.openspaces.grid.gsm.machines.MachinesSlaUtils;
 import org.openspaces.grid.gsm.machines.exceptions.FailedToDiscoverMachinesException;
 import org.openspaces.grid.gsm.machines.exceptions.WaitingForDiscoveredMachinesException;
-import org.openspaces.grid.gsm.machines.plugins.ElasticMachineProvisioningException;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
+import org.openspaces.grid.gsm.machines.plugins.exceptions.ElasticGridServiceAgentProvisioningException;
+import org.openspaces.grid.gsm.machines.plugins.exceptions.ElasticMachineProvisioningException;
 
 
 public class ElasticMachineProvisioningDiscoveredMachinesCache implements 
@@ -131,19 +132,15 @@ public class ElasticMachineProvisioningDiscoveredMachinesCache implements
                 throw (Error)cause;
             }
             
-            if (cause instanceof ElasticMachineProvisioningException) {
+            if (cause instanceof ElasticMachineProvisioningException || 
+                cause instanceof ElasticGridServiceAgentProvisioningException || 
+                cause instanceof AdminException ) {
                 if (!quiteMode) {
                     throw new FailedToDiscoverMachinesException(pu, e);
                 }
                 logger.info("Failed to discover machines",e);
             }
             
-            else if (cause instanceof AdminException) {
-                if (!quiteMode) {
-                    throw new FailedToDiscoverMachinesException(pu, e);
-                }
-                logger.info("Failed to discover machines",e);
-            }
             else {
                 throw new IllegalStateException("Unexpected exception type",e);
             }

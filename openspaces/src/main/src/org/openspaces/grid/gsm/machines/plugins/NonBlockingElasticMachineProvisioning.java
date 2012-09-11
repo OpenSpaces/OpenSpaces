@@ -27,6 +27,9 @@ import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.machines.FutureGridServiceAgent;
 import org.openspaces.grid.gsm.machines.FutureGridServiceAgents;
 import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIsolationAware;
+import org.openspaces.grid.gsm.machines.plugins.events.ElasticGridServiceAgentProvisioningProgressEventListenerAware;
+import org.openspaces.grid.gsm.machines.plugins.events.ElasticMachineProvisioningProgressChangedEventListenerAware;
+import org.openspaces.grid.gsm.machines.plugins.exceptions.ElasticMachineProvisioningException;
 
 /**
  * An Elastic Service Manager plug-in that enables starting, stopping and discovering of virtual machines.
@@ -42,7 +45,10 @@ import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIs
  *
  * @since 8.0
  */
-public interface NonBlockingElasticMachineProvisioning extends ElasticProcessingUnitMachineIsolationAware {
+public interface NonBlockingElasticMachineProvisioning 
+    extends ElasticProcessingUnitMachineIsolationAware,
+            ElasticMachineProvisioningProgressChangedEventListenerAware,
+            ElasticGridServiceAgentProvisioningProgressEventListenerAware {
 
     /**
      * @return true if this object supports starting and stopping of machines. 

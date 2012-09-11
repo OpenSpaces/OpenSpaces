@@ -51,6 +51,7 @@ import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementState.StateKey;
 import org.openspaces.grid.gsm.machines.exceptions.CannotDetermineIfNeedToStartMoreMachinesException;
 import org.openspaces.grid.gsm.machines.exceptions.DelayingScaleInUntilAllMachinesHaveStartedException;
 import org.openspaces.grid.gsm.machines.exceptions.FailedToDiscoverMachinesException;
+import org.openspaces.grid.gsm.machines.exceptions.FailedToStartNewGridServiceAgentException;
 import org.openspaces.grid.gsm.machines.exceptions.FailedToStartNewMachineException;
 import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcementPendingContainerDeallocationException;
@@ -63,8 +64,9 @@ import org.openspaces.grid.gsm.machines.exceptions.StartedTooManyMachinesExcepti
 import org.openspaces.grid.gsm.machines.exceptions.UndeployInProgressException;
 import org.openspaces.grid.gsm.machines.exceptions.UnexpectedShutdownOfNewGridServiceAgentException;
 import org.openspaces.grid.gsm.machines.exceptions.WaitingForDiscoveredMachinesException;
-import org.openspaces.grid.gsm.machines.plugins.ElasticMachineProvisioningException;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
+import org.openspaces.grid.gsm.machines.plugins.exceptions.ElasticGridServiceAgentProvisioningException;
+import org.openspaces.grid.gsm.machines.plugins.exceptions.ElasticMachineProvisioningException;
 
 /**
  * This class tracks started and shutdown machines while the operating is in progress. 
@@ -952,13 +954,14 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
      * @throws InconsistentMachineProvisioningException 
      * @throws UnexpectedShutdownOfNewGridServiceAgentException 
      * @throws MachinesSlaEnforcementInProgressException 
+     * @throws FailedToStartNewGridServiceAgentException 
      * @throws FailedMachineProvisioningException 
      */
     private void validateHealthyAgent(
             AbstractMachinesSlaPolicy sla, 
             Collection<GridServiceAgent> discoveredAgents, 
             FutureGridServiceAgent futureAgent) 
-                    throws UnexpectedShutdownOfNewGridServiceAgentException, InconsistentMachineProvisioningException, MachinesSlaEnforcementInProgressException  {
+                    throws UnexpectedShutdownOfNewGridServiceAgentException, InconsistentMachineProvisioningException, MachinesSlaEnforcementInProgressException, FailedToStartNewGridServiceAgentException  {
 
         final NonBlockingElasticMachineProvisioning machineProvisioning = sla.getMachineProvisioning();
         final Collection<String> usedAgentUids = state.getAllUsedAgentUids();
@@ -972,7 +975,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             } catch (ExecutionException e) {
                 // if runtime or error propagate exception "as-is"
                 Throwable cause = e.getCause();
-                if (cause instanceof TimeoutException || cause instanceof ElasticMachineProvisioningException || cause instanceof InterruptedException) {
+                if (cause instanceof TimeoutException || cause instanceof ElasticMachineProvisioningException || cause instanceof ElasticGridServiceAgentProvisioningException || cause instanceof InterruptedException) {
                     // expected exception
                     exception = e;
                 }
@@ -986,6 +989,9 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             
             if (exception != null) {
                 String[] affectedPUs = state.getProcessingUnitsOfFutureMachine(pu, futureAgent);
+                if (exception instanceof ElasticGridServiceAgentProvisioningException) {
+                    throw new FailedToStartNewGridServiceAgentException(affectedPUs, exception);
+                }
                 throw new FailedToStartNewMachineException(affectedPUs, exception);
             }
         }

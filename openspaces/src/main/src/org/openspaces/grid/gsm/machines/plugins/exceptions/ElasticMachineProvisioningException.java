@@ -15,11 +15,12 @@
  * limitations under the License.
  *  
  ******************************************************************************/
-package org.openspaces.grid.gsm.machines.plugins;
+package org.openspaces.grid.gsm.machines.plugins.exceptions;
 
 
 /**
- * An abstraction for any runtime exception that could be raised by an elastic machine provisioning implementation.
+ * An abstraction for any runtime exception that could be raised by an elastic machine provisioning implementation,
+ * that is not related to the GSA, but to the VM (IaaS)
  * @author itaif
  *
  */

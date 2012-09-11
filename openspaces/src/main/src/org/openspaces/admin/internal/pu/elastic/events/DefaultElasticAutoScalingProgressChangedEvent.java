@@ -26,7 +26,7 @@ import org.openspaces.admin.pu.elastic.events.ElasticAutoScalingProgressChangedE
  * @since 9.0.0
  */
 public class DefaultElasticAutoScalingProgressChangedEvent 
-        extends AbstractElasticProcessingUnitProgressChangedEvent 
+        extends AbstractElasticProcessingUnitDecisionEvent 
         implements ElasticAutoScalingProgressChangedEvent {
 
    private static final long serialVersionUID = 1L;

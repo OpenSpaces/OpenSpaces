@@ -28,6 +28,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.gsa.GridServiceAgent;
+import org.openspaces.admin.gsa.events.ElasticGridServiceAgentProvisioningProgressChangedEventListener;
+import org.openspaces.admin.machine.events.ElasticMachineProvisioningProgressChangedEventListener;
 import org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig;
 import org.openspaces.admin.zone.config.ExactZonesConfig;
 import org.openspaces.grid.gsm.capacity.CapacityRequirement;
@@ -37,6 +39,8 @@ import org.openspaces.grid.gsm.machines.FutureGridServiceAgent;
 import org.openspaces.grid.gsm.machines.FutureGridServiceAgents;
 import org.openspaces.grid.gsm.machines.exceptions.NoClassDefFoundElasticMachineProvisioningException;
 import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIsolation;
+import org.openspaces.grid.gsm.machines.plugins.exceptions.ElasticGridServiceAgentProvisioningException;
+import org.openspaces.grid.gsm.machines.plugins.exceptions.ElasticMachineProvisioningException;
 
 /**
  * An adapter that wraps an {@link ElasticMachineProvisioning} and exposes a {@link NonBlockingElasticMachineProvisioning}
@@ -95,6 +99,8 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
                         ref.set(agent);
                         logger.info("New machine started");
                     } catch (ElasticMachineProvisioningException e) {
+                        ref.set(e);
+                    } catch (ElasticGridServiceAgentProvisioningException e) {
                         ref.set(e);
                     } catch (InterruptedException e) {
                         ref.set(e);
@@ -193,6 +199,8 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
 					}
 				} catch (ElasticMachineProvisioningException e) {
 					logger.warn("Error while stopping " + hostAddress,e);
+				} catch (ElasticGridServiceAgentProvisioningException e) {
+                    logger.warn("Error while stopping " + hostAddress,e);
 				} catch (InterruptedException e) {
 					logger.info("Interrupted while stopping " + hostAddress,e);
 				} catch (TimeoutException e) {
@@ -227,6 +235,8 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
                     GridServiceAgent[] agents = machineProvisioning.getDiscoveredMachines(duration, unit);
                     ref.set(agents);
                 } catch (ElasticMachineProvisioningException e) {
+                    ref.set(e);
+                } catch (ElasticGridServiceAgentProvisioningException e) {
                     ref.set(e);
                 } catch (InterruptedException e) {
                     ref.set(e);
@@ -338,6 +348,18 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
     @Override
     public void setElasticProcessingUnitMachineIsolation(ElasticProcessingUnitMachineIsolation isolation) {
         machineProvisioning.setElasticProcessingUnitMachineIsolation(isolation);
+    }
+
+    @Override
+    public void setElasticMachineProvisioningProgressChangedEventListener(
+            ElasticMachineProvisioningProgressChangedEventListener machineEventListener) {
+        machineProvisioning.setElasticMachineProvisioningProgressChangedEventListener(machineEventListener);
+    }
+
+    @Override
+    public void setElasticGridServiceAgentProvisioningProgressEventListener(
+            ElasticGridServiceAgentProvisioningProgressChangedEventListener agentEventListener) {
+        machineProvisioning.setElasticGridServiceAgentProvisioningProgressEventListener(agentEventListener);
     }
     
 }
