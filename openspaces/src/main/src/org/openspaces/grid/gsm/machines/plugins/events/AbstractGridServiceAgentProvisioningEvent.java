@@ -15,10 +15,14 @@
  *******************************************************************************/
 package org.openspaces.grid.gsm.machines.plugins.events;
 
+import org.openspaces.admin.gsa.events.ElasticGridServiceAgentProvisioningProgressChangedEvent;
+import org.openspaces.admin.internal.pu.elastic.events.AbstractElasticProcessingUnitDecisionEvent;
+
 /**
  * @author Itai Frenkel
- *
+ * @since 9.1.0
  */
-public class AbstractGridServiceAgentProvisioningEvent {
-
+public class AbstractGridServiceAgentProvisioningEvent extends AbstractElasticProcessingUnitDecisionEvent implements ElasticGridServiceAgentProvisioningProgressChangedEvent {
+    
+    private static final long serialVersionUID = 1L;
 }
