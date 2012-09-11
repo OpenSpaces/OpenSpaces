@@ -500,7 +500,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         final boolean disableManifestClassPathJars = Boolean.getBoolean("com.gs.pu.manifest.classpath.disable");
         
         // this is used to inject the manifest jars to the webapp classloader (if exists)
-        List<URL> exportedManifestUrls = new ArrayList<URL>();
+        List<URL> manifestClassPathJars = new ArrayList<URL>();
         
         CommonClassLoader commonClassLoader = CommonClassLoader.getInstance();
         // handles class loader libraries
@@ -520,7 +520,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                 if (manifestFile.isFile()) {
                     try {
                         InputStream manifestStream = new FileInputStream(manifestFile);
-                        List<URL> manifestClassPathJars = getManifestClassPathJars(puName, libUrls, manifestStream);
+                        manifestClassPathJars = getManifestClassPathJars(puName, libUrls, manifestStream);
                         libUrls.addAll(manifestClassPathJars);
                     } catch (IOException e) {
                         if (logger.isWarnEnabled()) {
@@ -593,7 +593,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             if (!disableManifestClassPathJars) {
                 InputStream manifestStream = readManifestFromCodeServer(puName, puPath, codeserver, workLocation);
                 if (manifestStream != null) {
-                    List<URL> manifestClassPathJars = getManifestClassPathJars(puName, libUrls, manifestStream);
+                    manifestClassPathJars = getManifestClassPathJars(puName, libUrls, manifestStream);
                     libUrls.addAll(manifestClassPathJars);
                 }
             }
@@ -654,7 +654,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             ((ClassLoaderAwareProcessingUnitContainerProvider) factory).setClassLoader(contextClassLoader);
         }
         if (factory instanceof JettyJeeProcessingUnitContainerProvider) {
-            ((JettyJeeProcessingUnitContainerProvider) factory).setManifestUrls(exportedManifestUrls);
+            ((JettyJeeProcessingUnitContainerProvider) factory).setManifestUrls(manifestClassPathJars);
         }
         
         // only load the spring xml file if it is not a web application (if it is a web application, we will load it with the Bootstrap servlet context loader)
