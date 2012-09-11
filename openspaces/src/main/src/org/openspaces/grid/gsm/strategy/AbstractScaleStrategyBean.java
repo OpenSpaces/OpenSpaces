@@ -28,6 +28,8 @@ import org.apache.commons.logging.LogFactory;
 import org.jini.rio.monitor.event.EventsStore;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.bean.BeanConfigurationException;
+import org.openspaces.admin.gsa.events.ElasticGridServiceAgentProvisioningProgressChangedEvent;
+import org.openspaces.admin.gsa.events.ElasticGridServiceAgentProvisioningProgressChangedEventListener;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.gsa.events.DefaultElasticGridServiceAgentProvisioningProgressChangedEvent;
 import org.openspaces.admin.internal.gsc.events.DefaultElasticGridServiceContainerProvisioningProgressChangedEvent;
@@ -37,6 +39,9 @@ import org.openspaces.admin.internal.pu.elastic.ProcessingUnitSchemaConfig;
 import org.openspaces.admin.internal.pu.elastic.ScaleStrategyConfigUtils;
 import org.openspaces.admin.internal.pu.elastic.events.DefaultElasticAutoScalingProgressChangedEvent;
 import org.openspaces.admin.internal.pu.elastic.events.DefaultElasticProcessingUnitInstanceProvisioningProgressChangedEvent;
+import org.openspaces.admin.internal.pu.elastic.events.InternalElasticProcessingUnitProgressChangedEvent;
+import org.openspaces.admin.machine.events.ElasticMachineProvisioningProgressChangedEvent;
+import org.openspaces.admin.machine.events.ElasticMachineProvisioningProgressChangedEventListener;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
 import org.openspaces.core.bean.Bean;
@@ -224,6 +229,33 @@ public abstract class AbstractScaleStrategyBean implements
         // InternalAdmin#assertStateChangesPermitted() validates just that
         validateCorrectThread();
         
+        ElasticGridServiceAgentProvisioningProgressChangedEventListener agentEventListener = new ElasticGridServiceAgentProvisioningProgressChangedEventListener() {
+            
+            @Override
+            public void elasticGridServiceAgentProvisioningProgressChanged(
+                    ElasticGridServiceAgentProvisioningProgressChangedEvent event) {
+                if (!(event instanceof InternalElasticProcessingUnitProgressChangedEvent)) {
+                    throw new IllegalArgumentException("event must implement " + InternalElasticProcessingUnitProgressChangedEvent.class.getName());
+                }
+                injectEventContext((InternalElasticProcessingUnitProgressChangedEvent) event);
+                agentProvisioningEventState.enqueuProvisioningInProgressEvent((InternalElasticProcessingUnitProgressChangedEvent) event);
+            }
+        };
+        machineProvisioning.setElasticGridServiceAgentProvisioningProgressEventListener(agentEventListener);
+        
+        ElasticMachineProvisioningProgressChangedEventListener machineEventListener = new ElasticMachineProvisioningProgressChangedEventListener() {
+            
+            @Override
+            public void elasticMachineProvisioningProgressChanged(ElasticMachineProvisioningProgressChangedEvent event) {
+                if (!(event instanceof InternalElasticProcessingUnitProgressChangedEvent)) {
+                    throw new IllegalArgumentException("event must implement " + InternalElasticProcessingUnitProgressChangedEvent.class.getName());
+                }
+                injectEventContext((InternalElasticProcessingUnitProgressChangedEvent) event);
+                machineProvisioningEventState.enqueuProvisioningInProgressEvent((InternalElasticProcessingUnitProgressChangedEvent) event);
+            }
+        };
+        machineProvisioning.setElasticMachineProvisioningProgressChangedEventListener(machineEventListener);
+        
         scheduledTask = 
             admin.scheduleWithFixedDelayNonBlockingStateChange(
                     this, 
@@ -234,6 +266,12 @@ public abstract class AbstractScaleStrategyBean implements
         logger.debug(pu.getName() + " is being monitored for SLA violations every " + getPollingIntervalSeconds() + " seconds");
     }
 
+    private void injectEventContext(InternalElasticProcessingUnitProgressChangedEvent event) {
+        event.setProcessingUnitName(pu.getName());
+        event.setComplete(false);
+        event.setUndeploying(AbstractScaleStrategyBean.this.isUndeploying());  
+    }
+    
     @Override
     public void destroy() {
         
