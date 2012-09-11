@@ -17,11 +17,21 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.sla.exceptions;
 
+import org.openspaces.admin.internal.pu.elastic.events.InternalElasticProcessingUnitFailureEvent;
+
 /**
  * An exception decoration that indicates it should be reported as a failure
  * @author itaif
  * @since 8.0.6
  */
-public interface SlaEnforcementFailure extends SlaEnforcementDecision {
-
+public interface SlaEnforcementFailure {
+ 
+    public String[] getAffectedProcessingUnits();
+    
+    /**
+     * Must implement the equals method since it is used to filter failure events
+     */
+    public boolean equals(Object other);
+    
+    InternalElasticProcessingUnitFailureEvent toEvent();
 }

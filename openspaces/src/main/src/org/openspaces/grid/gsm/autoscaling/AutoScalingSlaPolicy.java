@@ -38,6 +38,7 @@ public class AutoScalingSlaPolicy extends ServiceLevelAgreementPolicy {
     private CapacityRequirements maxCapacity;
     private CapacityRequirements minCapacity;
     private ZonesConfig zonesConfig;
+    private long containerMemoryCapacityInMB;
     
     /**
      * @return the zonesConfig
@@ -121,16 +122,22 @@ public class AutoScalingSlaPolicy extends ServiceLevelAgreementPolicy {
         }
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
-    @Override
-    public String toString() {
-        return "AutoScalingSlaPolicy [capacityRequirements=" + capacityRequirements + ", rules="
-                + Arrays.toString(rules) + ", maxCapacity=" + maxCapacity + ", minCapacity=" + minCapacity
-                + ", zonesConfig=" + zonesConfig + "]";
+    public long getContainerMemoryCapacityInMB() {
+        return containerMemoryCapacityInMB;
     }
 
+    public void setContainerMemoryCapacityInMB(long containerMemoryCapacityInMB) {
+        this.containerMemoryCapacityInMB = containerMemoryCapacityInMB;
+    }
 
-
+    @Override
+    public String toString() {
+        return "AutoScalingSlaPolicy ["
+                + (capacityRequirements != null ? "capacityRequirements=" + capacityRequirements + ", " : "")
+                + (rules != null ? "rules=" + Arrays.toString(rules) + ", " : "")
+                + (maxCapacity != null ? "maxCapacity=" + maxCapacity + ", " : "")
+                + (minCapacity != null ? "minCapacity=" + minCapacity + ", " : "")
+                + (zonesConfig != null ? "zonesConfig=" + zonesConfig + ", " : "") + "containerMemoryCapacityInMB="
+                + containerMemoryCapacityInMB + "]";
+    }
 }

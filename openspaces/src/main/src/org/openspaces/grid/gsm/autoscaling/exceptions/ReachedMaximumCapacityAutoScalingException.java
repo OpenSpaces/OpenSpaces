@@ -15,7 +15,12 @@
  *******************************************************************************/
 package org.openspaces.grid.gsm.autoscaling.exceptions;
 
+import org.openspaces.admin.internal.pu.elastic.events.DefaultElasticAutoScalingFailureEvent;
+import org.openspaces.admin.internal.pu.elastic.events.InternalElasticProcessingUnitFailureEvent;
 import org.openspaces.admin.pu.ProcessingUnit;
+import org.openspaces.admin.pu.ProcessingUnitType;
+import org.openspaces.admin.pu.elastic.config.CapacityRequirementsConfig;
+import org.openspaces.admin.pu.elastic.events.ElasticStatelessReachedMaximumNumberOfInstancesEvent;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
 
@@ -31,20 +36,25 @@ public class ReachedMaximumCapacityAutoScalingException
     private static final long serialVersionUID = 1L;
     
     private final CapacityRequirements existingCapacity;
-    private final CapacityRequirements newCapacity;
+    private final CapacityRequirements requestedCapacity;
     private final CapacityRequirements maxCapacity;
+    private final ProcessingUnit pu;
+    private final long containerCapacityInMB;
 
     public ReachedMaximumCapacityAutoScalingException(
             ProcessingUnit pu,
             CapacityRequirements existingCapacity, 
             CapacityRequirements newCapacity, 
-            CapacityRequirements maxCapacity) {
+            CapacityRequirements maxCapacity,
+            long containerCapacityInMB) {
     
         super(pu, "Cannot increase capacity from " + existingCapacity + " to " + newCapacity
                 + " since it breaches maximum capacity " + maxCapacity);
         this.existingCapacity = existingCapacity;
-        this.newCapacity = newCapacity;
+        this.requestedCapacity = newCapacity;
         this.maxCapacity = maxCapacity;
+        this.pu = pu;
+        this.containerCapacityInMB = containerCapacityInMB;
     }
 
     @Override
@@ -53,7 +63,7 @@ public class ReachedMaximumCapacityAutoScalingException
         int result = super.hashCode();
         result = prime * result + ((existingCapacity == null) ? 0 : existingCapacity.hashCode());
         result = prime * result + ((maxCapacity == null) ? 0 : maxCapacity.hashCode());
-        result = prime * result + ((newCapacity == null) ? 0 : newCapacity.hashCode());
+        result = prime * result + ((requestedCapacity == null) ? 0 : requestedCapacity.hashCode());
         return result;
     }
 
@@ -76,11 +86,26 @@ public class ReachedMaximumCapacityAutoScalingException
                 return false;
         } else if (!maxCapacity.equals(other.maxCapacity))
             return false;
-        if (newCapacity == null) {
-            if (other.newCapacity != null)
+        if (requestedCapacity == null) {
+            if (other.requestedCapacity != null)
                 return false;
-        } else if (!newCapacity.equals(other.newCapacity))
+        } else if (!requestedCapacity.equals(other.requestedCapacity))
             return false;
         return true;
+    }
+    
+    @Override
+    public InternalElasticProcessingUnitFailureEvent toEvent() {
+        if (pu.getType().equals(ProcessingUnitType.STATEFUL)) {
+            DefaultElasticAutoScalingFailureEvent event = new DefaultElasticAutoScalingFailureEvent(); 
+            event.setFailureDescription(getMessage());
+            event.setProcessingUnitNames(getAffectedProcessingUnits());
+            return event;
+        }
+
+        int existingNumberOfInstances = (int) Math.ceil((new CapacityRequirementsConfig(existingCapacity).getMemoryCapacityInMB() * 1.0 / containerCapacityInMB));
+        int requestedNumberOfInstances = (int) Math.ceil((new CapacityRequirementsConfig(requestedCapacity).getMemoryCapacityInMB() * 1.0 / containerCapacityInMB));
+        int maximumNumberOfInstances =  (int) Math.ceil((new CapacityRequirementsConfig(maxCapacity).getMemoryCapacityInMB() * 1.0 / containerCapacityInMB));
+        return new ElasticStatelessReachedMaximumNumberOfInstancesEvent(pu, existingNumberOfInstances ,requestedNumberOfInstances, maximumNumberOfInstances);
     }
 }

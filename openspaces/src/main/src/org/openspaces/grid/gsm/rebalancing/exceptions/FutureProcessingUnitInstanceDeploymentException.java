@@ -17,6 +17,8 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.rebalancing.exceptions;
 
+import org.openspaces.admin.internal.pu.elastic.events.DefaultElasticProcessingUnitInstanceProvisioningFailureEvent;
+import org.openspaces.admin.internal.pu.elastic.events.InternalElasticProcessingUnitFailureEvent;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
 
@@ -25,6 +27,19 @@ public class FutureProcessingUnitInstanceDeploymentException extends Rebalancing
     private static final long serialVersionUID = 1L;
     
     public FutureProcessingUnitInstanceDeploymentException(ProcessingUnit pu, Throwable cause) {
-        super(pu, cause);
+        super(pu, message(pu, cause), cause);
+    }
+
+    private static String message(ProcessingUnit pu, Throwable cause) {
+        String causeMessage = (cause != null && cause.getMessage()!=null) ? cause.getMessage() : "";
+        return pu.getName() + " instance deployment failed." + causeMessage;
+    }
+    
+    @Override
+    public InternalElasticProcessingUnitFailureEvent toEvent() {
+        DefaultElasticProcessingUnitInstanceProvisioningFailureEvent event = new DefaultElasticProcessingUnitInstanceProvisioningFailureEvent(); 
+        event.setFailureDescription(getMessage());
+        event.setProcessingUnitNames(getAffectedProcessingUnits());
+        return event;
     }
 }

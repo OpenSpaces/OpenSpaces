@@ -21,6 +21,8 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.openspaces.admin.gsa.GridServiceAgent;
+import org.openspaces.admin.internal.machine.events.DefaultElasticMachineProvisioningFailureEvent;
+import org.openspaces.admin.internal.pu.elastic.events.InternalElasticProcessingUnitFailureEvent;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.machines.MachinesSlaUtils;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
@@ -67,5 +69,11 @@ public class StartedTooManyMachinesException extends MachinesSlaEnforcementInPro
         return true;
     }
     
-    
+    @Override
+    public InternalElasticProcessingUnitFailureEvent toEvent() {
+        DefaultElasticMachineProvisioningFailureEvent event = new DefaultElasticMachineProvisioningFailureEvent(); 
+        event.setFailureDescription(getMessage());
+        event.setProcessingUnitNames(getAffectedProcessingUnits());
+        return event;
+    }
 }

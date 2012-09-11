@@ -17,6 +17,8 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.machines.exceptions;
 
+import org.openspaces.admin.internal.machine.events.DefaultElasticMachineProvisioningFailureEvent;
+import org.openspaces.admin.internal.pu.elastic.events.InternalElasticProcessingUnitFailureEvent;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
 
@@ -27,4 +29,13 @@ public class FailedToDiscoverMachinesException extends MachinesSlaEnforcementInP
     public FailedToDiscoverMachinesException(ProcessingUnit pu, Exception cause) {
         super(new String[] { pu.getName() }, "Machine provisioning failed to discover existing agents. Cause:" + cause.getMessage(), cause);
     }
+
+    @Override
+    public InternalElasticProcessingUnitFailureEvent toEvent() {
+        DefaultElasticMachineProvisioningFailureEvent event = new DefaultElasticMachineProvisioningFailureEvent(); 
+        event.setFailureDescription(getMessage());
+        event.setProcessingUnitNames(getAffectedProcessingUnits());
+        return event;
+    }
+    
 }

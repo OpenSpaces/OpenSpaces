@@ -15,6 +15,9 @@
  *******************************************************************************/
 package org.openspaces.grid.gsm.sla.exceptions;
 
+import org.openspaces.admin.internal.gsa.events.DefaultElasticGridServiceAgentProvisioningFailureEvent;
+import org.openspaces.admin.internal.pu.elastic.events.InternalElasticProcessingUnitFailureEvent;
+
 
 /**
  * @author itaif
@@ -30,5 +33,13 @@ public class WrongNumberOfESMComponentsException extends SlaEnforcementInProgres
     
     private static String message(int numberOfEsms) {
         return "Number of ESMs must be 1. Currently " + numberOfEsms + " running.";
+    }
+    
+    @Override
+    public InternalElasticProcessingUnitFailureEvent toEvent() {
+        DefaultElasticGridServiceAgentProvisioningFailureEvent event = new DefaultElasticGridServiceAgentProvisioningFailureEvent(); 
+        event.setFailureDescription(getMessage());
+        event.setProcessingUnitNames(getAffectedProcessingUnits());
+        return event;
     }
 }

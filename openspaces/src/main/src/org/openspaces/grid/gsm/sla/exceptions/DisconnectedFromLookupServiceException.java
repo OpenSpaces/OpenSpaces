@@ -19,6 +19,9 @@ import java.util.Arrays;
 
 import net.jini.core.discovery.LookupLocator;
 
+import org.openspaces.admin.internal.gsa.events.DefaultElasticGridServiceAgentProvisioningFailureEvent;
+import org.openspaces.admin.internal.pu.elastic.events.InternalElasticProcessingUnitFailureEvent;
+
 
 /**
  * @author itaif
@@ -46,5 +49,13 @@ public class DisconnectedFromLookupServiceException extends SlaEnforcementInProg
             locatorsToString[i]=locators[i].getHost() + ":" + locators[i].getPort();
         }
         return toString(locatorsToString);
+    }
+    
+    @Override
+    public InternalElasticProcessingUnitFailureEvent toEvent() {
+        DefaultElasticGridServiceAgentProvisioningFailureEvent event = new DefaultElasticGridServiceAgentProvisioningFailureEvent(); 
+        event.setFailureDescription(getMessage());
+        event.setProcessingUnitNames(getAffectedProcessingUnits());
+        return event;
     }
 }

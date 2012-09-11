@@ -17,31 +17,19 @@
  ******************************************************************************/
 package org.openspaces.admin.internal.pu.elastic.events;
 
-import org.openspaces.admin.pu.ProcessingUnit;
-import org.openspaces.admin.pu.elastic.events.ElasticAutoScalingProgressChangedEvent;
+import org.jini.rio.monitor.event.Event;
+import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitProgressChangedEvent;
 
 /**
- * An event carrying progress information about the auto scaling process of the elastic pu. 
- * @author itaif
- * @since 9.0.0
+ * An interface for modifying ESM {@link ElasticProcessingUnitProgressChangedEvent} 
+ * @since 9.1.0
+ * @author Itai Frenkel
  */
-public class DefaultElasticAutoScalingProgressChangedEvent 
-        extends AbstractElasticProcessingUnitProgressChangedEvent 
-        implements ElasticAutoScalingProgressChangedEvent {
+public interface InternalElasticProcessingUnitProgressChangedEvent extends ElasticProcessingUnitProgressChangedEvent, Event {
 
-   private static final long serialVersionUID = 1L;
-   
-   /**
-    * de-serialization constructor
-    */
-   public DefaultElasticAutoScalingProgressChangedEvent() {
-       setUndeploying(false);
-       setComplete(false);
-   }
-
-   public DefaultElasticAutoScalingProgressChangedEvent(ProcessingUnit pu, String message) {
-        this();
-        setProcessingUnitName(pu.getName());
-        setDecisionDescription(message);
-    }
+    public void setProcessingUnitName(String puName);
+    
+    public void setComplete(boolean complete);
+    
+    public void setUndeploying(boolean undeploying);
 }

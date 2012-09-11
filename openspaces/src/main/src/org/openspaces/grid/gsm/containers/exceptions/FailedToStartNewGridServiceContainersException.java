@@ -17,6 +17,8 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.containers.exceptions;
 
+import org.openspaces.admin.internal.gsc.events.DefaultElasticGridServiceContainerProvisioningFailureEvent;
+import org.openspaces.admin.internal.pu.elastic.events.InternalElasticProcessingUnitFailureEvent;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.grid.gsm.containers.ContainersSlaUtils;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
@@ -63,5 +65,11 @@ public class FailedToStartNewGridServiceContainersException extends ContainersSl
         return true;
     }
 
-    
+    @Override
+    public InternalElasticProcessingUnitFailureEvent toEvent() {
+        DefaultElasticGridServiceContainerProvisioningFailureEvent event = new DefaultElasticGridServiceContainerProvisioningFailureEvent(); 
+        event.setFailureDescription(getMessage());
+        event.setProcessingUnitNames(getAffectedProcessingUnits());
+        return event;
+    }
 }

@@ -23,6 +23,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.openspaces.admin.gsa.GridServiceAgent;
+import org.openspaces.admin.internal.gsa.events.DefaultElasticGridServiceAgentProvisioningFailureEvent;
+import org.openspaces.admin.internal.pu.elastic.events.InternalElasticProcessingUnitFailureEvent;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.MachineCapacityRequirements;
@@ -131,5 +133,13 @@ public class NeedToStartMoreGridServiceAgentsException extends GridServiceAgentS
 
     private static StateKey getKey(ProcessingUnit pu, AbstractMachinesSlaPolicy sla) {
         return new MachinesSlaEnforcementState.StateKey(pu, sla.getGridServiceAgentZones());
+    }
+    
+    @Override
+    public InternalElasticProcessingUnitFailureEvent toEvent() {
+        DefaultElasticGridServiceAgentProvisioningFailureEvent event = new DefaultElasticGridServiceAgentProvisioningFailureEvent(); 
+        event.setFailureDescription(getMessage());
+        event.setProcessingUnitNames(getAffectedProcessingUnits());
+        return event;
     }
 }

@@ -23,6 +23,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.openspaces.admin.internal.pu.InternalProcessingUnit;
+import org.openspaces.admin.internal.pu.elastic.events.DefaultElasticAutoScalingFailureEvent;
+import org.openspaces.admin.internal.pu.elastic.events.InternalElasticProcessingUnitFailureEvent;
 import org.openspaces.admin.pu.elastic.config.AutomaticCapacityScaleRuleConfig;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
 
@@ -100,5 +102,13 @@ public class RulesConflictAutoScalingException  extends AutoScalingSlaEnforcemen
         } else if (!valuesBelowLowThresholdPerRule.equals(other.valuesBelowLowThresholdPerRule))
             return false;
         return true;
+    }
+    
+    @Override
+    public InternalElasticProcessingUnitFailureEvent toEvent() {
+        DefaultElasticAutoScalingFailureEvent event = new DefaultElasticAutoScalingFailureEvent(); 
+        event.setFailureDescription(getMessage());
+        event.setProcessingUnitNames(getAffectedProcessingUnits());
+        return event;
     }
 }

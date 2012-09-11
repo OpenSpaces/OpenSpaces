@@ -29,18 +29,14 @@ import org.jini.rio.monitor.event.EventsStore;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.internal.admin.InternalAdmin;
-import org.openspaces.admin.internal.gsa.events.DefaultElasticGridServiceAgentProvisioningFailureEvent;
 import org.openspaces.admin.internal.gsa.events.DefaultElasticGridServiceAgentProvisioningProgressChangedEvent;
-import org.openspaces.admin.internal.gsc.events.DefaultElasticGridServiceContainerProvisioningFailureEvent;
 import org.openspaces.admin.internal.gsc.events.DefaultElasticGridServiceContainerProvisioningProgressChangedEvent;
-import org.openspaces.admin.internal.machine.events.DefaultElasticMachineProvisioningFailureEvent;
 import org.openspaces.admin.internal.machine.events.DefaultElasticMachineProvisioningProgressChangedEvent;
 import org.openspaces.admin.internal.pu.InternalProcessingUnit;
 import org.openspaces.admin.internal.pu.elastic.ProcessingUnitSchemaConfig;
 import org.openspaces.admin.internal.pu.elastic.ScaleStrategyConfigUtils;
-import org.openspaces.admin.internal.pu.elastic.events.DefaultElasticProcessingUnitInstanceProvisioningFailureEvent;
+import org.openspaces.admin.internal.pu.elastic.events.DefaultElasticAutoScalingProgressChangedEvent;
 import org.openspaces.admin.internal.pu.elastic.events.DefaultElasticProcessingUnitInstanceProvisioningProgressChangedEvent;
-import org.openspaces.admin.internal.pu.elastic.events.DefaultElasticProcessingUnitScaleProgressChangedEvent;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
 import org.openspaces.core.bean.Bean;
@@ -209,11 +205,11 @@ public abstract class AbstractScaleStrategyBean implements
         
         logger.info("properties: "+properties);
     
-        machineProvisioningEventState = new ScaleStrategyProgressEventState(eventsStore, isUndeploying(), pu.getName(), DefaultElasticMachineProvisioningProgressChangedEvent.class, DefaultElasticMachineProvisioningFailureEvent.class);
-        agentProvisioningEventState = new ScaleStrategyProgressEventState(eventsStore, isUndeploying(), pu.getName(), DefaultElasticGridServiceAgentProvisioningProgressChangedEvent.class, DefaultElasticGridServiceAgentProvisioningFailureEvent.class );
-        containerProvisioningEventState = new ScaleStrategyProgressEventState(eventsStore, isUndeploying(), pu.getName(), DefaultElasticGridServiceContainerProvisioningProgressChangedEvent.class, DefaultElasticGridServiceContainerProvisioningFailureEvent.class );
-        puProvisioningEventState = new ScaleStrategyProgressEventState(eventsStore, isUndeploying(), pu.getName(), DefaultElasticProcessingUnitInstanceProvisioningProgressChangedEvent.class, DefaultElasticProcessingUnitInstanceProvisioningFailureEvent.class );
-        scaleEventState = new ScaleStrategyProgressEventState(eventsStore, isUndeploying(), pu.getName(), DefaultElasticProcessingUnitScaleProgressChangedEvent.class);
+        machineProvisioningEventState = new ScaleStrategyProgressEventState(eventsStore, isUndeploying(), pu.getName(), DefaultElasticMachineProvisioningProgressChangedEvent.class);
+        agentProvisioningEventState = new ScaleStrategyProgressEventState(eventsStore, isUndeploying(), pu.getName(), DefaultElasticGridServiceAgentProvisioningProgressChangedEvent.class);
+        containerProvisioningEventState = new ScaleStrategyProgressEventState(eventsStore, isUndeploying(), pu.getName(), DefaultElasticGridServiceContainerProvisioningProgressChangedEvent.class);
+        puProvisioningEventState = new ScaleStrategyProgressEventState(eventsStore, isUndeploying(), pu.getName(), DefaultElasticProcessingUnitInstanceProvisioningProgressChangedEvent.class);
+        scaleEventState = new ScaleStrategyProgressEventState(eventsStore, isUndeploying(), pu.getName(), DefaultElasticAutoScalingProgressChangedEvent.class);
         
         
         minimumNumberOfMachines = calcMinimumNumberOfMachines();

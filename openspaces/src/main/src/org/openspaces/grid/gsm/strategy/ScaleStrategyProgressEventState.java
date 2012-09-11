@@ -23,11 +23,10 @@ import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jini.rio.monitor.event.Event;
 import org.jini.rio.monitor.event.EventsStore;
-import org.openspaces.admin.internal.pu.elastic.events.AbstractElasticProcessingUnitFailureEvent;
-import org.openspaces.admin.internal.pu.elastic.events.AbstractElasticProcessingUnitProgressChangedEvent;
-import org.openspaces.admin.internal.pu.elastic.events.DefaultElasticProcessingUnitScaleProgressChangedEvent;
+import org.openspaces.admin.internal.pu.elastic.events.InternalElasticProcessingUnitDecisionEvent;
+import org.openspaces.admin.internal.pu.elastic.events.InternalElasticProcessingUnitFailureEvent;
+import org.openspaces.admin.internal.pu.elastic.events.InternalElasticProcessingUnitProgressChangedEvent;
 import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementDecision;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
@@ -45,51 +44,68 @@ public class ScaleStrategyProgressEventState {
     
     private boolean inProgressEventRaised;
     private boolean completedEventRaised;
-    private SlaEnforcementDecision lastInProgressException;
+    private SlaEnforcementInProgressException lastInProgressException;
     private final EventsStore eventStore;
     private final boolean isUndeploying;
     private final String processingUnitName;
-    private Class<? extends AbstractElasticProcessingUnitProgressChangedEvent> progressChangedEventClass;
-    private Class<? extends AbstractElasticProcessingUnitFailureEvent> failureEventClass;
 
+    private final Class<? extends InternalElasticProcessingUnitProgressChangedEvent> progressChangedEventClass;
+    
     private final Log logger = LogFactory.getLog(ScaleStrategyProgressEventState.class);
     private final Log filteredLogger= new SingleThreadedPollingLog(logger);
     
     public ScaleStrategyProgressEventState(
             EventsStore eventStore, 
             boolean isUndeploying, 
-            String processingUnitName, 
-            Class<? extends AbstractElasticProcessingUnitProgressChangedEvent> progressChangedEventClass,
-            Class<? extends AbstractElasticProcessingUnitFailureEvent> failureEventClass) {
+            String processingUnitName,
+            Class<? extends InternalElasticProcessingUnitProgressChangedEvent> progressChangedEventClass) {
         
         this.eventStore = eventStore;
         this.isUndeploying = isUndeploying;
         this.processingUnitName = processingUnitName;
         this.progressChangedEventClass = progressChangedEventClass;
-        this.failureEventClass = failureEventClass;
     }
     
-    public ScaleStrategyProgressEventState(EventsStore eventStore, boolean isUndeploying,
-            String processingUnitName, Class<DefaultElasticProcessingUnitScaleProgressChangedEvent> progressChangedEventClass) {
-        this(eventStore, isUndeploying, processingUnitName, progressChangedEventClass, null);
-    }
-
     public void enqueuProvisioningInProgressEvent(SlaEnforcementInProgressException e) {
-        enqueuProvisioningInProgressEvent();
         
         if (e instanceof SlaEnforcementDecision) {
             
-            if (this.lastInProgressException == null || !this.lastInProgressException.equals((SlaEnforcementDecision)e)) {
+            if (this.lastInProgressException == null || !this.lastInProgressException.equals(e)) {
+                this.lastInProgressException = e;
             
-                this.lastInProgressException = (SlaEnforcementDecision)e;
-            
-                Event event;
-                if (e instanceof SlaEnforcementFailure) {
+                InternalElasticProcessingUnitDecisionEvent event = createDecisionEvent((SlaEnforcementDecision)e);
+                
+                if (logger.isInfoEnabled()) {
+                    StringBuilder message = new StringBuilder();
+                    appendPuPrefix(message, e);
+                    message.append(event.getDecisionDescription());
+                        
+                    if (e instanceof SlaEnforcementLogStackTrace) {
+                        appendStackTrace(message, e);
+                        logger.info(message);
+                    }
+                    else {
+                        logger.info(message,e);
+                    }
+                }
+                enqueuProvisioningInProgressEvent(event);
+            }
+            else {
+                enqueuProvisioningInProgressEvent();
+            }
+        }
+        else {
+            enqueuProvisioningInProgressEvent();
+            if (e instanceof SlaEnforcementFailure) {
+                if (this.lastInProgressException == null || !this.lastInProgressException.equals(e)) {
+                    this.lastInProgressException = e;
+                
+                    InternalElasticProcessingUnitFailureEvent event = createFailureEvent((SlaEnforcementFailure)e);
                     
                     if (logger.isWarnEnabled()) {
                         StringBuilder message = new StringBuilder();
                         appendPuPrefix(message, e);
-                        message.append("SLA failure");
+                        message.append(event.getFailureDescription());
                         if (e instanceof SlaEnforcementLogStackTrace) {
                             appendStackTrace(message, e);
                             logger.warn(message);
@@ -98,56 +114,40 @@ public class ScaleStrategyProgressEventState {
                             logger.warn(message,e);
                         }
                     }
-                    
-                    event = createFailureEvent(e);
+                    eventStore.addEvent(event);
+                }
+            }
+            else if (logger.isDebugEnabled()) {
+                StringBuilder message = new StringBuilder();
+                appendPuPrefix(message, e);
+                message.append("SLA in progress");
+                if (e instanceof SlaEnforcementLogStackTrace) {
+                    appendStackTrace(message, e);
+                    filteredLogger.debug(message);
                 }
                 else {
-                    if (logger.isInfoEnabled()) {
-                        StringBuilder message = new StringBuilder();
-                        appendPuPrefix(message, e);
-                        message.append("SLA decision:");
-                        if (e instanceof SlaEnforcementLogStackTrace) {
-                            appendStackTrace(message, e);
-                            logger.info(message);
-                        }
-                        else {
-                            logger.info(message,e);
-                        }
-                    }
-                    event = createDecisionEvent(e);
+                    filteredLogger.debug(message, e);
                 }
-
-                eventStore.addEvent(event);
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Added event: " + failureEventClass + " " + e.getMessage());
-                }
-            }
-        }
-        else if (logger.isDebugEnabled()) {
-            StringBuilder message = new StringBuilder();
-            appendPuPrefix(message, e);
-            message.append("SLA in progress");
-            if (e instanceof SlaEnforcementLogStackTrace) {
-                appendStackTrace(message, e);
-                filteredLogger.debug(message);
-            }
-            else {
-                filteredLogger.debug(message, e);
             }
         }
     }
 
     public void enqueuProvisioningInProgressEvent() {
+        
+        final boolean isComplete = false;
+        InternalElasticProcessingUnitProgressChangedEvent event = createProgressChangedEvent(isComplete);
+        enqueuProvisioningInProgressEvent(event);
+    }
+    
+    public void enqueuProvisioningInProgressEvent(InternalElasticProcessingUnitProgressChangedEvent event) {
         if (!this.inProgressEventRaised) {
             this.completedEventRaised = false;
             this.inProgressEventRaised = true;
-            final boolean isComplete = false;
             
-            AbstractElasticProcessingUnitProgressChangedEvent event = createProgressChangedEvent(isComplete);
             eventStore.addEvent(event);
          
             if (logger.isDebugEnabled()) {
-                logger.debug("Added event: " + progressChangedEventClass + " processingUnit=" + processingUnitName + " isComplete=false isUndeploying="+isUndeploying);
+                logger.debug("Added event: " + event.getClass() + " processingUnit=" + processingUnitName + " isComplete=false isUndeploying="+isUndeploying);
             }
         }
         else {
@@ -164,10 +164,10 @@ public class ScaleStrategyProgressEventState {
             this.lastInProgressException = null;
             
             boolean isComplete = true;
-            AbstractElasticProcessingUnitProgressChangedEvent event = createProgressChangedEvent(isComplete);
+            InternalElasticProcessingUnitProgressChangedEvent event = createProgressChangedEvent(isComplete);
             eventStore.addEvent(event);
             if (logger.isDebugEnabled()) {
-                logger.debug("Added event: " + progressChangedEventClass + " processingUnit=" + processingUnitName + " isComplete=true isUndeploying="+isUndeploying);
+                logger.debug("Added event: " + event.getClass() + " processingUnit=" + processingUnitName + " isComplete=true isUndeploying="+isUndeploying);
             }
         }
         else {
@@ -177,8 +177,10 @@ public class ScaleStrategyProgressEventState {
         }
     }
 
-    private AbstractElasticProcessingUnitProgressChangedEvent createProgressChangedEvent(boolean isComplete) {
-        AbstractElasticProcessingUnitProgressChangedEvent newEvent;
+    private InternalElasticProcessingUnitProgressChangedEvent createProgressChangedEvent(
+            boolean isComplete) {
+        
+        InternalElasticProcessingUnitProgressChangedEvent newEvent;
         try {
             newEvent = progressChangedEventClass.newInstance();
         } catch (InstantiationException e) {
@@ -192,33 +194,13 @@ public class ScaleStrategyProgressEventState {
         return newEvent;
     }
     
-    private AbstractElasticProcessingUnitFailureEvent createFailureEvent(SlaEnforcementInProgressException ex) {
-        AbstractElasticProcessingUnitFailureEvent newEvent; 
-        try {
-            newEvent = failureEventClass.newInstance();
-        } catch (InstantiationException e) {
-            throw new IllegalStateException("failed creating new event",e);
-        } catch (IllegalAccessException e) {
-            throw new IllegalStateException("failed creating new event",e);
-        }
-        newEvent.setFailureDescription(ex.getMessage());
-        newEvent.setProcessingUnitNames(((SlaEnforcementFailure)ex).getAffectedProcessingUnits());
-        return newEvent;
+    private InternalElasticProcessingUnitFailureEvent createFailureEvent(SlaEnforcementFailure e) {
+        return e.toEvent();
     }
     
-    private AbstractElasticProcessingUnitProgressChangedEvent createDecisionEvent(SlaEnforcementInProgressException ex) {
-        AbstractElasticProcessingUnitProgressChangedEvent newEvent;
-        try {
-            newEvent = progressChangedEventClass.newInstance();
-        } catch (InstantiationException e) {
-            throw new IllegalStateException("failed creating new event",e);
-        } catch (IllegalAccessException e) {
-            throw new IllegalStateException("failed creating new event",e);
-        }
-        newEvent.setComplete(false);
+    private InternalElasticProcessingUnitDecisionEvent createDecisionEvent(SlaEnforcementDecision e) {
+        InternalElasticProcessingUnitDecisionEvent newEvent=  e.toEvent();
         newEvent.setUndeploying(isUndeploying);
-        newEvent.setProcessingUnitName(processingUnitName);
-        newEvent.setMessage(ex.getMessage());
         return newEvent;
     }
     

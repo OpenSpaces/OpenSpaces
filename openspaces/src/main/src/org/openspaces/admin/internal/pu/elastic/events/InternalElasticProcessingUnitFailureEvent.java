@@ -13,24 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.openspaces.grid.gsm.sla.exceptions;
+package org.openspaces.admin.internal.pu.elastic.events;
 
-import org.openspaces.admin.internal.pu.elastic.events.InternalElasticProcessingUnitDecisionEvent;
+import org.jini.rio.monitor.event.Event;
+import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitFailureEvent;
 
 /**
- * An exception decoration that indicates it should be reported as an SLA decision
- * 
- * @author itaif
- * @since 9.0.1
+ * @author Itai Frenkel
+ * @since 9.1.0
  */
-public interface SlaEnforcementDecision {
+public interface InternalElasticProcessingUnitFailureEvent extends ElasticProcessingUnitFailureEvent, Event {
 
-    public String[] getAffectedProcessingUnits();
+    void setProcessingUnitNames(String[] puNames);
     
-    /**
-     * Must implement the equals method since it is used to filter failure events
-     */
-    public boolean equals(Object other);
-    
-    InternalElasticProcessingUnitDecisionEvent toEvent();
+    void setFailureDescription(String failure);
 }
+

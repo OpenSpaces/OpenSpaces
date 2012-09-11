@@ -17,6 +17,8 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.machines.exceptions;
 
+import org.openspaces.admin.internal.machine.events.DefaultElasticMachineProvisioningFailureEvent;
+import org.openspaces.admin.internal.pu.elastic.events.InternalElasticProcessingUnitFailureEvent;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementLogStackTrace;
 
@@ -26,5 +28,13 @@ public class FailedToStartNewMachineException extends MachinesSlaEnforcementInPr
     
     public FailedToStartNewMachineException(String[] affectedProcessingUnits, Exception cause) {
         super(affectedProcessingUnits, "Machine provisioning failed to start a new machine. Cause:" + cause.getMessage(), cause);
+    }
+    
+    @Override
+    public InternalElasticProcessingUnitFailureEvent toEvent() {
+        DefaultElasticMachineProvisioningFailureEvent event = new DefaultElasticMachineProvisioningFailureEvent(); 
+        event.setFailureDescription(getMessage());
+        event.setProcessingUnitNames(getAffectedProcessingUnits());
+        return event;
     }
 }

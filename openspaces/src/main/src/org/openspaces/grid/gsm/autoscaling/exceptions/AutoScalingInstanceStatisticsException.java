@@ -15,6 +15,8 @@
  *******************************************************************************/
 package org.openspaces.grid.gsm.autoscaling.exceptions;
 
+import org.openspaces.admin.internal.pu.elastic.events.DefaultElasticAutoScalingFailureEvent;
+import org.openspaces.admin.internal.pu.elastic.events.InternalElasticProcessingUnitFailureEvent;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
 
@@ -32,5 +34,13 @@ public class AutoScalingInstanceStatisticsException extends AutoScalingStatistic
 
     private static String message(String metric, ProcessingUnitInstance instance) {
         return "Cannot monitor " + instance.getProcessingUnitInstanceName() + " for " + metric + ". If this alert has resolved quickly, consider increasing the scale-out cooldown period." ;
+    }
+
+    @Override
+    public InternalElasticProcessingUnitFailureEvent toEvent() {
+        DefaultElasticAutoScalingFailureEvent event = new DefaultElasticAutoScalingFailureEvent();
+        event.setFailureDescription(getMessage());
+        event.setProcessingUnitNames(getAffectedProcessingUnits());
+        return event;
     }
 }

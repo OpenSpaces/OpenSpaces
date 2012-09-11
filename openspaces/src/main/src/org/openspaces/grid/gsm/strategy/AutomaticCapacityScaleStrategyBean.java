@@ -20,7 +20,6 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.openspaces.admin.bean.BeanConfigurationException;
-import org.openspaces.admin.internal.pu.elastic.events.DefaultElasticAutoScalingFailureEvent;
 import org.openspaces.admin.internal.pu.elastic.events.DefaultElasticAutoScalingProgressChangedEvent;
 import org.openspaces.admin.pu.elastic.config.AutomaticCapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.config.AutomaticCapacityScaleRuleConfig;
@@ -102,9 +101,8 @@ implements AutoScalingSlaEnforcementEndpointAware {
                 new ScaleStrategyProgressEventState(
                         getEventsStore(), 
                         isUndeploying(),
-                        getProcessingUnit().getName(), 
-                        DefaultElasticAutoScalingProgressChangedEvent.class,
-                        DefaultElasticAutoScalingFailureEvent.class);
+                        getProcessingUnit().getName(),
+                        DefaultElasticAutoScalingProgressChangedEvent.class);
 
         //inject initial manual scale capacity
         super.setPlannedCapacity(initialCapacity);
@@ -315,6 +313,7 @@ implements AutoScalingSlaEnforcementEndpointAware {
         sla.setMinCapacity(minimum);
         sla.setRules(config.getRules());
         sla.setZonesConfig(zones);
+        sla.setContainerMemoryCapacityInMB(getGridServiceContainerConfig().getMaximumMemoryCapacityInMB());
         if (getLogger().isDebugEnabled()) {
             getLogger().debug("Automatic Scaling SLA Policy: " + sla);
         }

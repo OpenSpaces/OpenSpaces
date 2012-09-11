@@ -17,71 +17,25 @@ package org.openspaces.grid.gsm.autoscaling.exceptions;
 
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
-import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementDecision;
 
 /**
  * @author itaif
  * @since 9.0.1
  */
-public class AutoScalingLowThresholdBreachedException extends AutoScalingSlaEnforcementInProgressException 
-    implements SlaEnforcementDecision {
+public class AutoScalingLowThresholdBreachedException extends AutoScalingThresholdBreachedException {
 
     private static final long serialVersionUID = 1L;
-    private final CapacityRequirements newCapacity;
-    private final String puName;
-    
+
     public AutoScalingLowThresholdBreachedException(
             ProcessingUnit pu,
-            CapacityRequirements existingCapacity,
-            CapacityRequirements newCapacity) {
-        super(message(pu,existingCapacity,newCapacity));
-        this.newCapacity = newCapacity;
-        this.puName = pu.getName();
+            CapacityRequirements before,
+            CapacityRequirements after,
+            long containerCapacityInMB) {
+        super(message(pu, before, after), pu, before, after, containerCapacityInMB);
     }
 
     private static String message(ProcessingUnit pu, CapacityRequirements existingCapacity, CapacityRequirements newCapacity) {
         //TODO: Add rule, threshold, value that breached threshold, how value was calculated.
         return "Decreasing capacity of " + pu.getName() + " from " + existingCapacity + " to " + newCapacity;
     }
-
-    public CapacityRequirements getNewCapacity() {
-        return newCapacity;
-    }
-
-    @Override
-    public String[] getAffectedProcessingUnits() {
-        return new String[] { puName };
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((newCapacity == null) ? 0 : newCapacity.hashCode());
-        result = prime * result + ((puName == null) ? 0 : puName.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        AutoScalingLowThresholdBreachedException other = (AutoScalingLowThresholdBreachedException) obj;
-        if (newCapacity == null) {
-            if (other.newCapacity != null)
-                return false;
-        } else if (!newCapacity.equals(other.newCapacity))
-            return false;
-        if (puName == null) {
-            if (other.puName != null)
-                return false;
-        } else if (!puName.equals(other.puName))
-            return false;
-        return true;
-    }
-
 }

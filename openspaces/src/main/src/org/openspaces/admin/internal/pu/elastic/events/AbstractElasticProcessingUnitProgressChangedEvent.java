@@ -21,14 +21,11 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
-import org.jini.rio.monitor.event.Event;
-import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitProgressChangedEvent;
-
 import com.gigaspaces.internal.io.IOUtils;
 import com.gigaspaces.internal.version.PlatformLogicalVersion;
 import com.gigaspaces.lrmi.LRMIInvocationContext;
 
-public abstract class AbstractElasticProcessingUnitProgressChangedEvent implements ElasticProcessingUnitProgressChangedEvent , Event{
+public abstract class AbstractElasticProcessingUnitProgressChangedEvent implements InternalElasticProcessingUnitDecisionEvent {
     
     private static final long serialVersionUID = -3682386855602620479L;
     
@@ -63,7 +60,7 @@ public abstract class AbstractElasticProcessingUnitProgressChangedEvent implemen
         out.writeBoolean(isComplete);
         out.writeBoolean(isUndeploying);
         IOUtils.writeString(out, processingUnitName);
-        if (LRMIInvocationContext.getEndpointLogicalVersion().greaterOrEquals(PlatformLogicalVersion.v9_0_1)) {
+        if (LRMIInvocationContext.getEndpointLogicalVersion().greaterOrEquals(PlatformLogicalVersion.v9_1_0)) {
             IOUtils.writeString(out, message);    
         }
     }
@@ -78,24 +75,33 @@ public abstract class AbstractElasticProcessingUnitProgressChangedEvent implemen
         isComplete = in.readBoolean();
         isUndeploying = in.readBoolean();
         processingUnitName = IOUtils.readString(in);
-        if (LRMIInvocationContext.getEndpointLogicalVersion().greaterOrEquals(PlatformLogicalVersion.v9_0_1)) {
+        if (LRMIInvocationContext.getEndpointLogicalVersion().greaterOrEquals(PlatformLogicalVersion.v9_1_0)) {
             message = IOUtils.readString(in);    
         }
     }
 
+    @Override
     public void setComplete(boolean isComplete) {
         this.isComplete = isComplete;
     }
 
+    @Override
     public void setUndeploying(boolean isUndeploying) {
         this.isUndeploying = isUndeploying;
     }
 
+    @Override
     public void setProcessingUnitName(String processingUnitName) {
         this.processingUnitName = processingUnitName;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    @Override
+    public void setDecisionDescription(String description) {
+        this.message = description;
+    }
+    
+    @Override
+    public String getDecisionDescription() {
+        return message;
     }
 }

@@ -21,12 +21,9 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
-import org.jini.rio.monitor.event.Event;
-import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitFailureEvent;
-
 import com.gigaspaces.internal.io.IOUtils;
 
-public abstract class AbstractElasticProcessingUnitFailureEvent implements ElasticProcessingUnitFailureEvent , Event{
+public abstract class AbstractElasticProcessingUnitFailureEvent implements InternalElasticProcessingUnitFailureEvent {
     private static final long serialVersionUID = -4093118769084514194L;
     
     private String failureDescription;

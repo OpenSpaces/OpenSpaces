@@ -15,6 +15,8 @@
  *******************************************************************************/
 package org.openspaces.grid.gsm.autoscaling.exceptions;
 
+import org.openspaces.admin.internal.pu.elastic.events.DefaultElasticAutoScalingFailureEvent;
+import org.openspaces.admin.internal.pu.elastic.events.InternalElasticProcessingUnitFailureEvent;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
 
@@ -32,5 +34,13 @@ public class AutoScalingStatisticsFormatException extends AutoScalingStatisticsE
     
     private static String message(Object value, Object threshold) {
         return "Failed to compare value (" + value + ") with high threshold (" + threshold +")";
+    }
+    
+    @Override
+    public InternalElasticProcessingUnitFailureEvent toEvent() {
+        DefaultElasticAutoScalingFailureEvent event = new DefaultElasticAutoScalingFailureEvent(); 
+        event.setFailureDescription(getMessage());
+        event.setProcessingUnitNames(getAffectedProcessingUnits());
+        return event;
     }
 }

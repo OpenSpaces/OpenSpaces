@@ -105,15 +105,15 @@ public class DefaultAutoScalingSlaEnforcementEndpoint implements AutoScalingSlaE
             boolean aboveHighThreshold = isAboveHighThreshold(rule, value);
             
             if (belowLowThreshold) {
-                if (logger.isInfoEnabled()) {
-                    logger.info("Low threshold breached: " + value + " is less than " + rule.getLowThreshold() + ". Scaling rule: " + rule);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Low threshold breached: " + value + " is less than " + rule.getLowThreshold() + ". Scaling rule: " + rule);
                 }
                 valuesBelowLowThresholdPerRule.put(rule,value);
             }
             
             if (aboveHighThreshold) {
-                if (logger.isInfoEnabled()) {
-                    logger.info("High threshold breached: " + value + " is greater than " + rule.getHighThreshold() + ". Scaling rule: " + rule);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("High threshold breached: " + value + " is greater than " + rule.getHighThreshold() + ". Scaling rule: " + rule);
                 }
                 valuesAboveHighThresholdPerRule.put(rule,value);
             }
@@ -142,7 +142,7 @@ public class DefaultAutoScalingSlaEnforcementEndpoint implements AutoScalingSlaE
                 //apply max capacity restriction
                 CapacityRequirements correctedNewCapacity = newCapacity.min(maxCapacity);
                 if (correctedNewCapacity.equals(existingCapacity)) {
-                    throw new ReachedMaximumCapacityAutoScalingException(pu, existingCapacity, newCapacity, maxCapacity );
+                    throw new ReachedMaximumCapacityAutoScalingException(pu, existingCapacity, newCapacity, maxCapacity , sla.getContainerMemoryCapacityInMB());
                 }
                 if (logger.isDebugEnabled()) {
                     logger.debug("Cannot increase capacity from " + existingCapacity + " to " + newCapacity + " since it breaches maximum of " + maxCapacity +".");
@@ -152,8 +152,8 @@ public class DefaultAutoScalingSlaEnforcementEndpoint implements AutoScalingSlaE
             if (!newCapacity.greaterThan(existingCapacity)) {
                 throw new IllegalStateException("Expected " + newCapacity + " to be bigger than " + existingCapacity +  " due to the increase by " + minimunHighThresholdBreachedIncrease);
             }
-            
-            throw new AutoScalingHighThresholdBreachedException(pu, existingCapacity, newCapacity);
+                        
+            throw new AutoScalingHighThresholdBreachedException(pu, existingCapacity, newCapacity, sla.getContainerMemoryCapacityInMB());
         }
         else if (!valuesBelowLowThresholdPerRule.isEmpty()) {
             
@@ -175,7 +175,7 @@ public class DefaultAutoScalingSlaEnforcementEndpoint implements AutoScalingSlaE
                 newCapacity = correctedNewCapacity;
             }
             if (!existingCapacity.equals(newCapacity)) {
-                throw new AutoScalingLowThresholdBreachedException(pu, existingCapacity, newCapacity);
+                throw new AutoScalingLowThresholdBreachedException(pu, existingCapacity, newCapacity, sla.getContainerMemoryCapacityInMB());
             }
         }
     }

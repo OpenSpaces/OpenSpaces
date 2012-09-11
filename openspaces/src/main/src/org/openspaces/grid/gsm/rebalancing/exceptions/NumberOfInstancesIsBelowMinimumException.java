@@ -15,6 +15,8 @@
  *******************************************************************************/
 package org.openspaces.grid.gsm.rebalancing.exceptions;
 
+import org.openspaces.admin.internal.pu.elastic.events.DefaultElasticProcessingUnitInstanceProvisioningFailureEvent;
+import org.openspaces.admin.internal.pu.elastic.events.InternalElasticProcessingUnitFailureEvent;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
 
@@ -32,6 +34,14 @@ public class NumberOfInstancesIsBelowMinimumException extends RebalancingSlaEnfo
 
     private static String message(ProcessingUnit pu, int minimumNumberOfInstances) {
         return "Number of " + pu.getName() + " instances ("+ pu.getInstances().length+") is below the minimum of " + minimumNumberOfInstances +" instances.";
+    }
+    
+    @Override
+    public InternalElasticProcessingUnitFailureEvent toEvent() {
+        DefaultElasticProcessingUnitInstanceProvisioningFailureEvent event = new DefaultElasticProcessingUnitInstanceProvisioningFailureEvent(); 
+        event.setFailureDescription(getMessage());
+        event.setProcessingUnitNames(getAffectedProcessingUnits());
+        return event;
     }
 
 }
