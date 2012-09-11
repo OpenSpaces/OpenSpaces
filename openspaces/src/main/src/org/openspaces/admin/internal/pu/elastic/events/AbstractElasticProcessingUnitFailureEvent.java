@@ -65,4 +65,9 @@ public abstract class AbstractElasticProcessingUnitFailureEvent implements Inter
     public void setFailureDescription(String failureDescription) {
         this.failureDescription = failureDescription; 
     }
+    
+    @Override
+    public String toString() {
+        return getFailureDescription();
+    }
 }

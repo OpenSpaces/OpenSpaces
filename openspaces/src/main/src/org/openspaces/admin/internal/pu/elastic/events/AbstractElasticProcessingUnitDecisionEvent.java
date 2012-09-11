@@ -52,6 +52,11 @@ public class AbstractElasticProcessingUnitDecisionEvent extends AbstractElasticP
         super.readExternal(in);
         decisionDescription = IOUtils.readString(in);    
     }
+    
+    @Override
+    public String toString() {
+        return getDecisionDescription();
+    }
 
-
+    
 }
