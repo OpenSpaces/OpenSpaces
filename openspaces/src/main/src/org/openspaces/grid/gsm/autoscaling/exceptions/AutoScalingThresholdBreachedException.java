@@ -15,11 +15,11 @@
  *******************************************************************************/
 package org.openspaces.grid.gsm.autoscaling.exceptions;
 
-import org.openspaces.admin.internal.pu.elastic.events.DefaultElasticAutoScalingProgressChangedEvent;
 import org.openspaces.admin.internal.pu.elastic.events.InternalElasticProcessingUnitDecisionEvent;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitType;
 import org.openspaces.admin.pu.elastic.config.CapacityRequirementsConfig;
+import org.openspaces.admin.pu.elastic.events.ElasticStatefulProcessingUnitPlannedCapacityChangedEvent;
 import org.openspaces.admin.pu.elastic.events.ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementDecision;
@@ -92,12 +92,15 @@ public abstract class AutoScalingThresholdBreachedException extends AutoScalingS
     @Override
     public InternalElasticProcessingUnitDecisionEvent toEvent() {
         
+        CapacityRequirementsConfig beforeConfig = new CapacityRequirementsConfig(before);
+        CapacityRequirementsConfig afterConfig = new CapacityRequirementsConfig(after);
+        
         if (pu.getType().equals(ProcessingUnitType.STATEFUL)) {
-            return new DefaultElasticAutoScalingProgressChangedEvent(pu, getMessage());
+            return new ElasticStatefulProcessingUnitPlannedCapacityChangedEvent(beforeConfig, afterConfig);
         }
 
-        int beforeNumberOfInstances = (int) Math.ceil((new CapacityRequirementsConfig(before).getMemoryCapacityInMB() * 1.0 / containerCapacityInMB));
-        int afterNumberOfInstances = (int) Math.ceil((new CapacityRequirementsConfig(after).getMemoryCapacityInMB() * 1.0 / containerCapacityInMB));
-        return new ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent(pu, beforeNumberOfInstances ,afterNumberOfInstances);
+        int beforeNumberOfInstances = (int) Math.ceil((beforeConfig.getMemoryCapacityInMB() * 1.0 / containerCapacityInMB));
+        int afterNumberOfInstances = (int) Math.ceil((afterConfig.getMemoryCapacityInMB() * 1.0 / containerCapacityInMB));
+        return new ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent(beforeNumberOfInstances ,afterNumberOfInstances);
     }
 }

@@ -20,54 +20,59 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
 import org.openspaces.admin.internal.pu.elastic.events.AbstractElasticProcessingUnitDecisionEvent;
+import org.openspaces.admin.pu.elastic.config.CapacityRequirementsConfig;
+import org.openspaces.admin.pu.elastic.events.ElasticAutoScalingProgressChangedEvent;
+import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitDecisionEvent;
+
+import com.gigaspaces.internal.io.IOUtils;
 
 /**
  * @author Itai Frenkel
  * @since 9.1.0
  */
-public class ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent 
+public class ElasticStatefulProcessingUnitPlannedCapacityChangedEvent 
     extends AbstractElasticProcessingUnitDecisionEvent
     implements ElasticAutoScalingProgressChangedEvent , ElasticProcessingUnitDecisionEvent{
 
     private static final long serialVersionUID = 1L;
-    private int beforePlannedNumberOfInstances;
-    private int afterPlannedNumberOfInstances;
+    private CapacityRequirementsConfig beforePlanned;
+    private CapacityRequirementsConfig afterPlanned;
     
     /**
     * de-serialization constructor
     */
-    public ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent() {
+    public ElasticStatefulProcessingUnitPlannedCapacityChangedEvent() {
         
     }
     
-    public ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent(int beforePlannedNumberOfInstances, int afterPlannedNumberOfInstances) {
-        this.beforePlannedNumberOfInstances = beforePlannedNumberOfInstances;
-        this.afterPlannedNumberOfInstances = afterPlannedNumberOfInstances;
-        setDecisionDescription("Number of planned instances changed from " + beforePlannedNumberOfInstances + " to " + afterPlannedNumberOfInstances);
+    public ElasticStatefulProcessingUnitPlannedCapacityChangedEvent(CapacityRequirementsConfig before, CapacityRequirementsConfig after) {
+        this.beforePlanned = before;
+        this.afterPlanned = after;
+        setDecisionDescription("Planned capacity changed from " + before + " to " + after);
     }
 
 
-    public int getAfterPlannedNumberOfInstances() {
-        return afterPlannedNumberOfInstances;
+    public CapacityRequirementsConfig getafterPlanned() {
+        return afterPlanned;
     }
 
-    public int getBeforePlannedNumberOfInstances() {
-        return beforePlannedNumberOfInstances;
+    public CapacityRequirementsConfig getbeforePlanned() {
+        return beforePlanned;
     }
     
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         super.writeExternal(out);
         
-        out.writeInt(beforePlannedNumberOfInstances);
-        out.writeInt(afterPlannedNumberOfInstances);
+        IOUtils.writeMapStringString(out, beforePlanned.getProperties());
+        IOUtils.writeMapStringString(out, afterPlanned.getProperties());
     }
 
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
         
-        beforePlannedNumberOfInstances = in.readInt();
-        afterPlannedNumberOfInstances = in.readInt();
+        beforePlanned = new CapacityRequirementsConfig(IOUtils.readMapStringString(in));
+        afterPlanned = new CapacityRequirementsConfig(IOUtils.readMapStringString(in));
     }
 }

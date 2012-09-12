@@ -17,7 +17,6 @@
  ******************************************************************************/
 package org.openspaces.admin.internal.pu.elastic.events;
 
-import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.elastic.events.ElasticAutoScalingProgressChangedEvent;
 
 /**
@@ -26,7 +25,7 @@ import org.openspaces.admin.pu.elastic.events.ElasticAutoScalingProgressChangedE
  * @since 9.0.0
  */
 public class DefaultElasticAutoScalingProgressChangedEvent 
-        extends AbstractElasticProcessingUnitDecisionEvent 
+        extends AbstractElasticProcessingUnitProgressChangedEvent 
         implements ElasticAutoScalingProgressChangedEvent {
 
    private static final long serialVersionUID = 1L;
@@ -35,13 +34,5 @@ public class DefaultElasticAutoScalingProgressChangedEvent
     * de-serialization constructor
     */
    public DefaultElasticAutoScalingProgressChangedEvent() {
-       setUndeploying(false);
-       setComplete(false);
    }
-
-   public DefaultElasticAutoScalingProgressChangedEvent(ProcessingUnit pu, String message) {
-        this();
-        setProcessingUnitName(pu.getName());
-        setDecisionDescription(message);
-    }
 }
