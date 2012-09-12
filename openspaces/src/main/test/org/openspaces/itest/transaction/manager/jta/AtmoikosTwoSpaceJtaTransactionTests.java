@@ -42,4 +42,12 @@ public class AtmoikosTwoSpaceJtaTransactionTests extends AbstractTwoSpaceJtaTran
         // GS-10616 
     }
     
+    /* (non-Javadoc)
+     * @see org.openspaces.itest.transaction.manager.jta.AbstractTwoSpaceJtaTransactionTests#testSimpleCommitTwoSpaces()
+     */
+    @Override
+    public void testSimpleCommitTwoSpaces() {
+        // GS-10616 
+    }
+    
 }
