@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <launchConfiguration type="org.eclipse.jdt.junit.launchconfig">
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
-<listEntry value="/openspaces/src/main/test/org/openspaces/itest/events/notify/batch/namespace/NotifyContainerBatchTests.java"/>
+<listEntry value="/openspaces/src/test/java/org/openspaces/itest/events/notify/batch/namespace/NotifyContainerBatchTests.java"/>
 </listAttribute>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
 <listEntry value="1"/>
