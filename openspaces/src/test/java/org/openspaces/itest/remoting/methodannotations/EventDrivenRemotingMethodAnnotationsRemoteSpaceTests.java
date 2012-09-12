@@ -55,8 +55,10 @@ public class EventDrivenRemotingMethodAnnotationsRemoteSpaceTests extends Abstra
     }
 
     public void testInjectedRoutingHandler() {
-        int value = eventDrivenProxy.testInjectedRoutingHandler(1);
-        assertEquals(value, 1);
+        for (int i = 0; i < 10000; i++) {
+            int value = eventDrivenProxy.testInjectedRoutingHandler(1);
+            assertEquals(value, 1);
+        }
     }
 
     public void testAsyncInjectedRoutingHandler() throws ExecutionException, InterruptedException {
