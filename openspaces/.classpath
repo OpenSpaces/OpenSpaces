@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" output="target/classes" path="src/main/src"/>
 	<classpathentry kind="src" output="tools/maven/maven-openspaces-plugin/target/classes" path="tools/maven/maven-openspaces-plugin/src/main/java"/>
+	<classpathentry kind="src" path="src/test/java"/>
+	<classpathentry kind="src" path="src/main/java"/>
 	<classpathentry kind="src" output="target/sandbox-classes" path="src/sandbox/src"/>
 	<classpathentry kind="src" output="target/sandbox-test-classes" path="src/sandbox/test"/>
-	<classpathentry kind="src" output="target/main-test-classes" path="src/main/test"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/gigaspaces"/>
 	<classpathentry kind="lib" path="lib/external/common/commons-beanutils-1.7.0.jar"/>
@@ -111,5 +111,5 @@
 	<classpathentry exported="true" kind="lib" path="lib/platform/jetty/jetty-webapp-8.1.2.v20120308.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/platform/jetty/org.eclipse.jdt.core-3.7.1.jar"/>
 	<classpathentry kind="lib" path="lib/platform/jetty/jetty-xml-8.1.2.v20120308.jar"/>
-	<classpathentry kind="output" path="target/classes"/>
+	<classpathentry kind="output" path="target/main-test-classes"/>
 </classpath>
