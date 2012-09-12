@@ -37,8 +37,8 @@ import org.openspaces.admin.internal.machine.events.DefaultElasticMachineProvisi
 import org.openspaces.admin.internal.pu.InternalProcessingUnit;
 import org.openspaces.admin.internal.pu.elastic.ProcessingUnitSchemaConfig;
 import org.openspaces.admin.internal.pu.elastic.ScaleStrategyConfigUtils;
-import org.openspaces.admin.internal.pu.elastic.events.DefaultElasticAutoScalingProgressChangedEvent;
 import org.openspaces.admin.internal.pu.elastic.events.DefaultElasticProcessingUnitInstanceProvisioningProgressChangedEvent;
+import org.openspaces.admin.internal.pu.elastic.events.DefaultElasticProcessingUnitScaleProgressChangedEvent;
 import org.openspaces.admin.internal.pu.elastic.events.InternalElasticProcessingUnitProgressChangedEvent;
 import org.openspaces.admin.machine.events.ElasticMachineProvisioningProgressChangedEvent;
 import org.openspaces.admin.machine.events.ElasticMachineProvisioningProgressChangedEventListener;
@@ -214,7 +214,7 @@ public abstract class AbstractScaleStrategyBean implements
         agentProvisioningEventState = new ScaleStrategyProgressEventState(eventsStore, isUndeploying(), pu.getName(), DefaultElasticGridServiceAgentProvisioningProgressChangedEvent.class);
         containerProvisioningEventState = new ScaleStrategyProgressEventState(eventsStore, isUndeploying(), pu.getName(), DefaultElasticGridServiceContainerProvisioningProgressChangedEvent.class);
         puProvisioningEventState = new ScaleStrategyProgressEventState(eventsStore, isUndeploying(), pu.getName(), DefaultElasticProcessingUnitInstanceProvisioningProgressChangedEvent.class);
-        scaleEventState = new ScaleStrategyProgressEventState(eventsStore, isUndeploying(), pu.getName(), DefaultElasticAutoScalingProgressChangedEvent.class);
+        scaleEventState = new ScaleStrategyProgressEventState(eventsStore, isUndeploying(), pu.getName(), DefaultElasticProcessingUnitScaleProgressChangedEvent.class);
         
         
         minimumNumberOfMachines = calcMinimumNumberOfMachines();
