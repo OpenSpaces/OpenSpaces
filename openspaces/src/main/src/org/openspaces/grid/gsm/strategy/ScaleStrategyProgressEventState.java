@@ -92,7 +92,11 @@ public class ScaleStrategyProgressEventState {
                     if (logger.isWarnEnabled()) {
                         StringBuilder message = new StringBuilder();
                         appendPuPrefix(message, event.getProcessingUnitNames());
-                        message.append(event.getFailureDescription());
+                        String failureDescription = event.getFailureDescription();
+                        if (failureDescription == null) {
+                            throw new IllegalStateException("event " + event.getClass() + " failure description cannot be null");
+                        }
+                        message.append(failureDescription);
                         if (e instanceof SlaEnforcementLogStackTrace) {
                             appendStackTrace(message, e);
                             logger.warn(message);
@@ -127,7 +131,11 @@ public class ScaleStrategyProgressEventState {
             if (logger.isInfoEnabled()) {
                 StringBuilder message = new StringBuilder();
                 appendPuPrefix(message, new String[] {event.getProcessingUnitName()});
-                message.append(((ElasticProcessingUnitDecisionEvent)event).getDecisionDescription());
+                String decisionDescription = ((ElasticProcessingUnitDecisionEvent)event).getDecisionDescription();
+                if (decisionDescription == null) {
+                    throw new IllegalStateException("event " + event.getClass() + " decision description cannot be null");
+                }
+                message.append(decisionDescription);
                 if (e == null) {
                     logger.info(message);
                 }
