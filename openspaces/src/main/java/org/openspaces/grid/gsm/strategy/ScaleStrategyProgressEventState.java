@@ -78,11 +78,11 @@ public class ScaleStrategyProgressEventState {
                 enqueuProvisioningInProgressEvent(event,e);
             }
             else {
-                enqueuProvisioningInProgressEvent();
+                enqueuDefaultProvisioningInProgressEvent(e);
             }
         }
         else {
-            enqueuProvisioningInProgressEvent();
+            enqueuDefaultProvisioningInProgressEvent(e);
             if (e instanceof SlaEnforcementFailure) {
                 if (this.lastInProgressException == null || !this.lastInProgressException.equals(e)) {
                     this.lastInProgressException = e;
@@ -125,8 +125,9 @@ public class ScaleStrategyProgressEventState {
 
     private void enqueuProvisioningInProgressEvent(
             InternalElasticProcessingUnitProgressChangedEvent event,
-            SlaEnforcementInProgressException e) {
+            Throwable t) {
         
+        boolean logged = false;
         if (event instanceof ElasticProcessingUnitDecisionEvent) {
             if (logger.isInfoEnabled()) {
                 StringBuilder message = new StringBuilder();
@@ -136,16 +137,17 @@ public class ScaleStrategyProgressEventState {
                     throw new IllegalStateException("event " + event.getClass() + " decision description cannot be null");
                 }
                 message.append(decisionDescription);
-                if (e == null) {
+                if (t == null) {
                     logger.info(message);
                 }
-                else if (e instanceof SlaEnforcementLogStackTrace) {
-                    appendStackTrace(message, e);
+                else if (t instanceof SlaEnforcementLogStackTrace) {
+                    appendStackTrace(message, t);
                     logger.info(message);
                 }
                 else {
-                    logger.info(message,e);
+                    logger.info(message,t);
                 }
+                logged = true;
             }
         }
         
@@ -154,24 +156,30 @@ public class ScaleStrategyProgressEventState {
             this.inProgressEventRaised = true;
             
             eventStore.addEvent(event);
-         
-            if (logger.isDebugEnabled()) {
-                logger.debug("Added event: " + event.getClass() + " processingUnit=" + processingUnitName + " isComplete=false isUndeploying="+isUndeploying);
+            
+            if (!logged && logger.isInfoEnabled()) {
+                StringBuilder message = new StringBuilder(event.toString());
+                if (t instanceof SlaEnforcementLogStackTrace) {
+                    appendStackTrace(message, t);
+                    logger.info(message);
+                }
+                else {
+                    logger.info(message,t);
+                }
             }
         }
         else {
             if (logger.isTraceEnabled()) {
-                logger.trace("Ignoring event: " + progressChangedEventClass + " processingUnit=" + processingUnitName + " isComplete=false isUndeploying="+isUndeploying);
+                logger.trace("Ignoring event:" + event.toString(),t);
             }
         }
-        
     }
 
-    public void enqueuProvisioningInProgressEvent() {
+    public void enqueuDefaultProvisioningInProgressEvent(Throwable t) {
         
         final boolean isComplete = false;
         InternalElasticProcessingUnitProgressChangedEvent event = createProgressChangedEvent(isComplete);
-        enqueuProvisioningInProgressEvent(event);
+        enqueuProvisioningInProgressEvent(event, t);
     }
     
     public void enqueuProvisioningInProgressEvent(InternalElasticProcessingUnitProgressChangedEvent event) {
@@ -179,21 +187,23 @@ public class ScaleStrategyProgressEventState {
     }
 
     public void enqueuProvisioningCompletedEvent() {
+        
+        boolean isComplete = true;
+        InternalElasticProcessingUnitProgressChangedEvent event = createProgressChangedEvent(isComplete);
+        
         if (!this.completedEventRaised) {
             this.completedEventRaised = true;
             this.inProgressEventRaised = false;
             this.lastInProgressException = null;
             
-            boolean isComplete = true;
-            InternalElasticProcessingUnitProgressChangedEvent event = createProgressChangedEvent(isComplete);
             eventStore.addEvent(event);
-            if (logger.isDebugEnabled()) {
-                logger.debug("Added event: " + event.getClass() + " processingUnit=" + processingUnitName + " isComplete=true isUndeploying="+isUndeploying);
+            if (logger.isInfoEnabled()) {
+                logger.info(event.toString());
             }
         }
         else {
             if (logger.isTraceEnabled()) {
-                logger.trace("Ignoring event: " + progressChangedEventClass + " processingUnit=" + processingUnitName + " isComplete=true isUndeploying="+isUndeploying);
+                logger.trace("Ignoring event: " + event.toString());
             }
         }
     }
