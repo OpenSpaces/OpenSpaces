@@ -83,5 +83,10 @@ public abstract class AbstractElasticProcessingUnitProgressChangedEvent implemen
     public void setProcessingUnitName(String processingUnitName) {
         this.processingUnitName = processingUnitName;
     }
-
+    
+    protected String toStringHelper(final String op) {
+        final String adverb = isComplete() ? "completed." : "is in progress.";
+        final String verb = isUndeploying() ? "undeployment" : "SLA enforcement";
+        return "["+getProcessingUnitName() + "] "+op+" "+ verb+" " + adverb;
+    }
 }

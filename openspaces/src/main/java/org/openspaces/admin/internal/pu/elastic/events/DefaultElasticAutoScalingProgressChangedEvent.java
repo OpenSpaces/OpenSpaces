@@ -35,4 +35,9 @@ public class DefaultElasticAutoScalingProgressChangedEvent
     */
    public DefaultElasticAutoScalingProgressChangedEvent() {
    }
+
+   @Override
+   public String toString() {
+       return toStringHelper("automatic scaling rules");
+   }
 }

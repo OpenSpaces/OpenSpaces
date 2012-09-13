@@ -31,4 +31,9 @@ public class DefaultElasticMachineProvisioningProgressChangedEvent
      */
     public DefaultElasticMachineProvisioningProgressChangedEvent() {
     }
+    
+    @Override
+    public String toString() {
+        return toStringHelper("machines");
+    }
 }

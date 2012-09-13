@@ -31,4 +31,9 @@ public class DefaultElasticGridServiceAgentProvisioningProgressChangedEvent
      */
     public DefaultElasticGridServiceAgentProvisioningProgressChangedEvent() {
     }
+    
+    @Override
+    public String toString() {
+        return toStringHelper("agents");
+    }
 }

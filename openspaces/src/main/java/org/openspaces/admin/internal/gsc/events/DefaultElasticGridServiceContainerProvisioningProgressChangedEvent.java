@@ -32,5 +32,9 @@ public class DefaultElasticGridServiceContainerProvisioningProgressChangedEvent
     public DefaultElasticGridServiceContainerProvisioningProgressChangedEvent() {
         super();
     }
-
+    
+    @Override
+    public String toString() {
+        return toStringHelper("containers");
+    }
 }

@@ -29,11 +29,16 @@ public class DefaultElasticProcessingUnitScaleProgressChangedEvent
     extends AbstractElasticProcessingUnitProgressChangedEvent 
     implements ElasticProcessingUnitScaleProgressChangedEvent  {
 
-private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
            
     /**
      * de-serialization/reflection constructor
      */
     public DefaultElasticProcessingUnitScaleProgressChangedEvent() {
+    }
+    
+    @Override
+    public String toString() {
+        return toStringHelper("scale");
     }
 }

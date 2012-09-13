@@ -31,4 +31,9 @@ public class DefaultElasticProcessingUnitInstanceProvisioningProgressChangedEven
         */
        public DefaultElasticProcessingUnitInstanceProvisioningProgressChangedEvent() {
        }
+       
+       @Override
+       public String toString() {
+           return toStringHelper("instances");
+       }
 }
