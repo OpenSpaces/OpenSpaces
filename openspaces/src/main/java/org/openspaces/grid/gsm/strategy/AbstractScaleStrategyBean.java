@@ -233,12 +233,18 @@ public abstract class AbstractScaleStrategyBean implements
             
             @Override
             public void elasticGridServiceAgentProvisioningProgressChanged(
-                    ElasticGridServiceAgentProvisioningProgressChangedEvent event) {
+                    final ElasticGridServiceAgentProvisioningProgressChangedEvent event) {
                 if (!(event instanceof InternalElasticProcessingUnitProgressChangedEvent)) {
                     throw new IllegalArgumentException("event must implement " + InternalElasticProcessingUnitProgressChangedEvent.class.getName());
                 }
-                injectEventContext((InternalElasticProcessingUnitProgressChangedEvent) event);
-                agentProvisioningEventState.enqueuProvisioningInProgressEvent((InternalElasticProcessingUnitProgressChangedEvent) event);
+                admin.scheduleNonBlockingStateChange(new Runnable() {
+                    
+                    @Override
+                    public void run() {
+                        injectEventContext((InternalElasticProcessingUnitProgressChangedEvent) event);
+                        agentProvisioningEventState.enqueuProvisioningInProgressEvent((InternalElasticProcessingUnitProgressChangedEvent) event);
+                    }
+                });
             }
         };
         machineProvisioning.setElasticGridServiceAgentProvisioningProgressEventListener(agentEventListener);
@@ -246,12 +252,18 @@ public abstract class AbstractScaleStrategyBean implements
         ElasticMachineProvisioningProgressChangedEventListener machineEventListener = new ElasticMachineProvisioningProgressChangedEventListener() {
             
             @Override
-            public void elasticMachineProvisioningProgressChanged(ElasticMachineProvisioningProgressChangedEvent event) {
+            public void elasticMachineProvisioningProgressChanged(
+                    final ElasticMachineProvisioningProgressChangedEvent event) {
                 if (!(event instanceof InternalElasticProcessingUnitProgressChangedEvent)) {
                     throw new IllegalArgumentException("event must implement " + InternalElasticProcessingUnitProgressChangedEvent.class.getName());
                 }
-                injectEventContext((InternalElasticProcessingUnitProgressChangedEvent) event);
-                machineProvisioningEventState.enqueuProvisioningInProgressEvent((InternalElasticProcessingUnitProgressChangedEvent) event);
+                admin.scheduleNonBlockingStateChange(new Runnable() {
+                    @Override
+                    public void run() {                       
+                        injectEventContext((InternalElasticProcessingUnitProgressChangedEvent) event);
+                        machineProvisioningEventState.enqueuProvisioningInProgressEvent((InternalElasticProcessingUnitProgressChangedEvent) event);
+                    }
+                });
             }
         };
         machineProvisioning.setElasticMachineProvisioningProgressChangedEventListener(machineEventListener);
