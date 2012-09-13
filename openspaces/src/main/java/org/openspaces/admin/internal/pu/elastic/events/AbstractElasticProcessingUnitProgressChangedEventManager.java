@@ -108,12 +108,19 @@ public abstract class AbstractElasticProcessingUnitProgressChangedEventManager<T
             throw new IllegalArgumentException("newEvent cannot be null");
         }
         
+        if (newEvent.getProcessingUnitName() == null) {
+            throw new IllegalArgumentException("newEvent pu name cannot be null, " + newEvent);
+        }
+        
         //remove any existing events with the same pu name
         Iterator<TE> iterator = lastProgressEvents.iterator();
         while (iterator.hasNext()) {
             TE event = iterator.next();
             if (event == null) {
                 throw new IllegalStateException("Event could not be null: " + lastProgressEvents);
+            }
+            if (event.getProcessingUnitName() == null) {
+                throw new IllegalStateException("event pu name cannot be null, " + event);
             }
             if (event.getProcessingUnitName().equals(newEvent.getProcessingUnitName())) {
                 iterator.remove();
