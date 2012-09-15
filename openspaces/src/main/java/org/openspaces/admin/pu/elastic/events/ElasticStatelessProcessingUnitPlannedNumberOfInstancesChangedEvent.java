@@ -43,7 +43,6 @@ public class ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent
     public ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent(int beforePlannedNumberOfInstances, int afterPlannedNumberOfInstances) {
         this.beforePlannedNumberOfInstances = beforePlannedNumberOfInstances;
         this.afterPlannedNumberOfInstances = afterPlannedNumberOfInstances;
-        setDecisionDescription("Number of planned instances changed from " + beforePlannedNumberOfInstances + " to " + afterPlannedNumberOfInstances);
     }
 
 
@@ -69,5 +68,10 @@ public class ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent
         
         beforePlannedNumberOfInstances = in.readInt();
         afterPlannedNumberOfInstances = in.readInt();
+    }
+
+    @Override
+    public String getDecisionDescription() {
+        return "Number of planned instances changed from " + beforePlannedNumberOfInstances + " to " + afterPlannedNumberOfInstances;
     }
 }

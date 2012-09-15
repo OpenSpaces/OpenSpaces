@@ -48,7 +48,6 @@ public class ElasticStatefulProcessingUnitPlannedCapacityChangedEvent
     public ElasticStatefulProcessingUnitPlannedCapacityChangedEvent(CapacityRequirementsConfig before, CapacityRequirementsConfig after) {
         this.beforePlanned = before;
         this.afterPlanned = after;
-        setDecisionDescription("Planned capacity changed from " + before + " to " + after);
     }
 
 
@@ -74,5 +73,10 @@ public class ElasticStatefulProcessingUnitPlannedCapacityChangedEvent
         
         beforePlanned = new CapacityRequirementsConfig(IOUtils.readMapStringString(in));
         afterPlanned = new CapacityRequirementsConfig(IOUtils.readMapStringString(in));
+    }
+
+    @Override
+    public String getDecisionDescription() {
+        return "Planned capacity changed from " + beforePlanned + " to " + afterPlanned;
     }
 }
