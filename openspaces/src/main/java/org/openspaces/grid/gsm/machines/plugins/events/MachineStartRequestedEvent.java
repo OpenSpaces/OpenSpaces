@@ -22,8 +22,15 @@ package org.openspaces.grid.gsm.machines.plugins.events;
 public class MachineStartRequestedEvent extends AbstractMachineProvisioningEvent {
 
     private static final long serialVersionUID = 1L;
-    
+
+    /**
+     * Deserialization cotr
+     */
     public MachineStartRequestedEvent() {
-        setDecisionDescription("Starting a new machine");
+    }
+    
+    @Override
+    public String getDecisionDescription() {
+        return "Starting a new machine";
     }
 }

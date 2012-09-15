@@ -15,10 +15,66 @@
  *******************************************************************************/
 package org.openspaces.grid.gsm.machines.plugins.events;
 
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+
+import com.gigaspaces.internal.io.IOUtils;
+
 /**
  * @author Itai Frenkel
- *
+ * @since 9.1.0
  */
-public class GridServiceAgentStoppedEvent {
+public class GridServiceAgentStoppedEvent extends AbstractGridServiceAgentProvisioningEvent {
+        
+    private static final long serialVersionUID = 1L;
+    
+    private String hostAddress;
+    private String agentUid;
 
+    /**
+     * Deserialization cotr
+     */
+    public GridServiceAgentStoppedEvent() {
+    }
+    
+    public GridServiceAgentStoppedEvent(String hostAddress, String agentUid) {
+        this.hostAddress = hostAddress;
+        this.agentUid = agentUid;
+    }
+    
+    public String getHostAddress() {
+        return hostAddress;
+    }
+
+    public void setHostAddress(String hostAddress) {
+        this.hostAddress = hostAddress;
+    }
+
+    public String getAgentUid() {
+        return agentUid;
+    }
+
+    public void setAgentUid(String agentUid) {
+        this.agentUid = agentUid;
+    }
+
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        super.writeExternal(out);
+        IOUtils.writeString(out, hostAddress);
+        IOUtils.writeString(out, agentUid);
+    }
+    
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        super.readExternal(in);
+        hostAddress = IOUtils.readString(in);
+        agentUid = IOUtils.readString(in);
+    }
+
+    @Override
+    public String getDecisionDescription() {
+        return "Stopped agent " + agentUid + " on host " + hostAddress;
+    }
 }

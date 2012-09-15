@@ -38,7 +38,6 @@ public class MachineStoppedEvent extends AbstractMachineProvisioningEvent {
     }
     
     public MachineStoppedEvent(String hostAddress) {
-        setDecisionDescription("Machine was stopped. Host address " + hostAddress);
         this.hostAddress = hostAddress;
     }
     
@@ -60,5 +59,10 @@ public class MachineStoppedEvent extends AbstractMachineProvisioningEvent {
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
         hostAddress = IOUtils.readString(in);    
+    }
+
+    @Override
+    public String getDecisionDescription() {
+        return "Machine " + hostAddress + " is stopped.";
     }
 }

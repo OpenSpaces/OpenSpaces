@@ -39,7 +39,6 @@ public class GridServiceAgentStartedEvent extends AbstractGridServiceAgentProvis
     }
     
     public GridServiceAgentStartedEvent(String hostAddress, String agentUid) {
-        setDecisionDescription("New agent was started. Host address " + hostAddress + " Agent UID " + agentUid);
         this.hostAddress = hostAddress;
         this.agentUid = agentUid;
     }
@@ -72,5 +71,10 @@ public class GridServiceAgentStartedEvent extends AbstractGridServiceAgentProvis
         super.readExternal(in);
         hostAddress = IOUtils.readString(in);
         agentUid = IOUtils.readString(in);
+    }
+
+    @Override
+    public String getDecisionDescription() {
+        return "Started agent " + agentUid + " on machine " + hostAddress;
     }
 }

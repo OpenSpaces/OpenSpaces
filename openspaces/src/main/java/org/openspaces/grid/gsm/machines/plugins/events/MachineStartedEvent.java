@@ -38,7 +38,6 @@ public class MachineStartedEvent extends AbstractMachineProvisioningEvent {
     }
     
     public MachineStartedEvent(String hostAddress) {
-        setDecisionDescription("New machine was started. Host address " + hostAddress);
         this.hostAddress = hostAddress;
     }
     
@@ -60,5 +59,10 @@ public class MachineStartedEvent extends AbstractMachineProvisioningEvent {
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
         hostAddress = IOUtils.readString(in);    
+    }
+
+    @Override
+    public String getDecisionDescription() {
+        return "Started new machine " + hostAddress;
     }
 }

@@ -22,7 +22,7 @@ import org.openspaces.admin.internal.pu.elastic.events.AbstractElasticProcessing
  * @author Itai Frenkel
  * @since 9.1.0
  */
-public class AbstractGridServiceAgentProvisioningEvent extends AbstractElasticProcessingUnitDecisionEvent implements ElasticGridServiceAgentProvisioningProgressChangedEvent {
+public abstract class AbstractGridServiceAgentProvisioningEvent extends AbstractElasticProcessingUnitDecisionEvent implements ElasticGridServiceAgentProvisioningProgressChangedEvent {
     
     private static final long serialVersionUID = 1L;
 }

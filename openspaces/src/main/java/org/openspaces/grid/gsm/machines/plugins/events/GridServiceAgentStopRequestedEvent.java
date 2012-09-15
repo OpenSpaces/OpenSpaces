@@ -39,7 +39,6 @@ public class GridServiceAgentStopRequestedEvent extends AbstractGridServiceAgent
     }
     
     public GridServiceAgentStopRequestedEvent(String hostAddress, String agentUid) {
-        setDecisionDescription("Stopping agent. Host address " + hostAddress + " Agent UID " + agentUid);
         this.hostAddress = hostAddress;
         this.agentUid = agentUid;
     }
@@ -72,5 +71,10 @@ public class GridServiceAgentStopRequestedEvent extends AbstractGridServiceAgent
         super.readExternal(in);
         hostAddress = IOUtils.readString(in);
         agentUid = IOUtils.readString(in);
+    }
+
+    @Override
+    public String getDecisionDescription() {
+        return "Stopping agent " + agentUid + " on host " + hostAddress;
     }
 }

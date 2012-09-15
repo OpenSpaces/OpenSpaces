@@ -23,5 +23,4 @@ import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitDecisionEvent
  */
 public interface InternalElasticProcessingUnitDecisionEvent extends ElasticProcessingUnitDecisionEvent, InternalElasticProcessingUnitProgressChangedEvent {
 
-    void setDecisionDescription(String message);
 }

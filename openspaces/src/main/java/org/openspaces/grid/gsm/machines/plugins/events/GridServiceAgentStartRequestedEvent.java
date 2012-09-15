@@ -38,7 +38,6 @@ public class GridServiceAgentStartRequestedEvent extends AbstractGridServiceAgen
     
     public GridServiceAgentStartRequestedEvent(String hostAddress) {
         super();
-        setDecisionDescription("Starting a new grid service agent. Host Address " + hostAddress);
         this.hostAddress = hostAddress;
     }
     
@@ -61,5 +60,10 @@ public class GridServiceAgentStartRequestedEvent extends AbstractGridServiceAgen
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
         hostAddress = IOUtils.readString(in);    
+    }
+
+    @Override
+    public String getDecisionDescription() {
+         return "Starting a new agent on machine " + hostAddress;
     }
 }

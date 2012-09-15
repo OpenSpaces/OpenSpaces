@@ -15,43 +15,20 @@
  *******************************************************************************/
 package org.openspaces.admin.internal.pu.elastic.events;
 
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-
-import com.gigaspaces.internal.io.IOUtils;
 
 /**
  * @author Itai Frenkel
  * @since 9.1.0
  */
-public class AbstractElasticProcessingUnitDecisionEvent extends AbstractElasticProcessingUnitProgressChangedEvent implements InternalElasticProcessingUnitDecisionEvent {
+public abstract class AbstractElasticProcessingUnitDecisionEvent extends AbstractElasticProcessingUnitProgressChangedEvent implements InternalElasticProcessingUnitDecisionEvent {
 
     private static final long serialVersionUID = 1L;
     
-    private String decisionDescription;
-    
+    /**
+     * Each decision event instance has the same (parameterized) description as other event instances with the same type. 
+     */
     @Override
-    public void setDecisionDescription(String description) {
-        this.decisionDescription = description;
-    }
-    
-    @Override
-    public String getDecisionDescription() {
-        return decisionDescription;
-    }
-    
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        super.writeExternal(out);
-        IOUtils.writeString(out, decisionDescription);    
-    }
-    
-    @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        super.readExternal(in);
-        decisionDescription = IOUtils.readString(in);    
-    }
+    public abstract String getDecisionDescription();
     
     @Override
     public String toString() {

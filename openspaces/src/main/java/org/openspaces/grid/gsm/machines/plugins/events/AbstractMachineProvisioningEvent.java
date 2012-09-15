@@ -22,7 +22,7 @@ import org.openspaces.admin.machine.events.ElasticMachineProvisioningProgressCha
  * @author Itai Frenkel
  * @since 9.1.0
  */
-public class AbstractMachineProvisioningEvent extends AbstractElasticProcessingUnitDecisionEvent implements ElasticMachineProvisioningProgressChangedEvent {
+public abstract class AbstractMachineProvisioningEvent extends AbstractElasticProcessingUnitDecisionEvent implements ElasticMachineProvisioningProgressChangedEvent {
     
     private static final long serialVersionUID = 1L;
 }
