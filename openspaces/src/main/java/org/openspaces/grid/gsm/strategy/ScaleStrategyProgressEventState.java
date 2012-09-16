@@ -231,7 +231,9 @@ public class ScaleStrategyProgressEventState {
     
     private InternalElasticProcessingUnitDecisionEvent createDecisionEvent(SlaEnforcementDecision e) {
         InternalElasticProcessingUnitDecisionEvent newEvent=  e.toEvent();
+        newEvent.setComplete(false);
         newEvent.setUndeploying(isUndeploying);
+        newEvent.setProcessingUnitName(processingUnitName);
         return newEvent;
     }
     
