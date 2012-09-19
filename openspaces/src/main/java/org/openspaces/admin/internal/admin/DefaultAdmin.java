@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ConcurrentHashMap;
@@ -164,6 +165,7 @@ import com.gigaspaces.grid.gsm.PUDetails;
 import com.gigaspaces.grid.gsm.PUsDetails;
 import com.gigaspaces.internal.jvm.JVMDetails;
 import com.gigaspaces.internal.os.OSDetails;
+import com.gigaspaces.internal.utils.StringUtils;
 import com.gigaspaces.internal.utils.concurrent.GSThreadFactory;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.security.directory.UserDetails;
@@ -258,7 +260,7 @@ public class DefaultAdmin implements InternalAdmin {
     private final List<ProcessingUnitInstance> removedProcessingUnitInstances = new LinkedList<ProcessingUnitInstance>();
 
     //removedSpacesPerProcessingUnit needs to be locked under DefaultAdmin.this
-    private Map<ProcessingUnit, Space> removedSpacesPerProcessingUnit = new HashMap<ProcessingUnit,Space>();
+    private final Map<ProcessingUnit, Space> removedSpacesPerProcessingUnit = new HashMap<ProcessingUnit,Space>();
     
     public DefaultAdmin() {
         this.discoveryService = new DiscoveryService(this);
@@ -1496,6 +1498,8 @@ public class DefaultAdmin implements InternalAdmin {
         private Long eventsCursor;
         private String eventsCursorEsmUid;
 
+        private String lastHoldersStateDescription = "";
+        
         @Override
         public void run() {
             
@@ -1539,6 +1543,17 @@ public class DefaultAdmin implements InternalAdmin {
                         continue;
                     }
                     logger.warn("Failed to get GSM details", e);
+                }
+            }
+            
+            if (logger.isDebugEnabled()) {
+                String currentHoldersStateDescription = StringUtils.arrayToDelimitedString(
+                        holders.values().toArray(new Holder[0]), StringUtils.NEW_LINE);
+                
+                if (!currentHoldersStateDescription.equals(lastHoldersStateDescription)) {
+                    lastHoldersStateDescription = currentHoldersStateDescription;
+                    logger.debug("Current PUs Management state: " + StringUtils.NEW_LINE
+                            + currentHoldersStateDescription);
                 }
             }
             
@@ -1818,7 +1833,25 @@ public class DefaultAdmin implements InternalAdmin {
             GridServiceManager managingGSM;
 
             Map<String, GridServiceManager> backupGSMs = new HashMap<String, GridServiceManager>();
+            
+            @Override
+            public String toString() {
+                StringBuilder sb = new StringBuilder()
+                    .append("name: ").append(name).append(", ")
+                    .append("managingGSM: ").append(managingGSM != null ? managingGSM.getUid() : "null").append(", ")
+                    .append("backupGSMs: ");
+                
+                if (backupGSMs == null) {
+                    sb.append("null");
+                } else {
+                    TreeSet<String> uids = new TreeSet<String>(backupGSMs.keySet());
+                    sb.append(uids.toString());
+                }
+                
+                return sb.toString();
+            }
         }
+        
     }
 
     private class LoggerRunnable implements Runnable {
