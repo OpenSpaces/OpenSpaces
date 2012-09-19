@@ -250,17 +250,23 @@ implements AutoScalingSlaEnforcementEndpointAware {
             
             } catch (AutoScalingHighThresholdBreachedException e) {
                 if (getLogger().isDebugEnabled()) {
-                    getLogger().debug("High threshold breachned. Settings zones " + zones + " capacity to " + e.getNewCapacity());
+                    getLogger().debug("High threshold breached. Settings zones " + zones + " capacity to " + e.getNewCapacity());
                 }
                 newPlanned = newPlanned.set(zones, e.getNewCapacity());
 
             } catch (AutoScalingLowThresholdBreachedException e) {
                 if (getLogger().isDebugEnabled()) {
-                    getLogger().debug("Low threshold breachned. Settings zones " + zones + " capacity to " + e.getNewCapacity());
+                    getLogger().debug("Low threshold breached. Settings zones " + zones + " capacity to " + e.getNewCapacity());
                 }
                 newPlanned = newPlanned.set(zones, e.getNewCapacity());
 
             } catch (AutoScalingSlaEnforcementInProgressException e) {
+                // exception in one zone should not influence running autoscaling in another zone.
+                // save exceptions for later handling
+                pendingAutoscaleInProgressExceptions.addReason(zones, e);
+            }
+            
+            if (!newPlanned.getZones().contains(zones)) {
                 // do not change the plan if an exception was raised
                 final CapacityRequirements plannedForZones = planned.getZonesCapacityOrZero(zones);
                 
@@ -268,10 +274,6 @@ implements AutoScalingSlaEnforcementEndpointAware {
                     getLogger().debug("Copying exising zones " + zones +" capacity " + plannedForZones);
                 }
                 newPlanned = newPlanned.set(zones, plannedForZones);
-                
-                // exception in one zone should not influence running autoscaling in another zone.
-                // save exceptions for later handling
-                pendingAutoscaleInProgressExceptions.addReason(zones, e);
             }
         }
 
