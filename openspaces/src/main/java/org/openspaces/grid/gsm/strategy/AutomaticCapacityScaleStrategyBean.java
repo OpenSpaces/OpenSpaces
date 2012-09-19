@@ -249,15 +249,24 @@ implements AutoScalingSlaEnforcementEndpointAware {
                 enforceAutoScalingSla(zones, enforced, newPlanned);
             
             } catch (AutoScalingHighThresholdBreachedException e) {
+                if (getLogger().isDebugEnabled()) {
+                    getLogger().debug("High threshold breachned. Settings zones " + zones + " capacity to " + e.getNewCapacity());
+                }
                 newPlanned = newPlanned.set(zones, e.getNewCapacity());
 
             } catch (AutoScalingLowThresholdBreachedException e) {
+                if (getLogger().isDebugEnabled()) {
+                    getLogger().debug("Low threshold breachned. Settings zones " + zones + " capacity to " + e.getNewCapacity());
+                }
                 newPlanned = newPlanned.set(zones, e.getNewCapacity());
 
             } catch (AutoScalingSlaEnforcementInProgressException e) {
-                
                 // do not change the plan if an exception was raised
                 final CapacityRequirements plannedForZones = planned.getZonesCapacityOrZero(zones);
+                
+                if (getLogger().isDebugEnabled()) {
+                    getLogger().debug("Copying exising zones " + zones +" capacity " + plannedForZones);
+                }
                 newPlanned = newPlanned.set(zones, plannedForZones);
                 
                 // exception in one zone should not influence running autoscaling in another zone.
