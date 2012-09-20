@@ -231,9 +231,9 @@ public class DefaultAdmin implements InternalAdmin {
 
     private volatile long scheduledSpaceMonitorInterval = 1000; // default to one second
 
-    private Future scheduledAgentProcessessMonitorFuture;
+    private volatile Future scheduledAgentProcessessMonitorFuture;
 
-    private Future scheduledProcessingUnitMonitorFuture;
+    private volatile Future scheduledProcessingUnitMonitorFuture;
 
     private boolean scheduledStatisticsMonitor = false;
 
