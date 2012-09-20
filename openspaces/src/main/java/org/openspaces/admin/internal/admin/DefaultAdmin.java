@@ -498,6 +498,11 @@ public class DefaultAdmin implements InternalAdmin {
         discoveryService.stop();
         if (scheduledProcessingUnitMonitorFuture != null) { 
             scheduledProcessingUnitMonitorFuture.cancel(true);
+            scheduledProcessingUnitMonitorFuture = null;
+        }
+        if (scheduledAgentProcessessMonitorFuture != null) {
+            scheduledAgentProcessessMonitorFuture.cancel(true);
+            scheduledAgentProcessessMonitorFuture = null;
         }
 
         scheduledExecutorService.shutdownNow();
