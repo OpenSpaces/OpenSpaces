@@ -16,12 +16,14 @@
 
 package org.openspaces.admin;
 
-import org.openspaces.admin.internal.admin.DefaultAdmin;
-import org.jini.rio.boot.BootUtil;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.jini.rio.boot.BootUtil;
+import org.openspaces.admin.internal.admin.DefaultAdmin;
+
+import com.gigaspaces.logger.GSLogConfigLoader;
 import com.gigaspaces.security.directory.User;
 import com.gigaspaces.security.directory.UserDetails;
-import com.gigaspaces.logger.GSLogConfigLoader;
 
 /**
  * A factory allowing to create {@link org.openspaces.admin.Admin} instance.
@@ -40,6 +42,8 @@ public class AdminFactory {
     private final DefaultAdmin admin = new DefaultAdmin();
 
     private boolean useGsLogging = true;
+
+    private final AtomicBoolean created = new AtomicBoolean(false);
     
     public AdminFactory useGsLogging(boolean useGsLogging) {
         this.useGsLogging = useGsLogging;
@@ -120,6 +124,10 @@ public class AdminFactory {
      * Creates the admin and begins its listening for events from the lookup service.
      */
     public Admin create() {
+        if (!created.compareAndSet(false, true)) {
+            //used to make sure that the admin#begin() is not called twice
+            throw new IllegalStateException("AdminFactory#create() has already been called.");
+        }
         if (useGsLogging) {
             GSLogConfigLoader.getLoader();
         }
