@@ -370,9 +370,9 @@ public class DefaultAdmin implements InternalAdmin {
         }
 
         discoveryService.start();
-        scheduledProcessingUnitMonitorFuture = this.scheduleWithFixedDelay(
+        scheduledProcessingUnitMonitorFuture = scheduleWithFixedDelay(
                 new ScheduledProcessingUnitMonitor(), scheduledProcessingUnitMonitorInterval, scheduledProcessingUnitMonitorInterval, TimeUnit.MILLISECONDS);
-        scheduledAgentProcessessMonitorFuture = this.scheduleWithFixedDelay(new ScheduledAgentProcessessMonitor(),
+        scheduledAgentProcessessMonitorFuture = scheduleWithFixedDelay(new ScheduledAgentProcessessMonitor(),
                 scheduledAgentProcessessMonitorInterval, scheduledAgentProcessessMonitorInterval, TimeUnit.MILLISECONDS);
         
     }
@@ -421,7 +421,7 @@ public class DefaultAdmin implements InternalAdmin {
         this.scheduledProcessingUnitMonitorInterval = timeUnit.toMillis(interval);
         if (scheduledProcessingUnitMonitorFuture != null) { // during initialization
             scheduledProcessingUnitMonitorFuture.cancel(false);
-            scheduledProcessingUnitMonitorFuture = this.scheduleWithFixedDelay(new ScheduledProcessingUnitMonitor(), interval, interval, timeUnit);
+            scheduledProcessingUnitMonitorFuture = scheduleWithFixedDelay(new ScheduledProcessingUnitMonitor(), interval, interval, timeUnit);
         }
     }
 
@@ -433,7 +433,7 @@ public class DefaultAdmin implements InternalAdmin {
         this.scheduledAgentProcessessMonitorInterval = timeUnit.toMillis(interval);
         if (scheduledAgentProcessessMonitorFuture != null) { // during initialization
             scheduledAgentProcessessMonitorFuture.cancel(false);
-            scheduledAgentProcessessMonitorFuture = this.scheduleWithFixedDelay(new ScheduledAgentProcessessMonitor(), interval, interval, timeUnit);
+            scheduledAgentProcessessMonitorFuture = scheduleWithFixedDelay(new ScheduledAgentProcessessMonitor(), interval, interval, timeUnit);
         }
     }
 
@@ -1884,7 +1884,7 @@ public class DefaultAdmin implements InternalAdmin {
         if (closeStarted.get()) {
             throw new IllegalStateException("Admin already closed");
         }
-        return this.scheduleWithFixedDelay(new Runnable() {
+        return scheduleWithFixedDelay(new Runnable() {
 
             @Override
             public void run() {
