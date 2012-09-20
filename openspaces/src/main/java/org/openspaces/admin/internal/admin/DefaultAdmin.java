@@ -372,9 +372,9 @@ public class DefaultAdmin implements InternalAdmin {
         this.scheduledExecutorService = createScheduledThreadPoolExecutor("admin-scheduled-executor-thread",5);
 
         discoveryService.start();
-        scheduledProcessingUnitMonitorFuture = scheduledExecutorService.scheduleWithFixedDelay(
+        scheduledProcessingUnitMonitorFuture = this.scheduleWithFixedDelay(
                 new ScheduledProcessingUnitMonitor(), scheduledProcessingUnitMonitorInterval, scheduledProcessingUnitMonitorInterval, TimeUnit.MILLISECONDS);
-        scheduledAgentProcessessMonitorFuture = scheduledExecutorService.scheduleWithFixedDelay(new ScheduledAgentProcessessMonitor(),
+        scheduledAgentProcessessMonitorFuture = this.scheduleWithFixedDelay(new ScheduledAgentProcessessMonitor(),
                 scheduledAgentProcessessMonitorInterval, scheduledAgentProcessessMonitorInterval, TimeUnit.MILLISECONDS);
         
     }
@@ -1502,16 +1502,6 @@ public class DefaultAdmin implements InternalAdmin {
         
         @Override
         public void run() {
-            
-            if (closeEnded.get()) {
-                Exception e = new IllegalStateException("Not executing: " + this.toString() + " - Admin already closed. scheduledExecutorService.shutdownNow should have been called.");
-                if (logger.isDebugEnabled()) {
-                    logger.debug(e.getMessage(), e);
-                }
-                //TODO: In order to stop the scheduler completely this time, raise an exception
-                //throw e;
-                return;
-            }
             
             final List<Events> eventsFromGSMs = new ArrayList<Events>();
             final Map<String, Holder> holders = new HashMap<String, Holder>();
