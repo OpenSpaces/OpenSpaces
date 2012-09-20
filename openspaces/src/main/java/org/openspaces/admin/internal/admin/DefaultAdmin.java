@@ -183,7 +183,7 @@ public class DefaultAdmin implements InternalAdmin {
     
     private static final int DEFAULT_STATE_CHANGE_THREADS = 10;
 
-    private ScheduledThreadPoolExecutor scheduledExecutorService;
+    private final ScheduledThreadPoolExecutor scheduledExecutorService;
 
     private final DiscoveryService discoveryService;
 
@@ -221,7 +221,7 @@ public class DefaultAdmin implements InternalAdmin {
 
     private ExecutorService[] eventsExecutorServices;
 
-    private ExecutorService longRunningExecutorService;
+    private final ExecutorService longRunningExecutorService;
     
     private LinkedList<Runnable>[] eventsQueue;
 
@@ -265,6 +265,8 @@ public class DefaultAdmin implements InternalAdmin {
     public DefaultAdmin() {
         this.discoveryService = new DiscoveryService(this);
         this.alertManager = new DefaultAlertManager(this);
+        this.longRunningExecutorService = createThreadPoolExecutor("admin-state-change-thread",DEFAULT_STATE_CHANGE_THREADS);
+        this.scheduledExecutorService = createScheduledThreadPoolExecutor("admin-scheduled-executor-thread",5);
     }
     
     @Override
@@ -358,9 +360,7 @@ public class DefaultAdmin implements InternalAdmin {
     }
     
     public void begin() {
-        
-        this.longRunningExecutorService = createThreadPoolExecutor("admin-state-change-thread",DEFAULT_STATE_CHANGE_THREADS);
-        
+                
         int numberOfThreads = singleThreadedEventListeners ? 1 :  DEFAULT_EVENT_LISTENER_THREADS;
         this.eventsExecutorServices = new ExecutorService[numberOfThreads];
         eventsQueue = new LinkedList[numberOfThreads];
@@ -368,8 +368,6 @@ public class DefaultAdmin implements InternalAdmin {
             eventsExecutorServices[i] = createThreadPoolExecutor("admin-event-executor-tread", 1, singleThreadedEventListeners);
             eventsQueue[i] = new LinkedList<Runnable>();
         }
-    
-        this.scheduledExecutorService = createScheduledThreadPoolExecutor("admin-scheduled-executor-thread",5);
 
         discoveryService.start();
         scheduledProcessingUnitMonitorFuture = this.scheduleWithFixedDelay(
@@ -498,9 +496,10 @@ public class DefaultAdmin implements InternalAdmin {
         }
         closeStarted.set(true);
         discoveryService.stop();
-        if (scheduledProcessingUnitMonitorFuture != null) { // during initialization
+        if (scheduledProcessingUnitMonitorFuture != null) { 
             scheduledProcessingUnitMonitorFuture.cancel(true);
         }
+
         scheduledExecutorService.shutdownNow();
         for (ExecutorService executorService : eventsExecutorServices) {
             executorService.shutdownNow();
