@@ -32,7 +32,6 @@ public class ContextPropertyUtils {
     private static final String CONTEXT_PROPERTY_SERVICE_TIER_TYPE = "com.gs.service.type";
     private static final String CONTEXT_PROPERTY_SERVICE_ICON = "com.gs.service.icon";
     private static final String CONTEXT_PROPERTY_CLOUD_NAME = "com.gs.cloudify.cloud-name";
-    private static final String CONTEXT_PROPERTY_SERVICE_FILE_NAME = "com.gs.cloudify.service-file-name";
     
     public static ServiceTierType getTierType(InternalProcessingUnit processingUnit) {
         String tierType = getContextPropertyValue(processingUnit, CONTEXT_PROPERTY_SERVICE_TIER_TYPE);
@@ -42,10 +41,6 @@ public class ContextPropertyUtils {
         return ServiceTierType.valueOf(tierType);
     }
 
-    public static String getServiceFileCustomName(InternalProcessingUnit processingUnit) {
-        return getContextPropertyValue(processingUnit, CONTEXT_PROPERTY_SERVICE_FILE_NAME);
-    }
-    
     public static String getIconPath(InternalProcessingUnit processingUnit) {
         return getContextPropertyValue(processingUnit, CONTEXT_PROPERTY_SERVICE_ICON);
     }
