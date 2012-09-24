@@ -63,11 +63,8 @@ public class ElasticMachineProvisioningAlertBean extends AbstractElasticProcessi
      */
     @Override
     public void elasticMachineProvisioningFailure(ElasticMachineProvisioningFailureEvent event) {
-        String description = event.getFailureDescription();
-        for (String puName : event.getProcessingUnitNames()) {
-            ElasticMachineProvisioningAlert alert = new ElasticMachineProvisioningAlert(createRaisedAlert(puName, description));
-            super.raiseAlert(alert);
-        }
+        ElasticMachineProvisioningAlert alert = new ElasticMachineProvisioningAlert(createRaisedAlert(event));
+        super.raiseAlert(alert);
     }
 
     /**
@@ -76,12 +73,9 @@ public class ElasticMachineProvisioningAlertBean extends AbstractElasticProcessi
      */
     @Override
     public void elasticMachineProvisioningProgressChanged(ElasticMachineProvisioningProgressChangedEvent event) {
-        String puName = event.getProcessingUnitName();
-        if (event.isComplete()) {
-            for (Alert baseAlert : createResolvedAlerts(puName)) {
-                ElasticMachineProvisioningAlert alert = new ElasticMachineProvisioningAlert(baseAlert);
-                super.raiseAlert(alert);
-            }
+        for (Alert baseAlert : createResolvedAlerts(event)) {
+            ElasticMachineProvisioningAlert alert = new ElasticMachineProvisioningAlert(baseAlert);
+            super.raiseAlert(alert);
         }
     }
 }

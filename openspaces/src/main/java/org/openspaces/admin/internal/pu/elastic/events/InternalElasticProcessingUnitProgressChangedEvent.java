@@ -19,6 +19,7 @@ package org.openspaces.admin.internal.pu.elastic.events;
 
 import org.jini.rio.monitor.event.Event;
 import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitProgressChangedEvent;
+import org.openspaces.admin.zone.config.ZonesConfig;
 
 /**
  * An interface for modifying ESM {@link ElasticProcessingUnitProgressChangedEvent} 
@@ -32,4 +33,6 @@ public interface InternalElasticProcessingUnitProgressChangedEvent extends Elast
     public void setComplete(boolean complete);
     
     public void setUndeploying(boolean undeploying);
+    
+    public void setGridServiceAgentZones(ZonesConfig zones);
 }

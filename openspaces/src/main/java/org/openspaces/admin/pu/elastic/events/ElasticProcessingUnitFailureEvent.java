@@ -17,13 +17,20 @@
  ******************************************************************************/
 package org.openspaces.admin.pu.elastic.events;
 
+import org.openspaces.admin.zone.config.ZonesConfig;
+
 public interface ElasticProcessingUnitFailureEvent extends ElasticProcessingUnitEvent {
 
     /**
      * @return the list of processing units that may be affected by this failure to start a new machine
      */
-    String[] getProcessingUnitNames();
+    String getProcessingUnitName();
 
+    /**
+     * @return The GSA zones related to this event. 
+     */
+    ZonesConfig getGridServiceAgentZones();
+    
     /**
      * @return the failure description
      */

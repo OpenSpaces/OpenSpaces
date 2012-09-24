@@ -19,7 +19,17 @@ package org.openspaces.admin.pu.elastic.events;
 
 import java.io.Externalizable;
 
+import org.openspaces.admin.zone.config.ZonesConfig;
+
 public interface ElasticProcessingUnitEvent extends Externalizable{
 
-    
+    /**
+     * @return the processing units that this progress change refers to
+     */
+    public String getProcessingUnitName();
+
+    /**
+     * @return The GSA zones related to this event. 
+     */
+    public ZonesConfig getGridServiceAgentZones();    
 }

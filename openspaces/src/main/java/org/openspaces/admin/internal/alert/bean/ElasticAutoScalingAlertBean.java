@@ -63,11 +63,8 @@ public class ElasticAutoScalingAlertBean extends AbstractElasticProcessingUnitAl
      */
     @Override
     public void elasticAutoScalingFailure(ElasticAutoScalingFailureEvent event) {
-        String description = event.getFailureDescription();
-        for (String puName : event.getProcessingUnitNames()) {
-            ElasticAutoScalingAlert alert = new ElasticAutoScalingAlert(createRaisedAlert(puName, description));
-            super.raiseAlert(alert);
-        }
+        ElasticAutoScalingAlert alert = new ElasticAutoScalingAlert(createRaisedAlert(event));
+        super.raiseAlert(alert);
     }
 
     /**
@@ -76,12 +73,9 @@ public class ElasticAutoScalingAlertBean extends AbstractElasticProcessingUnitAl
      */
     @Override
     public void elasticAutoScalingProgressChanged(ElasticAutoScalingProgressChangedEvent event) {
-        String puName = event.getProcessingUnitName();
-        if (event.isComplete()) {
-            for (Alert baseAlert : createResolvedAlerts(puName)) {
-                ElasticAutoScalingAlert alert = new ElasticAutoScalingAlert(baseAlert);
-                super.raiseAlert(alert);
-            }
+        for (Alert baseAlert : createResolvedAlerts(event)) {
+            ElasticAutoScalingAlert alert = new ElasticAutoScalingAlert(baseAlert);
+            super.raiseAlert(alert);
         }
     }
 }

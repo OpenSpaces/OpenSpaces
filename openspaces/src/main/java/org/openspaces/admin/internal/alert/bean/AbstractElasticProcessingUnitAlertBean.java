@@ -29,6 +29,10 @@ import org.openspaces.admin.alert.AlertFactory;
 import org.openspaces.admin.alert.AlertSeverity;
 import org.openspaces.admin.alert.AlertStatus;
 import org.openspaces.admin.internal.alert.InternalAlertManager;
+import org.openspaces.admin.internal.zone.config.ZonesConfigUtils;
+import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitEvent;
+import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitFailureEvent;
+import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitProgressChangedEvent;
 
 public abstract class AbstractElasticProcessingUnitAlertBean implements AlertBean {
 
@@ -89,41 +93,51 @@ public abstract class AbstractElasticProcessingUnitAlertBean implements AlertBea
         
     }
     
-    protected Alert[] createResolvedAlerts(String processingUnitName) {
+    protected Alert[] createResolvedAlerts(ElasticProcessingUnitProgressChangedEvent event) {
+        
+        if (!event.isComplete()) {
+            return new Alert[0];
+        }
+        
         List<Alert> alerts = new ArrayList<Alert>();
-        String groupUid = generateGroupUid(processingUnitName);
+        String groupUid = generateGroupUid(event);
         // there could be multiple alerts per PU
         Alert[] alertsByGroupUid = ((InternalAlertManager)admin.getAlertManager()).getAlertRepository().getAlertsByGroupUid(groupUid);
         if (alertsByGroupUid.length != 0 && !alertsByGroupUid[0].getStatus().isResolved()) {
-            alerts.add(createResolvedAlert(processingUnitName));
+            alerts.add(createAlert(AlertStatus.RESOLVED, event));
         }
         return alerts.toArray(new Alert[alerts.size()]);
+    
+    }
+ 
+    protected Alert createRaisedAlert(ElasticProcessingUnitFailureEvent event) {
+        return createAlert(AlertStatus.RAISED, event);
     }
     
-    protected Alert createRaisedAlert(String processingUnitName, String alertDescription) {
-        return createAlert(AlertStatus.RAISED, processingUnitName, alertDescription);
+    private String generateGroupUid(ElasticProcessingUnitEvent event) {
+        String groupUid = beanUid.concat("-").concat(event.getProcessingUnitName());
+        if (event.getGridServiceAgentZones() != null) {
+            groupUid = groupUid.concat(ZonesConfigUtils.zonesToString(event.getGridServiceAgentZones()));
+        }
+        return groupUid;
     }
     
-    private Alert createResolvedAlert(String processingUnitName) {
-        String description = String.format(resolvedAlertDescriptionFormat,processingUnitName);
-        return createAlert(AlertStatus.RESOLVED, processingUnitName, description);
-    }
-    
-    private String generateGroupUid(String puName) {
-        return beanUid.concat("-").concat(puName);
-    }
-    
-    private Alert createAlert(AlertStatus status, String processingUnitName, String alertDescription) {
+    private Alert createAlert(AlertStatus status, ElasticProcessingUnitEvent event) {
         
-        final String groupUid = generateGroupUid(processingUnitName);
+        String alertDescription = String.format(resolvedAlertDescriptionFormat,event);
+        
+        final String groupUid = generateGroupUid(event);
+        
+        String zonesDescription = event.getGridServiceAgentZones() != null ? " in zones " + event.getGridServiceAgentZones() : "";
+        
         return  
             new AlertFactory()
             .name(alertName)
             .severity(alertSeverity)
             .description(alertDescription)
             .status(status)
-            .componentUid(processingUnitName)
-            .componentDescription(processingUnitName)
+            .componentUid(event.getProcessingUnitName())
+            .componentDescription(event.getProcessingUnitName() + zonesDescription)
             .groupUid(groupUid)
             .create();
     }
