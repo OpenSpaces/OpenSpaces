@@ -151,7 +151,7 @@ public class AdminFactory {
             admin.addGroup(group);
         }
         for (String locator : locators) {
-            admin.addGroup(locator);
+            admin.addLocator(locator);
         }
         if (this.discoverUnmanagedSpaces) {
             admin.getDiscoveryService().discoverUnmanagedSpaces();
