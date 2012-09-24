@@ -15,20 +15,14 @@
  *******************************************************************************/
 package org.openspaces.admin.internal.pu.elastic.events;
 
-import org.jini.rio.monitor.event.Event;
 import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitFailureEvent;
-import org.openspaces.admin.zone.config.ZonesConfig;
 
 /**
  * @author Itai Frenkel
  * @since 9.1.0
  */
-public interface InternalElasticProcessingUnitFailureEvent extends ElasticProcessingUnitFailureEvent, Event {
+public interface InternalElasticProcessingUnitFailureEvent extends ElasticProcessingUnitFailureEvent, InternalElasticProcessingUnitEvent {
 
-    void setProcessingUnitName(String puName);
-    
-    void setGridServiceAgentZones(ZonesConfig zones);
-    
     void setFailureDescription(String failure);
 }
 
