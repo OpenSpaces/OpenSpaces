@@ -174,9 +174,8 @@ public class DefaultAutoScalingSlaEnforcementEndpoint implements AutoScalingSlaE
                 }
                 newCapacity = correctedNewCapacity;
             }
-            if (!existingCapacity.equals(newCapacity)) {
-                throw new AutoScalingLowThresholdBreachedException(pu, existingCapacity, newCapacity, sla.getContainerMemoryCapacityInMB());
-            }
+            
+            throw new AutoScalingLowThresholdBreachedException(pu, existingCapacity, newCapacity, sla.getContainerMemoryCapacityInMB());
         }
     }
 

@@ -338,6 +338,25 @@ implements AutoScalingSlaEnforcementEndpointAware {
             
             autoScalingEndpoint.enforceSla(sla);
             autoScalingCompletedEvent(zones);
+        } catch (AutoScalingLowThresholdBreachedException e) {
+            
+            boolean supressException = false;
+            final CapacityRequirementsPerZones plannedPerZones = super.getPlannedCapacity().toCapacityRequirementsPerZones();
+            if (plannedPerZones.getZones().contains(zones)) {
+                CapacityRequirements planned = plannedPerZones.getZonesCapacity(zones);
+                if (planned.equals(e.getNewCapacity()) && planned.equals(minimum)) {
+                    if (getLogger().isDebugEnabled()) {
+                        getLogger().debug("Low threshold breached. However existing plan already reflects that and we cannot scale-in below minimum. Do not issue an alert. " + planned, e);
+                    }
+                    supressException = true;
+                }
+            }
+            
+            if (!supressException) {
+                // Change plan / Issue alert
+                autoScalingInProgressEvent(e, zones);
+                throw e;
+            }
         } 
         catch (AutoScalingSlaEnforcementInProgressException e) {
             autoScalingInProgressEvent(e, zones);
