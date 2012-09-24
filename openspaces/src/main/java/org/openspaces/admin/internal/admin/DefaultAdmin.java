@@ -231,9 +231,9 @@ public class DefaultAdmin implements InternalAdmin {
 
     private volatile long scheduledSpaceMonitorInterval = 1000; // default to one second
 
-    private volatile Future scheduledAgentProcessessMonitorFuture;
+    private volatile Future<?> scheduledAgentProcessessMonitorFuture;
 
-    private volatile Future scheduledProcessingUnitMonitorFuture;
+    private volatile Future<?> scheduledProcessingUnitMonitorFuture;
 
     private boolean scheduledStatisticsMonitor = false;
 
@@ -246,13 +246,13 @@ public class DefaultAdmin implements InternalAdmin {
 
     private TimeUnit defaultTimeoutTimeUnit = TimeUnit.MILLISECONDS;
 
-    private boolean singleThreadedEventListeners = false;
+    private final boolean singleThreadedEventListeners;
 
     private long executorSingleThreadId;
 
     private final AlertManager alertManager;
 
-    private boolean useDaemonThreads;
+    private final boolean useDaemonThreads;
     
     private final AtomicInteger eventListenersCount = new AtomicInteger();
     
@@ -261,12 +261,32 @@ public class DefaultAdmin implements InternalAdmin {
 
     //removedSpacesPerProcessingUnit needs to be locked under DefaultAdmin.this
     private final Map<ProcessingUnit, Space> removedSpacesPerProcessingUnit = new HashMap<ProcessingUnit,Space>();
-    
-    public DefaultAdmin() {
+        
+    /**
+     * @param useDaemonThreads
+     *            Sets worker and events threads to be automatically closed when the process dies.
+     *            
+     * @param singleThreadedEventListeners
+     *            Enables a single event loop threading model in which all event listeners and admin
+     *            state updates are done on the same thread. The underlying assumption is that event
+     *            listeners do not perform an I/O operation so they won't block the single event
+     *            thread. Call this method before begin()
+     * 
+     */
+    public DefaultAdmin(boolean useDaemonThreads, boolean singleThreadedEventListeners) {
+        this.useDaemonThreads = useDaemonThreads;
+        this.singleThreadedEventListeners = singleThreadedEventListeners;
         this.discoveryService = new DiscoveryService(this);
         this.alertManager = new DefaultAlertManager(this);
         this.longRunningExecutorService = createThreadPoolExecutor("admin-state-change-thread",DEFAULT_STATE_CHANGE_THREADS);
         this.scheduledExecutorService = createScheduledThreadPoolExecutor("admin-scheduled-executor-thread",5);
+        final int numberOfThreads = singleThreadedEventListeners ? 1 :  DEFAULT_EVENT_LISTENER_THREADS;
+        this.eventsExecutorServices = new ExecutorService[numberOfThreads];
+        eventsQueue = new LinkedList[numberOfThreads];
+        for (int i = 0; i < numberOfThreads; i++) {
+            eventsExecutorServices[i] = createThreadPoolExecutor("admin-event-executor-tread", 1, singleThreadedEventListeners);
+            eventsQueue[i] = new LinkedList<Runnable>();
+        }
     }
     
     @Override
@@ -319,15 +339,6 @@ public class DefaultAdmin implements InternalAdmin {
         this.processingUnits.setStatisticsHistorySize(historySize);
     }
 
-    public void setUseDaemonThreads(boolean useDaemonThreads) {
-        this.useDaemonThreads = useDaemonThreads;
-    }
-    
-    @Override
-    public void singleThreadedEventListeners() {
-      this.singleThreadedEventListeners = true;
-    }
-
     @Override
     public void startStatisticsMonitor() {
         assertStateChangesPermitted();
@@ -360,15 +371,7 @@ public class DefaultAdmin implements InternalAdmin {
     }
     
     public void begin() {
-                
-        int numberOfThreads = singleThreadedEventListeners ? 1 :  DEFAULT_EVENT_LISTENER_THREADS;
-        this.eventsExecutorServices = new ExecutorService[numberOfThreads];
-        eventsQueue = new LinkedList[numberOfThreads];
-        for (int i = 0; i < numberOfThreads; i++) {
-            eventsExecutorServices[i] = createThreadPoolExecutor("admin-event-executor-tread", 1, singleThreadedEventListeners);
-            eventsQueue[i] = new LinkedList<Runnable>();
-        }
-
+        
         discoveryService.start();
         scheduledProcessingUnitMonitorFuture = scheduleWithFixedDelay(
                 new ScheduledProcessingUnitMonitor(), scheduledProcessingUnitMonitorInterval, scheduledProcessingUnitMonitorInterval, TimeUnit.MILLISECONDS);

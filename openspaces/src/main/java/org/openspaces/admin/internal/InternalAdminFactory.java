@@ -18,7 +18,6 @@
 package org.openspaces.admin.internal;
 
 import org.openspaces.admin.AdminFactory;
-import org.openspaces.admin.internal.admin.InternalAdmin;
 
 public class InternalAdminFactory extends AdminFactory {
 
@@ -29,9 +28,9 @@ public class InternalAdminFactory extends AdminFactory {
      * so they won't block the single event thread.
      * @return this (fluent API)
      */
+    @Override
     public AdminFactory singleThreadedEventListeners() {
-        ((InternalAdmin)super.getAdmin()).singleThreadedEventListeners();
-        return this;
+        return super.singleThreadedEventListeners();
     }
 
 }

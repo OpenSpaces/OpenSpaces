@@ -132,17 +132,6 @@ public interface InternalAdmin extends Admin {
      */
     void scheduleAdminOperation(Runnable runnable);
 
-    
-    /**
-     * Enables a single event loop threading model in which all
-     * event listeners and admin state updates are done on the same thread.
-     * The underlying assumption is that event listeners do not perform an I/O operation
-     * so they won't block the single event thread.
-     * Call this method before begin()
-     * @return
-     */
-    void singleThreadedEventListeners();
-
     boolean isSingleThreadedEventListeners();
 
 }

@@ -16,6 +16,8 @@
 
 package org.openspaces.admin;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.jini.rio.boot.BootUtil;
@@ -39,11 +41,16 @@ import com.gigaspaces.security.directory.UserDetails;
  */
 public class AdminFactory {
 
-    private final DefaultAdmin admin = new DefaultAdmin();
-
     private boolean useGsLogging = true;
 
     private final AtomicBoolean created = new AtomicBoolean(false);
+
+    private boolean useDaemonThreads = false;
+    private boolean singleThreadedEventListeners = false;
+    private final List<String> groups = new ArrayList<String>();
+    private final List<String> locators = new ArrayList<String>();
+    private UserDetails userDetails = null;
+    private boolean discoverUnmanagedSpaces = false;
     
     public AdminFactory useGsLogging(boolean useGsLogging) {
         this.useGsLogging = useGsLogging;
@@ -51,7 +58,7 @@ public class AdminFactory {
     }
 
     public AdminFactory useDaemonThreads(boolean useDaemonThreads) {
-        admin.setUseDaemonThreads(useDaemonThreads);
+        this.useDaemonThreads = useDaemonThreads;
         return this;
     }
 
@@ -60,7 +67,7 @@ public class AdminFactory {
      * that will be used to listen for events.
      */
     public AdminFactory addGroup(String group) {
-        admin.addGroup(group);
+        groups.add(group);
         return this;
     }
 
@@ -81,7 +88,7 @@ public class AdminFactory {
      * for events.
      */
     public AdminFactory addLocator(String locator) {
-        admin.addLocator(locator);
+        locators.add(locator);
         return this;
     }
 
@@ -90,8 +97,10 @@ public class AdminFactory {
      * be used to listen for events.
      */
     public AdminFactory addLocators(String locators) {
-        // its already a comma delimited string, so we just add it
-        admin.addLocator(locators);
+        String[] locatorsArr = BootUtil.toArray(locators);
+        for (String locator : locatorsArr) {
+            addLocator(locator);
+        }
         return this;
     }
 
@@ -99,15 +108,14 @@ public class AdminFactory {
      * Sets the username and password for discovery of secured services.
      */
     public AdminFactory userDetails(String userName, String password) {
-        admin.setUserDetails(new User(userName, password));
-        return this;
+        return userDetails(new User(userName, password));
     }
 
     /**
      * Sets the user details that will be used when discovering secured services.
      */
     public AdminFactory userDetails(UserDetails userDetails) {
-        admin.setUserDetails(userDetails);
+        this.userDetails = userDetails;
         return this;
     }
 
@@ -116,7 +124,13 @@ public class AdminFactory {
      * within the Service Grid). Defaults to <code>false</code> (unmanaged spaces are not discovered).
      */
     public AdminFactory discoverUnmanagedSpaces() {
-        admin.getDiscoveryService().discoverUnmanagedSpaces();
+        this.discoverUnmanagedSpaces = true;
+        return this;
+    }
+
+    //exposed by InternalAdminFactory
+    protected AdminFactory singleThreadedEventListeners() {
+        this.singleThreadedEventListeners = true;
         return this;
     }
     
@@ -131,6 +145,17 @@ public class AdminFactory {
         if (useGsLogging) {
             GSLogConfigLoader.getLoader();
         }
+        DefaultAdmin admin = new DefaultAdmin(useDaemonThreads, singleThreadedEventListeners);
+        admin.setUserDetails(userDetails);
+        for (String group : groups) {
+            admin.addGroup(group);
+        }
+        for (String locator : locators) {
+            admin.addGroup(locator);
+        }
+        if (this.discoverUnmanagedSpaces) {
+            admin.getDiscoveryService().discoverUnmanagedSpaces();
+        }
         admin.begin();
         return admin;
     }
@@ -141,9 +166,5 @@ public class AdminFactory {
      */
     public Admin createAdmin() {
         return create();
-    }
-
-    protected Admin getAdmin() {
-        return this.admin;
     }
 }
