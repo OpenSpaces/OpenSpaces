@@ -26,11 +26,11 @@ public class SlaEnforcementInProgressException extends Exception {
     private final String puName;
     
     public SlaEnforcementInProgressException(ProcessingUnit pu, String message) {
-        this(pu.getName(), message);
+        this(getProcessingUnitName(pu), message);
     }
-    
+
     public SlaEnforcementInProgressException(ProcessingUnit pu, String message, Throwable cause) {
-        this(pu.getName(), message, cause);
+        this(getProcessingUnitName(pu), message, cause);
     }
     
     public SlaEnforcementInProgressException(String puName, String message) {
@@ -59,6 +59,14 @@ public class SlaEnforcementInProgressException extends Exception {
     public String getProcessingUnitName() {
         return puName;
     }
+
+    private static String getProcessingUnitName(ProcessingUnit pu) {
+        String name = null;
+        if (pu != null) {
+            name = pu.getName();
+        }
+        return name;
+    }  
 
     @Override
     public int hashCode() {
