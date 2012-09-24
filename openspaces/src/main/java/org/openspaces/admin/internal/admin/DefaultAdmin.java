@@ -1594,6 +1594,9 @@ public class DefaultAdmin implements InternalAdmin {
             // make sure that admin API events and internal state is updated based on elastic PU scale strategy events
             if (scaleStrategyEvents !=null && esm != null) {
                 for (Event event : scaleStrategyEvents.getEvents()) {
+                    if (logger.isTraceEnabled()) {
+                        logger.trace("Processing ESM event:" + event);
+                    }
                     machines.processElasticScaleStrategyEvent((ElasticProcessingUnitEvent)event);
                     gridServiceAgents.processElasticScaleStrategyEvent((ElasticProcessingUnitEvent)event);
                     gridServiceContainers.processElasticScaleStrategyEvent((ElasticProcessingUnitEvent)event);
@@ -1788,7 +1791,7 @@ public class DefaultAdmin implements InternalAdmin {
     
                     if (statistics == null) {
                         if (logger.isDebugEnabled()) {
-                            logger.debug("processing unit " + processingUnit.getName() + " state is scheduled because there are no statistics");
+                            logger.debug("processing unit " + processingUnit.getName() + " state is scheduled because there are no statistics for instance " + instance.getUid());
                         }
                         status = OperationalString.SCHEDULED;
                         break;
@@ -1797,7 +1800,7 @@ public class DefaultAdmin implements InternalAdmin {
                     ServiceMonitors serviceMonitors = statistics.getMonitors().get(CloudifyConstants_USM_MONITORS_SERVICE_ID);
                     if (serviceMonitors == null) {
                         if (logger.isDebugEnabled()) {
-                            logger.debug("processing unit " + processingUnit.getName() + " state is scheduled because there is no "+CloudifyConstants_USM_MONITORS_SERVICE_ID + " service monitor");
+                            logger.debug("processing unit " + processingUnit.getName() + " state is scheduled because there is no "+CloudifyConstants_USM_MONITORS_SERVICE_ID + " service monitor for instance " + instance.getUid());
                         }
                         status = OperationalString.SCHEDULED;
                         break;
@@ -1806,7 +1809,7 @@ public class DefaultAdmin implements InternalAdmin {
                     Integer state = (Integer)serviceMonitors.getMonitors().get(CloudifyConstants_USM_MONITORS_STATE_ID); 
                     if (!USMState_RUNNING.equals(state)) {
                         if (logger.isDebugEnabled()) {
-                            logger.debug("processing unit " + processingUnit.getName() + " state is scheduled because the USM state is " + state + " instead of " + CloudifyConstants_USM_MONITORS_STATE_ID);
+                            logger.debug("processing unit " + processingUnit.getName() + " state is scheduled because the USM state is " + state + " instead of " + CloudifyConstants_USM_MONITORS_STATE_ID + " for instance " + instance.getUid());
                         }
                         status = OperationalString.SCHEDULED;
                         break;
