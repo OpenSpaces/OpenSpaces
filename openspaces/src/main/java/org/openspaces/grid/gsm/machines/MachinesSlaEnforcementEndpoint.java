@@ -80,6 +80,11 @@ public interface MachinesSlaEnforcementEndpoint extends ServiceLevelAgreementEnf
     Set<ZonesConfig> getGridServiceAgentsZones();
 
     /**
+     * @return a list of zones that are being tracked for the specified processing unit, but do not have any state
+     */
+    Set<ZonesConfig> getUndeployedGridServiceAgentsZones();
+    
+    /**
      * Replaces the allocated capacity of the specified sla zones, with the allocated capacity
      * @return true if actually changed anything in the allocation
      * @since 9.1.0

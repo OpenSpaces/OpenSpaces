@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
@@ -530,6 +531,19 @@ public class MachinesSlaEnforcementState {
         Set<ZonesConfig> zones = new HashSet<ZonesConfig>();
         for (StateKey key : getStateForProcessingUnit(pu).keySet()) {
             zones.add(key.gridServiceAgentZones);
+        }
+        return zones;
+    }
+    
+    public Set<ZonesConfig> getUndeployedGridServiceAgentsZones(ProcessingUnit pu) {
+        //treemap is needed for deterministic toString  
+        Set<ZonesConfig> zones = new TreeSet<ZonesConfig>();
+        for (Entry<StateKey, StateValue> pair : state.entrySet()) {
+            if (pair.getKey().pu.equals(pu)) {
+                if (pair.getValue().equalsZero()) {
+                    zones.add(pair.getKey().gridServiceAgentZones);
+                }
+            }
         }
         return zones;
     }
