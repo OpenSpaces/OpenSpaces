@@ -27,7 +27,7 @@ import org.openspaces.admin.internal.pu.elastic.events.AbstractElasticProcessing
  */
 public class ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent 
     extends AbstractElasticProcessingUnitDecisionEvent
-    implements ElasticAutoScalingProgressChangedEvent , ElasticProcessingUnitDecisionEvent{
+    implements ElasticAutoScalingProgressChangedEvent {
 
     private static final long serialVersionUID = 1L;
     private int beforePlannedNumberOfInstances;

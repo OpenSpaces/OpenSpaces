@@ -21,8 +21,6 @@ import java.io.ObjectOutput;
 
 import org.openspaces.admin.internal.pu.elastic.events.AbstractElasticProcessingUnitDecisionEvent;
 import org.openspaces.admin.pu.elastic.config.CapacityRequirementsConfig;
-import org.openspaces.admin.pu.elastic.events.ElasticAutoScalingProgressChangedEvent;
-import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitDecisionEvent;
 
 import com.gigaspaces.internal.io.IOUtils;
 
@@ -32,7 +30,7 @@ import com.gigaspaces.internal.io.IOUtils;
  */
 public class ElasticStatefulProcessingUnitPlannedCapacityChangedEvent 
     extends AbstractElasticProcessingUnitDecisionEvent
-    implements ElasticAutoScalingProgressChangedEvent , ElasticProcessingUnitDecisionEvent{
+    implements ElasticAutoScalingProgressChangedEvent {
 
     private static final long serialVersionUID = 1L;
     private CapacityRequirementsConfig beforePlanned;

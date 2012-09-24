@@ -19,7 +19,7 @@ package org.openspaces.admin.pu.elastic.events;
  * @author Itai Frenkel
  * @since 9.1.0
  */
-public interface ElasticProcessingUnitDecisionEvent {
+public interface ElasticProcessingUnitDecisionEvent extends ElasticProcessingUnitProgressChangedEvent {
 
     String getDecisionDescription();
 }
