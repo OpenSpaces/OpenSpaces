@@ -27,6 +27,7 @@ import org.openspaces.admin.internal.pu.elastic.events.InternalElasticProcessing
 import org.openspaces.admin.internal.pu.elastic.events.InternalElasticProcessingUnitFailureEvent;
 import org.openspaces.admin.internal.pu.elastic.events.InternalElasticProcessingUnitProgressChangedEvent;
 import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitDecisionEvent;
+import org.openspaces.admin.zone.config.ZonesConfig;
 import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementDecision;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
@@ -66,27 +67,27 @@ public class ScaleStrategyProgressEventState {
         this.progressChangedEventClass = progressChangedEventClass;
     }
     
-    public void enqueuProvisioningInProgressEvent(SlaEnforcementInProgressException e) {
+    public void enqueuProvisioningInProgressEvent(SlaEnforcementInProgressException e, ZonesConfig zones) {
         
         if (e instanceof SlaEnforcementDecision) {
             
             if (this.lastInProgressException == null || !this.lastInProgressException.equals(e)) {
                 this.lastInProgressException = e;
             
-                InternalElasticProcessingUnitDecisionEvent event = createDecisionEvent((SlaEnforcementDecision)e);
+                InternalElasticProcessingUnitDecisionEvent event = createDecisionEvent((SlaEnforcementDecision)e, zones);
                 enqueuProvisioningInProgressEvent(event,e);
             }
             else {
-                enqueuDefaultProvisioningInProgressEvent(e);
+                enqueuDefaultProvisioningInProgressEvent(e, zones);
             }
         }
         else {
-            enqueuDefaultProvisioningInProgressEvent(e);
+            enqueuDefaultProvisioningInProgressEvent(e, zones);
             if (e instanceof SlaEnforcementFailure) {
                 if (this.lastInProgressException == null || !this.lastInProgressException.equals(e)) {
                     this.lastInProgressException = e;
                 
-                    InternalElasticProcessingUnitFailureEvent event = createFailureEvent((SlaEnforcementFailure)e);
+                    InternalElasticProcessingUnitFailureEvent event = createFailureEvent((SlaEnforcementFailure)e, zones);
                     
                     if (logger.isWarnEnabled()) {
                         StringBuilder message = new StringBuilder();
@@ -174,10 +175,10 @@ public class ScaleStrategyProgressEventState {
         }
     }
 
-    public void enqueuDefaultProvisioningInProgressEvent(Throwable t) {
+    public void enqueuDefaultProvisioningInProgressEvent(Throwable t, ZonesConfig zones) {
         
         final boolean isComplete = false;
-        InternalElasticProcessingUnitProgressChangedEvent event = createProgressChangedEvent(isComplete);
+        InternalElasticProcessingUnitProgressChangedEvent event = createProgressChangedEvent(isComplete, zones);
         enqueuProvisioningInProgressEvent(event, t);
     }
     
@@ -185,10 +186,10 @@ public class ScaleStrategyProgressEventState {
         enqueuProvisioningInProgressEvent(event,null);
     }
 
-    public void enqueuProvisioningCompletedEvent() {
+    public void enqueuProvisioningCompletedEvent(ZonesConfig zones) {
         
         boolean isComplete = true;
-        InternalElasticProcessingUnitProgressChangedEvent event = createProgressChangedEvent(isComplete);
+        InternalElasticProcessingUnitProgressChangedEvent event = createProgressChangedEvent(isComplete, zones);
         
         if (!this.completedEventRaised) {
             this.completedEventRaised = true;
@@ -208,7 +209,8 @@ public class ScaleStrategyProgressEventState {
     }
 
     private InternalElasticProcessingUnitProgressChangedEvent createProgressChangedEvent(
-            boolean isComplete) {
+            boolean isComplete,
+            ZonesConfig zones) {
         
         InternalElasticProcessingUnitProgressChangedEvent newEvent;
         try {
@@ -221,18 +223,26 @@ public class ScaleStrategyProgressEventState {
         newEvent.setComplete(isComplete);
         newEvent.setUndeploying(isUndeploying);
         newEvent.setProcessingUnitName(processingUnitName);
+        if (zones != null) {
+            newEvent.setGridServiceAgentZones(zones);
+        }
         return newEvent;
     }
     
-    private InternalElasticProcessingUnitFailureEvent createFailureEvent(SlaEnforcementFailure e) {
-        return e.toEvent();
+    private InternalElasticProcessingUnitFailureEvent createFailureEvent(SlaEnforcementFailure e, ZonesConfig zones) {
+        InternalElasticProcessingUnitFailureEvent event = e.toEvent();
+        event.setGridServiceAgentZones(zones);
+        return event;
     }
     
-    private InternalElasticProcessingUnitDecisionEvent createDecisionEvent(SlaEnforcementDecision e) {
+    private InternalElasticProcessingUnitDecisionEvent createDecisionEvent(SlaEnforcementDecision e, ZonesConfig zones) {
         InternalElasticProcessingUnitDecisionEvent newEvent=  e.toEvent();
         newEvent.setComplete(false);
         newEvent.setUndeploying(isUndeploying);
         newEvent.setProcessingUnitName(processingUnitName);
+        if (zones != null) {
+            newEvent.setGridServiceAgentZones(zones);
+        }
         return newEvent;
     }
     

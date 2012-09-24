@@ -117,15 +117,15 @@ public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
         
         try {
             machinesEndpoint.enforceSla(sla);
-            machineProvisioningCompletedEvent();
-            agentProvisioningCompletedEvent();
+            machineProvisioningCompletedEvent(sla.getGridServiceAgentZones());
+            agentProvisioningCompletedEvent(sla.getGridServiceAgentZones());
         } catch (MachinesSlaEnforcementInProgressException e) {
-            machineProvisioningInProgressEvent(e);
+            machineProvisioningInProgressEvent(e, sla.getGridServiceAgentZones());
             throw e;
         }
         catch (GridServiceAgentSlaEnforcementInProgressException e) {
-            machineProvisioningCompletedEvent();
-            agentProvisioningInProgressEvent(e);
+            machineProvisioningCompletedEvent(sla.getGridServiceAgentZones());
+            agentProvisioningInProgressEvent(e, sla.getGridServiceAgentZones());
             throw e;
         }
     }

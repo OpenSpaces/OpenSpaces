@@ -142,14 +142,14 @@ public class EagerScaleStrategyBean extends AbstractScaleStrategyBean
         try {
             machinesEndpoint.enforceSla(sla);
             
-            machineProvisioningCompletedEvent();
-            agentProvisioningCompletedEvent();
+            machineProvisioningCompletedEvent(sla.getGridServiceAgentZones());
+            agentProvisioningCompletedEvent(sla.getGridServiceAgentZones());
 
         }
         catch (GridServiceAgentSlaEnforcementInProgressException e) {
             
-            machineProvisioningCompletedEvent();
-            agentProvisioningInProgressEvent(e);
+            machineProvisioningCompletedEvent(sla.getGridServiceAgentZones());
+            agentProvisioningInProgressEvent(e, sla.getGridServiceAgentZones());
             throw e;
         }
 

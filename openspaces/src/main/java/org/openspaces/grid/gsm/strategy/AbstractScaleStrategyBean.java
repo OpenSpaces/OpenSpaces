@@ -44,6 +44,7 @@ import org.openspaces.admin.machine.events.ElasticMachineProvisioningProgressCha
 import org.openspaces.admin.machine.events.ElasticMachineProvisioningProgressChangedEventListener;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
+import org.openspaces.admin.zone.config.ZonesConfig;
 import org.openspaces.core.bean.Bean;
 import org.openspaces.core.internal.commons.math.fraction.Fraction;
 import org.openspaces.core.util.StringProperties;
@@ -372,18 +373,20 @@ public abstract class AbstractScaleStrategyBean implements
                 getLogger().debug("SLA enforced.");
             }
             
-            scaleEventState.enqueuProvisioningCompletedEvent();
+            ZonesConfig zones = null; // gsa zones not relevant for this context
+            scaleEventState.enqueuProvisioningCompletedEvent(zones);
             isScaleInProgress = false;
         }
         catch (SlaEnforcementInProgressException e) {
-            
-            scaleEventState.enqueuDefaultProvisioningInProgressEvent(e);    
+            ZonesConfig zones = null; // gsa zones not relevant for this context
+            scaleEventState.enqueuDefaultProvisioningInProgressEvent(e, zones);    
             
             isScaleInProgress = true;
         }
         catch (Throwable t) {
             getLogger().error("Unhandled Exception",t);
-            scaleEventState.enqueuDefaultProvisioningInProgressEvent(t);
+            ZonesConfig zones = null; // gsa zones not relevant for this context
+            scaleEventState.enqueuDefaultProvisioningInProgressEvent(t, zones);
             isScaleInProgress = true;
         }
     }
@@ -455,7 +458,8 @@ public abstract class AbstractScaleStrategyBean implements
         if (numberOfLookupServices == 0) {
             final DisconnectedFromLookupServiceException e = new DisconnectedFromLookupServiceException(this.getProcessingUnit(), admin.getLocators(), admin.getGroups());
             //eventually raises a machines alert. That's good enough
-            machineProvisioningEventState.enqueuProvisioningInProgressEvent(e);
+            ZonesConfig zones = null; // gsa zones not relevant for this error
+            machineProvisioningEventState.enqueuProvisioningInProgressEvent(e, zones);
             throw e;
         }
         
@@ -467,7 +471,8 @@ public abstract class AbstractScaleStrategyBean implements
             
             final WrongNumberOfESMComponentsException e = new WrongNumberOfESMComponentsException(numberOfEsms, this.getProcessingUnit().getName());
             //eventually raises a machines alert. That's good enough
-            machineProvisioningEventState.enqueuProvisioningInProgressEvent(e);
+            ZonesConfig zones = null; // gsa zones not relevant for this error
+            machineProvisioningEventState.enqueuProvisioningInProgressEvent(e, zones);
             throw e;
         }
     }
@@ -484,36 +489,40 @@ public abstract class AbstractScaleStrategyBean implements
         return isScaleInProgress;
     }
 
-    protected void agentProvisioningCompletedEvent() {
-        agentProvisioningEventState.enqueuProvisioningCompletedEvent();
+    protected void agentProvisioningCompletedEvent(ZonesConfig zones) {
+        agentProvisioningEventState.enqueuProvisioningCompletedEvent(zones);
     }
     
-    protected void agentProvisioningInProgressEvent(GridServiceAgentSlaEnforcementInProgressException e) {
-        agentProvisioningEventState.enqueuProvisioningInProgressEvent(e);
+    protected void agentProvisioningInProgressEvent(GridServiceAgentSlaEnforcementInProgressException e, ZonesConfig zones) {
+        agentProvisioningEventState.enqueuProvisioningInProgressEvent(e, zones);
     }
 
-    protected void machineProvisioningCompletedEvent() {
-        machineProvisioningEventState.enqueuProvisioningCompletedEvent();
+    protected void machineProvisioningCompletedEvent(ZonesConfig zones) {
+        machineProvisioningEventState.enqueuProvisioningCompletedEvent(zones);
     }
     
-    protected void machineProvisioningInProgressEvent(MachinesSlaEnforcementInProgressException e) {
-        machineProvisioningEventState.enqueuProvisioningInProgressEvent(e);
+    protected void machineProvisioningInProgressEvent(MachinesSlaEnforcementInProgressException e, ZonesConfig zones) {
+        machineProvisioningEventState.enqueuProvisioningInProgressEvent(e, zones);
     }
     
     protected void containerProvisioningCompletedEvent() {
-        containerProvisioningEventState.enqueuProvisioningCompletedEvent();
+        ZonesConfig zones = null; // gsa zones not relevant for containers
+        containerProvisioningEventState.enqueuProvisioningCompletedEvent(zones);
     }
     
     protected void containerProvisioningInProgressEvent(ContainersSlaEnforcementInProgressException e) {
-        containerProvisioningEventState.enqueuProvisioningInProgressEvent(e);
+        ZonesConfig zones = null; // gsa zones not relevant for containers
+        containerProvisioningEventState.enqueuProvisioningInProgressEvent(e, zones);
     }
     
     protected void puInstanceProvisioningCompletedEvent() {
-        puProvisioningEventState.enqueuProvisioningCompletedEvent();
+        ZonesConfig zones = null; // gsa zones not relevant for containers
+        puProvisioningEventState.enqueuProvisioningCompletedEvent(zones);
     }
 
     protected void puInstanceProvisioningInProgressEvent(RebalancingSlaEnforcementInProgressException e) {
-        puProvisioningEventState.enqueuProvisioningInProgressEvent(e);
+        ZonesConfig zones = null; // gsa zones not relevant for containers
+        puProvisioningEventState.enqueuProvisioningInProgressEvent(e, zones);
     }
     
     protected EventsStore getEventsStore() {

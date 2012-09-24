@@ -337,10 +337,10 @@ implements AutoScalingSlaEnforcementEndpointAware {
             }
             
             autoScalingEndpoint.enforceSla(sla);
-            autoScalingCompletedEvent();
-        }
+            autoScalingCompletedEvent(zones);
+        } 
         catch (AutoScalingSlaEnforcementInProgressException e) {
-            autoScalingInProgressEvent(e);
+            autoScalingInProgressEvent(e, zones);
             throw e;
         }
     }
@@ -425,11 +425,11 @@ implements AutoScalingSlaEnforcementEndpointAware {
         getProcessingUnit().stopStatisticsMonitor();
     }
 
-    private void autoScalingCompletedEvent() {
-        autoScalingEventState.enqueuProvisioningCompletedEvent();
+    private void autoScalingCompletedEvent(ZonesConfig zones) {
+        autoScalingEventState.enqueuProvisioningCompletedEvent(zones);
     }
 
-    private void autoScalingInProgressEvent(AutoScalingSlaEnforcementInProgressException e) {
-        autoScalingEventState.enqueuProvisioningInProgressEvent(e);
+    private void autoScalingInProgressEvent(AutoScalingSlaEnforcementInProgressException e, ZonesConfig zones) {
+        autoScalingEventState.enqueuProvisioningInProgressEvent(e, zones);
     }
 }
