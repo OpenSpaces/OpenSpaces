@@ -18,6 +18,7 @@ package org.openspaces.grid.gsm.machines.exceptions;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.zone.config.ZonesConfig;
 
 /**
@@ -28,8 +29,8 @@ public class PerZonesGridServiceAgentSlaEnforcementInProgressException extends G
 
     private static final long serialVersionUID = 1L;
     Map<ZonesConfig,GridServiceAgentSlaEnforcementInProgressException> reasons;
-    public PerZonesGridServiceAgentSlaEnforcementInProgressException(String[] puNames) {
-        super(puNames, "Multiple Exceptions");
+    public PerZonesGridServiceAgentSlaEnforcementInProgressException(ProcessingUnit pu) {
+        super(pu, "Multiple Exceptions");
         reasons = new HashMap<ZonesConfig, GridServiceAgentSlaEnforcementInProgressException>();
     }
 

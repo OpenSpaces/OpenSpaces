@@ -480,15 +480,6 @@ public class MachinesSlaEnforcementState {
             mapOfLists.put(key, new LinkedList<String>());
         }
     }
-
-    /**
-     * @return all processing units that have a share of the specified future machine
-     * not implemented yet. See GS-9484
-     */
-    public String[] getProcessingUnitsOfFutureMachine(ProcessingUnit pu, FutureGridServiceAgent futureAgent) {
-        
-        return new String[] {pu.getName()};
-    }
     
     public void removeFutureAgents(StateKey key, GridServiceAgentFutures futureAgents) {
         getState(key).removeFutureAgents(futureAgents);

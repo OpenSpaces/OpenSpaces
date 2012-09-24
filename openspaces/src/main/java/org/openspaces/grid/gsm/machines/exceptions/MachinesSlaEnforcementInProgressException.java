@@ -17,21 +17,22 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.machines.exceptions;
 
+import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementInProgressException;
 
 public class MachinesSlaEnforcementInProgressException extends SlaEnforcementInProgressException{
 
     private static final long serialVersionUID = 1L;
     
-    public MachinesSlaEnforcementInProgressException(String[] puNames) {
-        super(puNames, "Machines SLA Enforcement is in progress");
+    public MachinesSlaEnforcementInProgressException(ProcessingUnit pu) {
+        super(pu, "Machines SLA Enforcement is in progress");
     }
     
-    public MachinesSlaEnforcementInProgressException(String[] puNames, String message) {
-        super(puNames, "Machines SLA Enforcement is in progress: " + message);
+    public MachinesSlaEnforcementInProgressException(ProcessingUnit pu, String message) {
+        super(pu, "Machines SLA Enforcement is in progress: " + message);
     }
     
-    public MachinesSlaEnforcementInProgressException(String[] puNames, String message, Exception cause) {
-        super(puNames, "Machines SLA Enforcement is in progress: " + message, cause);
+    public MachinesSlaEnforcementInProgressException(ProcessingUnit pu, String message, Exception cause) {
+        super(pu, "Machines SLA Enforcement is in progress: " + message, cause);
     }
 }

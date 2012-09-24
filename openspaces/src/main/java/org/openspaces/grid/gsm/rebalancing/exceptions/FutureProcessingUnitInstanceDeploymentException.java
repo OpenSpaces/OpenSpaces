@@ -39,7 +39,7 @@ public class FutureProcessingUnitInstanceDeploymentException extends Rebalancing
     public InternalElasticProcessingUnitFailureEvent toEvent() {
         DefaultElasticProcessingUnitInstanceProvisioningFailureEvent event = new DefaultElasticProcessingUnitInstanceProvisioningFailureEvent(); 
         event.setFailureDescription(getMessage());
-        event.setProcessingUnitNames(getAffectedProcessingUnits());
+        event.setProcessingUnitName(getProcessingUnitName());
         return event;
     }
 }

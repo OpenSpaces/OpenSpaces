@@ -20,14 +20,15 @@ package org.openspaces.grid.gsm.containers.exceptions;
 import java.util.Collection;
 
 import org.openspaces.admin.gsc.GridServiceContainer;
+import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.containers.ContainersSlaUtils;
 
 public class ContainersSlaEnforcementPendingProcessingUnitDeallocationException extends ContainersSlaEnforcementInProgressException {
 
     private static final long serialVersionUID = 1L;
 
-    public ContainersSlaEnforcementPendingProcessingUnitDeallocationException(String[] puNames, Collection<GridServiceContainer> containers) {
-        super(puNames, "Cannot shutdown the following containers untill all processing units have been undeployed: " + ContainersSlaUtils.gscsToString(containers));
+    public ContainersSlaEnforcementPendingProcessingUnitDeallocationException(ProcessingUnit pu, Collection<GridServiceContainer> containers) {
+        super(pu, "Cannot shutdown the following containers untill all processing units have been undeployed: " + ContainersSlaUtils.gscsToString(containers));
     }
     
 

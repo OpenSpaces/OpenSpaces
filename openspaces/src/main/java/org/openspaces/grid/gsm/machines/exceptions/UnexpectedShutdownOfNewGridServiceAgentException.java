@@ -20,6 +20,7 @@ package org.openspaces.grid.gsm.machines.exceptions;
 import org.openspaces.admin.internal.gsa.events.DefaultElasticGridServiceAgentProvisioningFailureEvent;
 import org.openspaces.admin.internal.pu.elastic.events.InternalElasticProcessingUnitFailureEvent;
 import org.openspaces.admin.machine.Machine;
+import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.machines.MachinesSlaUtils;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
 
@@ -29,8 +30,8 @@ public class UnexpectedShutdownOfNewGridServiceAgentException extends GridServic
     private static final long serialVersionUID = 1L;
     private final String machineUid;
     
-    public UnexpectedShutdownOfNewGridServiceAgentException(Machine machine, String[] affectedProcessingUnits) {
-        super(affectedProcessingUnits, "New machine " + MachinesSlaUtils.machineToString(machine) +
+    public UnexpectedShutdownOfNewGridServiceAgentException(Machine machine, ProcessingUnit pu) {
+        super(pu, "New machine " + MachinesSlaUtils.machineToString(machine) +
                 " was started and the agent was also started, but then it was shutdown unexpectedly.");
         this.machineUid = machine.getUid();
     }
@@ -64,7 +65,7 @@ public class UnexpectedShutdownOfNewGridServiceAgentException extends GridServic
     public InternalElasticProcessingUnitFailureEvent toEvent() {
         DefaultElasticGridServiceAgentProvisioningFailureEvent event = new DefaultElasticGridServiceAgentProvisioningFailureEvent(); 
         event.setFailureDescription(getMessage());
-        event.setProcessingUnitNames(getAffectedProcessingUnits());
+        event.setProcessingUnitName(getProcessingUnitName());
         return event;
     }
 }

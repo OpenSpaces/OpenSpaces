@@ -28,6 +28,6 @@ GridServiceAgentSlaEnforcementInProgressException {
  private static final long serialVersionUID = 1L;
     
     public NeedToWaitUntilAllGridServiceAgentsDiscoveredException(ProcessingUnit pu, GridServiceContainer container) {
-        super(new String[] {pu.getName()}, "Waiting for the Grid Service Agent that started Grid Service Container " + container.getUid() + " to be discovered. It hosts an instance of pu " + pu.getName() + ".");
+        super(pu, "Waiting for the Grid Service Agent that started Grid Service Container " + container.getUid() + " to be discovered. It hosts an instance of pu " + pu.getName() + ".");
     }
 }

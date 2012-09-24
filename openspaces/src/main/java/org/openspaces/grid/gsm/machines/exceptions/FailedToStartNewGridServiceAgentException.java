@@ -19,6 +19,7 @@ package org.openspaces.grid.gsm.machines.exceptions;
 
 import org.openspaces.admin.internal.gsa.events.DefaultElasticGridServiceAgentProvisioningFailureEvent;
 import org.openspaces.admin.internal.pu.elastic.events.InternalElasticProcessingUnitFailureEvent;
+import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementLogStackTrace;
 
@@ -31,15 +32,15 @@ public class FailedToStartNewGridServiceAgentException extends GridServiceAgentS
 
     private static final long serialVersionUID = 1L;
     
-    public FailedToStartNewGridServiceAgentException(String[] affectedProcessingUnits, Exception cause) {
-        super(affectedProcessingUnits, "Grid Service Agent provisioning failed to start a new machine. Cause:" + cause.getMessage(), cause);
+    public FailedToStartNewGridServiceAgentException(ProcessingUnit pu, Exception cause) {
+        super(pu, "Grid Service Agent provisioning failed to start a new machine. Cause:" + cause.getMessage(), cause);
     }
     
     @Override
     public InternalElasticProcessingUnitFailureEvent toEvent() {
         DefaultElasticGridServiceAgentProvisioningFailureEvent event = new DefaultElasticGridServiceAgentProvisioningFailureEvent(); 
         event.setFailureDescription(getMessage());
-        event.setProcessingUnitNames(getAffectedProcessingUnits());
+        event.setProcessingUnitName(getProcessingUnitName());
         return event;
     }
 }

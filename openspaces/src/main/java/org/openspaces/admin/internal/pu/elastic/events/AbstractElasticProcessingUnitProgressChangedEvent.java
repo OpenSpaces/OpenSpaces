@@ -21,6 +21,9 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
+import org.openspaces.admin.internal.zone.config.ZonesConfigUtils;
+import org.openspaces.admin.zone.config.ZonesConfig;
+
 import com.gigaspaces.internal.io.IOUtils;
 
 public abstract class AbstractElasticProcessingUnitProgressChangedEvent implements InternalElasticProcessingUnitProgressChangedEvent {
@@ -30,7 +33,8 @@ public abstract class AbstractElasticProcessingUnitProgressChangedEvent implemen
     private boolean isComplete;
     private String processingUnitName;
     private boolean isUndeploying;
-    
+    private ZonesConfig gridServiceAgentZones;
+   
     /**
      * de-serialization/reflection constructor
      */
@@ -55,6 +59,7 @@ public abstract class AbstractElasticProcessingUnitProgressChangedEvent implemen
         out.writeBoolean(isComplete);
         out.writeBoolean(isUndeploying);
         IOUtils.writeString(out, processingUnitName);
+        writeZonesConfig(out, gridServiceAgentZones);
     }
 
     @Override
@@ -67,6 +72,7 @@ public abstract class AbstractElasticProcessingUnitProgressChangedEvent implemen
         isComplete = in.readBoolean();
         isUndeploying = in.readBoolean();
         processingUnitName = IOUtils.readString(in);
+        gridServiceAgentZones = readZonesConfig(in);
     }
 
     @Override
@@ -89,4 +95,30 @@ public abstract class AbstractElasticProcessingUnitProgressChangedEvent implemen
         final String verb = isUndeploying() ? "undeployment" : "SLA enforcement";
         return "["+getProcessingUnitName() + "] "+op+" "+ verb+" " + adverb;
     }
+    
+    private static void writeZonesConfig(ObjectOutput out, ZonesConfig gridServiceAgentZones) throws IOException {
+        if (gridServiceAgentZones == null) {
+            IOUtils.writeString(out, null);
+        }
+        else {
+            IOUtils.writeString(out, ZonesConfigUtils.zonesToString(gridServiceAgentZones));
+        }
+    }
+
+    private static ZonesConfig readZonesConfig(ObjectInput in) throws IOException, ClassNotFoundException {
+        final String zonesToString = IOUtils.readString(in);
+        if (zonesToString == null) {
+            return null;
+        }
+        return ZonesConfigUtils.zonesFromString(zonesToString);
+    }
+
+    public ZonesConfig getGridServiceAgentZones() {
+        return gridServiceAgentZones;
+    }
+
+    public void setGridServiceAgentZones(ZonesConfig gridServiceAgentZones) {
+        this.gridServiceAgentZones = gridServiceAgentZones;
+    }
+
 }

@@ -117,7 +117,7 @@ public class ElasticMachineProvisioningDiscoveredMachinesCache implements
     public Collection<GridServiceAgent> getDiscoveredAgents() throws WaitingForDiscoveredMachinesException, FailedToDiscoverMachinesException {
         
         if (futureAgents == null || !futureAgents.isDone()) {
-            throw new WaitingForDiscoveredMachinesException(new String[]{pu.getName()},
+            throw new WaitingForDiscoveredMachinesException(pu,
                     "Need to wait until retrieved list of machines.");
         }
         

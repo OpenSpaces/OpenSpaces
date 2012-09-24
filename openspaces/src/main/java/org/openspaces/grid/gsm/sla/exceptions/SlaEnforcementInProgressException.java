@@ -17,22 +17,30 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.sla.exceptions;
 
-import java.util.Arrays;
+import org.openspaces.admin.pu.ProcessingUnit;
 
 public class SlaEnforcementInProgressException extends Exception {
 
     private static final long serialVersionUID = 1L;
 
-    private final String[] puNames;
+    private final String puName;
     
-    public SlaEnforcementInProgressException(String[] puNames, String message) {
+    public SlaEnforcementInProgressException(ProcessingUnit pu, String message) {
+        this(pu.getName(), message);
+    }
+    
+    public SlaEnforcementInProgressException(ProcessingUnit pu, String message, Throwable cause) {
+        this(pu.getName(), message, cause);
+    }
+    
+    public SlaEnforcementInProgressException(String puName, String message) {
         super(message);
-        this.puNames = puNames;
+        this.puName = puName;
     }
 
-    public SlaEnforcementInProgressException(String[] puNames, String message, Throwable cause) {
+    public SlaEnforcementInProgressException(String puName, String message, Throwable cause) {
         super(message, cause);
-        this.puNames = puNames;
+        this.puName = puName;
     }
     
     /**
@@ -48,15 +56,15 @@ public class SlaEnforcementInProgressException extends Exception {
         return this;
     }
 
-    public String[] getAffectedProcessingUnits() {
-        return puNames;
+    public String getProcessingUnitName() {
+        return puName;
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + Arrays.hashCode(puNames);
+        result = prime * result + ((puName == null) ? 0 : puName.hashCode());
         return result;
     }
 
@@ -69,7 +77,10 @@ public class SlaEnforcementInProgressException extends Exception {
         if (getClass() != obj.getClass())
             return false;
         SlaEnforcementInProgressException other = (SlaEnforcementInProgressException) obj;
-        if (!Arrays.equals(puNames, other.puNames))
+        if (puName == null) {
+            if (other.puName != null)
+                return false;
+        } else if (!puName.equals(other.puName))
             return false;
         
         //custom code

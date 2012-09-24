@@ -17,13 +17,14 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.machines.exceptions;
 
+import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerAgent;
 
 public class GridServiceAgentSlaEnforcementPendingContainerDeallocationException extends GridServiceAgentSlaEnforcementInProgressException {
 
     private static final long serialVersionUID = 1L;
     
-    public GridServiceAgentSlaEnforcementPendingContainerDeallocationException(String[] puNames, CapacityRequirementsPerAgent clusterCapacityRequirements) {
-        super(puNames, "Cannot terminate the following machines, since they are still running containers:" + clusterCapacityRequirements.toDetailedString());
+    public GridServiceAgentSlaEnforcementPendingContainerDeallocationException(ProcessingUnit pu, CapacityRequirementsPerAgent clusterCapacityRequirements) {
+        super(pu, "Cannot terminate the following machines, since they are still running containers:" + clusterCapacityRequirements.toDetailedString());
     }
 }

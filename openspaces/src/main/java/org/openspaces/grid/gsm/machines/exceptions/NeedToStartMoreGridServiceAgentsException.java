@@ -41,7 +41,7 @@ public class NeedToStartMoreGridServiceAgentsException extends GridServiceAgentS
     private final CapacityRequirements capacityShortage;
 
     public NeedToStartMoreGridServiceAgentsException(AbstractMachinesSlaPolicy sla, MachinesSlaEnforcementState state, CapacityRequirements capacityShortage, ProcessingUnit pu) {
-        super(new String[] { pu.getName()}, createMessage(sla, state, capacityShortage, pu));
+        super(pu, createMessage(sla, state, capacityShortage, pu));
         this.capacityShortage = capacityShortage;
     }
     
@@ -139,7 +139,7 @@ public class NeedToStartMoreGridServiceAgentsException extends GridServiceAgentS
     public InternalElasticProcessingUnitFailureEvent toEvent() {
         DefaultElasticGridServiceAgentProvisioningFailureEvent event = new DefaultElasticGridServiceAgentProvisioningFailureEvent(); 
         event.setFailureDescription(getMessage());
-        event.setProcessingUnitNames(getAffectedProcessingUnits());
+        event.setProcessingUnitName(getProcessingUnitName());
         return event;
     }
 }

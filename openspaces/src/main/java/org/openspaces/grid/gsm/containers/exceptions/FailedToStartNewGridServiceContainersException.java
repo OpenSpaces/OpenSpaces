@@ -20,6 +20,7 @@ package org.openspaces.grid.gsm.containers.exceptions;
 import org.openspaces.admin.internal.gsc.events.DefaultElasticGridServiceContainerProvisioningFailureEvent;
 import org.openspaces.admin.internal.pu.elastic.events.InternalElasticProcessingUnitFailureEvent;
 import org.openspaces.admin.machine.Machine;
+import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.containers.ContainersSlaUtils;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
 
@@ -29,8 +30,8 @@ public class FailedToStartNewGridServiceContainersException extends ContainersSl
     private static final long serialVersionUID = 1L;
     private final String machineUid;
     
-    public FailedToStartNewGridServiceContainersException(Machine machine, String[] affectedProcessingUnits, Exception reason) {
-        super(affectedProcessingUnits, createMessage(machine, reason),reason);
+    public FailedToStartNewGridServiceContainersException(Machine machine, ProcessingUnit pu, Exception reason) {
+        super(pu, createMessage(machine, reason),reason);
         this.machineUid = machine.getUid();
     }
 
@@ -69,7 +70,7 @@ public class FailedToStartNewGridServiceContainersException extends ContainersSl
     public InternalElasticProcessingUnitFailureEvent toEvent() {
         DefaultElasticGridServiceContainerProvisioningFailureEvent event = new DefaultElasticGridServiceContainerProvisioningFailureEvent(); 
         event.setFailureDescription(getMessage());
-        event.setProcessingUnitNames(getAffectedProcessingUnits());
+        event.setProcessingUnitName(getProcessingUnitName());
         return event;
     }
 }

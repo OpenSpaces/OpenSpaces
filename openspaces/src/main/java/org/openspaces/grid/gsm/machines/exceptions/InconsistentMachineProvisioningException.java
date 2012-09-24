@@ -21,18 +21,19 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.openspaces.admin.gsa.GridServiceAgent;
+import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.machines.MachinesSlaUtils;
 
 public class InconsistentMachineProvisioningException extends GridServiceAgentSlaEnforcementInProgressException{
     
     private static final long serialVersionUID = 1L;
 
-    public InconsistentMachineProvisioningException(String[] puNames, Collection<GridServiceAgent> undiscoveredAgents) {
-        super(puNames, "Machines " + MachinesSlaUtils.machinesToString(undiscoveredAgents)+ " have not been discoved yet by the machine provisioning.");
+    public InconsistentMachineProvisioningException(ProcessingUnit pu, Collection<GridServiceAgent> undiscoveredAgents) {
+        super(pu, "Machines " + MachinesSlaUtils.machinesToString(undiscoveredAgents)+ " have not been discoved yet by the machine provisioning.");
     }
     
-    public InconsistentMachineProvisioningException(String[] puNames, GridServiceAgent undiscoveredAgents) {
-        this(puNames, Arrays.asList(new GridServiceAgent[] {undiscoveredAgents}));
+    public InconsistentMachineProvisioningException(ProcessingUnit pu, GridServiceAgent undiscoveredAgents) {
+        this(pu, Arrays.asList(new GridServiceAgent[] {undiscoveredAgents}));
     }
     
 }

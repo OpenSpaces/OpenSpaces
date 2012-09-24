@@ -30,7 +30,7 @@ public class UndeployInProgressException extends GridServiceAgentSlaEnforcementI
     private static final long serialVersionUID = 1L;
     
     public UndeployInProgressException(ProcessingUnit pu) {
-        super(new String[] { pu.getName()}, message(pu));
+        super(pu, message(pu));
     }
 
     private static String message(ProcessingUnit pu) {
@@ -42,7 +42,7 @@ public class UndeployInProgressException extends GridServiceAgentSlaEnforcementI
     public InternalElasticProcessingUnitFailureEvent toEvent() {
         DefaultElasticGridServiceAgentProvisioningFailureEvent event = new DefaultElasticGridServiceAgentProvisioningFailureEvent(); 
         event.setFailureDescription(getMessage());
-        event.setProcessingUnitNames(getAffectedProcessingUnits());
+        event.setProcessingUnitName(getProcessingUnitName());
         return event;
     }
 }

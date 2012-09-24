@@ -40,7 +40,7 @@ public class NumberOfInstancesPerPartitionIsBelowMinimumException extends Rebala
     public InternalElasticProcessingUnitFailureEvent toEvent() {
         DefaultElasticProcessingUnitInstanceProvisioningFailureEvent event = new DefaultElasticProcessingUnitInstanceProvisioningFailureEvent(); 
         event.setFailureDescription(getMessage());
-        event.setProcessingUnitNames(getAffectedProcessingUnits());
+        event.setProcessingUnitName(getProcessingUnitName());
         return event;
     }
 }

@@ -25,17 +25,10 @@ public class AutoScalingSlaEnforcementInProgressException extends SlaEnforcement
     private static final long serialVersionUID = 1L;
 
     public AutoScalingSlaEnforcementInProgressException(ProcessingUnit pu, String message) {
-        super(getPuName(pu), message);
+        super(pu, message);
     }
 
     public AutoScalingSlaEnforcementInProgressException(ProcessingUnit pu, String message, Throwable reason) {
-        super(getPuName(pu), message, reason);
-    }
-    
-    private static String[] getPuName(ProcessingUnit pu) {
-        if (pu == null) {
-            return new String[]{};
-        }
-        return new String[] {pu.getName()};
+        super(pu, message, reason);
     }
 }

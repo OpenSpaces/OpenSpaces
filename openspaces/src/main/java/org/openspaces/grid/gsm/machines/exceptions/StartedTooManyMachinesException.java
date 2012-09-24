@@ -33,7 +33,7 @@ public class StartedTooManyMachinesException extends MachinesSlaEnforcementInPro
     private final String[] agentUids;
     
     public StartedTooManyMachinesException(ProcessingUnit pu, Collection<GridServiceAgent> agents) {
-        super(new String[]{pu.getName()}, "Started too many machines " + MachinesSlaUtils.machinesToString(agents)+". They are not needed by " + pu.getName());
+        super(pu, "Started too many machines " + MachinesSlaUtils.machinesToString(agents)+". They are not needed by " + pu.getName());
         agentUids = createAgentUids(agents);
     }
 
@@ -73,7 +73,7 @@ public class StartedTooManyMachinesException extends MachinesSlaEnforcementInPro
     public InternalElasticProcessingUnitFailureEvent toEvent() {
         DefaultElasticMachineProvisioningFailureEvent event = new DefaultElasticMachineProvisioningFailureEvent(); 
         event.setFailureDescription(getMessage());
-        event.setProcessingUnitNames(getAffectedProcessingUnits());
+        event.setProcessingUnitName(getProcessingUnitName());
         return event;
     }
 }

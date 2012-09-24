@@ -99,7 +99,7 @@ public class ReachedMaximumCapacityAutoScalingException
         if (pu.getType().equals(ProcessingUnitType.STATEFUL)) {
             DefaultElasticAutoScalingFailureEvent event = new DefaultElasticAutoScalingFailureEvent(); 
             event.setFailureDescription(getMessage());
-            event.setProcessingUnitNames(getAffectedProcessingUnits());
+            event.setProcessingUnitName(getProcessingUnitName());
             return event;
         }
 

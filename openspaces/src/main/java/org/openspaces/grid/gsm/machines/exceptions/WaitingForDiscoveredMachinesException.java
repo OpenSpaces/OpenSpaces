@@ -17,12 +17,14 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.machines.exceptions;
 
+import org.openspaces.admin.pu.ProcessingUnit;
+
 
 public class WaitingForDiscoveredMachinesException extends MachinesSlaEnforcementInProgressException {
     
     private static final long serialVersionUID = 1L;
         
-    public WaitingForDiscoveredMachinesException(String[] puNames, String message) {
-        super(puNames, message);
+    public WaitingForDiscoveredMachinesException(ProcessingUnit pu, String message) {
+        super(pu, message);
     }   
 }

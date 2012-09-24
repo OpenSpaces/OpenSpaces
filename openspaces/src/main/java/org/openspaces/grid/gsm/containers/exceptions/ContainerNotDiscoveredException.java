@@ -16,6 +16,7 @@
 package org.openspaces.grid.gsm.containers.exceptions;
 
 import org.openspaces.admin.gsc.GridServiceContainer;
+import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.containers.ContainersSlaUtils;
 
 /**
@@ -26,8 +27,8 @@ public class ContainerNotDiscoveredException extends ContainersSlaEnforcementInP
 
     private static final long serialVersionUID = 1L;
     
-    public ContainerNotDiscoveredException(String[] puNames, GridServiceContainer container) {
-        super(puNames, message(container));
+    public ContainerNotDiscoveredException(ProcessingUnit pu, GridServiceContainer container) {
+        super(pu, message(container));
     }
 
     private static String message(GridServiceContainer container) {

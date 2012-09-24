@@ -217,8 +217,8 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
         }
         
         CapacityRequirementsPerAgent totalAllocatedCapacity = new CapacityRequirementsPerAgent();
-        PerZonesMachinesSlaEnforcementInProgressException pendingMachinesExceptions = new PerZonesMachinesSlaEnforcementInProgressException(new String[]{getProcessingUnit().getName()});
-        PerZonesGridServiceAgentSlaEnforcementInProgressException pendingAgentsExceptions = new PerZonesGridServiceAgentSlaEnforcementInProgressException(new String[]{getProcessingUnit().getName()});
+        PerZonesMachinesSlaEnforcementInProgressException pendingMachinesExceptions = new PerZonesMachinesSlaEnforcementInProgressException(getProcessingUnit());
+        PerZonesGridServiceAgentSlaEnforcementInProgressException pendingAgentsExceptions = new PerZonesGridServiceAgentSlaEnforcementInProgressException(getProcessingUnit());
         ContainersSlaEnforcementInProgressException pendingContainersException = null;
         RebalancingSlaEnforcementInProgressException pendingRebalancingException = null;
         

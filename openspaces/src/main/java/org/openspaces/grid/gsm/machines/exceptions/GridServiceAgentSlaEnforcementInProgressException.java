@@ -17,18 +17,19 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.machines.exceptions;
 
+import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementInProgressException;
 
 public class GridServiceAgentSlaEnforcementInProgressException extends SlaEnforcementInProgressException {
 
     private static final long serialVersionUID = 1L;
     
-    public GridServiceAgentSlaEnforcementInProgressException(String[] puNames, String message) {
-        super(puNames, message);
+    public GridServiceAgentSlaEnforcementInProgressException(ProcessingUnit pu, String message) {
+        super(pu, message);
     }
     
-    public GridServiceAgentSlaEnforcementInProgressException(String[] puNames, String message, Exception cause) {
-        super(puNames, message,cause);
+    public GridServiceAgentSlaEnforcementInProgressException(ProcessingUnit pu, String message, Exception cause) {
+        super(pu, message,cause);
     }
 
 }

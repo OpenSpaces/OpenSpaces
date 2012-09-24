@@ -25,24 +25,24 @@ public class RebalancingSlaEnforcementInProgressException extends SlaEnforcement
  private static final long serialVersionUID = 1L;
     
     public RebalancingSlaEnforcementInProgressException(ProcessingUnit pu) {
-        super(new String[]{pu.getName()},
+        super(pu,
               inProgressMessage(pu));
     }
     
     public RebalancingSlaEnforcementInProgressException(ProcessingUnit pu, Throwable cause) {
-        super(new String[]{pu.getName()},
+        super(pu,
               inProgressMessage(pu,cause), cause);
     }
 
     public RebalancingSlaEnforcementInProgressException(ProcessingUnit pu, String message) {
-        super(new String[]{pu.getName()},
+        super(pu,
                 inProgressMessage(pu)+": " + message + 
                 " Instances " + RebalancingUtils.processingUnitDeploymentToString(pu) + 
                 " Status = " + pu.getStatus());
     }
     
     public RebalancingSlaEnforcementInProgressException(ProcessingUnit pu, String message, Throwable cause) {
-        super(new String[]{pu.getName()}, 
+        super(pu, 
                 inProgressMessage(pu)+": " + message + 
                 " Instances " + RebalancingUtils.processingUnitDeploymentToString(pu) + 
                 " Status = " + pu.getStatus(), cause);

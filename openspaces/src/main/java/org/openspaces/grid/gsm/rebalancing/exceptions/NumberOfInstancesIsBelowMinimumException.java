@@ -40,7 +40,7 @@ public class NumberOfInstancesIsBelowMinimumException extends RebalancingSlaEnfo
     public InternalElasticProcessingUnitFailureEvent toEvent() {
         DefaultElasticProcessingUnitInstanceProvisioningFailureEvent event = new DefaultElasticProcessingUnitInstanceProvisioningFailureEvent(); 
         event.setFailureDescription(getMessage());
-        event.setProcessingUnitNames(getAffectedProcessingUnits());
+        event.setProcessingUnitName(getProcessingUnitName());
         return event;
     }
 

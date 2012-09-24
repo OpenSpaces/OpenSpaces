@@ -19,7 +19,6 @@ package org.openspaces.grid.gsm.strategy;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -91,7 +90,7 @@ public class ScaleStrategyProgressEventState {
                     
                     if (logger.isWarnEnabled()) {
                         StringBuilder message = new StringBuilder();
-                        appendPuPrefix(message, event.getProcessingUnitNames());
+                        appendPuPrefix(message, event.getProcessingUnitName());
                         String failureDescription = event.getFailureDescription();
                         if (failureDescription == null) {
                             throw new IllegalStateException("event " + event.getClass() + " failure description cannot be null");
@@ -110,7 +109,7 @@ public class ScaleStrategyProgressEventState {
             }
             else if (logger.isDebugEnabled()) {
                 StringBuilder message = new StringBuilder();
-                appendPuPrefix(message, e.getAffectedProcessingUnits());
+                appendPuPrefix(message, e.getProcessingUnitName());
                 message.append("SLA in progress");
                 if (e instanceof SlaEnforcementLogStackTrace) {
                     appendStackTrace(message, e);
@@ -131,7 +130,7 @@ public class ScaleStrategyProgressEventState {
         if (event instanceof ElasticProcessingUnitDecisionEvent) {
             if (logger.isInfoEnabled()) {
                 StringBuilder message = new StringBuilder();
-                appendPuPrefix(message, new String[] {event.getProcessingUnitName()});
+                appendPuPrefix(message, event.getProcessingUnitName());
                 String decisionDescription = ((ElasticProcessingUnitDecisionEvent)event).getDecisionDescription();
                 if (decisionDescription == null) {
                     throw new IllegalStateException("event " + event.getClass() + " decision description cannot be null");
@@ -254,7 +253,7 @@ public class ScaleStrategyProgressEventState {
         }
     }
     
-    private void appendPuPrefix(StringBuilder message, String[] puNames) {
-        message.append(Arrays.asList(puNames).toString()).append(" ");
+    private void appendPuPrefix(StringBuilder message, String puName) {
+        message.append("["+puName+"]").append(" ");
     }
 }

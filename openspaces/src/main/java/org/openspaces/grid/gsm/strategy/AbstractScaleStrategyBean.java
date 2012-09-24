@@ -446,14 +446,14 @@ public abstract class AbstractScaleStrategyBean implements
         }
 
         if (!pusNotCompletedStateRecovery.isEmpty()) {
-            throw new SomeProcessingUnitsHaveNotCompletedStateRecoveryException(pusNotCompletedStateRecovery);
+            throw new SomeProcessingUnitsHaveNotCompletedStateRecoveryException(getProcessingUnit(), pusNotCompletedStateRecovery);
         }   
     }
 
     private void validateAtLeastOneLookupServiceDiscovered() throws DisconnectedFromLookupServiceException {
         final int numberOfLookupServices= admin.getLookupServices().getSize();
         if (numberOfLookupServices == 0) {
-            final DisconnectedFromLookupServiceException e = new DisconnectedFromLookupServiceException(this.getProcessingUnit().getName(), admin.getLocators(), admin.getGroups());
+            final DisconnectedFromLookupServiceException e = new DisconnectedFromLookupServiceException(this.getProcessingUnit(), admin.getLocators(), admin.getGroups());
             //eventually raises a machines alert. That's good enough
             machineProvisioningEventState.enqueuProvisioningInProgressEvent(e);
             throw e;

@@ -28,7 +28,7 @@ public class WrongNumberOfESMComponentsException extends SlaEnforcementInProgres
     private static final long serialVersionUID = 1L;
         
     public WrongNumberOfESMComponentsException(int numberOfEsms, String puName) {
-        super(new String[]{puName}, message(numberOfEsms));
+        super(puName, message(numberOfEsms));
     }
     
     private static String message(int numberOfEsms) {
@@ -39,7 +39,7 @@ public class WrongNumberOfESMComponentsException extends SlaEnforcementInProgres
     public InternalElasticProcessingUnitFailureEvent toEvent() {
         DefaultElasticGridServiceAgentProvisioningFailureEvent event = new DefaultElasticGridServiceAgentProvisioningFailureEvent(); 
         event.setFailureDescription(getMessage());
-        event.setProcessingUnitNames(getAffectedProcessingUnits());
+        event.setProcessingUnitName(getProcessingUnitName());
         return event;
     }
 }

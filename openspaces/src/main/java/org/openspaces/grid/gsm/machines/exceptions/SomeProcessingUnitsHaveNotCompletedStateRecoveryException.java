@@ -27,13 +27,9 @@ public class SomeProcessingUnitsHaveNotCompletedStateRecoveryException extends
 
     private static final long serialVersionUID = 1L;
     
-    public SomeProcessingUnitsHaveNotCompletedStateRecoveryException(List<ProcessingUnit> pusNotCompletedStateRecovery) {
-        super(pusToArray(pusNotCompletedStateRecovery), "Waiting for the following processing units to complete state recovery: " + 
+    public SomeProcessingUnitsHaveNotCompletedStateRecoveryException(ProcessingUnit pu, List<ProcessingUnit> pusNotCompletedStateRecovery) {
+        super(pu, "Waiting for the following processing units to complete state recovery: " + 
                   pusToString(pusNotCompletedStateRecovery));
-    }
-
-    private static String[] pusToArray(List<ProcessingUnit> pusNotCompletedStateRecovery) {
-        return pusToList(pusNotCompletedStateRecovery).toArray(new String[pusNotCompletedStateRecovery.size()]);
     }
 
     private static String pusToString(List<ProcessingUnit> pus) {

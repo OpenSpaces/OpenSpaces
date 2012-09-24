@@ -31,7 +31,7 @@ public class MachinesSlaHasChangedException extends MachinesSlaEnforcementInProg
     private static final long serialVersionUID = 1L;
     
     public MachinesSlaHasChangedException(ProcessingUnit pu, ZonesConfig zones, CapacityRequirements oldCapacity, CapacityRequirementsPerAgent allocatedCapacity) {
-        super(new String[] {pu.getName()}, message(zones, oldCapacity, allocatedCapacity));
+        super(pu, message(zones, oldCapacity, allocatedCapacity));
     }
 
     private static String message(ZonesConfig zones, CapacityRequirements oldCapacity, CapacityRequirementsPerAgent allocatedCapacity) {

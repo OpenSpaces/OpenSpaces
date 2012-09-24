@@ -17,11 +17,13 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.machines.exceptions;
 
+import org.openspaces.admin.pu.ProcessingUnit;
+
 public class CannotDetermineIfNeedToStartMoreMachinesException extends GridServiceAgentSlaEnforcementInProgressException {
     
     private static final long serialVersionUID = 1L;
 
-    public CannotDetermineIfNeedToStartMoreMachinesException(String[] puNames, int machineShortage) {
-        super(puNames, "Cannot determine if more machines are needed in order to reach the minimum number of machines. Currently short of " + machineShortage + " machines. Will check again later since there are still some machines being started.");
+    public CannotDetermineIfNeedToStartMoreMachinesException(ProcessingUnit pu, int machineShortage) {
+        super(pu, "Cannot determine if more machines are needed in order to reach the minimum number of machines. Currently short of " + machineShortage + " machines. Will check again later since there are still some machines being started.");
     }
 }

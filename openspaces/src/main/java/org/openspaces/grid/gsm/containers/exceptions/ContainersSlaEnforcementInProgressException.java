@@ -17,17 +17,18 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.containers.exceptions;
 
+import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementInProgressException;
 
 public class ContainersSlaEnforcementInProgressException extends SlaEnforcementInProgressException {
 
     private static final long serialVersionUID = 1L;
 
-    public ContainersSlaEnforcementInProgressException(String[] puNames, String message) {
-        super(puNames, message);
+    public ContainersSlaEnforcementInProgressException(ProcessingUnit pu, String message) {
+        super(pu, message);
     }
     
-    public ContainersSlaEnforcementInProgressException(String[] puNames, String message, Exception reason) {
-        super(puNames, message, reason);
+    public ContainersSlaEnforcementInProgressException(ProcessingUnit pu, String message, Exception reason) {
+        super(pu, message, reason);
     }
 }

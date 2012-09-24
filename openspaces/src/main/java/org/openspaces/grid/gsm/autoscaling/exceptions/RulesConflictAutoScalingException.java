@@ -108,7 +108,7 @@ public class RulesConflictAutoScalingException  extends AutoScalingSlaEnforcemen
     public InternalElasticProcessingUnitFailureEvent toEvent() {
         DefaultElasticAutoScalingFailureEvent event = new DefaultElasticAutoScalingFailureEvent(); 
         event.setFailureDescription(getMessage());
-        event.setProcessingUnitNames(getAffectedProcessingUnits());
+        event.setProcessingUnitName(getProcessingUnitName());
         return event;
     }
 }

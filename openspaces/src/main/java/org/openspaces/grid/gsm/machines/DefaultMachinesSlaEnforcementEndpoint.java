@@ -276,7 +276,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
            }
         }
         if (undiscoveredAgents.size() > 0) {
-            throw new InconsistentMachineProvisioningException(new String[]{getProcessingUnit().getName()}, undiscoveredAgents);
+            throw new InconsistentMachineProvisioningException(getProcessingUnit(), undiscoveredAgents);
         }
     }
 
@@ -332,7 +332,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         
         if (!getCapacityMarkedForDeallocation(sla).equalsZero()) {
             // containers need to be removed (required when number of containers per machine changes)
-            throw new GridServiceAgentSlaEnforcementPendingContainerDeallocationException(new String[]{getProcessingUnit().getName()}, getCapacityMarkedForDeallocation(sla));
+            throw new GridServiceAgentSlaEnforcementPendingContainerDeallocationException(getProcessingUnit(), getCapacityMarkedForDeallocation(sla));
         }
     }
 
@@ -372,7 +372,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             machineShortage == 0) {
             
             if (getNumberOfFutureAgents(sla) > 0) {
-                throw new DelayingScaleInUntilAllMachinesHaveStartedException(new String[]{getProcessingUnit().getName()});
+                throw new DelayingScaleInUntilAllMachinesHaveStartedException(getProcessingUnit());
             }
             
             logger.debug("Considering scale in: "+
@@ -520,7 +520,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             
             // even if machineShortage is 0, we still need to come back to this method 
             // to check the capacity is satisfied (scale out)
-            throw new MachinesSlaEnforcementInProgressException(new String[] {getProcessingUnit().getName()});
+            throw new MachinesSlaEnforcementInProgressException(getProcessingUnit());
         }
         else {
             logger.debug("No action required in order to enforce machines sla. "+
@@ -534,17 +534,17 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
 
         if (!getCapacityMarkedForDeallocation(sla).equalsZero()) {
             // containers need to move to another machine
-            throw new GridServiceAgentSlaEnforcementPendingContainerDeallocationException(new String[]{getProcessingUnit().getName()}, getCapacityMarkedForDeallocation(sla));
+            throw new GridServiceAgentSlaEnforcementPendingContainerDeallocationException(getProcessingUnit(), getCapacityMarkedForDeallocation(sla));
         }
         
         if (getNumberOfFutureAgents(sla) > 0) {
             // new machines need to be started
-            throw new MachinesSlaEnforcementInProgressException(new String[] {getProcessingUnit().getName()});
+            throw new MachinesSlaEnforcementInProgressException(getProcessingUnit());
         }
         
         if (!getAgentUidsGoingDown(sla).isEmpty()) {
             // old machines need to complete shutdown
-            throw new MachinesSlaEnforcementInProgressException(new String[] {getProcessingUnit().getName()});
+            throw new MachinesSlaEnforcementInProgressException(getProcessingUnit());
         }
     }
 
@@ -562,7 +562,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                 if (!shortageCapacityRequirement.equalsZero() && expectedCapacityRequirement.equalsZero()) {
                     // cannot determine expected capacity, it could be enough to satisfy shortage 
                     // and if that is the case, there is no point in declaring there is shortage.
-                    throw new MachinesSlaEnforcementInProgressException(new String[] {getProcessingUnit().getName()});
+                    throw new MachinesSlaEnforcementInProgressException(getProcessingUnit());
                 }
             }
             
@@ -634,7 +634,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         }
         
         if (machineShortage > 0 && cannotDetermineExpectedNumberOfMachines) {
-            throw new CannotDetermineIfNeedToStartMoreMachinesException(new String[]{getProcessingUnit().getName()}, machineShortage);
+            throw new CannotDetermineIfNeedToStartMoreMachinesException(getProcessingUnit(), machineShortage);
         }
         
         if (machineShortage < 0) {
@@ -988,11 +988,11 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             }
             
             if (exception != null) {
-                String[] affectedPUs = state.getProcessingUnitsOfFutureMachine(pu, futureAgent);
+                
                 if (exception instanceof ElasticGridServiceAgentProvisioningException) {
-                    throw new FailedToStartNewGridServiceAgentException(affectedPUs, exception);
+                    throw new FailedToStartNewGridServiceAgentException(pu, exception);
                 }
-                throw new FailedToStartNewMachineException(affectedPUs, exception);
+                throw new FailedToStartNewMachineException(pu, exception);
             }
         }
         if (newAgent == null) {
@@ -1000,8 +1000,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         }
         
         if (!newAgent.isDiscovered()) {
-            String[] affectedPUs = state.getProcessingUnitsOfFutureMachine(pu, futureAgent);
-            UnexpectedShutdownOfNewGridServiceAgentException unexpectedShutdownException = new UnexpectedShutdownOfNewGridServiceAgentException(newAgent.getMachine(), affectedPUs);
+            UnexpectedShutdownOfNewGridServiceAgentException unexpectedShutdownException = new UnexpectedShutdownOfNewGridServiceAgentException(newAgent.getMachine(), pu);
             if (logger.isWarnEnabled()) {
                 logger.warn("Failed to start agent on new machine.", unexpectedShutdownException);
             }
@@ -1047,7 +1046,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
            }
            
            // providing a grace period for provisionedAgents to update.
-           throw new InconsistentMachineProvisioningException(new String[]{getProcessingUnit().getName()}, newAgent);
+           throw new InconsistentMachineProvisioningException(getProcessingUnit(), newAgent);
         }
     }
 

@@ -15,6 +15,8 @@
  *******************************************************************************/
 package org.openspaces.grid.gsm.machines.exceptions;
 
+import org.openspaces.admin.pu.ProcessingUnit;
+
 /**
  * @author itaif
  *
@@ -23,7 +25,7 @@ public class DelayingScaleInUntilAllMachinesHaveStartedException extends GridSer
     
     private static final long serialVersionUID = 1L;
 
-    public DelayingScaleInUntilAllMachinesHaveStartedException(String[] puNames) {
-        super(puNames, "Delaying scale in of existing machines since new machines are being started");
+    public DelayingScaleInUntilAllMachinesHaveStartedException(ProcessingUnit pu) {
+        super(pu, "Delaying scale in of existing machines since new machines are being started");
     }
 }

@@ -26,7 +26,7 @@ import org.openspaces.admin.internal.pu.elastic.events.InternalElasticProcessing
  */
 public interface SlaEnforcementFailure {
  
-    public String[] getAffectedProcessingUnits();
+    public String getProcessingUnitName();
     
     /**
      * Must implement the equals method since it is used to filter failure events

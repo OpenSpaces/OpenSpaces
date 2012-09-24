@@ -46,7 +46,7 @@ public class ElasticStatelessReachedMaximumNumberOfInstancesEvent
         this.existingNumberOfInstances = existingNumberOfInstances;
         this.requestedNumberOfInstances = requestedNumberOfInstances;
         this.maximumNumberOfInstances = maximumNumberOfInstances;
-        setProcessingUnitNames(new String[] { pu.getName()});
+        setProcessingUnitName(pu.getName());
         //TODO: Add statistics and threshold values 
         setFailureDescription(pu.getName() + " cannot increase from " + existingNumberOfInstances + " instances to " + requestedNumberOfInstances
                 + " instances, since it breaches maximum of " + maximumNumberOfInstances + " instances");

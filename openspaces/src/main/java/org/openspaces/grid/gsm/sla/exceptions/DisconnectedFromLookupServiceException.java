@@ -21,6 +21,7 @@ import net.jini.core.discovery.LookupLocator;
 
 import org.openspaces.admin.internal.gsa.events.DefaultElasticGridServiceAgentProvisioningFailureEvent;
 import org.openspaces.admin.internal.pu.elastic.events.InternalElasticProcessingUnitFailureEvent;
+import org.openspaces.admin.pu.ProcessingUnit;
 
 
 /**
@@ -31,8 +32,8 @@ public class DisconnectedFromLookupServiceException extends SlaEnforcementInProg
 
     private static final long serialVersionUID = 1L;
     
-    public DisconnectedFromLookupServiceException(String puName, LookupLocator[] locators, String[] groups) {
-        super(new String[] {puName}, message(locators, groups));
+    public DisconnectedFromLookupServiceException(ProcessingUnit pu, LookupLocator[] locators, String[] groups) {
+        super(pu, message(locators, groups));
     }
     
     private static String message(LookupLocator[] locators, String[] groups) {
@@ -55,7 +56,7 @@ public class DisconnectedFromLookupServiceException extends SlaEnforcementInProg
     public InternalElasticProcessingUnitFailureEvent toEvent() {
         DefaultElasticGridServiceAgentProvisioningFailureEvent event = new DefaultElasticGridServiceAgentProvisioningFailureEvent(); 
         event.setFailureDescription(getMessage());
-        event.setProcessingUnitNames(getAffectedProcessingUnits());
+        event.setProcessingUnitName(getProcessingUnitName());
         return event;
     }
 }

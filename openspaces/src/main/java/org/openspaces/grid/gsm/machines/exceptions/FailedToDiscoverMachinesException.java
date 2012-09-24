@@ -27,14 +27,14 @@ public class FailedToDiscoverMachinesException extends MachinesSlaEnforcementInP
     private static final long serialVersionUID = 1L;
     
     public FailedToDiscoverMachinesException(ProcessingUnit pu, Exception cause) {
-        super(new String[] { pu.getName() }, "Machine provisioning failed to discover existing agents. Cause:" + cause.getMessage(), cause);
+        super(pu, "Machine provisioning failed to discover existing agents. Cause:" + cause.getMessage(), cause);
     }
 
     @Override
     public InternalElasticProcessingUnitFailureEvent toEvent() {
         DefaultElasticMachineProvisioningFailureEvent event = new DefaultElasticMachineProvisioningFailureEvent(); 
         event.setFailureDescription(getMessage());
-        event.setProcessingUnitNames(getAffectedProcessingUnits());
+        event.setProcessingUnitName(getProcessingUnitName());
         return event;
     }
     
