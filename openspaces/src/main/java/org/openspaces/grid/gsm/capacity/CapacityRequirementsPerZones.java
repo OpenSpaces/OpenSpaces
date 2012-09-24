@@ -20,10 +20,7 @@ package org.openspaces.grid.gsm.capacity;
 import static org.openspaces.admin.internal.zone.config.ZonesConfigUtils.zonesFromString;
 import static org.openspaces.admin.internal.zone.config.ZonesConfigUtils.zonesToString;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.openspaces.admin.zone.config.ZonesConfig;
@@ -108,9 +105,7 @@ public class CapacityRequirementsPerZones extends AbstractCapacityRequirementsPe
     public String toDetailedString() {
         StringBuilder builder = new StringBuilder();
         builder.append("totalNumberOfZones:" + super.getKeys().size() + " , totalCapacity:" + getTotalAllocatedCapacity()+", details:{");
-        List<String> keySet = new ArrayList<String>(super.getKeys());
-        Collections.sort(keySet);
-        for (String key : keySet) {
+        for (String key : super.getKeys()) {
             builder.append(key + ":" + super.getKeyCapacity(key)+" , ");
         }
         builder.append("}");

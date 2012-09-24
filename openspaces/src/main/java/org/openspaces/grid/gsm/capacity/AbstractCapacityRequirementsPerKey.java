@@ -18,7 +18,7 @@
 package org.openspaces.grid.gsm.capacity;
 
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 abstract class AbstractCapacityRequirementsPerKey {
@@ -28,8 +28,9 @@ abstract class AbstractCapacityRequirementsPerKey {
     private CapacityRequirements totalCapacity;
     
     protected AbstractCapacityRequirementsPerKey() {
-        // use consistent ordering of machines so unit tests and bugs will have consistent iterator behavior.
-        this.capacityPerKey = new HashMap<String, CapacityRequirements>();
+        // use consistent ordering of machines so old machines will appear before new machines.
+        // and unit tests and bugs will have consistent iterator behavior.
+        this.capacityPerKey = new LinkedHashMap<String, CapacityRequirements>();
         totalCapacity = new CapacityRequirements();
     }
         

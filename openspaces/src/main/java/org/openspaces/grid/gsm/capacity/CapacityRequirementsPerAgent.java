@@ -17,10 +17,7 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.capacity;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 public class CapacityRequirementsPerAgent extends AbstractCapacityRequirementsPerKey {
 
@@ -96,9 +93,7 @@ public class CapacityRequirementsPerAgent extends AbstractCapacityRequirementsPe
     public String toDetailedString() {
         StringBuilder builder = new StringBuilder();
         builder.append("totalNumberOfMachines:" + super.getKeys().size() + " , totalCapacity:" + getTotalAllocatedCapacity()+", details:{");
-        List<String> keySet = new ArrayList<String>(super.getKeys());
-        Collections.sort(keySet);
-        for (String key : keySet) {
+        for (String key : super.getKeys()) {
             builder.append(key + ":" + super.getKeyCapacity(key)+" , ");
         }
         builder.append("}");
