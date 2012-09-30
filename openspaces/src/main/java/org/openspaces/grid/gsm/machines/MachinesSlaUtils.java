@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -225,8 +226,8 @@ public class MachinesSlaUtils {
         return Boolean.valueOf(autoShutdownFlag);
     }
     
-    public static Collection<GridServiceAgent> sortAndFilterAgents(GridServiceAgent[] agents, ElasticMachineProvisioningConfig machineProvisioningConfig, Log logger) {
-        Set<GridServiceAgent> filteredAgents = new HashSet<GridServiceAgent>();
+    public static Collection<GridServiceAgent> sortAndFilterAgents(Collection<GridServiceAgent> agents, ElasticMachineProvisioningConfig machineProvisioningConfig, Log logger) {
+        Set<GridServiceAgent> filteredAgents = new LinkedHashSet<GridServiceAgent>(); //maintain order
         for (final GridServiceAgent agent : agents) {
             if (!agent.isDiscovered()) {
                 if (logger.isDebugEnabled()) {
