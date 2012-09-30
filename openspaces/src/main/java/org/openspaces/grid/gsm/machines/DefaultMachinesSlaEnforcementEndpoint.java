@@ -1172,26 +1172,42 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         solver.setMinimumNumberOfMachines(sla.getMinimumNumberOfMachines());
         
         // the higher the priority the less likely the machine to be scaled in.
-        Map<String,Integer> scaleInPriorityPerAgentUid = new HashMap<String,Integer>();
+        Map<String,Long> scaleInPriorityPerAgentUid = new HashMap<String,Long>();
         GridServiceAgents agents = pu.getAdmin().getGridServiceAgents();
+        
+        final long FIRST_PRIORITY = Long.MAX_VALUE;
+        final long SECOND_PRIORITY = FIRST_PRIORITY - 1;
+        final long THIRD_PRIORITY = SECOND_PRIORITY - 1;
+        final long FOURTH_PRIORITY = THIRD_PRIORITY - 1;
+        final long now = System.currentTimeMillis();
+        
         for (String agentUid : getAllocatedCapacity(sla).getAgentUids()) {
-            int agentOrderToDeallocateContainers = 0;
+            long agentOrderToDeallocateContainers = 0;
             GridServiceAgent agent = agents.getAgentByUID(agentUid);
             if (agent != null) {
                 if (MachinesSlaUtils.isManagementRunningOnMachine(agent.getMachine())) {
                     // machine has management on it. It will not shutdown anyway, so try to scale in other
                     // machines first.
-                    agentOrderToDeallocateContainers = 3;
+                    agentOrderToDeallocateContainers = FIRST_PRIORITY;
                 }
                 else if (state.isAgentSharedWithOtherProcessingUnits(pu, agentUid)) {
                     // machine has other PUs on it. 
                     // try to scale in other machines first.
-                    agentOrderToDeallocateContainers = 2;
+                    agentOrderToDeallocateContainers = SECOND_PRIORITY;
                 }
                 else if (!MachinesSlaUtils.isAgentAutoShutdownEnabled(agent)) {
                     // machine cannot be shutdown by ESM
                     // try scaling in machines that we can shutdown first.
-                    agentOrderToDeallocateContainers = 1;
+                    agentOrderToDeallocateContainers = THIRD_PRIORITY;
+                }
+                else {
+                    long startTime = agent.getVirtualMachine().getDetails().getStartTime();
+                    long runDuration = now - startTime;
+                    if (runDuration > FOURTH_PRIORITY) {
+                        runDuration = FOURTH_PRIORITY;
+                    }
+                    //The more time the agent is running the higher the priority the less it should be shutdown
+                    agentOrderToDeallocateContainers = runDuration;
                 }
             }
             scaleInPriorityPerAgentUid.put(agentUid, agentOrderToDeallocateContainers);

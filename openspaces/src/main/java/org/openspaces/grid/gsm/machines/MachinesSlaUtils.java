@@ -226,7 +226,7 @@ public class MachinesSlaUtils {
         return Boolean.valueOf(autoShutdownFlag);
     }
     
-    public static Collection<GridServiceAgent> sortAndFilterAgents(Collection<GridServiceAgent> agents, ElasticMachineProvisioningConfig machineProvisioningConfig, Log logger) {
+    public static Collection<GridServiceAgent> sortAndFilterAgents(GridServiceAgent[] agents, ElasticMachineProvisioningConfig machineProvisioningConfig, Log logger) {
         Set<GridServiceAgent> filteredAgents = new LinkedHashSet<GridServiceAgent>(); //maintain order
         for (final GridServiceAgent agent : agents) {
             if (!agent.isDiscovered()) {

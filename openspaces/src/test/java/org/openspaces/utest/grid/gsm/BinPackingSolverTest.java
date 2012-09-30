@@ -1070,10 +1070,10 @@ public class BinPackingSolverTest extends TestCase {
             
         solver.setUnallocatedCapacity(unallocatedCapacity);
         solver.setMinimumNumberOfMachines(1);
-        Map<String, Integer> agentPriority = new HashMap<String,Integer>();
-        agentPriority.put(AGENT1_UID,100);
-        agentPriority.put(AGENT2_UID,20);
-        agentPriority.put(AGENT3_UID,3);
+        Map<String, Long> agentPriority = new HashMap<String, Long>();
+        agentPriority.put(AGENT1_UID,100L);
+        agentPriority.put(AGENT2_UID,20L);
+        agentPriority.put(AGENT3_UID,3L);
         solver.setAgentAllocationPriority(agentPriority);
         
         solver.solveManualCapacityScaleIn(cpuMemoryDrive(new Fraction(2),250, 0));

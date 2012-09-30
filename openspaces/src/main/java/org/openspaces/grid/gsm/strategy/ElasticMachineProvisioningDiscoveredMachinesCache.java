@@ -17,10 +17,7 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.strategy;
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -59,7 +56,6 @@ public class ElasticMachineProvisioningDiscoveredMachinesCache implements
     private final ProcessingUnit pu;
     private final InternalAdmin admin;
     private final NonBlockingElasticMachineProvisioning machineProvisioning;
-    private final LinkedHashSet<GridServiceAgent> discoveredAgentsOldestFirst = new LinkedHashSet<GridServiceAgent>();
     private final boolean quiteMode;
     
     // created by afterPropertiesSet()
@@ -156,14 +152,7 @@ public class ElasticMachineProvisioningDiscoveredMachinesCache implements
             logger.info("Failed to discover machines",e);
         }
         
-        // sort newest agents last
-        Collection<GridServiceAgent> discoveredAgents = new HashSet<GridServiceAgent>(Arrays.asList(agents));
-        // addAll inserts new discovered agents to the end of the linkedhashset, ignores existing agents
-        discoveredAgentsOldestFirst.addAll(discoveredAgents);
-        // retainAll removes agents that are no longer discovered.
-        discoveredAgentsOldestFirst.retainAll(discoveredAgents);
-        
-        return MachinesSlaUtils.sortAndFilterAgents(discoveredAgentsOldestFirst, machineProvisioning.getConfig(), logger);
+        return MachinesSlaUtils.sortAndFilterAgents(agents, machineProvisioning.getConfig(), logger);
     }
 
     public void gridServiceAgentRemoved(GridServiceAgent gridServiceAgent) {

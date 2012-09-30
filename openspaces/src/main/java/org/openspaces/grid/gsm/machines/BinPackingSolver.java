@@ -50,12 +50,12 @@ public class BinPackingSolver {
     
     private long maxMemoryCapacityInMB;
     private int minimumNumberOfMachines;
-    private HashMap<String, Integer> agentPriority;
+    private HashMap<String, Long> agentPriority;
     private long maxMemoryCapacityPerMachineInMB;
 
     public BinPackingSolver() {
         debugTrace ="";
-        agentPriority = new HashMap<String,Integer>();
+        agentPriority = new HashMap<String, Long>();
         allocatedCapacityResult = new CapacityRequirementsPerAgent();
         deallocatedCapacityResult = new CapacityRequirementsPerAgent();
     }
@@ -94,8 +94,8 @@ public class BinPackingSolver {
      * The higher the priority the less likely for the machine to be scaled in
      * @param agentPriority - a map between agent UID and its priority
      */
-    public void setAgentAllocationPriority(Map<String, Integer> agentPriority) {
-        this.agentPriority = new HashMap<String,Integer>(agentPriority);
+    public void setAgentAllocationPriority(Map<String, Long> agentPriority) {
+        this.agentPriority = new HashMap<String,Long>(agentPriority);
     }
     
     /**
@@ -406,11 +406,11 @@ public class BinPackingSolver {
                 Collections.sort(sortedAgentUids, new Comparator<String>() {
 
                     public int compare(String agentUid1, String agentUid2) {
-                        return getAgentPriority(agentUid1) - getAgentPriority(agentUid2);
+                        return Long.valueOf(getAgentPriority(agentUid1)).compareTo(getAgentPriority(agentUid2));
                     }
 
-                    private int getAgentPriority(String agentUid) {
-                        int priority = 0;
+                    private long getAgentPriority(String agentUid) {
+                        long priority = 0;
                         if (agentPriority.containsKey(agentUid)) {
                             priority = agentPriority.get(agentUid);
                         }
