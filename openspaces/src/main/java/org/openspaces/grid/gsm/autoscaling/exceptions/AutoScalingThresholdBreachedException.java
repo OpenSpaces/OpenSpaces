@@ -33,35 +33,37 @@ public abstract class AutoScalingThresholdBreachedException extends AutoScalingS
     implements SlaEnforcementDecision {
 
     private static final long serialVersionUID = 1L;
-    private final CapacityRequirements after;
-    private final CapacityRequirements before;
+    private final CapacityRequirements newPlan;
+    private final CapacityRequirements actual;
     private final ProcessingUnit pu;
     private final long containerCapacityInMB;
+    private CapacityRequirements oldPlan;
     
     public AutoScalingThresholdBreachedException(
             String message,
             ProcessingUnit pu,
-            CapacityRequirements before,
-            CapacityRequirements after,
+            CapacityRequirements actual,
+            CapacityRequirements newPlan,
             long containerCapacityInMB) {
         super(pu, message);
-        this.before = before;
-        this.after = after;
+        this.actual = actual;
+        this.newPlan = newPlan;
         this.pu = pu;
         this.containerCapacityInMB = containerCapacityInMB;
     }
 
     public CapacityRequirements getNewCapacity() {
-        return after;
+        return newPlan;
     }
-    
+
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + ((after == null) ? 0 : after.hashCode());
-        result = prime * result + ((before == null) ? 0 : before.hashCode());
+        result = prime * result + ((actual == null) ? 0 : actual.hashCode());
         result = prime * result + (int) (containerCapacityInMB ^ (containerCapacityInMB >>> 32));
+        result = prime * result + ((newPlan == null) ? 0 : newPlan.hashCode());
+        result = prime * result + ((oldPlan == null) ? 0 : oldPlan.hashCode());
         return result;
     }
 
@@ -74,33 +76,45 @@ public abstract class AutoScalingThresholdBreachedException extends AutoScalingS
         if (getClass() != obj.getClass())
             return false;
         AutoScalingThresholdBreachedException other = (AutoScalingThresholdBreachedException) obj;
-        if (after == null) {
-            if (other.after != null)
+        if (actual == null) {
+            if (other.actual != null)
                 return false;
-        } else if (!after.equals(other.after))
-            return false;
-        if (before == null) {
-            if (other.before != null)
-                return false;
-        } else if (!before.equals(other.before))
+        } else if (!actual.equals(other.actual))
             return false;
         if (containerCapacityInMB != other.containerCapacityInMB)
+            return false;
+        if (newPlan == null) {
+            if (other.newPlan != null)
+                return false;
+        } else if (!newPlan.equals(other.newPlan))
+            return false;
+        if (oldPlan == null) {
+            if (other.oldPlan != null)
+                return false;
+        } else if (!oldPlan.equals(other.oldPlan))
             return false;
         return true;
     }
 
+    public void setOldPlan(CapacityRequirements oldPlan) {
+        this.oldPlan = oldPlan;
+    }
+    
     @Override
     public InternalElasticProcessingUnitDecisionEvent toEvent() {
         
-        CapacityRequirementsConfig beforeConfig = new CapacityRequirementsConfig(before);
-        CapacityRequirementsConfig afterConfig = new CapacityRequirementsConfig(after);
+        CapacityRequirementsConfig actualConfig = new CapacityRequirementsConfig(actual);
+        CapacityRequirementsConfig newPlanConfig = new CapacityRequirementsConfig(newPlan);
+        CapacityRequirementsConfig oldPlanConfig = new CapacityRequirementsConfig(oldPlan);
         
         if (pu.getType().equals(ProcessingUnitType.STATEFUL)) {
-            return new ElasticStatefulProcessingUnitPlannedCapacityChangedEvent(beforeConfig, afterConfig);
+            return new ElasticStatefulProcessingUnitPlannedCapacityChangedEvent(actualConfig, newPlanConfig);
         }
 
-        int beforeNumberOfInstances = (int) Math.ceil((beforeConfig.getMemoryCapacityInMB() * 1.0 / containerCapacityInMB));
-        int afterNumberOfInstances = (int) Math.ceil((afterConfig.getMemoryCapacityInMB() * 1.0 / containerCapacityInMB));
-        return new ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent(beforeNumberOfInstances ,afterNumberOfInstances);
+        int actualNumberOfInstances = (int) Math.ceil((actualConfig.getMemoryCapacityInMB() * 1.0 / containerCapacityInMB));
+        int newPlannedNumberOfInstances = (int) Math.ceil((newPlanConfig.getMemoryCapacityInMB() * 1.0 / containerCapacityInMB));
+        int oldPlanmedNumberOfInstances = (int) Math.ceil((oldPlanConfig.getMemoryCapacityInMB() * 1.0 / containerCapacityInMB));
+        return new ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent(
+                actualNumberOfInstances, oldPlanmedNumberOfInstances, newPlannedNumberOfInstances);
     }
 }

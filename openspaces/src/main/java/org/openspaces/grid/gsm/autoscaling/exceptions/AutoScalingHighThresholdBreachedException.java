@@ -28,14 +28,14 @@ public class AutoScalingHighThresholdBreachedException extends AutoScalingThresh
     
     public AutoScalingHighThresholdBreachedException(
             ProcessingUnit pu,
-            CapacityRequirements before,
-            CapacityRequirements after,
+            CapacityRequirements actual,
+            CapacityRequirements newPlan,
             long containerCapacityInMB) {
-        super(message(pu, before, after), pu, before, after, containerCapacityInMB);
+        super(message(pu, actual, newPlan), pu, actual, newPlan, containerCapacityInMB);
     }
 
-    private static String message(ProcessingUnit pu, CapacityRequirements before, CapacityRequirements after) {
+    private static String message(ProcessingUnit pu, CapacityRequirements actual, CapacityRequirements newPlan) {
         //TODO: Add rule, threshold, value that breached threshold, how value was calculated.
-        return "Increasing capacity of " + pu.getName() + " from " + before + " to " + after;
+        return "Increasing planned capacity of " + pu.getName() + " to " + newPlan + "Actual capacity is " + actual;
     }
 }

@@ -28,14 +28,14 @@ public class AutoScalingLowThresholdBreachedException extends AutoScalingThresho
 
     public AutoScalingLowThresholdBreachedException(
             ProcessingUnit pu,
-            CapacityRequirements before,
-            CapacityRequirements after,
+            CapacityRequirements actual,
+            CapacityRequirements newPlan,
             long containerCapacityInMB) {
-        super(message(pu, before, after), pu, before, after, containerCapacityInMB);
+        super(message(pu, actual, newPlan), pu, actual, newPlan, containerCapacityInMB);
     }
 
-    private static String message(ProcessingUnit pu, CapacityRequirements existingCapacity, CapacityRequirements newCapacity) {
+    private static String message(ProcessingUnit pu, CapacityRequirements actual, CapacityRequirements newPlan) {
         //TODO: Add rule, threshold, value that breached threshold, how value was calculated.
-        return "Decreasing capacity of " + pu.getName() + " from " + existingCapacity + " to " + newCapacity;
+        return "Decreasing planned capacity of " + pu.getName() + " to " + newPlan +". Actual capacity is " + actual;
     }
 }

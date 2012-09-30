@@ -30,8 +30,9 @@ public class ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent
     implements ElasticAutoScalingProgressChangedEvent {
 
     private static final long serialVersionUID = 1L;
-    private int beforePlannedNumberOfInstances;
-    private int afterPlannedNumberOfInstances;
+    private int oldPlannedNumberOfInstances;
+    private int newPlannedNumberOfInstances;
+    private int actualNumberOfInstances;
     
     /**
     * de-serialization constructor
@@ -40,38 +41,44 @@ public class ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent
         
     }
     
-    public ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent(int beforePlannedNumberOfInstances, int afterPlannedNumberOfInstances) {
-        this.beforePlannedNumberOfInstances = beforePlannedNumberOfInstances;
-        this.afterPlannedNumberOfInstances = afterPlannedNumberOfInstances;
+    public ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent(
+            int actualNumberOfInstances, 
+            int oldPlannedNumberOfInstances,
+            int newPlannedNumberOfInstances) {
+        this.actualNumberOfInstances = actualNumberOfInstances;
+        this.oldPlannedNumberOfInstances = oldPlannedNumberOfInstances;
+        this.newPlannedNumberOfInstances = newPlannedNumberOfInstances;
     }
 
 
-    public int getAfterPlannedNumberOfInstances() {
-        return afterPlannedNumberOfInstances;
+    public int getNewPlannedNumberOfInstances() {
+        return newPlannedNumberOfInstances;
     }
 
     public int getBeforePlannedNumberOfInstances() {
-        return beforePlannedNumberOfInstances;
+        return oldPlannedNumberOfInstances;
     }
     
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         super.writeExternal(out);
         
-        out.writeInt(beforePlannedNumberOfInstances);
-        out.writeInt(afterPlannedNumberOfInstances);
+        out.writeInt(oldPlannedNumberOfInstances);
+        out.writeInt(newPlannedNumberOfInstances);
+        out.writeInt(actualNumberOfInstances);
     }
 
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
         
-        beforePlannedNumberOfInstances = in.readInt();
-        afterPlannedNumberOfInstances = in.readInt();
+        oldPlannedNumberOfInstances = in.readInt();
+        newPlannedNumberOfInstances = in.readInt();
+        actualNumberOfInstances = in.readInt();
     }
 
     @Override
     public String getDecisionDescription() {
-        return "Number of planned instances changed from " + beforePlannedNumberOfInstances + " to " + afterPlannedNumberOfInstances;
+        return "Number of planned instances changed from " + oldPlannedNumberOfInstances + " to " + newPlannedNumberOfInstances + ". Actual number of instances:" + actualNumberOfInstances;
     }
 }

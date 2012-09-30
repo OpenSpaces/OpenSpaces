@@ -338,6 +338,17 @@ implements AutoScalingSlaEnforcementEndpointAware {
             
             autoScalingEndpoint.enforceSla(sla);
             autoScalingCompletedEvent(zones);
+            
+        } catch (AutoScalingHighThresholdBreachedException e) {
+            // inject information not available when exception was raised
+            final CapacityRequirementsPerZones plannedPerZones = super.getPlannedCapacity().toCapacityRequirementsPerZones();
+  
+            //TODO: Suppress ex/event if oldPlan eq newPlan
+            CapacityRequirements oldPlan = plannedPerZones.getZonesCapacityOrZero(zones);
+            e.setOldPlan(oldPlan);
+            autoScalingInProgressEvent(e, zones);
+            throw e;
+            
         } catch (AutoScalingLowThresholdBreachedException e) {
             
             boolean supressException = false;
@@ -352,8 +363,13 @@ implements AutoScalingSlaEnforcementEndpointAware {
                 }
             }
             
+            //TODO: Suppress ex/event if oldPlan eq newPlan
+            
             if (!supressException) {
-                // Change plan / Issue alert
+                // inject information not available when exception was raised
+                CapacityRequirements oldPlan = plannedPerZones.getZonesCapacityOrZero(zones);
+                e.setOldPlan(oldPlan);
+                // Change plan event / Issue alert
                 autoScalingInProgressEvent(e, zones);
                 throw e;
             }
