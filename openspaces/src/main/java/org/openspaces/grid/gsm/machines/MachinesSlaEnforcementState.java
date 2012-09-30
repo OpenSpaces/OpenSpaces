@@ -409,17 +409,17 @@ public class MachinesSlaEnforcementState {
 
                  for (String agentUid : otherValue.allocatedCapacity.getAgentUids()) {
                      initValue(restrictedAgentUidsWithReason, agentUid);
-                     restrictedAgentUidsWithReason.get(agentUid).add(otherKey.pu + "machineIsolation=" + getState(otherKey).machineIsolation + " allocated on machine which restricts  " + key.pu + " machineIsolation="+getState(key).machineIsolation);
+                     restrictedAgentUidsWithReason.get(agentUid).add(otherKey.pu + "machineIsolation=" + getState(otherKey).machineIsolation + " allocated on machine which restricts  " + key.pu.getName() + " machineIsolation="+getState(key).machineIsolation);
                  }
 
                  for (String agentUid : otherValue.markedForDeallocationCapacity.getAgentUids()) {
                      initValue(restrictedAgentUidsWithReason, agentUid);
-                     restrictedAgentUidsWithReason.get(agentUid).add(otherKey.pu + "machineIsolation=" + getState(otherKey).machineIsolation + " marked for deallocation on machine which restricts  " + key.pu + " machineIsolation="+getState(key).machineIsolation);
+                     restrictedAgentUidsWithReason.get(agentUid).add(otherKey.pu + "machineIsolation=" + getState(otherKey).machineIsolation + " marked for deallocation on machine which restricts  " + key.pu.getName() + " machineIsolation="+getState(key).machineIsolation);
                  }
 
                  for (String agentUid : otherValue.timeoutTimestampPerAgentUidGoingDown.keySet()) {
                      initValue(restrictedAgentUidsWithReason, agentUid);
-                     restrictedAgentUidsWithReason.get(agentUid).add(otherKey.pu + "machineIsolation=" + getState(otherKey).machineIsolation + " is shutting down the agent which restricts  " + key.pu + " machineIsolation="+getState(key).machineIsolation);
+                     restrictedAgentUidsWithReason.get(agentUid).add(otherKey.pu + "machineIsolation=" + getState(otherKey).machineIsolation + " is shutting down the agent which restricts  " + key.pu.getName() + " machineIsolation="+getState(key).machineIsolation);
                  }
              }
 
