@@ -12,7 +12,7 @@
        http://www.openspaces.org/schema/sla http://www.openspaces.org/schema/9.1/sla/openspaces-sla.xsd">
 
     <!--
-        Spring propery configurer which allows us to use system properties (such as user.name).
+        Spring property configurer which allows us to use system properties (such as user.name).
     -->
     <bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
         <property name="properties">

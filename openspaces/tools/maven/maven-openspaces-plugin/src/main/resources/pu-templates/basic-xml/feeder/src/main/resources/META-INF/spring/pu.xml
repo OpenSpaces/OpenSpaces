@@ -13,7 +13,7 @@
 
 
     <!--
-        Spring propery configurer which allows us to use system properties (such as user.name).
+        Spring property configurer which allows us to use system properties (such as user.name).
     -->
     <bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
         <property name="properties">
