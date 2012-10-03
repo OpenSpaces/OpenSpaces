@@ -128,30 +128,30 @@ public class ScaleStrategyProgressEventState {
             Throwable t) {
         
         boolean logged = false;
-        if (event instanceof ElasticProcessingUnitDecisionEvent) {
-            if (logger.isInfoEnabled()) {
-                StringBuilder message = new StringBuilder();
-                appendPuPrefix(message, event.getProcessingUnitName());
-                String decisionDescription = ((ElasticProcessingUnitDecisionEvent)event).getDecisionDescription();
-                if (decisionDescription == null) {
-                    throw new IllegalStateException("event " + event.getClass() + " decision description cannot be null");
-                }
-                message.append(decisionDescription);
-                if (t == null) {
-                    logger.info(message);
-                }
-                else if (t instanceof SlaEnforcementLogStackTrace) {
-                    appendStackTrace(message, t);
-                    logger.info(message);
-                }
-                else {
-                    logger.info(message,t);
-                }
-                logged = true;
+        boolean decisionEvent =  event instanceof ElasticProcessingUnitDecisionEvent;
+        
+        if (decisionEvent && logger.isInfoEnabled()) {
+            StringBuilder message = new StringBuilder();
+            appendPuPrefix(message, event.getProcessingUnitName());
+            String decisionDescription = ((ElasticProcessingUnitDecisionEvent)event).getDecisionDescription();
+            if (decisionDescription == null) {
+                throw new IllegalStateException("event " + event.getClass() + " decision description cannot be null");
             }
+            message.append(decisionDescription);
+            if (t == null) {
+                logger.info(message);
+            }
+            else if (t instanceof SlaEnforcementLogStackTrace) {
+                appendStackTrace(message, t);
+                logger.info(message);
+            }
+            else {
+                logger.info(message,t);
+            }
+            logged = true;
         }
         
-        if (!this.inProgressEventRaised) {
+        if (decisionEvent || !this.inProgressEventRaised) {
             this.completedEventRaised = false;
             this.inProgressEventRaised = true;
             
