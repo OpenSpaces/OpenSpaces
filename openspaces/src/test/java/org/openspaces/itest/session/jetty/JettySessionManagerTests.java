@@ -85,7 +85,8 @@ public class JettySessionManagerTests extends AbstractDependencyInjectionSpringC
         session = sessionManager.newHttpSession(request);
         session.setAttribute("foo", 2);
         SessionData session = gigaSpace.read(new SessionData());
-        Assert.assertEquals(true,session.getExpiryTime() - session.getCreated() == session.getMaxIdleMs()); 
+        long timeToLive = session.getExpiryTime() - session.getCreated();
+        Assert.assertTrue("TimeToLive=" + timeToLive + " MaxIdleMs=" + session.getMaxIdleMs(), Math.abs(timeToLive - session.getMaxIdleMs()) < 50); 
     }
 
     public void testSetNullAttribute() throws Exception {
