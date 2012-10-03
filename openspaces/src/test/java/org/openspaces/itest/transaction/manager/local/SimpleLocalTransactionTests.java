@@ -53,11 +53,11 @@ public class SimpleLocalTransactionTests extends AbstractDependencyInjectionSpri
     }
 
     protected void onSetUp() throws Exception {
-        gigaSpace.clean();
+        gigaSpace.getSpace().clean();
     }
 
     protected void onTearDown() throws Exception {
-        gigaSpace.clean();
+        gigaSpace.getSpace().clean();
     }
 
     public void testSimpleCommit() {
