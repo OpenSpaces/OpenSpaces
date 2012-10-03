@@ -8,7 +8,7 @@
 	<properties>
 		<springVersion>3.1.1.RELEASE</springVersion>
 		<springSecurityVersion>3.0.7.RELEASE</springSecurityVersion>
-		<jettyVersion>8.1.6.v20120903</jettyVersion>
+		<jettyVersion>8.1.7.v20120910</jettyVersion>
 		<mavenVersion>3.0.2</mavenVersion>
 		<jotmVersion>2.2.3</jotmVersion>
 		<gsVersion>${version}</gsVersion>
