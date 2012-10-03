@@ -204,16 +204,19 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
     public void testIntegerMaxTask() throws Exception {
         AsyncFuture<Integer> result = clusteredGigaSpace1.execute(new MaxTask<Integer>(Integer.class, new IncrementalTask()));
         assertEquals(2, (int) result.get(100, TimeUnit.MILLISECONDS));
-    }
-
+        IncrementalTask.reset();
+    }        
+    
     public void testIntegerMinTask() throws Exception {
         AsyncFuture<Integer> result = clusteredGigaSpace1.execute(new MinTask<Integer>(Integer.class, new IncrementalTask()));
         assertEquals(1, (int) result.get(100, TimeUnit.MILLISECONDS));
+        IncrementalTask.reset();
     }
 
     public void testAvgTask() throws Exception {
         AsyncFuture<Float> result = clusteredGigaSpace1.execute(new AvgTask<Integer, Float>(Float.class, new IncrementalTask()));
         assertEquals(1.5, result.get(100, TimeUnit.MILLISECONDS), 0.000001);
+        IncrementalTask.reset();
     }
 
     public void testWaitForAnyListener() throws Exception {
@@ -285,10 +288,14 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
          *
          */
         private static final long serialVersionUID = -7307260935406936546L;
-        private AtomicInteger val = new AtomicInteger();
+        private static AtomicInteger val = new AtomicInteger();
 
         public Integer execute() throws Exception {
             return val.incrementAndGet();
+        }
+        
+        public static void reset() {
+            val.set(0);
         }
     }
 
