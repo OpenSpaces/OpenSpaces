@@ -520,7 +520,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
     
     public boolean isDynamicLocatorsEnabled()
     {
-        if (sdm != null && sdm.getDiscoveryManager() instanceof LookupDiscoveryManager) {
+        if (started && sdm != null && sdm.getDiscoveryManager() instanceof LookupDiscoveryManager) {
             LookupDiscoveryManager ldm = (LookupDiscoveryManager) sdm.getDiscoveryManager();
             return DynamicLookupLocatorDiscovery.dynamicLocatorsEnabled() || 
                    ldm.getDynamicLocatorDiscovery().isInitialized();
