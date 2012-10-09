@@ -233,6 +233,7 @@
                 <include name="docs/**"/>
                 <include name="tools/**"/>
             	<exclude name="tools/maven/maven-openspaces-plugin/target/**" />
+            	<exclude name="tools/maven/apache-maven-3.0.2/**" />
                 <exclude name="tools/**/*.iml" />
                 <exclude name="tools/gshell/**" />
 
