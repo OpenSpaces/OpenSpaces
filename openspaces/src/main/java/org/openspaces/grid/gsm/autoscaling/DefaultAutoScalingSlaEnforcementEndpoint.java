@@ -18,6 +18,7 @@ package org.openspaces.grid.gsm.autoscaling;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -152,8 +153,10 @@ public class DefaultAutoScalingSlaEnforcementEndpoint implements AutoScalingSlaE
             if (!newCapacity.greaterThan(existingCapacity)) {
                 throw new IllegalStateException("Expected " + newCapacity + " to be bigger than " + existingCapacity +  " due to the increase by " + minimunHighThresholdBreachedIncrease);
             }
-                        
-            throw new AutoScalingHighThresholdBreachedException(pu, existingCapacity, newCapacity, sla.getContainerMemoryCapacityInMB());
+            
+            for (Entry<AutomaticCapacityScaleRuleConfig, Object>  pair : valuesAboveHighThresholdPerRule.entrySet()) {
+                throw new AutoScalingHighThresholdBreachedException(pu, existingCapacity, newCapacity, sla.getContainerMemoryCapacityInMB(), pair.getKey(), pair.getValue().toString());
+            }
         }
         else if (!valuesBelowLowThresholdPerRule.isEmpty()) {
             
@@ -175,7 +178,9 @@ public class DefaultAutoScalingSlaEnforcementEndpoint implements AutoScalingSlaE
                 newCapacity = correctedNewCapacity;
             }
             
-            throw new AutoScalingLowThresholdBreachedException(pu, existingCapacity, newCapacity, sla.getContainerMemoryCapacityInMB());
+            for (Entry<AutomaticCapacityScaleRuleConfig, Object>  pair : valuesBelowLowThresholdPerRule.entrySet()) {
+                throw new AutoScalingLowThresholdBreachedException(pu, existingCapacity, newCapacity, sla.getContainerMemoryCapacityInMB(), pair.getKey(), pair.getValue().toString());
+            }
         }
     }
 

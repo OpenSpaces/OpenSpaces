@@ -16,6 +16,7 @@
 package org.openspaces.grid.gsm.autoscaling.exceptions;
 
 import org.openspaces.admin.pu.ProcessingUnit;
+import org.openspaces.admin.pu.elastic.config.AutomaticCapacityScaleRuleConfig;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 
 /**
@@ -26,12 +27,23 @@ public class AutoScalingLowThresholdBreachedException extends AutoScalingThresho
 
     private static final long serialVersionUID = 1L;
 
+    
+    /**
+     * @param pu - the processing unit being monitored
+     * @param actual - the actual capacity currently deployed
+     * @param newPlan - the new planned capacity to be deployed
+     * @param containerCapacityInMB
+     * @param rule - the rule that had the threshold breach
+     * @param metricValue - the metric value that breached the threshold as a string.
+     */
     public AutoScalingLowThresholdBreachedException(
             ProcessingUnit pu,
             CapacityRequirements actual,
             CapacityRequirements newPlan,
-            long containerCapacityInMB) {
-        super(message(pu, actual, newPlan), pu, actual, newPlan, containerCapacityInMB);
+            long containerCapacityInMB, 
+            AutomaticCapacityScaleRuleConfig rule,
+            String metricValue) {
+        super(message(pu, actual, newPlan), pu, actual, newPlan, containerCapacityInMB, rule, false, metricValue);
     }
 
     private static String message(ProcessingUnit pu, CapacityRequirements actual, CapacityRequirements newPlan) {

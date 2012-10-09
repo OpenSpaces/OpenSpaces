@@ -18,8 +18,12 @@ package org.openspaces.admin.pu.elastic.events;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.util.Map;
 
 import org.openspaces.admin.internal.pu.elastic.events.AbstractElasticProcessingUnitDecisionEvent;
+import org.openspaces.admin.pu.elastic.config.AutomaticCapacityScaleRuleConfig;
+
+import com.gigaspaces.internal.io.IOUtils;
 
 /**
  * @author Itai Frenkel
@@ -33,6 +37,9 @@ public class ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent
     private int oldPlannedNumberOfInstances;
     private int newPlannedNumberOfInstances;
     private int actualNumberOfInstances;
+    private AutomaticCapacityScaleRuleConfig rule;
+    private boolean highThresholdBreached;
+    private String metricValue;
     
     /**
     * de-serialization constructor
@@ -41,13 +48,27 @@ public class ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent
         
     }
     
+    /**
+     * @param actualNumberOfInstances - number of instances currently deployed
+     * @param oldPlannedNumberOfInstances - planned number of instances before rule breached
+     * @param newPlannedNumberOfInstances - planned number of instances after rule breached
+     * @param rule - the rule that was breached
+     * @param highThresholdBreached - true means high threshold breached, false means low threshold breached
+     * @param metricValue - the metric value that breached the threshold as a string.
+     */
     public ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent(
             int actualNumberOfInstances, 
             int oldPlannedNumberOfInstances,
-            int newPlannedNumberOfInstances) {
+            int newPlannedNumberOfInstances, 
+            AutomaticCapacityScaleRuleConfig rule, 
+            boolean highThresholdBreached, 
+            String metricValue) {
         this.actualNumberOfInstances = actualNumberOfInstances;
         this.oldPlannedNumberOfInstances = oldPlannedNumberOfInstances;
         this.newPlannedNumberOfInstances = newPlannedNumberOfInstances;
+        this.rule = rule;
+        this.highThresholdBreached = highThresholdBreached;
+        this.metricValue = metricValue;
     }
 
 
@@ -66,6 +87,9 @@ public class ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent
         out.writeInt(oldPlannedNumberOfInstances);
         out.writeInt(newPlannedNumberOfInstances);
         out.writeInt(actualNumberOfInstances);
+        out.writeBoolean(highThresholdBreached);
+        IOUtils.writeString(out, metricValue);
+        writeRule(out, rule);
     }
 
     @Override
@@ -75,10 +99,65 @@ public class ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent
         oldPlannedNumberOfInstances = in.readInt();
         newPlannedNumberOfInstances = in.readInt();
         actualNumberOfInstances = in.readInt();
+        highThresholdBreached = in.readBoolean();
+        metricValue = IOUtils.readString(in);
+        rule = readRule(in);
+    }
+    
+    private void writeRule(ObjectOutput out, AutomaticCapacityScaleRuleConfig rule) throws IOException {
+        IOUtils.writeMapStringString(out, rule.getProperties());
+    }
+
+    private static AutomaticCapacityScaleRuleConfig readRule(ObjectInput in) throws IOException, ClassNotFoundException {
+        AutomaticCapacityScaleRuleConfig rule = null;
+        Map<String,String> properties = IOUtils.readMapStringString(in);
+        if (properties != null) {
+            rule = new AutomaticCapacityScaleRuleConfig(properties);
+        }
+        return rule;
     }
 
     @Override
     public String getDecisionDescription() {
-        return "Number of planned instances changed from " + oldPlannedNumberOfInstances + " to " + newPlannedNumberOfInstances + ". Actual number of instances:" + actualNumberOfInstances;
+        StringBuilder desc = new StringBuilder();
+        desc.append(rule.getStatistics().getMetric())
+        .append(" (")
+        .append(metricValue)
+        .append(") is ");
+        
+        if (highThresholdBreached) {
+            desc.append("above high threshold (" + rule.getHighThreshold() +"). ");
+        }
+        else {
+            desc.append("below low threshold (" + rule.getLowThreshold() +"). ");
+        }
+        
+        desc
+        .append("Number of planned instances changed from ")
+        .append(oldPlannedNumberOfInstances)
+        .append(" to ")
+        .append(newPlannedNumberOfInstances)
+        .append(". ")
+        .append("Actual number of instances is ")
+        .append(actualNumberOfInstances)
+        .append(". ");
+        
+        return desc.toString();
+    }
+
+    public AutomaticCapacityScaleRuleConfig getRule() {
+        return rule;
+    }
+
+    public boolean isHighThresholdBreached() {
+        return highThresholdBreached;
+    }
+
+    public boolean isLowThresholdBreached() {
+        return !highThresholdBreached;
+    }
+    
+    public String getMetricValue() {
+        return metricValue;
     }
 }

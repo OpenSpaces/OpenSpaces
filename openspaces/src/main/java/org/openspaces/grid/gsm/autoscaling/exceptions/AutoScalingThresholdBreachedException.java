@@ -18,6 +18,7 @@ package org.openspaces.grid.gsm.autoscaling.exceptions;
 import org.openspaces.admin.internal.pu.elastic.events.InternalElasticProcessingUnitDecisionEvent;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitType;
+import org.openspaces.admin.pu.elastic.config.AutomaticCapacityScaleRuleConfig;
 import org.openspaces.admin.pu.elastic.config.CapacityRequirementsConfig;
 import org.openspaces.admin.pu.elastic.events.ElasticStatefulProcessingUnitPlannedCapacityChangedEvent;
 import org.openspaces.admin.pu.elastic.events.ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent;
@@ -38,18 +39,39 @@ public abstract class AutoScalingThresholdBreachedException extends AutoScalingS
     private final ProcessingUnit pu;
     private final long containerCapacityInMB;
     private CapacityRequirements oldPlan;
+    private AutomaticCapacityScaleRuleConfig rule;
+    private boolean highThresholdBreached;
+    private String metricValue;
     
+    /**
+     * 
+     * @param message - the exception specific message
+     * @param pu - the processing unit being monitored
+     * @param actual - the actual capacity currently deployed
+     * @param newPlan - the new planned capacity to be deployed
+     * @param containerCapacityInMB
+     * @param rule - the rule whos threshold was breached
+     * @param highThresholdBreached - true means high threshold breached, false means low threshold breached
+     * @param metricValue - the metric value that breached the threshold as a string.
+     */
     public AutoScalingThresholdBreachedException(
             String message,
             ProcessingUnit pu,
             CapacityRequirements actual,
             CapacityRequirements newPlan,
-            long containerCapacityInMB) {
+            long containerCapacityInMB, 
+            AutomaticCapacityScaleRuleConfig rule, 
+            boolean highThresholdBreached,  
+            String metricValue) {
+        
         super(pu, message);
         this.actual = actual;
         this.newPlan = newPlan;
         this.pu = pu;
         this.containerCapacityInMB = containerCapacityInMB;
+        this.rule = rule;
+        this.highThresholdBreached = highThresholdBreached;
+        this.metricValue = metricValue;
     }
 
     public CapacityRequirements getNewCapacity() {
@@ -115,6 +137,6 @@ public abstract class AutoScalingThresholdBreachedException extends AutoScalingS
         int newPlannedNumberOfInstances = (int) Math.ceil((newPlanConfig.getMemoryCapacityInMB() * 1.0 / containerCapacityInMB));
         int oldPlanmedNumberOfInstances = (int) Math.ceil((oldPlanConfig.getMemoryCapacityInMB() * 1.0 / containerCapacityInMB));
         return new ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent(
-                actualNumberOfInstances, oldPlanmedNumberOfInstances, newPlannedNumberOfInstances);
+                actualNumberOfInstances, oldPlanmedNumberOfInstances, newPlannedNumberOfInstances, rule, highThresholdBreached, metricValue);
     }
 }
