@@ -494,10 +494,9 @@ public class DefaultAdmin implements InternalAdmin {
 
     @Override
     public void close() {
-        if (closeStarted.get()) {
+        if (!closeStarted.compareAndSet(false, true)) {
             return;
         }
-        closeStarted.set(true);
         discoveryService.stop();
         if (scheduledProcessingUnitMonitorFuture != null) { 
             scheduledProcessingUnitMonitorFuture.cancel(true);
