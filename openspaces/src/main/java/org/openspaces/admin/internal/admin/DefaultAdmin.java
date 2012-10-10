@@ -1876,9 +1876,25 @@ public class DefaultAdmin implements InternalAdmin {
             try {
                 runnable.run();
             } catch (Exception e) {
-                logger.warn("Failed to execute: " + runnable + " - " + e, e);
+                if (closeStarted.get()) {
+
+                    if (logger.isDebugEnabled()) {
+                        if (closeEnded.get()) {
+                            logger.debug("Failed to execute: " + runnable + " since admin is already closed - " + e, e);
+                        }
+                        else {
+                            logger.debug("Failed to execute: " + runnable + " since admin is being closed - " + e, e);
+                        }
+                    }
+                }
+                else {
+                    // unexpected exception
+                    logger.warn("Failed to execute: " + runnable + " - " + e, e);
+                }
             } catch (Error e) {
+                // unexpected error
                 logger.error("Failed to execute: " + runnable + " - " + e, e);
+                // stop scheduled calls to this method
                 throw e;
             }
         }
