@@ -478,7 +478,7 @@ public class DefaultAdmin implements InternalAdmin {
         if (closeStarted.get()) {
             throw new IllegalStateException("Admin already closed");
         }
-        return getScheduler().scheduleWithFixedDelay(new LoggerRunnable(command), initialDelay, delay, unit);
+        return getScheduler().scheduleWithFixedDelay(toLoggerRunnable(command), initialDelay, delay, unit);
     }
 
     @Override
@@ -637,7 +637,7 @@ public class DefaultAdmin implements InternalAdmin {
     public void pushEvent(Object listener, Runnable notifier) {
         assertStateChangesPermitted();
         synchronized (DefaultAdmin.this) {
-            eventsQueue[Math.abs(listener.hashCode() % eventsExecutorServices.length)].add(new LoggerRunnable(notifier));
+            eventsQueue[Math.abs(listener.hashCode() % eventsExecutorServices.length)].add(toLoggerRunnable(notifier));
         }
     }
 
@@ -645,7 +645,7 @@ public class DefaultAdmin implements InternalAdmin {
     public void pushEventAsFirst(Object listener, Runnable notifier) {
         assertStateChangesPermitted();
         synchronized (DefaultAdmin.this) {
-            eventsQueue[Math.abs(listener.hashCode() % eventsExecutorServices.length)].addFirst(new LoggerRunnable(notifier));
+            eventsQueue[Math.abs(listener.hashCode() % eventsExecutorServices.length)].addFirst(toLoggerRunnable(notifier));
         }
     }
 
@@ -674,8 +674,17 @@ public class DefaultAdmin implements InternalAdmin {
         synchronized (DefaultAdmin.this) {
             // even though we are taking a lock we are not calling #assertStateChangesPermitted()
             // this is ok since submit() is non-blocking.
-            eventsExecutorServices[Math.abs(listener.hashCode() % eventsExecutorServices.length)].submit(new LoggerRunnable(notifier));
+            eventsExecutorServices[Math.abs(listener.hashCode() % eventsExecutorServices.length)].submit(toLoggerRunnable(notifier));
         }
+    }
+
+    private Runnable toLoggerRunnable(final Runnable command) {
+        
+        if (command instanceof LoggerRunnable) {
+            return command;           
+        }
+        
+        return new LoggerRunnable(command);
     }
 
     @Override
@@ -1582,7 +1591,7 @@ public class DefaultAdmin implements InternalAdmin {
             final Events scaleStrategyEvents = scaleStrategyEvents1;
             final InternalElasticServiceManager esm = esm1;
             
-            DefaultAdmin.this.scheduleNonBlockingStateChange(new LoggerRunnable( new Runnable(){
+            DefaultAdmin.this.scheduleNonBlockingStateChange(toLoggerRunnable( new Runnable(){
                 @Override
                 public void run() {
                     updateState(holders, scaleStrategyEvents, esm);
@@ -1922,12 +1931,12 @@ public class DefaultAdmin implements InternalAdmin {
         if (closeStarted.get()) {
             throw new IllegalStateException("Admin already closed");
         }
-        return this.getScheduler().schedule(new Runnable() {
+        return this.getScheduler().schedule(toLoggerRunnable(new Runnable() {
 
             @Override
             public void run() {
                 scheduleNonBlockingStateChange(command);
-            }}, 
+            }}), 
             
             delay, unit);
     }
