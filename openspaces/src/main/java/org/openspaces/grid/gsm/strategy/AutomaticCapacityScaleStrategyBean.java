@@ -39,6 +39,7 @@ import org.openspaces.grid.gsm.autoscaling.exceptions.AutoScalingConfigConflictE
 import org.openspaces.grid.gsm.autoscaling.exceptions.AutoScalingHighThresholdBreachedException;
 import org.openspaces.grid.gsm.autoscaling.exceptions.AutoScalingLowThresholdBreachedException;
 import org.openspaces.grid.gsm.autoscaling.exceptions.AutoScalingSlaEnforcementInProgressException;
+import org.openspaces.grid.gsm.autoscaling.exceptions.AutoScalingThresholdBreachedException;
 import org.openspaces.grid.gsm.autoscaling.exceptions.PerZoneAutoScalingSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerZones;
@@ -339,37 +340,22 @@ implements AutoScalingSlaEnforcementEndpointAware {
             autoScalingEndpoint.enforceSla(sla);
             autoScalingCompletedEvent(zones);
             
-        } catch (AutoScalingHighThresholdBreachedException e) {
-            // inject information not available when exception was raised
-            final CapacityRequirementsPerZones plannedPerZones = super.getPlannedCapacity().toCapacityRequirementsPerZones();
-  
-            //TODO: Suppress ex/event if oldPlan eq newPlan
-            CapacityRequirements oldPlan = plannedPerZones.getZonesCapacityOrZero(zones);
-            e.setOldPlan(oldPlan);
-            autoScalingInProgressEvent(e, zones);
-            throw e;
+        } catch (AutoScalingThresholdBreachedException e) {
             
-        } catch (AutoScalingLowThresholdBreachedException e) {
-            
-            boolean supressException = false;
             final CapacityRequirementsPerZones plannedPerZones = super.getPlannedCapacity().toCapacityRequirementsPerZones();
-            if (plannedPerZones.getZones().contains(zones)) {
-                CapacityRequirements planned = plannedPerZones.getZonesCapacity(zones);
-                if (planned.equals(e.getNewCapacity()) && planned.equals(minimum)) {
+            
+            if (plannedPerZones.getZones().contains(zones) &&
+                plannedPerZones.getZonesCapacity(zones).equals(e.getNewCapacity())) { 
+
                     if (getLogger().isDebugEnabled()) {
-                        getLogger().debug("Low threshold breached. However existing plan already reflects that and we cannot scale-in below minimum. Do not issue an alert. " + planned, e);
+                        getLogger().debug("Threshold breached. However existing plan already reflects that " + e.getNewCapacity(), e);
                     }
-                    supressException = true;
-                }
             }
-            
-            //TODO: Suppress ex/event if oldPlan eq newPlan
-            
-            if (!supressException) {
+            else {
                 // inject information not available when exception was raised
                 CapacityRequirements oldPlan = plannedPerZones.getZonesCapacityOrZero(zones);
                 e.setOldPlan(oldPlan);
-                // Change plan event / Issue alert
+                // Change plan event which would also raise an alert
                 autoScalingInProgressEvent(e, zones);
                 throw e;
             }
