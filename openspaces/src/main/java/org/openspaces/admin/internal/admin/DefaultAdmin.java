@@ -1918,7 +1918,8 @@ public class DefaultAdmin implements InternalAdmin {
 
             @Override
             public void run() {
-                scheduleNonBlockingStateChange(command);
+                // we want the exception to be logged in any case
+                scheduleNonBlockingStateChange(toLoggerRunnable(command));
             }}, 
             
             initialDelay, delay, unit);
