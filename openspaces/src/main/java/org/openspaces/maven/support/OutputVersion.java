@@ -22,10 +22,10 @@ import com.j_spaces.kernel.XapVersion;
 /**
  * Outputs the version to use with Maven. Following the following rules:
  *
- * 1. If this is patch, then concatenate build number to product version 6.5-3500  
- * 2. If this is GA, then just 6.5 will be used.
- * 3. If this is a final milestone, then 6.5-[milestone] will be used.
- * 4. If this is an internal milestone, then 6.5-[milestone]-[build number] will be used.
+ * 1. If this is an internal milestone, then 9.1.0-SNAPSHOT will be used.
+ * 2. If this is patch, then concatenate build number to product release version 9.1.0-RELEASE-7510  
+ * 3. If this is GA, then just 9.1.0-RELEASE will be used.
+ * 4. If this is a final milestone, then 9.1.0-[MILESTONE] will be used.
  *
  * @author kimchy
  */
@@ -33,37 +33,47 @@ public class OutputVersion {
 
     public static String computeVersion() {
         
+        if (PlatformVersion.getBuildNumber().indexOf("-") != -1) {
+            return PlatformVersion.getVersion() + "-SNAPSHOT";
+        }
+        
         if(PlatformVersion.getBuildType().contains("patch")) {
-            return PlatformVersion.getVersion() + "-" + PlatformVersion.getBuildNumber();
+            return PlatformVersion.getVersion() + "-RELEASE-" + PlatformVersion.getBuildNumber();
         }
         
         if (PlatformVersion.getMilestone().equalsIgnoreCase("GA")) {
-            return PlatformVersion.getVersion();
+            return PlatformVersion.getVersion() + "-RELEASE";
         }
         
         if (PlatformVersion.getBuildNumber().indexOf("-") == -1) {
-            return PlatformVersion.getVersion() + "-" + PlatformVersion.getMilestone();
+            return PlatformVersion.getVersion() + "-" + PlatformVersion.getMilestone().toUpperCase();
         }
         
-        return PlatformVersion.getVersion() + "-" + PlatformVersion.getMilestone() + "-" + PlatformVersion.getBuildNumber();
+        return "";
+        
     }
     
     public static String computeXapVersion() {
         
         XapVersion xapVersion = new XapVersion();
+        
+        if (xapVersion.getBuildNumber().indexOf("-") != -1) {
+            return xapVersion.getVersion() + "-SNAPSHOT";
+        }
+        
         if(xapVersion.getBuildType().contains("patch")) {
-            return xapVersion.getVersion() + "-" + xapVersion.getBuildNumber();
+            return xapVersion.getVersion() + "-RELEASE-" + xapVersion.getBuildNumber();
         }
         
         if (xapVersion.getMilestone().equalsIgnoreCase("GA")) {
-            return xapVersion.getVersion();
+            return xapVersion.getVersion() + "-RELEASE";
         }
         
         if (xapVersion.getBuildNumber().indexOf("-") == -1) {
-            return xapVersion.getVersion() + "-" + xapVersion.getMilestone();
+            return xapVersion.getVersion() + "-" + xapVersion.getMilestone().toUpperCase();
         }
         
-        return xapVersion.getVersion() + "-" + xapVersion.getMilestone() + "-" + xapVersion.getBuildNumber();
+        return "";
     }
     
     public static String computeCloudifyVersion() {

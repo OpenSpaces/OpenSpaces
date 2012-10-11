@@ -264,21 +264,22 @@
 	
 	<target name="install.maven" if="productversion">
 		<property name="maven.tmp.dir" value="${basedir}/maven.tmp.dir" />
+		<delete dir="${maven.tmp.dir}"/>
 	 	<java classname="org.openspaces.maven.support.POMGenerator" fork="true">
 	 		<arg value="${maven.tmp.dir}"/>
-	 		<arg value="${productversion}"/>
+	 		<arg value="${basedir}/tools/maven/maven-openspaces-plugin/"/>
 	 		<classpath refid="all-libs"/>
             <classpath location="${target.classes.dir}"/>
 	 	</java>	
-		<replaceregexp byline="true" file="${maven.tmp.dir}/gs-openspaces-pom.xml" 
+		<!--replaceregexp byline="true" file="${maven.tmp.dir}/gs-openspaces-pom.xml" 
              match="&lt;version&gt;${productversion}-(.*)&lt;/version&gt;"
-             replace="&lt;version&gt;${productversion}&lt;/version&gt;"/>
+             replace="&lt;version&gt;${productversion}&lt;/version&gt;"/-->
 		<echo message="${productversion}" />
     	<!-- Install newly created jar in local maven repository -->
 		<exec executable="${env.M2_HOME}\bin\${mvn.executable}"> 
 			<arg line="install:install-file -DgroupId=com.gigaspaces -DartifactId=gs-openspaces -DcreateChecksum=true -Dversion=${productversion} -Dpackaging=jar -DpomFile=${maven.tmp.dir}/gs-openspaces-pom.xml -Dfile=${lib.dir}/required/gs-openspaces.jar -Djavadoc=${target.javadoc.dir}/xap-javadoc.zip -Dsources=${lib.dir}/optional/openspaces/gs-openspaces-src.zip"/>
 		</exec>
-		<delete dir="${maven.tmp.dir}"/>
+		<!--delete dir="${maven.tmp.dir}"/-->
 	</target>
 
     <target name="dist">
