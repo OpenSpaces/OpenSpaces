@@ -43,11 +43,6 @@ call mvn install:install-file -DgroupId=com.gigaspaces -DcreateChecksum=true -Da
 REM Build and install OpenSpaces Maven Plugin 
 call mvn -f maven-openspaces-plugin/pom.xml install  -DcreateChecksum=true
 
-if "%EDITION%" == "XAP" (
-REM Copy licenese file
-call mvn os:install-license -Dfile="%JSHOMEDIR%\gslicense.xml" -Dversion=%XAP_VERSION%
-)
-
 if "%EDITION%" == "Cloudify" FOR /F "usebackq tokens=*" %%i IN (`installmavenrep.bat Cloudify`) DO @set CLOUDIFY_VERSION=%%i
 
 if "%EDITION%" == "Cloudify" (

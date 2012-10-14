@@ -30,10 +30,6 @@ mvn install:install-file -DgroupId=com.gigaspaces -DcreateChecksum=true -Dartifa
 # Build and install OpenSpaces Maven Plugin
 mvn -f maven-openspaces-plugin/pom.xml install -DcreateChecksum=true
 
-if [ "${EDITION}" = "XAP" ] ; then
-	# Copy licenese file
-	mvn os:install-license -Dfile=$JSHOMEDIR/gslicense.xml -Dversion=$XAP_VERSION
-fi
 
 if [ "${EDITION}" = "Cloudify" ] ; then
 	export CLOUDIFY_VERSION=`${JAVACMD} -cp ${GS_JARS} org.openspaces.maven.support.OutputVersion Cloudify`
