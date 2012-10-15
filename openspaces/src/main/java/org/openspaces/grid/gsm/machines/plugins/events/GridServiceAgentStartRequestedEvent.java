@@ -64,6 +64,6 @@ public class GridServiceAgentStartRequestedEvent extends AbstractGridServiceAgen
 
     @Override
     public String getDecisionDescription() {
-         return "Starting a new agent on machine " + hostAddress;
+         return "Installing agent on machine " + hostAddress;
     }
 }
