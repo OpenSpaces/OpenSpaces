@@ -120,6 +120,14 @@ public class ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent
     @Override
     public String getDecisionDescription() {
         StringBuilder desc = new StringBuilder();
+        
+        if (newPlannedNumberOfInstances > actualNumberOfInstances) {
+            desc.append("Scaling out. ");
+        }
+        else if (newPlannedNumberOfInstances < actualNumberOfInstances) {
+            desc.append("Scaling in. ");
+        }
+        
         desc.append(rule.getStatistics().getMetric())
         .append(" (")
         .append(metricValue)
