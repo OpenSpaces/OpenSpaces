@@ -155,7 +155,7 @@ public class DefaultAutoScalingSlaEnforcementEndpoint implements AutoScalingSlaE
             }
             
             for (Entry<AutomaticCapacityScaleRuleConfig, Object>  pair : valuesAboveHighThresholdPerRule.entrySet()) {
-                throw new AutoScalingHighThresholdBreachedException(pu, existingCapacity, newCapacity, sla.getContainerMemoryCapacityInMB(), pair.getKey(), pair.getValue().toString());
+                throw new AutoScalingHighThresholdBreachedException(pu, existingCapacity, newCapacity, sla.getContainerMemoryCapacityInMB(), pair.getKey(), AutoScalingSlaUtils.formatMetricValue(pair.getValue()));
             }
         }
         else if (!valuesBelowLowThresholdPerRule.isEmpty()) {
@@ -179,7 +179,7 @@ public class DefaultAutoScalingSlaEnforcementEndpoint implements AutoScalingSlaE
             }
             
             for (Entry<AutomaticCapacityScaleRuleConfig, Object>  pair : valuesBelowLowThresholdPerRule.entrySet()) {
-                throw new AutoScalingLowThresholdBreachedException(pu, existingCapacity, newCapacity, sla.getContainerMemoryCapacityInMB(), pair.getKey(), pair.getValue().toString());
+                throw new AutoScalingLowThresholdBreachedException(pu, existingCapacity, newCapacity, sla.getContainerMemoryCapacityInMB(), pair.getKey(),AutoScalingSlaUtils.formatMetricValue(pair.getValue()));
             }
         }
     }

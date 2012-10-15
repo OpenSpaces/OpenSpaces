@@ -15,6 +15,8 @@
  *******************************************************************************/
 package org.openspaces.grid.gsm.autoscaling;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -218,6 +220,31 @@ public class AutoScalingSlaUtils {
         }
 
         return value;
+    }
+    
+    private static final DecimalFormat decimalFormat = initDecimalFormat();
+    
+    private static DecimalFormat initDecimalFormat() {
+        DecimalFormatSymbols decimalFormatSymbols = new DecimalFormatSymbols();
+        decimalFormatSymbols.setDecimalSeparator('.');
+        decimalFormatSymbols.setGroupingSeparator(',');
+        return new DecimalFormat("#,##0.##", decimalFormatSymbols);
+    }
+    
+    public static String formatMetricValue(Object value) {
+        if (value == null) {
+            return "null";
+        }
+        
+        if (value instanceof Double) {
+            return formatDouble(value);
+        }
+        
+        return value.toString();
+    }
+
+    private static String formatDouble(Object value) {
+        return decimalFormat.format((Double)value);
     }
 
 }
