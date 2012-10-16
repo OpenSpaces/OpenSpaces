@@ -79,7 +79,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/optional/spring/org.springframework.orm-3.1.1.RELEASE.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/optional/spring/org.springframework.web-3.1.1.RELEASE.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/optional/spring/org.springframework.web.servlet-3.1.1.RELEASE.jar"/>
-	<classpathentry kind="lib" path="lib/platform/jetty/servlet-api-3.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/platform/jetty/servlet-api-3.0.jar"/>
 	<classpathentry kind="lib" path="lib/optional/security/spring-security-core-3.0.7.RELEASE.jar" sourcepath="lib/external/spring/spring-security-core-3.1.1.RELEASE-sources.jar"/>
 	<classpathentry kind="lib" path="lib/external/spymemcached/memcached-2.5.jar"/>
 	<classpathentry kind="lib" path="tools/maven/apache-maven-3.0.2/lib/maven-artifact-3.0.2.jar"/>
