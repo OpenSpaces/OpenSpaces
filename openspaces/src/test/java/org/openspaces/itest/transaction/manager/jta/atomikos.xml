@@ -3,11 +3,19 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
 
-
     <bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"/>
 
+	<bean id="log-config-loader" class="org.openspaces.itest.transaction.manager.jta.LogConfigLoaderBean" 
+		init-method="init" >
+        <property name="overridedProperties">
+	        <props>
+	        	<prop key="com.gigaspaces.core.engine.operations.level">FINEST</prop>
+	        	<prop key="com.atomikos.icatch.level">FINEST</prop>
+	        </props>
+	    </property>
+	</bean>
 
-    <bean id="space" class="org.openspaces.core.space.UrlSpaceFactoryBean">
+    <bean id="space" class="org.openspaces.core.space.UrlSpaceFactoryBean" depends-on="log-config-loader">
         <property name="url" value="/./space"/>
         <property name="lookupGroups" value="${user.name}" />
     </bean>
