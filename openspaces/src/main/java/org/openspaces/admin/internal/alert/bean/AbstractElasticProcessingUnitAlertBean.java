@@ -124,7 +124,14 @@ public abstract class AbstractElasticProcessingUnitAlertBean implements AlertBea
     
     private Alert createAlert(AlertStatus status, ElasticProcessingUnitEvent event) {
         
-        String alertDescription = String.format(resolvedAlertDescriptionFormat,event);
+        String alertDescription;
+        
+        if (status.equals(AlertStatus.RESOLVED)) {
+            alertDescription = String.format(resolvedAlertDescriptionFormat, event.getProcessingUnitName());
+        }
+        else {
+            alertDescription = event.toString();
+        }
         
         final String groupUid = generateGroupUid(event);
         

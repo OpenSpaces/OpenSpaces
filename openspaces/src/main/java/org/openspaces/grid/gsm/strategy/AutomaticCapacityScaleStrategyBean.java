@@ -338,8 +338,7 @@ implements AutoScalingSlaEnforcementEndpointAware {
             }
             
             autoScalingEndpoint.enforceSla(sla);
-            autoScalingCompletedEvent(zones);
-            
+           
         } catch (AutoScalingThresholdBreachedException e) {
             
             final CapacityRequirementsPerZones plannedPerZones = super.getPlannedCapacity().toCapacityRequirementsPerZones();
@@ -364,6 +363,7 @@ implements AutoScalingSlaEnforcementEndpointAware {
             autoScalingInProgressEvent(e, zones);
             throw e;
         }
+        autoScalingCompletedEvent(zones);
     }
 
     private void validateRulesConfig() {
