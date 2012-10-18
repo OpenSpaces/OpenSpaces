@@ -15,6 +15,7 @@
  *******************************************************************************/
 package org.openspaces.itest.transaction.manager.jta;
 
+import java.lang.reflect.Field;
 import java.util.Properties;
 
 import com.gigaspaces.logger.GSLogConfigLoader;
@@ -28,16 +29,28 @@ public class LogConfigLoaderBean {
     
     public LogConfigLoaderBean() { }
     
-    public void init() {
+    public void override() throws Exception {
+        nastyHackInOrderToReinitializeLoggingConfig();
         GSLogConfigLoader.getLoader(overridedProperties);
     }
 
+    public void restore() throws Exception {
+        nastyHackInOrderToReinitializeLoggingConfig();
+        GSLogConfigLoader.getLoader();
+    }
+    
     public Properties getOverridedProperties() {
         return overridedProperties;
     }
 
     public void setOverridedProperties(Properties overridedProperties) {
         this.overridedProperties = overridedProperties;
+    }
+    
+    private static void nastyHackInOrderToReinitializeLoggingConfig() throws Exception {
+        Field field = GSLogConfigLoader.class.getDeclaredField("_loader");
+        field.setAccessible(true);
+        field.set(null, null);
     }
     
 }
