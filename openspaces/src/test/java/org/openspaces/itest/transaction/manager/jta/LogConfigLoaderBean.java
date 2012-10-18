@@ -18,23 +18,28 @@ package org.openspaces.itest.transaction.manager.jta;
 import java.lang.reflect.Field;
 import java.util.Properties;
 
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
+
 import com.gigaspaces.logger.GSLogConfigLoader;
 
 /**
  * @author Dan Kilman
  */
-public class LogConfigLoaderBean {
+public class LogConfigLoaderBean implements InitializingBean, DisposableBean {
 
     private Properties overridedProperties;
     
     public LogConfigLoaderBean() { }
     
-    public void override() throws Exception {
+    @Override
+    public void afterPropertiesSet() throws Exception {
         nastyHackInOrderToReinitializeLoggingConfig();
         GSLogConfigLoader.getLoader(overridedProperties);
     }
 
-    public void restore() throws Exception {
+    @Override
+    public void destroy() throws Exception {
         nastyHackInOrderToReinitializeLoggingConfig();
         GSLogConfigLoader.getLoader();
     }

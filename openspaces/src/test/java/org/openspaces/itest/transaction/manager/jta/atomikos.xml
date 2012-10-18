@@ -5,10 +5,7 @@
 
     <bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"/>
 
-	<bean id="log-config-loader" 
-		class="org.openspaces.itest.transaction.manager.jta.LogConfigLoaderBean" 
-		init-method="override" 
-		destroy-method="restore">
+	<bean id="log-config-loader" class="org.openspaces.itest.transaction.manager.jta.LogConfigLoaderBean">
         <property name="overridedProperties">
 	        <props>
 	        	<prop key="com.gigaspaces.core.engine.operations.level">FINEST</prop>
