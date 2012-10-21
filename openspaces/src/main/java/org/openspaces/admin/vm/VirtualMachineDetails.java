@@ -76,6 +76,7 @@ public interface VirtualMachineDetails {
     String getClassPath();
     String[] getInputArguments();
     Map<String, String> getSystemProperties();
+    Map<String, String> getEnvironmentVariables();
 
     long getMemoryHeapInitInBytes();
     double getMemoryHeapInitInMB();

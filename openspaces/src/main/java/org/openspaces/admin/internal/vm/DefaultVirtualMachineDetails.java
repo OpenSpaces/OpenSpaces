@@ -88,6 +88,10 @@ public class DefaultVirtualMachineDetails implements VirtualMachineDetails {
     public Map<String, String> getSystemProperties() {
         return details.getSystemProperties();
     }
+    
+    public Map<String, String> getEnvironmentVariables() {
+        return details.getEnvironmentVariables();
+    }
 
     public long getMemoryHeapInitInBytes() {
         return details.getMemoryHeapInit();
