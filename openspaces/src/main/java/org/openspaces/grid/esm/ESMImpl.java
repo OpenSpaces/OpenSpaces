@@ -28,6 +28,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -38,6 +39,7 @@ import org.jini.rio.core.jsb.ServiceBeanContext;
 import org.jini.rio.jsb.ServiceBeanActivation;
 import org.jini.rio.jsb.ServiceBeanActivation.LifeCycleManager;
 import org.jini.rio.jsb.ServiceBeanAdapter;
+import org.jini.rio.monitor.event.Event;
 import org.jini.rio.monitor.event.Events;
 import org.jini.rio.monitor.event.EventsStore;
 import org.openspaces.admin.Admin;
@@ -110,7 +112,8 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
     private String[] configArgs;
     private final NonBlockingElasticMachineProvisioningAdapterFactory nonBlockingAdapterFactory;
     private final EventsStore eventsStore;
-
+    private final AtomicBoolean destroyStarted = new AtomicBoolean(false);
+    
     /**
      * Create an ESM
      */
@@ -243,6 +246,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
     @Override
     public synchronized void destroy(boolean force) {
         logger.info("Stopping ESM ...");
+        destroyStarted.set(true);
 
         admin.getProcessingUnits().getProcessingUnitRemoved().remove(this);
         admin.getProcessingUnits().getProcessingUnitAdded().remove(this);
@@ -409,14 +413,23 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
     
     public Events getScaleStrategyEvents(final long cursor, final int maxNumberOfEvents) {
         logger.fine("get scale strategy events cursor=" + cursor + " maxNumberOfEvents=" + maxNumberOfEvents);
-        return submitAndWait(new Callable<Events>() {
-
-            @Override
-            public Events call() throws Exception {
-                return eventsStore.getEventsFromCursor(cursor, maxNumberOfEvents);
+        try {
+            return submitAndWait(new Callable<Events>() {
+    
+                @Override
+                public Events call() throws Exception {
+                    return eventsStore.getEventsFromCursor(cursor, maxNumberOfEvents);
+                }
+            });
+        }
+        catch (IllegalStateException e) {
+            if (destroyStarted.get()) {
+                //going down, gracefully return no events
+                return new Events(cursor,new Event[] {});
             }
-        });
-    }
+            throw e;
+        }
+     }
     /**
      * Note: Not thread safe. Call only from submitAndWait
      */
