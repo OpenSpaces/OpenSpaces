@@ -17,14 +17,17 @@
  ******************************************************************************/
 package org.openspaces.launcher;
 
-import com.gigaspaces.admin.cli.RuntimeInfo;
-import com.gigaspaces.logger.GSLogConfigLoader;
+import java.io.File;
+import java.util.logging.Logger;
+
+import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.openspaces.pu.container.support.CommandLineParser;
 
-import java.io.File;
-import java.util.logging.Logger;
+import com.gigaspaces.admin.cli.RuntimeInfo;
+import com.gigaspaces.logger.GSLogConfigLoader;
 
 /**
  * @author Guy Korland
@@ -62,7 +65,13 @@ public class Launcher {
         }
         GSLogConfigLoader.getLoader(name);
         GSLogConfigLoader.getLoader();
-        Server server = new Server(port);
+        
+        Server server = new Server();
+        SelectChannelConnector connector = new SelectChannelConnector();
+        connector.setReuseAddress( false );
+        connector.setPort( port );
+        server.setConnectors( new Connector[]{ connector } );
+        
         WebAppContext webAppContext = new WebAppContext();
         webAppContext.setContextPath("/");
         webAppContext.setWar(path);
@@ -75,7 +84,6 @@ public class Launcher {
         server.setHandler(webAppContext);
         
         Logger.getLogger(logger).info(RuntimeInfo.getShortEnvironmentInfo());
-        
         server.start();
         webAppContext.start();
         
