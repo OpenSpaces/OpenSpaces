@@ -11,6 +11,11 @@
         <property name="lookupGroups" value="${user.name}" />
     </bean>
 
+    <bean id="space2" class="org.openspaces.core.space.UrlSpaceFactoryBean">
+        <property name="url" value="/./space2"/>
+        <property name="lookupGroups" value="${user.name}" />
+    </bean>
+
     <bean id="jotm" class="org.openspaces.itest.jotm.JotmFactoryBean" />
 
     <bean id="transactionManager" class="org.springframework.transaction.jta.JtaTransactionManager">
@@ -23,7 +28,7 @@
     </bean>
 
     <bean id="gigaSpace2" class="org.openspaces.core.GigaSpaceFactoryBean">
-        <property name="space" ref="space"/>
+        <property name="space" ref="space2"/>
         <property name="transactionManager" ref="transactionManager"/>
     </bean>
 </beans>
