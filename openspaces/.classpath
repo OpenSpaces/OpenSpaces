@@ -58,7 +58,6 @@
 	<classpathentry kind="lib" path="lib/external/jsr223/js.jar"/>
 	<classpathentry kind="lib" path="lib/external/jsr223/script-api.jar"/>
 	<classpathentry kind="lib" path="lib/external/jsr223/script-js.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/external/junit/junit.jar"/>
 	<classpathentry kind="lib" path="lib/external/maven/maven-dependency-tree-1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/external/backport/backport-util-concurrent.jar"/>
 	<classpathentry kind="lib" path="tools/groovy/embeddable/groovy-all-1.8.6.jar"/>
@@ -111,5 +110,6 @@
 	<classpathentry kind="lib" path="lib/platform/jetty/jetty-util-8.1.7.v20120910.jar"/>
 	<classpathentry kind="lib" path="lib/platform/jetty/jetty-webapp-8.1.7.v20120910.jar"/>
 	<classpathentry kind="lib" path="lib/platform/jetty/jetty-xml-8.1.7.v20120910.jar"/>
+	<classpathentry kind="lib" path="lib/external/junit/junit-4.8.2.jar"/>
 	<classpathentry kind="output" path="target/main-test-classes"/>
 </classpath>
