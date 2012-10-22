@@ -10,7 +10,7 @@
 	        <props>
 	        	<prop key="com.gigaspaces.core.engine.operations.level">FINEST</prop>
 	        	<prop key="com.gigaspaces.core.xa.level">FINEST</prop>
-	        	<prop key="com.atomikos.icatch.level">FINEST</prop>
+	        	<prop key="com.atomikos.level">FINEST</prop>
 	        </props>
 	    </property>
 	</bean>
