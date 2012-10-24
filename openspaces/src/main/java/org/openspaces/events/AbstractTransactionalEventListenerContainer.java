@@ -31,7 +31,7 @@ public abstract class AbstractTransactionalEventListenerContainer extends Abstra
 
     private DefaultTransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
 
-    private boolean disableTransactionValidation = false;
+    protected boolean disableTransactionValidation = false;
 
 
     /**

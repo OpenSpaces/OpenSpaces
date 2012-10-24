@@ -91,6 +91,19 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractTran
     private TriggerOperationHandler triggerOperationHandler;
 
 
+    /* (non-Javadoc)
+     * @see org.openspaces.events.AbstractTransactionalEventListenerContainer#validateConfiguration()
+     */
+    @Override
+    protected void validateConfiguration() {
+        super.validateConfiguration();
+        
+        if (!disableTransactionValidation && getTransactionManager() != null && getGigaSpace().getTxProvider().isEnabled() && getTransactionDefinition() != null){
+            if ((getTransactionDefinition().getTimeout() * 1000)<= getReceiveTimeout())
+                throw new IllegalStateException("Receive timeout [" + getReceiveTimeout() + "ms] must be lower than the transaction timeout [" + getTransactionDefinition().getTimeout() * 1000 + "ms]");
+        }
+    }
+    
     /**
      * If set to <code>true</code> will pass an array value returned from a
      * {@link org.openspaces.events.polling.receive.ReceiveOperationHandler}
