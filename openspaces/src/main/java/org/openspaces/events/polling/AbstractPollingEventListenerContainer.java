@@ -24,6 +24,7 @@ import org.openspaces.events.polling.receive.SingleTakeReceiveOperationHandler;
 import org.openspaces.events.polling.trigger.TriggerOperationHandler;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.dao.DataAccessException;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.ReflectionUtils;
@@ -99,7 +100,8 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractTran
         super.validateConfiguration();
         
         if (!disableTransactionValidation && getTransactionManager() != null && getGigaSpace().getTxProvider().isEnabled() && getTransactionDefinition() != null){
-            if ((getTransactionDefinition().getTimeout() * 1000)<= getReceiveTimeout())
+            int timeout = getTransactionDefinition().getTimeout();
+            if (timeout != TransactionDefinition.TIMEOUT_DEFAULT && (timeout * 1000)<= getReceiveTimeout())
                 throw new IllegalStateException("Receive timeout [" + getReceiveTimeout() + "ms] must be lower than the transaction timeout [" + getTransactionDefinition().getTimeout() * 1000 + "ms]");
         }
     }
