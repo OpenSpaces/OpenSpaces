@@ -57,6 +57,7 @@
             <plugin>
                 <!-- Enable the prefix 'os' for the plugin -->
                 <artifactId>maven-plugin-plugin</artifactId>
+                <version>3.1</version>
                 <configuration>
                     <goalPrefix>os</goalPrefix>
                 </configuration>
@@ -64,6 +65,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.5.1</version>
                 <configuration>
                     <source>1.6</source>
                     <target>1.6</target>
