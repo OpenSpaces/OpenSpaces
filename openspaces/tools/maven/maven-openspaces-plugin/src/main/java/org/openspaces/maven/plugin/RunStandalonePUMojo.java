@@ -44,7 +44,7 @@ public class RunStandalonePUMojo extends AbstractOpenSpacesMojo {
     /**
      * cluster
      *
-     * @parameter expression="${cluster}"
+     * @parameter expression="cluster"
      */
     private String cluster;
 
@@ -52,7 +52,7 @@ public class RunStandalonePUMojo extends AbstractOpenSpacesMojo {
     /**
      * proeprties
      *
-     * @parameter expression="${properties}"
+     * @parameter expression="properties"
      */
     private String properties;
 
@@ -60,7 +60,7 @@ public class RunStandalonePUMojo extends AbstractOpenSpacesMojo {
     /**
      * puName
      *
-     * @parameter expression="${module}"
+     * @parameter expression="module"
      */
     private String module;
 
@@ -75,7 +75,7 @@ public class RunStandalonePUMojo extends AbstractOpenSpacesMojo {
     
     
     /**
-     * @parameter expression="${localRepository}"
+     * @parameter expression="localRepository"
      * @required
      * @readonly
      */
@@ -85,7 +85,7 @@ public class RunStandalonePUMojo extends AbstractOpenSpacesMojo {
     /**
      * groups
      *
-     * @parameter expression="${groups}"
+     * @parameter expression="groups"
      */
     private String groups;
 
@@ -93,7 +93,7 @@ public class RunStandalonePUMojo extends AbstractOpenSpacesMojo {
     /**
      * locators
      *
-     * @parameter expression="${locators}"
+     * @parameter expression="locators"
      */
     private String locators;
 
@@ -107,7 +107,7 @@ public class RunStandalonePUMojo extends AbstractOpenSpacesMojo {
     /**
      * The remote repositories.
      * 
-     * @parameter expression="${project.remoteArtifactRepositories}"
+     * @parameter expression="project.remoteArtifactRepositories"
      */
      private List remoteRepositories;
      
