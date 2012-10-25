@@ -20,6 +20,7 @@ package org.openspaces.grid.gsm.machines.plugins;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.openspaces.admin.gsa.GSAReservationId;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig;
 import org.openspaces.admin.zone.config.ExactZonesConfig;
@@ -87,7 +88,7 @@ public interface ElasticMachineProvisioning extends
 	 * 
 	 * @since 8.0
 	 */
-	GridServiceAgent startMachine(ExactZonesConfig zones, long duration,  TimeUnit unit)
+	GridServiceAgent startMachine(ExactZonesConfig zones, GSAReservationId reservationId, long duration,  TimeUnit unit)
 	throws ElasticMachineProvisioningException, ElasticGridServiceAgentProvisioningException, InterruptedException , TimeoutException ;
 
 	 /**

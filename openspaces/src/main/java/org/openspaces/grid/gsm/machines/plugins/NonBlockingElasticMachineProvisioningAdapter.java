@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openspaces.admin.gsa.GSAReservationId;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsa.events.ElasticGridServiceAgentProvisioningProgressChangedEventListener;
 import org.openspaces.admin.machine.events.ElasticMachineProvisioningProgressChangedEventListener;
@@ -79,7 +80,8 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
         if (!isStartMachineSupported()) {
             throw new UnsupportedOperationException();
         }
-        
+
+        final GSAReservationId reservationId = GSAReservationId.randomGSAReservationId();
         final CapacityRequirements singleMachineCapacity = machineProvisioning.getCapacityOfSingleMachine();
         int numberOfMachines = calcNumberOfMachines(capacityRequirements, machineProvisioning);
         FutureGridServiceAgent[] futureAgents = new FutureGridServiceAgent[numberOfMachines];
@@ -95,7 +97,7 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
                     try {
                         logger.info("Starting a new machine");
                         
-                        GridServiceAgent agent = machineProvisioning.startMachine(zones, duration, unit);
+                        GridServiceAgent agent = machineProvisioning.startMachine(zones, reservationId, duration, unit);
                         ref.set(agent);
                         logger.info("New machine started");
                     } catch (ElasticMachineProvisioningException e) {
@@ -171,6 +173,10 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
 
                 public CapacityRequirements getFutureCapacity() {
                     return singleMachineCapacity;
+                }
+                
+                public GSAReservationId getReservationId() {
+                    return reservationId;
                 }
             };
         }

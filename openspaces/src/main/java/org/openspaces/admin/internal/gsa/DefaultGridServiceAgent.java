@@ -38,6 +38,7 @@ import org.openspaces.admin.dump.DumpResult;
 import org.openspaces.admin.esm.ElasticServiceManager;
 import org.openspaces.admin.esm.events.ElasticServiceManagerAddedEventListener;
 import org.openspaces.admin.gsa.ElasticServiceManagerOptions;
+import org.openspaces.admin.gsa.GSAReservationId;
 import org.openspaces.admin.gsa.GridServiceContainerOptions;
 import org.openspaces.admin.gsa.GridServiceManagerOptions;
 import org.openspaces.admin.gsa.GridServiceOptions;
@@ -90,6 +91,8 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
 
     private ConcurrentHashMap<Integer,InternalAgentGridComponent> removedAgentGridComponents = new ConcurrentHashMap<Integer,InternalAgentGridComponent>();
 
+    private static final String RESERVATION_PROPERTY = "com.gs.agent.reservationid";
+    
     public DefaultGridServiceAgent(ServiceID serviceID, GSA gsa, InternalAdmin admin, AgentProcessesDetails processesDetails) {
         super(admin);
         this.serviceID = serviceID;
@@ -540,5 +543,14 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
     @Override
     public ExactZonesConfig getExactZones() {
         return new ExactZonesConfigurer().addZones(getZones().keySet()).create();
+    }
+
+    @Override
+    public GSAReservationId getReservationId() {
+        String reservationId = getVirtualMachine().getDetails().getSystemProperties().get(RESERVATION_PROPERTY);
+        if (reservationId == null) {
+            return null;
+        }
+        return new GSAReservationId(reservationId);
     }
 }

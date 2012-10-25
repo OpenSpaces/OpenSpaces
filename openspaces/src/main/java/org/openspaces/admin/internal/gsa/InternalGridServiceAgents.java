@@ -17,6 +17,11 @@
  ******************************************************************************/
 package org.openspaces.admin.internal.gsa;
 
+import java.util.Collection;
+import java.util.Map;
+
+import org.openspaces.admin.gsa.GSAReservationId;
+import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsa.GridServiceAgents;
 import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitEvent;
 
@@ -34,4 +39,11 @@ public interface InternalGridServiceAgents extends GridServiceAgents {
      * @since 8.0.6
      */
     void processElasticScaleStrategyEvent(ElasticProcessingUnitEvent event);
+    
+
+    /**
+     * @return all agents indexed by their reservationId
+     * @since 9.1.1
+     */
+    Map<GSAReservationId, Collection<GridServiceAgent>> getAgentsGroupByReservationId();
 }

@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
+import org.openspaces.admin.gsa.GSAReservationId;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
@@ -46,6 +47,15 @@ class GridServiceAgentFutures {
     
     CapacityRequirements getExpectedCapacity() {
         return expectedCapacity;
+    }
+    
+    public Collection<GSAReservationId> getReservationIds() {
+        
+        Collection<GSAReservationId> reservationIds = new HashSet<GSAReservationId>();
+        for (FutureGridServiceAgent futureAgent: futureAgents) {
+            reservationIds.add(futureAgent.getReservationId());
+        }
+        return reservationIds;
     }
     
     public Collection<GridServiceAgent> getGridServiceAgents() {

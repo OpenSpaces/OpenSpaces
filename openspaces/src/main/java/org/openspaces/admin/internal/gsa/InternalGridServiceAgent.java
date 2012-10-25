@@ -19,6 +19,7 @@ package org.openspaces.admin.internal.gsa;
 
 import net.jini.core.lookup.ServiceID;
 
+import org.openspaces.admin.gsa.GSAReservationId;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
 import org.openspaces.admin.internal.support.InternalAgentGridComponent;
@@ -66,5 +67,14 @@ public interface InternalGridServiceAgent extends GridServiceAgent, InternalGrid
      * @author itaif 
      */
     InternalAgentGridComponent[] getUnconfirmedRemovedAgentGridComponents();
-    
+
+
+    /**
+     * @return The identifies the request to start this grid service agent
+     * Used to correlate request to start a new agent with this agent.
+     * The agent reservation id can be set by the "com.gs.agent.reservationid" GSA system property,
+     * or by setting the GSA_RESERVATION_ID environment variable. 
+     * @since 9.1.1 
+     */
+    GSAReservationId getReservationId();
 }

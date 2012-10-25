@@ -34,8 +34,10 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.Admin;
+import org.openspaces.admin.gsa.GSAReservationId;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsc.GridServiceContainer;
+import org.openspaces.admin.internal.gsa.InternalGridServiceAgents;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.zone.config.ExactZonesConfig;
 import org.openspaces.admin.zone.config.ZonesConfig;
@@ -449,14 +451,19 @@ public class MachinesSlaEnforcementState {
         }
         
         // add all future grid service agents that have been started but not allocated yet
-        for (Entry<StateKey, StateValue> pair : state.entrySet()) {
-            for (GridServiceAgentFutures futureAgents: pair.getValue().futureAgents) {
-                for (GridServiceAgent agent : futureAgents.getGridServiceAgents()) {
+        Map<GSAReservationId, Collection<GridServiceAgent>> agentsByReservationId = ((InternalGridServiceAgents)admin.getGridServiceAgents()).getAgentsGroupByReservationId();
+        Map<GSAReservationId, StateKey> futureAgentsReservationIds = getFutureAgentsReservationIds();
+        for (Entry<GSAReservationId, StateKey> pair : futureAgentsReservationIds.entrySet()) {
+            GSAReservationId reservationId = pair.getKey();
+            StateKey startedTheAgent = pair.getValue();
+            Collection<GridServiceAgent> reservedAgents = agentsByReservationId.get(reservationId);
+            if (reservedAgents != null) {
+                for (GridServiceAgent agent : reservedAgents) {
                     String agentUid = agent.getUid();
                     initValue(restrictedAgentUidsWithReason, agentUid);
-                    restrictedAgentUidsWithReason.get(agentUid).add("Agent has been started by " + pair.getKey() +" but not allocated yet");
+                    restrictedAgentUidsWithReason.get(agentUid).add("Agent has been started by " + startedTheAgent +" but not allocated yet. ReservationID=" + reservationId);
                 }
-            }        
+            }
         }
         
         if (key.gridServiceAgentZones != null) {
@@ -474,6 +481,18 @@ public class MachinesSlaEnforcementState {
         
         return restrictedAgentUidsWithReason;
    }
+    
+    private Map<GSAReservationId, StateKey> getFutureAgentsReservationIds() {
+        Map<GSAReservationId, StateKey> reservationIds = new HashMap<GSAReservationId, MachinesSlaEnforcementState.StateKey>();
+        for (Entry<StateKey, StateValue> pair : state.entrySet()) {
+            for (GridServiceAgentFutures futureAgents: pair.getValue().futureAgents) {
+                for (GSAReservationId reservationId : futureAgents.getReservationIds()) {
+                    reservationIds.put(reservationId, pair.getKey());
+                }
+            }
+        }
+        return reservationIds;
+    }
 
     private void initValue(Map<String, List<String>> mapOfLists, String key) {
         if (!mapOfLists.containsKey(key)) {

@@ -103,11 +103,6 @@ public class DiscoveredMachineProvisioningBean implements NonBlockingElasticMach
         return false;
     }
 
-    public FutureGridServiceAgent[] startMachinesAsync(CapacityRequirements capacityRequirements, long duration,
-            TimeUnit unit) {
-        throw new UnsupportedOperationException();
-    }
-
     public void stopMachineAsync(GridServiceAgent agent, long duration, TimeUnit unit) {
         agent.shutdown();
     }

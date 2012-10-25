@@ -31,9 +31,11 @@ import java.util.concurrent.TimeoutException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.Admin;
+import org.openspaces.admin.gsa.GSAReservationId;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsa.GridServiceAgents;
 import org.openspaces.admin.gsc.GridServiceContainer;
+import org.openspaces.admin.internal.gsa.InternalGridServiceAgent;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.zone.config.ExactZonesConfig;
@@ -997,6 +999,13 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         }
         if (newAgent == null) {
             throw new IllegalStateException("Machine provisioning future is done without exception, but returned a null agent");
+        }
+        GSAReservationId reservationId = ((InternalGridServiceAgent)newAgent).getReservationId();
+        if (reservationId == null) {
+            throw new IllegalStateException("Machine provisioning future is done without exception, but returned a null reservationId from the agent");
+        }
+        if (!reservationId.equals(futureAgent.getReservationId())) {
+            throw new IllegalStateException("Machine provisioning future is done without exception, but returned an agent with the wrong reservationId");
         }
         
         if (!newAgent.isDiscovered()) {

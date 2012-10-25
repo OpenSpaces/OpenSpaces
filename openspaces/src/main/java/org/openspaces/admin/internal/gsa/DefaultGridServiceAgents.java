@@ -17,7 +17,10 @@
  ******************************************************************************/
 package org.openspaces.admin.internal.gsa;
 
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -28,6 +31,7 @@ import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.dump.CompoundDumpResult;
 import org.openspaces.admin.dump.DumpResult;
+import org.openspaces.admin.gsa.GSAReservationId;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsa.events.ElasticGridServiceAgentProvisioningFailureEvent;
 import org.openspaces.admin.gsa.events.ElasticGridServiceAgentProvisioningFailureEventManager;
@@ -251,6 +255,23 @@ public class DefaultGridServiceAgents implements InternalGridServiceAgents {
         else if (event instanceof ElasticGridServiceAgentProvisioningProgressChangedEvent) {
             elasticGridServiceAgentProvisioningProgressChangedEventManager.elasticGridServiceAgentProvisioningProgressChanged((ElasticGridServiceAgentProvisioningProgressChangedEvent)event);
         }
+    }
+
+    @Override
+    public Map<GSAReservationId, Collection<GridServiceAgent>> getAgentsGroupByReservationId() {
+        Map<GSAReservationId, Collection<GridServiceAgent>> agentsByReservationId = new HashMap<GSAReservationId, Collection<GridServiceAgent>>();
+        for (GridServiceAgent agent : agents.values()) {
+            GSAReservationId reservationId = ((InternalGridServiceAgent)agent).getReservationId();
+            if (reservationId != null) {
+                Collection<GridServiceAgent> reservedAgents = agentsByReservationId.get(reservationId);
+                if (reservedAgents == null) {
+                    reservedAgents = new HashSet<GridServiceAgent>();
+                    agentsByReservationId.put(reservationId, reservedAgents);
+                }
+                reservedAgents.add(agent);
+            }
+        }
+        return agentsByReservationId;
     }
 
 }
