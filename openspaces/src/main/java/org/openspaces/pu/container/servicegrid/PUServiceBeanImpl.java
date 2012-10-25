@@ -37,6 +37,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.StringTokenizer;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -452,7 +453,9 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
             String deployedProcessingUnitsLocation = workLocation.getAbsolutePath() + "/processing-units";
 
-            deployPath = new File(deployedProcessingUnitsLocation + "/" + deployName.replace('.', '_'));
+            int uuid = Math.abs(new Random().nextInt());
+            
+            deployPath = new File(deployedProcessingUnitsLocation + "/" + deployName.replace('.', '_') + "_" + uuid);
             FileSystemUtils.deleteRecursively(deployPath);
             deployPath.mkdirs();
 
