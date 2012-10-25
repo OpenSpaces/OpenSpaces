@@ -43,6 +43,7 @@ import org.apache.commons.logging.LogFactory;
 import org.jini.rio.boot.BootUtil;
 import org.jini.rio.resources.servicecore.Service;
 import org.openspaces.admin.AdminException;
+import org.openspaces.admin.internal.admin.AdminClosedException;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.esm.DefaultElasticServiceManager;
 import org.openspaces.admin.internal.esm.InternalElasticServiceManager;
@@ -248,13 +249,13 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 direcyIjspace.login(admin.getUserDetails());
             }
 
-            IInternalRemoteJSpaceAdmin spaceAdmin = (IInternalRemoteJSpaceAdmin) direcyIjspace.getAdmin();
+            final IInternalRemoteJSpaceAdmin spaceAdmin = (IInternalRemoteJSpaceAdmin) direcyIjspace.getAdmin();
 
-            InternalSpaceInstance spaceInstance = new DefaultSpaceInstance(serviceID, direcyIjspace, spaceAdmin,
+            final InternalSpaceInstance spaceInstance = new DefaultSpaceInstance(serviceID, direcyIjspace, spaceAdmin,
                     admin);
-            NIODetails nioDetails = spaceInstance.getNIODetails();
-            OSDetails osDetails = spaceInstance.getOSDetails();
-            JVMDetails jvmDetails = spaceInstance.getJVMDetails();
+            final NIODetails nioDetails = spaceInstance.getNIODetails();
+            final OSDetails osDetails = spaceInstance.getOSDetails();
+            final JVMDetails jvmDetails = spaceInstance.getJVMDetails();
             
             IJSpaceContainer container = direcyIjspace.getContainer();
             IJSpaceContainerAdmin containerAdmin = ( IJSpaceContainerAdmin )container;
@@ -266,10 +267,22 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
             catch( RemoteException re ){
                 logger.warn( "Failed to fetch jndi url from space container", re);   
             }
+            final String optionalJmxServiceURL = jmxServiceURL;
             
+            final String[] zones = spaceAdmin.getZones();
             
-            admin.addSpaceInstance(spaceInstance, nioDetails, osDetails, jvmDetails, jmxServiceURL, spaceAdmin.getZones());
-        } catch (Exception e) {
+            admin.scheduleNonBlockingStateChange(new Runnable() {
+                @Override
+                public void run() {
+                    admin.addSpaceInstance(spaceInstance, nioDetails, osDetails, jvmDetails, optionalJmxServiceURL, zones);
+                }
+            });
+        } catch (AdminClosedException e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to add Space instance since admin is already closed", e);
+            }
+        }
+        catch (Exception e) {
             logger.warn("Failed to add [Space Instance] with uid [" + serviceID + "]", e);
         }
     }
@@ -302,6 +315,10 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
 
                 }
             });
+        } catch (AdminClosedException e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to add PU since admin is already closed", e);
+            }
         } catch (Exception e) {
             logger.warn("Failed to add [Processing Unit Instance] with uid [" + serviceID + "]", e);
         }
@@ -330,6 +347,10 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                             osDetails, jvmDetails, jmxUrl, zones);
                 }
             });
+        } catch (AdminClosedException e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to add GSC since admin is already closed", e);
+            }
         } catch (Exception e) {
             logger.warn("Failed to add GSC with uid [" + serviceID + "]", e);
         }
@@ -358,6 +379,11 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                     admin.addGridServiceAgent(gridServiceAgent, nioDetails, osDetails, jvmDetails, jmxUrl, zones);
                 }
             });
+        } catch (AdminClosedException e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to add GSA since admin is already closed", e);
+            }
+        
         } catch (Exception e) {
             logger.warn("Failed to add [GSA] with uid [" + serviceID + "]", e);
         }
@@ -386,6 +412,10 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                                                 osDetails, jvmDetails, jmxUrl, zones);
                 }
             });
+        } catch (AdminClosedException e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to add ESM since admin is already closed", e);
+            }
         } catch (Exception e) {
             logger.warn("Failed to add [ESM] with uid [" + serviceID + "]", e);
         }        
@@ -413,7 +443,10 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                     admin.addGridServiceManager(gridServiceManager, nioDetails, osDetails, jvmDetails, jmxUrl, zones);
                 }
             });
-
+        } catch (AdminClosedException e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to add GSM since admin is already closed", e);
+            }
         } catch (Exception e) {
             logger.warn("Failed to add [GSM] with uid [" + serviceID + "]", e);
         }        

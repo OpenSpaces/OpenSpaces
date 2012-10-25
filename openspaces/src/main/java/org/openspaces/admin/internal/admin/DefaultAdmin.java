@@ -419,7 +419,7 @@ public class DefaultAdmin implements InternalAdmin {
     @Override
     public void setProcessingUnitMonitorInterval(long interval, TimeUnit timeUnit) {
         if (closeStarted.get()) {
-            throw new IllegalStateException("Admin already closed");
+            throw new AdminClosedException();
         }
         this.scheduledProcessingUnitMonitorInterval = timeUnit.toMillis(interval);
         if (scheduledProcessingUnitMonitorFuture != null) { // during initialization
@@ -431,7 +431,7 @@ public class DefaultAdmin implements InternalAdmin {
     @Override
     public void setAgentProcessessMonitorInterval(long interval, TimeUnit timeUnit) {
         if (closeStarted.get()) {
-            throw new IllegalStateException("Admin already closed");
+            throw new AdminClosedException();
         }
         this.scheduledAgentProcessessMonitorInterval = timeUnit.toMillis(interval);
         if (scheduledAgentProcessessMonitorFuture != null) { // during initialization
@@ -476,7 +476,7 @@ public class DefaultAdmin implements InternalAdmin {
     @Override
     public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit) {
         if (closeStarted.get()) {
-            throw new IllegalStateException("Admin already closed");
+            throw new AdminClosedException();
         }
         return getScheduler().scheduleWithFixedDelay(toLoggerRunnable(command), initialDelay, delay, unit);
     }
@@ -690,7 +690,7 @@ public class DefaultAdmin implements InternalAdmin {
     @Override
     public void scheduleNonBlockingStateChange(Runnable command) {
         if (closeStarted.get()) {
-            throw new IllegalStateException("Admin already closed");
+            throw new AdminClosedException();
         }
         if (singleThreadedEventListeners) {
             raiseEvent(this,command);
@@ -1252,7 +1252,7 @@ public class DefaultAdmin implements InternalAdmin {
             
             InternalGridServiceContainer gridServiceContainer = (InternalGridServiceContainer) gridServiceContainers.getContainerByUID(processingUnitInstance.getGridServiceContainerServiceID().toString());
             if (gridServiceContainer == null) {
-                throw new IllegalStateException("Internal error in admin, should not happen");
+                throw new IllegalStateException("gridServiceContainer cloud not be null. Internal error in admin, should not happen");
             }
             processingUnitInstance.setGridServiceContainer(gridServiceContainer);
             gridServiceContainer.addProcessingUnitInstance(processingUnitInstance);
@@ -1872,7 +1872,7 @@ public class DefaultAdmin implements InternalAdmin {
         @Override
         public void run() {
             if (closeEnded.get()) {
-                Exception e = new IllegalStateException("Not executing: " + runnable + " - Admin already closed. executorService.shutdownNow should have been called.");
+                Exception e = new AdminClosedException("Not executing: " + runnable + " - Admin already closed. executorService.shutdownNow should have been called.");
                 if (logger.isDebugEnabled()) {
                     logger.debug(e.getMessage(), e);
                 }
@@ -1912,7 +1912,7 @@ public class DefaultAdmin implements InternalAdmin {
     public ScheduledFuture<?> scheduleWithFixedDelayNonBlockingStateChange(final Runnable command, long initialDelay,
             long delay, TimeUnit unit) {
         if (closeStarted.get()) {
-            throw new IllegalStateException("Admin already closed");
+            throw new AdminClosedException();
         }
         return scheduleWithFixedDelay(new Runnable() {
 
@@ -1930,7 +1930,7 @@ public class DefaultAdmin implements InternalAdmin {
             final Runnable command, 
             long delay, TimeUnit unit) {
         if (closeStarted.get()) {
-            throw new IllegalStateException("Admin already closed");
+            throw new AdminClosedException();
         }
         return this.getScheduler().schedule(toLoggerRunnable(new Runnable() {
 
