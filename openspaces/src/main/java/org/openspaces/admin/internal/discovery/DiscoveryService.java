@@ -293,31 +293,38 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
         }
         try {
             PUDetails puDetails = puServiceBean.getPUDetails();
-            final InternalProcessingUnitInstance processingUnitInstance = new DefaultProcessingUnitInstance(
-                    serviceID, puDetails, puServiceBean, admin);
-            final NIODetails nioDetails = processingUnitInstance.getNIODetails();
-            final OSDetails osDetails = processingUnitInstance.getOSDetails();
-            final JVMDetails jvmDetails = processingUnitInstance.getJVMDetails();
-            final String[] zones = puServiceBean.getZones();
-            admin.scheduleNonBlockingStateChange(new Runnable() {
-                @Override
-                public void run() {
-                    String jmxUrl = getJMXConnection( serviceItem.attributeSets );
-                    admin.addProcessingUnitInstance(processingUnitInstance, nioDetails, osDetails, jvmDetails, jmxUrl,
-                            zones);
-                    if (!discoverUnmanagedSpaces) {
-                        for (SpaceServiceDetails serviceDetails : processingUnitInstance.getEmbeddedSpacesDetails()) {
-                            InternalSpaceInstance spaceInstance = new DefaultSpaceInstance(puServiceBean,
-                                    serviceDetails, admin);
-                            admin.addSpaceInstance(spaceInstance, nioDetails, osDetails, jvmDetails, jmxUrl, zones);
-                        }
-                    }
-
+            if (puDetails == null) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Failed to add [Processing Unit Instance] with uid [" + serviceID + "] since instance is being shutdown");
                 }
-            });
+            }
+            else {
+                final InternalProcessingUnitInstance processingUnitInstance = new DefaultProcessingUnitInstance(
+                        serviceID, puDetails, puServiceBean, admin);
+                final NIODetails nioDetails = processingUnitInstance.getNIODetails();
+                final OSDetails osDetails = processingUnitInstance.getOSDetails();
+                final JVMDetails jvmDetails = processingUnitInstance.getJVMDetails();
+                final String[] zones = puServiceBean.getZones();
+                admin.scheduleNonBlockingStateChange(new Runnable() {
+                    @Override
+                    public void run() {
+                        String jmxUrl = getJMXConnection( serviceItem.attributeSets );
+                        admin.addProcessingUnitInstance(processingUnitInstance, nioDetails, osDetails, jvmDetails, jmxUrl,
+                                zones);
+                        if (!discoverUnmanagedSpaces) {
+                            for (SpaceServiceDetails serviceDetails : processingUnitInstance.getEmbeddedSpacesDetails()) {
+                                InternalSpaceInstance spaceInstance = new DefaultSpaceInstance(puServiceBean,
+                                        serviceDetails, admin);
+                                admin.addSpaceInstance(spaceInstance, nioDetails, osDetails, jvmDetails, jmxUrl, zones);
+                            }
+                        }
+    
+                    }
+                });
+            }
         } catch (AdminClosedException e) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Failed to add PU since admin is already closed", e);
+                logger.debug("Failed to add [Processing Unit Instance] with uid " + serviceID + " since admin is already closed", e);
             }
         } catch (Exception e) {
             logger.warn("Failed to add [Processing Unit Instance] with uid [" + serviceID + "]", e);
