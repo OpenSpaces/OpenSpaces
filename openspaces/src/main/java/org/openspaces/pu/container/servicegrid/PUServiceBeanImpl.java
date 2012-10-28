@@ -1056,7 +1056,8 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                 }
             }
             if (!deleted) {
-                logger.debug("Failed to delete deployed processing unit from [" + deployPath + "]");
+                String message = "Failed to delete deployed processing unit from [" + deployPath + "]";
+                logger.warn(message);
             }
         }
     }
