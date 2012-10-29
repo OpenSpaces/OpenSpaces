@@ -121,23 +121,27 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
 
     @Override
     public GridServiceManager waitForAtLeastOne(long timeout, TimeUnit timeUnit) {
-        final CountDownLatch latch = new CountDownLatch(1);
-        final AtomicReference<GridServiceManager> ref = new AtomicReference<GridServiceManager>();
-        GridServiceManagerAddedEventListener added = new GridServiceManagerAddedEventListener() {
-            public void gridServiceManagerAdded(GridServiceManager gridServiceManager) {
-                ref.set(gridServiceManager);
-                latch.countDown();
+        GridServiceManager gsm = getGridServiceManager();
+        if (gsm == null) {
+            final CountDownLatch latch = new CountDownLatch(1);
+            final AtomicReference<GridServiceManager> ref = new AtomicReference<GridServiceManager>();
+            GridServiceManagerAddedEventListener added = new GridServiceManagerAddedEventListener() {
+                public void gridServiceManagerAdded(GridServiceManager gridServiceManager) {
+                    ref.set(gridServiceManager);
+                    latch.countDown();
+                }
+            };
+            getGridServiceManagerAdded().add(added);
+            try {
+                latch.await(timeout, timeUnit);
+                gsm = ref.get();
+            } catch (InterruptedException e) {
+                //gsm is null
+            } finally {
+                getGridServiceManagerAdded().remove(added);
             }
-        };
-        getGridServiceManagerAdded().add(added);
-        try {
-            latch.await(timeout, timeUnit);
-            return ref.get();
-        } catch (InterruptedException e) {
-            return null;
-        } finally {
-            getGridServiceManagerAdded().remove(added);
         }
+        return gsm;
     }
 
     @Override
@@ -380,7 +384,9 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
         long end = System.currentTimeMillis() + timeUnit.toMillis(timeout);
         InternalGridServiceManager gridServiceManager = (InternalGridServiceManager) waitForAtLeastOne(timeout, timeUnit);
         if (gridServiceManager == null) {
-            throw new AdminException("No Grid Service Manager found to undeploy [" + processingUnits[0].getName() + "]");
+            throw new AdminException(
+                    "Timeout waiting for Grid Service Manager when undeploying [" + processingUnits[0].getName() + "]. "+
+                    "Timeout is " + timeout + " " + timeUnit);
         }
         long remaining = Math.max(0, end - System.currentTimeMillis());
         return gridServiceManager.undeployProcessingUnitsAndWait(processingUnits, remaining, TimeUnit.MILLISECONDS);
