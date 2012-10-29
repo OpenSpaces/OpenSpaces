@@ -40,7 +40,7 @@ if [ "${EDITION}" = "Cloudify" ] ; then
 	echo ""
 	echo ""
 	
-	mvn install:install-file -DgroupId=org.cloudifysource -DcreateChecksum=true -DartifactId=dsl -Dversion=$CLOUDIFY_VERSION -DpomFile=$TMPDIR/dsl-pom.xml -Dpackaging=jar -Dfile=${JSHOMEDIR}/lib/required/dsl.jar 
+	mvn install:install-file -DgroupId=org.cloudifysource -DcreateChecksum=true -DartifactId=dsl -Dversion=$CLOUDIFY_VERSION -DpomFile=$TMPDIR/dsl-pom.xml -Dpackaging=jar -Dfile=${JSHOMEDIR}/lib/platform/cloudify/dsl.jar 
 	mvn install:install-file -DgroupId=org.cloudifysource -DcreateChecksum=true -DartifactId=usm -Dversion=$CLOUDIFY_VERSION -DpomFile=$TMPDIR/usm-pom.xml -Dpackaging=jar -Dfile=${JSHOMEDIR}/lib/platform/usm/usm.jar
 	mvn install:install-file -DgroupId=org.cloudifysource -DcreateChecksum=true -DartifactId=esc -Dversion=$CLOUDIFY_VERSION -DpomFile=$TMPDIR/esc-pom.xml -Dpackaging=jar -Dfile=${JSHOMEDIR}/lib/platform/esm/esc-$CLOUDIFY_VERSION.jar
 
