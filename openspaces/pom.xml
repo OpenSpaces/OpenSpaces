@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.gigaspaces</groupId>
 	<artifactId>gs-openspaces</artifactId>
-	<version>9.1.0-SNAPSHOT</version>
+	<version>9.5.0-SNAPSHOT</version>
 
 	<properties>
 		<springVersion>3.1.1.RELEASE</springVersion>
@@ -615,16 +615,13 @@
 				<version>2.4</version>
 				<executions>
 					<execution>
-						<id>openspaces-jar</id>
+						<id>default-jar</id>
 						<goals>
 							<goal>jar</goal>
 						</goals>
 						<phase>package</phase>
 						<configuration>
-							<includes>
-								<include>org/openspaces/**</include>
-								<include>org/apache/openjpa/**</include>
-							</includes>
+						<finalName>${project.artifactId}</finalName>
 							<excludes>
 								<exclude>org/openspaces/pu/container/jee/jetty/holder/**</exclude>
 								<exclude>org/openspaces/pu/container/jee/jetty/support/**</exclude>
@@ -632,7 +629,7 @@
 							<archive>
 								<manifestEntries>
 									<Implementation-Title>${openspacesTitle}</Implementation-Title>
-									<Implementation-Version>${version}</Implementation-Version>
+									<Implementation-Version>${project.version}</Implementation-Version>
 								</manifestEntries>
 							</archive>
 						</configuration>
@@ -644,7 +641,8 @@
 						</goals>
 						<phase>package</phase>
 						<configuration>
-							<classifier>${openspacesJetty}</classifier>
+							<finalName>${project.artifactId}-${openspacesJetty}</finalName>
+							<!-- classifier>${openspacesJetty}</classifier-->
 							<includes>
 								<include>org/openspaces/pu/container/jee/jetty/holder/**</include>
 								<include>org/openspaces/pu/container/jee/jetty/support/**</include>
@@ -652,14 +650,14 @@
 							<archive>
 								<manifestEntries>
 									<Implementation-Title>${openspacesTitle}</Implementation-Title>
-									<Implementation-Version>${version}</Implementation-Version>
+									<Implementation-Version>${project.version}</Implementation-Version>
 								</manifestEntries>
 							</archive>
 						</configuration>
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
+			<!-- plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
@@ -677,10 +675,11 @@
 						</configuration>
 					</execution>
 				</executions>
-			</plugin>
+			</plugin-->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.5.1</version>
 				<configuration>
 					<source>1.6</source>
 					<target>1.6</target>

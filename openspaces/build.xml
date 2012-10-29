@@ -74,7 +74,9 @@
     <target name="clean" description="Clean all output dirs (dist, javadocs, classes, test-classes, etc)">
         <!-- Just kill target dir (it's safer). No need at this point to keep it. -->
         <delete dir="${target.dir}"/>
-        <delete dir="${lib.dir}/${name}"/>
+    	<exec executable="${env.M2_HOME}\bin\${mvn.executable}"> 
+			<arg line="clean"/>
+		</exec>
     </target>
 
     <!--
@@ -82,76 +84,18 @@
     -->
 
     <target name="buildmain" description="Compile main source tree java files into class files">
-
-        <mkdir dir="${target.classes.dir}"/>
-        <mkdir dir="${target.classes.dir}/META-INF"/>
-
-        <javac  destdir="${target.classes.dir}" source="1.6" target="1.6" debug="${debug}"
-               deprecation="false" optimize="false" failonerror="true">
-            <src path="${main.src.dir}"/>
-            <classpath refid="all-libs"/>
-        </javac>
-
-        <copy todir="${target.classes.dir}" preservelastmodified="true">
-            <fileset dir="${main.src.dir}">
-                <include name="**/*.properties"/>
-                <include name="**/*.handlers"/>
-                <include name="**/*.schemas"/>
-                <include name="**/*.xml"/>
-                <include name="**/*.dtd"/>
-                <include name="**/*.xsd"/>
-                <include name="**/*.groovy"/>
-            </fileset>
-        </copy>
+    	<exec executable="${env.M2_HOME}\bin\${mvn.executable}"> 
+			<arg line="package -DskipTests"/>
+		</exec>
     </target>
 
 
     <target name="build_1_5" depends="clean, buildmain" description="Compile main sources"/>
 
-    <target name="fulljar_1_5" depends="build_1_5, fulljar"/>
-
-    <target name="fulljar" description="Create full JAR file with all OpenSpaces classes">
-
-        <mkdir dir="${target.classes.dir}" />
-        <mkdir dir="${lib.dir}/required"/>
-        <delete file="${lib.dir}/required/gs-openspaces.jar"/>
-
-        <jar jarfile="${lib.dir}/required/gs-openspaces.jar">
-            <fileset dir="${target.classes.dir}">
-                <include name="META-INF/**"/>
-                <include name="org/openspaces/**"/>
-            	<include name="org/apache/openjpa/**"/>
-                <exclude name="org/openspaces/pu/container/jee/jetty/holder/**"/>
-                <exclude name="org/openspaces/pu/container/jee/jetty/support/**"/>
-                <exclude name="org/apache/catalina/**"/>
-                <exclude name="com/sun/**"/>
-            </fileset>
-            <manifest>
-                <attribute name="Implementation-Title" value="${openspaces-title}"/>
-                <attribute name="Implementation-Version" value="${openspaces-version}"/>
-                <attribute name="OpenSpaces-Version" value="${openspaces-version}"/>
-            </manifest>
-        </jar>
-
-        <mkdir dir="${lib.dir}/optional/openspaces"/>
-
-        
-        <delete file="${lib.dir}/platform/openspaces/gs-openspaces-jetty.jar"/>
-        <jar jarfile="${lib.dir}/platform/openspaces/gs-openspaces-jetty.jar">
-            <fileset dir="${target.classes.dir}">
-                <include name="org/openspaces/pu/container/jee/jetty/holder/**"/>
-                <include name="org/openspaces/pu/container/jee/jetty/support/**"/>
-            </fileset>
-            <manifest>
-                <attribute name="Implementation-Title" value="${openspaces-title}"/>
-                <attribute name="Implementation-Version" value="${openspaces-version}"/>
-                <attribute name="OpenSpaces-Version" value="${openspaces-version}"/>
-            </manifest>
-        </jar>
-    </target>
 
     <target name="srczip" description="Create source ZIP (containing Java sources)">
 
+    	<mkdir dir="${lib.dir}/optional/openspaces"/>
         <delete file="${lib.dir}/optional/openspaces/gs-openspaces-src.zip"/>
 
         <zip zipfile="${lib.dir}/optional/openspaces/gs-openspaces-src.zip">
@@ -216,7 +160,7 @@
         <delete dir="lib/optional/openspaces/schema"/>
     	<mkdir dir="lib/optional/openspaces/schema"/>
         <copy todir="lib/optional/openspaces/schema" flatten="true">
-            <fileset dir="${main.src.dir}">
+            <fileset dir="${main.resources.dir}">
                 <include name="**/*.xsd"/>
             </fileset>
         </copy>
@@ -229,7 +173,7 @@
     </target>
 
     <target name="dist_1_5"
-            depends="build_1_5, fulljar, srczip, javadoc, install.maven, schema, license"
+            depends="build_1_5, srczip, javadoc, install.maven, schema, license"
             description="Creates the OpenSpaces distribution">
         <mkdir dir="${dist.dir}"/>
         <delete file="${dist.dir}/${name}-1.5.zip"/>
@@ -259,6 +203,9 @@
             </zipfileset>
         	<zipfileset dir="${lib.dir}/external/common" includes="commons-logging.jar" prefix="lib/required">
         	</zipfileset>
+        	<zipfileset dir="${target.dir}" includes="gs-openspaces.jar" prefix="lib/required" />
+        	<zipfileset dir="${target.dir}" includes="gs-openspaces-jetty.jar" prefix="lib/platform/openspaces" />
+        	
         </zip>
     </target>
 	
@@ -274,21 +221,16 @@
 		<echo message="${productversion}" />
     	<!-- Install newly created jar in local maven repository -->
 		<exec executable="${env.M2_HOME}\bin\${mvn.executable}"> 
-			<arg line="install:install-file -DgroupId=com.gigaspaces -DartifactId=gs-openspaces -DcreateChecksum=true -Dversion=${productversion} -Dpackaging=jar -DpomFile=${maven.tmp.dir}/gs-openspaces-pom.xml -Dfile=${lib.dir}/required/gs-openspaces.jar -Djavadoc=${target.javadoc.dir}/xap-javadoc.zip -Dsources=${lib.dir}/optional/openspaces/gs-openspaces-src.zip"/>
+			<arg line="install:install-file -DgroupId=com.gigaspaces -DartifactId=gs-openspaces -DcreateChecksum=true -Dversion=${productversion} -Dpackaging=jar -DpomFile=${maven.tmp.dir}/gs-openspaces-pom.xml -Dfile=${target.dir}/gs-openspaces.jar -Djavadoc=${target.javadoc.dir}/xap-javadoc.zip -Dsources=${lib.dir}/optional/openspaces/gs-openspaces-src.zip"/>
 		</exec>
 		<exec executable="${env.M2_HOME}\bin\${mvn.executable}"> 
-			<arg line="install:install-file -DgroupId=com.gigaspaces -DartifactId=jetty-os -DcreateChecksum=true -Dversion=${productversion} -Dpackaging=jar -DpomFile=${maven.tmp.dir}/jetty-os-pom.xml -Dfile=${lib.dir}/platform/openspaces/gs-openspaces-jetty.jar"/>
+			<arg line="install:install-file -DgroupId=com.gigaspaces -DartifactId=jetty-os -DcreateChecksum=true -Dversion=${productversion} -Dpackaging=jar -DpomFile=${maven.tmp.dir}/jetty-os-pom.xml -Dfile=${target.dir}/gs-openspaces-jetty.jar"/>
 		</exec>
 		<!--delete dir="${maven.tmp.dir}"/-->
 	</target>
 
     <target name="dist">
         <antcall target="dist_1_5"/>
-        <!--antcall target="dist_1_4"/-->
-    </target>
-
-    <target name="install_1_5" depends="dist_1_5">
-        <unzip src="${dist.dir}/${name}-1.5.zip" dest="${gshome.dir}"/>
     </target>
 
 
@@ -357,8 +299,8 @@
 
 
     <!--
-         Run test suite and generate test summary, for both main and sandbox tests.
-         Does not halt on failure or error, in contrast to the "tests" target above.
+         Run test suite and generate test summary.
+         Does not halt on failure or error.
      -->
       <target name="testsummary" depends="buildtests" description="Run tests and generate test summary">
 
@@ -413,74 +355,4 @@
 	</target>
 		
     <target name="clean_tests" depends="clean,tests"/>
-
-
-    <!-- SANDBOX -->
-
-    <target name="buildsandbox" description="Compile the sandbox source tree java files into class files">
-
-        <mkdir dir="${target.sandbox-classes.dir}"/>
-        <mkdir dir="${target.sandbox-classes.dir}/META-INF"/>
-
-        <javac destdir="${target.sandbox-classes.dir}" source="1.6" target="1.6" debug="${debug}"
-               deprecation="false" optimize="false" failonerror="true">
-            <src path="${sandbox.src.dir}"/>
-            <classpath refid="all-libs"/>
-        </javac>
-
-        <copy todir="${target.sandbox-classes.dir}" preservelastmodified="true">
-            <fileset dir="${main.src.dir}">
-                <include name="**/*.properties"/>
-                <include name="**/*.handlers"/>
-                <include name="**/*.schemas"/>
-                <include name="**/*.xml"/>
-                <include name="**/*.dtd"/>
-                <include name="**/*.xsd"/>
-                <include name="**/*.groovy"/>
-            </fileset>
-        </copy>
-
-    </target>
-
-    <target name="sandboxjar" description="Create full sandbox JAR file with all OpenSpaces classes"
-            depends="buildsandbox">
-
-        <mkdir dir="${lib.dir}/${name}"/>
-        <delete file="${lib.dir}/${name}/${name}-sandbox.jar"/>
-
-        <jar jarfile="${lib.dir}/${name}/${name}-sandbox.jar">
-            <fileset dir="${target.sandbox-classes.dir}">
-                <include name="META-INF/**"/>
-                <include name="org/openspaces/**"/>
-            </fileset>
-            <manifest>
-                <attribute name="Implementation-Title" value="${openspaces-title}"/>
-                <attribute name="Implementation-Version" value="${openspaces-version}"/>
-                <attribute name="OpenSpaces-Version" value="${openspaces-version}"/>
-            </manifest>
-        </jar>
-
-    </target>
-
-    <target name="agentjar" description="Create agent JAR file with all OpenSpaces classes" depends="buildsandbox">
-
-        <mkdir dir="${lib.dir}/${name}"/>
-        <delete file="${lib.dir}/${name}/${name}-agent.jar"/>
-
-        <jar jarfile="${lib.dir}/${name}/${name}-agent.jar">
-            <fileset dir="${target.sandbox-classes.dir}">
-                <include name="org/openspaces/enhancer/**"/>
-                <include name="org/openspaces/libraries/asm/**"/>
-            </fileset>
-            <manifest>
-                <attribute name="Implementation-Title" value="${openspaces-title}"/>
-                <attribute name="Implementation-Version" value="${openspaces-version}"/>
-                <attribute name="OpenSpaces-Version" value="${openspaces-version}"/>
-                <attribute name="Premain-Class" value="org.openspaces.enhancer.EnhancerAgent"/>
-            </manifest>
-        </jar>
-
-    </target>
-
-
 </project>
