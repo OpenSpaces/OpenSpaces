@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" output="tools/maven/maven-openspaces-plugin/target/classes" path="tools/maven/maven-openspaces-plugin/src/main/java"/>
-	<classpathentry kind="src" path="src/test/java"/>
+	<classpathentry kind="src" output="target/test-classes" path="src/test/java"/>
 	<classpathentry kind="src" path="src/main/java"/>
-	<classpathentry kind="src" output="target/sandbox-classes" path="src/sandbox/src"/>
-	<classpathentry kind="src" output="target/sandbox-test-classes" path="src/sandbox/test"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/gigaspaces"/>
 	<classpathentry kind="lib" path="lib/external/common/commons-beanutils-1.7.0.jar"/>

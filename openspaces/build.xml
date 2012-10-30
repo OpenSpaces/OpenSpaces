@@ -205,6 +205,7 @@
         	</zipfileset>
         	<zipfileset dir="${target.dir}" includes="gs-openspaces.jar" prefix="lib/required" />
         	<zipfileset dir="${target.dir}" includes="gs-openspaces-jetty.jar" prefix="lib/platform/openspaces" />
+        	<zipfileset dir="${target.dir}" includes="gs-openspaces-sources.jar" prefix="lib/optional/openspaces" />
         	
         </zip>
     </target>
@@ -221,7 +222,7 @@
 		<echo message="${productversion}" />
     	<!-- Install newly created jar in local maven repository -->
 		<exec executable="${env.M2_HOME}\bin\${mvn.executable}"> 
-			<arg line="install:install-file -DgroupId=com.gigaspaces -DartifactId=gs-openspaces -DcreateChecksum=true -Dversion=${productversion} -Dpackaging=jar -DpomFile=${maven.tmp.dir}/gs-openspaces-pom.xml -Dfile=${target.dir}/gs-openspaces.jar -Djavadoc=${target.javadoc.dir}/xap-javadoc.zip -Dsources=${lib.dir}/optional/openspaces/gs-openspaces-src.zip"/>
+			<arg line="install:install-file -DgroupId=com.gigaspaces -DartifactId=gs-openspaces -DcreateChecksum=true -Dversion=${productversion} -Dpackaging=jar -DpomFile=${maven.tmp.dir}/gs-openspaces-pom.xml -Dfile=${target.dir}/gs-openspaces.jar -Djavadoc=${target.javadoc.dir}/xap-javadoc.zip -Dsources=${lib.dir}/optional/openspaces/gs-openspaces-sources.zip"/>
 		</exec>
 		<exec executable="${env.M2_HOME}\bin\${mvn.executable}"> 
 			<arg line="install:install-file -DgroupId=com.gigaspaces -DartifactId=jetty-os -DcreateChecksum=true -Dversion=${productversion} -Dpackaging=jar -DpomFile=${maven.tmp.dir}/jetty-os-pom.xml -Dfile=${target.dir}/gs-openspaces-jetty.jar"/>
@@ -304,46 +305,9 @@
      -->
       <target name="testsummary" depends="buildtests" description="Run tests and generate test summary">
 
-        <delete dir="${target.junit.reports.dir}" />
-        <delete dir="${target.junit.summary.dir}" />
-
-        <mkdir dir="${target.junit.reports.dir}"/>
-        <mkdir dir="${target.junit.summary.dir}"/>
-
-        <junit failureproperty="junit.tests.failed" errorproperty="junit.tests.error" forkmode="${junit.forkmode}" printsummary="yes" haltonfailure="no" haltonerror="no">
-
-            <jvmarg line="-Djava.security.policy=policy/policy.all -Djava.awt.headless=true -Xmx512m -XX:MaxPermSize=128m"/>
-
-            <!-- Must go first to ensure any jndi.properties files etc take precedence  -->
-            <classpath location="${target.testclasses.dir}"/>
-            <classpath location="${target.classes.dir}"/>
-
-            <!-- Need files loaded as resources -->
-            <classpath location="${main.test.dir}"/>
-    		<classpath location="${deploy.templates.dir}"/> 
-            	
-            <classpath refid="tests-libs"/>
-
-            <formatter type="plain" usefile="false"/>
-            <formatter type="xml"/>
-
-            <batchtest fork="yes" todir="${target.junit.reports.dir}">
-                <fileset dir="${target.testclasses.dir}" includes="${test.includes}" excludes="${test.excludes}"/>
-            </batchtest>
-
-        </junit>
-
-        <junitreport todir="${target.junit.reports.dir}">
-            <fileset dir="${target.junit.reports.dir}">
-                <include name="TEST-*.xml"/>
-            </fileset>
-            <report todir="${target.junit.summary.dir}"/>
-        </junitreport>
-    	
-    	<ant target="create.dummy.file.if.tests.failed"/> 
-    	<ant target="create.dummy.file.if.error.in.tests"/>
-    	<!--fail if="junit.tests.failed" message="JUnit tests failed. exiting..."/-->
-
+      	<exec executable="${env.M2_HOME}\bin\${mvn.executable}"> 
+			<arg line="test"/>
+		</exec>
     </target>
 	
 	<target name="create.dummy.file.if.tests.failed" if="junit.tests.failed">
