@@ -603,14 +603,6 @@
 				<directory>deploy/templates</directory>
 			</testResource>
 			<testResource>
-				<directory>src/test/java</directory>
-				<includes>
-					<include>**/*.xml</include>
-					<include>**/*.properties</include>
-					<include>**/*.groovy</include>
-				</includes>
-			</testResource>
-			<testResource>
 				<directory>../gigaspaces</directory>
 				<includes>
 					<include>gslicense.xml</include>
