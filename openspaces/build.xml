@@ -173,7 +173,7 @@
     </target>
 
     <target name="dist_1_5"
-            depends="build_1_5, srczip, javadoc, install.maven, schema, license"
+            depends="build_1_5, javadoc, install.maven, schema, license"
             description="Creates the OpenSpaces distribution">
         <mkdir dir="${dist.dir}"/>
         <delete file="${dist.dir}/${name}-1.5.zip"/>
