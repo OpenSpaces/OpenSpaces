@@ -303,7 +303,7 @@
          Run test suite and generate test summary.
          Does not halt on failure or error.
      -->
-      <target name="testsummary" depends="buildtests" description="Run tests and generate test summary">
+      <target name="testsummary" description="Run tests and generate test summary">
 
       	<exec executable="${env.M2_HOME}\bin\${mvn.executable}"> 
 			<arg line="test"/>
