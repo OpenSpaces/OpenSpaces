@@ -695,7 +695,10 @@
 				<version>2.12.4</version>
 				<configuration>
 					<testFailureIgnore>true</testFailureIgnore>
-					<parallel>true</parallel>
+					<parallel>classes</parallel>
+					<forkMode>pertest</forkMode>
+					<argLine>-Xms512m -Xmx512m</argLine>
+					<threadCount>4</threadCount>
 					<includes>
 						<include>**/*Test.java</include>
 						<include>**/*Tests.java</include>
