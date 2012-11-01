@@ -24,6 +24,10 @@
 			<url>https://repository.jboss.org/nexus/content/repositories/thirdparty-releases</url>
 		</repository>
 		<repository>
+			<id>jboss-public-repository-group</id>
+			<url>https://repository.jboss.org/nexus/content/groups/public</url>
+		</repository>
+		<repository>
 			<id>org.openspaces</id>
 			<url>http://maven-repository.openspaces.org</url>
 		</repository>
@@ -264,6 +268,11 @@
 			<artifactId>commons-io</artifactId>
 			<version>2.0.1</version>
 			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.jbossts</groupId>
+			<artifactId>jbossjta</artifactId>
+			<version>4.15.0.Final</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.netty</groupId>
@@ -590,8 +599,7 @@
 		<dependency>
 			<groupId>com.atomikos</groupId>
 			<artifactId>transactions-jta</artifactId>
-			<version>3.8.0</version>
-			
+			<version>3.8.0</version>		
 		</dependency>
 	</dependencies>
 	<build>
