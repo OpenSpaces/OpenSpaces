@@ -562,14 +562,18 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                
                 CapacityRequirement expectedCapacityRequirement = expectedCapacityRequirements.getRequirement(shortageCapacityRequirement.getType());
                 if (!shortageCapacityRequirement.equalsZero() && expectedCapacityRequirement.equalsZero()) {
-                    // cannot determine expected capacity, it could be enough to satisfy shortage 
-                    // and if that is the case, there is no point in declaring there is shortage.
-                    throw new MachinesSlaEnforcementInProgressException(getProcessingUnit());
+                    throw new MachinesSlaEnforcementInProgressException(getProcessingUnit(), 
+                            "Cannot determine if more machines need to be started, waiting for relevant " + getProcessingUnit() + " machines to start first to offset machine shortage.");
                 }
             }
             
             shortageCapacity = 
                 shortageCapacity.subtractOrZero(expectedCapacityRequirements);
+        }
+        
+        if (!shortageCapacity.equalsZero() && isFutureAgentsOfOtherSharedServices(sla)) {
+            throw new MachinesSlaEnforcementInProgressException(getProcessingUnit(),
+                    "Cannot determine if more machines need to be started, waiting for other machines from same tenant to start first, to offset machine shortage.");
         }
         return shortageCapacity;
     }
@@ -1312,6 +1316,10 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
 
     private Collection<GridServiceAgentFutures> getFutureAgents(AbstractMachinesSlaPolicy sla) {
         return state.getFutureAgents(getKey(sla));
+    }
+
+    private boolean isFutureAgentsOfOtherSharedServices(AbstractMachinesSlaPolicy sla) {
+        return state.isFutureAgentsOfOtherSharedServices(getKey(sla));
     }
 
     private void unmarkCapacityForDeallocation(AbstractMachinesSlaPolicy sla, String agentUid, CapacityRequirements agentCapacity) {

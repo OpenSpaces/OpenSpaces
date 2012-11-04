@@ -383,27 +383,8 @@ public class MachinesSlaEnforcementState {
         Map<String,List<String>> restrictedAgentUidsWithReason = new HashMap<String,List<String>>();
          if (!(puIsolation instanceof PublicMachineIsolation)) {
              //find all PUs with different machine isolation, and same machine isolation
-             Collection<StateKey> keysWithDifferentIsolation = new HashSet<StateKey>();
-             Collection<StateKey> keysWithSameIsolation = new HashSet<StateKey>();
-
-             for (Entry<StateKey, StateValue> pair : state.entrySet()) {
-                 ElasticProcessingUnitMachineIsolation otherPuIsolation = pair.getValue().machineIsolation;
-                 if (otherPuIsolation == null) {
-                     throw new IllegalStateException(pair.getKey() + " should have set machine isolation");
-                 }
-                 if (otherPuIsolation.equals(puIsolation)) {
-                     keysWithSameIsolation.add(pair.getKey());
-                 }
-                 else {
-                     keysWithDifferentIsolation.add(pair.getKey());
-                 }
-             }
-
-             // add all agent uids used by conflicting pus
-             if (logger.isDebugEnabled()) {
-                 logger.debug("PUs with different isolation than pu " + key +" are: "+ keysWithDifferentIsolation);
-                 logger.debug("PUs with same isolation of " + key + " are: " + keysWithSameIsolation);
-             }
+             final Collection<StateKey> keysWithDifferentIsolation = getKeysWithDifferentIsolation(key);
+             final Collection<StateKey> keysWithSameIsolation = getKeysWithSameIsolation(key);
 
              for (StateKey otherKey: keysWithDifferentIsolation) {
 
@@ -481,6 +462,49 @@ public class MachinesSlaEnforcementState {
         
         return restrictedAgentUidsWithReason;
    }
+
+   private Collection<StateKey> getKeysWithSameIsolation(StateKey key) {
+        
+       final ElasticProcessingUnitMachineIsolation puIsolation = getState(key).machineIsolation;
+       final Collection<StateKey> keysWithSameIsolation = new HashSet<StateKey>();
+
+       for (Entry<StateKey, StateValue> pair : state.entrySet()) {
+            ElasticProcessingUnitMachineIsolation otherPuIsolation = pair.getValue().machineIsolation;
+            if (otherPuIsolation == null) {
+                throw new IllegalStateException(pair.getKey() + " should have set machine isolation");
+            }
+           if (otherPuIsolation.equals(puIsolation)) {
+                keysWithSameIsolation.add(pair.getKey());
+            }
+        }
+         
+        if (logger.isDebugEnabled()) {
+            logger.debug("PUs with same isolation of " + key + " are: " + keysWithSameIsolation);
+        }
+         
+        return keysWithSameIsolation;
+    }
+
+    private Collection<StateKey> getKeysWithDifferentIsolation(StateKey key) {
+            
+        final ElasticProcessingUnitMachineIsolation puIsolation = getState(key).machineIsolation;
+        final Collection<StateKey> keysWithDifferentIsolation = new HashSet<StateKey>();
+        for (final Entry<StateKey, StateValue> pair : state.entrySet()) {
+             final ElasticProcessingUnitMachineIsolation otherPuIsolation = pair.getValue().machineIsolation;
+             if (otherPuIsolation == null) {
+                 throw new IllegalStateException(pair.getKey() + " should have set machine isolation");
+             }
+             if (!otherPuIsolation.equals(puIsolation)) {
+                 keysWithDifferentIsolation.add(pair.getKey());
+             }
+        }
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("PUs with different isolation than pu " + key +" are: "+ keysWithDifferentIsolation);
+        }
+
+        return keysWithDifferentIsolation;
+    }
     
     private Map<GSAReservationId, StateKey> getFutureAgentsReservationIds() {
         Map<GSAReservationId, StateKey> reservationIds = new HashMap<GSAReservationId, MachinesSlaEnforcementState.StateKey>();
@@ -688,5 +712,22 @@ public class MachinesSlaEnforcementState {
             // undeploy is not in progress 
             validatedUndeployNotInProgressPerProcessingUnit.add(pu);
         }
+    }
+
+    /**
+     * @return true - If there are future machines in other keys that can be shared with this key
+     */
+    public boolean isFutureAgentsOfOtherSharedServices(StateKey key) {
+        final Collection<StateKey> keysWithSameIsolation = getKeysWithSameIsolation(key);
+        for (Entry<StateKey, StateValue> pair : state.entrySet()) {
+            StateKey otherKey = pair.getKey();
+            if (!key.equals(otherKey) &&
+                keysWithSameIsolation.contains(otherKey) &&
+                getNumberOfFutureAgents(otherKey) > 0) {
+                
+                return true;
+            }
+        }
+        return false;
     }
 }
