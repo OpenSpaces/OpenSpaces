@@ -37,6 +37,7 @@ import org.openspaces.grid.gsm.ProcessingUnitAware;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.machines.FutureGridServiceAgent;
 import org.openspaces.grid.gsm.machines.FutureGridServiceAgents;
+import org.openspaces.grid.gsm.machines.FutureStoppedMachine;
 import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIsolation;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
 
@@ -103,8 +104,43 @@ public class DiscoveredMachineProvisioningBean implements NonBlockingElasticMach
         return false;
     }
 
-    public void stopMachineAsync(GridServiceAgent agent, long duration, TimeUnit unit) {
+    public FutureStoppedMachine stopMachineAsync(final GridServiceAgent agent, long duration, TimeUnit unit) {
+        
+        final long start = System.currentTimeMillis();
+        
         agent.shutdown();
+        return new FutureStoppedMachine() {
+            
+            @Override
+            public boolean isTimedOut() {
+                return false;
+            }
+            
+            @Override
+            public boolean isDone() {
+                return true;
+            }
+            
+            @Override
+            public Date getTimestamp() {
+                return new Date(start);
+            }
+            
+            @Override
+            public ExecutionException getException() {
+                return null;
+            }
+            
+            @Override
+            public Void get() throws ExecutionException, IllegalStateException, TimeoutException {
+                return null;
+            }
+
+            @Override
+            public GridServiceAgent getGridServiceAgent() {
+                return agent;
+            }
+        };
     }
 
     @Override

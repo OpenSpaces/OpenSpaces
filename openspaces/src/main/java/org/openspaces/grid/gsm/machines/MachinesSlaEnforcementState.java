@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -113,8 +112,20 @@ public class MachinesSlaEnforcementState {
         private final List<GridServiceAgentFutures> futureAgents = new ArrayList<GridServiceAgentFutures>();
         private CapacityRequirementsPerAgent markedForDeallocationCapacity = new CapacityRequirementsPerAgent();
         private ElasticProcessingUnitMachineIsolation machineIsolation;
-        private Map<String,Long> timeoutTimestampPerAgentUidGoingDown = new HashMap<String,Long>();
+        private List<FutureStoppedMachine> machinesBeingStopped = new ArrayList<FutureStoppedMachine>();
         private boolean completedStateRecoveryAfterRestart;
+        
+        public void addFutureStoppedMachine(FutureStoppedMachine futureStoppedMachine) {
+            machinesBeingStopped.add(futureStoppedMachine);
+        }
+        
+        public void removeFutureStoppedMachine(FutureStoppedMachine futureStoppedMachine) {
+            machinesBeingStopped.remove(futureStoppedMachine);
+        }
+        
+        public Collection<FutureStoppedMachine> getMachineGoingDown() {
+            return Collections.unmodifiableList(new ArrayList<FutureStoppedMachine>(this.machinesBeingStopped));
+        }
         
         public void addFutureAgents(FutureGridServiceAgent[] newFutureAgents, CapacityRequirements capacityRequirements) {
             futureAgents.add(new GridServiceAgentFutures(newFutureAgents,capacityRequirements));
@@ -163,17 +174,6 @@ public class MachinesSlaEnforcementState {
             return doneFutures;
         }
 
-        public void agentGoingDown(String agentUid, long timeout, TimeUnit unit) {
-            if (machineIsolation == null) {
-                throw new IllegalStateException(this + " should have set machine isolation before agentGoingDown");
-            }
-            timeoutTimestampPerAgentUidGoingDown.put(agentUid, System.currentTimeMillis() + TimeUnit.MILLISECONDS.convert(timeout, unit));
-        }
-
-        public Collection<String> getAgentUidsGoingDown() {
-            return Collections.unmodifiableCollection(new ArrayList<String>(this.timeoutTimestampPerAgentUidGoingDown.keySet()));
-        }
-
         public void removeFutureAgents(GridServiceAgentFutures futureAgentsToRemove) {
             if (machineIsolation == null) {
                 throw new IllegalStateException(this + " should have set machine isolation before removing future agent");
@@ -193,16 +193,14 @@ public class MachinesSlaEnforcementState {
                     + (markedForDeallocationCapacity != null ? "markedForDeallocationCapacity="
                             + markedForDeallocationCapacity + ", " : "")
                     + (machineIsolation != null ? "machineIsolation=" + machineIsolation + ", " : "")
-                    + (timeoutTimestampPerAgentUidGoingDown != null ? "timeoutTimestampPerAgentUidGoingDown="
-                            + timeoutTimestampPerAgentUidGoingDown + ", " : "") + "completedStateRecoveryAfterRestart="
+                    + "completedStateRecoveryAfterRestart="
                     + completedStateRecoveryAfterRestart + "]";
         }
 
         public boolean equalsZero() {
             return allocatedCapacity.equalsZero() 
                    && markedForDeallocationCapacity.equalsZero() 
-                   && futureAgents.isEmpty() 
-                   && timeoutTimestampPerAgentUidGoingDown.isEmpty();
+                   && futureAgents.isEmpty();
         }
     }
     
@@ -330,34 +328,9 @@ public class MachinesSlaEnforcementState {
         }
         return false;
     }
-
-    public void agentGoingDown(StateKey key, String agentUid, long timeout, TimeUnit unit) {
-        getState(key).agentGoingDown(agentUid, timeout, unit);
-    }
-
-    public void agentShutdownComplete(String agentUid) {
-        for (StateValue value : state.values()) {
-            if (value.timeoutTimestampPerAgentUidGoingDown.containsKey(agentUid)) {
-                value.timeoutTimestampPerAgentUidGoingDown.remove(agentUid);
-                return;
-            }
-        }
-        throw new IllegalArgumentException("agentUid");
-    }
-
-    public Collection<String> getAgentUidsGoingDown(StateKey key) {
-        return getState(key).getAgentUidsGoingDown();
-    }
     
-    public boolean isAgentUidGoingDownTimedOut(String agentUid) {
-        
-        for (StateValue value : state.values()) {
-            if (value.timeoutTimestampPerAgentUidGoingDown.containsKey(agentUid)) {
-                return value.timeoutTimestampPerAgentUidGoingDown.get(agentUid) < System.currentTimeMillis();
-            }
-        }
-        
-        throw new IllegalArgumentException("agentUid");
+    public Collection<FutureStoppedMachine> getMachinesGoingDown(StateKey key) {
+        return getState(key).getMachineGoingDown();
     }
 
     public void markAgentCapacityForDeallocation(StateKey key, String uid) {
@@ -400,9 +373,10 @@ public class MachinesSlaEnforcementState {
                      restrictedAgentUidsWithReason.get(agentUid).add(otherKey.pu + "machineIsolation=" + getState(otherKey).machineIsolation + " marked for deallocation on machine which restricts  " + key.pu.getName() + " machineIsolation="+getState(key).machineIsolation);
                  }
 
-                 for (String agentUid : otherValue.timeoutTimestampPerAgentUidGoingDown.keySet()) {
-                     initValue(restrictedAgentUidsWithReason, agentUid);
-                     restrictedAgentUidsWithReason.get(agentUid).add(otherKey.pu + "machineIsolation=" + getState(otherKey).machineIsolation + " is shutting down the agent which restricts  " + key.pu.getName() + " machineIsolation="+getState(key).machineIsolation);
+                 for (FutureStoppedMachine futureStoppedMachine : otherValue.getMachineGoingDown()) {
+                     GridServiceAgent agent = futureStoppedMachine.getGridServiceAgent();
+                     initValue(restrictedAgentUidsWithReason, agent.getUid());
+                     restrictedAgentUidsWithReason.get(agent.getUid()).add(otherKey.pu + "machineIsolation=" + getState(otherKey).machineIsolation + " is shutting down the agent which restricts  " + key.pu.getName() + " machineIsolation="+getState(key).machineIsolation);
                  }
              }
 
@@ -526,6 +500,23 @@ public class MachinesSlaEnforcementState {
     
     public void removeFutureAgents(StateKey key, GridServiceAgentFutures futureAgents) {
         getState(key).removeFutureAgents(futureAgents);
+    }
+    
+    public void removeFutureStoppedMachine(StateKey key, FutureStoppedMachine futureStoppedMachine) {
+        getState(key).removeFutureStoppedMachine(futureStoppedMachine);
+    }
+    
+    public Collection<FutureStoppedMachine> getMachinesGoingDown() {
+        
+        List<FutureStoppedMachine> machinesGoingDown = new ArrayList<FutureStoppedMachine>();
+        for (StateValue value : state.values()) {
+            machinesGoingDown.addAll(value.getMachineGoingDown());
+        }
+        return Collections.unmodifiableList(new ArrayList<FutureStoppedMachine>(machinesGoingDown));
+    }
+    
+    public void addFutureStoppedMachine(StateKey key, FutureStoppedMachine futureStoppedMachine) {
+        getState(key).addFutureStoppedMachine(futureStoppedMachine);
     }
     
     public Collection<String> getUsedAgentUids(StateKey key) {

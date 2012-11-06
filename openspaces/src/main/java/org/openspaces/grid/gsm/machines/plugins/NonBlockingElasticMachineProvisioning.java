@@ -26,6 +26,7 @@ import org.openspaces.admin.zone.config.ExactZonesConfig;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.machines.FutureGridServiceAgent;
 import org.openspaces.grid.gsm.machines.FutureGridServiceAgents;
+import org.openspaces.grid.gsm.machines.FutureStoppedMachine;
 import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIsolationAware;
 import org.openspaces.grid.gsm.machines.plugins.events.ElasticGridServiceAgentProvisioningProgressEventListenerAware;
 import org.openspaces.grid.gsm.machines.plugins.events.ElasticMachineProvisioningProgressChangedEventListenerAware;
@@ -108,12 +109,13 @@ public interface NonBlockingElasticMachineProvisioning
 	 * @param agent
 	 * @param duration
 	 * @param unit
+	 * @return 
 	 * @throws TimeoutException 
 	 * @throws InterruptedException 
 	 * @throws ElasticMachineProvisioningException
 	 * 
      * @since 8.0 
 	 */
-	void stopMachineAsync(GridServiceAgent agent, long duration, TimeUnit unit);
+	FutureStoppedMachine stopMachineAsync(GridServiceAgent agent, long duration, TimeUnit unit);
 	
 }

@@ -55,6 +55,8 @@ import org.openspaces.grid.gsm.machines.exceptions.DelayingScaleInUntilAllMachin
 import org.openspaces.grid.gsm.machines.exceptions.FailedToDiscoverMachinesException;
 import org.openspaces.grid.gsm.machines.exceptions.FailedToStartNewGridServiceAgentException;
 import org.openspaces.grid.gsm.machines.exceptions.FailedToStartNewMachineException;
+import org.openspaces.grid.gsm.machines.exceptions.FailedToStopGridServiceAgentException;
+import org.openspaces.grid.gsm.machines.exceptions.FailedToStopMachineException;
 import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcementPendingContainerDeallocationException;
 import org.openspaces.grid.gsm.machines.exceptions.InconsistentMachineProvisioningException;
@@ -544,10 +546,18 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             throw new MachinesSlaEnforcementInProgressException(getProcessingUnit());
         }
         
-        if (!getAgentUidsGoingDown(sla).isEmpty()) {
+        if (!getFutureStoppedMachines(sla).isEmpty()) {
             // old machines need to complete shutdown
             throw new MachinesSlaEnforcementInProgressException(getProcessingUnit());
         }
+    }
+
+    /**
+     * @param sla
+     * @return
+     */
+    private Collection<FutureStoppedMachine> getFutureStoppedMachines(CapacityMachinesSlaPolicy sla) {
+        return state.getMachinesGoingDown(getKey(sla));
     }
 
     private CapacityRequirements getCapacityShortage(CapacityMachinesSlaPolicy sla, CapacityRequirements target) throws MachinesSlaEnforcementInProgressException {
@@ -654,8 +664,11 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
      * Kill agents marked for deallocation that no longer manage containers. 
      * @param sla 
      * @param machineProvisioning
+     * @return 
+     * @throws FailedToStopMachineException 
+     * @throws FailedToStopGridServiceAgentException 
      */
-    private void updateAgentsMarkedForDeallocationState(AbstractMachinesSlaPolicy sla) {
+    private void updateAgentsMarkedForDeallocationState(AbstractMachinesSlaPolicy sla) throws FailedToStopMachineException, FailedToStopGridServiceAgentException {
         CapacityRequirementsPerAgent capacityMarkedForDeallocation = getCapacityMarkedForDeallocation(sla);
         for (String agentUid : capacityMarkedForDeallocation.getAgentUids()) {
             
@@ -710,10 +723,6 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                     continue;
                 }
                 
-                logger.info(
-                       "Agent " + agent.getUid() + " on machine " + MachinesSlaUtils.machineToString(agent.getMachine())+ " is no longer in use by any processing unit. "+
-                       "It is going down!");
-
                stopMachine(sla, agent);
             }
         }
@@ -722,14 +731,51 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
     }
 
     private void stopMachine(AbstractMachinesSlaPolicy sla, GridServiceAgent agent) {
-        final NonBlockingElasticMachineProvisioning machineProvisioning = sla.getMachineProvisioning();
-        // The machineProvisioning might not be the same one that started this agent,
-        // Nevertheless, we expect it to be able to stop this agent.
-        machineProvisioning.stopMachineAsync(
-                agent, 
-                STOP_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+
+        if (!isAgentExistsInStoppedMachinesFutures(agent)) {
+            
+            logger.info("Agent " + agent.getUid() + " on machine " + MachinesSlaUtils.machineToString(agent.getMachine()) 
+                    + " is no longer in use by any processing unit. "+
+                    "It is going down!");
+            
+            final NonBlockingElasticMachineProvisioning machineProvisioning = sla.getMachineProvisioning();
+            // The machineProvisioning might not be the same one that started this agent,
+            // Nevertheless, we expect it to be able to stop this agent.
+            FutureStoppedMachine stopMachineFuture = machineProvisioning.stopMachineAsync(
+                    agent, 
+                    STOP_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            
+            
+            addFutureStoppedMachine(sla, stopMachineFuture);            
+        }
+
+    }
+    
+    public boolean isAgentExistsInStoppedMachinesFutures(GridServiceAgent agent) {
         
-        agentGoingDown(sla, agent);
+        /** {@link NonBlockingElasticMachineProvisioning#stopMachineAsync(GridServiceAgent, long, TimeUnit) may not be idempotent.
+         *  Make sure stopAsync has not already been called on this agent.
+         */  
+        Collection<FutureStoppedMachine> machinesGoingDown = state.getMachinesGoingDown();
+        for (FutureStoppedMachine machineGoingDown : machinesGoingDown) {
+            if (machineGoingDown.getGridServiceAgent().getUid().equals(agent.getUid())) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Not calling stopMachine for agent with uid = " + agent.getUid() 
+                            + " because a request was already sent to shut it down");
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @param sla
+     * @param stopMachineFuture
+     */
+    private void addFutureStoppedMachine(AbstractMachinesSlaPolicy sla, FutureStoppedMachine stopMachineFuture) {
+        state.addFutureStoppedMachine(getKey(sla), stopMachineFuture);
+        
     }
 
     /**
@@ -762,35 +808,68 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             }
         }
     }
-    
-    private void cleanMachinesGoingDown(AbstractMachinesSlaPolicy sla) {
 
-        final NonBlockingElasticMachineProvisioning machineProvisioning = sla.getMachineProvisioning();
-        GridServiceAgents agents = pu.getAdmin().getGridServiceAgents();
-
-        // cleanup agents that were gracefully shutdown
-        for (String agentUid: getAgentUidsGoingDown(sla)) {
-            GridServiceAgent agent = agents.getAgentByUID(agentUid);
-            if (agent == null) {
-                logger.warn("Agent " + agentUid + " shutdown completed succesfully.");
-                state.agentShutdownComplete(agentUid);
-            }
+    private void cleanMachinesGoingDown(AbstractMachinesSlaPolicy sla) throws FailedToStopMachineException, FailedToStopGridServiceAgentException {
+        
+        for (FutureStoppedMachine futureStoppedMachine : state.getMachinesGoingDown(getKey(sla))) {
             
-            else if (state.isAgentUidGoingDownTimedOut(agentUid)) {
-                
-                logger.warn("Failed to shutdown agent " + agentUid + " on machine " + MachinesSlaUtils.machineToString(agent.getMachine()) +" . Retrying one last time.");
-                
-                machineProvisioning.stopMachineAsync(
-                        agent, 
-                        STOP_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-                
-                // no more retries
-                state.agentShutdownComplete(agentUid);
-            }
-        }
+            GridServiceAgent agent = futureStoppedMachine.getGridServiceAgent();
+            Exception exception = null;
+            try {
+                if (futureStoppedMachine.isDone()) {
+                    futureStoppedMachine.get();       
 
+                    if (agent.isDiscovered()) {
+                        throw new IllegalStateException("Agent [" + agent.getUid() + "] should not be discovered at this point.");
+                    }
+                    removeFutureStoppedMachine(sla, futureStoppedMachine);
+                }
+            } catch (ExecutionException e) {
+                // if runtime or error propagate exception "as-is"
+                Throwable cause = e.getCause();
+                if (cause instanceof TimeoutException || 
+                    cause instanceof ElasticMachineProvisioningException || 
+                    cause instanceof ElasticGridServiceAgentProvisioningException || 
+                    cause instanceof InterruptedException) {
+                    // expected exception
+                    exception = e;
+                }
+                else {
+                    throw new IllegalStateException("Unexpected Exception from machine provisioning.",e);
+                }
+            } catch (TimeoutException e) {
+                // expected exception
+                exception = e;
+            }
+
+            if (exception != null) {
+                if (logger.isDebugEnabled()) {
+                    if (agent.isDiscovered()) {
+                        logger.debug("Agent [" + agent.getUid() + "] is still discovered. Another processing unit may use it if needed." 
+                                + "if not, another attempt to shut it down will be executed.");
+                    } else {
+                        logger.debug("agent [" + agent.getUid() + "] is not discovered. but an error happened while terminating the machine");
+                    }
+
+                }
+                removeFutureStoppedMachine(sla, futureStoppedMachine);
+                if (exception instanceof ElasticGridServiceAgentProvisioningException) {
+                    throw new FailedToStopGridServiceAgentException(pu, agent,exception);
+                }
+                throw new FailedToStopMachineException(pu, agent, exception);
+            }  
+        }
     }
-    
+
+    /**
+     * @param sla
+     * @param futureStoppedMachine
+     */
+    private void removeFutureStoppedMachine(AbstractMachinesSlaPolicy sla, FutureStoppedMachine futureStoppedMachine) {
+        state.removeFutureStoppedMachine(getKey(sla), futureStoppedMachine);
+        
+    }
+
     /**
      * Move future agents that completed startup, from the future state to allocated state. 
      * 
@@ -1310,10 +1389,6 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         state.addFutureAgents(getKey(sla), futureAgents, shortageCapacity);
     }
 
-    private Collection<String> getAgentUidsGoingDown(AbstractMachinesSlaPolicy sla) {
-        return state.getAgentUidsGoingDown(getKey(sla));
-    }
-
     private Collection<GridServiceAgentFutures> getFutureAgents(AbstractMachinesSlaPolicy sla) {
         return state.getFutureAgents(getKey(sla));
     }
@@ -1328,10 +1403,6 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
 
     private void deallocateAgentCapacity(AbstractMachinesSlaPolicy sla, String agentUid) {
         state.deallocateAgentCapacity(getKey(sla), agentUid);
-    }
-    
-    private void agentGoingDown(AbstractMachinesSlaPolicy sla, GridServiceAgent agent) {
-        state.agentGoingDown(getKey(sla),agent.getUid(),STOP_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
     }
     
     private void markAgentCapacityForDeallocation(AbstractMachinesSlaPolicy sla, String agentUid) {

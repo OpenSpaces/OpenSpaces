@@ -23,6 +23,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.logging.Log;
@@ -38,6 +39,7 @@ import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.NumberOfMachinesCapacityRequirement;
 import org.openspaces.grid.gsm.machines.FutureGridServiceAgent;
 import org.openspaces.grid.gsm.machines.FutureGridServiceAgents;
+import org.openspaces.grid.gsm.machines.FutureStoppedMachine;
 import org.openspaces.grid.gsm.machines.exceptions.NoClassDefFoundElasticMachineProvisioningException;
 import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIsolation;
 import org.openspaces.grid.gsm.machines.plugins.exceptions.ElasticGridServiceAgentProvisioningException;
@@ -182,41 +184,104 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
         }
         return futureAgents;
 
-        
-    }	
-	
-    @Override
-	public void stopMachineAsync(final GridServiceAgent agent, final long duration,
-			final TimeUnit unit) {
 
-	    if (!isStartMachineSupported()) {
-	        throw new UnsupportedOperationException();
-	    }
-	    
-		final String hostAddress = agent.getMachine().getHostAddress();
-		
-		submit(new Runnable() {
-			public void run() {
-				try {
-				    
-		            logger.info("Stopping machine " + hostAddress);
-			    	if (NonBlockingElasticMachineProvisioningAdapter.this.machineProvisioning.stopMachine(agent, duration, unit)) {
-					    logger.info("machine " + hostAddress + " succesfully stopped.");
-					}
-				} catch (ElasticMachineProvisioningException e) {
-					logger.warn("Error while stopping " + hostAddress,e);
-				} catch (ElasticGridServiceAgentProvisioningException e) {
-                    logger.warn("Error while stopping " + hostAddress,e);
-				} catch (InterruptedException e) {
-					logger.info("Interrupted while stopping " + hostAddress,e);
-				} catch (TimeoutException e) {
-					logger.info("Stopping " + hostAddress + " times out.",e);
-				}
-			}
-		});
-	}
-	
-	private void submit(Runnable runnable) {
+    }	
+
+    @Override
+    public FutureStoppedMachine stopMachineAsync(final GridServiceAgent agent, final long duration,
+            final TimeUnit unit) {
+
+        final AtomicReference<Throwable> atomicExceptionRef = new AtomicReference<Throwable>();
+        final AtomicBoolean atomicDone = new AtomicBoolean(false);
+        
+        if (!isStartMachineSupported()) {
+            throw new UnsupportedOperationException();
+        }
+
+        final long start = System.currentTimeMillis();
+        final long end = System.currentTimeMillis() + unit.toMillis(duration);
+        final String hostAddress = agent.getMachine().getHostAddress();
+        submit(new Runnable() {
+
+            @Override
+            public void run() {
+                
+                logger.info("Stopping machine " + hostAddress);
+                try {
+                    if (NonBlockingElasticMachineProvisioningAdapter.this.machineProvisioning.stopMachine(agent, duration, unit)) {
+                        logger.info("machine " + hostAddress + " succesfully stopped.");
+                        atomicDone.set(true);
+                    }
+                } catch (ElasticMachineProvisioningException e) {
+					atomicExceptionRef.set(e);
+                } catch (ElasticGridServiceAgentProvisioningException e) {
+                    atomicExceptionRef.set(e);
+                } catch (InterruptedException e) {
+					atomicExceptionRef.set(e);
+                } catch (TimeoutException e) {
+					atomicExceptionRef.set(e);
+                } catch (NoClassDefFoundError e) {
+                    atomicExceptionRef.set((new NoClassDefFoundElasticMachineProvisioningException(e)));
+                } catch (Throwable e) {
+                    atomicExceptionRef.set(e);
+                }
+            }
+            
+        });
+        
+        return new FutureStoppedMachine() {
+            
+            @Override
+            public boolean isTimedOut() {
+                Throwable exception = atomicExceptionRef.get();
+                return (exception instanceof TimeoutException) || (!isDone() && System.currentTimeMillis() > end);
+            }
+            
+            @Override
+            public boolean isDone() {
+                return atomicDone.get() || (atomicExceptionRef.get() != null);
+            }
+            
+            @Override
+            public Date getTimestamp() {
+                return new Date(start);
+            }
+            
+            @Override
+            public ExecutionException getException() {
+                ExecutionException executionException = null;
+                if (atomicExceptionRef.get() != null) {
+                    executionException = new ExecutionException(atomicExceptionRef.get());
+                }
+                return executionException;
+            }
+            
+            @Override
+            public Void get() throws ExecutionException, IllegalStateException, TimeoutException {
+               
+                if (!isDone()) {
+                    // dont allow calling get() before isDone returns true.
+                    throw new IllegalStateException("Async operation has not completed yet");
+                }                
+
+                if (isDone() && getException() == null) {
+                    // all is ok
+                    return null;
+                } else {
+                    throw getException();                    
+                }
+            }
+
+            @Override
+            public GridServiceAgent getGridServiceAgent() {
+                return agent;
+            }
+        };
+        
+        
+    }
+
+    private void submit(Runnable runnable) {
         executorService.submit(runnable);
     }
     
@@ -225,7 +290,7 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
 	        public void run() {
                 submit(runnable);
             }}
-	    ,delay,unit);
+        ,delay,unit);
     }
 	
 	@Override
@@ -304,9 +369,9 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
                 if (getException() != null) {
                     throw getException();
                 }
-                
+
                 return (GridServiceAgent[]) result;
-                
+
             }
         };
     }
@@ -320,7 +385,7 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
     public boolean isStartMachineSupported() {
         return machineProvisioning.isStartMachineSupported();
     }
-    
+
     private static int calcNumberOfMachines(
             CapacityRequirements capacityRequirements, 
             ElasticMachineProvisioning machineProvisioning) {
