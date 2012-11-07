@@ -280,11 +280,11 @@
 			<version>4.15.0.Final</version>
 			<scope>test</scope>
 			<exclusions>
-		       <exclusion>
-		          <groupId>org.jboss.logging</groupId>
-		          <artifactId>jboss-logging-spi</artifactId>
-		        </exclusion>
-      		</exclusions>
+				<exclusion>
+					<groupId>org.jboss.logging</groupId>
+					<artifactId>jboss-logging-spi</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.netty</groupId>
@@ -597,7 +597,7 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.atomikos</groupId> 
+			<groupId>com.atomikos</groupId>
 			<artifactId>atomikos-util</artifactId>
 			<version>3.8.0</version>
 			<scope>test</scope>
@@ -611,7 +611,7 @@
 		<dependency>
 			<groupId>com.atomikos</groupId>
 			<artifactId>transactions-jta</artifactId>
-			<version>3.8.0</version>		
+			<version>3.8.0</version>
 		</dependency>
 	</dependencies>
 	<build>
@@ -717,7 +717,7 @@
 					<testFailureIgnore>true</testFailureIgnore>
 					<parallel>classes</parallel>
 					<forkMode>pertest</forkMode>
-					<argLine>-Xms512m -Xmx512m</argLine>
+					<argLine>-Xms1024m -Xmx1024m</argLine>
 					<threadCount>4</threadCount>
 					<includes>
 						<include>**/*Test.java</include>
@@ -737,7 +737,38 @@
 				<artifactId>maven-surefire-report-plugin</artifactId>
 				<version>2.12.4</version>
 				<configuration>
-					
+
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.9</version>
+				<configuration>
+					<sourcepath>${project.build.sourceDirectory};${basedir}/../gigaspaces/src/java</sourcepath>
+					<windowtitle>GigaSpaces XAP 9.5 API</windowtitle>
+					<source>1.6</source>
+					<author>true</author>
+					<version>true</version>
+					<use>true</use>
+					<header>&lt;a href="index.html" target="_top"&gt;GigaSpaces XAP 9.5 API&lt;/a&gt;</header>
+					<excludePackageNames>org.openspaces.admin.internal.*:org.openspaces.core.executor.internal.*:org.openspaces.core.internal.*:org.openspaces.core.transaction.internal.*</excludePackageNames>
+					<additionalJOptions>
+						<additionalJOption>-J-Xmx256m</additionalJOption>
+						<additionalJOption>-J-XX:MaxPermSize=256m</additionalJOption>
+						<additionalJOption>-breakiterator</additionalJOption>
+					</additionalJOptions>
+					<doctitle>&lt;h1&gt;GigaSpaces XAP 9.5 API&lt;/h1&gt;</doctitle>
+					<bottom>&lt;i&gt;Copyright &copy; &lt;a href="http://www.gigaspaces.com/" target="_top"&gt;GigaSpaces&lt;/a&gt;.&lt;/i&gt;</bottom>
+					<links>
+						<link>http://docs.oracle.com/javase/6/docs/api/</link>
+						<link>http://www.gigaspaces.com/docs/JiniApi</link>
+						<link>http://static.springsource.org/spring/docs/${springVersion}/javadoc-api/</link>
+						<link>http://aopalliance.sourceforge.net/doc</link>
+						<link>http://cglib.sourceforge.net/apidocs</link>
+						<link>http://jakarta.apache.org/commons/logging/apidocs/</link>
+						<link>http://jakarta.apache.org/commons/pool/apidocs/</link>
+					</links>
 				</configuration>
 			</plugin>
 		</plugins>
@@ -773,12 +804,12 @@
 		</pluginManagement>
 	</build>
 	<reporting>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jxr-plugin</artifactId>
-        <version>2.3</version>
-      </plugin>
-    </plugins>
-  </reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jxr-plugin</artifactId>
+				<version>2.3</version>
+			</plugin>
+		</plugins>
+	</reporting>
 </project>
