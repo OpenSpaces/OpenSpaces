@@ -222,7 +222,7 @@
 		<echo message="${productversion}" />
     	<!-- Install newly created jar in local maven repository -->
 		<exec executable="${env.M2_HOME}\bin\${mvn.executable}"> 
-			<arg line="install:install-file -DgroupId=com.gigaspaces -DartifactId=gs-openspaces -DcreateChecksum=true -Dversion=${productversion} -Dpackaging=jar -DpomFile=${maven.tmp.dir}/gs-openspaces-pom.xml -Dfile=${target.dir}/gs-openspaces.jar -Djavadoc=${target.javadoc.dir}/xap-javadoc.zip -Dsources=${lib.dir}/optional/openspaces/gs-openspaces-sources.zip"/>
+			<arg line="install:install-file -DgroupId=com.gigaspaces -DartifactId=gs-openspaces -DcreateChecksum=true -Dversion=${productversion} -Dpackaging=jar -DpomFile=${maven.tmp.dir}/gs-openspaces-pom.xml -Dfile=${target.dir}/gs-openspaces.jar -Djavadoc=${target.javadoc.dir}/xap-javadoc.zip -Dsources=${target.dir}/gs-openspaces-sources.zip"/>
 		</exec>
 		<exec executable="${env.M2_HOME}\bin\${mvn.executable}"> 
 			<arg line="install:install-file -DgroupId=com.gigaspaces -DartifactId=jetty-os -DcreateChecksum=true -Dversion=${productversion} -Dpackaging=jar -DpomFile=${maven.tmp.dir}/jetty-os-pom.xml -Dfile=${target.dir}/gs-openspaces-jetty.jar"/>
