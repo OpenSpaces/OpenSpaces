@@ -30,6 +30,7 @@ import org.openspaces.admin.internal.gsm.InternalGridServiceManager;
 import org.openspaces.admin.internal.lus.InternalLookupService;
 import org.openspaces.admin.internal.pu.InternalProcessingUnitInstance;
 import org.openspaces.admin.internal.space.InternalSpaceInstance;
+import org.openspaces.security.AdminFilter;
 
 import com.gigaspaces.internal.jvm.JVMDetails;
 import com.gigaspaces.internal.os.OSDetails;
@@ -53,6 +54,8 @@ public interface InternalAdmin extends Admin {
     TimeUnit getDefaultTimeoutTimeUnit();
 
     UserDetails getUserDetails();
+    
+    AdminFilter getAdminFilter();
 
     void pushEvent(Object listener, Runnable notifier);
 

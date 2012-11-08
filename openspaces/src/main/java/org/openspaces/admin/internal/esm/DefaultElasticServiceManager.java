@@ -63,9 +63,9 @@ public class DefaultElasticServiceManager extends AbstractAgentGridComponent imp
 
     private final Map<String, Boolean> esmScaleIsInProgressPerProcessingUnit;
 
-    public DefaultElasticServiceManager(ServiceID serviceID, ESM esm, InternalAdmin admin, int agentId, String agentUid)
+    public DefaultElasticServiceManager(ServiceID serviceID, ESM esm, InternalAdmin admin, int agentId, String agentUid, JVMDetails jvmDetails)
     throws RemoteException {
-        super(admin, agentId, agentUid);
+        super(admin, agentId, agentUid, jvmDetails);
         this.serviceID = serviceID;
         this.esm = esm;
         this.esmScaleIsInProgressPerProcessingUnit = new ConcurrentHashMap<String, Boolean>();
@@ -149,10 +149,6 @@ public class DefaultElasticServiceManager extends AbstractAgentGridComponent imp
 
     public OSStatistics getOSStatistics() throws RemoteException {
         return esm.getOSStatistics();
-    }
-
-    public JVMDetails getJVMDetails() throws RemoteException {
-        return esm.getJVMDetails();
     }
 
     public JVMStatistics getJVMStatistics() throws RemoteException {

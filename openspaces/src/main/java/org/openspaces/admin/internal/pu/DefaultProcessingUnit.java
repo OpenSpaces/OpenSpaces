@@ -212,7 +212,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
 
     private final ConcurrentHashSet<ProcessingUnitStatisticsId> statisticsIds;
     
-    public DefaultProcessingUnit(InternalAdmin admin, InternalProcessingUnits processingUnits, PUDetails details) {
+    public DefaultProcessingUnit(InternalAdmin admin, InternalProcessingUnits processingUnits, PUDetails details, BeanLevelProperties beanLevelProperties) {
         this.admin = admin;
         this.processingUnits = processingUnits;
         this.name = details.getName();
@@ -241,12 +241,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
             dependencies.addDetailedDependenciesByCommandLineOption(RequiredDependenciesCommandLineParser.INSTANCE_START_REQUIRED_DEPENDENCIES_PARAMETER_NAME,instanceStartDependencies);
         }
                 
-        try {
-            this.beanLevelProperties = (BeanLevelProperties) details.getBeanLevelProperties().get();
-        } catch (Exception e) {
-            throw new AdminException("Failed to get bean level properties", e);
-        }
-        
+        this.beanLevelProperties = beanLevelProperties;
         
         if (details.getApplicationName() != null) {
             applicationName = details.getApplicationName();

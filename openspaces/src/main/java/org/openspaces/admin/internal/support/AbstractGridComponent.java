@@ -25,6 +25,8 @@ import org.openspaces.admin.os.OperatingSystem;
 import org.openspaces.admin.transport.Transport;
 import org.openspaces.admin.vm.VirtualMachine;
 
+import com.gigaspaces.internal.jvm.JVMDetails;
+
 import java.util.Map;
 import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
@@ -48,9 +50,12 @@ public abstract class AbstractGridComponent implements InternalGridComponent {
     private volatile boolean discovered = true;
 
     private final Map<String, Zone> zones = new ConcurrentHashMap<String, Zone>();
+    
+    private final JVMDetails jvmDetails;
 
-    protected AbstractGridComponent(InternalAdmin admin) {
+    protected AbstractGridComponent(InternalAdmin admin, JVMDetails jvmDetails) {
         this.admin = admin;
+        this.jvmDetails=jvmDetails;
     }
 
     public Admin getAdmin() {
@@ -113,5 +118,10 @@ public abstract class AbstractGridComponent implements InternalGridComponent {
     
     protected void assertStateChangesPermitted() {
         this.admin.assertStateChangesPermitted();
+    }
+    
+    @Override
+    public JVMDetails getJVMDetails(){
+        return jvmDetails;
     }
 }

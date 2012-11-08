@@ -140,8 +140,8 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
 
     private volatile MemberAliveIndicatorStatus memberAliveIndicatorStatus = MemberAliveIndicatorStatus.ALIVE;
 
-    public DefaultProcessingUnitInstance(ServiceID serviceID, PUDetails puDetails, PUServiceBean puServiceBean, InternalAdmin admin) {
-        super(admin);
+    public DefaultProcessingUnitInstance(ServiceID serviceID, PUDetails puDetails, PUServiceBean puServiceBean, InternalAdmin admin, JVMDetails jvmDetails) {
+        super(admin, jvmDetails);
         this.serviceID = serviceID;
         this.uid = serviceID.toString();
         this.puDetails = puDetails;
@@ -669,10 +669,6 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
 
     public OSStatistics getOSStatistics() throws RemoteException {
         return puServiceBean.getOSStatistics();
-    }
-
-    public JVMDetails getJVMDetails() throws RemoteException {
-        return puServiceBean.getJVMDetails();
     }
 
     public JVMStatistics getJVMStatistics() throws RemoteException {

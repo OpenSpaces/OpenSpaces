@@ -93,8 +93,8 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
 
     private static final String RESERVATION_PROPERTY = "com.gs.agent.reservationid";
     
-    public DefaultGridServiceAgent(ServiceID serviceID, GSA gsa, InternalAdmin admin, AgentProcessesDetails processesDetails) {
-        super(admin);
+    public DefaultGridServiceAgent(ServiceID serviceID, GSA gsa, InternalAdmin admin, AgentProcessesDetails processesDetails, JVMDetails jvmDetails) {
+        super(admin, jvmDetails);
         this.serviceID = serviceID;
         this.gsa = gsa;
         this.processesDetails = processesDetails;
@@ -508,10 +508,6 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
 
     public OSStatistics getOSStatistics() throws RemoteException {
         return gsa.getOSStatistics();
-    }
-
-    public JVMDetails getJVMDetails() throws RemoteException {
-        return gsa.getJVMDetails();
     }
 
     public JVMStatistics getJVMStatistics() throws RemoteException {

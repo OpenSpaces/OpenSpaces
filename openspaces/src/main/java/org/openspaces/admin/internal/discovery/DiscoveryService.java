@@ -63,6 +63,7 @@ import org.openspaces.core.space.SpaceServiceDetails;
 import org.openspaces.grid.esm.ESM;
 import org.openspaces.pu.container.servicegrid.PUDetails;
 import org.openspaces.pu.container.servicegrid.PUServiceBean;
+import org.openspaces.security.AdminFilterHelper;
 
 import com.gigaspaces.grid.gsa.AgentIdAware;
 import com.gigaspaces.grid.gsa.AgentProcessesDetails;
@@ -72,6 +73,7 @@ import com.gigaspaces.grid.gsm.GSM;
 import com.gigaspaces.grid.zone.GridZoneProvider;
 import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
 import com.gigaspaces.internal.jvm.JVMDetails;
+import com.gigaspaces.internal.jvm.JVMInfoProvider;
 import com.gigaspaces.internal.os.OSDetails;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.management.entry.JMXConnection;
@@ -175,18 +177,22 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
     public void discovered(final DiscoveryEvent disEvent) {
         for (final ServiceRegistrar registrar : disEvent.getRegistrars()) {
             try {
+
+                final JVMDetails jvmDetails = ((JVMInfoProvider) registrar.getRegistrar()).getJVMDetails();
+                if( !AdminFilterHelper.acceptJvm( admin.getAdminFilter(), jvmDetails ) ){
+                    continue;
+                }
+                
                 final InternalLookupService lookupService = new DefaultLookupService(registrar,
                         registrar.getServiceID(), admin, ((AgentIdAware) registrar.getRegistrar()).getAgentId(),
-                        ((AgentIdAware) registrar.getRegistrar()).getGSAServiceID());
+                        ((AgentIdAware) registrar.getRegistrar()).getGSAServiceID(), jvmDetails);
                 
                 if (logger.isDebugEnabled()) {
                     logger.debug("Service Added [LUS] with uid [" + registrar.getServiceID() + "]");
                 }
                 
-                // get the details here, on the thread pool
                 final NIODetails nioDetails = lookupService.getNIODetails();
                 final OSDetails osDetails = lookupService.getOSDetails();
-                final JVMDetails jvmDetails = lookupService.getJVMDetails();
                 final String[] zones = ((GridZoneProvider) registrar.getRegistrar()).getZones();
                 final Entry[] attributeSets = ((com.sun.jini.reggie.Registrar)registrar.getRegistrar()).getLookupAttributes();
                 admin.scheduleNonBlockingStateChange(new Runnable() {
@@ -251,11 +257,16 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
 
             final IInternalRemoteJSpaceAdmin spaceAdmin = (IInternalRemoteJSpaceAdmin) direcyIjspace.getAdmin();
 
-            final InternalSpaceInstance spaceInstance = new DefaultSpaceInstance(serviceID, direcyIjspace, spaceAdmin,
-                    admin);
+            final JVMDetails jvmDetails = spaceAdmin.getJVMDetails(); 
+            if( !AdminFilterHelper.acceptJvm( admin.getAdminFilter(), jvmDetails ) ){
+                return;
+            }
+
+            final InternalSpaceInstance spaceInstance = new DefaultSpaceInstance( serviceID, 
+                    direcyIjspace, spaceAdmin, admin, jvmDetails );
+
             final NIODetails nioDetails = spaceInstance.getNIODetails();
             final OSDetails osDetails = spaceInstance.getOSDetails();
-            final JVMDetails jvmDetails = spaceInstance.getJVMDetails();
             
             IJSpaceContainer container = direcyIjspace.getContainer();
             IJSpaceContainerAdmin containerAdmin = ( IJSpaceContainerAdmin )container;
@@ -299,11 +310,17 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 }
             }
             else {
+                final JVMDetails jvmDetails = puServiceBean.getJVMDetails();                
+                if( !AdminFilterHelper.acceptJvm( admin.getAdminFilter(), jvmDetails ) ){
+                    return;
+                }                
+
                 final InternalProcessingUnitInstance processingUnitInstance = new DefaultProcessingUnitInstance(
-                        serviceID, puDetails, puServiceBean, admin);
+                        serviceID, puDetails, puServiceBean, admin, jvmDetails);
+
                 final NIODetails nioDetails = processingUnitInstance.getNIODetails();
                 final OSDetails osDetails = processingUnitInstance.getOSDetails();
-                final JVMDetails jvmDetails = processingUnitInstance.getJVMDetails();
+
                 final String[] zones = puServiceBean.getZones();
                 admin.scheduleNonBlockingStateChange(new Runnable() {
                     @Override
@@ -314,7 +331,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                         if (!discoverUnmanagedSpaces) {
                             for (SpaceServiceDetails serviceDetails : processingUnitInstance.getEmbeddedSpacesDetails()) {
                                 InternalSpaceInstance spaceInstance = new DefaultSpaceInstance(puServiceBean,
-                                        serviceDetails, admin);
+                                        serviceDetails, admin, jvmDetails );
                                 admin.addSpaceInstance(spaceInstance, nioDetails, osDetails, jvmDetails, jmxUrl, zones);
                             }
                         }
@@ -339,12 +356,19 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
             if (gsc.isServiceSecured()) {
                 gsc.login(admin.getUserDetails());
             }
-            final InternalGridServiceContainer gridServiceContainer = new DefaultGridServiceContainer(serviceID,
-                    gsc, admin, gsc.getAgentId(), gsc.getGSAServiceID());
+
+            final JVMDetails jvmDetails = gsc.getJVMDetails();
+            if( !AdminFilterHelper.acceptJvm( admin.getAdminFilter(), jvmDetails ) ){
+                return;
+            }
+            
+            final InternalGridServiceContainer gridServiceContainer = new DefaultGridServiceContainer(
+                    serviceID, gsc, admin, gsc.getAgentId(), gsc.getGSAServiceID(), jvmDetails);
+            
             // get the details here, on the thread pool
             final NIODetails nioDetails = gridServiceContainer.getNIODetails();
             final OSDetails osDetails = gridServiceContainer.getOSDetails();
-            final JVMDetails jvmDetails = gridServiceContainer.getJVMDetails();
+            
             final String[] zones = gsc.getZones();
             admin.scheduleNonBlockingStateChange(new Runnable() {
                 @Override
@@ -371,13 +395,20 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
             if (gsa.isServiceSecured()) {
                 gsa.login(admin.getUserDetails());
             }
+            
+            final JVMDetails jvmDetails = gsa.getJVMDetails();
+            if( !AdminFilterHelper.acceptJvm( admin.getAdminFilter(), jvmDetails ) ){
+                return;
+            }            
+            
             AgentProcessesDetails processesDetails = gsa.getDetails();
-            final InternalGridServiceAgent gridServiceAgent = new DefaultGridServiceAgent(serviceID, gsa, admin,
-                    processesDetails);
+            final InternalGridServiceAgent gridServiceAgent = new DefaultGridServiceAgent(serviceID, 
+                    gsa, admin, processesDetails, jvmDetails);
+            
+
             // get the details here, on the thread pool
             final NIODetails nioDetails = gridServiceAgent.getNIODetails();
             final OSDetails osDetails = gridServiceAgent.getOSDetails();
-            final JVMDetails jvmDetails = gridServiceAgent.getJVMDetails();
             final String[] zones = gsa.getZones();
             admin.scheduleNonBlockingStateChange(new Runnable() {
                 @Override
@@ -404,12 +435,17 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
             // if (esm.isServiceSecured()) {
             // esm.login(admin.getUserDetails());
             // }
+            final JVMDetails jvmDetails = esm.getJVMDetails();
+            if( !AdminFilterHelper.acceptJvm( admin.getAdminFilter(), jvmDetails ) ){
+                return;
+            }
+            
             final InternalElasticServiceManager elasticServiceManager = new DefaultElasticServiceManager(serviceID,
-                    esm, admin, esm.getAgentId(), esm.getGSAServiceID());
+                    esm, admin, esm.getAgentId(), esm.getGSAServiceID(), jvmDetails );
             // get the details here, on the thread pool
             final NIODetails nioDetails = elasticServiceManager.getNIODetails();
             final OSDetails osDetails = elasticServiceManager.getOSDetails();
-            final JVMDetails jvmDetails = elasticServiceManager.getJVMDetails();
+            
             final String[] zones = esm.getZones();
             admin.scheduleNonBlockingStateChange(new Runnable() {
                 @Override
@@ -436,12 +472,20 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
             if (gsm.isServiceSecured()) {
                 gsm.login(admin.getUserDetails());
             }
+
+            final JVMDetails jvmDetails = gsm.getJVMDetails();
+            if( !AdminFilterHelper.acceptJvm( admin.getAdminFilter(), jvmDetails ) ){
+                return;
+            }
+
             final InternalGridServiceManager gridServiceManager = new DefaultGridServiceManager(serviceID, gsm,
-                    admin, gsm.getAgentId(), gsm.getGSAServiceID());
+                    admin, gsm.getAgentId(), gsm.getGSAServiceID(), jvmDetails);
+            
+            
             // get the details here, on the thread pool
             final NIODetails nioDetails = gridServiceManager.getNIODetails();
             final OSDetails osDetails = gridServiceManager.getOSDetails();
-            final JVMDetails jvmDetails = gridServiceManager.getJVMDetails();
+            
             final String[] zones = gsm.getZones();
             admin.scheduleNonBlockingStateChange(new Runnable() {
                 @Override

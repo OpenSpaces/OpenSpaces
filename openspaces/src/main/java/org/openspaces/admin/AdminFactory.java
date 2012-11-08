@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.jini.rio.boot.BootUtil;
 import org.openspaces.admin.internal.admin.DefaultAdmin;
+import org.openspaces.security.AdminFilter;
 
 import com.gigaspaces.logger.GSLogConfigLoader;
 import com.gigaspaces.security.directory.User;
@@ -51,6 +52,7 @@ public class AdminFactory {
     private final List<String> locators = new ArrayList<String>();
     private UserDetails userDetails = null;
     private boolean discoverUnmanagedSpaces = false;
+    private AdminFilter adminFilter;
     
     public AdminFactory useGsLogging(boolean useGsLogging) {
         this.useGsLogging = useGsLogging;
@@ -119,6 +121,16 @@ public class AdminFactory {
         return this;
     }
 
+    /***
+     * Sets adminFilter, allows to filter services, machines and etc.
+     * @param adminFilter
+     * @since 9.1.1
+     */
+    public AdminFactory adminFilter( AdminFilter adminFilter ){
+        this.adminFilter = adminFilter;
+        return this;
+    }
+    
     /**
      * Enables discovery of unmanaged spaces (spaces that are not started by being deployed
      * within the Service Grid). Defaults to <code>false</code> (unmanaged spaces are not discovered).
@@ -147,6 +159,7 @@ public class AdminFactory {
         }
         DefaultAdmin admin = new DefaultAdmin(useDaemonThreads, singleThreadedEventListeners);
         admin.setUserDetails(userDetails);
+        admin.setAdminFilter(adminFilter);
         for (String group : groups) {
             admin.addGroup(group);
         }

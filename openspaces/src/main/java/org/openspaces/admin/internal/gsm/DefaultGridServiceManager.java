@@ -113,9 +113,9 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
 
     private long eventsCursor = 0;
 
-    public DefaultGridServiceManager(ServiceID serviceID, GSM gsm, InternalAdmin admin, int agentId, String agentUid)
+    public DefaultGridServiceManager(ServiceID serviceID, GSM gsm, InternalAdmin admin, int agentId, String agentUid, JVMDetails jvmDetails)
             throws RemoteException {
-        super(admin, agentId, agentUid);
+        super(admin, agentId, agentUid, jvmDetails);
         this.serviceID = serviceID;
         this.gsm = gsm;
         this.gsmAdmin = (ProvisionMonitorAdmin) gsm.getAdmin();
@@ -441,10 +441,6 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
 
     public OSStatistics getOSStatistics() throws RemoteException {
         return gsm.getOSStatistics();
-    }
-
-    public JVMDetails getJVMDetails() throws RemoteException {
-        return gsm.getJVMDetails();
     }
 
     public JVMStatistics getJVMStatistics() throws RemoteException {

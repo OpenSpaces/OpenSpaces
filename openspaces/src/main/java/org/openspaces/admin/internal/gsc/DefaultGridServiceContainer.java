@@ -68,8 +68,8 @@ public class DefaultGridServiceContainer extends AbstractAgentGridComponent impl
 
     private final InternalProcessingUnitInstances processingUnitInstances;
 
-    public DefaultGridServiceContainer(ServiceID serviceID, GSC gsc, InternalAdmin admin, int agentId, String agentUid) {
-        super(admin, agentId, agentUid);
+    public DefaultGridServiceContainer(ServiceID serviceID, GSC gsc, InternalAdmin admin, int agentId, String agentUid, JVMDetails jvmDetails) {
+        super(admin, agentId, agentUid, jvmDetails);
         this.serviceID = serviceID;
         this.gsc = gsc;
         this.processingUnitInstances = new DefaultProcessingUnitInstances(admin);
@@ -245,10 +245,6 @@ public class DefaultGridServiceContainer extends AbstractAgentGridComponent impl
 
     public OSStatistics getOSStatistics() throws RemoteException {
         return gsc.getOSStatistics();
-    }
-
-    public JVMDetails getJVMDetails() throws RemoteException {
-        return gsc.getJVMDetails();
     }
 
     public JVMStatistics getJVMStatistics() throws RemoteException {

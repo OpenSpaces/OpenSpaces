@@ -156,8 +156,11 @@ import org.openspaces.admin.vm.VirtualMachines;
 import org.openspaces.admin.zone.Zone;
 import org.openspaces.admin.zone.ZoneAware;
 import org.openspaces.admin.zone.Zones;
+import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.core.space.SpaceServiceDetails;
 import org.openspaces.pu.service.ServiceMonitors;
+import org.openspaces.security.AdminFilter;
+import org.openspaces.security.AdminFilterHelper;
 
 import com.gigaspaces.grid.gsa.AgentProcessesDetails;
 import com.gigaspaces.grid.gsa.GSA;
@@ -255,6 +258,8 @@ public class DefaultAdmin implements InternalAdmin {
     private final boolean useDaemonThreads;
     
     private final AtomicInteger eventListenersCount = new AtomicInteger();
+    
+    private AdminFilter adminFilter;
     
     //removedProcessingUnitInstances needs to be locked under DefaultAdmin.this
     private final List<ProcessingUnitInstance> removedProcessingUnitInstances = new LinkedList<ProcessingUnitInstance>();
@@ -1651,9 +1656,25 @@ public class DefaultAdmin implements InternalAdmin {
                     details = holder.backupDetail;
                 }
                 boolean newProcessingUnit = false;
-                InternalProcessingUnit processingUnit = (InternalProcessingUnit) processingUnits.getProcessingUnit(holder.name);
+                InternalProcessingUnit processingUnit = 
+                		(InternalProcessingUnit) processingUnits.getProcessingUnit(holder.name);
                 if (processingUnit == null) {
-                    processingUnit = new DefaultProcessingUnit(DefaultAdmin.this, processingUnits, details);
+                    BeanLevelProperties beanLevelProperties = null;
+                    try{
+                        beanLevelProperties = (BeanLevelProperties) details.getBeanLevelProperties().get();
+                    }
+                    catch( Throwable e ){
+                        logger.error( "Failed to get bean level properties for Processing Unit [" + 
+                                        holder.name + "]", e );
+                        continue;
+                    }
+                    if( !AdminFilterHelper.acceptProcessingUnit( getAdminFilter(), beanLevelProperties ) ){
+                        continue;
+                    }
+                    
+                    processingUnit = new DefaultProcessingUnit(DefaultAdmin.this, 
+                                                processingUnits, details, beanLevelProperties);
+
                     newProcessingUnit = true;
                 }
                 // we always update the number of instances and backups since they might increate/decrease
@@ -1983,5 +2004,17 @@ public class DefaultAdmin implements InternalAdmin {
      */
     private void addRemovedSpace(InternalSpace removedSpace, ProcessingUnit processingUnit) {
         removedSpacesPerProcessingUnit.put(processingUnit,removedSpace);
+    }
+
+    /**
+     * @param adminFilter
+     */
+    public void setAdminFilter( AdminFilter adminFilter ) {
+        this.adminFilter = adminFilter;
+    }
+    
+    @Override
+    public AdminFilter getAdminFilter(){
+        return adminFilter;
     }
 }

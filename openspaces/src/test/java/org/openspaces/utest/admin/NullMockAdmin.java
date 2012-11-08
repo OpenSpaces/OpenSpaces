@@ -57,6 +57,7 @@ import org.openspaces.admin.space.Spaces;
 import org.openspaces.admin.transport.Transports;
 import org.openspaces.admin.vm.VirtualMachines;
 import org.openspaces.admin.zone.Zones;
+import org.openspaces.security.AdminFilter;
 
 import com.gigaspaces.internal.jvm.JVMDetails;
 import com.gigaspaces.internal.os.OSDetails;
@@ -420,5 +421,14 @@ public class NullMockAdmin implements Admin, InternalAdmin {
     public boolean isSingleThreadedEventListeners() {
         // TODO Auto-generated method stub
         return false;
+    }
+
+    /* (non-Javadoc)
+     * @see org.openspaces.admin.internal.admin.InternalAdmin#getAdminFilter()
+     */
+    @Override
+    public AdminFilter getAdminFilter() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

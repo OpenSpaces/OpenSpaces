@@ -139,8 +139,8 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
 
     private int scheduledStatisticsRefCount = 0;
 
-    public DefaultSpaceInstance(ServiceID serviceID, IJSpace directSpace, IInternalRemoteJSpaceAdmin spaceAdmin, InternalAdmin admin) {
-        super(admin);
+    public DefaultSpaceInstance(ServiceID serviceID, IJSpace directSpace, IInternalRemoteJSpaceAdmin spaceAdmin, InternalAdmin admin, JVMDetails jvmDetails) {
+        super(admin, jvmDetails);
         this.puService = null;
         this.uid = serviceID.toString();
         this.serviceID = serviceID;
@@ -184,8 +184,8 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
         }
     }
 
-    public DefaultSpaceInstance(PUServiceBean puService, SpaceServiceDetails spaceServiceDetails, InternalAdmin admin) {
-        super(admin);
+    public DefaultSpaceInstance(PUServiceBean puService, SpaceServiceDetails spaceServiceDetails, InternalAdmin admin, JVMDetails jvmDetails ) {
+        super(admin, jvmDetails);
         this.uid = spaceServiceDetails.getServiceID().toString();
         this.serviceID = spaceServiceDetails.getServiceID();
         this.puService = puService;
@@ -561,13 +561,6 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
             return spaceAdmin.getOSStatistics();
         }
         return puService.getOSStatistics();
-    }
-
-    public JVMDetails getJVMDetails() throws RemoteException {
-        if (spaceAdmin != null) {
-            return spaceAdmin.getJVMDetails();
-        }
-        return puService.getJVMDetails();
     }
 
     public JVMStatistics getJVMStatistics() throws RemoteException {

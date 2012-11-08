@@ -56,8 +56,8 @@ public class DefaultLookupService extends AbstractAgentGridComponent implements 
     private final ServiceID serviceID;
 
     public DefaultLookupService(ServiceRegistrar registrar, ServiceID serviceID, InternalAdmin admin,
-                                int agentId, String agentUid) {
-        super(admin, agentId, agentUid);
+                                int agentId, String agentUid, JVMDetails jvmDetails) {
+        super(admin, agentId, agentUid, jvmDetails);
         this.registrar = registrar;
         this.serviceID = serviceID;
     }
@@ -154,10 +154,6 @@ public class DefaultLookupService extends AbstractAgentGridComponent implements 
 
     public OSStatistics getOSStatistics() throws RemoteException {
         return ((OSInfoProvider) registrar.getRegistrar()).getOSStatistics();
-    }
-
-    public JVMDetails getJVMDetails() throws RemoteException {
-        return ((JVMInfoProvider) registrar.getRegistrar()).getJVMDetails();
     }
 
     public JVMStatistics getJVMStatistics() throws RemoteException {

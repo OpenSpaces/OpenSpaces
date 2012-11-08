@@ -22,6 +22,8 @@ import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.gsa.InternalGridServiceAgent;
 
+import com.gigaspaces.internal.jvm.JVMDetails;
+
 /**
  * @author kimchy
  */
@@ -33,8 +35,8 @@ public abstract class AbstractAgentGridComponent extends AbstractGridComponent i
 
     private volatile GridServiceAgent gridServiceAgent;
 
-    public AbstractAgentGridComponent(InternalAdmin admin, int agentId, String agentUid) {
-        super(admin);
+    public AbstractAgentGridComponent(InternalAdmin admin, int agentId, String agentUid, JVMDetails jvmDetails) {
+        super(admin, jvmDetails);
         this.agentId = agentId;
         this.agentUid = agentUid;
     }
