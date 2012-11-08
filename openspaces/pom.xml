@@ -29,7 +29,7 @@
 		</repository>
 		<repository>
 			<id>org.openspaces</id>
-			<url>http://maven-repository.openspaces.org</url>
+			<url>https://s3-eu-west-1.amazonaws.com/gigaspaces-maven-repository-eu/</url>
 		</repository>
 		<repository>
 			<id>spy</id>
