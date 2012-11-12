@@ -252,7 +252,7 @@ public class NullMockAdmin implements Admin, InternalAdmin {
     }
 
     public void addGridServiceManager(InternalGridServiceManager gridServiceManager, NIODetails nioDetails,
-            OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones) {
+            OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones, boolean acceptVM) {
         // TODO Auto-generated method stub
         
     }

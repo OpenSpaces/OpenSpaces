@@ -858,29 +858,33 @@ public class DefaultAdmin implements InternalAdmin {
 
     @Override
     public void addGridServiceManager(InternalGridServiceManager gridServiceManager,
-            NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones) {
+            NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, 
+            String[] zones, boolean acceptVM) {
         assertStateChangesPermitted();
         synchronized (DefaultAdmin.this) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Adding GSM uid=" + gridServiceManager.getUid());
             }
-            OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(gridServiceManager, osDetails);
-            VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(gridServiceManager, jvmDetails, jmxUrl);
-            InternalTransport transport = processTransportOnServiceAddition(gridServiceManager, nioDetails, virtualMachine);
-    
-            InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(),
-                    transport, operatingSystem, virtualMachine,
-                    (InternalMachineAware) virtualMachine, gridServiceManager);
-    
-            processAgentOnServiceAddition(gridServiceManager);
-            processZonesOnServiceAddition(zones, gridServiceManager.getUid(), transport, virtualMachine, machine, gridServiceManager);
-    
-            ((InternalGridServiceManagers) machine.getGridServiceManagers()).addGridServiceManager(gridServiceManager);
-            ((InternalGridServiceManagers) ((InternalVirtualMachine) virtualMachine).getGridServiceManagers()).addGridServiceManager(gridServiceManager);
-            for (Zone zone : gridServiceManager.getZones().values()) {
-                ((InternalGridServiceManagers) zone.getGridServiceManagers()).addGridServiceManager(gridServiceManager);
+
+            if( acceptVM ){
+                OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(gridServiceManager, osDetails);
+                VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(gridServiceManager, jvmDetails, jmxUrl);
+                InternalTransport transport = processTransportOnServiceAddition(gridServiceManager, nioDetails, virtualMachine);
+
+                InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(),
+                        transport, operatingSystem, virtualMachine,
+                        (InternalMachineAware) virtualMachine, gridServiceManager);
+
+                processAgentOnServiceAddition(gridServiceManager);
+                processZonesOnServiceAddition(zones, gridServiceManager.getUid(), transport, virtualMachine, machine, gridServiceManager);
+
+                ((InternalGridServiceManagers) machine.getGridServiceManagers()).addGridServiceManager(gridServiceManager);
+                ((InternalGridServiceManagers) ((InternalVirtualMachine) virtualMachine).getGridServiceManagers()).addGridServiceManager(gridServiceManager);
+                for (Zone zone : gridServiceManager.getZones().values()) {
+                    ((InternalGridServiceManagers) zone.getGridServiceManagers()).addGridServiceManager(gridServiceManager);
+                }
             }
-    
+            
             gridServiceManagers.addGridServiceManager(gridServiceManager);
     
             flushEvents();
@@ -1525,7 +1529,7 @@ public class DefaultAdmin implements InternalAdmin {
             
             final List<Events> eventsFromGSMs = new ArrayList<Events>();
             final Map<String, Holder> holders = new HashMap<String, Holder>();
-            for (GridServiceManager gsm : gridServiceManagers) {
+            for (GridServiceManager gsm : gridServiceManagers.getManagersNonFiltered()) {
                 try {
                     PUsDetails pusDetails = ((InternalGridServiceManager) gsm).getGSM().getPUsDetails();
                     for (PUDetails detail : pusDetails.getDetails()) {

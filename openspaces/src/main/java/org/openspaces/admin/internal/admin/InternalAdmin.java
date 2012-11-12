@@ -63,15 +63,18 @@ public interface InternalAdmin extends Admin {
 
     void raiseEvent(Object listener, Runnable notifier);
 
-    void addLookupService(InternalLookupService lookupService, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones);
+    void addLookupService(InternalLookupService lookupService, NIODetails nioDetails, 
+            OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones);
 
     void removeLookupService(String uid);
 
-    void addGridServiceAgent(InternalGridServiceAgent gridServiceAgent, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones);
+    void addGridServiceAgent(InternalGridServiceAgent gridServiceAgent, NIODetails nioDetails, 
+            OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones);
 
     void removeGridServiceAgent(String uid);
 
-    void addGridServiceManager(InternalGridServiceManager gridServiceManager, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones);
+    void addGridServiceManager(InternalGridServiceManager gridServiceManager, NIODetails nioDetails, 
+            OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones, boolean acceptVM);
 
     void removeGridServiceManager(String uid);
 

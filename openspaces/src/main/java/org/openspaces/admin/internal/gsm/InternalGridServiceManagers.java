@@ -20,6 +20,7 @@ package org.openspaces.admin.internal.gsm;
 import java.util.concurrent.TimeUnit;
 
 import org.openspaces.admin.application.Application;
+import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.gsm.GridServiceManagers;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.topology.ProcessingUnitDeploymentTopology;
@@ -29,6 +30,8 @@ import org.openspaces.admin.pu.topology.ProcessingUnitDeploymentTopology;
  */
 public interface InternalGridServiceManagers extends GridServiceManagers {
 
+    GridServiceManager[] getManagersNonFiltered();
+    
     void addGridServiceManager(InternalGridServiceManager gridServiceManager);
 
     InternalGridServiceManager removeGridServiceManager(String uid);

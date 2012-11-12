@@ -353,13 +353,14 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
             logger.debug("Service Added [GSC] with uid [" + serviceID + "]");
         }
         try {
-            if (gsc.isServiceSecured()) {
-                gsc.login(admin.getUserDetails());
-            }
-
+            
             final JVMDetails jvmDetails = gsc.getJVMDetails();
             if( !AdminFilterHelper.acceptJvm( admin.getAdminFilter(), jvmDetails ) ){
                 return;
+            }
+            
+            if (gsc.isServiceSecured()) {
+                gsc.login(admin.getUserDetails());
             }
             
             final InternalGridServiceContainer gridServiceContainer = new DefaultGridServiceContainer(
@@ -392,14 +393,14 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
             logger.debug("Service Added [GSA] with uid [" + serviceID + "]");
         }
         try {
-            if (gsa.isServiceSecured()) {
-                gsa.login(admin.getUserDetails());
-            }
-            
             final JVMDetails jvmDetails = gsa.getJVMDetails();
             if( !AdminFilterHelper.acceptJvm( admin.getAdminFilter(), jvmDetails ) ){
                 return;
             }            
+            
+            if (gsa.isServiceSecured()) {
+                gsa.login(admin.getUserDetails());
+            }
             
             AgentProcessesDetails processesDetails = gsa.getDetails();
             final InternalGridServiceAgent gridServiceAgent = new DefaultGridServiceAgent(serviceID, 
@@ -474,10 +475,6 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
             }
 
             final JVMDetails jvmDetails = gsm.getJVMDetails();
-            if( !AdminFilterHelper.acceptJvm( admin.getAdminFilter(), jvmDetails ) ){
-                return;
-            }
-
             final InternalGridServiceManager gridServiceManager = new DefaultGridServiceManager(serviceID, gsm,
                     admin, gsm.getAgentId(), gsm.getGSAServiceID(), jvmDetails);
             
@@ -491,7 +488,9 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 @Override
                 public void run() {
                     String jmxUrl = getJMXConnection( serviceItem.attributeSets );
-                    admin.addGridServiceManager(gridServiceManager, nioDetails, osDetails, jvmDetails, jmxUrl, zones);
+                    boolean acceptVM = AdminFilterHelper.acceptJvm( admin.getAdminFilter(), jvmDetails );
+                    admin.addGridServiceManager(gridServiceManager, nioDetails, osDetails, 
+                                                jvmDetails, jmxUrl, zones, acceptVM);
                 }
             });
         } catch (AdminClosedException e) {

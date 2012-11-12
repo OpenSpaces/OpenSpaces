@@ -27,7 +27,7 @@ import java.rmi.RemoteException;
  */
 public interface InternalVirtualMachineInfoProvider extends InternalVirtualMachineAware {
 
-    JVMDetails getJVMDetails() throws RemoteException;
+    JVMDetails getJVMDetails();
 
     JVMStatistics getJVMStatistics() throws RemoteException;
 

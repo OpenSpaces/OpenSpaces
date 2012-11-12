@@ -17,9 +17,15 @@
  ******************************************************************************/
 package org.openspaces.admin.internal.gsm;
 
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -52,7 +58,9 @@ import org.openspaces.admin.pu.elastic.ElasticStatelessProcessingUnitDeployment;
 import org.openspaces.admin.pu.topology.ProcessingUnitDeploymentTopology;
 import org.openspaces.admin.space.ElasticSpaceDeployment;
 import org.openspaces.admin.space.SpaceDeployment;
+import org.openspaces.security.AdminFilterHelper;
 
+import com.gigaspaces.internal.jvm.JVMDetails;
 import com.j_spaces.kernel.SizeConcurrentHashMap;
 
 /**
@@ -91,27 +99,50 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
 
     @Override
     public GridServiceManager[] getManagers() {
-        return gridServiceManagersByUID.values().toArray(new GridServiceManager[0]);
+        Collection<GridServiceManager> values = gridServiceManagersByUID.values();
+        List<GridServiceManager> filteredManagers = new LinkedList<GridServiceManager>();
+        for( GridServiceManager gsm : values ){
+            if( accept( ( InternalGridServiceManager )gsm ) ){
+                filteredManagers.add( gsm );
+            }
+        }
+        return filteredManagers.toArray( new GridServiceManager[filteredManagers.size()] );
     }
+    
+    @Override
+    public GridServiceManager[] getManagersNonFiltered() {
+        return gridServiceManagersByUID.values().toArray(new GridServiceManager[0]);
+    }    
 
     @Override
     public GridServiceManager getManagerByUID(String uid) {
-        return gridServiceManagersByUID.get(uid);
+        GridServiceManager gridServiceManager = gridServiceManagersByUID.get(uid);
+        boolean accept = accept( ( InternalGridServiceManager )gridServiceManager );
+        return accept ? gridServiceManager : null;
     }
-
+    
     @Override
     public Map<String, GridServiceManager> getUids() {
-        return Collections.unmodifiableMap(gridServiceManagersByUID);
+        Set<Entry<String, GridServiceManager>> entrySet = gridServiceManagersByUID.entrySet();
+        Map<String,GridServiceManager> tempMap = new HashMap<String, GridServiceManager>();
+        for( Entry<String, GridServiceManager> entry : entrySet ){
+            GridServiceManager gsm = entry.getValue();
+            if( accept( ( InternalGridServiceManager )gsm ) ){
+                tempMap.put( entry.getKey(), gsm);
+            }
+        }
+        
+        return tempMap;
     }
-
+    
     @Override
     public int getSize() {
-        return gridServiceManagersByUID.size();
+        return getManagers().length;
     }
-
+    
     @Override
     public boolean isEmpty() {
-        return gridServiceManagersByUID.isEmpty();
+        return getSize() == 0;
     }
 
     @Override
@@ -143,6 +174,7 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
         }
         return gsm;
     }
+    
 
     @Override
     public boolean waitFor(int numberOfGridServiceManagers) {
@@ -313,6 +345,14 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
         }
         return null;
     }
+    
+    private GridServiceManager getGridServiceManagerNonFiltered() {
+        Iterator<GridServiceManager> it = iterator();
+        if (it.hasNext()) {
+            return it.next();
+        }
+        return null;
+    }    
 
     @Override
     public void addLifecycleListener(GridServiceManagerLifecycleEventListener eventListener) {
@@ -328,14 +368,14 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
 
     @Override
     public Iterator<GridServiceManager> iterator() {
-        return Collections.unmodifiableCollection(gridServiceManagersByUID.values()).iterator();
+        return Collections.unmodifiableCollection( getUids().values() ).iterator();
     }
 
     @Override
     public void addGridServiceManager(final InternalGridServiceManager gridServiceManager) {
         assertStateChangePermitted();
         GridServiceManager existingGSM = gridServiceManagersByUID.put(gridServiceManager.getUid(), gridServiceManager);
-        if (existingGSM == null) {
+        if (existingGSM == null && accept( gridServiceManager ) ) {
             gridServiceManagerAddedEventManager.gridServiceManagerAdded(gridServiceManager);
         }
     }
@@ -344,7 +384,7 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
     public InternalGridServiceManager removeGridServiceManager(String uid) {
         assertStateChangePermitted();
         final InternalGridServiceManager existingGSM = (InternalGridServiceManager) gridServiceManagersByUID.remove(uid);
-        if (existingGSM != null) {
+        if (existingGSM != null && accept( existingGSM ) ) {
             gridServiceManagerRemovedEventManager.gridServiceManagerRemoved(existingGSM);
         }
         return existingGSM;
@@ -365,7 +405,9 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
     public DumpResult generateDump(String cause, Map<String, Object> context, String... processor) throws AdminException {
         CompoundDumpResult dumpResult = new CompoundDumpResult();
         for (GridServiceManager gsm : this) {
-            dumpResult.add(gsm.generateDump(cause, context, processor));
+            if( accept( ( InternalGridServiceManager )gsm ) ){
+                dumpResult.add(gsm.generateDump(cause, context, processor));
+            }
         }
         return dumpResult;
     }
@@ -421,5 +463,17 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
             throw new AdminException("No Grid Service Manager found to deploy [" + applicationConfig.getName() + "]");
         }
         return gridServiceManager.deploy(applicationConfig, timeout, timeUnit);
+    }
+    
+    private boolean accept( InternalGridServiceManager gridServiceManager ){
+        
+        if( gridServiceManager == null ){
+            return false;
+        }
+        
+        JVMDetails jvmDetails = gridServiceManager.getJVMDetails();
+        boolean isAcceptJvm = AdminFilterHelper.acceptJvm( admin.getAdminFilter(), jvmDetails );
+        
+        return isAcceptJvm;
     }
 }
