@@ -31,6 +31,5 @@ http\://www.openspaces.org/schema/9.1/jms/openspaces-jms.xsd=org/openspaces/jms/
 http\://www.openspaces.org/schema/9.1/sla/openspaces-sla.xsd=org/openspaces/pu/sla/config/openspaces-sla.xsd
 http\://www.openspaces.org/schema/9.1/admin/openspaces-admin.xsd=org/openspaces/admin/config/openspaces-admin.xsd
 
+http\://www.openspaces.org/schema/9.1/archive/openspaces-archive.xsd=org/openspaces/archive/config/openspaces-archive.xsd
 
-
-        

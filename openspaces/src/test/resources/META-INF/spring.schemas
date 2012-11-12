@@ -8,6 +8,5 @@ http\://www.openspaces.org/schema/mule/mule-os-eventcontainer.xsd=org/openspaces
 http\://www.openspaces.org/schema/mule/mule-os-queue.xsd=org/openspaces/esb/mule/queue/config/mule-os-queue.xsd
 http\://www.openspaces.org/schema/mule/mule-os-seda.xsd=org/openspaces/esb/mule/seda/config/mule-os-seda.xsd
 http\://www.openspaces.org/servicemix/openspacesflow/1.0=org/esb/servicemix/config/servicemix-os-flow.xsd
-
-
         
+http\://www.openspaces.org/schema/9.1/archive/openspaces-archive.xsd=org/openspaces/archive/config/openspaces-archive.xsd
