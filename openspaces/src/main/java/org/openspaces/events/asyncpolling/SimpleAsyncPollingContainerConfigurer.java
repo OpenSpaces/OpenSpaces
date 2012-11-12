@@ -59,6 +59,9 @@ public class SimpleAsyncPollingContainerConfigurer {
         pollingEventListenerContainer.setGigaSpace(gigaSpace);
     }
 
+    /**
+     * @see org.openspaces.events.AbstractEventListenerContainer#setBeanName(String)
+     */
     public SimpleAsyncPollingContainerConfigurer name(String name) {
         pollingEventListenerContainer.setBeanName(name);
         return this;
