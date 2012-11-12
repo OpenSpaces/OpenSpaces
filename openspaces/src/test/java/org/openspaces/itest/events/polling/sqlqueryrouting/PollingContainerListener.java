@@ -20,7 +20,7 @@ package org.openspaces.itest.events.polling.sqlqueryrouting;
 import org.openspaces.events.EventTemplate;
 import org.openspaces.events.adapter.SpaceDataEvent;
 import org.openspaces.events.polling.Polling;
-import org.openspaces.itest.events.polling.sqlqueryrouting.SQLQueryRoutingPollingContainerTest.MyClass;
+import org.openspaces.itest.events.pojos.MockPojo;
 
 import com.j_spaces.core.client.SQLQuery;
 
@@ -45,7 +45,7 @@ public class PollingContainerListener {
     
     @EventTemplate
     public Object getTemplate() {
-        SQLQuery<MyClass> query = new SQLQuery<MyClass>(MyClass.class, "processed = false");
+        SQLQuery<MockPojo> query = new SQLQuery<MockPojo>(MockPojo.class, "processed = false");
         query.setRouting(routing);
         return query;
     }
@@ -55,7 +55,7 @@ public class PollingContainerListener {
     }
     
     @SpaceDataEvent
-    public void event(MyClass value) {
+    public void event(MockPojo value) {
         value.setProcessed(true);
         System.out.println("PollingContainer #" + routing + ": " + value);
         counter++;
