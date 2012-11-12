@@ -34,13 +34,20 @@ public class AnnotationProcessorUtils {
     }
 
     public static EventContainersBus findBus(ApplicationContext applicationContext) {
-        Map eventContainerBuses = applicationContext.getBeansOfType(EventContainersBus.class);
-        if (eventContainerBuses.isEmpty()) {
-            throw new IllegalArgumentException("No event container bus found, can't register polling container");
-        } else if (eventContainerBuses.size() > 1) {
-            throw new IllegalArgumentException("Multiple event container buses found, can't register polling container");
+        
+        EventContainersBus ecb = null;
+        Map<String, EventContainersBus> eventContainerBuses = applicationContext.getBeansOfType(EventContainersBus.class);
+        
+        //resolve <os-events:annotation-support>
+        ecb = eventContainerBuses.get(org.openspaces.events.config.AnnotationSupportBeanDefinitionParser.PRIMARY_EVENT_CONTAINER_BUS_BEAN_NAME);
+        if (ecb == null) {
+            //resolve <os-archive:annotation-support>
+            ecb = eventContainerBuses.get(org.openspaces.archive.config.AnnotationSupportBeanDefinitionParser.SECONDARY_EVENT_CONTAINER_BUS_BEAN_NAME);
         }
-        return (EventContainersBus) eventContainerBuses.values().iterator().next();
+        if (ecb == null) {
+            throw new IllegalArgumentException("No event container bus found, can't register polling container. Add <os-events:annotation-support> or <os-archive:annotation-support>");
+        }
+        return ecb;
     }
 
     public static GigaSpace findGigaSpace(final Object bean, String gigaSpaceName, ApplicationContext applicationContext, String beanName) throws IllegalArgumentException {

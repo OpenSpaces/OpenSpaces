@@ -32,10 +32,14 @@ import org.w3c.dom.Element;
  */
 public class AnnotationSupportBeanDefinitionParser implements BeanDefinitionParser {
 
+    public static final String PRIMARY_EVENT_CONTAINER_BUS_BEAN_NAME = "internal-eventContainerBus";
+
     public BeanDefinition parse(Element element, ParserContext parserContext) {
+        
         BeanDefinition bd = new RootBeanDefinition(EventContainersBus.class);
         bd.setLazyInit(true);
-        BeanComponentDefinition bcd = new BeanComponentDefinition(bd, "internal-eventContainerBus");
+        bd.setPrimary(true);
+        BeanComponentDefinition bcd = new BeanComponentDefinition(bd, PRIMARY_EVENT_CONTAINER_BUS_BEAN_NAME);
         parserContext.registerBeanComponent(bcd);
 
         bd = new RootBeanDefinition(PollingAnnotationPostProcessor.class);

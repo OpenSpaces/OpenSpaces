@@ -17,6 +17,7 @@
 package org.openspaces.archive.config;
 
 import org.openspaces.archive.ArchivePollingAnnotationPostProcessor;
+import org.openspaces.events.support.EventContainersBus;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -30,11 +31,23 @@ import org.w3c.dom.Element;
  */
 public class AnnotationSupportBeanDefinitionParser implements BeanDefinitionParser {
 
+    public static final String SECONDARY_EVENT_CONTAINER_BUS_BEAN_NAME = "internal-archiveContainerBus";
+    
     public BeanDefinition parse(Element element, ParserContext parserContext) {
+
+        {
+        BeanDefinition bd = new RootBeanDefinition(EventContainersBus.class);
+        bd.setLazyInit(true);
+        bd.setPrimary(false); // prefer <os-events:annotation-support> which creates internal-eventsContainerBus
+        BeanComponentDefinition bcd = new BeanComponentDefinition(bd, SECONDARY_EVENT_CONTAINER_BUS_BEAN_NAME);
+        parserContext.registerBeanComponent(bcd);
+        }
         
+        {
         RootBeanDefinition bd = new RootBeanDefinition(ArchivePollingAnnotationPostProcessor.class);
         BeanComponentDefinition bcd = new BeanComponentDefinition(bd, "internal-archivePollingContainerAnnotationPostProcessor");
         parserContext.registerBeanComponent(bcd);
+        }
         
         return null;
     }

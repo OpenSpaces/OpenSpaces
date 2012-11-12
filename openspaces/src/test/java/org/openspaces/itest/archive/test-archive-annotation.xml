@@ -16,7 +16,6 @@
 	
 	<!-- Enable support for @Archive annotation -->
 	<os-archive:annotation-support />
-	<os-events:annotation-support />
 	
 	<os-core:space id="space" url="/./space" />
 	
