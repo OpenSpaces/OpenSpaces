@@ -23,9 +23,10 @@ import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.containers.ContainersSlaUtils;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
+import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementLogStackTrace;
 
 
-public class FailedToStartNewGridServiceContainersException extends ContainersSlaEnforcementInProgressException implements SlaEnforcementFailure {
+public class FailedToStartNewGridServiceContainersException extends ContainersSlaEnforcementInProgressException implements SlaEnforcementFailure, SlaEnforcementLogStackTrace {
 
     private static final long serialVersionUID = 1L;
     private final String machineUid;
@@ -35,10 +36,21 @@ public class FailedToStartNewGridServiceContainersException extends ContainersSl
         this.machineUid = machine.getUid();
     }
 
-    private static String createMessage(Machine machine, Exception reason) {
-        return "Failed to start container on machine "
-                + ContainersSlaUtils.machineToString(machine)+ ". "+
-                "Caused By:" + reason.getMessage();
+    /**
+     * Find root cause. Usually an IOException.
+     * SlaEnforcementLogStackTrace means the ESM log will contain full stack trace anyway.
+     */
+    private static String createMessage(Machine machine, final Exception reason) {
+        Throwable rootCause = reason; 
+        for (int i = 0 ; i< 10 /*endless loop protection*/;i++) {
+            if (rootCause == null || rootCause.getCause() == null || rootCause.getCause() == rootCause) {
+                break;
+            }
+            rootCause = rootCause.getCause();
+        }
+        return "Failed to start container on machine."
+                + ContainersSlaUtils.machineToString(machine)+ "."+
+                rootCause != null  ? " Caused By:" + rootCause.getMessage(): "";
     }
 
     @Override
