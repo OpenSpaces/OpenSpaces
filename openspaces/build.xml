@@ -84,7 +84,7 @@
     -->
 
     <target name="buildmain" description="Compile main source tree java files into class files">
-    	<exec executable="${env.M2_HOME}\bin\${mvn.executable}"> 
+    	<exec executable="${env.M2_HOME}\bin\${mvn.executable}" failonerror="true"> 
 			<arg line="package -DskipTests"/>
 		</exec>
     </target>
@@ -145,7 +145,7 @@
             <link href="http://jakarta.apache.org/commons/logging/apidocs/"/>
             <link href="http://jakarta.apache.org/commons/pool/apidocs/"/>
         </javadoc>
-		<zip zipfile="${target.javadoc.dir}/xap-javadoc.zip">
+		<zip zipfile="${target.dir}/xap-javadoc.zip">
     		<zipfileset dir="${target.javadoc.dir}">
                 <include name="**/*"/>
             	<exclude name="xap-javadoc.zip" />
@@ -175,39 +175,9 @@
     <target name="dist_1_5"
             depends="build_1_5, javadoc, install.maven, schema, license"
             description="Creates the OpenSpaces distribution">
-        <mkdir dir="${dist.dir}"/>
-        <delete file="${dist.dir}/${name}-1.5.zip"/>
-        <zip zipfile="${dist.dir}/${name}-1.5.zip">
-            <zipfileset dir="${basedir}">
-                <include name="bin/pu*"/>
-                <include name="bin/gs-m*"/>
-                <include name="deploy/**"/>
-                <include name="docs/xap-javadoc.zip"/>
-                <include name="tools/**"/>
-            	<exclude name="tools/maven/maven-openspaces-plugin/target/**" />
-            	<exclude name="tools/maven/apache-maven-3.0.2/**" />
-                <exclude name="tools/**/*.iml" />
-                <exclude name="tools/gshell/**" />
-
-                <include name="lib/required/**"/>
-                <include name="lib/optional/openspaces/**"/>
-                <include name="lib/optional/spring/**"/>
-                <include name="lib/optional/security/**"/>
-                <include name="lib/platform/openspaces/**" />
-                <include name="lib/platform/jee/activation.jar" />
-                <include name="lib/platform/jee/jta.jar" />
-                <include name="lib/platform/jee/connector.jar" />
-                <include name="lib/platform/jetty/**" />
-                <include name="lib/platform/velocity/**" />
-            	<include name="lib/platform/jpa/**" />
-            </zipfileset>
-        	<zipfileset dir="${lib.dir}/external/common" includes="commons-logging.jar" prefix="lib/required">
-        	</zipfileset>
-        	<zipfileset dir="${target.dir}" includes="gs-openspaces.jar" prefix="lib/required" />
-        	<zipfileset dir="${target.dir}" includes="gs-openspaces-jetty.jar" prefix="lib/platform/openspaces" />
-        	<zipfileset dir="${target.dir}" includes="gs-openspaces-sources.jar" prefix="lib/optional/openspaces" />
-        	
-        </zip>
+    	<exec executable="${env.M2_HOME}\bin\${mvn.executable}"> 
+			<arg line="assembly:single"/>
+		</exec>
     </target>
 	
 	<target name="install.maven" if="productversion">
@@ -222,7 +192,7 @@
 		<echo message="${productversion}" />
     	<!-- Install newly created jar in local maven repository -->
 		<exec executable="${env.M2_HOME}\bin\${mvn.executable}"> 
-			<arg line="install:install-file -DgroupId=com.gigaspaces -DartifactId=gs-openspaces -DcreateChecksum=true -Dversion=${productversion} -Dpackaging=jar -DpomFile=${maven.tmp.dir}/gs-openspaces-pom.xml -Dfile=${target.dir}/gs-openspaces.jar -Djavadoc=${target.javadoc.dir}/xap-javadoc.zip -Dsources=${target.dir}/gs-openspaces-sources.zip"/>
+			<arg line="install:install-file -DgroupId=com.gigaspaces -DartifactId=gs-openspaces -DcreateChecksum=true -Dversion=${productversion} -Dpackaging=jar -DpomFile=${maven.tmp.dir}/gs-openspaces-pom.xml -Dfile=${target.dir}/gs-openspaces.jar -Djavadoc=${target.dir}/xap-javadoc.zip -Dsources=${target.dir}/gs-openspaces-sources.jar"/>
 		</exec>
 		<exec executable="${env.M2_HOME}\bin\${mvn.executable}"> 
 			<arg line="install:install-file -DgroupId=com.gigaspaces -DartifactId=jetty-os -DcreateChecksum=true -Dversion=${productversion} -Dpackaging=jar -DpomFile=${maven.tmp.dir}/jetty-os-pom.xml -Dfile=${target.dir}/gs-openspaces-jetty.jar"/>
