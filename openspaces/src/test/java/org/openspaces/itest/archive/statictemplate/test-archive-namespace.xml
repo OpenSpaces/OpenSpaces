@@ -20,6 +20,7 @@
 	<os-archive:archive-container id="archiveContainer" giga-space="gigaSpace" batch-size="2">
     	<os-core:template ref="mockTemplate" />
     	<os-archive:archive-handler ref="mockArchiveHandler" />
+    	<os-archive:tx-support tx-manager="transactionManager"/>
     </os-archive:archive-container>
 	
 	<!--  mocks -->

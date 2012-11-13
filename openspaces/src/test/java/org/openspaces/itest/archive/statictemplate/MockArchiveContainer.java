@@ -21,6 +21,7 @@ import org.openspaces.archive.ArchiveOperationHandler;
 import org.openspaces.events.EventTemplate;
 import org.openspaces.itest.events.pojos.MockPojo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Archives {@link MockPojo} to the {@link ArchiveOperationHandler}
@@ -30,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * 
  */
 @Archive(batchSize=2)
+@Transactional
 public class MockArchiveContainer {
 
     @Autowired

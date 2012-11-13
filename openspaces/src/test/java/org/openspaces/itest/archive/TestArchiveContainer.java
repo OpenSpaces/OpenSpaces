@@ -27,6 +27,8 @@ import org.openspaces.archive.ArchivePollingContainerConfigurer;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.GigaSpaceConfigurer;
 import org.openspaces.core.space.UrlSpaceConfigurer;
+import org.openspaces.core.transaction.manager.AbstractJiniTransactionManager;
+import org.openspaces.core.transaction.manager.DistributedJiniTxManagerConfigurer;
 import org.openspaces.events.DynamicEventTemplate;
 import org.openspaces.events.DynamicEventTemplateProvider;
 import org.openspaces.events.support.AnnotationProcessorUtils;
@@ -34,6 +36,7 @@ import org.openspaces.events.support.EventContainersBus;
 import org.openspaces.itest.events.pojos.MockPojo;
 import org.openspaces.itest.utils.TestUtils;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import com.j_spaces.core.IJSpace;
 
@@ -185,9 +188,18 @@ public class TestArchiveContainer {
     private void configurerTest(boolean atomic, TemplateToTest templateToTest, Integer batchSize) throws Exception {
         final UrlSpaceConfigurer urlSpaceConfigurer = new UrlSpaceConfigurer("/./space");
         try {
+            PlatformTransactionManager transactionManager = null;
+            if (atomic) {
+                transactionManager = new DistributedJiniTxManagerConfigurer().transactionManager();
+                if (transactionManager instanceof AbstractJiniTransactionManager) {
+                    //used later to verify that container has a tx manager.
+                    ((AbstractJiniTransactionManager)transactionManager).setBeanName("tx-manager");
+                }
+            }
+            
             final IJSpace space = urlSpaceConfigurer.create();
-            final GigaSpace gigaSpace = new GigaSpaceConfigurer(space).create();
-
+            final GigaSpace gigaSpace = new GigaSpaceConfigurer(space).transactionManager(transactionManager).create();
+                        
             final MockArchiveOperationsHandler archiveHandler = new MockArchiveOperationsHandler();
             archiveHandler.setAtomicArchiveOfMultipleObjects(atomic);
 
@@ -196,6 +208,10 @@ public class TestArchiveContainer {
                     .archiveHandler(archiveHandler);
             configureTemplate(containerConfigurer, templateToTest);
 
+            if (atomic) {
+                containerConfigurer.transactionManager(transactionManager);
+            }
+            
             if (atomic && batchSize != null) {
                 containerConfigurer.batchSize(batchSize);
             }
@@ -208,7 +224,7 @@ public class TestArchiveContainer {
                 expectedBatchSize = batchSize;
             }
             else if (atomic && batchSize == null) {
-                expectedBatchSize = 50; //the default both in the annotation and in the polling container.
+                expectedBatchSize = 50; //the default both in the annotation and in the archive container.
             }
             else {
                 expectedBatchSize = 1;
@@ -318,7 +334,10 @@ public class TestArchiveContainer {
                 Assert.assertEquals("Test configuration error. Cannot expect batchSize!=1 if not atomic, since the implementation uses take and not takeMultiple", 1, expectedBatchSize);
                 actualBatchSize = 1;
             }
+            
             Assert.assertEquals(expectedBatchSize, actualBatchSize);
+            Assert.assertTrue("Atomic test must be performed with a space that uses a transaction manager", !atomic || gigaSpace.getTxProvider() != null);
+            Assert.assertTrue("Atomic test must be performed with a container that uses a transaction manager", !atomic || container.getTransactionManagerName() != null);
             
             test(archiveHandler, gigaSpace, actualBatchSize);
     }
