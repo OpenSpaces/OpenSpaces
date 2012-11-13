@@ -46,6 +46,10 @@ public class AdminFilterHelper {
     public static boolean acceptProcessingUnit( AdminFilter adminFilter, 
                                                 BeanLevelProperties beanLevelProperties ){
         
+        if( adminFilter == null ){
+            return true;
+        }
+        
         Properties contextProperties = null;
         if( beanLevelProperties == null ){
             contextProperties = new Properties();
@@ -57,7 +61,7 @@ public class AdminFilterHelper {
             }
         }
                 
-        return adminFilter == null ? true : adminFilter.acceptProcessingUnit( 
+        return adminFilter.acceptProcessingUnit( 
                                     new HashMap<String, String>( ( Map )contextProperties ) );
     }
 }
