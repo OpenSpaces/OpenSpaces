@@ -17,6 +17,7 @@
  ******************************************************************************/
 package org.openspaces.admin.internal.esm;
 
+import org.openspaces.admin.esm.ElasticServiceManager;
 import org.openspaces.admin.esm.ElasticServiceManagers;
 
 /**
@@ -24,6 +25,8 @@ import org.openspaces.admin.esm.ElasticServiceManagers;
  */
 public interface InternalElasticServiceManagers extends ElasticServiceManagers {
 
+    ElasticServiceManager[] getManagersNonFiltered();
+    
     void addElasticServiceManager(InternalElasticServiceManager elasticServiceManager);
 
     InternalElasticServiceManager removeElasticServiceManager(String uid);

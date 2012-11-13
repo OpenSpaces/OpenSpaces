@@ -48,6 +48,7 @@ import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.application.InternalApplication;
 import org.openspaces.admin.internal.esm.InternalElasticServiceManager;
+import org.openspaces.admin.internal.esm.InternalElasticServiceManagers;
 import org.openspaces.admin.internal.gsm.InternalGridServiceManager;
 import org.openspaces.admin.internal.gsm.InternalGridServiceManagers;
 import org.openspaces.admin.internal.pu.dependency.DefaultProcessingUnitDependencies;
@@ -920,7 +921,8 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         
         while (true) {
         
-            ElasticServiceManager[] elasticManagers = admin.getElasticServiceManagers().getManagers();
+            ElasticServiceManager[] elasticManagers = ( ( InternalElasticServiceManagers )
+                                    admin.getElasticServiceManagers() ).getManagersNonFiltered();
             if (elasticManagers.length == 1) {
                 InternalElasticServiceManager esm = (InternalElasticServiceManager) elasticManagers[0];
                 // we use the nocache method since the local cache does not contain the strategyConfig

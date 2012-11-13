@@ -17,9 +17,15 @@
  ******************************************************************************/
 package org.openspaces.admin.internal.esm;
 
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -39,7 +45,9 @@ import org.openspaces.admin.internal.esm.events.DefaultElasticServiceManagerAdde
 import org.openspaces.admin.internal.esm.events.DefaultElasticServiceManagerRemovedEventManager;
 import org.openspaces.admin.internal.esm.events.InternalElasticServiceManagerAddedEventManager;
 import org.openspaces.admin.internal.esm.events.InternalElasticServiceManagerRemovedEventManager;
+import org.openspaces.security.AdminFilterHelper;
 
+import com.gigaspaces.internal.jvm.JVMDetails;
 import com.j_spaces.kernel.SizeConcurrentHashMap;
 
 /**
@@ -61,73 +69,108 @@ public class DefaultElasticServiceManagers implements InternalElasticServiceMana
         this.elasticServiceManagerRemovedEventManager = new DefaultElasticServiceManagerRemovedEventManager(this);
     }
 
+    @Override
     public Admin getAdmin() {
         return this.admin;
     }
-
+    
+    @Override
     public ElasticServiceManager getManagerByUID(String uid) {
-        return elasticServiceManagersByUID.get(uid);
+        
+        ElasticServiceManager elasticServiceManager = elasticServiceManagersByUID.get(uid);
+        boolean accept = accept( ( InternalElasticServiceManager )elasticServiceManager );
+        return accept ? elasticServiceManager : null;
     }
-
+    
+    @Override
     public ElasticServiceManager[] getManagers() {
-        return elasticServiceManagersByUID.values().toArray(new ElasticServiceManager[0]);
+        Collection<ElasticServiceManager> values = elasticServiceManagersByUID.values();
+        List<ElasticServiceManager> filteredManagers = new LinkedList<ElasticServiceManager>();
+        for( ElasticServiceManager esm : values ){
+            if( accept( ( InternalElasticServiceManager )esm ) ){
+                filteredManagers.add( esm );
+            }
+        }
+        return filteredManagers.toArray( new ElasticServiceManager[filteredManagers.size()] );
     }
 
+    @Override
     public int getSize() {
-        return elasticServiceManagersByUID.size();
+        return getManagers().length;
     }
 
+    @Override
     public Map<String, ElasticServiceManager> getUids() {
-        return Collections.unmodifiableMap(elasticServiceManagersByUID);
+        Set<Entry<String, ElasticServiceManager>> entrySet = elasticServiceManagersByUID.entrySet();
+        Map<String,ElasticServiceManager> filteredManageresMap = new HashMap<String, ElasticServiceManager>();
+        for( Entry<String, ElasticServiceManager> entry : entrySet ){
+            ElasticServiceManager esm = entry.getValue();
+            if( accept( ( InternalElasticServiceManager)esm ) ){
+                filteredManageresMap.put( entry.getKey(), esm);
+            }
+        }
+
+        return filteredManageresMap;
     }
 
+    @Override
     public boolean isEmpty() {
-        return elasticServiceManagersByUID.isEmpty();
+        return getSize() == 0;
     }
     
-    public Iterator<ElasticServiceManager> iterator() {
-        return Collections.unmodifiableCollection(elasticServiceManagersByUID.values()).iterator();
+   @Override
+   public Iterator<ElasticServiceManager> iterator() {
+        return Collections.unmodifiableCollection( getUids().values() ).iterator();
     }
     
+    @Override
     public ElasticServiceManagerAddedEventManager getElasticServiceManagerAdded() {
         return this.elasticServiceManagerAddedEventManager;
     }
 
+    @Override
     public ElasticServiceManagerRemovedEventManager getElasticServiceManagerRemoved() {
         return this.elasticServiceManagerRemovedEventManager;
     }
 
+    @Override
     public void addElasticServiceManager(final InternalElasticServiceManager elasticServiceManager) {
         assertStateChangesPermitted();
-        ElasticServiceManager existingESM = elasticServiceManagersByUID.put(elasticServiceManager.getUid(), elasticServiceManager);
-        if (existingESM == null) {
+        InternalElasticServiceManager existingESM = (InternalElasticServiceManager)
+                elasticServiceManagersByUID.put(elasticServiceManager.getUid(), elasticServiceManager);
+        if (existingESM == null && accept(existingESM)) {
             elasticServiceManagerAddedEventManager.elasticServiceManagerAdded(elasticServiceManager);
         }
     }
 
+    @Override
     public InternalElasticServiceManager removeElasticServiceManager(String uid) {
         assertStateChangesPermitted();
         final InternalElasticServiceManager existingESM = (InternalElasticServiceManager) elasticServiceManagersByUID.remove(uid);
-        if (existingESM != null) {
+        if (existingESM != null && accept(existingESM)) {
             elasticServiceManagerRemovedEventManager.elasticServiceManagerRemoved(existingESM);
         }
         return existingESM;
     }
     
+    @Override
     public void addLifecycleListener(ElasticServiceManagerLifecycleEventListener eventListener) {
         getElasticServiceManagerAdded().add(eventListener);
         getElasticServiceManagerRemoved().add(eventListener);
     }
     
+    @Override
     public void removeLifecycleListener(ElasticServiceManagerLifecycleEventListener eventListener) {
         getElasticServiceManagerAdded().remove(eventListener);
         getElasticServiceManagerRemoved().remove(eventListener);        
     }
 
+    @Override
     public boolean waitFor(int numberOfElasticServiceManagers) {
         return waitFor(numberOfElasticServiceManagers, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
 
+    @Override
     public boolean waitFor(int numberOfElasticServiceManagers, long timeout, TimeUnit timeUnit) {
         if (numberOfElasticServiceManagers == 0) {
             final CountDownLatch latch = new CountDownLatch(getSize());
@@ -162,10 +205,12 @@ public class DefaultElasticServiceManagers implements InternalElasticServiceMana
         }
     }
 
+    @Override
     public ElasticServiceManager waitForAtLeastOne() {
         return waitForAtLeastOne(admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
 
+    @Override
     public ElasticServiceManager waitForAtLeastOne(long timeout, TimeUnit timeUnit) {
         final CountDownLatch latch = new CountDownLatch(1);
         final AtomicReference<ElasticServiceManager> ref = new AtomicReference<ElasticServiceManager>();
@@ -186,10 +231,12 @@ public class DefaultElasticServiceManagers implements InternalElasticServiceMana
         }
     }
 
+    @Override
     public DumpResult generateDump(String cause, Map<String, Object> context) throws AdminException {
         return generateDump(cause, context, (String[]) null);
     }
 
+    @Override
     public DumpResult generateDump(String cause, Map<String, Object> context, String... processor)
             throws AdminException {
         CompoundDumpResult dumpResult = new CompoundDumpResult();
@@ -199,15 +246,25 @@ public class DefaultElasticServiceManagers implements InternalElasticServiceMana
         return dumpResult;
     }
     
-    private ElasticServiceManager getElasticServiceManager() {
-        Iterator<ElasticServiceManager> it = iterator();
-        if (it.hasNext()) {
-            return it.next();
-        }
-        return null;
-    }
-    
     protected void assertStateChangesPermitted() {
         this.admin.assertStateChangesPermitted();
     }
+
+    @Override
+    public ElasticServiceManager[] getManagersNonFiltered() {
+
+        return elasticServiceManagersByUID.values().toArray(new ElasticServiceManager[0]);
+    }
+    
+    private boolean accept( InternalElasticServiceManager elasticServiceManager ){
+        
+        if( elasticServiceManager == null ){
+            return false;
+        }
+        
+        JVMDetails jvmDetails = elasticServiceManager.getJVMDetails();
+        boolean isAcceptJvm = AdminFilterHelper.acceptJvm( admin.getAdminFilter(), jvmDetails );
+        
+        return isAcceptJvm;
+    }    
 }

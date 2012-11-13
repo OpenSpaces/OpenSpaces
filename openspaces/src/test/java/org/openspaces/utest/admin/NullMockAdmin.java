@@ -26,7 +26,6 @@ import java.util.concurrent.TimeUnit;
 import net.jini.core.discovery.LookupLocator;
 
 import org.apache.commons.logging.Log;
-import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminEventListener;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.GridComponent;
@@ -64,7 +63,7 @@ import com.gigaspaces.internal.os.OSDetails;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.security.directory.UserDetails;
 
-public class NullMockAdmin implements Admin, InternalAdmin {
+public class NullMockAdmin implements InternalAdmin {
 
     public Log getAdminLogger() {
         // TODO Auto-generated method stub
@@ -234,7 +233,7 @@ public class NullMockAdmin implements Admin, InternalAdmin {
     }
 
     public void addElasticServiceManager(InternalElasticServiceManager elasticServiceManager, NIODetails nioDetails,
-            OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones) {
+            OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones, boolean acceptVM) {
         // TODO Auto-generated method stub
         
     }

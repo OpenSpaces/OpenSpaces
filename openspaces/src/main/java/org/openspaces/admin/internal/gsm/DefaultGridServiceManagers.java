@@ -124,15 +124,15 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
     @Override
     public Map<String, GridServiceManager> getUids() {
         Set<Entry<String, GridServiceManager>> entrySet = gridServiceManagersByUID.entrySet();
-        Map<String,GridServiceManager> tempMap = new HashMap<String, GridServiceManager>();
+        Map<String,GridServiceManager> filteredManageresMap = new HashMap<String, GridServiceManager>();
         for( Entry<String, GridServiceManager> entry : entrySet ){
             GridServiceManager gsm = entry.getValue();
             if( accept( ( InternalGridServiceManager )gsm ) ){
-                tempMap.put( entry.getKey(), gsm);
+                filteredManageresMap.put( entry.getKey(), gsm);
             }
         }
         
-        return tempMap;
+        return filteredManageresMap;
     }
     
     @Override
@@ -346,14 +346,6 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
         return null;
     }
     
-    private GridServiceManager getGridServiceManagerNonFiltered() {
-        Iterator<GridServiceManager> it = iterator();
-        if (it.hasNext()) {
-            return it.next();
-        }
-        return null;
-    }    
-
     @Override
     public void addLifecycleListener(GridServiceManagerLifecycleEventListener eventListener) {
         getGridServiceManagerAdded().add(eventListener);
@@ -405,9 +397,7 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
     public DumpResult generateDump(String cause, Map<String, Object> context, String... processor) throws AdminException {
         CompoundDumpResult dumpResult = new CompoundDumpResult();
         for (GridServiceManager gsm : this) {
-            if( accept( ( InternalGridServiceManager )gsm ) ){
-                dumpResult.add(gsm.generateDump(cause, context, processor));
-            }
+            dumpResult.add(gsm.generateDump(cause, context, processor));
         }
         return dumpResult;
     }

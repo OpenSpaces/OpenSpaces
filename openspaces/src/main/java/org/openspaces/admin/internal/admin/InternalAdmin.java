@@ -78,7 +78,9 @@ public interface InternalAdmin extends Admin {
 
     void removeGridServiceManager(String uid);
 
-    void addElasticServiceManager(InternalElasticServiceManager elasticServiceManager, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones);
+    void addElasticServiceManager(InternalElasticServiceManager elasticServiceManager, 
+            NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, 
+            String[] zones, boolean acceptVM);
 
     void removeElasticServiceManager(String uid);
     

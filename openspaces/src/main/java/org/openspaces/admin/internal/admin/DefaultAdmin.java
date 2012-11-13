@@ -922,28 +922,33 @@ public class DefaultAdmin implements InternalAdmin {
     
     @Override
     public void addElasticServiceManager(InternalElasticServiceManager elasticServiceManager,
-            NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones) {
+            NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, 
+            String[] zones, boolean acceptVM ) {
         assertStateChangesPermitted();
         synchronized (DefaultAdmin.this) {
             
             if (logger.isDebugEnabled()) {
                 logger.debug("Adding ESM uid=" + elasticServiceManager.getUid());
             }
-            OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(elasticServiceManager, osDetails);
-            VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(elasticServiceManager, jvmDetails, jmxUrl );
-            InternalTransport transport = processTransportOnServiceAddition(elasticServiceManager, nioDetails, virtualMachine);
-    
-            InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(),
-                    transport, operatingSystem, virtualMachine,
-                    (InternalMachineAware) virtualMachine, elasticServiceManager);
-    
-            processAgentOnServiceAddition(elasticServiceManager);
-            processZonesOnServiceAddition(zones, elasticServiceManager.getUid(), transport, virtualMachine, machine, elasticServiceManager);
-    
-            ((InternalElasticServiceManagers) machine.getElasticServiceManagers()).addElasticServiceManager(elasticServiceManager);
-            ((InternalElasticServiceManagers) ((InternalVirtualMachine) virtualMachine).getElasticServiceManagers()).addElasticServiceManager(elasticServiceManager);
-            for (Zone zone : elasticServiceManager.getZones().values()) {
-                ((InternalElasticServiceManagers) zone.getElasticServiceManagers()).addElasticServiceManager(elasticServiceManager);
+
+            if( acceptVM ){            
+
+                OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(elasticServiceManager, osDetails);
+                VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(elasticServiceManager, jvmDetails, jmxUrl );
+                InternalTransport transport = processTransportOnServiceAddition(elasticServiceManager, nioDetails, virtualMachine);
+
+                InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(),
+                        transport, operatingSystem, virtualMachine,
+                        (InternalMachineAware) virtualMachine, elasticServiceManager);
+
+                processAgentOnServiceAddition(elasticServiceManager);
+                processZonesOnServiceAddition(zones, elasticServiceManager.getUid(), transport, virtualMachine, machine, elasticServiceManager);
+
+                ((InternalElasticServiceManagers) machine.getElasticServiceManagers()).addElasticServiceManager(elasticServiceManager);
+                ((InternalElasticServiceManagers) ((InternalVirtualMachine) virtualMachine).getElasticServiceManagers()).addElasticServiceManager(elasticServiceManager);
+                for (Zone zone : elasticServiceManager.getZones().values()) {
+                    ((InternalElasticServiceManagers) zone.getElasticServiceManagers()).addElasticServiceManager(elasticServiceManager);
+                }
             }
     
             elasticServiceManagers.addElasticServiceManager(elasticServiceManager);
@@ -1576,7 +1581,7 @@ public class DefaultAdmin implements InternalAdmin {
             try {
                 
                 if (elasticServiceManagers.getSize() > 0) {
-                    esm1 = ((InternalElasticServiceManager)elasticServiceManagers.getManagers()[0]);
+                    esm1 = ((InternalElasticServiceManager)elasticServiceManagers.getManagersNonFiltered()[0]);
                     if (eventsCursorEsmUid == null || !esm1.getUid().equals(eventsCursorEsmUid)) {
                         eventsCursor = 0L;
                         eventsCursorEsmUid = esm1.getUid();

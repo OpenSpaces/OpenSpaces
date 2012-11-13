@@ -437,12 +437,9 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
             // esm.login(admin.getUserDetails());
             // }
             final JVMDetails jvmDetails = esm.getJVMDetails();
-            if( !AdminFilterHelper.acceptJvm( admin.getAdminFilter(), jvmDetails ) ){
-                return;
-            }
-            
-            final InternalElasticServiceManager elasticServiceManager = new DefaultElasticServiceManager(serviceID,
-                    esm, admin, esm.getAgentId(), esm.getGSAServiceID(), jvmDetails );
+            final InternalElasticServiceManager elasticServiceManager = 
+                    new DefaultElasticServiceManager(serviceID, esm, admin, esm.getAgentId(), 
+                            esm.getGSAServiceID(), jvmDetails );
             // get the details here, on the thread pool
             final NIODetails nioDetails = elasticServiceManager.getNIODetails();
             final OSDetails osDetails = elasticServiceManager.getOSDetails();
@@ -452,8 +449,9 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 @Override
                 public void run() {
                     String jmxUrl = getJMXConnection( serviceItem.attributeSets );
+                    boolean acceptVM = AdminFilterHelper.acceptJvm( admin.getAdminFilter(), jvmDetails );
                     admin.addElasticServiceManager(elasticServiceManager, nioDetails, 
-                                                osDetails, jvmDetails, jmxUrl, zones);
+                                                osDetails, jvmDetails, jmxUrl, zones, acceptVM);
                 }
             });
         } catch (AdminClosedException e) {
