@@ -16,7 +16,7 @@
 package org.openspaces.archive.config;
 
 import org.openspaces.archive.ArchivePollingContainer;
-import org.openspaces.events.config.AbstractTxEventContainerBeanDefinitionParser;
+import org.openspaces.events.config.AbstractTemplateEventContainerBeanDefinitionParser;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.StringUtils;
@@ -28,11 +28,7 @@ import org.w3c.dom.Element;
  * @since 9.1.1
  */
 public class ArchivePollingContainerBeanDefinitionParser
-    extends AbstractTxEventContainerBeanDefinitionParser {
-
-        private static final String TEMPLATE = "template";
-
-        private static final String SQL_QUERY = "sql-query";
+    extends AbstractTemplateEventContainerBeanDefinitionParser {
 
         private static final String RECEIVE_TIMEOUT = "receive-timeout";
 
@@ -53,17 +49,8 @@ public class ArchivePollingContainerBeanDefinitionParser
         }
 
         protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
+            
             super.doParse(element, parserContext, builder);
-
-            Element templateEle = DomUtils.getChildElementByTagName(element, TEMPLATE);
-            if (templateEle != null) {
-                Object template = parserContext.getDelegate().parsePropertyValue(templateEle, builder.getRawBeanDefinition(), "template");
-                builder.addPropertyValue("template", template);
-            }
-            Element sqlQueryEle = DomUtils.getChildElementByTagName(element, SQL_QUERY);
-            if (sqlQueryEle != null) {
-                builder.addPropertyValue("template", parserContext.getDelegate().parsePropertySubElement(sqlQueryEle, builder.getRawBeanDefinition(), null));
-            }
 
             Element archiveHandlerEle = DomUtils.getChildElementByTagName(element, ARCHIVE_HANDLER);
             if (archiveHandlerEle != null) {

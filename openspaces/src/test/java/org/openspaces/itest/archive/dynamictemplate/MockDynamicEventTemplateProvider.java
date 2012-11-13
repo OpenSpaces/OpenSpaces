@@ -13,37 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.openspaces.itest.archive;
+package org.openspaces.itest.archive.dynamictemplate;
 
-import org.openspaces.archive.Archive;
-import org.openspaces.archive.ArchiveHandler;
-import org.openspaces.archive.ArchiveOperationHandler;
-import org.openspaces.events.EventTemplate;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
+
+import org.openspaces.events.DynamicEventTemplateProvider;
 import org.openspaces.itest.events.pojos.MockPojo;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * Archives {@link MockPojo} to the {@link ArchiveOperationHandler}
- * 
+ * Standalone bean implementing a dynamic template
  * @author Itai Frenkel
  * @since 9.1.1
- * 
  */
-@Archive()
-public class MockArchiveContainer {
+public class MockDynamicEventTemplateProvider implements DynamicEventTemplateProvider {
 
-    @Autowired
-    private ArchiveOperationHandler archiveHandler;
-
-    @ArchiveHandler
-    public ArchiveOperationHandler getArchiveOperationHandler() {
-        return archiveHandler;
-    }
+    private final Logger logger = Logger.getLogger(this.getClass().getName());
+    final AtomicInteger routing = new AtomicInteger();
     
-    @EventTemplate
-    MockPojo getTemplate() {
-        MockPojo template = new MockPojo();
+    @Override
+    public Object getDynamicTemplate() {
+        final MockPojo template = new MockPojo();
         template.setProcessed(false);
+        template.setRouting(routing.incrementAndGet());
+        logger.info("getDynamicTemplate() returns " + template);
         return template;
     }
+
 }

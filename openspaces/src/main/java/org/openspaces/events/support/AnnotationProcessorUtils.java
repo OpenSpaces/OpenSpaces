@@ -18,6 +18,8 @@
 package org.openspaces.events.support;
 
 import org.openspaces.core.GigaSpace;
+import org.openspaces.events.DynamicEventTemplateProvider;
+import org.openspaces.events.adapter.AnnotationDynamicEventTemplateProviderAdapter;
 import org.springframework.context.ApplicationContext;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.StringUtils;
@@ -84,5 +86,28 @@ public class AnnotationProcessorUtils {
             }
         }
         return txManager;
+    }
+
+
+    /**
+     * @return a {@link DynamicEventTemplateProvider} based on interface or annotation.
+     */
+    public static DynamicEventTemplateProvider findDynamicEventTemplateProvider(final Object bean) {
+        
+        DynamicEventTemplateProvider provider = null;
+        if (bean instanceof DynamicEventTemplateProvider) {
+            provider =(DynamicEventTemplateProvider) bean;
+        } 
+        else {
+            AnnotationDynamicEventTemplateProviderAdapter adapter = 
+                    new AnnotationDynamicEventTemplateProviderAdapter();
+            adapter.setDelegate(bean);
+            adapter.setFailSilentlyIfMethodNotFound(true);
+            adapter.afterPropertiesSet();
+            if (adapter.isMethodFound()) {
+                provider = adapter;
+            }
+        }
+        return provider;
     }
 }

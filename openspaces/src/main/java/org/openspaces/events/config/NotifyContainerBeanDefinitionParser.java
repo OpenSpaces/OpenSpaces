@@ -26,11 +26,7 @@ import org.w3c.dom.Element;
 /**
  * @author kimchy
  */
-public class NotifyContainerBeanDefinitionParser extends AbstractTxEventContainerBeanDefinitionParser {
-
-    private static final String TEMPLATE = "template";
-
-    private static final String SQL_QUERY = "sql-query";
+public class NotifyContainerBeanDefinitionParser extends AbstractTemplateEventContainerBeanDefinitionParser {
 
     private static final String COM_TYPE = "com-type";
 
@@ -76,21 +72,15 @@ public class NotifyContainerBeanDefinitionParser extends AbstractTxEventContaine
     }
 
     @Override
+    protected boolean isSupportsDynamicTemplate() {
+        return false;
+    }
+
+    @Override
     protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
+        
         super.doParse(element, parserContext, builder);
-
-        Element templateEle = DomUtils.getChildElementByTagName(element, TEMPLATE);
-        if (templateEle != null) {
-            Object template = parserContext.getDelegate().parsePropertyValue(templateEle,
-                    builder.getRawBeanDefinition(), "template");
-            builder.addPropertyValue("template", template);
-        }
-        Element sqlQueryEle = DomUtils.getChildElementByTagName(element, SQL_QUERY);
-        if (sqlQueryEle != null) {
-            builder.addPropertyValue("template", parserContext.getDelegate().parsePropertySubElement(sqlQueryEle,
-                    builder.getRawBeanDefinition(), null));
-        }
-
+        
         Element notifyEle = DomUtils.getChildElementByTagName(element, NOTIFY);
         if (notifyEle != null) {
             String write = notifyEle.getAttribute("write");

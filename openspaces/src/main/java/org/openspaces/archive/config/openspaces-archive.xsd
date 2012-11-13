@@ -99,6 +99,13 @@
                                     </xsd:documentation>
                                 </xsd:annotation>
                             </xsd:element>
+                            <xsd:element name="dynamic-template" type="os-events:dynamicEventTemplateProviderType" minOccurs="0" maxOccurs="1">
+	                            <xsd:annotation>
+	                                <xsd:documentation source="java:org.openspaces.events.DynamicEventTemplateProvider">
+	                                    The template provider that will be called before each receive operation handler to take/read/... event data from the Space.
+	                                </xsd:documentation>
+	                            </xsd:annotation>
+	                        </xsd:element>
                         </xsd:choice>
                     </xsd:choice>
                     <xsd:attribute name="receive-timeout" type="xsd:string">

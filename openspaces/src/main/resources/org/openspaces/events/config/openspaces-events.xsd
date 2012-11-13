@@ -93,6 +93,13 @@
                                     </xsd:documentation>
                                 </xsd:annotation>
                             </xsd:element>
+                            <xsd:element name="dynamic-template" type="dynamicEventTemplateProviderType" minOccurs="0" maxOccurs="1">
+	                            <xsd:annotation>
+	                                <xsd:documentation source="java:org.openspaces.events.DynamicEventTemplateProvider">
+	                                    The template provider that will be called before each receive operation handler to take/read/... event data from the Space.
+	                                </xsd:documentation>
+	                            </xsd:annotation>
+	                        </xsd:element>
                         </xsd:choice>
                         <xsd:element name="listener" type="spaceDataEventListenerType" minOccurs="1" maxOccurs="1">
                             <xsd:annotation>
@@ -280,6 +287,13 @@
                                     </xsd:documentation>
                                 </xsd:annotation>
                             </xsd:element>
+                            <xsd:element name="dynamic-template" type="dynamicEventTemplateProviderType" minOccurs="0" maxOccurs="1">
+	                            <xsd:annotation>
+	                                <xsd:documentation source="java:org.openspaces.events.DynamicEventTemplateProvider">
+	                                    The template provider that will be called before each receive operation handler to take/read/... event data from the Space.
+	                                </xsd:documentation>
+	                            </xsd:annotation>
+	                        </xsd:element>
                         </xsd:choice>
                         <xsd:element name="listener" type="spaceDataEventListenerType" minOccurs="1" maxOccurs="1">
                             <xsd:annotation>
@@ -929,6 +943,31 @@
         </xsd:complexType>
     </xsd:element>
 
+    <xsd:complexType name="dynamicEventTemplateProviderType">
+        <xsd:annotation>
+            <xsd:appinfo>
+                <tool:annotation kind="ref">
+                    <tool:expected-type type="org.openspaces.events.DynamicEventTemplateProvider"/>
+                </tool:annotation>
+            </xsd:appinfo>
+            <xsd:documentation>
+                Provides a template factory that is called before each read and take operation 
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:attribute name="ref" type="xsd:string">
+            <xsd:annotation>
+                <xsd:appinfo>
+                    <tool:annotation kind="ref">
+                        <tool:expected-type type="org.openspaces.events.DynamicEventTemplateProvider"/>
+                    </tool:annotation>
+                </xsd:appinfo>
+                <xsd:documentation><![CDATA[
+    A short-cut alternative to a nested "<ref bean='...'/>".
+                ]]></xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+    </xsd:complexType>
+    
     <xsd:element name="method-adapter">
         <xsd:annotation>
             <xsd:documentation>
@@ -964,4 +1003,5 @@
             </xsd:complexContent>
         </xsd:complexType>
     </xsd:element>
+   
 </xsd:schema>

@@ -57,7 +57,9 @@ public class MockPojo {
 
     @Override
     public String toString() {
-        return "MockPojo [id=" + id + ", processed=" + processed + "]";
+        return "MockPojo [" + (id != null ? "id=" + id + ", " : "")
+                + (processed != null ? "processed=" + processed + ", " : "")
+                + (routing != null ? "routing=" + routing : "") + "]";
     }
 
     public void setRouting(Integer routing) {

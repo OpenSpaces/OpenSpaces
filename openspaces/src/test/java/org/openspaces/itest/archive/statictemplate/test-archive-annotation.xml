@@ -12,7 +12,7 @@
 	                    http://www.openspaces.org/schema/archive http://www.openspaces.org/schema/9.1/archive/openspaces-archive.xsd">
 
 	<!-- Enable scan for OpenSpaces and Spring components -->
-	<context:component-scan base-package="org.openspaces.itest.archive"/>
+	<context:component-scan base-package="org.openspaces.itest.archive.statictemplate"/>
 	
 	<!-- Enable support for @Archive annotation -->
 	<os-archive:annotation-support />

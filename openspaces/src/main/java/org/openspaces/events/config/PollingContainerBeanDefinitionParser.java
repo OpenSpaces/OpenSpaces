@@ -26,11 +26,7 @@ import org.w3c.dom.Element;
 /**
  * @author kimchy
  */
-public class PollingContainerBeanDefinitionParser extends AbstractTxEventContainerBeanDefinitionParser {
-
-    private static final String TEMPLATE = "template";
-
-    private static final String SQL_QUERY = "sql-query";
+public class PollingContainerBeanDefinitionParser extends AbstractTemplateEventContainerBeanDefinitionParser {
 
     private static final String RECEIVE_OPERATION_HANDLER = "receive-operation-handler";
 
@@ -49,24 +45,15 @@ public class PollingContainerBeanDefinitionParser extends AbstractTxEventContain
     private static final String PERFORM_SNAPSHOT = "perform-snapshot";
 
     private static final String PASS_ARRAY_AS_IS = "pass-array-as-is";
-
+    
     protected Class<SimplePollingEventListenerContainer> getBeanClass(Element element) {
         return SimplePollingEventListenerContainer.class;
     }
 
     protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
+
         super.doParse(element, parserContext, builder);
-
-        Element templateEle = DomUtils.getChildElementByTagName(element, TEMPLATE);
-        if (templateEle != null) {
-            Object template = parserContext.getDelegate().parsePropertyValue(templateEle, builder.getRawBeanDefinition(), "template");
-            builder.addPropertyValue("template", template);
-        }
-        Element sqlQueryEle = DomUtils.getChildElementByTagName(element, SQL_QUERY);
-        if (sqlQueryEle != null) {
-            builder.addPropertyValue("template", parserContext.getDelegate().parsePropertySubElement(sqlQueryEle, builder.getRawBeanDefinition(), null));
-        }
-
+        
         Element receiveOperationHandlerEle = DomUtils.getChildElementByTagName(element, RECEIVE_OPERATION_HANDLER);
         if (receiveOperationHandlerEle != null) {
             builder.addPropertyValue("receiveOperationHandler",

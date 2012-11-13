@@ -16,6 +16,9 @@
 package org.openspaces.archive;
 
 import org.openspaces.core.GigaSpace;
+import org.openspaces.events.DynamicEventTemplateProvider;
+import org.openspaces.events.adapter.AnnotationDynamicEventTemplateProviderAdapter;
+import org.openspaces.events.adapter.MethodDynamicEventTemplateProviderAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 
 /**
@@ -153,6 +156,36 @@ public class ArchivePollingContainerConfigurer {
         return this;
     }
 
+    /**
+     * @see org.openspaces.events.polling.SimplePollingEventListenerContainer#setTemplateProvider()
+     */
+    public ArchivePollingContainerConfigurer dynamicTemplate(DynamicEventTemplateProvider templateProvider) {
+        archiveContainer.setDynamicTemplate(templateProvider);
+        return this;
+    }
+
+    /**
+     * @see org.openspaces.events.adapter.MethodTemplateProviderAdapter
+     */
+    public ArchivePollingContainerConfigurer dynamicTemplateMethod(Object templateProvider, String methodName) {
+        MethodDynamicEventTemplateProviderAdapter adapter = new MethodDynamicEventTemplateProviderAdapter();
+        adapter.setDelegate(templateProvider);
+        adapter.setMethodName(methodName);
+        adapter.afterPropertiesSet();
+        return dynamicTemplate(adapter);
+    }
+    
+    /**
+     * 
+     * @see org.openspaces.events.adapter.AnnotationDynamicEventTemplateProviderAdapter
+     */
+    public ArchivePollingContainerConfigurer dynamicTemplateAnnotation(Object templateProvider) {
+        AnnotationDynamicEventTemplateProviderAdapter adapter = new AnnotationDynamicEventTemplateProviderAdapter();
+        adapter.setDelegate(templateProvider);
+        adapter.afterPropertiesSet();
+        return dynamicTemplate(adapter);
+    }
+    
     public ArchivePollingContainer create() {
         if (!initialized) {
             archiveContainer.setRegisterSpaceModeListener(true);

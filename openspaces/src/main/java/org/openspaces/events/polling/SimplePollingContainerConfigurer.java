@@ -17,10 +17,13 @@
 package org.openspaces.events.polling;
 
 import org.openspaces.core.GigaSpace;
+import org.openspaces.events.DynamicEventTemplateProvider;
 import org.openspaces.events.EventExceptionHandler;
 import org.openspaces.events.SpaceDataEventListener;
+import org.openspaces.events.adapter.AnnotationDynamicEventTemplateProviderAdapter;
 import org.openspaces.events.adapter.AnnotationEventListenerAdapter;
 import org.openspaces.events.adapter.MethodEventListenerAdapter;
+import org.openspaces.events.adapter.MethodDynamicEventTemplateProviderAdapter;
 import org.openspaces.events.polling.receive.ReceiveOperationHandler;
 import org.openspaces.events.polling.trigger.TriggerOperationHandler;
 import org.springframework.core.task.TaskExecutor;
@@ -254,6 +257,36 @@ public class SimplePollingContainerConfigurer {
         return this;
     }
 
+    /**
+     * @see org.openspaces.events.polling.SimplePollingEventListenerContainer#setTemplateProvider()
+     */
+    public SimplePollingContainerConfigurer dynamicTemplate(DynamicEventTemplateProvider templateProvider) {
+        pollingEventListenerContainer.setDynamicTemplate(templateProvider);
+        return this;
+    }
+
+    /**
+     * @see org.openspaces.events.adapter.MethodTemplateProviderAdapter
+     */
+    public SimplePollingContainerConfigurer dynamicTemplateMethod(Object templateProvider, String methodName) {
+        MethodDynamicEventTemplateProviderAdapter adapter = new MethodDynamicEventTemplateProviderAdapter();
+        adapter.setDelegate(templateProvider);
+        adapter.setMethodName(methodName);
+        adapter.afterPropertiesSet();
+        return dynamicTemplate(adapter);
+    }
+    
+    /**
+     * 
+     * @see org.openspaces.events.adapter.AnnotationDynamicEventTemplateProviderAdapter
+     */
+    public SimplePollingContainerConfigurer dynamicTemplateAnnotation(Object templateProvider) {
+        AnnotationDynamicEventTemplateProviderAdapter adapter = new AnnotationDynamicEventTemplateProviderAdapter();
+        adapter.setDelegate(templateProvider);
+        adapter.afterPropertiesSet();
+        return dynamicTemplate(adapter);
+    }
+    
     /**
      * Creates a new {@link SimplePollingEventListenerContainer} instance.
      */

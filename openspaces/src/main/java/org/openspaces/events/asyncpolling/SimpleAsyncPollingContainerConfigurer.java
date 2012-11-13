@@ -17,9 +17,12 @@
 package org.openspaces.events.asyncpolling;
 
 import org.openspaces.core.GigaSpace;
+import org.openspaces.events.DynamicEventTemplateProvider;
 import org.openspaces.events.EventExceptionHandler;
 import org.openspaces.events.SpaceDataEventListener;
+import org.openspaces.events.adapter.AnnotationDynamicEventTemplateProviderAdapter;
 import org.openspaces.events.adapter.AnnotationEventListenerAdapter;
+import org.openspaces.events.adapter.MethodDynamicEventTemplateProviderAdapter;
 import org.openspaces.events.adapter.MethodEventListenerAdapter;
 import org.openspaces.events.asyncpolling.receive.AsyncOperationHandler;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -197,6 +200,36 @@ public class SimpleAsyncPollingContainerConfigurer {
         return this;
     }
 
+    /**
+     * @see org.openspaces.events.polling.SimplePollingEventListenerContainer#setTemplateProvider()
+     */
+    public SimpleAsyncPollingContainerConfigurer dynamicTemplate(DynamicEventTemplateProvider templateProvider) {
+        pollingEventListenerContainer.setDynamicTemplate(templateProvider);
+        return this;
+    }
+
+    /**
+     * @see org.openspaces.events.adapter.MethodTemplateProviderAdapter
+     */
+    public SimpleAsyncPollingContainerConfigurer dynamicTemplateMethod(Object templateProvider, String methodName) {
+        MethodDynamicEventTemplateProviderAdapter adapter = new MethodDynamicEventTemplateProviderAdapter();
+        adapter.setDelegate(templateProvider);
+        adapter.setMethodName(methodName);
+        adapter.afterPropertiesSet();
+        return dynamicTemplate(adapter);
+    }
+    
+    /**
+     * 
+     * @see org.openspaces.events.adapter.AnnotationDynamicEventTemplateProviderAdapter
+     */
+    public SimpleAsyncPollingContainerConfigurer dynamicTemplateAnnotation(Object templateProvider) {
+        AnnotationDynamicEventTemplateProviderAdapter adapter = new AnnotationDynamicEventTemplateProviderAdapter();
+        adapter.setDelegate(templateProvider);
+        adapter.afterPropertiesSet();
+        return dynamicTemplate(adapter);
+    }
+    
     /**
      * Creates a new {@link SimpleAsyncPollingEventListenerContainer} instance.
      */

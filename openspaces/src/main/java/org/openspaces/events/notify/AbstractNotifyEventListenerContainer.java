@@ -28,6 +28,7 @@ import net.jini.lease.LeaseListener;
 import org.openspaces.core.UnusableEntryException;
 import org.openspaces.core.util.SpaceUtils;
 import org.openspaces.events.AbstractTransactionalEventListenerContainer;
+import org.openspaces.events.DynamicEventTemplateProvider;
 import org.springframework.core.Constants;
 import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -558,6 +559,12 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
         this.passArrayAsIs = passArrayAsIs;
     }
 
+    
+    @Override
+    public void setDynamicTemplate(DynamicEventTemplateProvider templateProvider) {
+        throw new UnsupportedOperationException("Notify container does not support dynamic event templates.");
+    }
+    
     protected boolean isPassArrayAsIs() {
         return this.passArrayAsIs;
     }
@@ -994,5 +1001,4 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
             throw err;
         }
     }
-
 }

@@ -26,11 +26,7 @@ import org.w3c.dom.Element;
 /**
  * @author kimchy
  */
-public class AsyncPollingContainerBeanDefinitionParser extends AbstractTxEventContainerBeanDefinitionParser {
-
-    private static final String TEMPLATE = "template";
-
-    private static final String SQL_QUERY = "sql-query";
+public class AsyncPollingContainerBeanDefinitionParser extends AbstractTemplateEventContainerBeanDefinitionParser {
 
     private static final String ASYNC_OPERATION_HANDLER = "async-operation-handler";
 
@@ -45,17 +41,8 @@ public class AsyncPollingContainerBeanDefinitionParser extends AbstractTxEventCo
     }
 
     protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
-        super.doParse(element, parserContext, builder);
 
-        Element templateEle = DomUtils.getChildElementByTagName(element, TEMPLATE);
-        if (templateEle != null) {
-            Object template = parserContext.getDelegate().parsePropertyValue(templateEle, builder.getRawBeanDefinition(), "template");
-            builder.addPropertyValue("template", template);
-        }
-        Element sqlQueryEle = DomUtils.getChildElementByTagName(element, SQL_QUERY);
-        if (sqlQueryEle != null) {
-            builder.addPropertyValue("template", parserContext.getDelegate().parsePropertySubElement(sqlQueryEle, builder.getRawBeanDefinition(), null));
-        }
+        super.doParse(element, parserContext, builder);
 
         Element asyncOperationHandlerEle = DomUtils.getChildElementByTagName(element, ASYNC_OPERATION_HANDLER);
         if (asyncOperationHandlerEle != null) {

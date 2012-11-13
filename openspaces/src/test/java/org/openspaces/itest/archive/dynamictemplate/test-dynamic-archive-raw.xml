@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:os-sla="http://www.openspaces.org/schema/sla"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd 
+	                    http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+
+    
+	<bean id="space" class="org.openspaces.core.space.UrlSpaceFactoryBean">
+	    <property name="url" value="/./space" />
+	</bean>
+	
+	<bean id="gigaSpace" class="org.openspaces.core.GigaSpaceFactoryBean">
+		<property name="space" ref="space" />
+	</bean>
+   
+	<bean id="archiver" class="org.openspaces.archive.ArchivePollingContainer">
+	
+	    <property name="gigaSpace" ref="gigaSpace" />
+	
+	    <property name="dynamicTemplate" ref="mockDynamicTemplate" />
+
+	    <property name="archiveHandler" ref="mockArchiveHandler" />
+
+	</bean>
+	
+	<!--  test mocks -->
+	<bean id="mockArchiveHandler" class="org.openspaces.itest.archive.MockArchiveOperationsHandler">
+		<property name="atomicArchiveOfMultipleObjects" value="false" />
+	</bean>
+	
+	<bean id="mockDynamicTemplate" class="org.openspaces.itest.archive.dynamictemplate.MockDynamicEventTemplateProvider" />
+	
+</beans>

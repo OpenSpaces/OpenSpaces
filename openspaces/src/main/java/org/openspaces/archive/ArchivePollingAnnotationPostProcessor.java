@@ -17,6 +17,7 @@ package org.openspaces.archive;
 
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.util.AnnotationUtils;
+import org.openspaces.events.DynamicEventTemplateProvider;
 import org.openspaces.events.TransactionalEvent;
 import org.openspaces.events.support.AnnotationProcessorUtils;
 import org.openspaces.events.support.EventContainersBus;
@@ -79,6 +80,11 @@ public class ArchivePollingAnnotationPostProcessor implements BeanPostProcessor,
                 .recoveryInterval(archive.recoveryInterval())
                 .autoStart(archive.autoStart());
 
+        DynamicEventTemplateProvider templateProvider = AnnotationProcessorUtils.findDynamicEventTemplateProvider(bean);
+        if (templateProvider != null) {
+            archiveContainerConfigurer.dynamicTemplate(templateProvider);
+        }
+        
         // handle transactions (we support using either @Transactional or @TransactionalEvent or both)
         TransactionalEvent transactionalEvent = AnnotationUtils.findAnnotation(beanClass, TransactionalEvent.class);
         Transactional transactional = AnnotationUtils.findAnnotation(beanClass, Transactional.class);

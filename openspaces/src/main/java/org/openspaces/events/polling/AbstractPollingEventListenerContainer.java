@@ -16,6 +16,10 @@
 
 package org.openspaces.events.polling;
 
+import java.lang.reflect.Array;
+import java.lang.reflect.Method;
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.openspaces.core.SpaceInterruptedException;
 import org.openspaces.events.AbstractTransactionalEventListenerContainer;
 import org.openspaces.events.SpaceDataEventListener;
@@ -28,10 +32,6 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.ReflectionUtils;
-
-import java.lang.reflect.Array;
-import java.lang.reflect.Method;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Base class for listener container implementations which are based on polling. Provides support
@@ -232,7 +232,7 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractTran
         if (triggerOperationHandler != null) {
             Object trigger;
             try {
-                trigger = triggerOperationHandler.triggerReceive(getReceiveTemplate(), getGigaSpace(), receiveTimeout);
+                trigger = triggerOperationHandler.triggerReceive(template, getGigaSpace(), receiveTimeout);
             } catch (SpaceInterruptedException e) {
                 return false;
             }

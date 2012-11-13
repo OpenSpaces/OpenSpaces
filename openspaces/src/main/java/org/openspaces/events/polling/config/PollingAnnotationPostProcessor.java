@@ -18,6 +18,7 @@ package org.openspaces.events.polling.config;
 
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.util.AnnotationUtils;
+import org.openspaces.events.DynamicEventTemplateProvider;
 import org.openspaces.events.EventDriven;
 import org.openspaces.events.SpaceDataEventListener;
 import org.openspaces.events.TransactionalEvent;
@@ -94,6 +95,12 @@ public class PollingAnnotationPostProcessor implements BeanPostProcessor, Applic
         } else {
             pollingContainerConfigurer.eventListenerAnnotation(bean);
         }
+        
+        DynamicEventTemplateProvider templateProvider = AnnotationProcessorUtils.findDynamicEventTemplateProvider(bean);
+        if (templateProvider != null) {
+            pollingContainerConfigurer.dynamicTemplate(templateProvider);
+        }
+        
         pollingContainerConfigurer.concurrentConsumers(polling.concurrentConsumers());
         pollingContainerConfigurer.maxConcurrentConsumers(polling.maxConcurrentConsumers());
         pollingContainerConfigurer.receiveTimeout(polling.receiveTimeout());

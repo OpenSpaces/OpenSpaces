@@ -16,12 +16,12 @@
 
 package org.openspaces.events;
 
+import java.lang.reflect.Method;
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.springframework.aop.support.AopUtils;
 import org.springframework.dao.DataAccessException;
 import org.springframework.util.ReflectionUtils;
-
-import java.lang.reflect.Method;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * A simple base class that provides support methods for Template based event listeners.
@@ -38,9 +38,13 @@ public abstract class AbstractTemplateEventListenerContainer extends AbstractEve
 
     private Object template;
 
-    private boolean performSnapshot = true;
+    private boolean performSnapshot = true; // enabled by default
 
     private Object receiveTemplate;
+
+    private DynamicEventTemplateProvider dynamicTemplate;
+
+    private String dymamicTemplateRef;
 
     @Override
     public void afterPropertiesSet() {
@@ -73,6 +77,15 @@ public abstract class AbstractTemplateEventListenerContainer extends AbstractEve
                 }
             }
         }
+        
+        if (dynamicTemplate == null && dymamicTemplateRef != null) {
+            dynamicTemplate = getApplicationContext().getBean(dymamicTemplateRef, DynamicEventTemplateProvider.class);
+        }
+        
+        if (template != null && dynamicTemplate != null) {
+            throw new IllegalArgumentException("dynamicTemplate and template are mutually exclusive.");
+        }
+        
         super.afterPropertiesSet();
     }
 
@@ -98,7 +111,7 @@ public abstract class AbstractTemplateEventListenerContainer extends AbstractEve
     public void setTemplate(Object template) {
         this.template = template;
     }
-
+    
     /**
      * Returns the template that will be used. Note, in order to perform receive operations, the
      * {@link #getReceiveTemplate()} should be used.
@@ -113,6 +126,11 @@ public abstract class AbstractTemplateEventListenerContainer extends AbstractEve
      * will return the snapshot of the provided template.
      */
     protected Object getReceiveTemplate() {
+        
+        if (dynamicTemplate != null) {
+            return dynamicTemplate.getDynamicTemplate();
+        }
+        
         return receiveTemplate;
     }
 
@@ -128,5 +146,21 @@ public abstract class AbstractTemplateEventListenerContainer extends AbstractEve
 
     protected boolean isPerformSnapshot() {
         return this.performSnapshot;
+    }
+    
+    /**
+     * Called before each take and read polling operation to change the template
+     * Overrides any template defined with {@link #setTemplate(Object)} 
+     * @param templateProvider - An object that returns a template that may change with each invocaiton. 
+     */
+    public void setDynamicTemplate(DynamicEventTemplateProvider dynamicTemplate) {
+        this.dynamicTemplate = dynamicTemplate;
+    }
+
+    /**
+     * Defines a bean (id) that implements {@link DynamicEventTemplateProvider}
+     */
+    public void setDynamicTemplateRef(String dynamicTemplateBeanRef) {
+        this.dymamicTemplateRef = dynamicTemplateBeanRef; 
     }
 }
