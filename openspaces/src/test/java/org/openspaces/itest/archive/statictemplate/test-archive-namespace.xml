@@ -17,14 +17,14 @@
 	
 	<os-core:giga-space id="gigaSpace" space="space" tx-manager="transactionManager"/>
 	
-	<os-archive:archive-container id="archiveContainer" giga-space="gigaSpace">
+	<os-archive:archive-container id="archiveContainer" giga-space="gigaSpace" batch-size="2">
     	<os-core:template ref="mockTemplate" />
     	<os-archive:archive-handler ref="mockArchiveHandler" />
     </os-archive:archive-container>
 	
 	<!--  mocks -->
 	<bean id = "mockArchiveHandler" class="org.openspaces.itest.archive.MockArchiveOperationsHandler">
-		<property name="atomicArchiveOfMultipleObjects" value="false" />
+		<property name="atomicArchiveOfMultipleObjects" value="true" />
 	</bean>
    
    	<bean id="mockTemplate" class="org.openspaces.itest.events.pojos.MockPojo">

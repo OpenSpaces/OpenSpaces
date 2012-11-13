@@ -78,7 +78,8 @@ public class ArchivePollingAnnotationPostProcessor implements BeanPostProcessor,
                 .receiveTimeout(archive.receiveTimeout())
                 .performSnapshot(archive.performSnapshot())
                 .recoveryInterval(archive.recoveryInterval())
-                .autoStart(archive.autoStart());
+                .autoStart(archive.autoStart())
+                .batchSize(archive.batchSize());
 
         DynamicEventTemplateProvider templateProvider = AnnotationProcessorUtils.findDynamicEventTemplateProvider(bean);
         if (templateProvider != null) {

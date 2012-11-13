@@ -41,6 +41,7 @@ public class ArchivePollingContainer
     private ArchiveOperationHandler archiveHandler;
     private Object archiveHandlerProvider;
     private boolean atomicArchiveOfMultipleObjects;
+    private int batchSize = 50; // == MultiTakeReceiveOperationHandler#DEFAULT_MAX_ENTRIES;
     
     public ArchivePollingContainer() {
         super.setEventListener(this);
@@ -69,7 +70,7 @@ public class ArchivePollingContainer
         atomicArchiveOfMultipleObjects = archiveHandler.supportsAtomicBatchArchiving();
         if (atomicArchiveOfMultipleObjects) {
             MultiTakeReceiveOperationHandler receiveHandler = new MultiTakeReceiveOperationHandler();
-            //receiveHandler.setMaxEntries(/*Configuration Driven*/);
+            receiveHandler.setMaxEntries(batchSize);
             setReceiveOperationHandler(receiveHandler);
             super.setPassArrayAsIs(true);
         }
@@ -138,6 +139,18 @@ public class ArchivePollingContainer
      */
     public void setArchiveHandlerProvider(Object archiveHandlerProvider) {
         this.archiveHandlerProvider = archiveHandlerProvider;
+    }
+
+    /**
+     * @param batchSize - The maximum number of objects to hand over to the archiver in one method call.
+     * This parameter has affect only if the archive handler {@link ArchiveOperationHandler#supportsAtomicBatchArchiving()}
+     */
+    public void setBatchSize(int batchSize) {
+        this.batchSize = batchSize;
+    }
+
+    public int getBatchSize() {
+        return this.batchSize;
     }
     
 }

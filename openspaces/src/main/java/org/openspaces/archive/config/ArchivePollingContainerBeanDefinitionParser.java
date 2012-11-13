@@ -44,6 +44,8 @@ public class ArchivePollingContainerBeanDefinitionParser
 
         private static final String ARCHIVE_HANDLER = "archive-handler";
         
+        private static final String BATCH_SIZE = "batch-size";
+        
         protected Class<ArchivePollingContainer> getBeanClass(Element element) {
             return ArchivePollingContainer.class;
         }
@@ -86,6 +88,11 @@ public class ArchivePollingContainerBeanDefinitionParser
             String performSnapshot = element.getAttribute(PERFORM_SNAPSHOT);
             if (StringUtils.hasLength(performSnapshot)) {
                 builder.addPropertyValue("performSnapshot", performSnapshot);
+            }
+            
+            String batchSize = element.getAttribute(BATCH_SIZE);
+            if (StringUtils.hasLength(batchSize)) {
+                builder.addPropertyValue("batchSize", batchSize);
             }
         }
     }

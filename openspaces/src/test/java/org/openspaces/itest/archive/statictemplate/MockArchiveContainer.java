@@ -29,7 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @since 9.1.1
  * 
  */
-@Archive()
+@Archive(batchSize=2)
 public class MockArchiveContainer {
 
     @Autowired

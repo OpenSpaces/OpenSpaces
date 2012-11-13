@@ -204,5 +204,16 @@ public class ArchivePollingContainerConfigurer {
         return this;
     }
 
+    /**
+     * Determines the maximum number of objects to take from the space
+     * 
+     * @param batchSize
+     * @return 
+     */
+    public ArchivePollingContainerConfigurer batchSize(Integer batchSize) {
+        archiveContainer.setBatchSize(batchSize);
+        return this;
+    }
+
     
 }

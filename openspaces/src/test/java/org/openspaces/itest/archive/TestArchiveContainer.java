@@ -22,12 +22,15 @@ import junit.framework.Assert;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
+import org.openspaces.archive.ArchivePollingContainer;
 import org.openspaces.archive.ArchivePollingContainerConfigurer;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.GigaSpaceConfigurer;
 import org.openspaces.core.space.UrlSpaceConfigurer;
 import org.openspaces.events.DynamicEventTemplate;
 import org.openspaces.events.DynamicEventTemplateProvider;
+import org.openspaces.events.support.AnnotationProcessorUtils;
+import org.openspaces.events.support.EventContainersBus;
 import org.openspaces.itest.events.pojos.MockPojo;
 import org.openspaces.itest.utils.TestUtils;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -54,13 +57,14 @@ public class TestArchiveContainer {
     private final String TEST_DYNAMIC_RAW_XML = "/org/openspaces/itest/archive/dynamictemplate/test-dynamic-archive-raw.xml";
     private final String TEST_DYNAMIC_NAMESPACE_XML = "/org/openspaces/itest/archive/dynamictemplate/test-dynamic-archive-namespace.xml";
     private final String TEST_DYNAMIC_ANNOTATION_XML = "/org/openspaces/itest/archive/dynamictemplate/test-dynamic-archive-annotation.xml";
-
+    
     /**
      * Tests archiver with raw spring bean xml
      */
     @Test
     public void testXmlRaw() throws InterruptedException {
-        xmlTest(TEST_RAW_XML);
+        final int expectedBatchSize = 1;
+        xmlTest(TEST_RAW_XML, expectedBatchSize);
     }
 
     /**
@@ -68,7 +72,9 @@ public class TestArchiveContainer {
      */
     @Test 
     public void testXmlNamespace() throws InterruptedException {
-        xmlTest(TEST_NAMESPACE_XML); 
+        //see batch-size="2" in xml file
+        final int expectedBatchSize = 2;
+        xmlTest(TEST_NAMESPACE_XML , expectedBatchSize); 
     }
     
     /**
@@ -76,7 +82,9 @@ public class TestArchiveContainer {
      */
     @Test 
     public void testXmlAnnotation() throws InterruptedException {
-        xmlTest(TEST_ANNOTATION_XML); 
+        // see @Archive(batchSize=2) annotation and atomic=true in xml file
+        int expectedBatchSize = 2; 
+        xmlTest(TEST_ANNOTATION_XML , expectedBatchSize); 
     }
   
     /**
@@ -84,7 +92,8 @@ public class TestArchiveContainer {
      */
     @Test 
     public void testXmlDynamicTemplateAnnotation() throws InterruptedException {
-        xmlTest(TEST_DYNAMIC_ANNOTATION_XML); 
+        int expectedBatchSize = 1;
+        xmlTest(TEST_DYNAMIC_ANNOTATION_XML, expectedBatchSize); 
     }
 
     
@@ -93,7 +102,8 @@ public class TestArchiveContainer {
      */
     @Test 
     public void testXmlDynamicTemplateNamespace() throws InterruptedException {
-        xmlTest(TEST_DYNAMIC_NAMESPACE_XML); 
+        final int expectedBatchSize = 1;
+        xmlTest(TEST_DYNAMIC_NAMESPACE_XML, expectedBatchSize); 
     }
     
     /**
@@ -101,7 +111,8 @@ public class TestArchiveContainer {
      */
     @Test 
     public void testXmlDynamicTemplateRaw() throws InterruptedException {
-        xmlTest(TEST_DYNAMIC_RAW_XML); 
+        final int expectedBatchSize = 1;
+        xmlTest(TEST_DYNAMIC_RAW_XML , expectedBatchSize); 
     }
     
     /**
@@ -114,7 +125,7 @@ public class TestArchiveContainer {
     }
 
     /**
-     * Tests archiver with atomic archive handler
+     * Tests archiver with atomic archive handler with default batchSize
      */
     @Test
     public void testConfigurerAtomic() throws Exception {
@@ -122,6 +133,16 @@ public class TestArchiveContainer {
         configurerTest(atomic, TemplateToTest.TEMPLATE);
     }
 
+    /**
+     * Tests archiver with atomic archive handler with batchSize
+     */
+    @Test
+    public void testConfigurerAtomicBatchSize() throws Exception {
+        boolean atomic = true;
+        int batchSize = 2;
+        configurerTest(atomic, TemplateToTest.TEMPLATE, batchSize);
+    }
+    
     /**
      * Tests archiver with dynamic template (interface)
      */
@@ -157,6 +178,11 @@ public class TestArchiveContainer {
     }
     
     private void configurerTest(boolean atomic, TemplateToTest templateToTest) throws Exception {
+        Integer batchSize = null;
+        configurerTest(atomic, templateToTest, batchSize);
+    }
+    
+    private void configurerTest(boolean atomic, TemplateToTest templateToTest, Integer batchSize) throws Exception {
         final UrlSpaceConfigurer urlSpaceConfigurer = new UrlSpaceConfigurer("/./space");
         try {
             final IJSpace space = urlSpaceConfigurer.create();
@@ -169,17 +195,30 @@ public class TestArchiveContainer {
                     new ArchivePollingContainerConfigurer(gigaSpace)           
                     .archiveHandler(archiveHandler);
             configureTemplate(containerConfigurer, templateToTest);
+
+            if (atomic && batchSize != null) {
+                containerConfigurer.batchSize(batchSize);
+            }
             
             // autostart is enabled by default
-            containerConfigurer.create();
-
+            ArchivePollingContainer container = containerConfigurer.create();
             
-            test(archiveHandler, gigaSpace, atomic);
+            int expectedBatchSize;
+            if (atomic && batchSize != null) {
+                expectedBatchSize = batchSize;
+            }
+            else if (atomic && batchSize == null) {
+                expectedBatchSize = 50; //the default both in the annotation and in the polling container.
+            }
+            else {
+                expectedBatchSize = 1;
+            }
+            test(archiveHandler, gigaSpace, container, expectedBatchSize);
         } finally {
             urlSpaceConfigurer.destroy();
         }
     }
-
+    
     private void configureTemplate(ArchivePollingContainerConfigurer containerConfigurer, TemplateToTest templateToTest) {
         switch (templateToTest) {
         case TEMPLATE:
@@ -243,24 +282,53 @@ public class TestArchiveContainer {
         }
     }
 
-    private void xmlTest(String relativeXmlName) throws InterruptedException {
+    private void xmlTest(String relativeXmlName, int expectedBatchSize) throws InterruptedException {
 
         final ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(relativeXmlName);
         try {
             final MockArchiveOperationsHandler archiveHandler = context.getBean(MockArchiveOperationsHandler.class);
             final GigaSpace gigaSpace = context.getBean(org.openspaces.core.GigaSpace.class);
-            boolean atomic = false;
-            test(archiveHandler, gigaSpace, atomic);
+            ArchivePollingContainer container = getArchivePollingContainer(context);
+            test(archiveHandler, gigaSpace, container, expectedBatchSize);
         } finally {
             context.close();
         }
     }
 
-    private void test(final MockArchiveOperationsHandler archiveHandler, GigaSpace gigaSpace, final boolean atomic)
+    private ArchivePollingContainer getArchivePollingContainer(final ClassPathXmlApplicationContext context) {
+        ArchivePollingContainer container;
+        try {
+            container = context.getBean(ArchivePollingContainer.class);
+        }
+        catch (final Exception e) {
+            final EventContainersBus eventContainersBus = AnnotationProcessorUtils.findBus(context);
+            container = (ArchivePollingContainer) eventContainersBus.getEventContainers().iterator().next();
+        }
+        return container;
+    }
+    
+    private void test(MockArchiveOperationsHandler archiveHandler, GigaSpace gigaSpace, ArchivePollingContainer container, int expectedBatchSize) throws InterruptedException {
+          boolean atomic = archiveHandler.supportsAtomicBatchArchiving();
+          int batchSize = container.getBatchSize();
+          int actualBatchSize;
+            if (atomic) {
+                actualBatchSize = batchSize;
+            }
+            else {
+                Assert.assertEquals("Test configuration error. Cannot expect batchSize!=1 if not atomic, since the implementation uses take and not takeMultiple", 1, expectedBatchSize);
+                actualBatchSize = 1;
+            }
+            Assert.assertEquals(expectedBatchSize, actualBatchSize);
+            
+            test(archiveHandler, gigaSpace, actualBatchSize);
+    }
+
+    private void test(final MockArchiveOperationsHandler archiveHandler, GigaSpace gigaSpace, final int batchSize)
             throws InterruptedException {
 
+        
         // TODO: Make it transactional by default?
-        final MockPojo[] entries = new MockPojo[] { new MockPojo(false, 1), new MockPojo(false, 2), new MockPojo(false, 3), new MockPojo(false, 4)  };
+        final MockPojo[] entries = new MockPojo[] { new MockPojo(false, 1), new MockPojo(false, 2), new MockPojo(false, 3), new MockPojo(false, 4), new MockPojo(false, 5) };
         final int numberOfEntries = entries.length;
         gigaSpace.writeMultiple(entries);
         TestUtils.repetitive(new Runnable() {
@@ -272,11 +340,22 @@ public class TestArchiveContainer {
 
         }, 10000);
 
-        if (atomic) {
-            // MultiTake uses take() and then takeMultiple
-            Assert.assertTrue(countOperations(archiveHandler) <= 2);
-        } else {
+        if (batchSize >= 5) {
+            // MultiTake uses take() and then takeMultiple() or
+            // takeMultiple()
+            int count = countOperations(archiveHandler);
+            Assert.assertTrue("expected at most 2 count operations (" + count +" > 2)", count <= 2);
+        }
+        else if (batchSize == 2) {
+            // MultiTake uses take() and then takeMultiple (twice) or
+            // MultiTake uses takeMultiple (three times) 
+            Assert.assertEquals(3, countOperations(archiveHandler));
+        }
+        else if (batchSize == 1) {
             Assert.assertEquals(numberOfEntries, countOperations(archiveHandler));
+        }
+        else {
+            Assert.fail("unexpected batchSize " + batchSize);
         }
     }
 

@@ -210,6 +210,16 @@
                             </xsd:documentation>
                         </xsd:annotation>
                     </xsd:attribute>
+                    <xsd:attribute name="batch-size" type="xsd:string">
+                        <xsd:annotation>
+                            <xsd:documentation>
+                                Sets the maximum number of objects to hand over to the archiver in one method call.
+     							This parameter has affect only if the archive handler supports atomic batch archiving.
+     							Default is 50
+     							See also {@link ArchiveOperationHandler#supportsAtomicBatchArchiving()}
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:attribute>
                 </xsd:extension>
             </xsd:complexContent>
         </xsd:complexType>

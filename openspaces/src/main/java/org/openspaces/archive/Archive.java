@@ -73,7 +73,7 @@ public @interface Archive {
      * of events. However, note that any ordering guarantees are lost once multiple consumers are
      * registered. In general, stick with 1 consumer for low-volume events.
      *
-     * @see org.openspaces.events.polling.SimplePollingEventListenerContainer#setConcurrentConsumers(int)
+     * @see org.openspaces.archive.ArchivePollingContainer#setConcurrentConsumers(int)
      */
     int concurrentConsumers() default 1;
 
@@ -91,7 +91,7 @@ public @interface Archive {
      * of events. However, note that any ordering guarantees are lost once multiple consumers are
      * registered. In general, stick with 1 consumer for low-volume events.
      *
-     * @see org.openspaces.events.polling.SimplePollingEventListenerContainer#setMaxConcurrentConsumers(int)
+     * @see org.openspaces.archive.ArchivePollingContainer#setMaxConcurrentConsumers(int)
      */
     int maxConcurrentConsumers() default 1;
 
@@ -102,7 +102,7 @@ public @interface Archive {
      * <p><b>NOTE:</b> This value needs to be smaller than the transaction timeout used by the
      * transaction manager (in the appropriate unit, of course).
      *
-     * @see org.openspaces.events.polling.SimplePollingEventListenerContainer#setReceiveTimeout(long)
+     * @see org.openspaces.archive.ArchivePollingContainer#setReceiveTimeout(long)
      */
     long receiveTimeout() default ArchivePollingContainer.DEFAULT_RECEIVE_TIMEOUT;
 
@@ -111,7 +111,7 @@ public @interface Archive {
      * before invoking registering as an event listener.
      *
      * @see org.openspaces.core.GigaSpace#snapshot(Object)
-     * @see org.openspaces.events.polling.SimplePollingEventListenerContainer#setPerformSnapshot(boolean)
+     * @see org.openspaces.archive.ArchivePollingContainer#setPerformSnapshot(boolean)
      */
     boolean performSnapshot() default true;
 
@@ -124,8 +124,13 @@ public @interface Archive {
     boolean autoStart() default true;
 
     /**
-     * @see org.openspaces.events.polling.SimplePollingEventListenerContainer#setRecoveryInterval(long)
+     * @see org.openspaces.archive.ArchivePollingContainer#setRecoveryInterval(long)
      */
     long recoveryInterval() default ArchivePollingContainer.DEFAULT_RECOVERY_INTERVAL;
+
+    /**
+     * @see org.openspaces.archive.ArchivePollingContainer#setBatchSize(Integer)
+     */
+    int batchSize() default 50;
 }
 

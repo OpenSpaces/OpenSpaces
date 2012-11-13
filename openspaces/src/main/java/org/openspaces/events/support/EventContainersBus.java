@@ -24,6 +24,7 @@ import org.openspaces.pu.service.ServiceMonitorsProvider;
 import org.springframework.beans.factory.DisposableBean;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -59,6 +60,10 @@ public class EventContainersBus implements DisposableBean, ServiceDetailsProvide
         return containers.get(name + SUFFIX);
     }
 
+    public Collection<AbstractEventListenerContainer> getEventContainers() {
+        return new ArrayList<AbstractEventListenerContainer>(containers.values());
+    }
+    
     public ServiceDetails[] getServicesDetails() {
         ArrayList<ServiceDetails> list = new ArrayList<ServiceDetails>();
         for (AbstractEventListenerContainer container : containers.values()) {
