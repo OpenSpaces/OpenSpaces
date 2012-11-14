@@ -17,16 +17,17 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.containers.exceptions;
 
+import java.io.IOException;
+
 import org.openspaces.admin.internal.gsc.events.DefaultElasticGridServiceContainerProvisioningFailureEvent;
 import org.openspaces.admin.internal.pu.elastic.events.InternalElasticProcessingUnitFailureEvent;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.containers.ContainersSlaUtils;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
-import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementLogStackTrace;
 
 
-public class FailedToStartNewGridServiceContainersException extends ContainersSlaEnforcementInProgressException implements SlaEnforcementFailure, SlaEnforcementLogStackTrace {
+public class FailedToStartNewGridServiceContainersException extends ContainersSlaEnforcementInProgressException implements SlaEnforcementFailure {
 
     private static final long serialVersionUID = 1L;
     private final String machineUid;
@@ -43,16 +44,17 @@ public class FailedToStartNewGridServiceContainersException extends ContainersSl
     private static String createMessage(Machine machine, final Exception reason) {
         Throwable rootCause = reason; 
         for (int i = 0 ; i< 10 /*endless loop protection*/;i++) {
-            if (rootCause == null || rootCause.getCause() == null || rootCause.getCause() == rootCause) {
+            if (rootCause == null || rootCause.getCause() == null || rootCause.getCause() == rootCause || 
+                (rootCause instanceof IOException)) {
                 break;
             }
             rootCause = rootCause.getCause();
         }
         return "Failed to start container on machine."
                 + ContainersSlaUtils.machineToString(machine)+ "."+
-                rootCause != null  ? " Caused By:" + rootCause.getMessage(): "";
-    }
-
+                (rootCause != null  ? " Caused By:" + rootCause.getMessage(): "");
+    } 
+    
     @Override
     public int hashCode() {
         final int prime = 31;
