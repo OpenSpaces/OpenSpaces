@@ -28,6 +28,8 @@ import org.openspaces.pu.container.support.CompoundProcessingUnitContainer;
 import org.springframework.core.io.Resource;
 import org.springframework.util.FileCopyUtils;
 
+import com.gigaspaces.internal.io.BootIOUtils;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -344,7 +346,7 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
     private void addJarsLocation(File fileLocation, List<URL> urls, String dir) {
         File libLocation = new File(fileLocation, dir);
         if (libLocation.exists()) {
-            File[] jarFiles = libLocation.listFiles();
+            File[] jarFiles = BootIOUtils.listFiles(libLocation);
             for (File jarFile : jarFiles) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Adding jar [" + jarFile.getAbsolutePath() + "] with pu directory location ["

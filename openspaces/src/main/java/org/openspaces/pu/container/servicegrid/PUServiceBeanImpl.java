@@ -112,6 +112,7 @@ import com.gigaspaces.grid.zone.ZoneHelper;
 import com.gigaspaces.internal.dump.InternalDump;
 import com.gigaspaces.internal.dump.InternalDumpProcessor;
 import com.gigaspaces.internal.dump.InternalDumpProcessorFailedException;
+import com.gigaspaces.internal.io.BootIOUtils;
 import com.gigaspaces.internal.jvm.JVMDetails;
 import com.gigaspaces.internal.jvm.JVMHelper;
 import com.gigaspaces.internal.jvm.JVMStatistics;
@@ -511,7 +512,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             List<URL> libUrls = new ArrayList<URL>();
             File libDir = new File(deployPath, "lib");
             if (libDir.exists()) {
-                File[] libFiles = libDir.listFiles();
+                File[] libFiles = BootIOUtils.listFiles(libDir);
                 for (File libFile : libFiles) {
                     libUrls.add(libFile.toURI().toURL());
                 }
@@ -538,14 +539,14 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             List<URL> sharedlibUrls = new ArrayList<URL>();
             File sharedlibDir = new File(deployPath, "shared-lib");
             if (sharedlibDir.exists()) {
-                File[] sharedlibFiles = sharedlibDir.listFiles();
+                File[] sharedlibFiles = BootIOUtils.listFiles(sharedlibDir);
                 for (File sharedlibFile : sharedlibFiles) {
                     sharedlibUrls.add(sharedlibFile.toURI().toURL());
                 }
             }
             sharedlibDir = new File(deployPath, "WEB-INF/shared-lib");
             if (sharedlibDir.exists()) {
-                File[] sharedlibFiles = sharedlibDir.listFiles();
+                File[] sharedlibFiles = BootIOUtils.listFiles(sharedlibDir);
                 for (File sharedlibFile : sharedlibFiles) {
                     sharedlibUrls.add(sharedlibFile.toURI().toURL());
                 }
@@ -1375,7 +1376,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             } catch (IOException e) {
                 // don't copy it
             }
-            File[] wenInfJars = webInfLib.listFiles();
+            File[] wenInfJars = BootIOUtils.listFiles(webInfLib);
             ArrayList<String> deleted = new ArrayList<String>();
             for (File webInfJarFile : wenInfJars) {
                 boolean delete = false;
