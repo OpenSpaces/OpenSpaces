@@ -136,9 +136,12 @@ public class DefaultElasticServiceManagers implements InternalElasticServiceMana
     @Override
     public void addElasticServiceManager(final InternalElasticServiceManager elasticServiceManager) {
         assertStateChangesPermitted();
+        if (elasticServiceManager == null) {
+            throw new IllegalArgumentException("elasticServiceManager cannot be null");
+        }
         InternalElasticServiceManager existingESM = (InternalElasticServiceManager)
                 elasticServiceManagersByUID.put(elasticServiceManager.getUid(), elasticServiceManager);
-        if (existingESM == null && accept(existingESM)) {
+        if (existingESM == null && accept(elasticServiceManager)) {
             elasticServiceManagerAddedEventManager.elasticServiceManagerAdded(elasticServiceManager);
         }
     }
@@ -259,7 +262,7 @@ public class DefaultElasticServiceManagers implements InternalElasticServiceMana
     private boolean accept( InternalElasticServiceManager elasticServiceManager ){
         
         if( elasticServiceManager == null ){
-            return false;
+            throw new IllegalArgumentException("elasticServiceManager cannot be null");
         }
         
         JVMDetails jvmDetails = elasticServiceManager.getJVMDetails();

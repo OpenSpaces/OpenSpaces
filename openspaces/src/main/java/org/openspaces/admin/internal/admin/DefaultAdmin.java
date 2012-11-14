@@ -863,7 +863,7 @@ public class DefaultAdmin implements InternalAdmin {
         assertStateChangesPermitted();
         synchronized (DefaultAdmin.this) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Adding GSM uid=" + gridServiceManager.getUid());
+                logger.debug("Adding GSM uid=" + gridServiceManager.getUid()+ (acceptVM ? "" : ". Filtered out of Admin API"));
             }
 
             if( acceptVM ){
@@ -933,7 +933,7 @@ public class DefaultAdmin implements InternalAdmin {
         synchronized (DefaultAdmin.this) {
             
             if (logger.isDebugEnabled()) {
-                logger.debug("Adding ESM uid=" + elasticServiceManager.getUid());
+                logger.debug("Adding ESM uid=" + elasticServiceManager.getUid() + (acceptVM ? "" : ". Filtered out of Admin API"));
             }
 
             if( acceptVM ){            

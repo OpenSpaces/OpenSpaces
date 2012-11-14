@@ -366,6 +366,9 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
     @Override
     public void addGridServiceManager(final InternalGridServiceManager gridServiceManager) {
         assertStateChangePermitted();
+        if (gridServiceManager == null) {
+            throw new IllegalArgumentException("gridServiceManager cannot be null");
+        }
         GridServiceManager existingGSM = gridServiceManagersByUID.put(gridServiceManager.getUid(), gridServiceManager);
         if (existingGSM == null && accept( gridServiceManager ) ) {
             gridServiceManagerAddedEventManager.gridServiceManagerAdded(gridServiceManager);
@@ -455,10 +458,10 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
         return gridServiceManager.deploy(applicationConfig, timeout, timeUnit);
     }
     
-    private boolean accept( InternalGridServiceManager gridServiceManager ){
+    private boolean accept( InternalGridServiceManager gridServiceManager){
         
         if( gridServiceManager == null ){
-            return false;
+            throw new IllegalArgumentException("gridServiceManager cannot be null");
         }
         
         JVMDetails jvmDetails = gridServiceManager.getJVMDetails();
