@@ -8,3 +8,8 @@
 .classpath
 .settings
 target
+dist
+docs
+
+/lib/optional/openspaces
+/etarget
