@@ -197,8 +197,13 @@
 		<exec executable="${env.M2_HOME}\bin\${mvn.executable}"> 
 			<arg line="install:install-file -DgroupId=com.gigaspaces -DartifactId=jetty-os -DcreateChecksum=true -Dversion=${productversion} -Dpackaging=jar -DpomFile=${maven.tmp.dir}/jetty-os-pom.xml -Dfile=${target.dir}/gs-openspaces-jetty.jar"/>
 		</exec>
+		
+		<replaceregexp file="${basedir}/tools/alert-integration/pom.xml"
+                    match="&lt;gsVersion&gt;(.*)&lt;\/gsVersion&gt;"
+                    replace="&lt;gsVersion&gt;${productversion}&lt;\/gsVersion&gt;"/>
 		<!--delete dir="${maven.tmp.dir}"/-->
 	</target>
+	
 
     <target name="dist">
         <antcall target="dist_1_5"/>
