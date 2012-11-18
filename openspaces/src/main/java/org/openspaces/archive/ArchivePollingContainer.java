@@ -67,7 +67,7 @@ public class ArchivePollingContainer
         
         initArchiveHandler();
         
-        atomicArchiveOfMultipleObjects = archiveHandler.supportsAtomicBatchArchiving();
+        atomicArchiveOfMultipleObjects = archiveHandler.supportsBatchArchiving();
         if (atomicArchiveOfMultipleObjects) {
             MultiTakeReceiveOperationHandler receiveHandler = new MultiTakeReceiveOperationHandler();
             receiveHandler.setMaxEntries(batchSize);

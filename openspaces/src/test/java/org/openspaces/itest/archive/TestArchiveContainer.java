@@ -324,7 +324,7 @@ public class TestArchiveContainer {
     }
     
     private void test(MockArchiveOperationsHandler archiveHandler, GigaSpace gigaSpace, ArchivePollingContainer container, int expectedBatchSize) throws InterruptedException {
-          boolean atomic = archiveHandler.supportsAtomicBatchArchiving();
+          boolean atomic = archiveHandler.supportsBatchArchiving();
           int batchSize = container.getBatchSize();
           int actualBatchSize;
             if (atomic) {

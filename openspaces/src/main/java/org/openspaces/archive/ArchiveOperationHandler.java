@@ -24,8 +24,17 @@ public interface ArchiveOperationHandler {
     void archive(Object... objects);
 
     /**
-     * @return true - if calling archive with more than one object results in an atomic operation, meaning all or no objects are archived.
+     * What happens when the archive operation receives a batch of objects to persist and throws an exception in the middle of the archiving?
+     * The external archive container (assuming the exception is not swollen with an exception handler) will retry writing the objects.
+     *  
+     * If the archive operation implementation is atomic (meaning that throwing an exception cancels all writes - all or nothing) then return true.
+     * If the archive operation implementation is idempotent (meaning that writing the same objects twice has no visible on the result) then return true.
+     * 
+     * Otherwise return false, since raising an exception would case all objects to be archived again, which would result in objects being archived twice.
+     * Even when returning false, there is a possibility of an object being archived twice in case of a process fail-over.
+     * 
+     * @return true - if calling archive with more than one object
      *         false - means that calls to {@link #archive(Object...)} will contain only one object 
      */
-    boolean supportsAtomicBatchArchiving();
+    boolean supportsBatchArchiving();
 }
