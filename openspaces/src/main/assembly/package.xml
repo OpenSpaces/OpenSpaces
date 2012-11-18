@@ -107,7 +107,7 @@
 			<includes>
 				<include>activation-*</include>
 				<include>transactions-jta-*</include>
-				<include>geronimo-connector-*</include>
+				<include>geronimo-j2ee-connector_1.5_spec-*</include>
 			</includes>
 		</fileSet>
 		<fileSet>

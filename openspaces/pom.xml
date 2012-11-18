@@ -383,11 +383,10 @@
 			<version>1.1</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>geronimo</groupId> <!-- Not original version -->
-			<artifactId>geronimo-connector</artifactId>
-			<version>1.0</version>
-			<scope>provided</scope>
+			<dependency>
+			<groupId>org.apache.geronimo.specs</groupId>
+			<artifactId>geronimo-j2ee-connector_1.5_spec</artifactId>
+			<version>1.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
