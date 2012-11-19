@@ -17,7 +17,6 @@ package org.openspaces.events.config;
 
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
 
@@ -43,13 +42,8 @@ public class AbstractTemplateEventContainerBeanDefinitionParser extends Abstract
         
         Element dynamicTemplateEle = DomUtils.getChildElementByTagName(element, DYNAMIC_TEMPLATE);
         if (isSupportsDynamicTemplate() && dynamicTemplateEle != null) {
-            String dynamicTemplateRef = dynamicTemplateEle.getAttribute("ref");
-            if (StringUtils.hasLength(dynamicTemplateRef)) {
-                builder.addPropertyValue("dynamicTemplateRef", dynamicTemplateRef);
-            } else {
-                builder.addPropertyValue("dynamicTemplate", parserContext.getDelegate().parsePropertyValue(dynamicTemplateEle,
+            builder.addPropertyValue("dynamicTemplate", parserContext.getDelegate().parsePropertyValue(dynamicTemplateEle,
                         builder.getRawBeanDefinition(), "dynamicTemplate"));
-            }
         }
         else {
 

@@ -19,6 +19,7 @@ package org.openspaces.events;
 import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.openspaces.events.support.AnnotationProcessorUtils;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.dao.DataAccessException;
 import org.springframework.util.ReflectionUtils;
@@ -43,8 +44,7 @@ public abstract class AbstractTemplateEventListenerContainer extends AbstractEve
     private Object receiveTemplate;
 
     private DynamicEventTemplateProvider dynamicTemplate;
-
-    private String dymamicTemplateRef;
+    private Object dynamicTemplateRef;
 
     @Override
     public void afterPropertiesSet() {
@@ -78,8 +78,12 @@ public abstract class AbstractTemplateEventListenerContainer extends AbstractEve
             }
         }
         
-        if (dynamicTemplate == null && dymamicTemplateRef != null) {
-            dynamicTemplate = getApplicationContext().getBean(dymamicTemplateRef, DynamicEventTemplateProvider.class);
+        if (dynamicTemplate == null && dynamicTemplateRef != null) {
+            Object dynamicTemplateProviderBean = dynamicTemplateRef;
+            dynamicTemplate = AnnotationProcessorUtils.findDynamicEventTemplateProvider(dynamicTemplateProviderBean);
+            if (dynamicTemplate == null) {
+                throw new IllegalArgumentException("Cannot find dynamic template provider in " + dynamicTemplateRef.getClass());
+            }
         }
         
         if (template != null && dynamicTemplate != null) {
@@ -151,16 +155,11 @@ public abstract class AbstractTemplateEventListenerContainer extends AbstractEve
     /**
      * Called before each take and read polling operation to change the template
      * Overrides any template defined with {@link #setTemplate(Object)} 
-     * @param templateProvider - An object that returns a template that may change with each invocaiton. 
+     * @param templateProvider - 
+     *      An object that implements {@link DynamicEventTemplateProvider} 
+     *      or has a method annotated with {@link DynamicEventTemplateProvider}   
      */
-    public void setDynamicTemplate(DynamicEventTemplateProvider dynamicTemplate) {
-        this.dynamicTemplate = dynamicTemplate;
-    }
-
-    /**
-     * Defines a bean (id) that implements {@link DynamicEventTemplateProvider}
-     */
-    public void setDynamicTemplateRef(String dynamicTemplateBeanRef) {
-        this.dymamicTemplateRef = dynamicTemplateBeanRef; 
+    public void setDynamicTemplate(Object dynamicTemplate) {
+        this.dynamicTemplateRef = dynamicTemplate;
     }
 }
