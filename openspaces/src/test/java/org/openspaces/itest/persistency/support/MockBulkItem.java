@@ -20,6 +20,9 @@ package org.openspaces.itest.persistency.support;
 import java.util.Map;
 
 import com.gigaspaces.datasource.BulkItem;
+import com.gigaspaces.document.SpaceDocument;
+import com.gigaspaces.metadata.SpaceTypeDescriptor;
+import com.gigaspaces.sync.DataSyncOperationType;
 
 /**
  * @author kimchy
@@ -57,5 +60,77 @@ public class MockBulkItem implements BulkItem {
 
     public Map<String, Object> getItemValues() {
         return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.gigaspaces.sync.DataSyncOperation#getUid()
+     */
+    @Override
+    public String getUid() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.gigaspaces.sync.DataSyncOperation#getDataSyncOperationType()
+     */
+    @Override
+    public DataSyncOperationType getDataSyncOperationType() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.gigaspaces.sync.DataSyncOperation#getDataAsObject()
+     */
+    @Override
+    public Object getDataAsObject() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.gigaspaces.sync.DataSyncOperation#getDataAsDocument()
+     */
+    @Override
+    public SpaceDocument getDataAsDocument() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.gigaspaces.sync.DataSyncOperation#getTypeDescriptor()
+     */
+    @Override
+    public SpaceTypeDescriptor getTypeDescriptor() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.gigaspaces.sync.DataSyncOperation#supportsGetTypeDescriptor()
+     */
+    @Override
+    public boolean supportsGetTypeDescriptor() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    /* (non-Javadoc)
+     * @see com.gigaspaces.sync.DataSyncOperation#supportsDataAsObject()
+     */
+    @Override
+    public boolean supportsDataAsObject() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    /* (non-Javadoc)
+     * @see com.gigaspaces.sync.DataSyncOperation#supportsDataAsDocument()
+     */
+    @Override
+    public boolean supportsDataAsDocument() {
+        // TODO Auto-generated method stub
+        return false;
     }
 }
