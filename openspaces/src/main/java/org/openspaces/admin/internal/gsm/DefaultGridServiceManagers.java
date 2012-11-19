@@ -117,8 +117,15 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
     @Override
     public GridServiceManager getManagerByUID(String uid) {
         GridServiceManager gridServiceManager = gridServiceManagersByUID.get(uid);
-        boolean accept = accept( ( InternalGridServiceManager )gridServiceManager );
-        return accept ? gridServiceManager : null;
+        
+        if (gridServiceManager != null && 
+            !accept( ( InternalGridServiceManager )gridServiceManager )) {
+            
+            //filter out result
+            gridServiceManager = null;
+        }
+        
+        return gridServiceManager;
     }
     
     @Override

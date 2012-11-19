@@ -78,8 +78,15 @@ public class DefaultElasticServiceManagers implements InternalElasticServiceMana
     public ElasticServiceManager getManagerByUID(String uid) {
         
         ElasticServiceManager elasticServiceManager = elasticServiceManagersByUID.get(uid);
-        boolean accept = accept( ( InternalElasticServiceManager )elasticServiceManager );
-        return accept ? elasticServiceManager : null;
+        
+        if (elasticServiceManager != null && 
+            !accept( ( InternalElasticServiceManager )elasticServiceManager )) {
+            
+            //filter out result
+            elasticServiceManager = null;
+        }
+        
+        return elasticServiceManager;
     }
     
     @Override
