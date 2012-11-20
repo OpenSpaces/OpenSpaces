@@ -25,12 +25,12 @@ public interface ArchiveOperationHandler {
 
     /**
      * What happens when the archive operation receives a batch of objects to persist and throws an exception in the middle of the archiving?
-     * The external archive container (assuming the exception is not swollen with an exception handler) will retry writing the objects.
+     * The external archive container (assuming the exception is not swollen with an exception handler) will retry archiving all objects.
      *  
      * If the archive operation implementation is atomic (meaning that throwing an exception cancels all writes - all or nothing) then return true.
-     * If the archive operation implementation is idempotent (meaning that writing the same objects twice has no visible on the result) then return true.
+     * If the archive operation implementation is idempotent (meaning that writing the same objects twice has no visibility on the result) then return true.
      * 
-     * Otherwise return false, since raising an exception would case all objects to be archived again, which would result in objects being archived twice.
+     * Otherwise return false, so the archive method is called one object at a time.
      * Even when returning false, there is a possibility of an object being archived twice in case of a process fail-over.
      * 
      * @return true - if calling archive with more than one object
