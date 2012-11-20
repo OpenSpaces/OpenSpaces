@@ -21,6 +21,10 @@ package org.openspaces.archive;
  */
 public interface ArchiveOperationHandler {
 
+    /**
+     * Writes the specified objects to the external storage
+     * @param objects - one or more objects to write. If not {@link #supportsBatchArchiving()} then only one object is passed at a time.
+     */
     void archive(Object... objects);
 
     /**
