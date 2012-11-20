@@ -17,9 +17,8 @@
 	
 	<os-core:giga-space id="gigaSpace" space="space" tx-manager="transactionManager"/>
 	
-	<os-archive:archive-container id="archiveContainer" giga-space="gigaSpace" batch-size="2">
+	<os-archive:archive-container id="archiveContainer" giga-space="gigaSpace" batch-size="2" archive-handler="mockArchiveHandler">
     	<os-core:template ref="mockTemplate" />
-    	<os-archive:archive-handler ref="mockArchiveHandler" />
     	<os-archive:tx-support tx-manager="transactionManager"/>
     </os-archive:archive-container>
 	

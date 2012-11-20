@@ -35,6 +35,7 @@ import org.openspaces.events.support.AnnotationProcessorUtils;
 import org.openspaces.events.support.EventContainersBus;
 import org.openspaces.itest.events.pojos.MockPojo;
 import org.openspaces.itest.utils.TestUtils;
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -56,6 +57,7 @@ public class TestArchiveContainer {
     private final String TEST_RAW_XML = "/org/openspaces/itest/archive/statictemplate/test-archive-raw.xml";
     private final String TEST_NAMESPACE_XML = "/org/openspaces/itest/archive/statictemplate/test-archive-namespace.xml";
     private final String TEST_ANNOTATION_XML = "/org/openspaces/itest/archive/statictemplate/test-archive-annotation.xml";
+    private final String TEST_ANNOTATION_WRONG_XML = "/org/openspaces/itest/archive/wrong/test-wrong-archive-annotation.xml";
     
     private final String TEST_DYNAMIC_RAW_XML = "/org/openspaces/itest/archive/dynamictemplate/test-dynamic-archive-raw.xml";
     private final String TEST_DYNAMIC_NAMESPACE_XML = "/org/openspaces/itest/archive/dynamictemplate/test-dynamic-archive-namespace.xml";
@@ -90,6 +92,15 @@ public class TestArchiveContainer {
         xmlTest(TEST_ANNOTATION_XML , expectedBatchSize); 
     }
   
+    /**
+     * Tests archiver with mostly annotations such as @Archive (minimal xml)
+     */
+    @Test(expected=BeanCreationException.class)
+    public void testXmlWrongAnnotationAttribute() throws InterruptedException {
+        int expectedBatchSize = 2; 
+        xmlTest(TEST_ANNOTATION_WRONG_XML , expectedBatchSize); 
+    }
+    
     /**
      * Tests archiver with mostly annotations such as @Archive (minimal xml)
      */

@@ -66,12 +66,13 @@ public class ArchivePollingAnnotationPostProcessor implements BeanPostProcessor,
         }
         
         GigaSpace gigaSpace = AnnotationProcessorUtils.findGigaSpace(bean, archive.gigaSpace(), applicationContext, beanName);
+        ArchiveOperationHandler archiveHandler = AnnotationProcessorUtils.findArchiveHandler(bean, archive.archiveHandler(), applicationContext, beanName);
 
         EventContainersBus eventContainersBus = AnnotationProcessorUtils.findBus(applicationContext);
         
         ArchivePollingContainerConfigurer archiveContainerConfigurer = 
                 new ArchivePollingContainerConfigurer(gigaSpace)
-                .archiveHandlerProvider(bean)
+                .archiveHandler(archiveHandler)
                 .name(beanName)
                 .concurrentConsumers(archive.concurrentConsumers())
                 .maxConcurrentConsumers(archive.maxConcurrentConsumers())

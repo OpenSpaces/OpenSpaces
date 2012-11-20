@@ -17,6 +17,7 @@
  ******************************************************************************/
 package org.openspaces.events.support;
 
+import org.openspaces.archive.ArchiveOperationHandler;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.events.DynamicEventTemplateProvider;
 import org.openspaces.events.adapter.AnnotationDynamicEventTemplateProviderAdapter;
@@ -53,23 +54,31 @@ public class AnnotationProcessorUtils {
     }
 
     public static GigaSpace findGigaSpace(final Object bean, String gigaSpaceName, ApplicationContext applicationContext, String beanName) throws IllegalArgumentException {
-        GigaSpace gigaSpace = null;
-        if (StringUtils.hasLength(gigaSpaceName)) {
-            gigaSpace = (GigaSpace) applicationContext.getBean(gigaSpaceName);
-            if (gigaSpace == null) {
-                throw new IllegalArgumentException("Failed to lookup GigaSpace using name [" + gigaSpaceName + "] in bean [" + beanName + "]");
+        return findRef(bean, gigaSpaceName, applicationContext, beanName, GigaSpace.class);
+    }
+    
+    public static ArchiveOperationHandler findArchiveHandler(final Object bean, String archiveHandlerName, ApplicationContext applicationContext, String beanName) throws IllegalArgumentException {
+        return findRef(bean, archiveHandlerName, applicationContext, beanName, ArchiveOperationHandler.class);
+    }
+    
+    public static <T> T findRef(final Object bean, String refName, ApplicationContext applicationContext, String beanName, Class<T> refClass) throws IllegalArgumentException {
+        T ref= null;
+        if (StringUtils.hasLength(refName)) {
+            ref = (T) applicationContext.getBean(refName, refClass);
+            if (ref == null) {
+                throw new IllegalArgumentException("Failed to lookup " + refClass.getName() + " using name [" + refName + "] in bean [" + beanName + "]");
             }
-            return gigaSpace;
+            return ref;
         }
 
-        Map gigaSpaces = applicationContext.getBeansOfType(GigaSpace.class);
-        if (gigaSpaces.size() == 1) {
-            return (GigaSpace) gigaSpaces.values().iterator().next();
+        Map<String, T> refs = applicationContext.getBeansOfType(refClass);
+        if (refs.size() == 1) {
+            return (T) refs.values().iterator().next();
         } 
-        throw new IllegalArgumentException("Failed to resolve GigaSpace to use with event container, " +
-                "[" + beanName + "] does not specifiy one, has no fields of that type, and there are more than one GigaSpace beans within the context");
+        throw new IllegalArgumentException("Failed to resolve " + refClass.getName() + " to use with event container, " +
+                "[" + beanName + "] does not specifiy one, has no fields of that type, and there are more than one " + refClass.getName() + " beans within the context");
     }
-
+    
     public static PlatformTransactionManager findTxManager(String txManagerName, ApplicationContext applicationContext, String beanName) {
         PlatformTransactionManager txManager;
         if (StringUtils.hasLength(txManagerName)) {

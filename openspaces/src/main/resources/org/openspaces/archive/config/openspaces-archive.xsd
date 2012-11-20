@@ -23,22 +23,16 @@
         </xsd:annotation>
     </xsd:element>
 
-	
-    <xsd:complexType name="archiveHandlerType">
-     <xsd:attribute name="ref" use="required">
-         <xsd:annotation>
-             <xsd:documentation>
-                 Reference to the bean.
-             </xsd:documentation>
-             <xsd:appinfo>
-                 <tool:annotation kind="ref">
-                     <tool:expected-type
-                             type="org.openspaces.archive.ArchiveOperationHandler"/>
-                 </tool:annotation>
-             </xsd:appinfo>
-         </xsd:annotation>
-     </xsd:attribute>
- </xsd:complexType>
+	<xsd:simpleType name="archiveHandlerRefType">
+        <xsd:annotation>
+            <xsd:appinfo>
+                <tool:annotation kind="ref">
+                    <tool:expected-type type="org.openspaces.archive.ArchiveOperationHandler"/>
+                </tool:annotation>
+            </xsd:appinfo>
+        </xsd:annotation>
+        <xsd:union memberTypes="xsd:string"/>
+    </xsd:simpleType>
 
  
   	<xsd:element name="archive-container">
@@ -53,14 +47,7 @@
             <xsd:complexContent>
                 <xsd:extension base="os-events:baseEventContainer">
                     <xsd:choice minOccurs="1" maxOccurs="unbounded">
-                    	<xsd:element name="archive-handler" type="archiveHandlerType" minOccurs="1" maxOccurs="1" >
-                    	    <xsd:annotation>
-                                <xsd:documentation>
-                                    The archive handler that will archive objects taken from the Space.
-                                </xsd:documentation>
-                            </xsd:annotation>
-                        </xsd:element>
-                        <xsd:element name="tx-support" type="os-events:txEventSupport" minOccurs="0" maxOccurs="1">
+                    	<xsd:element name="tx-support" type="os-events:txEventSupport" minOccurs="0" maxOccurs="1">
                             <xsd:annotation>
                                 <xsd:documentation>
                                     Configures the polling container to work under a transaction. The transaction
@@ -108,6 +95,18 @@
 	                        </xsd:element>
                         </xsd:choice>
                     </xsd:choice>
+                    <xsd:attribute name="archive-handler" type="archiveHandlerRefType" use="required">
+                    <xsd:annotation>
+                        <xsd:appinfo>
+                            <tool:annotation kind="ref">
+                                <tool:expected-type type="org.openspaces.archive.ArchiveOperationHandler"/>
+                            </tool:annotation>
+                        </xsd:appinfo>
+                        <xsd:documentation>
+                            The archive handler that will archive objects taken from the Space.
+                        </xsd:documentation>
+                    </xsd:annotation>
+                </xsd:attribute>
                     <xsd:attribute name="receive-timeout" type="xsd:string">
                         <xsd:annotation>
                             <xsd:documentation>

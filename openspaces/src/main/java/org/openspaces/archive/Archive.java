@@ -51,8 +51,8 @@ public @interface Archive {
     String value() default "";
 
     /**
-     * The name of the bean that that is the {@link org.openspaces.core.GigaSpace} this container will
-     * used.
+     * The name of the bean that is the {@link org.openspaces.core.GigaSpace} this container will
+     * use.
      *
      * <p>Note, this is optional. If there is only one {@link org.openspaces.core.GigaSpace}
      * defined in the application context, it will be used.
@@ -132,5 +132,15 @@ public @interface Archive {
      * @see org.openspaces.archive.ArchivePollingContainer#setBatchSize(Integer)
      */
     int batchSize() default 50;
+    
+
+    /**
+     * The name of the bean that is the {@link org.openspaces.archive.ArchiveOperationHandler} this container will
+     * use.
+     *
+     * <p>Note, this is optional. If there is only one {@link org.openspaces.archive.ArchiveOperationHandler}
+     * defined in the application context, it will be used.
+     */
+    String archiveHandler() default "";
 }
 

@@ -20,7 +20,6 @@ import org.openspaces.events.config.AbstractTemplateEventContainerBeanDefinition
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.StringUtils;
-import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
 
 /**
@@ -54,11 +53,9 @@ public class ArchivePollingContainerBeanDefinitionParser
             
             super.doParse(element, parserContext, builder);
 
-            Element archiveHandlerEle = DomUtils.getChildElementByTagName(element, ARCHIVE_HANDLER);
-            if (archiveHandlerEle != null) {
-                builder.addPropertyValue("archiveHandler",
-                        parserContext.getDelegate().parsePropertyValue(archiveHandlerEle, builder.getRawBeanDefinition(), "archiveHandler"));
-            }
+            String archiveHandler = element.getAttribute(ARCHIVE_HANDLER);
+            builder.addPropertyReference("archiveHandler", archiveHandler);
+
             
             String receiveTimeout = element.getAttribute(RECEIVE_TIMEOUT);
             if (StringUtils.hasLength(receiveTimeout)) {

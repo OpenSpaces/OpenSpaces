@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.openspaces.itest.archive.statictemplate;
+package org.openspaces.itest.archive.wrong;
 
 import org.openspaces.archive.Archive;
 import org.openspaces.archive.ArchiveOperationHandler;
@@ -24,15 +24,14 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Archives {@link MockPojo} to the {@link ArchiveOperationHandler}
  * 
- * Tests the archive @EventTemplate annotation and 
- * tests the archiveHandler attribute of the @Archive annotation
+ * Tests a wrong archiveHandler attribute of the @Archive annotation
  * @author Itai Frenkel
  * @since 9.1.1
  * 
  */
-@Archive(batchSize=2, archiveHandler="mockArchiveHandler")
+@Archive(batchSize=2, archiveHandler="WRONG-mockArchiveHandler")
 @Transactional
-public class MockArchiveContainer {
+public class MockArchiveContainerWrongHandler {
     
     @EventTemplate
     MockPojo getTemplate() {

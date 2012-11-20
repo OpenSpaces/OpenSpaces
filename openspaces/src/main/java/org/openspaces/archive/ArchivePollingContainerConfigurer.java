@@ -195,15 +195,6 @@ public class ArchivePollingContainerConfigurer {
         return archiveContainer;
     }
 
-
-    /**
-     * @see ArchivePollingContainer#setArchiveHandlerProvider(Object)
-     */
-    public ArchivePollingContainerConfigurer archiveHandlerProvider(Object archiveHandlerProvider) {
-        archiveContainer.setArchiveHandlerProvider(archiveHandlerProvider);
-        return this;
-    }
-
     /**
      * Determines the maximum number of objects to take from the space
      * 

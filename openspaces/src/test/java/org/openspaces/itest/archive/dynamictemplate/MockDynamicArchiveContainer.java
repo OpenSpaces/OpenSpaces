@@ -19,11 +19,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 import org.openspaces.archive.Archive;
-import org.openspaces.archive.ArchiveHandler;
 import org.openspaces.archive.ArchiveOperationHandler;
 import org.openspaces.events.DynamicEventTemplate;
 import org.openspaces.itest.events.pojos.MockPojo;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Archives {@link MockPojo} to the {@link ArchiveOperationHandler}
@@ -37,15 +35,6 @@ public class MockDynamicArchiveContainer {
 
     private final Logger logger = Logger.getLogger(this.getClass().getName());
     private final AtomicInteger routing = new AtomicInteger();
-    
-    @Autowired
-    private ArchiveOperationHandler archiveHandler;
-
-
-    @ArchiveHandler
-    public ArchiveOperationHandler getArchiveOperationHandler() {
-        return archiveHandler;
-    }
     
     @DynamicEventTemplate
     MockPojo getDynamicTemplate() {
