@@ -15,12 +15,16 @@
  *******************************************************************************/
 package org.openspaces.archive;
 
+import org.openspaces.archive.ArchiveOperationHandler;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.events.SpaceDataEventListener;
 import org.openspaces.events.polling.SimplePollingEventListenerContainer;
 import org.openspaces.events.polling.receive.MultiTakeReceiveOperationHandler;
+import org.openspaces.events.polling.receive.SingleTakeReceiveOperationHandler;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.transaction.TransactionStatus;
+
+import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
 
 /**
  * Takes objects specified in the template into the archive handler defined by {@link #setArchiveHandler(ArchiveOperationHandler)}
@@ -34,8 +38,8 @@ public class ArchivePollingContainer
     implements SpaceDataEventListener<Object> {
 
     private ArchiveOperationHandler archiveHandler;
-
     private int batchSize = 50; // == MultiTakeReceiveOperationHandler#DEFAULT_MAX_ENTRIES;
+    private long nonBlockingSleep = 100;
     
     public ArchivePollingContainer() {
         super.setEventListener(this);
@@ -55,19 +59,39 @@ public class ArchivePollingContainer
         }
     }
     
-    
     @Override
     public void afterPropertiesSet() {
         
         initArchiveHandler();
         
+        ISpaceProxy space = (ISpaceProxy) getGigaSpace().getSpace();
+        boolean clustered = space.isClustered();
         if (archiveHandler.supportsBatchArchiving()) {
             MultiTakeReceiveOperationHandler receiveHandler = new MultiTakeReceiveOperationHandler();
             receiveHandler.setMaxEntries(batchSize);
+            if (clustered) {
+              //remote clustered proxy does not support blocking takeMultiple
+              receiveHandler.setNonBlocking(true);
+              receiveHandler.setNonBlockingFactor(calcNonBlockingFactor());
+            }
             setReceiveOperationHandler(receiveHandler);
             super.setPassArrayAsIs(true);
         }
+        else {
+            SingleTakeReceiveOperationHandler receiveHandler = new SingleTakeReceiveOperationHandler();
+            if (clustered) {
+                //remote clustered proxy does not support blocking take
+                receiveHandler.setNonBlocking(true);
+                receiveHandler.setNonBlockingFactor(calcNonBlockingFactor());
+            }
+            setReceiveOperationHandler(receiveHandler);
+        }
         super.afterPropertiesSet();
+    }
+
+    private int calcNonBlockingFactor() {
+        long nonblockingFactor = getReceiveTimeout()/getNonBlockingSleep();
+        return (int)Math.max(1,nonblockingFactor);
     }
 
     /**
@@ -100,6 +124,21 @@ public class ArchivePollingContainer
 
     public int getBatchSize() {
         return this.batchSize;
+    }
+
+    public long getNonBlockingSleep() {
+        return nonBlockingSleep;
+    }
+
+    /**
+     * In case the space is a proxy to a remote clustered space we use non-blocking take operation for polling.
+     * If the take returned without any object the thread sleeps for 100 milliseconds.
+     * Use this method to set the sleep timeout to a different value.
+     * 
+     * @param nonBlockingSleepMilliseconds - the time to sleep if take returned no values (milliseconds)
+     */
+    public void setNonBlockingSleep(long nonBlockingSleepMilliseconds) {
+        this.nonBlockingSleep = nonBlockingSleepMilliseconds;
     }
     
 }

@@ -196,15 +196,18 @@ public class ArchivePollingContainerConfigurer {
     }
 
     /**
-     * Determines the maximum number of objects to take from the space
-     * 
-     * @param batchSize
-     * @return 
+     * @see ArchivePollingContainer#setBatchSize(int)
      */
-    public ArchivePollingContainerConfigurer batchSize(Integer batchSize) {
+    public ArchivePollingContainerConfigurer batchSize(int batchSize) {
         archiveContainer.setBatchSize(batchSize);
         return this;
     }
-
     
+    /**
+     * @see ArchivePollingContainer#setNonBlockingSleep(long)
+     */
+    public ArchivePollingContainerConfigurer nonBlockingSleep(long nonBlockingSleepMilliseconds) {
+        archiveContainer.setNonBlockingSleep(nonBlockingSleepMilliseconds);
+        return this;
+    }
 }

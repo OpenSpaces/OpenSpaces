@@ -26,6 +26,7 @@ import org.openspaces.archive.ArchivePollingContainer;
 import org.openspaces.archive.ArchivePollingContainerConfigurer;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.GigaSpaceConfigurer;
+import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.space.UrlSpaceConfigurer;
 import org.openspaces.core.transaction.manager.AbstractJiniTransactionManager;
 import org.openspaces.core.transaction.manager.DistributedJiniTxManagerConfigurer;
@@ -62,7 +63,7 @@ public class TestArchiveContainer {
     private final String TEST_DYNAMIC_RAW_XML = "/org/openspaces/itest/archive/dynamictemplate/test-dynamic-archive-raw.xml";
     private final String TEST_DYNAMIC_NAMESPACE_XML = "/org/openspaces/itest/archive/dynamictemplate/test-dynamic-archive-namespace.xml";
     private final String TEST_DYNAMIC_ANNOTATION_XML = "/org/openspaces/itest/archive/dynamictemplate/test-dynamic-archive-annotation.xml";
-    
+
     /**
      * Tests archiver with raw spring bean xml
      */
@@ -88,7 +89,7 @@ public class TestArchiveContainer {
     @Test 
     public void testXmlAnnotation() throws InterruptedException {
         // see @Archive(batchSize=2) annotation and atomic=true in xml file
-        int expectedBatchSize = 2; 
+        final int expectedBatchSize = 2; 
         xmlTest(TEST_ANNOTATION_XML , expectedBatchSize); 
     }
   
@@ -97,7 +98,7 @@ public class TestArchiveContainer {
      */
     @Test(expected=BeanCreationException.class)
     public void testXmlWrongAnnotationAttribute() throws InterruptedException {
-        int expectedBatchSize = 2; 
+        final int expectedBatchSize = 2; 
         xmlTest(TEST_ANNOTATION_WRONG_XML , expectedBatchSize); 
     }
     
@@ -106,7 +107,7 @@ public class TestArchiveContainer {
      */
     @Test 
     public void testXmlDynamicTemplateAnnotation() throws InterruptedException {
-        int expectedBatchSize = 1;
+        final int expectedBatchSize = 1;
         xmlTest(TEST_DYNAMIC_ANNOTATION_XML, expectedBatchSize); 
     }
 
@@ -134,8 +135,7 @@ public class TestArchiveContainer {
      */
     @Test
     public void testConfigurer() throws Exception {
-        boolean atomic = false;
-        configurerTest(atomic, TemplateToTest.TEMPLATE);
+        configurerTest(TemplateToTest.TEMPLATE);
     }
 
     /**
@@ -143,8 +143,8 @@ public class TestArchiveContainer {
      */
     @Test
     public void testConfigurerAtomic() throws Exception {
-        boolean atomic = true;
-        configurerTest(atomic, TemplateToTest.TEMPLATE);
+        final boolean atomic = true;
+        configurerTest(TemplateToTest.TEMPLATE, atomic);
     }
 
     /**
@@ -152,9 +152,10 @@ public class TestArchiveContainer {
      */
     @Test
     public void testConfigurerAtomicBatchSize() throws Exception {
-        boolean atomic = true;
-        int batchSize = 2;
-        configurerTest(atomic, TemplateToTest.TEMPLATE, batchSize);
+        final boolean atomic = true;
+        final boolean remote = false;
+        final int batchSize = 2;
+        configurerTest(TemplateToTest.TEMPLATE, atomic, remote, batchSize);
     }
     
     /**
@@ -162,8 +163,7 @@ public class TestArchiveContainer {
      */
     @Test
     public void testConfigurerDynamicTemplateInterface() throws Exception {
-        boolean atomic = false;
-        configurerTest(atomic, TemplateToTest.DYNAMIC_TEMPLATE_INTERFACE);
+        configurerTest(TemplateToTest.DYNAMIC_TEMPLATE_INTERFACE);
     }
     
     /**
@@ -171,8 +171,7 @@ public class TestArchiveContainer {
      */
     @Test
     public void testConfigurerDynamicTemplateAnnotation() throws Exception {
-        boolean atomic = false;
-        configurerTest(atomic, TemplateToTest.DYNAMIC_TEMPLATE_ANNOTATION);
+        configurerTest(TemplateToTest.DYNAMIC_TEMPLATE_ANNOTATION);
     }
     
     /**
@@ -180,8 +179,21 @@ public class TestArchiveContainer {
      */
     @Test
     public void testConfigurerDynamicTemplateMethod() throws Exception {
-        boolean atomic = false;
-        configurerTest(atomic, TemplateToTest.DYNAMIC_TEMPLATE_METHOD);
+        configurerTest(TemplateToTest.DYNAMIC_TEMPLATE_METHOD);
+    }
+    
+    @Test
+    public void testConfigurerClustered() throws Exception {
+        final boolean atomic = false;
+        final boolean clustered = true;
+        configurerTest(TemplateToTest.TEMPLATE, atomic, clustered);
+    }
+    
+    @Test
+    public void testConfigurerAtomicClustered() throws Exception {
+        final boolean atomic = true;
+        final boolean clustered = true;
+        configurerTest(TemplateToTest.TEMPLATE, atomic, clustered);
     }
     
     enum TemplateToTest {
@@ -191,13 +203,25 @@ public class TestArchiveContainer {
         DYNAMIC_TEMPLATE_METHOD
     }
     
-    private void configurerTest(boolean atomic, TemplateToTest templateToTest) throws Exception {
-        Integer batchSize = null;
-        configurerTest(atomic, templateToTest, batchSize);
+    private void configurerTest(TemplateToTest templateToTest) throws Exception {
+        final boolean atomic = false;
+        configurerTest(templateToTest, atomic);
     }
     
-    private void configurerTest(boolean atomic, TemplateToTest templateToTest, Integer batchSize) throws Exception {
-        final UrlSpaceConfigurer urlSpaceConfigurer = new UrlSpaceConfigurer("/./space");
+    private void configurerTest(TemplateToTest templateToTest, boolean atomic) throws Exception {
+        final boolean remote = false;
+        configurerTest(templateToTest, atomic, remote);
+    }
+    
+    private void configurerTest(TemplateToTest templateToTest, boolean atomic, boolean remote) throws Exception {
+        final Integer batchSize = null;
+        configurerTest(templateToTest, atomic, remote, batchSize);
+    }
+    
+    private void configurerTest(TemplateToTest templateToTest, boolean atomic, boolean clustered, Integer batchSize) throws Exception {
+       
+        UrlSpaceConfigurer urlSpaceConfigurer = new UrlSpaceConfigurer("/./space").clusterInfo(new ClusterInfo("partitioned-sync2backup",1,null,1,0));
+        UrlSpaceConfigurer remoteUrlSpaceConfigurer = new UrlSpaceConfigurer("jini://*/*/space");
         try {
             PlatformTransactionManager transactionManager = null;
             if (atomic) {
@@ -208,8 +232,16 @@ public class TestArchiveContainer {
                 }
             }
             
+            GigaSpace gigaSpace;
+            
             final IJSpace space = urlSpaceConfigurer.create();
-            final GigaSpace gigaSpace = new GigaSpaceConfigurer(space).transactionManager(transactionManager).create();
+            if (clustered) {
+                final IJSpace remoteSpace = remoteUrlSpaceConfigurer.create();
+                gigaSpace = new GigaSpaceConfigurer(remoteSpace).transactionManager(transactionManager).create();
+            }
+            else {
+                gigaSpace = new GigaSpaceConfigurer(space).transactionManager(transactionManager).create();
+            }
                         
             final MockArchiveOperationsHandler archiveHandler = new MockArchiveOperationsHandler();
             archiveHandler.setAtomicArchiveOfMultipleObjects(atomic);
@@ -242,7 +274,14 @@ public class TestArchiveContainer {
             }
             test(archiveHandler, gigaSpace, container, expectedBatchSize);
         } finally {
-            urlSpaceConfigurer.destroy();
+            
+            if (remoteUrlSpaceConfigurer != null) {
+                remoteUrlSpaceConfigurer.destroy();
+            }
+            
+            if (urlSpaceConfigurer != null) {
+                urlSpaceConfigurer.destroy();
+            }
         }
     }
     
@@ -276,6 +315,7 @@ public class TestArchiveContainer {
             final Object dynamicTemplateAnnotation = new Object() {
                 final AtomicInteger routing = new AtomicInteger();
                 
+                @SuppressWarnings("unused")
                 @DynamicEventTemplate
                 public Object getDynamicTemplate() {
                     final MockPojo template = new MockPojo();
@@ -293,6 +333,7 @@ public class TestArchiveContainer {
             final Object dynamicTemplateMethod = new Object() {
                 final AtomicInteger routing = new AtomicInteger();
                 
+                @SuppressWarnings("unused")
                 public Object getDynamicTemplateMethod() {
                     final MockPojo template = new MockPojo();
                     template.setProcessed(false);
