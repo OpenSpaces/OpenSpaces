@@ -34,7 +34,7 @@ public class ArchivePollingContainer
     implements SpaceDataEventListener<Object> {
 
     private ArchiveOperationHandler archiveHandler;
-    private boolean atomicArchiveOfMultipleObjects;
+
     private int batchSize = 50; // == MultiTakeReceiveOperationHandler#DEFAULT_MAX_ENTRIES;
     
     public ArchivePollingContainer() {
@@ -61,8 +61,7 @@ public class ArchivePollingContainer
         
         initArchiveHandler();
         
-        atomicArchiveOfMultipleObjects = archiveHandler.supportsBatchArchiving();
-        if (atomicArchiveOfMultipleObjects) {
+        if (archiveHandler.supportsBatchArchiving()) {
             MultiTakeReceiveOperationHandler receiveHandler = new MultiTakeReceiveOperationHandler();
             receiveHandler.setMaxEntries(batchSize);
             setReceiveOperationHandler(receiveHandler);
@@ -83,7 +82,7 @@ public class ArchivePollingContainer
 
     @Override
     public void onEvent(Object data, GigaSpace gigaSpace, TransactionStatus txStatus, Object source) {
-        if (atomicArchiveOfMultipleObjects) {
+        if (isPassArrayAsIs()) {
             archiveHandler.archive((Object[])data);
         }
         else {
