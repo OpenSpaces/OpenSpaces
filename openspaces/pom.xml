@@ -116,7 +116,6 @@
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>${junitVersion}</version>
-			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.hibernate</groupId>
@@ -127,7 +126,6 @@
 			<groupId>com.gigaspaces</groupId>
 			<artifactId>gs-runtime</artifactId>
 			<version>${gsVersion}</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.aopalliance</groupId>
@@ -186,7 +184,6 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-tx</artifactId>
 			<version>${springVersion}</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -303,7 +300,6 @@
 			<groupId>org.jboss.jbossts</groupId>
 			<artifactId>jbossjta</artifactId>
 			<version>4.15.0.Final</version>
-			<scope>test</scope>
 			<exclusions>
 				<exclusion>
 					<groupId>org.jboss.logging</groupId>
@@ -369,7 +365,6 @@
 			<groupId>org.apache.openjpa</groupId>
 			<artifactId>openjpa-all</artifactId>
 			<version>2.0.1</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>hsqldb</groupId> <!-- Not original version -->
