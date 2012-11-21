@@ -16,6 +16,7 @@
 
 package org.openspaces.persistency.hibernate.iterator;
 
+import com.gigaspaces.datasource.DataSourceSQLQuery;
 import com.j_spaces.core.client.SQLQuery;
 import org.hibernate.CacheMode;
 import org.hibernate.Query;
@@ -35,7 +36,7 @@ public class HibernateIteratorUtils {
         return entity;
     }
 
-    public static Query createQueryFromSQLQuery(SQLQuery sqlQuery, Session session) {
+    public static Query createQueryFromSQLQuery(SQLQuery<?> sqlQuery, Session session) {
         String select = sqlQuery.getFromQuery();
         Query query = session.createQuery(select);
         Object[] preparedValues = sqlQuery.getParameters();
@@ -50,10 +51,36 @@ public class HibernateIteratorUtils {
         return query;
     }
 
-    public static Query createQueryFromSQLQuery(SQLQuery sqlQuery, StatelessSession session) {
+    public static Query createQueryFromSQLQuery(SQLQuery<?> sqlQuery, StatelessSession session) {
         String select = sqlQuery.getFromQuery();
         Query query = session.createQuery(select);
         Object[] preparedValues = sqlQuery.getParameters();
+        if (preparedValues != null) {
+            for (int i = 0; i < preparedValues.length; i++) {
+                query.setParameter(i, preparedValues[i]);
+            }
+        }
+        query.setReadOnly(true);
+        return query;
+    }
+
+    public static Query createQueryFromDataSourceSQLQuery(DataSourceSQLQuery<?> dataSourceSQLQuery, Session session) {
+        String select = dataSourceSQLQuery.getQuery();
+        Query query = session.createQuery(select);
+        Object[] preparedValues = dataSourceSQLQuery.getQueryParameters();
+        if (preparedValues != null) {
+            for (int i = 0; i < preparedValues.length; i++) {
+                query.setParameter(i, preparedValues[i]);
+            }
+        }
+        query.setReadOnly(true);
+        return query;
+    }
+    
+    public static Query createQueryFromDataSourceSQLQuery(DataSourceSQLQuery<?> dataSourceSQLQuery, StatelessSession session) {
+        String select = dataSourceSQLQuery.getQuery();
+        Query query = session.createQuery(select);
+        Object[] preparedValues = dataSourceSQLQuery.getQueryParameters();
         if (preparedValues != null) {
             for (int i = 0; i < preparedValues.length; i++) {
                 query.setParameter(i, preparedValues[i]);

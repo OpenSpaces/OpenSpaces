@@ -17,6 +17,7 @@
 package org.openspaces.persistency.hibernate.iterator;
 
 import com.gigaspaces.datasource.DataIterator;
+import com.gigaspaces.datasource.DataSourceSQLQuery;
 import com.j_spaces.core.client.SQLQuery;
 import org.hibernate.CacheMode;
 import org.hibernate.Criteria;
@@ -36,7 +37,9 @@ import java.util.Iterator;
  */
 public class DefaultListQueryDataIterator implements DataIterator {
 
-    protected final SQLQuery sqlQuery;
+    protected final SQLQuery<?> sqlQuery;
+    
+    protected final DataSourceSQLQuery<?> dataSourceSQLQuery;
 
     protected final String entityName;
 
@@ -55,6 +58,7 @@ public class DefaultListQueryDataIterator implements DataIterator {
     public DefaultListQueryDataIterator(SQLQuery sqlQuery, SessionFactory sessionFactory) {
         this.sqlQuery = sqlQuery;
         this.entityName = null;
+        this.dataSourceSQLQuery = null;
         this.sessionFactory = sessionFactory;
         this.from = -1;
         this.size = -1;
@@ -63,6 +67,16 @@ public class DefaultListQueryDataIterator implements DataIterator {
     public DefaultListQueryDataIterator(String entityName, SessionFactory sessionFactory) {
         this.entityName = entityName;
         this.sqlQuery = null;
+        this.dataSourceSQLQuery = null;
+        this.sessionFactory = sessionFactory;
+        this.from = -1;
+        this.size = -1;
+    }
+    
+    public DefaultListQueryDataIterator(DataSourceSQLQuery dataSourceSQLQuery, SessionFactory sessionFactory) {
+        this.dataSourceSQLQuery = dataSourceSQLQuery;
+        this.sqlQuery = null;
+        this.entityName = null;
         this.sessionFactory = sessionFactory;
         this.from = -1;
         this.size = -1;
@@ -71,14 +85,16 @@ public class DefaultListQueryDataIterator implements DataIterator {
     public DefaultListQueryDataIterator(String entityName, SessionFactory sessionFactory, int from, int size) {
         this.entityName = entityName;
         this.sqlQuery = null;
+        this.dataSourceSQLQuery = null;
         this.sessionFactory = sessionFactory;
         this.from = from;
         this.size = size;
     }
 
     public DefaultListQueryDataIterator(SQLQuery sqlQuery, SessionFactory sessionFactory, int from, int size) {
-        this.entityName = null;
         this.sqlQuery = sqlQuery;
+        this.entityName = null;
+        this.dataSourceSQLQuery = null;
         this.sessionFactory = sessionFactory;
         this.from = from;
         this.size = size;
@@ -128,6 +144,13 @@ public class DefaultListQueryDataIterator implements DataIterator {
             return criteria.list().iterator();
         } else if (sqlQuery != null) {
             Query query = HibernateIteratorUtils.createQueryFromSQLQuery(sqlQuery, session);
+            if (from >= 0) {
+                query.setFirstResult(from);
+                query.setMaxResults(size);
+            }
+            return query.list().iterator();
+        } else if (dataSourceSQLQuery != null) {
+            Query query = HibernateIteratorUtils.createQueryFromDataSourceSQLQuery(dataSourceSQLQuery, session);
             if (from >= 0) {
                 query.setFirstResult(from);
                 query.setMaxResults(size);
