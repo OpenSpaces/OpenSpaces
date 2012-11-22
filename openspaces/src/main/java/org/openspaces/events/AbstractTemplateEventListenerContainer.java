@@ -47,7 +47,8 @@ public abstract class AbstractTemplateEventListenerContainer extends AbstractEve
     private Object dynamicTemplateRef;
 
     @Override
-    public void afterPropertiesSet() {
+    public void initialize() throws DataAccessException {
+        
         if (template == null) {
             Class eventListenerType = getEventListenerClass();
             if (eventListenerType != null) {
@@ -89,12 +90,7 @@ public abstract class AbstractTemplateEventListenerContainer extends AbstractEve
         if (template != null && dynamicTemplate != null) {
             throw new IllegalArgumentException("dynamicTemplate and template are mutually exclusive.");
         }
-        
-        super.afterPropertiesSet();
-    }
 
-    @Override
-    public void initialize() throws DataAccessException {
         if (performSnapshot && template != null) {
             if (logger.isTraceEnabled()) {
                 logger.trace(message("Performing snapshot on template [" + template + "]"));
