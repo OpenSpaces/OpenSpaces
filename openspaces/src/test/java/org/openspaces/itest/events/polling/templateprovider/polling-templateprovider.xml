@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:os-core="http://www.openspaces.org/schema/core"
+       xmlns:os-events="http://www.openspaces.org/schema/events"
+       xmlns:os-remoting="http://www.openspaces.org/schema/remoting"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+       http://www.openspaces.org/schema/core http://www.openspaces.org/schema/9.1/core/openspaces-core.xsd
+       http://www.openspaces.org/schema/events http://www.openspaces.org/schema/9.1/events/openspaces-events.xsd
+       http://www.openspaces.org/schema/remoting http://www.openspaces.org/schema/9.1/remoting/openspaces-remoting.xsd">
+
+    <bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"/>
+
+    <os-core:space id="space" url="/./eventSpace" lookup-groups="${user.name}" />            
+
+    <os-core:giga-space id="gigaSpace" space="space" />
+
+	<bean id="eventListener" class="org.openspaces.itest.events.polling.templateprovider.TestEventListener" />
+
+	<bean id="templateProvider" class="org.openspaces.itest.events.polling.templateprovider.TestEventTemplateProvider" />
+
+    <os-events:polling-container id="pollingContainer" giga-space="gigaSpace">
+        <os-events:listener ref="eventListener"/>
+        <os-core:template ref="templateProvider" />
+    </os-events:polling-container>
+</beans>

@@ -16,13 +16,8 @@
 
 package org.openspaces.events;
 
-import java.lang.reflect.Method;
-import java.util.concurrent.atomic.AtomicReference;
-
 import org.openspaces.events.support.AnnotationProcessorUtils;
-import org.springframework.aop.support.AopUtils;
 import org.springframework.dao.DataAccessException;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * A simple base class that provides support methods for Template based event listeners.
@@ -49,33 +44,24 @@ public abstract class AbstractTemplateEventListenerContainer extends AbstractEve
     @Override
     public void initialize() throws DataAccessException {
         
-        if (template == null) {
-            Class eventListenerType = getEventListenerClass();
+        Object possibleTemplateProvider = null;
+        
+        if (template != null) {
+            // check if template object is actually a template provider
+            possibleTemplateProvider = template;
+        }
+        else {
+            Class<?> eventListenerType = getEventListenerClass();
             if (eventListenerType != null) {
-                Object listener = getActualEventListener();
-
-                // check if it implements an interface to provide the template
-                if (EventTemplateProvider.class.isAssignableFrom(listener.getClass())) {
-                    setTemplate(((EventTemplateProvider) getEventListener()).getTemplate());
-                }
-
-                // check if there is an annotation for it
-                final AtomicReference<Method> ref = new AtomicReference<Method>();
-                ReflectionUtils.doWithMethods(AopUtils.getTargetClass(listener), new ReflectionUtils.MethodCallback() {
-                    public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
-                        if (method.isAnnotationPresent(EventTemplate.class)) {
-                            ref.set(method);
-                        }
-                    }
-                });
-                if (ref.get() != null) {
-                    ref.get().setAccessible(true);
-                    try {
-                        setTemplate(ref.get().invoke(listener));
-                    } catch (Exception e) {
-                        throw new IllegalArgumentException("Failed to get template from method [" + ref.get().getName() + "]", e);
-                    }
-                }
+                //check if listener object is also a template provider
+                possibleTemplateProvider = getActualEventListener();
+            }
+        }
+        
+        if (possibleTemplateProvider != null) {
+            Object templateFromProvider = AnnotationProcessorUtils.findTemplateFromProvider(possibleTemplateProvider);
+            if (templateFromProvider != null) {
+                setTemplate(templateFromProvider);
             }
         }
         

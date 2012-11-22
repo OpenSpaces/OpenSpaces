@@ -20,12 +20,18 @@ package org.openspaces.events.support;
 import org.openspaces.archive.ArchiveOperationHandler;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.events.DynamicEventTemplateProvider;
+import org.openspaces.events.EventTemplate;
+import org.openspaces.events.EventTemplateProvider;
 import org.openspaces.events.adapter.AnnotationDynamicEventTemplateProviderAdapter;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author kimchy
@@ -118,5 +124,33 @@ public class AnnotationProcessorUtils {
             }
         }
         return provider;
+    }
+
+    public static Object findTemplateFromProvider(Object listener) {
+        Object newTemplate = null;
+        // check if it implements an interface to provide the template
+        if (EventTemplateProvider.class.isAssignableFrom(listener.getClass())) {
+            newTemplate = ((EventTemplateProvider) listener).getTemplate();
+        }
+        else {
+            // check if there is an annotation for it
+            final AtomicReference<Method> ref = new AtomicReference<Method>();
+            ReflectionUtils.doWithMethods(AopUtils.getTargetClass(listener), new ReflectionUtils.MethodCallback() {
+                public void doWith(final Method method) throws IllegalArgumentException, IllegalAccessException {
+                    if (method.isAnnotationPresent(EventTemplate.class)) {
+                        ref.set(method);
+                    }
+                }
+            });
+            if (ref.get() != null) {
+                ref.get().setAccessible(true);
+                try {
+                    newTemplate = ref.get().invoke(listener);
+                } catch (final Exception e) {
+                    throw new IllegalArgumentException("Failed to get template from method [" + ref.get().getName() + "]", e);
+                }
+            }
+        }
+        return newTemplate;
     }
 }

@@ -109,7 +109,7 @@ public abstract class AbstractEventListenerContainer extends AbstractSpaceListen
         return applicationContext;
     }
 
-    protected Class getEventListenerClass() {
+    protected Class<?> getEventListenerClass() {
         if (eventListener != null) {
             return eventListener.getClass();
         }
