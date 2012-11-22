@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.openspaces.archive;
 
-import org.openspaces.archive.ArchiveOperationHandler;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.events.SpaceDataEventListener;
 import org.openspaces.events.polling.SimplePollingEventListenerContainer;
@@ -60,9 +59,7 @@ public class ArchivePollingContainer
     }
     
     @Override
-    public void afterPropertiesSet() {
-        
-        initArchiveHandler();
+    public void initialize() {
         
         ISpaceProxy space = (ISpaceProxy) getGigaSpace().getSpace();
         boolean clustered = space.isClustered();
@@ -74,7 +71,7 @@ public class ArchivePollingContainer
               receiveHandler.setNonBlocking(true);
               receiveHandler.setNonBlockingFactor(calcNonBlockingFactor());
             }
-            setReceiveOperationHandler(receiveHandler);
+            super.setReceiveOperationHandler(receiveHandler);
             super.setPassArrayAsIs(true);
         }
         else {
@@ -84,24 +81,19 @@ public class ArchivePollingContainer
                 receiveHandler.setNonBlocking(true);
                 receiveHandler.setNonBlockingFactor(calcNonBlockingFactor());
             }
-            setReceiveOperationHandler(receiveHandler);
+            super.setReceiveOperationHandler(receiveHandler);
         }
-        super.afterPropertiesSet();
+        
+        if (getExceptionHandler() == null) {
+            setExceptionHandler(new DefaultArchivePollingContainerExceptionHandler());
+        }
+        
+        super.initialize();
     }
-
+    
     private int calcNonBlockingFactor() {
         long nonblockingFactor = getReceiveTimeout()/getNonBlockingSleep();
         return (int)Math.max(1,nonblockingFactor);
-    }
-
-    /**
-     * Validate there is a valid archiveHandler or extract one from a valid archiveHandlerProvider.
-     */
-    private void initArchiveHandler() {
-                
-        if (archiveHandler == null) {
-            throw new IllegalStateException("archiveHandler cannot be null");
-        }
     }
 
     @Override
@@ -140,5 +132,4 @@ public class ArchivePollingContainer
     public void setNonBlockingSleep(long nonBlockingSleepMilliseconds) {
         this.nonBlockingSleep = nonBlockingSleepMilliseconds;
     }
-    
 }
