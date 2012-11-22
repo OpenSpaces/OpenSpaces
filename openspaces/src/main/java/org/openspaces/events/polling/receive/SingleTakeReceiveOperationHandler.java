@@ -37,6 +37,8 @@ public class SingleTakeReceiveOperationHandler extends AbstractFifoGroupingRecei
         int modifiers = gigaSpace.getSpace().getReadModifiers();
         if(useFifoGrouping)
             modifiers |= TakeModifiers.FIFO_GROUPING_POLL;
+        if (useMemoryOnlySearch)
+            modifiers |= TakeModifiers.MEMORY_ONLY_SEARCH;
         return gigaSpace.take(template, receiveTimeout, modifiers);
     }
 
@@ -49,12 +51,14 @@ public class SingleTakeReceiveOperationHandler extends AbstractFifoGroupingRecei
         int modifiers = gigaSpace.getSpace().getReadModifiers();
         if(useFifoGrouping)
             modifiers |= TakeModifiers.FIFO_GROUPING_POLL;
+        if (useMemoryOnlySearch)
+            modifiers |= TakeModifiers.MEMORY_ONLY_SEARCH;
         return gigaSpace.take(template, 0, modifiers);
     }
 
     @Override
     public String toString() {
-        //TODO FG : add fifoGroups when name is final
-        return "Single Take, nonBlocking[" + nonBlocking + "], nonBlockingFactor[" + nonBlockingFactor + "]";
+        return "Single Take, nonBlocking[" + nonBlocking + "], nonBlockingFactor[" + nonBlockingFactor
+                + "], useFifoGroups[" + isUseFifoGrouping() + "], useMemoryOnlySearch[" + isUseMemoryOnlySearch() + "]";
     }
 }

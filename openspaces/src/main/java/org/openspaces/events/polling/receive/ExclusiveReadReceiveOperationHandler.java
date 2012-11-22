@@ -46,6 +46,8 @@ public class ExclusiveReadReceiveOperationHandler extends AbstractFifoGroupingRe
         int modifiers = gigaSpace.getModifiersForIsolationLevel() | ReadModifiers.EXCLUSIVE_READ_LOCK;
         if(useFifoGrouping)
             modifiers |= ReadModifiers.FIFO_GROUPING_POLL;
+        if (useMemoryOnlySearch)
+            modifiers |= ReadModifiers.MEMORY_ONLY_SEARCH;
         return gigaSpace.read(template, receiveTimeout, modifiers);
     }
 
@@ -62,12 +64,14 @@ public class ExclusiveReadReceiveOperationHandler extends AbstractFifoGroupingRe
         int modifiers = gigaSpace.getModifiersForIsolationLevel() | ReadModifiers.EXCLUSIVE_READ_LOCK;
         if(useFifoGrouping)
             modifiers |= ReadModifiers.FIFO_GROUPING_POLL;
+        if (useMemoryOnlySearch)
+            modifiers |= ReadModifiers.MEMORY_ONLY_SEARCH;
         return gigaSpace.read(template, 0, modifiers);
     }
 
     @Override
     public String toString() {
-    	//TODO FG: add fifoGroups when name is final.
-        return "Single Exclusive Read, nonBlocking[" + nonBlocking + "], nonBlockingFactor[" + nonBlockingFactor + "]";
+        return "Single Exclusive Read, nonBlocking[" + nonBlocking + "], nonBlockingFactor[" + nonBlockingFactor
+                + "], useFifoGroups[" + isUseFifoGrouping() + "], useMemoryOnlySearch[" + isUseMemoryOnlySearch() + "]";
     }
 }

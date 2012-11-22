@@ -53,6 +53,8 @@ public class MultiTakeReceiveOperationHandler extends AbstractFifoGroupingReceiv
         int modifiers = gigaSpace.getSpace().getReadModifiers();
         if(useFifoGrouping)
             modifiers |= TakeModifiers.FIFO_GROUPING_POLL;
+        if (useMemoryOnlySearch)
+            modifiers |= TakeModifiers.MEMORY_ONLY_SEARCH;
         
         Object[] results = gigaSpace.takeMultiple(template,maxEntries, modifiers);
         if (results != null && results.length > 0) {
@@ -70,6 +72,8 @@ public class MultiTakeReceiveOperationHandler extends AbstractFifoGroupingReceiv
         int modifiers = gigaSpace.getSpace().getReadModifiers();
         if(useFifoGrouping)
             modifiers |= TakeModifiers.FIFO_GROUPING_POLL;
+        if (useMemoryOnlySearch)
+            modifiers |= TakeModifiers.MEMORY_ONLY_SEARCH;
         Object[] results = gigaSpace.takeMultiple(template, maxEntries, modifiers);
         if (results != null && results.length > 0) {
             return results;
@@ -79,7 +83,7 @@ public class MultiTakeReceiveOperationHandler extends AbstractFifoGroupingReceiv
 
     @Override
     public String toString() {
-      //TODO FG : add fifoGroups when name is final
-        return "Multi Take, maxEntries[" + maxEntries + "], nonBlocking[" + nonBlocking + "], nonBlockingFactor[" + nonBlockingFactor + "]";
+        return "Multi Take, maxEntries[" + maxEntries + "], nonBlocking[" + nonBlocking + "], nonBlockingFactor[" + nonBlockingFactor
+                + "], useFifoGroups[" + isUseFifoGrouping() + "], useMemoryOnlySearch[" + isUseMemoryOnlySearch() + "]";
     }
 }

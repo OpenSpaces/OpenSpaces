@@ -19,12 +19,14 @@ package org.openspaces.events.polling.receive;
 import org.openspaces.core.GigaSpace;
 import org.springframework.dao.DataAccessException;
 
+import com.j_spaces.core.client.ReadModifiers;
+
 /**
  * Performs single read operation using {@link org.openspaces.core.GigaSpace#read(Object,long)}.
  * 
  * @author kimchy
  */
-public class SingleReadReceiveOperationHandler extends AbstractNonBlockingReceiveOperationHandler{
+public class SingleReadReceiveOperationHandler extends AbstractMemoryOnlySearchReceiveOperationHandler{
 
     /**
      * Performs single read operation using {@link org.openspaces.core.GigaSpace#read(Object,long)} with the
@@ -32,7 +34,11 @@ public class SingleReadReceiveOperationHandler extends AbstractNonBlockingReceiv
      */
     @Override
     protected Object doReceiveBlocking(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException {
-        return gigaSpace.read(template, receiveTimeout);
+        int modifiers = gigaSpace.getSpace().getReadModifiers();
+        if (useMemoryOnlySearch)
+            modifiers |= ReadModifiers.MEMORY_ONLY_SEARCH;
+        
+        return gigaSpace.read(template, receiveTimeout, modifiers);
     }
 
     /**
@@ -41,11 +47,16 @@ public class SingleReadReceiveOperationHandler extends AbstractNonBlockingReceiv
      */
     @Override
     protected Object doReceiveNonBlocking(Object template, GigaSpace gigaSpace) throws DataAccessException {
-        return gigaSpace.read(template, 0);
+        int modifiers = gigaSpace.getSpace().getReadModifiers();
+        if (useMemoryOnlySearch)
+            modifiers |= ReadModifiers.MEMORY_ONLY_SEARCH;
+        
+        return gigaSpace.read(template, 0, modifiers);
     }
 
     @Override
     public String toString() {
-        return "Single Read, nonBlocking[" + nonBlocking + "], nonBlockingFactor[" + nonBlockingFactor + "]";
+        return "Single Read, nonBlocking[" + nonBlocking + "], nonBlockingFactor[" + nonBlockingFactor
+                + "], useMemoryOnlySearch[" + isUseMemoryOnlySearch() + "]";
     }
 }

@@ -58,6 +58,8 @@ public class MultiExclusiveReadReceiveOperationHandler extends AbstractFifoGroup
         int modifiers = gigaSpace.getModifiersForIsolationLevel() | ReadModifiers.EXCLUSIVE_READ_LOCK;
         if(useFifoGrouping)
             modifiers |= ReadModifiers.FIFO_GROUPING_POLL;
+        if (useMemoryOnlySearch)
+            modifiers |= ReadModifiers.MEMORY_ONLY_SEARCH;
         
         Object[] results = gigaSpace.readMultiple(template, maxEntries, modifiers);
         if (results != null && results.length > 0) {
@@ -78,6 +80,8 @@ public class MultiExclusiveReadReceiveOperationHandler extends AbstractFifoGroup
         int modifiers = gigaSpace.getModifiersForIsolationLevel() | ReadModifiers.EXCLUSIVE_READ_LOCK;
         if(useFifoGrouping)
             modifiers |= ReadModifiers.FIFO_GROUPING_POLL;
+        if (useMemoryOnlySearch)
+            modifiers |= ReadModifiers.MEMORY_ONLY_SEARCH;
         
         Object[] results = gigaSpace.readMultiple(template, maxEntries, modifiers);
         if (results != null && results.length > 0) {
@@ -88,7 +92,7 @@ public class MultiExclusiveReadReceiveOperationHandler extends AbstractFifoGroup
 
     @Override
     public String toString() {
-        //TODO FG : add fifoGroups when name is final
-        return "Multi Exclusive Read, maxEntries[" + maxEntries + "], nonBlocking[" + nonBlocking + "], nonBlockingFactor[" + nonBlockingFactor + "]";
+        return "Multi Exclusive Read, maxEntries[" + maxEntries + "], nonBlocking[" + nonBlocking + "], nonBlockingFactor[" + nonBlockingFactor
+                + "], useFifoGroups[" + isUseFifoGrouping() + "], useMemoryOnlySearch[" + isUseMemoryOnlySearch() + "]";
     }
 }

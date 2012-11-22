@@ -19,6 +19,8 @@ package org.openspaces.events.polling.receive;
 import org.openspaces.core.GigaSpace;
 import org.springframework.dao.DataAccessException;
 
+import com.j_spaces.core.client.ReadModifiers;
+
 /**
  * First tries and perform a {@link org.openspaces.core.GigaSpace#readMultiple(Object,int)} using
  * the provided template and configured maxEntries (defaults to <code>50</code>). If no values
@@ -27,7 +29,7 @@ import org.springframework.dao.DataAccessException;
  *
  * @author kimchy
  */
-public class MultiReadReceiveOperationHandler extends AbstractNonBlockingReceiveOperationHandler {
+public class MultiReadReceiveOperationHandler extends AbstractMemoryOnlySearchReceiveOperationHandler {
 
     private static final int DEFAULT_MAX_ENTRIES = 50;
 
@@ -48,11 +50,14 @@ public class MultiReadReceiveOperationHandler extends AbstractNonBlockingReceive
      */
     @Override
     protected Object doReceiveBlocking(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException {
-        Object[] results = gigaSpace.readMultiple(template, maxEntries);
+        int modifiers = gigaSpace.getSpace().getReadModifiers();
+        if (useMemoryOnlySearch)
+            modifiers |= ReadModifiers.MEMORY_ONLY_SEARCH;
+        Object[] results = gigaSpace.readMultiple(template, maxEntries, modifiers);
         if (results != null && results.length > 0) {
             return results;
         }
-        return gigaSpace.read(template, receiveTimeout);
+        return gigaSpace.read(template, receiveTimeout, modifiers);
     }
 
     /**
@@ -62,7 +67,10 @@ public class MultiReadReceiveOperationHandler extends AbstractNonBlockingReceive
      */
     @Override
     protected Object doReceiveNonBlocking(Object template, GigaSpace gigaSpace) throws DataAccessException {
-        Object[] results = gigaSpace.readMultiple(template, maxEntries);
+        int modifiers = gigaSpace.getSpace().getReadModifiers();
+        if (useMemoryOnlySearch)
+            modifiers |= ReadModifiers.MEMORY_ONLY_SEARCH;
+        Object[] results = gigaSpace.readMultiple(template, maxEntries, modifiers);
         if (results != null && results.length > 0) {
             return results;
         }
@@ -71,6 +79,7 @@ public class MultiReadReceiveOperationHandler extends AbstractNonBlockingReceive
 
     @Override
     public String toString() {
-        return "Multi Read, maxEntries[" + maxEntries + "], nonBlocking[" + nonBlocking + "], nonBlockingFactor[" + nonBlockingFactor + "]";
+        return "Multi Read, maxEntries[" + maxEntries + "], nonBlocking[" + nonBlocking + "], nonBlockingFactor[" + nonBlockingFactor
+                + "], useMemoryOnlySearch[" + isUseMemoryOnlySearch() + "]";
     }
 }

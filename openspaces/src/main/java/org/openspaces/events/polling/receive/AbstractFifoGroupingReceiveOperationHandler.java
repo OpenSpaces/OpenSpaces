@@ -29,11 +29,13 @@ import com.j_spaces.core.client.TakeModifiers;
  * @author yael
  * @since 9.0
  */
-public abstract class AbstractFifoGroupingReceiveOperationHandler extends AbstractNonBlockingReceiveOperationHandler {
+public abstract class AbstractFifoGroupingReceiveOperationHandler extends AbstractMemoryOnlySearchReceiveOperationHandler {
     
     protected boolean useFifoGrouping = false;
 
-    
+    /**
+     * Returns whether the handler is configured to use fifo grouping or not.
+     */
     public boolean isUseFifoGrouping() {
         return useFifoGrouping;
     }
