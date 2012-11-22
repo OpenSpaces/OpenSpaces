@@ -36,6 +36,11 @@
         <path path="${basedir}/../gigaspaces/src/java/resources" />
 
     </path>
+	
+    <path id="javadoc-libs">
+        <path path="${target.classes.dir}" />
+    	<path path="${basedir}/../gigaspaces/classes" />
+    </path>
 
     <path id="tests-libs">
 
@@ -126,7 +131,7 @@
             <arg value="-J-XX:MaxPermSize=256m"/>
             <doctitle><![CDATA[<h1>GigaSpaces XAP 9.5 API</h1>]]></doctitle>
             <bottom><![CDATA[<i>Copyright &copy; <a href="http://www.gigaspaces.com/" target="_top">GigaSpaces</a>.</i>]]></bottom>
-            <classpath refid="all-libs"/>
+            <classpath refid="javadoc-libs"/>
         	<fileset dir="${basedir}/../gigaspaces/src/java" defaultexcludes="yes">
 	      		<include name="com/**"/>
 				<exclude name="com/j_spaces/jms/**" />
@@ -173,7 +178,7 @@
     </target>
 
     <target name="dist_1_5"
-            depends="build_1_5, javadoc, install.maven, schema, license"
+            depends="build_1_5, javadoc, install.maven"
             description="Creates the OpenSpaces distribution">
     	<exec executable="${env.M2_HOME}\bin\${mvn.executable}"> 
 			<arg line="assembly:single"/>
