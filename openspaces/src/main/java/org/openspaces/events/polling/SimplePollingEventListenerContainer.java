@@ -65,7 +65,8 @@ import com.gigaspaces.internal.dump.InternalDumpProcessorFailedException;
  * to the standard number of consumers once the load decreases. Consider adapting the
  * {@link #setIdleTaskExecutionLimit "idleTaskExecutionLimit"} setting to control the lifespan of
  * each new task, to avoid frequent scaling up and down. Note that using more than one consumer
- * might break fifo behavior if fifo is configured by the space or the specific class type.
+ * might break fifo behavior if fifo is configured by the space or the specific class type, however, this is not
+ * the case when using fifo grouping.
  *
  * @author kimchy
  */
