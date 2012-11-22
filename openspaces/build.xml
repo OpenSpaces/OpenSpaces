@@ -131,7 +131,7 @@
             <arg value="-J-XX:MaxPermSize=256m"/>
             <doctitle><![CDATA[<h1>GigaSpaces XAP 9.5 API</h1>]]></doctitle>
             <bottom><![CDATA[<i>Copyright &copy; <a href="http://www.gigaspaces.com/" target="_top">GigaSpaces</a>.</i>]]></bottom>
-            <classpath refid="javadoc-libs"/>
+            <classpath refid="all-libs"/>
         	<fileset dir="${basedir}/../gigaspaces/src/java" defaultexcludes="yes">
 	      		<include name="com/**"/>
 				<exclude name="com/j_spaces/jms/**" />
