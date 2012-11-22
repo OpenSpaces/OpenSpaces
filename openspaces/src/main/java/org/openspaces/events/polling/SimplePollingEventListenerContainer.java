@@ -587,7 +587,7 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
         }
         return new ServiceDetails[]{new PollingEventContainerServiceDetails(beanName, getGigaSpace().getName(), tempalte, isPerformSnapshot(), getTransactionManagerName(),
                 getReceiveTimeout(), getReceiveOperationHandler().toString(), getTriggerOperationHandler() != null ? getTriggerOperationHandler().toString() : null,
-                        getConcurrentConsumers(), getMaxConcurrentConsumers(), isPassArrayAsIs())};
+                        getConcurrentConsumers(), getMaxConcurrentConsumers(), isPassArrayAsIs(), isDynamicTemplate())};
     }
 
     public ServiceMonitors[] getServicesMonitors() {

@@ -42,6 +42,7 @@ public class PollingEventContainerServiceDetails extends EventContainerServiceDe
         public static final String CONCURRENT_CONSUMERS = "concurrent-consumers";
         public static final String MAX_CONCURRENT_CONSUMERS = "max-concurrent-consumers";
         public static final String PASS_ARRAY_AS_IS = "pass-array-as-is";
+        public static final String DYNAMIC_TEMPLATE = "dynamic-template";
     }
 
     public PollingEventContainerServiceDetails() {
@@ -51,7 +52,7 @@ public class PollingEventContainerServiceDetails extends EventContainerServiceDe
     public PollingEventContainerServiceDetails(String id, String gigaSpace, Object template, boolean performSnapshot, String transactionManager,
                                                long receiveTimeout,
                                                String receiveOperationHandler, String triggerOperationHandler,
-                                               int concurrentConsumers, int maxConcurrentConsumers, boolean passArrayAsIs) {
+                                               int concurrentConsumers, int maxConcurrentConsumers, boolean passArrayAsIs, boolean dynamicTemplate) {
         super(id, SERVICE_SUB_TYPE, gigaSpace, "Polling event container", "Polling event container, template [" + template + "]", template, performSnapshot, transactionManager);
         getAttributes().put(Attributes.RECEIVE_TIMEOUT, receiveTimeout);
         getAttributes().put(Attributes.RECEIVE_OPERATION_HANDLER, receiveOperationHandler);
@@ -59,6 +60,7 @@ public class PollingEventContainerServiceDetails extends EventContainerServiceDe
         getAttributes().put(Attributes.CONCURRENT_CONSUMERS, concurrentConsumers);
         getAttributes().put(Attributes.MAX_CONCURRENT_CONSUMERS, maxConcurrentConsumers);
         getAttributes().put(Attributes.PASS_ARRAY_AS_IS, passArrayAsIs);
+        getAttributes().put(Attributes.DYNAMIC_TEMPLATE, dynamicTemplate);
     }
 
     public Long getReceiveTimeout() {
@@ -83,6 +85,10 @@ public class PollingEventContainerServiceDetails extends EventContainerServiceDe
 
     public Boolean isPassArrayAsIs() {
         return (Boolean) getAttributes().get(Attributes.PASS_ARRAY_AS_IS);
+    }
+    
+    public Boolean isDynamicTemplate() {
+        return (Boolean) getAttributes().get(Attributes.DYNAMIC_TEMPLATE);
     }
 
     @Override

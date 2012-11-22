@@ -278,8 +278,9 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
         int minConcurrentConsumers = Integer.parseInt(props.get("concurrent-consumers"));
         int maxConcurrentConsumer = Integer.parseInt(props.get("max-concurrent-consumers"));
         boolean batchProcessing = Boolean.parseBoolean(props.get("pass-array-as-is"));
-        return  new PollingEventContainerServiceDetails(id, space, template, performSnapshot, txManager, receiveTimeout, 
-                receiveOperationHandler, triggerOperationHandler, minConcurrentConsumers, maxConcurrentConsumer, batchProcessing);
+        boolean dynamicTemplate = Boolean.parseBoolean(props.get("dynamic-template"));
+        return new PollingEventContainerServiceDetails(id, space, template, performSnapshot, txManager, receiveTimeout, 
+                receiveOperationHandler, triggerOperationHandler, minConcurrentConsumers, maxConcurrentConsumer, batchProcessing, dynamicTemplate);
     }
 
     private RemotingServiceDetails buildRemotingServiceDetails(String id, Map<String, String> properties) {

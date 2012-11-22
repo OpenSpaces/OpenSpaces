@@ -105,6 +105,13 @@ public abstract class AbstractTemplateEventListenerContainer extends AbstractEve
     protected Object getTemplate() {
         return this.template;
     }
+    
+    /**
+     * Returns whether dynamic template is configured
+     */
+    protected boolean isDynamicTemplate(){
+        return dynamicTemplate != null;
+    }
 
     /**
      * Returns the template to be used for receive operations. If
