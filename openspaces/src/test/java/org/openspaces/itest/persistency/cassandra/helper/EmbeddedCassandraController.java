@@ -15,6 +15,8 @@ import org.openspaces.test.client.executor.RemoteJavaCommand;
 public class EmbeddedCassandraController
 {
     
+    private static final String CASSANDRA_YAML = "org/openspaces/itest/persistency/cassandra/cassandra.yaml";
+    
     private RemoteAsyncCommandResult<IEmbeddedCassandra> _dbRemoteAdmin;
     private IEmbeddedCassandra                           _db;
     private int                                          _rpcPort = EmbeddedCassandra.DEFAULT_RPC_PORT;
@@ -23,6 +25,7 @@ public class EmbeddedCassandraController
     {
         if (isEmbedded) 
         {
+            System.setProperty("cassandra.config", CASSANDRA_YAML);
             _db = new EmbeddedCassandra();
         }
         else
@@ -32,7 +35,7 @@ public class EmbeddedCassandraController
                 URL baseConfiguration = Thread
                         .currentThread()
                         .getContextClassLoader()
-                        .getResource("org/openspaces/itest/persistency/cassandra/cassandra.yaml");
+                        .getResource(CASSANDRA_YAML);
                 String randomUID = UUID.randomUUID().toString().substring(0, 8);
                 File configDestination = new File("target/cassandra-" + randomUID + ".yaml");
                 String root = "target/cassandra/" + randomUID;
