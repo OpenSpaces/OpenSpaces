@@ -369,7 +369,7 @@ public class HectorCassandraClient {
     }
     
     private static String generateIndexName(String typeName, String columnName) {
-        return typeName+"_"+columnName.replace(".", "_");
+        return (typeName+"_"+columnName).replace(".", "_");
     }
     
     private void persistColumnFamilyMetadata(ColumnFamilyMetadata metadata) {
