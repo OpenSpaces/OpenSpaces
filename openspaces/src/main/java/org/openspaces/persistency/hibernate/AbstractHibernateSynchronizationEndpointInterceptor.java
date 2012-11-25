@@ -26,17 +26,17 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.metadata.ClassMetadata;
+import org.openspaces.persistency.patterns.ManagedEntriesSynchronizationEndpointInterceptor;
 
 import com.gigaspaces.metadata.SpaceTypeDescriptor;
 import com.gigaspaces.sync.DataSyncOperation;
-import com.gigaspaces.sync.SynchronizationEndpointInterceptor;
 
 /**
  * A base class for Hibernate based synchronization endpoint interceptor implementations.
  * @author eitany
  * @since 9.5
  */
-public abstract class AbstractHibernateSynchronizationEndpointInterceptor extends SynchronizationEndpointInterceptor {
+public abstract class AbstractHibernateSynchronizationEndpointInterceptor extends ManagedEntriesSynchronizationEndpointInterceptor {
 
     protected static final Log logger = LogFactory.getLog(AbstractHibernateSynchronizationEndpointInterceptor.class);
     private final ManagedEntitiesContainer sessionManager;
@@ -121,6 +121,14 @@ public abstract class AbstractHibernateSynchronizationEndpointInterceptor extend
      */
     public SessionFactory getSessionFactory() {
         return sessionFactory;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.openspaces.persistency.patterns.ManagedEntriesSynchronizationEndpointInterceptor#getManagedEntries()
+     */
+    @Override
+    public Iterable<String> getManagedEntries() {
+        return sessionManager.getManagedEntries();
     }
 
 

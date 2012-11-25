@@ -27,6 +27,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.metadata.ClassMetadata;
 import org.hibernate.persister.entity.AbstractEntityPersister;
 import org.openspaces.persistency.hibernate.iterator.HibernateProxyRemoverIterator;
+import org.openspaces.persistency.patterns.ManagedEntriesSpaceDataSource;
 import org.openspaces.persistency.support.ConcurrentMultiDataIterator;
 
 import com.gigaspaces.datasource.DataIterator;
@@ -37,7 +38,7 @@ import com.gigaspaces.datasource.SpaceDataSource;
  * @author eitany
  * @since 9.5
  */
-public abstract class AbstractHibernateSpaceDataSource extends SpaceDataSource {
+public abstract class AbstractHibernateSpaceDataSource extends ManagedEntriesSpaceDataSource {
 
     protected static final Log logger = LogFactory.getLog(AbstractHibernateSpaceDataSource.class);
     
@@ -139,6 +140,14 @@ public abstract class AbstractHibernateSpaceDataSource extends SpaceDataSource {
     @Override
     public boolean supportsInheritance() {
         return true;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.openspaces.persistency.patterns.ManagedEntriesSpaceDataSource#getManagedEntries()
+     */
+    @Override
+    public Iterable<String> getManagedEntries() {
+        return sessionManager.getManagedEntries();
     }
 
 

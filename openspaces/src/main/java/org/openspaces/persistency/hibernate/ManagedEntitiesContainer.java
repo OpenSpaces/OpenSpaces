@@ -59,4 +59,8 @@ public class ManagedEntitiesContainer {
         return managedEntries.contains(entityName);
     }
 
+    public Iterable<String> getManagedEntries() {
+        return managedEntries;
+    }
+
 }
