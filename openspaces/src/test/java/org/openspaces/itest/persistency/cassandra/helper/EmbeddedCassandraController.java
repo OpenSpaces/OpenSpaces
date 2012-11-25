@@ -29,8 +29,10 @@ public class EmbeddedCassandraController
         {
             try
             {
-//                URL baseConfiguration = new File("src/test/resources/cassandra.yaml").toURI().toURL();
-                URL baseConfiguration = Thread.currentThread().getContextClassLoader().getResource("cassandra.yaml");
+                URL baseConfiguration = Thread
+                        .currentThread()
+                        .getContextClassLoader()
+                        .getResource("org/openspaces/itest/persistency/cassandra/cassandra.yaml");
                 String randomUID = UUID.randomUUID().toString().substring(0, 8);
                 File configDestination = new File("target/cassandra-" + randomUID + ".yaml");
                 String root = "target/cassandra/" + randomUID;
