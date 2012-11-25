@@ -75,8 +75,8 @@ public class WriteAndRemoveCassandraTest extends AbstractCassandraTest
         while (iterator.hasNext())
         {
             SpaceDocument doc = (SpaceDocument) iterator.next();
-            long key = doc.getProperty(keyName);
-            read.add((Long) doc.getProperty(keyName));
+            Long key = doc.getProperty(keyName);
+            read.add(key);
             Assert.assertEquals("unexpected property", key, doc.getProperty("some_prop"));
         }
         
