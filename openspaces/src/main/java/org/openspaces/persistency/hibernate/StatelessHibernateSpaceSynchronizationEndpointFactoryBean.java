@@ -19,10 +19,8 @@ import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
-import com.gigaspaces.sync.SynchronizationEndpointInterceptor;
-
 /**
- * A factory bean which creates {@link SynchronizationEndpointInterceptor}.
+ * A factory bean which creates {@link StatelessHibernateSpaceSynchronizationEndpoint}.
  * @author eitany
  * @since 9.5
  */
