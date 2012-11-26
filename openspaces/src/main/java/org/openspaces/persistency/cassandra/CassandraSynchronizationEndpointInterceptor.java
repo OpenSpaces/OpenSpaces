@@ -39,18 +39,18 @@ import com.gigaspaces.sync.AddIndexData;
 import com.gigaspaces.sync.DataSyncOperation;
 import com.gigaspaces.sync.IntroduceTypeData;
 import com.gigaspaces.sync.OperationsBatchData;
-import com.gigaspaces.sync.SynchronizationEndpointInterceptor;
+import com.gigaspaces.sync.SpaceSynchronizationEndpoint;
 import com.gigaspaces.sync.TransactionData;
 
 /**
  * 
- * A Cassandra implementation of {@link SynchronizationEndpointInterceptor}.
+ * A Cassandra implementation of {@link SpaceSynchronizationEndpoint}.
  * 
  * @since 9.5
  * @author Dan Kilman
  */
 public class CassandraSynchronizationEndpointInterceptor
-        extends SynchronizationEndpointInterceptor {
+        extends SpaceSynchronizationEndpoint {
     
     private final CassandraErrorHandler           errorHandler = new DefaultCassandraErrorHandler();
     private final SpaceDocumentColumnFamilyMapper mapper;

@@ -25,21 +25,21 @@ import com.gigaspaces.sync.AddIndexData;
 import com.gigaspaces.sync.DataSyncOperation;
 import com.gigaspaces.sync.IntroduceTypeData;
 import com.gigaspaces.sync.OperationsBatchData;
-import com.gigaspaces.sync.SynchronizationEndpointInterceptor;
+import com.gigaspaces.sync.SpaceSynchronizationEndpoint;
 import com.gigaspaces.sync.SynchronizationSourceDetails;
 import com.gigaspaces.sync.TransactionData;
 import com.gigaspaces.transaction.ConsolidatedDistributedTransactionMetaData;
 import com.gigaspaces.transaction.TransactionParticipantMetaData;
 
 /**
- * A synchronization endpoint interceptor that implements the synchronization methods. Reshuffles the given synchronization operations by
+ * A space synchronization endpoint that implements the synchronization methods. Reshuffles the given synchronization operations by
  * grouping them based on the types and then calls the correseponding synchronization method for each type respective interceptor.
  * @author eitany
  * @since 9.5
  */
-public class SynchronizationEndpointInterceptorSplitter extends SynchronizationEndpointInterceptor {
+public class SynchronizationEndpointInterceptorSplitter extends SpaceSynchronizationEndpoint {
 
-    private Map<String, SynchronizationEndpointInterceptor> entriesToDataSource = new HashMap<String, SynchronizationEndpointInterceptor>();
+    private Map<String, SpaceSynchronizationEndpoint> entriesToDataSource = new HashMap<String, SpaceSynchronizationEndpoint>();
     
     public SynchronizationEndpointInterceptorSplitter(ManagedEntriesSynchronizationEndpointInterceptor[] dataSources) {
         for (ManagedEntriesSynchronizationEndpointInterceptor dataSource : dataSources) {
@@ -50,21 +50,21 @@ public class SynchronizationEndpointInterceptorSplitter extends SynchronizationE
         }
     }
     
-    protected SynchronizationEndpointInterceptor getEndpointInterceptor(String entry) {
+    protected SpaceSynchronizationEndpoint getEndpointInterceptor(String entry) {
         return entriesToDataSource.get(entry);
     }
     
     /**
      * split the batch into multiple batches according to their entry type and delegate it to the
      * corresponding synchronization endpoint interceptor
-     * {@link SynchronizationEndpointInterceptor#onOperationsBatchSynchronization(OperationsBatchData)}
+     * {@link SpaceSynchronizationEndpoint#onOperationsBatchSynchronization(OperationsBatchData)}
      */
     @Override
     public void onOperationsBatchSynchronization(final OperationsBatchData batchData) {
         DataSyncOperation[] operations =  batchData.getBatchDataItems();
-        Map<SynchronizationEndpointInterceptor, List<DataSyncOperation>> splitBatchDataMap = splitOperations(operations);
+        Map<SpaceSynchronizationEndpoint, List<DataSyncOperation>> splitBatchDataMap = splitOperations(operations);
         
-        for (final Entry<SynchronizationEndpointInterceptor, List<DataSyncOperation>> splitElement : splitBatchDataMap.entrySet()) {
+        for (final Entry<SpaceSynchronizationEndpoint, List<DataSyncOperation>> splitElement : splitBatchDataMap.entrySet()) {
             splitElement.getKey().onOperationsBatchSynchronization(wrapSplitAsOperationsBatchData(batchData, splitElement));
         }
     }
@@ -72,14 +72,14 @@ public class SynchronizationEndpointInterceptorSplitter extends SynchronizationE
     /**
      * split the batch into multiple batches according to their entry type and delegate it to the
      * corresponding synchronization endpoint interceptor
-     * {@link SynchronizationEndpointInterceptor#afterOperationsBatchSynchronization(OperationsBatchData)}
+     * {@link SpaceSynchronizationEndpoint#afterOperationsBatchSynchronization(OperationsBatchData)}
      */
     @Override
     public void afterOperationsBatchSynchronization(OperationsBatchData batchData) {
         DataSyncOperation[] operations =  batchData.getBatchDataItems();
-        Map<SynchronizationEndpointInterceptor, List<DataSyncOperation>> splitBatchDataMap = splitOperations(operations);
+        Map<SpaceSynchronizationEndpoint, List<DataSyncOperation>> splitBatchDataMap = splitOperations(operations);
         
-        for (final Entry<SynchronizationEndpointInterceptor, List<DataSyncOperation>> splitElement : splitBatchDataMap.entrySet()) {
+        for (final Entry<SpaceSynchronizationEndpoint, List<DataSyncOperation>> splitElement : splitBatchDataMap.entrySet()) {
             splitElement.getKey().afterOperationsBatchSynchronization(wrapSplitAsOperationsBatchData(batchData, splitElement));
         }
     }
@@ -87,15 +87,15 @@ public class SynchronizationEndpointInterceptorSplitter extends SynchronizationE
     /**
      * split the transaction data into multiple transaction data according to their entry type and delegate it to the
      * corresponding synchronization endpoint interceptor
-     * {@link SynchronizationEndpointInterceptor#onTransactionSynchronization(TransactionData)}.
+     * {@link SpaceSynchronizationEndpoint#onTransactionSynchronization(TransactionData)}.
      * This may break transaction atomicity if one of the delegated synchronization endpoint interceptor throws an exception while other did not.
      */
     @Override
     public void onTransactionSynchronization(TransactionData transactionData) {
         DataSyncOperation[] operations =  transactionData.getTransactionParticipantDataItems();
-        Map<SynchronizationEndpointInterceptor, List<DataSyncOperation>> splitBatchDataMap = splitOperations(operations);
+        Map<SpaceSynchronizationEndpoint, List<DataSyncOperation>> splitBatchDataMap = splitOperations(operations);
         
-        for (final Entry<SynchronizationEndpointInterceptor, List<DataSyncOperation>> splitElement : splitBatchDataMap.entrySet()) {
+        for (final Entry<SpaceSynchronizationEndpoint, List<DataSyncOperation>> splitElement : splitBatchDataMap.entrySet()) {
             splitElement.getKey().onTransactionSynchronization(wrapSplitAsTransactionData(transactionData, splitElement));
         }
     }
@@ -103,14 +103,14 @@ public class SynchronizationEndpointInterceptorSplitter extends SynchronizationE
     /**
      * split the transaction data into multiple transaction data according to their entry type and delegate it to the
      * corresponding synchronization endpoint interceptor
-     * {@link SynchronizationEndpointInterceptor#afterTransactionSynchronization(TransactionData)}.
+     * {@link SpaceSynchronizationEndpoint#afterTransactionSynchronization(TransactionData)}.
      */
     @Override
     public void afterTransactionSynchronization(TransactionData transactionData) {
         DataSyncOperation[] operations =  transactionData.getTransactionParticipantDataItems();
-        Map<SynchronizationEndpointInterceptor, List<DataSyncOperation>> splitBatchDataMap = splitOperations(operations);
+        Map<SpaceSynchronizationEndpoint, List<DataSyncOperation>> splitBatchDataMap = splitOperations(operations);
         
-        for (final Entry<SynchronizationEndpointInterceptor, List<DataSyncOperation>> splitElement : splitBatchDataMap.entrySet()) {
+        for (final Entry<SpaceSynchronizationEndpoint, List<DataSyncOperation>> splitElement : splitBatchDataMap.entrySet()) {
             splitElement.getKey().afterTransactionSynchronization(wrapSplitAsTransactionData(transactionData, splitElement));
         }
     }
@@ -120,7 +120,7 @@ public class SynchronizationEndpointInterceptorSplitter extends SynchronizationE
      */
     @Override
     public void onAddIndex(AddIndexData addIndexData) {
-        SynchronizationEndpointInterceptor endpointInterceptor = getEndpointInterceptor(addIndexData.getTypeName());
+        SpaceSynchronizationEndpoint endpointInterceptor = getEndpointInterceptor(addIndexData.getTypeName());
         if (endpointInterceptor != null)
             endpointInterceptor.onAddIndex(addIndexData);
     }
@@ -130,18 +130,18 @@ public class SynchronizationEndpointInterceptorSplitter extends SynchronizationE
      */
     @Override
     public void onIntroduceType(IntroduceTypeData introduceTypeData) {
-        SynchronizationEndpointInterceptor endpointInterceptor = getEndpointInterceptor(introduceTypeData.getTypeDescriptor().getTypeName());
+        SpaceSynchronizationEndpoint endpointInterceptor = getEndpointInterceptor(introduceTypeData.getTypeDescriptor().getTypeName());
         if (endpointInterceptor != null)
             endpointInterceptor.onIntroduceType(introduceTypeData);
     }
     
-    private Map<SynchronizationEndpointInterceptor, List<DataSyncOperation>> splitOperations(
+    private Map<SpaceSynchronizationEndpoint, List<DataSyncOperation>> splitOperations(
             DataSyncOperation[] operations) {
-        Map<SynchronizationEndpointInterceptor, List<DataSyncOperation>> splitBatchDataMap = new HashMap<SynchronizationEndpointInterceptor, List<DataSyncOperation>>();
+        Map<SpaceSynchronizationEndpoint, List<DataSyncOperation>> splitBatchDataMap = new HashMap<SpaceSynchronizationEndpoint, List<DataSyncOperation>>();
         for (DataSyncOperation dataSyncOperation : operations) {
             if (!dataSyncOperation.supportsGetTypeDescriptor())
                 continue;
-            SynchronizationEndpointInterceptor endpointInterceptor = getEndpointInterceptor(dataSyncOperation.getTypeDescriptor().getTypeName());
+            SpaceSynchronizationEndpoint endpointInterceptor = getEndpointInterceptor(dataSyncOperation.getTypeDescriptor().getTypeName());
             if (endpointInterceptor == null)
                 continue;
             List<DataSyncOperation> list = splitBatchDataMap.get(endpointInterceptor);
@@ -155,7 +155,7 @@ public class SynchronizationEndpointInterceptorSplitter extends SynchronizationE
     }
 
     private OperationsBatchData wrapSplitAsOperationsBatchData(final OperationsBatchData batchData,
-            final Entry<SynchronizationEndpointInterceptor, List<DataSyncOperation>> splitElement) {
+            final Entry<SpaceSynchronizationEndpoint, List<DataSyncOperation>> splitElement) {
         return new OperationsBatchData() {
             
             @Override
@@ -172,7 +172,7 @@ public class SynchronizationEndpointInterceptorSplitter extends SynchronizationE
     }
     
     private TransactionData wrapSplitAsTransactionData(final TransactionData transactionData,
-            final Entry<SynchronizationEndpointInterceptor, List<DataSyncOperation>> splitElement) {
+            final Entry<SpaceSynchronizationEndpoint, List<DataSyncOperation>> splitElement) {
         return new TransactionData() {
             
             @Override

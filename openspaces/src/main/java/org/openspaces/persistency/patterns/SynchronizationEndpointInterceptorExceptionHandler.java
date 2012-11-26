@@ -19,21 +19,21 @@ import com.gigaspaces.sync.AddIndexData;
 import com.gigaspaces.sync.ConsolidationParticipantData;
 import com.gigaspaces.sync.IntroduceTypeData;
 import com.gigaspaces.sync.OperationsBatchData;
-import com.gigaspaces.sync.SynchronizationEndpointInterceptor;
+import com.gigaspaces.sync.SpaceSynchronizationEndpoint;
 import com.gigaspaces.sync.TransactionData;
 
 /**
- * An exception handler that delegates {@link com.gigaspaces.sync.SynchronizationEndpointInterceptor} execution
+ * An exception handler that delegates {@link com.gigaspaces.sync.SpaceSynchronizationEndpoint} execution
  * and calls the provided {@link org.openspaces.persistency.patterns.PersistencyExceptionHandler} in case of exceptions on synchronization methods.
  * @author eitany
  * @since 9.5
  */
-public class SynchronizationEndpointInterceptorExceptionHandler extends SynchronizationEndpointInterceptor {
+public class SynchronizationEndpointInterceptorExceptionHandler extends SpaceSynchronizationEndpoint {
 
-    private final SynchronizationEndpointInterceptor interceptor;
+    private final SpaceSynchronizationEndpoint interceptor;
     private final PersistencyExceptionHandler exceptionHandler;
 
-    public SynchronizationEndpointInterceptorExceptionHandler(SynchronizationEndpointInterceptor interceptor, PersistencyExceptionHandler exceptionHandler) {
+    public SynchronizationEndpointInterceptorExceptionHandler(SpaceSynchronizationEndpoint interceptor, PersistencyExceptionHandler exceptionHandler) {
         this.interceptor = interceptor;
         this.exceptionHandler = exceptionHandler;
     }

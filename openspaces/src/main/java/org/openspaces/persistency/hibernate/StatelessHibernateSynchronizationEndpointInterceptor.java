@@ -35,7 +35,7 @@ import com.gigaspaces.metadata.SpaceTypeDescriptor;
 import com.gigaspaces.sync.DataSyncOperation;
 import com.gigaspaces.sync.OperationsBatchData;
 import com.gigaspaces.sync.SynchronizationEndpointInterceptor;
-import com.gigaspaces.sync.SynchronizationEndpointInterceptorException;
+import com.gigaspaces.sync.SpaceSynchronizationEndpointException;
 import com.gigaspaces.sync.TransactionData;
 
 /**
@@ -147,7 +147,7 @@ public class StatelessHibernateSynchronizationEndpointInterceptor extends Abstra
             tr.commit();
         } catch (Exception e) {
             rollbackTx(tr);
-            throw new SynchronizationEndpointInterceptorException("Failed to execute bulk operation, latest object [" + latest + "]", e);
+            throw new SpaceSynchronizationEndpointException("Failed to execute bulk operation, latest object [" + latest + "]", e);
         } finally {
             closeSession(session);
         }

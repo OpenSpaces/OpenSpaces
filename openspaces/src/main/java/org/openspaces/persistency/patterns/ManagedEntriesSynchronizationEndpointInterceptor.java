@@ -15,15 +15,15 @@
  *******************************************************************************/
 package org.openspaces.persistency.patterns;
 
-import com.gigaspaces.sync.SynchronizationEndpointInterceptor;
+import com.gigaspaces.sync.SpaceSynchronizationEndpoint;
 
 /**
- * An implementation of {@link com.gigaspaces.datasource.SynchronizationEndpointInterceptor} that can provide a list
+ * An implementation of {@link com.gigaspaces.datasource.SpaceSynchronizationEndpoint} that can provide a list
  * of all the given entries this synchronization endpoint interceptor handles.
  * @author eitany
  * @since 9.5
  */
-public abstract class ManagedEntriesSynchronizationEndpointInterceptor extends SynchronizationEndpointInterceptor {
+public abstract class ManagedEntriesSynchronizationEndpointInterceptor extends SpaceSynchronizationEndpoint {
     
     public abstract Iterable<String> getManagedEntries();
 
