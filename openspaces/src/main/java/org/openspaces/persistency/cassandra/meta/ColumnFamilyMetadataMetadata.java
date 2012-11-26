@@ -21,7 +21,7 @@ import java.util.Map;
 import org.openspaces.persistency.cassandra.meta.conversion.ColumnFamilyNameConverter;
 import org.openspaces.persistency.cassandra.meta.mapping.node.TypeNode;
 import org.openspaces.persistency.cassandra.meta.mapping.node.TypeNodeContext;
-import org.openspaces.persistency.cassandra.meta.mapping.node.VirtualEntryTopLevelTypeNode;
+import org.openspaces.persistency.cassandra.meta.mapping.node.SpaceDocumentTopLevelTypeNode;
 
 
 /**
@@ -38,7 +38,7 @@ public class ColumnFamilyMetadataMetadata extends ColumnFamilyMetadata {
     public static final String                       BLOB_COLUMN_NAME = "metadata";
     
     private ColumnFamilyMetadataMetadata() {
-        super(new VirtualEntryTopLevelTypeNode(NAME, 
+        super(new SpaceDocumentTopLevelTypeNode(NAME, 
                                                KEY_NAME, 
                                                String.class, 
                                                getSelfMetadataFields(), 

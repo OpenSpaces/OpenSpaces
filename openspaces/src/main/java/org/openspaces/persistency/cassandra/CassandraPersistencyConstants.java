@@ -30,7 +30,7 @@ public class CassandraPersistencyConstants {
      * will be considered compound {@link com.gigaspaces.document.SpaceDocument} entries. Their type name
      * will be inferred from what follows after the colon.
      */
-    public static final String VIRTUAL_ENTRY_COLUMN_PREFIX = "__ve:";
+    public static final String SPACE_DOCUMENT_COLUMN_PREFIX = "__sd:";
     
     /**
      * Columns containing a {@link java.lang.String} value with this value as their prefix

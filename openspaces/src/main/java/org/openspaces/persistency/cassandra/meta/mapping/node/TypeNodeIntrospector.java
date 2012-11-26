@@ -30,7 +30,7 @@ import org.openspaces.persistency.cassandra.meta.types.dynamic.DynamicPropertySe
 import org.openspaces.persistency.cassandra.meta.types.dynamic.PropertyValueSerializer;
 import org.openspaces.persistency.cassandra.meta.types.dynamic.PropertyValueSerializerHectorSerializerAdapter;
 
-import com.gigaspaces.entry.VirtualEntry;
+import com.gigaspaces.document.SpaceDocument;
 import com.gigaspaces.metadata.SpacePropertyDescriptor;
 import com.gigaspaces.metadata.SpaceTypeDescriptor;
 
@@ -128,7 +128,7 @@ public class TypeNodeIntrospector {
             }
         }
         
-        return new VirtualEntryTopLevelTypeNode(typeName,
+        return new SpaceDocumentTopLevelTypeNode(typeName,
                                         keyName,
                                         keyType,
                                         initialChildren,
@@ -143,10 +143,10 @@ public class TypeNodeIntrospector {
                                                          value.getClass(),
                                                          context.isDynamic());
 
-        if (shouldFlatten && value instanceof VirtualEntry) {
-            return introspectVirtualEntry(parentFullName,
+        if (shouldFlatten && value instanceof SpaceDocument) {
+            return introspectSpaceDocument(parentFullName,
                                           name,
-                                          ((VirtualEntry) value).getTypeName(),
+                                          ((SpaceDocument) value).getTypeName(),
                                           context);
         } else if (shouldFlatten && pojoTypeFilter.shouldFlatten(parentFullName,
                                                                name,
@@ -170,8 +170,8 @@ public class TypeNodeIntrospector {
                                                          type,
                                                          context.isDynamic());
         
-        if (shouldFlatten && VirtualEntry.class.isAssignableFrom(type)) {
-            return introspectVirtualEntry(parentFullName, name, type, context);
+        if (shouldFlatten && SpaceDocument.class.isAssignableFrom(type)) {
+            return introspectSpaceDocument(parentFullName, name, type, context);
         } else if (shouldFlatten && pojoTypeFilter.shouldFlatten(parentFullName,
                                                                name,
                                                                type,
@@ -185,15 +185,15 @@ public class TypeNodeIntrospector {
         }
     }
     
-    private TypeNode introspectVirtualEntry(String parentFullName, String name, Class<?> type, TypeNodeContext context) {
+    private TypeNode introspectSpaceDocument(String parentFullName, String name, Class<?> type, TypeNodeContext context) {
         // if a VirtualEntry type is found during fixed properties introspection a null value is returned
         // denoting this field/fixed property should be ignored. it will be created dynamically during a write
         // operation
         return null;
     }
     
-    private TypeNode introspectVirtualEntry(String parentFullName, String name, String typeName, TypeNodeContext context) {
-        return new VirtualEntryTypeNode(typeName, parentFullName, name, null, context);
+    private TypeNode introspectSpaceDocument(String parentFullName, String name, String typeName, TypeNodeContext context) {
+        return new SpaceDocumentTypeNode(typeName, parentFullName, name, null, context);
     }
     
     private TypeNode introspectPojo(String parentFullName, String name, Class<?> type, TypeNodeContext context) {

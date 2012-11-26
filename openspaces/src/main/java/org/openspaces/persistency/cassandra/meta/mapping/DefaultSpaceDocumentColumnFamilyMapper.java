@@ -28,7 +28,7 @@ import org.openspaces.persistency.cassandra.meta.mapping.filter.FlattenedPropert
 import org.openspaces.persistency.cassandra.meta.mapping.node.TopLevelTypeNode;
 import org.openspaces.persistency.cassandra.meta.mapping.node.TypeNodeContext;
 import org.openspaces.persistency.cassandra.meta.mapping.node.TypeNodeIntrospector;
-import org.openspaces.persistency.cassandra.meta.mapping.node.VirtualEntryTopLevelTypeNode;
+import org.openspaces.persistency.cassandra.meta.mapping.node.SpaceDocumentTopLevelTypeNode;
 import org.openspaces.persistency.cassandra.meta.types.dynamic.PropertyValueSerializer;
 
 import com.gigaspaces.document.SpaceDocument;
@@ -104,7 +104,7 @@ public class DefaultSpaceDocumentColumnFamilyMapper
     @Override
     public SpaceDocument toDocument(ColumnFamilyRow columnFamilyRow) {
         // currently this is the only supported top level type node
-        VirtualEntryTopLevelTypeNode topLevelTypeNode = (VirtualEntryTopLevelTypeNode) columnFamilyRow
+        SpaceDocumentTopLevelTypeNode topLevelTypeNode = (SpaceDocumentTopLevelTypeNode) columnFamilyRow
                 .getColumnFamilyMetadata()
                 .getTopLevelTypeNode();
         

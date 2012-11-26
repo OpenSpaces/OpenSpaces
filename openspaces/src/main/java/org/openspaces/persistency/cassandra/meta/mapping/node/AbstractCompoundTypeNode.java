@@ -106,7 +106,7 @@ abstract public class AbstractCompoundTypeNode implements CompoundTypeNode {
             TypeNodeContext context);
 
     /**
-     *  controls how this type will be read from cassandra, see implementations and VirtualEntryTopLevelTypeNode.
+     *  controls how this type will be read from cassandra, see implementations and SpaceDocumentTopLevelTypeNode.
      *  returning null will result by child property values being put in a HashMap
      */
     abstract protected String getDynamicHeaderColumnName();

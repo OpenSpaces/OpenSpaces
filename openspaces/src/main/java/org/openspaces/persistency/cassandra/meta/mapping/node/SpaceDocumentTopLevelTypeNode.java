@@ -33,19 +33,18 @@ import org.openspaces.persistency.cassandra.meta.data.ColumnFamilyRow;
 import org.openspaces.persistency.cassandra.meta.types.PrimitiveClassUtils;
 
 import com.gigaspaces.document.SpaceDocument;
-import com.gigaspaces.entry.VirtualEntry;
 import com.gigaspaces.internal.io.IOUtils;
 import com.gigaspaces.internal.metadata.pojo.PojoPropertyInfo;
 import com.gigaspaces.internal.metadata.pojo.PojoTypeInfo;
 import com.gigaspaces.internal.metadata.pojo.PojoTypeInfoRepository;
 
 /**
- * A {@link VirtualEntry} based implementation of {@link TopLevelTypeNode}.
+ * A {@link SpaceDocument} based implementation of {@link TopLevelTypeNode}.
  * 
  * @since 9.5
  * @author Dan Kilman
  */
-public class VirtualEntryTopLevelTypeNode extends VirtualEntryTypeNode
+public class SpaceDocumentTopLevelTypeNode extends SpaceDocumentTypeNode
     implements TopLevelTypeNode {
     
     private static final long serialVersionUID = 1L;
@@ -56,11 +55,11 @@ public class VirtualEntryTopLevelTypeNode extends VirtualEntryTypeNode
     private Class<?>          keyType;
     
     /* for Externalizable */
-    public VirtualEntryTopLevelTypeNode() { 
+    public SpaceDocumentTopLevelTypeNode() { 
         
     }
     
-    public VirtualEntryTopLevelTypeNode(
+    public SpaceDocumentTopLevelTypeNode(
             String typeName, 
             String keyName, 
             Class<?> keyType, 
@@ -141,8 +140,8 @@ public class VirtualEntryTopLevelTypeNode extends VirtualEntryTypeNode
             TypeNodeContext context) {
         if (value instanceof String) {
             String strValue = (String) value;
-            if (strValue.startsWith(CassandraPersistencyConstants.VIRTUAL_ENTRY_COLUMN_PREFIX)) {
-                String typeName = strValue.substring(CassandraPersistencyConstants.VIRTUAL_ENTRY_COLUMN_PREFIX.length());
+            if (strValue.startsWith(CassandraPersistencyConstants.SPACE_DOCUMENT_COLUMN_PREFIX)) {
+                String typeName = strValue.substring(CassandraPersistencyConstants.SPACE_DOCUMENT_COLUMN_PREFIX.length());
                 value = createDocumentFromTypeName(compoundProperties, columnName, typeName);
             } else if (strValue.equals(CassandraPersistencyConstants.MAP_ENTRY_COLUMN)) {
                 Map<String, Object> map = new HashMap<String, Object>();
@@ -210,8 +209,8 @@ public class VirtualEntryTopLevelTypeNode extends VirtualEntryTypeNode
 
                 Object newParent = compoundProperties.get(token);
                 if (newParent == null) {
-                    if (currentParent instanceof VirtualEntry) {
-                        currentParent = ((VirtualEntry) currentParent).getProperty(token);
+                    if (currentParent instanceof SpaceDocument) {
+                        currentParent = ((SpaceDocument) currentParent).getProperty(token);
                     } else if (currentParent instanceof Map) {
                         currentParent = ((Map) currentParent).get(token);
                     } else  {
@@ -263,8 +262,8 @@ public class VirtualEntryTopLevelTypeNode extends VirtualEntryTypeNode
             Object value,
             Object propertyParent, 
             TypeNodeContext context) {
-        if (propertyParent instanceof VirtualEntry) {
-            ((VirtualEntry) propertyParent).setProperty(propertyName, value);
+        if (propertyParent instanceof SpaceDocument) {
+            ((SpaceDocument) propertyParent).setProperty(propertyName, value);
         } else if (propertyParent instanceof Map) {
             ((Map) propertyParent).put(propertyName, value);
         } else {

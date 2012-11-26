@@ -105,6 +105,8 @@ public class CassandraSpaceSynchronizationEndpoint
                 continue;
             }
                 
+                        
+            
             SpaceDocument spaceDoc = dataSyncOperation.getDataAsDocument();
             String typeName = spaceDoc.getTypeName();
             ColumnFamilyMetadata metadata = hectorClient.getColumnFamilyMetadata(typeName);

@@ -29,7 +29,7 @@ import com.gigaspaces.entry.VirtualEntry;
  * @since 9.5
  * @author Dan Kilman
  */
-public class VirtualEntryTypeNode extends AbstractCompoundTypeNode {
+public class SpaceDocumentTypeNode extends AbstractCompoundTypeNode {
     // _name if this is a direct child of the top level type node
     // path from top level type node otherwise
     protected String fullName;
@@ -39,12 +39,12 @@ public class VirtualEntryTypeNode extends AbstractCompoundTypeNode {
     // virtual entrie's type name
     protected String typeName;
     
-    public VirtualEntryTypeNode() {
+    public SpaceDocumentTypeNode() {
         
     }
     
     // if this is a top level document than name is the keyname, otherwise it is the property simple name
-    public VirtualEntryTypeNode(String typeName, 
+    public SpaceDocumentTypeNode(String typeName, 
             String parentFullName,
             String name, 
             Map<String, TypeNode> initialChildren,
@@ -86,7 +86,7 @@ public class VirtualEntryTypeNode extends AbstractCompoundTypeNode {
     
     @Override
     protected String getDynamicHeaderColumnName() {
-        return CassandraPersistencyConstants.VIRTUAL_ENTRY_COLUMN_PREFIX + typeName;
+        return CassandraPersistencyConstants.SPACE_DOCUMENT_COLUMN_PREFIX + typeName;
     }
     
     @Override
