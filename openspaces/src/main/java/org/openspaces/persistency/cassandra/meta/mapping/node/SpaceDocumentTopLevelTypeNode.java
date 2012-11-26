@@ -31,7 +31,6 @@ import org.openspaces.persistency.cassandra.meta.ColumnFamilyMetadata;
 import org.openspaces.persistency.cassandra.meta.data.ColumnData;
 import org.openspaces.persistency.cassandra.meta.data.ColumnFamilyRow;
 import org.openspaces.persistency.cassandra.meta.types.PrimitiveClassUtils;
-
 import com.gigaspaces.document.SpaceDocument;
 import com.gigaspaces.internal.io.IOUtils;
 import com.gigaspaces.internal.metadata.pojo.PojoPropertyInfo;
@@ -88,6 +87,17 @@ public class SpaceDocumentTopLevelTypeNode extends SpaceDocumentTypeNode
     protected boolean shouldSkipEntryWrite(String key, Object value) {
         return getKeyName().equals(key) ||
                super.shouldSkipEntryWrite(key, value);
+    }
+
+    @Override
+    protected void writePropertyToColumnFamilyRow(ColumnFamilyRow row, String propertyName, Object propertyValue,
+            TypeNodeContext context) {
+
+        propertyValue = context
+                .getTypeNodeIntrospector()
+                .convertFromSpaceDocumentIfNeeded(propertyValue, getChildren().get(propertyName));
+        
+        super.writePropertyToColumnFamilyRow(row, propertyName, propertyValue, context);
     }
     
     @Override

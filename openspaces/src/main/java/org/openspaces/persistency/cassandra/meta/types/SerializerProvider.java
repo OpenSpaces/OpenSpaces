@@ -98,7 +98,7 @@ public class SerializerProvider {
      * @return <code>true</code> if this type is serialized using
      * {@link ObjectSerializer}
      */
-    public static boolean isSerializedByObjectSerializer(Class<?> type) {
-        return getSerializer(type) == ObjectSerializer.get();
+    public static boolean isCommonJavaType(Class<?> type) {
+        return !(getSerializer(type) == ObjectSerializer.get());
     }
 }

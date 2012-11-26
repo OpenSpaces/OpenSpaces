@@ -129,7 +129,7 @@ public class ColumnFamilyMetadata implements Externalizable {
         for (TypedColumnMetadata typeColumnMetadata : columns.values()) {
             // primitive types for fixed properties columns are always serialized
             // using native serialization
-            if (SerializerProvider.isSerializedByObjectSerializer(typeColumnMetadata.getType())) {
+            if (!SerializerProvider.isCommonJavaType(typeColumnMetadata.getType())) {
                 typeColumnMetadata.setSerializer(serializer);
             }
         }

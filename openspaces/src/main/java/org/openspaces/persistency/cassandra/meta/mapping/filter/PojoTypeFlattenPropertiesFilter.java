@@ -41,7 +41,7 @@ public class PojoTypeFlattenPropertiesFilter implements FlattenedPropertiesFilte
             Class<?> propertyType, 
             boolean isDynamicProperty) {
         // quick reject
-        boolean isCandidate = SerializerProvider.isSerializedByObjectSerializer(propertyType) &&
+        boolean isCandidate = !SerializerProvider.isCommonJavaType(propertyType) &&
                               !propertyType.isSynthetic() &&
                               !propertyType.isArray() &&
                               !Map.class.isAssignableFrom(propertyType) &&

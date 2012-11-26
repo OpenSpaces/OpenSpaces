@@ -31,6 +31,7 @@ import org.openspaces.persistency.cassandra.meta.types.dynamic.PropertyValueSeri
 import org.openspaces.persistency.cassandra.meta.types.dynamic.PropertyValueSerializerHectorSerializerAdapter;
 
 import com.gigaspaces.document.SpaceDocument;
+import com.gigaspaces.metadata.SpaceDocumentSupport;
 import com.gigaspaces.metadata.SpacePropertyDescriptor;
 import com.gigaspaces.metadata.SpaceTypeDescriptor;
 
@@ -42,6 +43,8 @@ public class TypeNodeIntrospector {
     
     private static final int                DEFAULT_MAX_NESTING_LEVEL = 10;
 
+    private final CassandraDocumentObjectConverter documentConverter = new CassandraDocumentObjectConverter();
+    
     private final ProcedureCache procedureCache = new ProcedureCache();
     
     // used internally to decide if an object is a valid pojo for flattening
@@ -210,7 +213,7 @@ public class TypeNodeIntrospector {
             Serializer<Object> serializer = null;
             // primitive types for fixed properties columns are always serialized
             // using native serialization
-            if (SerializerProvider.isSerializedByObjectSerializer(type)) {
+            if (!SerializerProvider.isCommonJavaType(type)) {
                 serializer = fixedPropertyValueSerializer;
             }
                 
@@ -222,6 +225,17 @@ public class TypeNodeIntrospector {
         }
     }
 
+    public Object convertFromSpaceDocumentIfNeeded(Object value, TypeNode typeNode) {
+        if (!SerializerProvider.isCommonJavaType(value.getClass()) &&
+            typeNode != null && !(typeNode instanceof SpaceDocumentTypeNode)) {
+            value = documentConverter.fromDocumentIfNeeded(
+                    value, 
+                    SpaceDocumentSupport.CONVERT, 
+                    typeNode.getType());
+        }
+        return value;
+    }
+    
     public ProcedureCache getProcedureCache() {
         return procedureCache;
     }
