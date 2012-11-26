@@ -22,11 +22,11 @@ import java.util.Set;
 import org.hibernate.SessionFactory;
 
 /**
- * A configurer class which is used to configure a {@link StatelessHibernateSynchronizationEndpointInterceptor}.
+ * A configurer class which is used to configure a {@link StatelessHibernateSpaceSynchronizationEndpoint}.
  * @author eitany
  * @since 9.5
  */
-public class StatelessHibernateSynchronizationEndpointInterceptorConfigurer {
+public class StatelessHibernateSpaceSynchronizationEndpointConfigurer {
     
     private SessionFactory sessionFactory;
 
@@ -35,7 +35,7 @@ public class StatelessHibernateSynchronizationEndpointInterceptorConfigurer {
     /**
      * Injects the Hibernate SessionFactory to be used with this synchronization endpoint interceptor.
      */
-    public StatelessHibernateSynchronizationEndpointInterceptorConfigurer sessionFactory(SessionFactory sessionFactory) {
+    public StatelessHibernateSpaceSynchronizationEndpointConfigurer sessionFactory(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
         return this;
     }
@@ -48,16 +48,16 @@ public class StatelessHibernateSynchronizationEndpointInterceptorConfigurer {
      *
      * <p>Usually, there is no need to explicitly set this.
      */
-    public StatelessHibernateSynchronizationEndpointInterceptorConfigurer managedEntries(String... entries) {
+    public StatelessHibernateSpaceSynchronizationEndpointConfigurer managedEntries(String... entries) {
         this.managedEntries = new HashSet<String>();
         this.managedEntries.addAll(Arrays.asList(entries));
         return this;
     }
     
     /**
-     * Creates a {@link DefaultHibernateSynchronizationEndpointInterceptor} with the setup configuration.
+     * Creates a {@link DefaultHibernateSpaceSynchronizationEndpoint} with the setup configuration.
      */
-    public StatelessHibernateSynchronizationEndpointInterceptor create(){
-        return new StatelessHibernateSynchronizationEndpointInterceptor(sessionFactory, managedEntries);
+    public StatelessHibernateSpaceSynchronizationEndpoint create(){
+        return new StatelessHibernateSpaceSynchronizationEndpoint(sessionFactory, managedEntries);
     }
 }

@@ -32,17 +32,17 @@ import com.gigaspaces.transaction.ConsolidatedDistributedTransactionMetaData;
 import com.gigaspaces.transaction.TransactionParticipantMetaData;
 
 /**
- * A space synchronization endpoint that implements the synchronization methods. Reshuffles the given synchronization operations by
- * grouping them based on the types and then calls the correseponding synchronization method for each type respective interceptor.
+ * A {@link SpaceSynchronizationEndpoint} that implements the synchronization methods. Reshuffles the given synchronization operations by
+ * grouping them based on the types and then calls the corresponding synchronization method for each type respective synchronization endpoint.
  * @author eitany
  * @since 9.5
  */
-public class SynchronizationEndpointInterceptorSplitter extends SpaceSynchronizationEndpoint {
+public class SpaceSynchronizationEndpointSplitter extends SpaceSynchronizationEndpoint {
 
     private Map<String, SpaceSynchronizationEndpoint> entriesToDataSource = new HashMap<String, SpaceSynchronizationEndpoint>();
     
-    public SynchronizationEndpointInterceptorSplitter(ManagedEntriesSynchronizationEndpointInterceptor[] dataSources) {
-        for (ManagedEntriesSynchronizationEndpointInterceptor dataSource : dataSources) {
+    public SpaceSynchronizationEndpointSplitter(ManagedEntriesSpaceSynchronizationEndpoint[] dataSources) {
+        for (ManagedEntriesSpaceSynchronizationEndpoint dataSource : dataSources) {
             
             for (String entry : dataSource.getManagedEntries()) {
                 entriesToDataSource.put(entry, dataSource);

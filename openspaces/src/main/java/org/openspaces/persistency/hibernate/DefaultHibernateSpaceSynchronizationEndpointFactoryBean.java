@@ -19,18 +19,39 @@ import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
-import com.gigaspaces.sync.SynchronizationEndpointInterceptor;
-
 /**
- * A factory bean which creates {@link SynchronizationEndpointInterceptor}.
+ * A factory bean which creates {@link DefaultHibernateSpaceSynchronizationEndpoint}
  * @author eitany
  * @since 9.5
  */
-public class StatelessHibernateSynchronizationEndpointInterceptorFactoryBean implements
-        FactoryBean<StatelessHibernateSynchronizationEndpointInterceptor>, InitializingBean {
+public class DefaultHibernateSpaceSynchronizationEndpointFactoryBean implements
+        FactoryBean<DefaultHibernateSpaceSynchronizationEndpoint>, InitializingBean {
 
-    private final StatelessHibernateSynchronizationEndpointInterceptorConfigurer synchronizationEndpointInterceptorConfigurer = new StatelessHibernateSynchronizationEndpointInterceptorConfigurer();
-    private StatelessHibernateSynchronizationEndpointInterceptor synchronizationEndpointInterceptor;
+    private final DefaultHibernateSpaceSynchronizationEndpointConfigurer synchronizationEndpointInterceptorConfigurer = new DefaultHibernateSpaceSynchronizationEndpointConfigurer();
+    
+    private DefaultHibernateSpaceSynchronizationEndpoint synchronizationEndpointInterceptor;
+    
+    /**
+     * If set to <code>true</code>, will use Hibernate <code>merge</code> to perform the create/update, and will
+     * merge before calling delete. This might be required for complex mappings (depends on Hibernate) at the
+     * expense of slower performance. Defaults to <code>false</code>.
+     * @return 
+     */
+    public void setUseMerge(boolean useMerge) {
+        synchronizationEndpointInterceptorConfigurer.useMerge(useMerge);
+    }
+
+    /**    
+     * If set to <code>true</code> the object will be deleted using only its id.
+     * If set to <code>false</code> the object will be deleted using the whole object.
+     * Defaults to <code>true</code>.
+     * @param deleteById
+     * @return 
+     */
+    public void setDeleteById(boolean deleteById) {
+        synchronizationEndpointInterceptorConfigurer.deleteById(deleteById);
+    }
+    
     /**
      * Injects the Hibernate SessionFactory to be used with this synchronization endpoint interceptor.
      */
@@ -62,7 +83,7 @@ public class StatelessHibernateSynchronizationEndpointInterceptorFactoryBean imp
      * @see org.springframework.beans.factory.FactoryBean#getObject()
      */
     @Override
-    public StatelessHibernateSynchronizationEndpointInterceptor getObject() throws Exception {
+    public DefaultHibernateSpaceSynchronizationEndpoint getObject() throws Exception {
         return synchronizationEndpointInterceptor;
     }
 
@@ -71,7 +92,7 @@ public class StatelessHibernateSynchronizationEndpointInterceptorFactoryBean imp
      */
     @Override
     public Class<?> getObjectType() {
-        return StatelessHibernateSynchronizationEndpointInterceptor.class;
+        return DefaultHibernateSpaceSynchronizationEndpoint.class;
     }
 
     /* (non-Javadoc)

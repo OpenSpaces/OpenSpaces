@@ -49,11 +49,11 @@ import com.gigaspaces.sync.TransactionData;
  * @since 9.5
  *
  */
-public class StatelessHibernateSynchronizationEndpointInterceptor extends AbstractHibernateSynchronizationEndpointInterceptor {
+public class StatelessHibernateSpaceSynchronizationEndpoint extends AbstractHibernateSpaceSynchronizationEndpoint {
 
     private static final Log batchingLogger = LogFactory.getLog("org.hibernate.jdbc.BatchingBatcher");
     
-    public StatelessHibernateSynchronizationEndpointInterceptor(SessionFactory sessionFactory, Set<String> managedEntries) {
+    public StatelessHibernateSpaceSynchronizationEndpoint(SessionFactory sessionFactory, Set<String> managedEntries) {
         super(sessionFactory, managedEntries);
     }
     

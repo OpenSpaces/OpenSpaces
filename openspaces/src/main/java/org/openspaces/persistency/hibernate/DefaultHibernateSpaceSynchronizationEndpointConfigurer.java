@@ -22,11 +22,11 @@ import java.util.Set;
 import org.hibernate.SessionFactory;
 
 /**
- * A configurer class which is used to configure a {@link DefaultHibernateSynchronizationEndpointInterceptor}.
+ * A configurer class which is used to configure a {@link DefaultHibernateSpaceSynchronizationEndpoint}.
  * @author eitany
  * @since 9.5
  */
-public class DefaultHibernateSynchronizationEndpointInterceptorConfigurer {
+public class DefaultHibernateSpaceSynchronizationEndpointConfigurer {
     
     private SessionFactory sessionFactory;
 
@@ -43,7 +43,7 @@ public class DefaultHibernateSynchronizationEndpointInterceptorConfigurer {
      * expense of slower performance. Defaults to <code>false</code>.
      * @return 
      */
-    public DefaultHibernateSynchronizationEndpointInterceptorConfigurer useMerge(boolean useMerge) {
+    public DefaultHibernateSpaceSynchronizationEndpointConfigurer useMerge(boolean useMerge) {
         this.useMerge = useMerge;
         return this;
     }
@@ -55,7 +55,7 @@ public class DefaultHibernateSynchronizationEndpointInterceptorConfigurer {
      * @param deleteById
      * @return 
      */
-    public DefaultHibernateSynchronizationEndpointInterceptorConfigurer deleteById(boolean deleteById) {
+    public DefaultHibernateSpaceSynchronizationEndpointConfigurer deleteById(boolean deleteById) {
         this.deleteById = deleteById;
         return this;
     }
@@ -63,7 +63,7 @@ public class DefaultHibernateSynchronizationEndpointInterceptorConfigurer {
     /**
      * Injects the Hibernate SessionFactory to be used with this synchronization endpoint interceptor.
      */
-    public DefaultHibernateSynchronizationEndpointInterceptorConfigurer sessionFactory(SessionFactory sessionFactory) {
+    public DefaultHibernateSpaceSynchronizationEndpointConfigurer sessionFactory(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
         return this;
     }
@@ -76,16 +76,16 @@ public class DefaultHibernateSynchronizationEndpointInterceptorConfigurer {
      *
      * <p>Usually, there is no need to explicitly set this.
      */
-    public DefaultHibernateSynchronizationEndpointInterceptorConfigurer managedEntries(String... entries) {
+    public DefaultHibernateSpaceSynchronizationEndpointConfigurer managedEntries(String... entries) {
         this.managedEntries = new HashSet<String>();
         this.managedEntries.addAll(Arrays.asList(entries));
         return this;
     }
     
     /**
-     * Creates a {@link DefaultHibernateSynchronizationEndpointInterceptor} with the setup configuration.
+     * Creates a {@link DefaultHibernateSpaceSynchronizationEndpoint} with the setup configuration.
      */
-    public DefaultHibernateSynchronizationEndpointInterceptor create(){
-        return new DefaultHibernateSynchronizationEndpointInterceptor(sessionFactory, managedEntries, useMerge, deleteById);
+    public DefaultHibernateSpaceSynchronizationEndpoint create(){
+        return new DefaultHibernateSpaceSynchronizationEndpoint(sessionFactory, managedEntries, useMerge, deleteById);
     }
 }

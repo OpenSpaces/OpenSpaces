@@ -23,7 +23,7 @@ import com.gigaspaces.sync.SpaceSynchronizationEndpoint;
  * @author eitany
  * @since 9.5
  */
-public abstract class ManagedEntriesSynchronizationEndpointInterceptor extends SpaceSynchronizationEndpoint {
+public abstract class ManagedEntriesSpaceSynchronizationEndpoint extends SpaceSynchronizationEndpoint {
     
     public abstract Iterable<String> getManagedEntries();
 

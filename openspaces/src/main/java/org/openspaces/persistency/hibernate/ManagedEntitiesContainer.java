@@ -25,7 +25,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.metadata.ClassMetadata;
 
 /**
- * An managed entities container which is used by {@link AbstractHibernateSpaceDataSource} and {@link AbstractHibernateSynchronizationEndpointInterceptor} based
+ * An managed entities container which is used by {@link AbstractHibernateSpaceDataSource} and {@link AbstractHibernateSpaceSynchronizationEndpoint} based
  * implementations.
  * @author eitany
  * @since 9.5

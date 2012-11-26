@@ -31,21 +31,21 @@ import com.gigaspaces.datasource.DataSourceException;
 import com.gigaspaces.metadata.SpaceTypeDescriptor;
 import com.gigaspaces.sync.DataSyncOperation;
 import com.gigaspaces.sync.OperationsBatchData;
-import com.gigaspaces.sync.SynchronizationEndpointInterceptor;
+import com.gigaspaces.sync.SpaceSynchronizationEndpoint;
 import com.gigaspaces.sync.SpaceSynchronizationEndpointException;
 import com.gigaspaces.sync.TransactionData;
 
 /**
- * The default Hibernate {@link SynchronizationEndpointInterceptor} implementation. Based on Hibernate {@link Session}.
+ * The default Hibernate {@link SpaceSynchronizationEndpoint} implementation. Based on Hibernate {@link Session}.
  * @author eitany
  * @since 9.5
  */
-public class DefaultHibernateSynchronizationEndpointInterceptor extends AbstractHibernateSynchronizationEndpointInterceptor {
+public class DefaultHibernateSpaceSynchronizationEndpoint extends AbstractHibernateSpaceSynchronizationEndpoint {
     
     private final boolean useMerge;
     private final boolean deleteById;
     
-    public DefaultHibernateSynchronizationEndpointInterceptor(SessionFactory sessionFactory, Set<String> managedEntries, boolean useMerge, boolean deleteById) {
+    public DefaultHibernateSpaceSynchronizationEndpoint(SessionFactory sessionFactory, Set<String> managedEntries, boolean useMerge, boolean deleteById) {
         super(sessionFactory, managedEntries);
         this.useMerge = useMerge;
         this.deleteById = deleteById;

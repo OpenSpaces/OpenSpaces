@@ -28,12 +28,12 @@ import com.gigaspaces.sync.TransactionData;
  * @author eitany
  * @since 9.5
  */
-public class SynchronizationEndpointInterceptorExceptionHandler extends SpaceSynchronizationEndpoint {
+public class SpaceSynchronizationEndpointExceptionHandler extends SpaceSynchronizationEndpoint {
 
     private final SpaceSynchronizationEndpoint interceptor;
     private final PersistencyExceptionHandler exceptionHandler;
 
-    public SynchronizationEndpointInterceptorExceptionHandler(SpaceSynchronizationEndpoint interceptor, PersistencyExceptionHandler exceptionHandler) {
+    public SpaceSynchronizationEndpointExceptionHandler(SpaceSynchronizationEndpoint interceptor, PersistencyExceptionHandler exceptionHandler) {
         this.interceptor = interceptor;
         this.exceptionHandler = exceptionHandler;
     }
