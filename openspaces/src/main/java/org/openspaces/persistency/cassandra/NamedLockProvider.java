@@ -17,8 +17,6 @@ package org.openspaces.persistency.cassandra;
 
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.annotation.concurrent.ThreadSafe;
-
 import com.google.common.base.Function;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -30,7 +28,6 @@ import com.google.common.cache.LoadingCache;
  * @since 9.5
  * @author Dan Kilman
  */
-@ThreadSafe
 public class NamedLockProvider {
 
     private final LoadingCache<String, ReentrantLock> lockCache;

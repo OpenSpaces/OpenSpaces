@@ -19,8 +19,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.concurrent.ExecutionException;
 
-import javax.annotation.concurrent.ThreadSafe;
-
 import com.gigaspaces.internal.reflection.IConstructor;
 import com.gigaspaces.internal.reflection.IGetterMethod;
 import com.gigaspaces.internal.reflection.ISetterMethod;
@@ -37,7 +35,6 @@ import com.google.common.cache.LoadingCache;
  * @since 9.5
  * @author Dan Kilman
  */
-@ThreadSafe
 public class ProcedureCache {
 
     private final LoadingCache<Method, IGetterMethod<Object>> getters;
@@ -72,7 +69,7 @@ public class ProcedureCache {
         try {
             return getters.get(getterMethod);
         } catch (ExecutionException e) {
-            throw new IllegalStateException("Reflection factory failed unexpectedly");
+            throw new IllegalStateException("Reflection factory failed unexpectedly", e);
         }
     }
     
@@ -85,7 +82,7 @@ public class ProcedureCache {
         try {
             return setters.get(setterMethod);
         } catch (ExecutionException e) {
-            throw new IllegalStateException("Reflection factory failed unexpectedly");
+            throw new IllegalStateException("Reflection factory failed unexpectedly", e);
         }
     }
     
@@ -98,7 +95,7 @@ public class ProcedureCache {
         try {
             return constructors.get(constructor);
         } catch (ExecutionException e) {
-            throw new IllegalStateException("Reflection factory failed unexpectedly");
+            throw new IllegalStateException("Reflection factory failed unexpectedly", e);
         }
     }
     
