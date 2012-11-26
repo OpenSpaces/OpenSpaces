@@ -26,12 +26,12 @@ import com.gigaspaces.document.SpaceDocument;
 
 /**
  * 
- *  A configurer for creating {@link CassandraSynchronizationEndpointInterceptor} instances.
+ *  A configurer for creating {@link CassandraSpaceSynchronizationEndpoint} instances.
  * 
  * @since 9.5
  * @author Dan Kilman
  */
-public class CassandraSynchronizationEndpointInterceptorConfigurer {
+public class CassandraSpaceSynchronizationEndpointConfigurer {
 
     private int                                   maxNestingLevel = 10;
     private PropertyValueSerializer               fixedPropertyValueSerializer;
@@ -47,7 +47,7 @@ public class CassandraSynchronizationEndpointInterceptorConfigurer {
      * (default: 10)
      * @return {@code this} instance.
      */
-    public CassandraSynchronizationEndpointInterceptorConfigurer maxNestingLevel(int maxNestingLevel) {
+    public CassandraSpaceSynchronizationEndpointConfigurer maxNestingLevel(int maxNestingLevel) {
         this.maxNestingLevel = maxNestingLevel;
         return this;
     }
@@ -60,7 +60,7 @@ public class CassandraSynchronizationEndpointInterceptorConfigurer {
      * @param fixedPropertyValueSerializer the {@link PropertyValueSerializer} to use.
      * @return {@code this} instance.
      */
-    public CassandraSynchronizationEndpointInterceptorConfigurer fixedPropertyValueSerializer(
+    public CassandraSpaceSynchronizationEndpointConfigurer fixedPropertyValueSerializer(
             PropertyValueSerializer fixedPropertyValueSerializer) {
         this.fixedPropertyValueSerializer = fixedPropertyValueSerializer;
         return this;
@@ -70,12 +70,12 @@ public class CassandraSynchronizationEndpointInterceptorConfigurer {
      * Optional. If set, all dynamic properties will be serialized using 
      * {@link PropertyValueSerializer#fromByteBuffer(java.nio.ByteBuffer)}.
      * Note: This property must correspond to the property set on 
-     * {@link CassandraSynchronizationEndpointInterceptor}.
+     * {@link CassandraSpaceSynchronizationEndpoint}.
      * (default {@link DynamicPropertyValueSerializer})
      * @param dynamicPropertyValueSerializer the {@link PropertyValueSerializer} to use.
      * @return {@code this} instance.
      */
-    public CassandraSynchronizationEndpointInterceptorConfigurer dynamicPropertyValueSerializer(
+    public CassandraSpaceSynchronizationEndpointConfigurer dynamicPropertyValueSerializer(
             PropertyValueSerializer dynamicPropertyValueSerializer) {
         this.dynamicPropertyValueSerializer = dynamicPropertyValueSerializer;
         return this;
@@ -88,7 +88,7 @@ public class CassandraSynchronizationEndpointInterceptorConfigurer {
      * @see FlattenedPropertiesFilter
      * @return {@code this} instance.
      */
-    public CassandraSynchronizationEndpointInterceptorConfigurer flattenedPropertiesFilter(
+    public CassandraSpaceSynchronizationEndpointConfigurer flattenedPropertiesFilter(
             FlattenedPropertiesFilter flattenedPropertiesFilter) {
         this.flattenedPropertiesFilter = flattenedPropertiesFilter;
         return this;
@@ -101,7 +101,7 @@ public class CassandraSynchronizationEndpointInterceptorConfigurer {
      * @see ColumnFamilyNameConverter
      * @return {@code this} instance.
      */
-    public CassandraSynchronizationEndpointInterceptorConfigurer columnFamilyNameConverter(
+    public CassandraSpaceSynchronizationEndpointConfigurer columnFamilyNameConverter(
             ColumnFamilyNameConverter columnFamilyNameConverter) {
         this.columnFamilyNameConverter = columnFamilyNameConverter;
         return this;
@@ -111,18 +111,18 @@ public class CassandraSynchronizationEndpointInterceptorConfigurer {
      * @param hectorClient an instance of {@link HectorCassandraClient}.
      * @return {@code this} instance.
      */
-    public CassandraSynchronizationEndpointInterceptorConfigurer hectorClient(
+    public CassandraSpaceSynchronizationEndpointConfigurer hectorClient(
             HectorCassandraClient hectorClient) {
         this.hectorClient = hectorClient;
         return this;
     }
     
     /**
-     * @return An instance of {@link CassandraSynchronizationEndpointInterceptor} 
+     * @return An instance of {@link CassandraSpaceSynchronizationEndpoint} 
      * matching this configurer configuration.
      */
-    public CassandraSynchronizationEndpointInterceptor create() {
-        return new CassandraSynchronizationEndpointInterceptor(maxNestingLevel,
+    public CassandraSpaceSynchronizationEndpoint create() {
+        return new CassandraSpaceSynchronizationEndpoint(maxNestingLevel,
                                                                fixedPropertyValueSerializer,
                                                                dynamicPropertyValueSerializer,
                                                                flattenedPropertiesFilter,

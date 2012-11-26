@@ -15,6 +15,8 @@ import org.apache.cassandra.cql.jdbc.CassandraDataSource;
 import org.apache.cassandra.service.CassandraDaemon;
 import org.openspaces.itest.persistency.cassandra.helper.config.CassandraTestUtils;
 
+import com.gigaspaces.logger.GSLogConfigLoader;
+
 
 public class EmbeddedCassandra implements IEmbeddedCassandra, Remote
 {
@@ -51,9 +53,8 @@ public class EmbeddedCassandra implements IEmbeddedCassandra, Remote
 
     public EmbeddedCassandra()
     {
+        GSLogConfigLoader.getLoader();
         _rpcPort = Integer.getInteger(RPC_PORT_PROP, DEFAULT_RPC_PORT);
-        
-        TestLoggingHelper.init();
         _logger.info("Starting Embedded Cassandra with keyspace ");
         cleanup();
         CassandraDaemon cassandraDaemon = new CassandraDaemon();

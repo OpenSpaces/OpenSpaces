@@ -48,7 +48,7 @@ public class DefaultSpaceDocumentColumnFamilyMapper
     private final TypeNodeIntrospector      typeNodeIntrospector;
     private final ColumnFamilyNameConverter columnFamilyNameConverter;
     
-    // used by CassandraSynchronizationEndpointInterceptor
+    // used by CassandraSpaceSynchronizationEndpoint
     public DefaultSpaceDocumentColumnFamilyMapper(
             PropertyValueSerializer fixedPropertyValueSerializer, 
             PropertyValueSerializer dynamicPropertyValueSerializer, 

@@ -26,28 +26,28 @@ import org.springframework.beans.factory.InitializingBean;
 /**
  * 
  * A {@link FactoryBean} for creating a singleton instance of
- * {@link CassandraSynchronizationEndpointInterceptor}.
+ * {@link CassandraSpaceSynchronizationEndpoint}.
  * 
  * @since 9.5
  * @author Dan Kilman
  */
-public class CassandraSynchronizationEndpointInterceptorFactoryBean implements 
-    FactoryBean<CassandraSynchronizationEndpointInterceptor>, InitializingBean, DisposableBean {
+public class CassandraSpaceSynchronizationEndpointFactoryBean implements 
+    FactoryBean<CassandraSpaceSynchronizationEndpoint>, InitializingBean, DisposableBean {
 
-    private final CassandraSynchronizationEndpointInterceptorConfigurer configurer =
-            new CassandraSynchronizationEndpointInterceptorConfigurer();
+    private final CassandraSpaceSynchronizationEndpointConfigurer configurer =
+            new CassandraSpaceSynchronizationEndpointConfigurer();
     
-    private CassandraSynchronizationEndpointInterceptor cassandraSynchronizationEndpointInterceptor;
+    private CassandraSpaceSynchronizationEndpoint cassandraSynchronizationEndpointInterceptor;
     
     /**
-     * @see CassandraSynchronizationEndpointInterceptorConfigurer#maxNestingLevel(int)
+     * @see CassandraSpaceSynchronizationEndpointConfigurer#maxNestingLevel(int)
      */
     public void setMaxNestingLevel(int maxNestingLevel) {
         configurer.maxNestingLevel(maxNestingLevel);
     }
 
     /**
-     * @see CassandraSynchronizationEndpointInterceptorConfigurer#fixedPropertyValueSerializer(PropertyValueSerializer)
+     * @see CassandraSpaceSynchronizationEndpointConfigurer#fixedPropertyValueSerializer(PropertyValueSerializer)
      */
     public void setFixedPropertyValueSerializer(
             PropertyValueSerializer fixedPropertyValueSerializer) {
@@ -55,7 +55,7 @@ public class CassandraSynchronizationEndpointInterceptorFactoryBean implements
     }
 
     /**
-     * @see CassandraSynchronizationEndpointInterceptorConfigurer#dynamicPropertyValueSerializer(PropertyValueSerializer)
+     * @see CassandraSpaceSynchronizationEndpointConfigurer#dynamicPropertyValueSerializer(PropertyValueSerializer)
      */
     public void setDynamicPropertyValueSerializer(
             PropertyValueSerializer dynamicPropertyValueSerializer) {
@@ -63,7 +63,7 @@ public class CassandraSynchronizationEndpointInterceptorFactoryBean implements
     }
 
     /**
-     * @see CassandraSynchronizationEndpointInterceptorConfigurer#flattenedPropertiesFilter(FlattenedPropertiesFilter)
+     * @see CassandraSpaceSynchronizationEndpointConfigurer#flattenedPropertiesFilter(FlattenedPropertiesFilter)
      */
     public void setFlattenedPropertiesFilter(
             FlattenedPropertiesFilter flattenedPropertiesFilter) {
@@ -71,7 +71,7 @@ public class CassandraSynchronizationEndpointInterceptorFactoryBean implements
     }
 
     /**
-     * @see CassandraSynchronizationEndpointInterceptorConfigurer#columnFamilyNameConverter(ColumnFamilyNameConverter)
+     * @see CassandraSpaceSynchronizationEndpointConfigurer#columnFamilyNameConverter(ColumnFamilyNameConverter)
      */
     public void setColumnFamilyNameConverter(
             ColumnFamilyNameConverter columnFamilyNameConverter) {
@@ -79,7 +79,7 @@ public class CassandraSynchronizationEndpointInterceptorFactoryBean implements
     }
 
     /**
-     * @see CassandraSynchronizationEndpointInterceptorConfigurer#hectorClient(HectorCassandraClient)
+     * @see CassandraSpaceSynchronizationEndpointConfigurer#hectorClient(HectorCassandraClient)
      */
     public void setHectorClient(HectorCassandraClient hectorClient) {
         configurer.hectorClient(hectorClient);
@@ -91,13 +91,13 @@ public class CassandraSynchronizationEndpointInterceptorFactoryBean implements
     }
     
     @Override
-    public CassandraSynchronizationEndpointInterceptor getObject() throws Exception {
+    public CassandraSpaceSynchronizationEndpoint getObject() throws Exception {
         return cassandraSynchronizationEndpointInterceptor;
     }
 
     @Override
     public Class<?> getObjectType() {
-        return CassandraSynchronizationEndpointInterceptor.class;
+        return CassandraSpaceSynchronizationEndpoint.class;
     }
 
     @Override

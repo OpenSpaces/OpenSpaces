@@ -9,15 +9,15 @@ import org.apache.cassandra.cql.jdbc.CassandraDataSource;
 import org.junit.After;
 import org.junit.Before;
 import org.openspaces.itest.persistency.cassandra.helper.EmbeddedCassandraController;
-import org.openspaces.itest.persistency.cassandra.helper.TestLoggingHelper;
 import org.openspaces.itest.persistency.cassandra.mock.MockIntroduceTypeData;
 import org.openspaces.persistency.cassandra.CassandraSpaceDataSource;
-import org.openspaces.persistency.cassandra.CassandraSynchronizationEndpointInterceptor;
-import org.openspaces.persistency.cassandra.CassandraSynchronizationEndpointInterceptorConfigurer;
+import org.openspaces.persistency.cassandra.CassandraSpaceSynchronizationEndpoint;
+import org.openspaces.persistency.cassandra.CassandraSpaceSynchronizationEndpointConfigurer;
 import org.openspaces.persistency.cassandra.HectorCassandraClient;
 import org.openspaces.persistency.cassandra.meta.mapping.filter.FlattenedPropertiesFilter;
 
 import com.gigaspaces.document.SpaceDocument;
+import com.gigaspaces.logger.GSLogConfigLoader;
 import com.gigaspaces.metadata.SpaceTypeDescriptorBuilder;
 import com.gigaspaces.metadata.index.SpaceIndexType;
 
@@ -33,7 +33,7 @@ abstract public class AbstractCassandraTest
     protected int                                         _rpcPort;
     
     protected final EmbeddedCassandraController           _cassandraController = new EmbeddedCassandraController();
-    protected CassandraSynchronizationEndpointInterceptor _syncInterceptor;
+    protected CassandraSpaceSynchronizationEndpoint _syncInterceptor;
     protected CassandraSpaceDataSource                    _dataSource;
     
     @Before
@@ -46,7 +46,7 @@ abstract public class AbstractCassandraTest
         }
         else
         {
-            TestLoggingHelper.init();
+            GSLogConfigLoader.getLoader();
             _cassandraController.initCassandra(isEmbedded());
             _cassandraController.createKeySpace(_keySpaceName);
             _rpcPort = _cassandraController.getRpcPort();
@@ -80,11 +80,11 @@ abstract public class AbstractCassandraTest
         return hectorClient;
     }
     
-    protected CassandraSynchronizationEndpointInterceptor createCassandraSyncEndpointInterceptor(
+    protected CassandraSpaceSynchronizationEndpoint createCassandraSyncEndpointInterceptor(
             HectorCassandraClient hectorClient)
     {
-        CassandraSynchronizationEndpointInterceptor syncInterceptor = 
-                new CassandraSynchronizationEndpointInterceptorConfigurer()
+        CassandraSpaceSynchronizationEndpoint syncInterceptor = 
+                new CassandraSpaceSynchronizationEndpointConfigurer()
                     .flattenedPropertiesFilter(new FlattenedPropertiesFilter() {
                         public boolean shouldFlatten(String pathToProperty, String propertyName,
                                 Class<?> propertyType, boolean isDynamicProperty) {

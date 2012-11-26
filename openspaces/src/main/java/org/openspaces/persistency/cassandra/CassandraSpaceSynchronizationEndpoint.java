@@ -49,14 +49,14 @@ import com.gigaspaces.sync.TransactionData;
  * @since 9.5
  * @author Dan Kilman
  */
-public class CassandraSynchronizationEndpointInterceptor
+public class CassandraSpaceSynchronizationEndpoint
         extends SpaceSynchronizationEndpoint {
     
     private final CassandraErrorHandler           errorHandler = new DefaultCassandraErrorHandler();
     private final SpaceDocumentColumnFamilyMapper mapper;
     private final HectorCassandraClient           hectorClient;
 
-    public CassandraSynchronizationEndpointInterceptor(int maxNestingLevel,
+    public CassandraSpaceSynchronizationEndpoint(int maxNestingLevel,
             PropertyValueSerializer fixedPropertyValueSerializer,
             PropertyValueSerializer dynamicPropertyValueSerializer,
             FlattenedPropertiesFilter flattenedPropertiesFilter,

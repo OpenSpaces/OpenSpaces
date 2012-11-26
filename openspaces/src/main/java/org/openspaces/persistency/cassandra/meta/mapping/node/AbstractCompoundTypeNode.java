@@ -111,7 +111,7 @@ abstract public class AbstractCompoundTypeNode implements CompoundTypeNode {
      */
     abstract protected String getDynamicHeaderColumnName();
     
-    public Map<String, TypeNode> getChildren() {
+    protected Map<String, TypeNode> getChildren() {
         return children;
     }
 

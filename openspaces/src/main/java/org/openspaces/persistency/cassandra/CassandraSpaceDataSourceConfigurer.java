@@ -41,7 +41,7 @@ public class CassandraSpaceDataSourceConfigurer {
      * Optional. If set, all fixed properties with a type that is not primitive nor a common 
      * java type will be deserialized using {@link PropertyValueSerializer#fromByteBuffer(java.nio.ByteBuffer)}
      * Note: This property must correspond to the property set on 
-     * {@link CassandraSynchronizationEndpointInterceptor}.
+     * {@link CassandraSpaceSynchronizationEndpoint}.
      * (default: Java object deserialization)
      * @param fixedPropertyValueSerializer The {@link PropertyValueSerializer} to use.
      * @return {@code this} instance.
@@ -56,7 +56,7 @@ public class CassandraSpaceDataSourceConfigurer {
      * Optional. If set, all dynamic properties will be deserialized using 
      * {@link PropertyValueSerializer#fromByteBuffer(java.nio.ByteBuffer)}.
      * Note: This property must correspond to the property set on 
-     * {@link CassandraSynchronizationEndpointInterceptor}.
+     * {@link CassandraSpaceSynchronizationEndpoint}.
      * (default {@link DynamicPropertyValueSerializer})
      * @param dynamicPropertyValueSerializer the {@link PropertyValueSerializer} to use.
      * @return {@code this} instance.

@@ -8,7 +8,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 import org.openspaces.itest.persistency.cassandra.helper.EmbeddedCassandraController;
-import org.openspaces.itest.persistency.cassandra.helper.TestLoggingHelper;
+
+import com.gigaspaces.logger.GSLogConfigLoader;
 
 
 @RunWith(Suite.class)
@@ -40,7 +41,7 @@ public class CassandraTestSuite
     @BeforeClass
     public static void beforeSuite()
     {
-        TestLoggingHelper.init();
+        GSLogConfigLoader.getLoader();
         isSuiteMode = true;
         cassandraController.initCassandra(false);
     }

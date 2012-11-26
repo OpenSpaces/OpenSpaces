@@ -14,7 +14,7 @@ import org.openspaces.itest.persistency.cassandra.data.MyCassandraPojo1;
 import org.openspaces.itest.persistency.cassandra.mock.MockDataSourceQuery;
 import org.openspaces.itest.persistency.cassandra.mock.MockOperationsBatchDataBuilder;
 import org.openspaces.persistency.cassandra.CassandraSpaceDataSource;
-import org.openspaces.persistency.cassandra.CassandraSynchronizationEndpointInterceptor;
+import org.openspaces.persistency.cassandra.CassandraSpaceSynchronizationEndpoint;
 import org.openspaces.persistency.cassandra.HectorCassandraClient;
 import org.openspaces.persistency.cassandra.meta.mapping.filter.FlattenedPropertiesFilter;
 import org.openspaces.persistency.cassandra.meta.types.dynamic.PropertyValueSerializer;
@@ -121,11 +121,11 @@ public class CustomSerializersCassandraTest extends AbstractCassandraTest
     };
     
     @Override
-    protected CassandraSynchronizationEndpointInterceptor createCassandraSyncEndpointInterceptor(
+    protected CassandraSpaceSynchronizationEndpoint createCassandraSyncEndpointInterceptor(
             HectorCassandraClient hectorClient)
     {
-        CassandraSynchronizationEndpointInterceptor syncInterceptor = 
-                new CassandraSynchronizationEndpointInterceptor(10,
+        CassandraSpaceSynchronizationEndpoint syncInterceptor = 
+                new CassandraSpaceSynchronizationEndpoint(10,
                                                                 _simpleSerializer,
                                                                 _simpleSerializer,
                                                                 _simpleFilter,

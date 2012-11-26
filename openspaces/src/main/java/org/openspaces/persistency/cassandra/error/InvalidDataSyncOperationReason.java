@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.openspaces.persistency.cassandra.error;
 
-import org.openspaces.persistency.cassandra.CassandraSynchronizationEndpointInterceptor;
+import org.openspaces.persistency.cassandra.CassandraSpaceSynchronizationEndpoint;
 import org.openspaces.persistency.cassandra.meta.conversion.ColumnFamilyNameConverter;
 import org.openspaces.persistency.cassandra.meta.data.ColumnFamilyRow;
 
@@ -23,9 +23,9 @@ import com.gigaspaces.sync.DataSyncOperation;
 
 /**
  * An enum containing reasons why a certain {@link DataSyncOperation} recieved in a call to
- * {@link CassandraSynchronizationEndpointInterceptor#onTransactionSynchronization(com.gigaspaces.sync.TransactionData)}
+ * {@link CassandraSpaceSynchronizationEndpoint#onTransactionSynchronization(com.gigaspaces.sync.TransactionData)}
  * or 
- * {@link CassandraSynchronizationEndpointInterceptor#onOperationsBatchSynchronization(com.gigaspaces.sync.OperationsBatchData)}
+ * {@link CassandraSpaceSynchronizationEndpoint#onOperationsBatchSynchronization(com.gigaspaces.sync.OperationsBatchData)}
  * could not be operated on.
  * 
  * @since 9.5
