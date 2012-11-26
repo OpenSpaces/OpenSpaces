@@ -46,7 +46,7 @@ public class DefaultColumnFamilyNameConverter implements ColumnFamilyNameConvert
         String typeNameMD5 = encrypter.encrypt(typeName);
         String typeNameMD5Suffix = typeNameMD5.substring(0, NUMBER_OF_MD5_CHARS_SUFFIX);
         
-        String underScoredTypeName = typeName.replace('.', '_');
+        String underScoredTypeName = typeName.replace('.', '_').replace('$', '_');
         String[] typeNameSplit = underScoredTypeName.split("_");
         String simpleTypeName = typeNameSplit[typeNameSplit.length - 1];
         
