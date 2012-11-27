@@ -89,8 +89,8 @@ public class HectorCassandraClient {
         if (host == null) {
             throw new IllegalArgumentException("host must be set");
         }
-        if (port == 0) {
-            throw new IllegalArgumentException("port must be set");
+        if (port <= 0) {
+            throw new IllegalArgumentException("port must be positive number");
         }
         if (keyspaceName == null) {
             throw new IllegalArgumentException("keyspacename must be set");
