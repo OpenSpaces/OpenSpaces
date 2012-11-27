@@ -19,7 +19,7 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
-import org.openspaces.persistency.cassandra.error.CassandraDataSourceException;
+import org.openspaces.persistency.cassandra.error.SpaceCassandraDataSourceException;
 
 import com.j_spaces.kernel.pool.IResourceFactory;
 
@@ -44,7 +44,7 @@ public class ConnectionResourceFactory
         try {
             return new ConnectionResource(dataSource.getConnection());
         } catch (SQLException e) {
-            throw new CassandraDataSourceException("Could not allocate a new connection", e);
+            throw new SpaceCassandraDataSourceException("Could not allocate a new connection", e);
         }
     }
 }

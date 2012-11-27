@@ -26,7 +26,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.persistency.cassandra.CassandraPersistencyConstants;
-import org.openspaces.persistency.cassandra.error.CassandraTypeIntrospectionException;
+import org.openspaces.persistency.cassandra.error.SpaceCassandraTypeIntrospectionException;
 import org.openspaces.persistency.cassandra.meta.ColumnFamilyMetadata;
 import org.openspaces.persistency.cassandra.meta.data.ColumnData;
 import org.openspaces.persistency.cassandra.meta.data.ColumnFamilyRow;
@@ -228,7 +228,7 @@ public class SpaceDocumentTopLevelTypeNode extends SpaceDocumentTypeNode
                         PojoTypeInfo pojoTypeInfo = PojoTypeInfoRepository.getPojoTypeInfo(currentParent.getClass());
                         PojoPropertyInfo propertyInfo = pojoTypeInfo.getProperty(token);
                         if (propertyInfo == null || propertyInfo.getGetterMethod() == null) {
-                            throw new CassandraTypeIntrospectionException("Could not find getter method for " +
+                            throw new SpaceCassandraTypeIntrospectionException("Could not find getter method for " +
                             		"property " + token + " of type: " + currentParent.getClass(), null);
                         }
                         
@@ -238,13 +238,13 @@ public class SpaceDocumentTopLevelTypeNode extends SpaceDocumentTypeNode
                                                    .getterMethodFor(propertyInfo.getGetterMethod())
                                                    .get(currentParent);
                         } catch (IllegalArgumentException e) {
-                            throw new CassandraTypeIntrospectionException("Failed getting value for " +
+                            throw new SpaceCassandraTypeIntrospectionException("Failed getting value for " +
                                     "property " + token + " of parent: " + currentParent.getClass(), e);
                         } catch (IllegalAccessException e) {
-                            throw new CassandraTypeIntrospectionException("Failed getting value for " +
+                            throw new SpaceCassandraTypeIntrospectionException("Failed getting value for " +
                                     "property " + token + " of parent: " + currentParent.getClass(), e);
                         } catch (InvocationTargetException e) {
-                            throw new CassandraTypeIntrospectionException("Failed getting value for " +
+                            throw new SpaceCassandraTypeIntrospectionException("Failed getting value for " +
                                     "property " + token + " of parent: " + currentParent.getClass(), e);
                         }
                     }
@@ -281,7 +281,7 @@ public class SpaceDocumentTopLevelTypeNode extends SpaceDocumentTypeNode
             PojoTypeInfo pojoTypeInfo = PojoTypeInfoRepository.getPojoTypeInfo(propertyParent.getClass());
             PojoPropertyInfo propertyInfo = pojoTypeInfo.getProperty(propertyName);
             if (propertyInfo == null || propertyInfo.getSetterMethod() == null) {
-                throw new CassandraTypeIntrospectionException("Could not find setter method for " +
+                throw new SpaceCassandraTypeIntrospectionException("Could not find setter method for " +
                         "property " + propertyName + " of parent: " + propertyParent.getClass(), null);
             }
             
@@ -291,13 +291,13 @@ public class SpaceDocumentTopLevelTypeNode extends SpaceDocumentTypeNode
                        .setterMethodFor(propertyInfo.getSetterMethod())
                        .set(propertyParent, value);
             } catch (IllegalArgumentException e) {
-                throw new CassandraTypeIntrospectionException("Failed setting value for " +
+                throw new SpaceCassandraTypeIntrospectionException("Failed setting value for " +
                         "property " + propertyName + " of parent: " + propertyParent.getClass(), e);
             } catch (IllegalAccessException e) {
-                throw new CassandraTypeIntrospectionException("Failed setting value for " +
+                throw new SpaceCassandraTypeIntrospectionException("Failed setting value for " +
                         "property " + propertyName + " of parent: " + propertyParent.getClass(), e);
             } catch (InvocationTargetException e) {
-                throw new CassandraTypeIntrospectionException("Failed setting value for " +
+                throw new SpaceCassandraTypeIntrospectionException("Failed setting value for " +
                         "property " + propertyName + " of parent: " + propertyParent.getClass(), e);
             }
             

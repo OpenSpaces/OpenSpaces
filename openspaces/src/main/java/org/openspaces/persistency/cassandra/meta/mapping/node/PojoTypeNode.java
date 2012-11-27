@@ -27,7 +27,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.persistency.cassandra.CassandraPersistencyConstants;
-import org.openspaces.persistency.cassandra.error.CassandraTypeIntrospectionException;
+import org.openspaces.persistency.cassandra.error.SpaceCassandraTypeIntrospectionException;
 import org.openspaces.persistency.cassandra.meta.DynamicColumnMetadata;
 import org.openspaces.persistency.cassandra.meta.data.ColumnData;
 import org.openspaces.persistency.cassandra.meta.data.ColumnFamilyRow;
@@ -101,10 +101,10 @@ public class PojoTypeNode extends AbstractCompoundTypeNode
         try {
             constructor = (Constructor<Object>) type.getConstructor();
         } catch (SecurityException e) {
-            throw new CassandraTypeIntrospectionException("Could not find default constructor for type: "
+            throw new SpaceCassandraTypeIntrospectionException("Could not find default constructor for type: "
                                                           + type.getName(), e);
         } catch (NoSuchMethodException e) {
-            throw new CassandraTypeIntrospectionException("Could not find default constructor for type: "
+            throw new SpaceCassandraTypeIntrospectionException("Could not find default constructor for type: "
                     + type.getName(), e);
         }
         
@@ -170,15 +170,15 @@ public class PojoTypeNode extends AbstractCompoundTypeNode
                         .getterMethodFor(propertyGetter)
                         .get(value);
             } catch (IllegalArgumentException e) {
-                throw new CassandraTypeIntrospectionException("Failed getting value for property " +
+                throw new SpaceCassandraTypeIntrospectionException("Failed getting value for property " +
                                                               propertyName + " from property " +
                                                               fullName, e);
             } catch (IllegalAccessException e) {
-                throw new CassandraTypeIntrospectionException("Failed getting value for property " +
+                throw new SpaceCassandraTypeIntrospectionException("Failed getting value for property " +
                         propertyName + " from property " +
                         fullName, e);
             } catch (InvocationTargetException e) {
-                throw new CassandraTypeIntrospectionException("Failed getting value for property " +
+                throw new SpaceCassandraTypeIntrospectionException("Failed getting value for property " +
                         propertyName + " from property " +
                         fullName, e);
             }
@@ -225,13 +225,13 @@ public class PojoTypeNode extends AbstractCompoundTypeNode
                                  .constructorFor(constructor)
                                  .newInstance();
         } catch (InstantiationException e) {
-            throw new CassandraTypeIntrospectionException("Failed creating instance for property " +
+            throw new SpaceCassandraTypeIntrospectionException("Failed creating instance for property " +
                     fullName + " of type " + type.getName(), e);
         } catch (IllegalAccessException e) {
-            throw new CassandraTypeIntrospectionException("Failed creating instance for property " +
+            throw new SpaceCassandraTypeIntrospectionException("Failed creating instance for property " +
                     fullName + " of type " + type.getName(), e);
         } catch (InvocationTargetException e) {
-            throw new CassandraTypeIntrospectionException("Failed creating instance for property " +
+            throw new SpaceCassandraTypeIntrospectionException("Failed creating instance for property " +
                     fullName + " of type " + type.getName(), e);
         } 
         
@@ -245,14 +245,14 @@ public class PojoTypeNode extends AbstractCompoundTypeNode
                        .setterMethodFor(setterMethod)
                        .set(newInstance, value);
             } catch (IllegalArgumentException e) {
-                throw new CassandraTypeIntrospectionException("Failed setting property value for property: "
+                throw new SpaceCassandraTypeIntrospectionException("Failed setting property value for property: "
                                                               + entry.getKey() + " of " + fullName, e);
             }
             catch (IllegalAccessException e) {
-                throw new CassandraTypeIntrospectionException("Failed setting property value for property: "
+                throw new SpaceCassandraTypeIntrospectionException("Failed setting property value for property: "
                         + entry.getKey() + " of " + fullName, e);
             } catch (InvocationTargetException e) {
-                throw new CassandraTypeIntrospectionException("Failed setting property value for property: "
+                throw new SpaceCassandraTypeIntrospectionException("Failed setting property value for property: "
                         + entry.getKey() + " of " + fullName, e);
             }
         }

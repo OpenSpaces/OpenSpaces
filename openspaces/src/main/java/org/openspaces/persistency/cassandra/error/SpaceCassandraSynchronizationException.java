@@ -17,16 +17,15 @@ package org.openspaces.persistency.cassandra.error;
 
 
 /**
- * A runtime exception for cassandra data source related runtime exceptions
+ * A runtime exception for cassandra data synchonization related runtime exceptions
  * 
  * @since 9.5
  * @author Dan Kilman
  */
-public class CassandraDataSourceException extends CassandraRuntimeException {
+public class SpaceCassandraSynchronizationException extends SpaceCassandraException {
 
     private static final long serialVersionUID = 1L;
-
-    public CassandraDataSourceException(String message, Throwable e) {
+    public SpaceCassandraSynchronizationException(String message, Throwable e) {
         super(message, e);
     }
 

@@ -30,7 +30,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import org.openspaces.persistency.cassandra.error.CassandraSerializationException;
+import org.openspaces.persistency.cassandra.error.SpaceCassandraSerializationException;
 
 import me.prettyprint.cassandra.serializers.IntegerSerializer;
 
@@ -208,7 +208,7 @@ public class DynamicPropertyValueSerializer implements PropertyValueSerializer {
             System.arraycopy(stringUTFBytes, 0, bytes, 1, stringUTFBytes.length);
             return ByteBuffer.wrap(bytes);
         } catch (UnsupportedEncodingException e) {
-            throw new CassandraSerializationException("Failed serializing string: " + value, e);
+            throw new SpaceCassandraSerializationException("Failed serializing string: " + value, e);
         }
     }
 
@@ -336,7 +336,7 @@ public class DynamicPropertyValueSerializer implements PropertyValueSerializer {
             ois.close();
             return object;
         } catch (Exception e) {
-            throw new CassandraSerializationException("Failed deserializing object", e);
+            throw new SpaceCassandraSerializationException("Failed deserializing object", e);
         }
     }
     
@@ -352,7 +352,7 @@ public class DynamicPropertyValueSerializer implements PropertyValueSerializer {
             System.arraycopy(objectBytes, 0, bytes, 1, objectBytes.length);
             return ByteBuffer.wrap(bytes);
         } catch (IOException e) {
-            throw new CassandraSerializationException("Failed serializing object " + value, e);
+            throw new SpaceCassandraSerializationException("Failed serializing object " + value, e);
         }
     }
     

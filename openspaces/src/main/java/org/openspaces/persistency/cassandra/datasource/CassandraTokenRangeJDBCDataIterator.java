@@ -31,7 +31,7 @@ import me.prettyprint.hector.api.Serializer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.openspaces.persistency.cassandra.error.CassandraQueryExecutionException;
+import org.openspaces.persistency.cassandra.error.SpaceCassandraQueryExecutionException;
 import org.openspaces.persistency.cassandra.meta.ColumnFamilyMetadata;
 import org.openspaces.persistency.cassandra.meta.ColumnMetadata;
 import org.openspaces.persistency.cassandra.meta.DynamicColumnMetadata;
@@ -90,14 +90,14 @@ public class CassandraTokenRangeJDBCDataIterator implements DataIterator<Object>
             preparedStatement = connection.prepareStatement(statementData.query);
             setPreparedStatementParameters(statementData);
         } catch (SQLException e) {
-            throw new CassandraQueryExecutionException("Failed preparing statement " +
+            throw new SpaceCassandraQueryExecutionException("Failed preparing statement " +
                     statementData.query, e);
         }
         
         try {
             resultSet = preparedStatement.executeQuery();
         } catch (SQLException e) {
-            throw new CassandraQueryExecutionException("Failed executing statement " +
+            throw new SpaceCassandraQueryExecutionException("Failed executing statement " +
                     statementData.query, e);
         }
         
@@ -116,7 +116,7 @@ public class CassandraTokenRangeJDBCDataIterator implements DataIterator<Object>
             currentResultInResultSet = getNextValidDocument();
             return currentResultInResultSet != null;
         } catch (SQLException e) {
-            throw new CassandraQueryExecutionException("Failed checking for any remaining entries ", e);
+            throw new SpaceCassandraQueryExecutionException("Failed checking for any remaining entries ", e);
         }
     }
 
@@ -182,7 +182,7 @@ public class CassandraTokenRangeJDBCDataIterator implements DataIterator<Object>
                     currentCount++;
                 }
             } catch (SQLException e) {
-                throw new CassandraQueryExecutionException("Failed retrieving next entry", e);
+                throw new SpaceCassandraQueryExecutionException("Failed retrieving next entry", e);
             }
         }
 

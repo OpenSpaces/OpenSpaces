@@ -30,7 +30,7 @@ import org.openspaces.persistency.cassandra.datasource.CassandraTokenRangeAwareD
 import org.openspaces.persistency.cassandra.datasource.CassandraTokenRangeAwareInitialLoadDataIterator;
 import org.openspaces.persistency.cassandra.datasource.DataIteratorAdapter;
 import org.openspaces.persistency.cassandra.datasource.SingleEntryDataIterator;
-import org.openspaces.persistency.cassandra.error.CassandraDataSourceException;
+import org.openspaces.persistency.cassandra.error.SpaceCassandraDataSourceException;
 import org.openspaces.persistency.cassandra.meta.ColumnFamilyMetadata;
 import org.openspaces.persistency.cassandra.meta.mapping.DefaultSpaceDocumentColumnFamilyMapper;
 import org.openspaces.persistency.cassandra.meta.mapping.SpaceDocumentColumnFamilyMapper;
@@ -153,7 +153,7 @@ public class CassandraSpaceDataSource
         if (metadata == null) {
             metadata = hectorClient.fetchKnownColumnFamily(typeName, mapper);
             if (metadata == null) {
-                throw new CassandraDataSourceException("Could not find column family for type name: "
+                throw new SpaceCassandraDataSourceException("Could not find column family for type name: "
                                                        + typeName, null);
             }
         }
@@ -168,7 +168,7 @@ public class CassandraSpaceDataSource
             Object[] params = sqlQuery.getQueryParameters();
             queryContext = new CQLQueryContext(null, sqlQuery.getQuery(), params);
         } else {
-            throw new CassandraDataSourceException("Unsupported data source query", null);
+            throw new SpaceCassandraDataSourceException("Unsupported data source query", null);
         }
          
         Object keyValue = getKeyValue(queryContext, metadata);

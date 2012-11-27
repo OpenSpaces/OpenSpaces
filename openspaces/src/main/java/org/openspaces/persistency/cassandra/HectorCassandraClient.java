@@ -25,7 +25,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.openspaces.persistency.cassandra.datasource.SpaceDocumentMapper;
-import org.openspaces.persistency.cassandra.error.CassandraSchemaUpdateException;
+import org.openspaces.persistency.cassandra.error.SpaceCassandraSchemaUpdateException;
 import org.openspaces.persistency.cassandra.meta.ColumnFamilyMetadata;
 import org.openspaces.persistency.cassandra.meta.ColumnFamilyMetadataCache;
 import org.openspaces.persistency.cassandra.meta.ColumnFamilyMetadataMetadata;
@@ -254,7 +254,7 @@ public class HectorCassandraClient {
             try {
                 cluster.addColumnFamily(cfDef, true);
             } catch (HectorException e) {
-                throw new CassandraSchemaUpdateException("Failed adding column family definition to cassandra", e, true);
+                throw new SpaceCassandraSchemaUpdateException("Failed adding column family definition to cassandra", e, true);
             }
         } finally {
             lockForType.unlock();
@@ -278,7 +278,7 @@ public class HectorCassandraClient {
         if (metadata == null) {
             metadata = fetchKnownColumnFamily(typeName, mapper);
             if (metadata == null) {
-                throw new CassandraSchemaUpdateException("Failed finding column family metadata for " +
+                throw new SpaceCassandraSchemaUpdateException("Failed finding column family metadata for " +
                     typeName, null, false);
             }
         }
@@ -290,7 +290,7 @@ public class HectorCassandraClient {
             
             ColumnFamilyDefinition columnFamilyDefinition = getColumnFamilyDefinition(metadata);
             if (columnFamilyDefinition == null) {
-                throw new CassandraSchemaUpdateException("column family definitaion: " + metadata.getColumnFamilyName() + 
+                throw new SpaceCassandraSchemaUpdateException("column family definitaion: " + metadata.getColumnFamilyName() + 
                                                    " for type: " + typeName + " not found", null, false);
             }
             
@@ -328,7 +328,7 @@ public class HectorCassandraClient {
             try {
                 cluster.updateColumnFamily(thriftCfDef, true);
             } catch (HectorException e) {
-                throw new CassandraSchemaUpdateException("Failed adding column family definition to cassandra", null, true);
+                throw new SpaceCassandraSchemaUpdateException("Failed adding column family definition to cassandra", null, true);
             }
         
         } finally {
@@ -376,7 +376,7 @@ public class HectorCassandraClient {
                                   ObjectSerializer.get().toByteBuffer(metadata));
             template.update(updater);
         } catch (HectorException e) {
-            throw new CassandraSchemaUpdateException("Failed persisting column family metadata for " +
+            throw new SpaceCassandraSchemaUpdateException("Failed persisting column family metadata for " +
                     metadata.getTypeName(), e, true);
         }
     }

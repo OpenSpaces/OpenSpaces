@@ -22,11 +22,11 @@ package org.openspaces.persistency.cassandra.error;
  * @since 9.5
  * @author Dan Kilman
  */
-public class CassandraSerializationException extends CassandraRuntimeException {
+public class SpaceCassandraSerializationException extends SpaceCassandraException {
 
     private static final long serialVersionUID = 1L;
 
-    public CassandraSerializationException(String message, Throwable e) {
+    public SpaceCassandraSerializationException(String message, Throwable e) {
         super(message, e);
     }
     

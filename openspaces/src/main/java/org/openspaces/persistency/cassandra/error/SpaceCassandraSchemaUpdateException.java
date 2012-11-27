@@ -16,17 +16,26 @@
 package org.openspaces.persistency.cassandra.error;
 
 /**
- * Base runtime exception class for all cassandra related exceptions.
+ * A runtime exception for Cassandra schema update related exceptions
+ * Contains an isRetryable field denoting wheter this is an exception
+ * which might be resolved by retrying the operation.
  * 
  * @since 9.5
  * @author Dan Kilman
  */
-abstract public class CassandraRuntimeException extends RuntimeException {
-
+public class SpaceCassandraSchemaUpdateException
+        extends SpaceCassandraException {
     private static final long serialVersionUID = 1L;
 
-    public CassandraRuntimeException(String message, Throwable e) {
+    private final boolean isRetryable;
+    
+    public SpaceCassandraSchemaUpdateException(String message, Throwable e, boolean isRetryable) {
         super(message, e);
+        this.isRetryable = isRetryable;
     }
 
+    public boolean isRetryable() {
+        return isRetryable;
+    }
+    
 }

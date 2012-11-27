@@ -16,17 +16,17 @@
 package org.openspaces.persistency.cassandra.error;
 
 /**
- * A runtime exception to denote exceptions that occured during reflection based
- * type introspection
+ * Base runtime exception class for all cassandra related exceptions.
  * 
  * @since 9.5
  * @author Dan Kilman
  */
-public class CassandraTypeIntrospectionException extends CassandraRuntimeException {
+abstract public class SpaceCassandraException extends RuntimeException {
+
     private static final long serialVersionUID = 1L;
 
-    public CassandraTypeIntrospectionException(String message, Throwable t) {
-        super(message, t);
+    public SpaceCassandraException(String message, Throwable e) {
+        super(message, e);
     }
 
 }

@@ -18,8 +18,8 @@ package org.openspaces.persistency.cassandra;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.openspaces.persistency.cassandra.error.CassandraDataSourceException;
-import org.openspaces.persistency.cassandra.error.CassandraSynchronizationException;
+import org.openspaces.persistency.cassandra.error.SpaceCassandraDataSourceException;
+import org.openspaces.persistency.cassandra.error.SpaceCassandraSynchronizationException;
 import org.openspaces.persistency.cassandra.meta.ColumnFamilyMetadata;
 import org.openspaces.persistency.cassandra.meta.conversion.ColumnFamilyNameConverter;
 import org.openspaces.persistency.cassandra.meta.data.ColumnFamilyRow;
@@ -95,7 +95,7 @@ public class CassandraSpaceSynchronizationEndpoint
         
         for (DataSyncOperation dataSyncOperation : dataSyncOperations) {
             if (!dataSyncOperation.supportsDataAsDocument()) {
-                throw new CassandraSynchronizationException("Data sync operation does not support asDocument", null);
+                throw new SpaceCassandraSynchronizationException("Data sync operation does not support asDocument", null);
             }
                         
             
@@ -106,7 +106,7 @@ public class CassandraSpaceSynchronizationEndpoint
             if (metadata == null) {
                 metadata = hectorClient.fetchKnownColumnFamily(typeName, mapper);
                 if (metadata == null) {
-                    throw new CassandraDataSourceException("Could not find column family for type name: "
+                    throw new SpaceCassandraDataSourceException("Could not find column family for type name: "
                             + typeName, null);
                 }
             }
@@ -115,7 +115,7 @@ public class CassandraSpaceSynchronizationEndpoint
             Object keyValue = spaceDoc.getProperty(keyName);
                 
             if (keyValue == null) {
-                throw new CassandraSynchronizationException("Data sync operation missing id property value", null);
+                throw new SpaceCassandraSynchronizationException("Data sync operation missing id property value", null);
             }
             
             ColumnFamilyRow columnFamilyRow;

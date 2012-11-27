@@ -23,7 +23,7 @@ import javax.annotation.PostConstruct;
 import org.openspaces.archive.ArchiveOperationHandler;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.persistency.cassandra.HectorCassandraClient;
-import org.openspaces.persistency.cassandra.error.CassandraTypeIntrospectionException;
+import org.openspaces.persistency.cassandra.error.SpaceCassandraTypeIntrospectionException;
 import org.openspaces.persistency.cassandra.meta.ColumnFamilyMetadata;
 import org.openspaces.persistency.cassandra.meta.conversion.ColumnFamilyNameConverter;
 import org.openspaces.persistency.cassandra.meta.data.ColumnFamilyRow;
@@ -144,7 +144,7 @@ public class CassandraArchiveOperationHandler implements ArchiveOperationHandler
                                                  false);
                 rows.add(columnFamilyRow);
             }
-            catch (CassandraTypeIntrospectionException e) {
+            catch (SpaceCassandraTypeIntrospectionException e) {
                 //TODO CAS:throw exception
             }
         }
