@@ -22,8 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.annotation.concurrent.GuardedBy;
-
 import org.apache.cassandra.cql.jdbc.CassandraDataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -80,8 +78,6 @@ public class CassandraSpaceDataSource
     private final int                               batchLimit;
 
     private final Object                            lock         = new Object();
-    
-    @GuardedBy("lock")
     private boolean                                 closed       = false;
     
     public CassandraSpaceDataSource(
@@ -193,7 +189,8 @@ public class CassandraSpaceDataSource
             if (performIdQuery) {
                 return new SingleEntryDataIterator(getByIdImpl(metadata.getTypeName(), keyValue));
             } else {
-                int maxResults = keyValue != null ? 1 : query.getMaxResults();
+//                int maxResults = keyValue != null ? 1 : query.getMaxResults();
+                int maxResults = Integer.MAX_VALUE;
                 return new CassandraTokenRangeAwareDataIterator(mapper,
                                                                 metadata, 
                                                                 connectionPool.getResource(), 

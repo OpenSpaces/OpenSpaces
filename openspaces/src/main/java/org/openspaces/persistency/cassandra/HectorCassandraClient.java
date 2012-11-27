@@ -24,8 +24,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.annotation.concurrent.GuardedBy;
-
 import org.openspaces.persistency.cassandra.datasource.SpaceDocumentMapper;
 import org.openspaces.persistency.cassandra.error.CassandraSchemaUpdateException;
 import org.openspaces.persistency.cassandra.meta.ColumnFamilyMetadata;
@@ -84,8 +82,6 @@ public class HectorCassandraClient {
     private final Cluster                                                     cluster;
 
     private final Object                                                      lock            = new Object();
-    
-    @GuardedBy("lock")
     private boolean                                                           closed          = false;
     
     public HectorCassandraClient(String host, int port, String keyspaceName, String clusterName) {
