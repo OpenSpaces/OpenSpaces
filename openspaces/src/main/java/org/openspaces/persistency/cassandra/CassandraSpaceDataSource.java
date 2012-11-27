@@ -177,14 +177,15 @@ public class CassandraSpaceDataSource
         if (performIdQuery) {
             return new SingleEntryDataIterator(getByIdImpl(metadata.getTypeName(), keyValue));
         } else {
-//                int maxResults = keyValue != null ? 1 : query.getMaxResults();
-            int maxResults = Integer.MAX_VALUE;
+            int queryMaxResults = keyValue != null ? 1 : query.getMaxResults();
+            int iteratorMaxResults = Integer.MAX_VALUE;
+            int actualBatchLimit = (queryMaxResults < batchLimit) ? queryMaxResults : batchLimit;
             return new CassandraTokenRangeAwareDataIterator(mapper,
                                                             metadata, 
                                                             connectionPool.getResource(), 
                                                             queryContext, 
-                                                            maxResults,
-                                                            batchLimit);
+                                                            iteratorMaxResults,
+                                                            actualBatchLimit);
         }
     }
 
