@@ -28,6 +28,7 @@ import org.w3c.dom.Element;
 /**
  * @author Itai Frenkel
  * @since 9.1.1
+ * @see ArchiveNamespaceHandler
  */
 public class AnnotationSupportBeanDefinitionParser implements BeanDefinitionParser {
 

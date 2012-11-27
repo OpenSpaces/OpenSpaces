@@ -25,6 +25,7 @@ import org.w3c.dom.Element;
 /**
  * @author Itai Frenkel
  * @since 9.1.1
+ * @see ArchiveNamespaceHandler
  */
 public class ArchivePollingContainerBeanDefinitionParser
     extends AbstractTemplateEventContainerBeanDefinitionParser {
@@ -45,6 +46,7 @@ public class ArchivePollingContainerBeanDefinitionParser
         
         private static final String BATCH_SIZE = "batch-size";
         
+        @Override
         protected Class<ArchivePollingContainer> getBeanClass(Element element) {
             return ArchivePollingContainer.class;
         }
