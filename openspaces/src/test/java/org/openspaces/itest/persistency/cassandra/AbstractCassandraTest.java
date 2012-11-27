@@ -8,7 +8,6 @@ import java.util.Set;
 import org.apache.cassandra.cql.jdbc.CassandraDataSource;
 import org.junit.After;
 import org.junit.Before;
-import org.openspaces.itest.persistency.cassandra.helper.EmbeddedCassandraController;
 import org.openspaces.itest.persistency.cassandra.mock.MockIntroduceTypeData;
 import org.openspaces.persistency.cassandra.CassandraSpaceDataSource;
 import org.openspaces.persistency.cassandra.CassandraSpaceSynchronizationEndpoint;
@@ -17,7 +16,6 @@ import org.openspaces.persistency.cassandra.HectorCassandraClient;
 import org.openspaces.persistency.cassandra.meta.mapping.filter.FlattenedPropertiesFilter;
 
 import com.gigaspaces.document.SpaceDocument;
-import com.gigaspaces.logger.GSLogConfigLoader;
 import com.gigaspaces.metadata.SpaceTypeDescriptorBuilder;
 import com.gigaspaces.metadata.index.SpaceIndexType;
 
@@ -29,29 +27,17 @@ abstract public class AbstractCassandraTest
     private static final String                           LOCALHOST     = "127.0.0.1";
     private static final String                           DEFAULT_AUTH  = "default";
     
-    protected String                                      _keySpaceName = "space";
-    protected int                                         _rpcPort;
-    
-    protected final EmbeddedCassandraController           _cassandraController = new EmbeddedCassandraController();
     protected CassandraSpaceSynchronizationEndpoint _syncInterceptor;
     protected CassandraSpaceDataSource                    _dataSource;
+    
+    private CassandraTestServer server = new CassandraTestServer();
     
     @Before
     public void initialSetup()
     {
-        if (CassandraTestSuite.isSuiteMode())
-        {
-            _keySpaceName = CassandraTestSuite.createKeySpaceAndReturnItsName();
-            _rpcPort = CassandraTestSuite.getRpcPort();
-        }
-        else
-        {
-            GSLogConfigLoader.getLoader();
-            _cassandraController.initCassandra(isEmbedded());
-            _cassandraController.createKeySpace(_keySpaceName);
-            _rpcPort = _cassandraController.getRpcPort();
-        }
-        
+       
+    	server.initialize(isEmbedded());
+    	
         _syncInterceptor = createCassandraSyncEndpointInterceptor(createCassandraHectorClient("cluster-sync"));
         _dataSource = createCassandraSpaceDataSource(createCassandraHectorClient("cluster-datasource"));
     }
@@ -59,11 +45,15 @@ abstract public class AbstractCassandraTest
     @After
     public void finalTeardown()
     {
-        _syncInterceptor.close();
-        _dataSource.close();
-        
-        if (!CassandraTestSuite.isSuiteMode())
-            _cassandraController.stopCassandra();
+    	if (_syncInterceptor != null) {
+    		_syncInterceptor.close();
+    	}
+    	
+    	if (_dataSource != null) {
+    		_dataSource.close();
+    	}
+    	
+    	server.destroy();
     }
 
     protected boolean isEmbedded()
@@ -74,8 +64,8 @@ abstract public class AbstractCassandraTest
     protected HectorCassandraClient createCassandraHectorClient(String clusterName)
     {
         HectorCassandraClient hectorClient = new HectorCassandraClient(LOCALHOST,
-                                                                       _rpcPort,
-                                                                       _keySpaceName,
+                                                                       server.getPort(),
+                                                                       server.getKeySpaceName(),
                                                                        clusterName);
         return hectorClient;
     }
@@ -111,8 +101,8 @@ abstract public class AbstractCassandraTest
     protected CassandraDataSource createCassandraDataSource()
     {
         return new CassandraDataSource(LOCALHOST,
-                                       _rpcPort,
-                                       _keySpaceName,
+                                       server.getPort(),
+                                       server.getKeySpaceName(),
                                        DEFAULT_AUTH,
                                        DEFAULT_AUTH,
                                        CQL_VERSION);
