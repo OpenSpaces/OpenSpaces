@@ -23,10 +23,15 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.openspaces.core.GigaSpace;
+import org.openspaces.core.GigaSpaceConfigurer;
+import org.openspaces.core.space.UrlSpaceConfigurer;
 import org.openspaces.itest.persistency.cassandra.CassandraTestServer;
 import org.openspaces.persistency.cassandra.archive.CassandraArchiveOperationHandler;
+import org.openspaces.persistency.cassandra.archive.CassandraArchiveOperationHandlerConfigurer;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import com.j_spaces.core.IJSpace;
 
 /**
  * GS-10785 Test Archive Container
@@ -59,11 +64,45 @@ public class TestCassandaraArchiveOperationHandler {
      * Tests archiver with namespace spring bean xml
      */
     @Test 
-    public void testXmlNamespace() throws InterruptedException {
+    public void testXmlNamespace() {
         xmlTest(TEST_NAMESPACE_XML); 
     }
     
-    private void xmlTest(String relativeXmlName) throws InterruptedException {
+    @Test
+    public void testConfigurer() throws Exception {
+    	
+    	UrlSpaceConfigurer urlSpaceConfigurer = new UrlSpaceConfigurer("/./space");
+    	
+    	CassandraArchiveOperationHandler archiveHandler = null;
+    	
+        try {
+            GigaSpace gigaSpace;
+            
+            final IJSpace space = urlSpaceConfigurer.create();
+            gigaSpace = new GigaSpaceConfigurer(space).create();
+
+            archiveHandler = 
+            	new CassandraArchiveOperationHandlerConfigurer()
+	            .keyspace(server.getKeySpaceName())
+	        	.host(server.getHost())
+	        	.port(server.getPort())
+	        	.gigaSpace(gigaSpace)
+	            .create();
+            
+            test(archiveHandler, gigaSpace);
+        } finally {
+            
+            if (urlSpaceConfigurer != null) {
+                urlSpaceConfigurer.destroy();
+            }
+            
+            if (archiveHandler != null) {
+            	archiveHandler.destroy();
+            }
+        }
+    }
+    
+    private void xmlTest(String relativeXmlName) {
 
     	final boolean refreshNow = false;
     	final ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[]{relativeXmlName}, refreshNow);
@@ -86,7 +125,7 @@ public class TestCassandaraArchiveOperationHandler {
         }
     }
 
-    private void test(CassandraArchiveOperationHandler archiveHandler, GigaSpace gigaSpace) throws InterruptedException {
+    private void test(CassandraArchiveOperationHandler archiveHandler, GigaSpace gigaSpace) {
          
     }
 }
