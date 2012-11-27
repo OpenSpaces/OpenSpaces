@@ -23,7 +23,7 @@ import javax.annotation.PostConstruct;
 import org.openspaces.archive.ArchiveOperationHandler;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.persistency.cassandra.HectorCassandraClient;
-import org.openspaces.persistency.cassandra.error.SpaceCassandraTypeIntrospectionException;
+import org.openspaces.persistency.cassandra.error.SpaceCassandraException;
 import org.openspaces.persistency.cassandra.meta.ColumnFamilyMetadata;
 import org.openspaces.persistency.cassandra.meta.conversion.ColumnFamilyNameConverter;
 import org.openspaces.persistency.cassandra.meta.data.ColumnFamilyRow;
@@ -88,15 +88,17 @@ public class CassandraArchiveOperationHandler implements ArchiveOperationHandler
             maxNestingLevel = DEFAULT_MAX_NESTING_LEVEL;
         }
         
-        mapper = new DefaultSpaceDocumentColumnFamilyMapper(fixedPropertyValueSerializer,
-                null,                                           
-                flattenedPropertiesFilter, 
-                columnFamilyNameConverter,
+        PropertyValueSerializer dynamicPropertyValueSerializer = null;
+        
+        mapper = new DefaultSpaceDocumentColumnFamilyMapper(
+        		fixedPropertyValueSerializer, // can be null
+        		dynamicPropertyValueSerializer, //not used, can be null                                         
+                flattenedPropertiesFilter, // can be null
+                columnFamilyNameConverter, // can be null
                 maxNestingLevel);
         
     }
     
-    //TODO CAS: finish implementation
     /**
      * @see ArchiveOperationHandler#archive(Object...)
      * 
@@ -104,6 +106,8 @@ public class CassandraArchiveOperationHandler implements ArchiveOperationHandler
      *  1. The archiver must not write two different entries with the same ID.
      *     This would corrupt the entry in Cassandra.
      *  2. Only Space Documents are supported
+     *  
+     *  @throws SpaceCassandraException - Problem encountered while archiving to cassandra
      */
     @Override
     public void archive(Object... objects) {
@@ -112,10 +116,7 @@ public class CassandraArchiveOperationHandler implements ArchiveOperationHandler
         for (Object object : objects) {
 
             if (!(object instanceof SpaceDocument)) {
-                //TODO CAS: throw exception
-                //errorHandler.onDataSyncOperationError(dataSyncOperation, 
-                //                                      InvalidDataSyncOperationReason.NotSupportsAsDocument,
-                //                                      null);
+            	throw new SpaceCassandraArchiveOperationHandlerException(object.getClass() + " is not supported since it is not a " + SpaceDocument.class.getName());
             }
             
             SpaceDocument spaceDoc = (SpaceDocument) object;
@@ -130,23 +131,16 @@ public class CassandraArchiveOperationHandler implements ArchiveOperationHandler
             Object keyValue = spaceDoc.getProperty(keyName);
                 
             if (keyValue == null) {
-                //TODO CAS: throw exception
-                //errorHandler.onDataSyncOperationError(dataSyncOperation, 
-                //                                       InvalidDataSyncOperationReason.MissingIDValue,
-                //                                       null);
+            	throw new SpaceCassandraArchiveOperationHandlerException(object.getClass() + " entry is illegal since SpaceId property is undefined");
             }
             ColumnFamilyRow columnFamilyRow;
-            try {
-                columnFamilyRow = 
-                        mapper.toColumnFamilyRow(metadata, 
-                                                 spaceDoc, 
-                                                 ColumnFamilyRowType.Write,
-                                                 false);
-                rows.add(columnFamilyRow);
-            }
-            catch (SpaceCassandraTypeIntrospectionException e) {
-                //TODO CAS:throw exception
-            }
+        
+            columnFamilyRow = 
+                    mapper.toColumnFamilyRow(metadata, 
+                                             spaceDoc, 
+                                             ColumnFamilyRowType.Write,
+                                             false);
+            rows.add(columnFamilyRow);
         }
 
         hectorClient.performBatchOperation(rows);
@@ -166,7 +160,6 @@ public class CassandraArchiveOperationHandler implements ArchiveOperationHandler
         return mapper.toColumnFamilyMetadata(dynamicTypeDesc);
     }
     
-    //TODO CAS: implement
     /**
      * @see ArchiveOperationHandler#supportsBatchArchiving() 
      * @return true - 

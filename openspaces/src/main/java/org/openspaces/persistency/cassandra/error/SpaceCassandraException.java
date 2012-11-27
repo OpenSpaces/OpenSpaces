@@ -29,4 +29,8 @@ abstract public class SpaceCassandraException extends RuntimeException {
         super(message, e);
     }
 
+	public SpaceCassandraException(String message) {
+		super(message);
+	}
+
 }
