@@ -187,6 +187,9 @@ public class CassandraArchiveOperationHandler implements ArchiveOperationHandler
     private ColumnFamilyMetadata createColumnFamilyMetadata(String typeName)
     {
         SpaceTypeDescriptor typeDesc = gigaSpace.getTypeManager().getTypeDescriptor(typeName);
+        if (typeDesc == null) {
+        	throw new SpaceCassandraArchiveOperationHandlerException("Cannot find type descriptor of " + typeName);
+        }
         String keyName = typeDesc.getIdPropertyName();
         Class<?> keyType = typeDesc.getFixedProperty(keyName).getType();
         SpaceTypeDescriptor dynamicTypeDesc = new SpaceTypeDescriptorBuilder(typeName)

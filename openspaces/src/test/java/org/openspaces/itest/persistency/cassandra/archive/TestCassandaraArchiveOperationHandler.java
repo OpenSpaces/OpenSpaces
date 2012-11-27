@@ -15,6 +15,8 @@
  *******************************************************************************/
 package org.openspaces.itest.persistency.cassandra.archive;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
@@ -28,9 +30,14 @@ import org.openspaces.core.space.UrlSpaceConfigurer;
 import org.openspaces.itest.persistency.cassandra.CassandraTestServer;
 import org.openspaces.persistency.cassandra.archive.CassandraArchiveOperationHandler;
 import org.openspaces.persistency.cassandra.archive.CassandraArchiveOperationHandlerConfigurer;
+import org.openspaces.persistency.cassandra.error.SpaceCassandraException;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import com.gigaspaces.document.SpaceDocument;
+import com.gigaspaces.metadata.SpaceTypeDescriptor;
+import com.gigaspaces.metadata.SpaceTypeDescriptorBuilder;
+import com.gigaspaces.metadata.index.SpaceIndexType;
 import com.j_spaces.core.IJSpace;
 
 /**
@@ -49,6 +56,8 @@ public class TestCassandaraArchiveOperationHandler {
     private final String TEST_NAMESPACE_XML = "/org/openspaces/itest/persistency/cassandra/archive/test-cassandra-archive-handler-namespace.xml";
     
     private final CassandraTestServer server = new CassandraTestServer();
+
+	private boolean skipRegisterTypeDescriptor;
     
     @Before
     public void startServer() {
@@ -70,8 +79,17 @@ public class TestCassandaraArchiveOperationHandler {
     
     @Test
     public void testConfigurer() throws Exception {
-    	
-    	UrlSpaceConfigurer urlSpaceConfigurer = new UrlSpaceConfigurer("/./space");
+    	configurerTest();
+    }
+
+    @Test(expected = SpaceCassandraException.class)
+    public void testNoTypeDescriptorInSpace() throws Exception {
+    	skipRegisterTypeDescriptor = true;
+    	configurerTest();
+    }
+
+	private void configurerTest() throws Exception {
+		final UrlSpaceConfigurer urlSpaceConfigurer = new UrlSpaceConfigurer("/./space");
     	
     	CassandraArchiveOperationHandler archiveHandler = null;
     	
@@ -100,7 +118,7 @@ public class TestCassandaraArchiveOperationHandler {
             	archiveHandler.destroy();
             }
         }
-    }
+	}
     
     private void xmlTest(String relativeXmlName) {
 
@@ -127,6 +145,24 @@ public class TestCassandaraArchiveOperationHandler {
 
     private void test(CassandraArchiveOperationHandler archiveHandler, GigaSpace gigaSpace) {
          
+		if (!skipRegisterTypeDescriptor) {
+			SpaceTypeDescriptor typeDescriptor = 
+					new SpaceTypeDescriptorBuilder("Product")
+			.idProperty("CatalogNumber")
+			.routingProperty("Category")
+			.addPropertyIndex("Name", SpaceIndexType.BASIC)
+			.addPropertyIndex("Price", SpaceIndexType.EXTENDED)
+			.create();
+			gigaSpace.getTypeManager().registerTypeDescriptor(typeDescriptor);
+		}
+		
+		Map<String, Object> properties = new HashMap<String, Object>();
+		properties.put("CatalogNumber", "hw-1234");
+		properties.put("Category", "Hardware");
+		properties.put("Name", "Anvil");
+		properties.put("Price", 9.99f);
+		SpaceDocument document = new SpaceDocument("Product", properties);
+		archiveHandler.archive(document);
     }
 }
 
