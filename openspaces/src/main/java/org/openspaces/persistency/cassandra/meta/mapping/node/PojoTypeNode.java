@@ -115,11 +115,6 @@ public class PojoTypeNode extends AbstractCompoundTypeNode
             
             if (property.getGetterMethod() == null || 
                 property.getSetterMethod() == null) {
-                if (logger.isWarnEnabled()) {
-                    logger.warn("found property with no public getter or setter: " + 
-                            typeInfo.getName() + "." + property.getName() + ". Ignoring property");
-                }
-                
                 continue;
             }
             
