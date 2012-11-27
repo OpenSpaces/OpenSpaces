@@ -19,8 +19,11 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.openspaces.core.GigaSpace;
+import org.openspaces.itest.persistency.cassandra.CassandraTestServer;
 import org.openspaces.persistency.cassandra.archive.CassandraArchiveOperationHandler;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -40,6 +43,18 @@ public class TestCassandaraArchiveOperationHandler {
     
     private final String TEST_NAMESPACE_XML = "/org/openspaces/itest/persistency/cassandra/archive/test-cassandra-archive-handler-namespace.xml";
     
+    private final CassandraTestServer server = new CassandraTestServer();
+    
+    @Before
+    public void startServer() {
+    	server.initialize(false);
+    }
+    
+    @After
+    public void stopServer() {
+    	server.destroy();
+    }
+    
     /**
      * Tests archiver with namespace spring bean xml
      */
@@ -55,10 +70,9 @@ public class TestCassandaraArchiveOperationHandler {
     	
     	PropertyPlaceholderConfigurer propertyConfigurer = new PropertyPlaceholderConfigurer();
     	Properties properties = new Properties();
-    	properties.put("cassandra.cluster.name","myclustername");
-    	properties.put("cassandra.keyspace", "mykeyspace");
-    	properties.put("cassandra.host", "localhost");
-    	properties.put("cassandra.port", "4444");
+    	properties.put("cassandra.keyspace", server.getKeySpaceName());
+    	properties.put("cassandra.host", server.getHost());
+    	properties.put("cassandra.port", ""+server.getPort());
     	propertyConfigurer.setProperties(properties);
     	context.addBeanFactoryPostProcessor(propertyConfigurer);
     	context.refresh();
