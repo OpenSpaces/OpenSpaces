@@ -30,9 +30,7 @@ import org.openspaces.persistency.cassandra.datasource.CassandraTokenRangeAwareD
 import org.openspaces.persistency.cassandra.datasource.CassandraTokenRangeAwareInitialLoadDataIterator;
 import org.openspaces.persistency.cassandra.datasource.DataIteratorAdapter;
 import org.openspaces.persistency.cassandra.datasource.SingleEntryDataIterator;
-import org.openspaces.persistency.cassandra.error.CassandraErrorHandler;
-import org.openspaces.persistency.cassandra.error.DefaultCassandraErrorHandler;
-import org.openspaces.persistency.cassandra.error.GetDataIteratorErrorReason;
+import org.openspaces.persistency.cassandra.error.CassandraDataSourceException;
 import org.openspaces.persistency.cassandra.meta.ColumnFamilyMetadata;
 import org.openspaces.persistency.cassandra.meta.mapping.DefaultSpaceDocumentColumnFamilyMapper;
 import org.openspaces.persistency.cassandra.meta.mapping.SpaceDocumentColumnFamilyMapper;
@@ -67,8 +65,6 @@ public class CassandraSpaceDataSource
     private static final String                     CQL_VERSION  = "2.0.0";
     
     private static final Log                        logger       = LogFactory.getLog(CassandraSpaceDataSource.class);
-
-    private final CassandraErrorHandler             errorHandler = new DefaultCassandraErrorHandler();
 
     private final SpaceDocumentColumnFamilyMapper   mapper;
 
@@ -157,17 +153,14 @@ public class CassandraSpaceDataSource
         if (metadata == null) {
             metadata = hectorClient.fetchKnownColumnFamily(typeName, mapper);
             if (metadata == null) {
-                errorHandler.onGetDataIteraotrError(query, 
-                                                     GetDataIteratorErrorReason.MissingColumnFamily, 
-                                                     null);
-                return new SingleEntryDataIterator(null);
+                throw new CassandraDataSourceException("Could not find column family for type name: "
+                                                       + typeName, null);
             }
         }
         
         CQLQueryContext queryContext = null;
         if (query.supportsTemplateAsDocument()) {
             SpaceDocument templateDocument = query.getTemplateAsDocument();
-            
             Map<String, Object> properties = templateDocument.getProperties();
             queryContext = new CQLQueryContext(properties, null, null);
         } else if (query.supportsAsSQLQuery()) {
@@ -175,35 +168,23 @@ public class CassandraSpaceDataSource
             Object[] params = sqlQuery.getQueryParameters();
             queryContext = new CQLQueryContext(null, sqlQuery.getQuery(), params);
         } else {
-            errorHandler.onGetDataIteraotrError(query, 
-                                                 GetDataIteratorErrorReason.UnsupportedDataSourceQuery, 
-                                                 null);
-            
-            return new SingleEntryDataIterator(null);
+            throw new CassandraDataSourceException("Unsupported data source query", null);
         }
          
-        try {
-            Object keyValue = getKeyValue(queryContext, metadata);
-            boolean performIdQuery = keyValue != null && !templateHasPropertyOtherThanKey(queryContext, metadata);
-            
-            if (performIdQuery) {
-                return new SingleEntryDataIterator(getByIdImpl(metadata.getTypeName(), keyValue));
-            } else {
+        Object keyValue = getKeyValue(queryContext, metadata);
+        boolean performIdQuery = keyValue != null && !templateHasPropertyOtherThanKey(queryContext, metadata);
+        
+        if (performIdQuery) {
+            return new SingleEntryDataIterator(getByIdImpl(metadata.getTypeName(), keyValue));
+        } else {
 //                int maxResults = keyValue != null ? 1 : query.getMaxResults();
-                int maxResults = Integer.MAX_VALUE;
-                return new CassandraTokenRangeAwareDataIterator(mapper,
-                                                                metadata, 
-                                                                connectionPool.getResource(), 
-                                                                queryContext, 
-                                                                maxResults,
-                                                                batchLimit);
-            }
-        } catch (Exception e) {
-            errorHandler.onGetDataIteraotrError(query, 
-                                                 GetDataIteratorErrorReason.QueryExecutionException, 
-                                                 e);
-            
-            return new SingleEntryDataIterator(null);
+            int maxResults = Integer.MAX_VALUE;
+            return new CassandraTokenRangeAwareDataIterator(mapper,
+                                                            metadata, 
+                                                            connectionPool.getResource(), 
+                                                            queryContext, 
+                                                            maxResults,
+                                                            batchLimit);
         }
     }
 

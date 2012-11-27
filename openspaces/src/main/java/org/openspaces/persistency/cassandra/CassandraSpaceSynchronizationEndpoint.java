@@ -18,11 +18,8 @@ package org.openspaces.persistency.cassandra;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.openspaces.persistency.cassandra.error.CassandraErrorHandler;
-import org.openspaces.persistency.cassandra.error.CassandraSchemaUpdateException;
-import org.openspaces.persistency.cassandra.error.CassandraTypeIntrospectionException;
-import org.openspaces.persistency.cassandra.error.DefaultCassandraErrorHandler;
-import org.openspaces.persistency.cassandra.error.InvalidDataSyncOperationReason;
+import org.openspaces.persistency.cassandra.error.CassandraDataSourceException;
+import org.openspaces.persistency.cassandra.error.CassandraSynchronizationException;
 import org.openspaces.persistency.cassandra.meta.ColumnFamilyMetadata;
 import org.openspaces.persistency.cassandra.meta.conversion.ColumnFamilyNameConverter;
 import org.openspaces.persistency.cassandra.meta.data.ColumnFamilyRow;
@@ -52,7 +49,6 @@ import com.gigaspaces.sync.TransactionData;
 public class CassandraSpaceSynchronizationEndpoint
         extends SpaceSynchronizationEndpoint {
     
-    private final CassandraErrorHandler           errorHandler = new DefaultCassandraErrorHandler();
     private final SpaceDocumentColumnFamilyMapper mapper;
     private final HectorCassandraClient           hectorClient;
 
@@ -99,12 +95,8 @@ public class CassandraSpaceSynchronizationEndpoint
         
         for (DataSyncOperation dataSyncOperation : dataSyncOperations) {
             if (!dataSyncOperation.supportsDataAsDocument()) {
-                errorHandler.onDataSyncOperationError(dataSyncOperation, 
-                                                      InvalidDataSyncOperationReason.NotSupportsAsDocument,
-                                                      null);
-                continue;
+                throw new CassandraSynchronizationException("Data sync operation does not support asDocument", null);
             }
-                
                         
             
             SpaceDocument spaceDoc = dataSyncOperation.getDataAsDocument();
@@ -114,10 +106,8 @@ public class CassandraSpaceSynchronizationEndpoint
             if (metadata == null) {
                 metadata = hectorClient.fetchKnownColumnFamily(typeName, mapper);
                 if (metadata == null) {
-                    errorHandler.onDataSyncOperationError(dataSyncOperation,
-                                                          InvalidDataSyncOperationReason.MissingColumnFamily,
-                                                          null);
-                    continue;
+                    throw new CassandraDataSourceException("Could not find column family for type name: "
+                            + typeName, null);
                 }
             }
 
@@ -125,82 +115,53 @@ public class CassandraSpaceSynchronizationEndpoint
             Object keyValue = spaceDoc.getProperty(keyName);
                 
             if (keyValue == null) {
-                errorHandler.onDataSyncOperationError(dataSyncOperation, 
-                                                       InvalidDataSyncOperationReason.MissingIDValue,
-                                                       null);
-                continue;
+                throw new CassandraSynchronizationException("Data sync operation missing id property value", null);
             }
             
             ColumnFamilyRow columnFamilyRow;
-            try {
-                switch(dataSyncOperation.getDataSyncOperationType()) {
-                    case WRITE:
-                        columnFamilyRow = mapper.toColumnFamilyRow(metadata, 
-                                                                    spaceDoc, 
-                                                                    ColumnFamilyRowType.Write,
-                                                                    true /* useDynamicPropertySerializerForDynamicColumns*/);
-                        break;
-                    case UPDATE:
-                        columnFamilyRow = mapper.toColumnFamilyRow(metadata, 
-                                                                    spaceDoc, 
-                                                                    ColumnFamilyRowType.Update,
-                                                                    true /* useDynamicPropertySerializerForDynamicColumns*/);
-                        break;
-                    case PARTIAL_UPDATE:
-                        columnFamilyRow = mapper.toColumnFamilyRow(metadata, 
-                                                                   spaceDoc, 
-                                                                   ColumnFamilyRowType.PartialUpdate,
-                                                                   true /* useDynamicPropertySerializerForDynamicColumns*/);
-                        break;
-                    case REMOVE:
-                        columnFamilyRow = new ColumnFamilyRow(metadata, keyValue, ColumnFamilyRowType.Remove);
-                        break;
-                    default:
-                    {
-                        errorHandler.onDataSyncOperationError(dataSyncOperation, 
-                                                               InvalidDataSyncOperationReason.UnsupportedDataSyncOperation,
-                                                               null);
-                        continue;
-                    }
+            switch(dataSyncOperation.getDataSyncOperationType()) {
+                case WRITE:
+                    columnFamilyRow = mapper.toColumnFamilyRow(metadata, 
+                                                                spaceDoc, 
+                                                                ColumnFamilyRowType.Write,
+                                                                true /* useDynamicPropertySerializerForDynamicColumns*/);
+                    break;
+                case UPDATE:
+                    columnFamilyRow = mapper.toColumnFamilyRow(metadata, 
+                                                                spaceDoc, 
+                                                                ColumnFamilyRowType.Update,
+                                                                true /* useDynamicPropertySerializerForDynamicColumns*/);
+                    break;
+                case PARTIAL_UPDATE:
+                    columnFamilyRow = mapper.toColumnFamilyRow(metadata, 
+                                                               spaceDoc, 
+                                                               ColumnFamilyRowType.PartialUpdate,
+                                                               true /* useDynamicPropertySerializerForDynamicColumns*/);
+                    break;
+                case REMOVE:
+                    columnFamilyRow = new ColumnFamilyRow(metadata, keyValue, ColumnFamilyRowType.Remove);
+                    break;
+                default:
+                {
+                    throw new IllegalStateException("Unsupported data sync operation type: " + 
+                            dataSyncOperation.getDataSyncOperationType());
                 }
-            } catch (CassandraTypeIntrospectionException e) {
-                errorHandler.onDataSyncOperationError(dataSyncOperation, 
-                                                       InvalidDataSyncOperationReason.TypeIntrospectionException,
-                                                       e);
-                continue;
             }
             
             rows.add(columnFamilyRow);
         }
 
-
-        // no exception handling here, the exception will propagate
-        // and the entire batch will be re-written
         hectorClient.performBatchOperation(rows);
     }
 
     @Override
     public void onIntroduceType(IntroduceTypeData introduceTypeData) {
         
-        ColumnFamilyMetadata columnFamilyMetadata;
-        try {
-            columnFamilyMetadata = mapper.toColumnFamilyMetadata(introduceTypeData.getTypeDescriptor());
-        } catch (Exception e) {
-            errorHandler.onIntroduceTypeError(introduceTypeData, e);
-            return;
-        }
+        ColumnFamilyMetadata columnFamilyMetadata = 
+                mapper.toColumnFamilyMetadata(introduceTypeData.getTypeDescriptor());
         
-        try {
-            hectorClient.createColumnFamilyIfNecessary(columnFamilyMetadata,
-                                                       true /* shouldPersist */);
-        } catch (CassandraSchemaUpdateException e) {
-            if (e.isRetryable()) {
-                throw e;
-            }
-            
-            errorHandler.onIntroduceTypeError(introduceTypeData, e);
-        }
-
+        hectorClient.createColumnFamilyIfNecessary(columnFamilyMetadata,
+                                                   true /* shouldPersist */);
     }
     
     @Override
@@ -219,15 +180,7 @@ public class CassandraSpaceSynchronizationEndpoint
             return;
         }
         
-        try {
-            hectorClient.addIndexesToColumnFamily(typeName, indexes, mapper);
-        } catch (CassandraSchemaUpdateException e) {
-            if (e.isRetryable()) {
-                throw e;
-            }
-            
-            errorHandler.onAddIndexError(addIndexData, e);
-        }
+        hectorClient.addIndexesToColumnFamily(typeName, indexes, mapper);
     }
     
 }

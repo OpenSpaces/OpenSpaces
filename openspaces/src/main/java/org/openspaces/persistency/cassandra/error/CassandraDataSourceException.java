@@ -17,7 +17,7 @@ package org.openspaces.persistency.cassandra.error;
 
 
 /**
- * A runtime exception for cassandra jdbc related runtime exceptions
+ * A runtime exception for cassandra data source related runtime exceptions
  * 
  * @since 9.5
  * @author Dan Kilman
