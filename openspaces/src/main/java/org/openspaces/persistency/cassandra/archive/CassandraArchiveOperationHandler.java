@@ -109,20 +109,12 @@ public class CassandraArchiveOperationHandler implements ArchiveOperationHandler
     }
 
 	private void createHectorClient() {
-		if (host == null) {
-			throw new IllegalArgumentException("Cassandra host name cannot be null");
-		}
+		
 		if (port == null) {
 			port = DEFAULT_CASSANDRA_PORT;
 		}
-		if (port <= 0) {
-			throw new IllegalArgumentException("Cassnadra port must be a positive integer");
-		}
-		if (keyspace == null) {
-			throw new IllegalArgumentException("Cassandra keyspace cannot be null");
-		}
 		
-		final String hectorClusterName = host+":"+port;
+		final String hectorClusterName = ""+host+":"+port;
         hectorClient = new HectorCassandraClient(host, port, keyspace, hectorClusterName);
 	}
 
