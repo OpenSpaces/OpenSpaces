@@ -111,7 +111,8 @@ public class CassandraTokenRangeAwareDataIterator implements DataIterator<Object
     }
 
     private int calculateRemainingResults() {
-        int maxRemaining = maxResults - currentResultCount;
+        int maxRemaining = maxResults == Integer.MAX_VALUE ? Integer.MAX_VALUE : 
+                                                             maxResults - currentResultCount;
         return maxRemaining >= batchLimit ? batchLimit : maxRemaining;
     }
     

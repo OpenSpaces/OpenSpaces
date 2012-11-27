@@ -169,15 +169,18 @@ public class CassandraTokenRangeJDBCDataIterator implements DataIterator<Object>
     
     @Override
     public SpaceDocument next() {
-        currentCount++;
 
         SpaceDocument result;
         if (currentResultInResultSet != null) {
             result = currentResultInResultSet;
             currentResultInResultSet = null;
+            currentCount++;
         } else {
             try {
                 result = getNextValidDocument();
+                if (result != null) {
+                    currentCount++;
+                }
             } catch (SQLException e) {
                 throw new CassandraQueryExecutionException("Failed retrieving next entry", e);
             }
