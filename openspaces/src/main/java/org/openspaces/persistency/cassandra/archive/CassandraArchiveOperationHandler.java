@@ -38,6 +38,14 @@ import com.gigaspaces.metadata.SpaceTypeDescriptor;
 import com.gigaspaces.metadata.SpaceTypeDescriptorBuilder;
 
 /**
+ * 
+ * Known Limitation:
+ *  1. The archiver must not write two different entries with the same ID.
+ *     This would corrupt the entry in Cassandra.
+ *  2. Only Space Documents are supported
+ *  3. The archiver is thread safe
+ *  4. The archiver is idempotent as long as there are no two threads that are writing two different objects with the same space id.
+ *  
  * @author Dan Kilman
  * @since 9.1.1
  */
@@ -102,11 +110,6 @@ public class CassandraArchiveOperationHandler implements ArchiveOperationHandler
     /**
      * @see ArchiveOperationHandler#archive(Object...)
      * 
-     * Known Limitation:
-     *  1. The archiver must not write two different entries with the same ID.
-     *     This would corrupt the entry in Cassandra.
-     *  2. Only Space Documents are supported
-     *  
      *  @throws SpaceCassandraException - Problem encountered while archiving to cassandra
      */
     @Override
@@ -124,6 +127,7 @@ public class CassandraArchiveOperationHandler implements ArchiveOperationHandler
             ColumnFamilyMetadata metadata = hectorClient.getColumnFamilyMetadata(typeName);
             if (metadata == null) {
                 metadata = createColumnFamilyMetadata(typeName);
+                //thread safe call
                 hectorClient.createColumnFamilyIfNecessary(metadata, false /* persist metadata */);
             }
 
@@ -163,10 +167,7 @@ public class CassandraArchiveOperationHandler implements ArchiveOperationHandler
     /**
      * @see ArchiveOperationHandler#supportsBatchArchiving() 
      * @return true - 
-     *         Since write implementation is idempotent. 
-     *         Multiple archiving of the exact same objects is supported as long as
-     *         there is only one instance of {@link CassandraArchiveOperationHandler} that 
-     *         tries to archive it.
+     *         Since Multiple archiving of the exact same objects is supported (idempotent).
      */
     @Override
     public boolean supportsBatchArchiving() {
