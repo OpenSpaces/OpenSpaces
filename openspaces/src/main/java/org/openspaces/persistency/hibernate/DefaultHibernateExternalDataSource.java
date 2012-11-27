@@ -43,7 +43,9 @@ import com.j_spaces.core.client.SQLQuery;
  * The default Hibernate external data source implementation. Based on Hibernate {@link Session}.
  *
  * @author kimchy
+ * @deprecated since 9.5 - use {@link DefaultHibernateSpaceDataSource} or {@link DefaultHibernateSpaceSynchronizationEndpoint} instead.
  */
+@Deprecated
 public class DefaultHibernateExternalDataSource extends AbstractHibernateExternalDataSource implements BulkDataPersister, SQLDataProvider {
 
     private boolean useMerge = false;

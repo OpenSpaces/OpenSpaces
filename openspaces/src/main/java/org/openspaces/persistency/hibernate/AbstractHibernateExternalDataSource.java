@@ -46,7 +46,9 @@ import com.gigaspaces.datasource.hibernate.SessionFactoryBuilder;
  * <p>See the different setters for more information and the {@link #init(java.util.Properties)}. 
  *
  * @author kimchy
+ * @deprecated since 9.5 - use {@link AbstractHibernateSpaceDataSource} or {@link AbstractHibernateSpaceSynchronizationEndpoint} instead. 
  */
+@Deprecated
 public abstract class AbstractHibernateExternalDataSource implements ManagedDataSource, ManagedDataSourceEntriesProvider {
 
     protected final Log logger = LogFactory.getLog(getClass());

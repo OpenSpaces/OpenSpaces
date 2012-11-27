@@ -50,6 +50,7 @@ import com.j_spaces.core.client.SQLQuery;
  * dirty operations).
  *
  * @author kimchy
+ * @deprecated since 9.5 - use {@link StatelessHibernateSpaceDataSource} or {@link StatelessHibernateSpaceSynchronizationEndpoint} instead.
  */
 public class StatelessHibernateExternalDataSource extends AbstractHibernateExternalDataSource implements BulkDataPersister, SQLDataProvider {
 

@@ -39,7 +39,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * objects.
  *
  * @author kimchy
+ * @deprecated since 9.5 - use {@link CriteriaHibernateSpaceDataSource} instead.
  */
+@Deprecated
 public class CriteriaHibernateExternalDataSource extends DefaultHibernateExternalDataSource implements DataProvider {
 
     private Map<String, ClassMetadata> metaDataTable = new ConcurrentHashMap<String, ClassMetadata>();
