@@ -19,6 +19,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 import org.openspaces.archive.ArchiveOperationHandler;
 import org.openspaces.core.GigaSpace;
@@ -52,9 +53,10 @@ import com.gigaspaces.metadata.SpaceTypeDescriptorBuilder;
 public class CassandraArchiveOperationHandler implements ArchiveOperationHandler {
 
     private static final int DEFAULT_MAX_NESTING_LEVEL = 10;
+
+	private static final int DEFAULT_CASSANDRA_PORT = 9160;
     
     //injected (required)
-    private HectorCassandraClient hectorClient;
     private GigaSpace gigaSpace;
     
     //injected (overrides default value)
@@ -62,24 +64,38 @@ public class CassandraArchiveOperationHandler implements ArchiveOperationHandler
     private PropertyValueSerializer fixedPropertyValueSerializer;
     private FlattenedPropertiesFilter flattenedPropertiesFilter;
     private ColumnFamilyNameConverter columnFamilyNameConverter;
+    private String host;
+    private Integer port;
+    private String keyspace;
     
-    //helper object
+    //lifecycle objects
+    private HectorCassandraClient hectorClient;
     private DefaultSpaceDocumentColumnFamilyMapper mapper;
 
-    @Required
-    public void setHectorClient(HectorCassandraClient hectorClient) {
-        this.hectorClient = hectorClient;
-    }
 
     @Required
     public void setGigaSpace(GigaSpace gigaSpace) {
         this.gigaSpace = gigaSpace;
     }
 
-    public void setMaxNestingLevel(int maxNestingLevel) {
+    public void setMaxNestingLevel(Integer maxNestingLevel) {
         this.maxNestingLevel = maxNestingLevel;
     }
-    
+
+    @Required
+	public void setHost(String host) {
+		this.host = host;
+	}
+
+	public void setPort(Integer port) {
+		this.port = port;
+	}
+
+	@Required
+	public void setKeyspace(String keyspace) {
+		this.keyspace = keyspace;
+	}
+	
     @PostConstruct
     public void afterPropertiesSet() {
         
@@ -87,16 +103,36 @@ public class CassandraArchiveOperationHandler implements ArchiveOperationHandler
             throw new IllegalArgumentException("gigaSpace cannot be null");
         }
         
-        if (hectorClient == null) {
-            throw new IllegalArgumentException("hectorClient cannot be null");
-        }
+        createMapper();
+        createHectorClient();
         
-        if (maxNestingLevel == null) {
+    }
+
+	private void createHectorClient() {
+		if (host == null) {
+			throw new IllegalArgumentException("Cassandra host name cannot be null");
+		}
+		if (port == null) {
+			port = DEFAULT_CASSANDRA_PORT;
+		}
+		if (port <= 0) {
+			throw new IllegalArgumentException("Cassnadra port must be a positive integer");
+		}
+		if (keyspace == null) {
+			throw new IllegalArgumentException("Cassandra keyspace cannot be null");
+		}
+		
+		final String hectorClusterName = host+":"+port;
+        hectorClient = new HectorCassandraClient(host, port, keyspace, hectorClusterName);
+	}
+
+	private void createMapper() {
+		if (maxNestingLevel == null) {
             //default value
             maxNestingLevel = DEFAULT_MAX_NESTING_LEVEL;
         }
         
-        PropertyValueSerializer dynamicPropertyValueSerializer = null;
+        final PropertyValueSerializer dynamicPropertyValueSerializer = null;
         
         mapper = new DefaultSpaceDocumentColumnFamilyMapper(
         		fixedPropertyValueSerializer, // can be null
@@ -104,7 +140,13 @@ public class CassandraArchiveOperationHandler implements ArchiveOperationHandler
                 flattenedPropertiesFilter, // can be null
                 columnFamilyNameConverter, // can be null
                 maxNestingLevel);
-        
+	}
+    
+    @PreDestroy
+    public void destroy() {
+    	if (hectorClient != null) {
+    		hectorClient.close();
+    	}
     }
     
     /**

@@ -34,7 +34,6 @@
         <xsd:union memberTypes="xsd:string"/>
     </xsd:simpleType>
 
- 
   	<xsd:element name="archive-container">
         <xsd:annotation>
             <xsd:documentation source="java:org.openspaces.events.polling.SimplePollingEventListenerContainer">
@@ -222,5 +221,53 @@
                 </xsd:extension>
             </xsd:complexContent>
         </xsd:complexType>
+    </xsd:element>
+    
+    <xsd:element name="cassandra-archive-handler">
+        <xsd:annotation>
+            <xsd:documentation source="java:org.openspaces.persistency.cassandra.archive.CassandraArchiveOperationHandler">
+                An archive handler that writes space objects to Cassandra.
+            </xsd:documentation>
+        </xsd:annotation>
+          <xsd:complexType>
+            <xsd:complexContent>
+    			<xsd:extension base="beans:identifiedType">
+	                <xsd:attribute name="giga-space" type="os-core:gigaSpaceRefType" use="required">
+	                    <xsd:annotation>
+	                        <xsd:appinfo>
+	                            <tool:annotation kind="ref">
+	                                <tool:expected-type type="org.openspaces.core.GigaSpace"/>
+	                            </tool:annotation>
+	                        </xsd:appinfo>
+	                        <xsd:documentation>
+	                            The GigaSpace which controls which Space this archive handler will read entry type metadata from.
+	                        </xsd:documentation>
+	                    </xsd:annotation>
+	                </xsd:attribute>
+	                <xsd:attribute name="keyspace" type="xsd:string" use="required">
+			            <xsd:annotation>
+			                <xsd:documentation>
+			                    Specify the cassandra keyspace name
+			                </xsd:documentation>
+			            </xsd:annotation>
+        			</xsd:attribute>
+        			<xsd:attribute name="host" type="xsd:string" use="required">
+			            <xsd:annotation>
+			                <xsd:documentation>
+			                    Specify the cassandra host name or ip address.
+			                </xsd:documentation>
+			            </xsd:annotation>
+        			</xsd:attribute>
+        			<xsd:attribute name="port" type="xsd:string" use="optional">
+			            <xsd:annotation>
+			                <xsd:documentation>
+			                    Specify the cassandra port.
+			                </xsd:documentation>
+			            </xsd:annotation>
+        			</xsd:attribute>
+        		</xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+        
     </xsd:element>
 </xsd:schema>

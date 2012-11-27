@@ -16,6 +16,7 @@
 
 package org.openspaces.archive.config;
 
+import org.openspaces.persistency.cassandra.archive.CassandraArchiveOperationHandlerBeanDefinitionParser;
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 
 /**
@@ -27,5 +28,6 @@ public class ArchiveNamespaceHandler extends NamespaceHandlerSupport {
     public void init() {
         registerBeanDefinitionParser("annotation-support", new AnnotationSupportBeanDefinitionParser());
         registerBeanDefinitionParser("archive-container", new ArchivePollingContainerBeanDefinitionParser());
+        registerBeanDefinitionParser("cassandra-archive-handler", new CassandraArchiveOperationHandlerBeanDefinitionParser());
     }
 }
