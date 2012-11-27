@@ -28,7 +28,9 @@ import java.util.List;
  * and calls the provided {@link org.openspaces.persistency.patterns.ExceptionHandler} in case of exceptions.
  *
  * @author kimchy
+ * @deprecated since 9.5 - use {@link SpaceSynchronizationEndpointExceptionHandler} instead.
  */
+@Deprecated
 public class BulkDataPersisterExceptionHandler extends AbstractManagedDataSourceDelegator implements BulkDataPersister {
 
     protected final ExceptionHandler exceptionHandler;

@@ -28,7 +28,9 @@ import com.j_spaces.core.client.SQLQuery;
  * can handle the given type.
  *
  * @author kimchy
+ * @deprecated since 9.5 - use {@link SpaceDataSourceSplitter} instead.
  */
+@Deprecated
 public class SQLDataProviderSplitter extends BulkDataPersisterSplitter implements SQLDataProvider {
 
     public SQLDataProviderSplitter(ManagedDataSourceEntriesProvider[] dataSources) {

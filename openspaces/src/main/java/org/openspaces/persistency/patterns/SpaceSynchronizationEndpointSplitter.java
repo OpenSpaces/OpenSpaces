@@ -39,19 +39,19 @@ import com.gigaspaces.transaction.TransactionParticipantMetaData;
  */
 public class SpaceSynchronizationEndpointSplitter extends SpaceSynchronizationEndpoint {
 
-    private Map<String, SpaceSynchronizationEndpoint> entriesToDataSource = new HashMap<String, SpaceSynchronizationEndpoint>();
+    private Map<String, SpaceSynchronizationEndpoint> entriesToSyncEndpoint = new HashMap<String, SpaceSynchronizationEndpoint>();
     
     public SpaceSynchronizationEndpointSplitter(ManagedEntriesSpaceSynchronizationEndpoint[] dataSources) {
         for (ManagedEntriesSpaceSynchronizationEndpoint dataSource : dataSources) {
             
             for (String entry : dataSource.getManagedEntries()) {
-                entriesToDataSource.put(entry, dataSource);
+                entriesToSyncEndpoint.put(entry, dataSource);
             }
         }
     }
     
-    protected SpaceSynchronizationEndpoint getEndpointInterceptor(String entry) {
-        return entriesToDataSource.get(entry);
+    protected SpaceSynchronizationEndpoint getEndpoint(String entry) {
+        return entriesToSyncEndpoint.get(entry);
     }
     
     /**
@@ -120,7 +120,7 @@ public class SpaceSynchronizationEndpointSplitter extends SpaceSynchronizationEn
      */
     @Override
     public void onAddIndex(AddIndexData addIndexData) {
-        SpaceSynchronizationEndpoint endpointInterceptor = getEndpointInterceptor(addIndexData.getTypeName());
+        SpaceSynchronizationEndpoint endpointInterceptor = getEndpoint(addIndexData.getTypeName());
         if (endpointInterceptor != null)
             endpointInterceptor.onAddIndex(addIndexData);
     }
@@ -130,7 +130,7 @@ public class SpaceSynchronizationEndpointSplitter extends SpaceSynchronizationEn
      */
     @Override
     public void onIntroduceType(IntroduceTypeData introduceTypeData) {
-        SpaceSynchronizationEndpoint endpointInterceptor = getEndpointInterceptor(introduceTypeData.getTypeDescriptor().getTypeName());
+        SpaceSynchronizationEndpoint endpointInterceptor = getEndpoint(introduceTypeData.getTypeDescriptor().getTypeName());
         if (endpointInterceptor != null)
             endpointInterceptor.onIntroduceType(introduceTypeData);
     }
@@ -141,7 +141,7 @@ public class SpaceSynchronizationEndpointSplitter extends SpaceSynchronizationEn
         for (DataSyncOperation dataSyncOperation : operations) {
             if (!dataSyncOperation.supportsGetTypeDescriptor())
                 continue;
-            SpaceSynchronizationEndpoint endpointInterceptor = getEndpointInterceptor(dataSyncOperation.getTypeDescriptor().getTypeName());
+            SpaceSynchronizationEndpoint endpointInterceptor = getEndpoint(dataSyncOperation.getTypeDescriptor().getTypeName());
             if (endpointInterceptor == null)
                 continue;
             List<DataSyncOperation> list = splitBatchDataMap.get(endpointInterceptor);

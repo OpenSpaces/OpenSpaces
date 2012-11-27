@@ -23,7 +23,9 @@ import com.gigaspaces.datasource.ManagedDataSource;
  * of all the given entries this managed data source handles.
  *
  * @author kimchy
+ * @deprecated since 9.5 - use {@link ManagedEntriesSpaceDataSource} or {@link ManagedEntriesSpaceSynchronizationEndpoint} instead.
  */
+@Deprecated
 public interface ManagedDataSourceEntriesProvider extends ManagedDataSource {
 
     String[] getManagedEntries();

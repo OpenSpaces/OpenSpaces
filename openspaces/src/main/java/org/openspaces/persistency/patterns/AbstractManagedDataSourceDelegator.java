@@ -26,7 +26,9 @@ import java.util.Properties;
  * Base class that delegates execution to data source.
  *
  * @author kimchy
+ * @deprecated since 9.5
  */
+@Deprecated
 public abstract class AbstractManagedDataSourceDelegator implements ManagedDataSource {
 
     protected final ManagedDataSource dataSource;

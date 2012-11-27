@@ -31,7 +31,9 @@ import java.util.Map;
  * grouping them based on the types and then calls the executeBulk for each type respective persister.
  *
  * @author kimchy
+ * @deprecated since 9.5 - use {@link SpaceSynchronizationEndpointSplitter} instead.
  */
+@Deprecated
 public class BulkDataPersisterSplitter extends AbstractManagedDataSourceSplitter implements BulkDataPersister {
 
     public BulkDataPersisterSplitter(ManagedDataSourceEntriesProvider[] dataSources) {

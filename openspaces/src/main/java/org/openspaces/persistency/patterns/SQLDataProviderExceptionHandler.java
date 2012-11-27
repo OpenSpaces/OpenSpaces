@@ -25,7 +25,9 @@ import com.j_spaces.core.client.SQLQuery;
 
 /**
  * @author kimchy
+ * @deprecated since 9.5 - use {@link SpaceDataSourceExceptionHandler} instead.
  */
+@Deprecated
 public class SQLDataProviderExceptionHandler extends BulkDataPersisterExceptionHandler implements SQLDataProvider {
 
     public SQLDataProviderExceptionHandler(ManagedDataSource dataSource, ExceptionHandler exceptionHandler) {

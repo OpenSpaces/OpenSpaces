@@ -27,7 +27,9 @@ import com.gigaspaces.datasource.ManagedDataSource;
  * handle its type.
  *
  * @author kimchy
+ * @deprecated since 9.5 - use {@link SpaceDataSourceSplitter} instead.
  */
+@Deprecated
 public class DataProviderSplitter extends BulkDataPersisterSplitter implements DataProvider {
 
     public DataProviderSplitter(ManagedDataSourceEntriesProvider[] dataSources) {

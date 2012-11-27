@@ -22,7 +22,9 @@ import com.gigaspaces.datasource.DataSourceException;
  * A generic handler for exception handling.
  *
  * @author kimchy
+ * @deprecated since 9.5 - use {@link PersistencyExceptionHandler} instead.
  */
+@Deprecated
 public interface ExceptionHandler {
 
     /**

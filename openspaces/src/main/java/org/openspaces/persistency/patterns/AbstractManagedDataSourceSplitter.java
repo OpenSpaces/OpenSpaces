@@ -31,7 +31,9 @@ import java.util.Properties;
  * and based on their respective managed entries will split operations to the ones that control a given entry.
  *
  * @author kimchy
+ * @deprecated since 9.5 - use {@link SpaceDataSourceSplitter} or {@link SpaceSynchronizationEndpointSplitter} instead.
  */
+@Deprecated
 public class AbstractManagedDataSourceSplitter implements ManagedDataSource {
 
     protected final ManagedDataSourceEntriesProvider[] dataSources;
