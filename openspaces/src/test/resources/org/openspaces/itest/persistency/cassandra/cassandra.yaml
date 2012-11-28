@@ -415,7 +415,7 @@ index_interval: 128
 # The passwords used in these options must match the passwords used when generating
 # the keystore and truststore.  For instructions on generating these files, see:
 # http://download.oracle.com/javase/6/docs/technotes/guides/security/jsse/JSSERefGuide.html#CreateKeystore
-server_encryption_options:
+encryption_options:
     internode_encryption: none
     keystore: conf/.keystore
     keystore_password: cassandra

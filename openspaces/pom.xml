@@ -18,7 +18,7 @@
 		<openspacesJetty>jetty</openspacesJetty>
 		<cassandraJdbcVersion>1.1.2</cassandraJdbcVersion>
 		<hectorVersion>1.1-2</hectorVersion>
-		<cassandraVersion>1.2.0-beta2</cassandraVersion>
+		<cassandraVersion>1.1.6</cassandraVersion>
 		<slf4jVersion>1.6.6</slf4jVersion>
 	</properties>
 
@@ -659,28 +659,28 @@
 			<groupId>org.apache.cassandra</groupId>
 			<artifactId>cassandra-clientutil</artifactId>
 			<version>${cassandraVersion}</version>
-			<scope>compile</scope>
+			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.cassandra</groupId>
 			<artifactId>cassandra-thrift</artifactId>
 			<version>${cassandraVersion}</version>
-			<scope>compile</scope>
+			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.cassandra</groupId>
 			<artifactId>cassandra-jdbc</artifactId>
 			<version>${cassandraJdbcVersion}</version>
-			<scope>compile</scope>
+			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.hectorclient</groupId>
 			<artifactId>hector-core</artifactId>
 			<version>${hectorVersion}</version>
-			<scope>compile</scope>
+			<scope>provided</scope>
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
@@ -693,14 +693,14 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 			<version>${slf4jVersion}</version>
-			<scope>test</scope>
+			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-jdk14</artifactId>
 			<version>${slf4jVersion}</version>
-			<scope>test</scope>
+			<scope>provided</scope>
 		</dependency>
 		
 		<dependency>

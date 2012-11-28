@@ -15,12 +15,11 @@
  *******************************************************************************/
 package org.openspaces.persistency.cassandra;
 
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.google.common.base.Function;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import com.google.common.collect.MapMaker;
 
 /**
  * Provides a thread safe name based lock interface for getting a shared lock instance based on its name. 
@@ -30,14 +29,14 @@ import com.google.common.cache.LoadingCache;
  */
 public class NamedLockProvider {
 
-    private final LoadingCache<String, ReentrantLock> lockCache;
+    private final ConcurrentMap<String, ReentrantLock> lockCache;
 
     public NamedLockProvider() {
-        lockCache = CacheBuilder.newBuilder().build(CacheLoader.from(new Function<String, ReentrantLock>() {
+        lockCache = new MapMaker().makeComputingMap(new Function<String, ReentrantLock>() {
             public ReentrantLock apply(String name) {
                 return new ReentrantLock();
             }
-        }));
+        });
     }
     
     /**
@@ -48,7 +47,7 @@ public class NamedLockProvider {
      * calling this method.
      */
     public ReentrantLock forName(String name) {
-        return lockCache.getUnchecked(name);
+        return lockCache.get(name);
     }
     
 }

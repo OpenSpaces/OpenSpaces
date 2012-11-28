@@ -12,7 +12,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.cassandra.cql.jdbc.CassandraDataSource;
-import org.apache.cassandra.service.CassandraDaemon;
+import org.apache.cassandra.thrift.CassandraDaemon;
 import org.openspaces.itest.persistency.cassandra.helper.config.CassandraTestUtils;
 
 import com.gigaspaces.logger.GSLogConfigLoader;
