@@ -64,6 +64,7 @@ public class CassandraSpaceSynchronizationEndpoint
         }
         
         this.hectorClient = hectorClient;
+        this.hectorClient.createMetadataColumnFamilyColumnFamilyIfNecessary();
         
         mapper = new DefaultSpaceDocumentColumnFamilyMapper(fixedPropertyValueSerializer,
                                                             dynamicPropertyValueSerializer,                                                             

@@ -101,7 +101,6 @@ public class HectorCassandraClient {
         
         cluster = HFactory.getOrCreateCluster(clusterName, host + ":" + port);
         keyspace = HFactory.createKeyspace(keyspaceName, cluster, createConsistencyLevelPolicy());
-        createMetadataColumnFamilyColumnFamilyIfNecessary();
     }
 
     private ConsistencyLevelPolicy createConsistencyLevelPolicy() {
@@ -142,7 +141,7 @@ public class HectorCassandraClient {
         return getColumnFamilyDefinition(metadata) != null;
     }
     
-    private void createMetadataColumnFamilyColumnFamilyIfNecessary() {
+    public void createMetadataColumnFamilyColumnFamilyIfNecessary() {
         createColumnFamilyIfNecessary(ColumnFamilyMetadataMetadata.INSTANCE, true);
     }
     

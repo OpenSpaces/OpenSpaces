@@ -111,6 +111,7 @@ public class CassandraSpaceDataSource
         
         this.batchLimit = batchLimit;
         this.hectorClient = hectorClient;
+        this.hectorClient.createMetadataColumnFamilyColumnFamilyIfNecessary();
         
         IResourceFactory<ConnectionResource> resourceFactory = new ConnectionResourceFactory(cassandraDataSource);
         connectionPool = new ResourcePool<ConnectionResource>(resourceFactory,
@@ -153,8 +154,7 @@ public class CassandraSpaceDataSource
         if (metadata == null) {
             metadata = hectorClient.fetchKnownColumnFamily(typeName, mapper);
             if (metadata == null) {
-                throw new SpaceCassandraDataSourceException("Could not find column family for type name: "
-                                                       + typeName, null);
+                return null;
             }
         }
         
