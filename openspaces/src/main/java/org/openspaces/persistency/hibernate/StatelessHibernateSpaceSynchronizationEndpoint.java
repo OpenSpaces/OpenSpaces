@@ -271,7 +271,7 @@ public class StatelessHibernateSpaceSynchronizationEndpoint extends AbstractHibe
         for (Map.Entry<String, Object> updateEntry : itemValues.entrySet()) {
             query.setParameter(updateEntry.getKey(), updateEntry.getValue());
         }
-        query.setParameter("id_" + typeName ,dataSyncOperation.getDataAsDocument().getProperty(typeDescriptor.getIdPropertyName()));
+        query.setParameter("id_" + typeDescriptor.getIdPropertyName() ,dataSyncOperation.getDataAsDocument().getProperty(typeDescriptor.getIdPropertyName()));
         query.executeUpdate();
     }
     
