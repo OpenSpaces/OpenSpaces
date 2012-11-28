@@ -25,4 +25,31 @@ public class MockDataSourceSqlQuery
     {
         return _parameters;
     }
+
+    /* (non-Javadoc)
+     * @see com.gigaspaces.datasource.DataSourceSQLQuery#getFromQuery()
+     */
+    @Override
+    public String getFromQuery() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.gigaspaces.datasource.DataSourceSQLQuery#getSelectAllQuery()
+     */
+    @Override
+    public String getSelectAllQuery() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.gigaspaces.datasource.DataSourceSQLQuery#getSelectCountQuery()
+     */
+    @Override
+    public String getSelectCountQuery() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }
