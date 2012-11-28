@@ -16,9 +16,11 @@
 package org.openspaces.persistency.hibernate;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -78,12 +80,15 @@ public abstract class AbstractHibernateSpaceSynchronizationEndpoint extends Mana
         ClassMetadata classMetadata = getSessionFactory().getClassMetadata(entityName);
         String[] propertyNames = classMetadata.getPropertyNames();
         List<String> names = Arrays.asList(propertyNames);
-        Iterator<String> iterator = itemValues.keySet().iterator();
+        HashMap<String, Object> filteredItems = new HashMap<String, Object>();
+        Iterator<Entry<String, Object>> iterator = itemValues.entrySet().iterator();
         while(iterator.hasNext()){
-            if(!names.contains(iterator.next()))
-                iterator.remove();
+            Entry<String, Object> next = iterator.next();
+            if (names.contains(next.getKey())){
+                filteredItems.put(next.getKey(), next.getValue());
+            }
         }
-        return itemValues;
+        return filteredItems;
     }
 
     protected String getPartialUpdateHQL(DataSyncOperation dataSyncOperation, Map<String, Object> updatedValues) {
