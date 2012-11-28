@@ -40,7 +40,7 @@ import com.gigaspaces.internal.metadata.pojo.PojoTypeInfoRepository;
 /**
  * A {@link SpaceDocument} based implementation of {@link TopLevelTypeNode}.
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class SpaceDocumentTopLevelTypeNode extends SpaceDocumentTypeNode

@@ -22,7 +22,7 @@ import java.util.Map;
  * Utility class for testing wheter a given type is a primite type
  * and to obtain reference to a primitive type {@link Class} instance by name.
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class PrimitiveClassUtils {

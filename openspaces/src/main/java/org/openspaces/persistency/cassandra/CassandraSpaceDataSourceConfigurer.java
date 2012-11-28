@@ -24,7 +24,7 @@ import org.openspaces.persistency.cassandra.meta.types.dynamic.PropertyValueSeri
  * 
  * A configurer for creating {@link CassandraSpaceDataSource} instances.
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class CassandraSpaceDataSourceConfigurer {

@@ -19,7 +19,7 @@ package org.openspaces.persistency.cassandra.error;
  * A runtime exception to denote exceptions that serialization/deserialization
  * of object to/from Cassandra.
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class SpaceCassandraSerializationException extends SpaceCassandraException {

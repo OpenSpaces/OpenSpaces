@@ -43,7 +43,7 @@ import com.gigaspaces.sync.TransactionData;
  * 
  * A Cassandra implementation of {@link SpaceSynchronizationEndpoint}.
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class CassandraSpaceSynchronizationEndpoint

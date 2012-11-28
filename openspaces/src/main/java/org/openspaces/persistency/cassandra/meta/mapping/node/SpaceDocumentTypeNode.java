@@ -26,7 +26,7 @@ import com.gigaspaces.entry.VirtualEntry;
 /**
  * A {@link VirtualEntry} based implementation of {@link CompoundTypeNode}.
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class SpaceDocumentTypeNode extends AbstractCompoundTypeNode {

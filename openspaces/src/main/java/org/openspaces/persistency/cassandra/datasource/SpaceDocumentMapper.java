@@ -32,7 +32,7 @@ import com.gigaspaces.document.SpaceDocument;
  * A {@link ColumnFamilyRowMapper} implementation. Delegating the actual mapping job
  * to a {@link SpaceDocumentColumnFamilyMapper} instance.
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class SpaceDocumentMapper

@@ -20,7 +20,7 @@ package org.openspaces.persistency.cassandra.error;
  * Contains an isRetryable field denoting wheter this is an exception
  * which might be resolved by retrying the operation.
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class SpaceCassandraSchemaUpdateException

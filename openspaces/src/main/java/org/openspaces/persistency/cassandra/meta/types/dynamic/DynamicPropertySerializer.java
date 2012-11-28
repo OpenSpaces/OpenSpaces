@@ -20,7 +20,7 @@ import me.prettyprint.hector.api.Serializer;
 /**
  * a {@link Serializer} implementation based which uses {@link DynamicPropertyValueSerializer}
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class DynamicPropertySerializer extends PropertyValueSerializerHectorSerializerAdapter {

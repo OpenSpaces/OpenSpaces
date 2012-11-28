@@ -24,7 +24,7 @@ import com.google.common.collect.MapMaker;
 /**
  * Provides a thread safe name based lock interface for getting a shared lock instance based on its name. 
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class NamedLockProvider {

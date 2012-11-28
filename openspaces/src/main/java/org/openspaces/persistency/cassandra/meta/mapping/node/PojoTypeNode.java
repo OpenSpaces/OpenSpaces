@@ -40,7 +40,7 @@ import com.gigaspaces.internal.metadata.pojo.PojoTypeInfoRepository;
 /**
  * POJO based {@link CompoundTypeNode}.
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class PojoTypeNode extends AbstractCompoundTypeNode

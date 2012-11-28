@@ -20,7 +20,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
 /**
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class HectorCassandraClientFactoryBean implements

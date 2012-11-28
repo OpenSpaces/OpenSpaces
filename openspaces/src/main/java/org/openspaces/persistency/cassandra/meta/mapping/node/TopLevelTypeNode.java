@@ -20,7 +20,7 @@ package org.openspaces.persistency.cassandra.meta.mapping.node;
  * i.e. when an entry is read/written from/to cassandra top level type node representing
  * the entry metadata
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public interface TopLevelTypeNode extends CompoundTypeNode, ExternalizableTypeNode {

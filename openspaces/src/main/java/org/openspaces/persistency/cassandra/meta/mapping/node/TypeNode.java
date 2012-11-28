@@ -20,7 +20,7 @@ import org.openspaces.persistency.cassandra.meta.data.ColumnFamilyRow;
 /**
  * An interface to describe a property's metadata that is part of a type hierarcy. 
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public interface TypeNode {

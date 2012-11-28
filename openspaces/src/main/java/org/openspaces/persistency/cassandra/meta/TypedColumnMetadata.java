@@ -33,7 +33,7 @@ import com.gigaspaces.internal.io.IOUtils;
  * A {@link TypeNode} implementations for representing a typed column. I.e. its type is part
  * of the matching static column family metadata.
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class TypedColumnMetadata extends AbstractColumnMetadata

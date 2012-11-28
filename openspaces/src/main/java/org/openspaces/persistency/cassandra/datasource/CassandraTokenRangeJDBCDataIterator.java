@@ -47,7 +47,7 @@ import com.gigaspaces.document.SpaceDocument;
 import com.gigaspaces.internal.utils.StringUtils;
 
 /**
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class CassandraTokenRangeJDBCDataIterator implements DataIterator<Object> {

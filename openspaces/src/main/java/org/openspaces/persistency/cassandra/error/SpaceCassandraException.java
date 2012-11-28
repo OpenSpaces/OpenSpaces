@@ -18,7 +18,7 @@ package org.openspaces.persistency.cassandra.error;
 /**
  * Base runtime exception class for all cassandra related exceptions.
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 abstract public class SpaceCassandraException extends RuntimeException {

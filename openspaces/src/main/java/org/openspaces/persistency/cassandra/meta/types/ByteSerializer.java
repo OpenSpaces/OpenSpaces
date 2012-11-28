@@ -23,7 +23,7 @@ import me.prettyprint.hector.api.Serializer;
 /**
  * A {@link Serializer} implementation for {@link Byte} values.
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class ByteSerializer

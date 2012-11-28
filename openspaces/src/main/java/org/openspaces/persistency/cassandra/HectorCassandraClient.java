@@ -68,7 +68,7 @@ import com.gigaspaces.document.SpaceDocument;
 /**
  * A wrapper around the Cassandra Hector client library.
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class HectorCassandraClient {

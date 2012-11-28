@@ -24,7 +24,7 @@ import org.openspaces.persistency.cassandra.meta.data.ColumnFamilyRow;
 /**
  * {@link Map} based {@link CompoundTypeNode} (currently, unused)
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class MapTypeNode extends AbstractCompoundTypeNode {

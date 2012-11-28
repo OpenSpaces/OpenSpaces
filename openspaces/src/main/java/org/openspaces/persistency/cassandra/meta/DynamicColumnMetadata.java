@@ -23,7 +23,7 @@ import me.prettyprint.hector.api.Serializer;
  * A {@link TypeNode} implementation representing a dynamic column for which no metadata 
  * exists on the matching Cassandra column family.
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class DynamicColumnMetadata extends AbstractColumnMetadata {

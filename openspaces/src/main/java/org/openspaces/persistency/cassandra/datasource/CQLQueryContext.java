@@ -21,7 +21,7 @@ import java.util.Map;
  *  CQL query context for holding the properies map if this is a template based query
  *  or the {@link String} query and the parameters array if this is a complex query. 
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class CQLQueryContext {

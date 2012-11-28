@@ -23,7 +23,7 @@ import org.openspaces.persistency.cassandra.meta.mapping.node.TypeNodeContext;
 /**
  * Base class for {@link ColumnMetadata} implementations
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 abstract public class AbstractColumnMetadata implements ColumnMetadata, TypeNode {

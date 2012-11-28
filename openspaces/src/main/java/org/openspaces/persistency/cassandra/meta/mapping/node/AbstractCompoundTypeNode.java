@@ -27,7 +27,7 @@ import org.openspaces.persistency.cassandra.meta.data.ColumnFamilyRow;
 /**
  * Base class for {@link CompoundTypeNode} implementations. 
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 abstract public class AbstractCompoundTypeNode implements CompoundTypeNode {

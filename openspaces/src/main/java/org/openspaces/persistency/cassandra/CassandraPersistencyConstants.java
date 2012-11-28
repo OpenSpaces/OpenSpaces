@@ -20,7 +20,7 @@ package org.openspaces.persistency.cassandra;
  * 
  * Contains constants values used in the Cassandra persistency layer implementation.
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class CassandraPersistencyConstants {

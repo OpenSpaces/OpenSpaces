@@ -18,7 +18,7 @@ package org.openspaces.persistency.cassandra.meta.mapping.node;
 /**
  * Context used during type introspection and during read/write operations
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class TypeNodeContext {

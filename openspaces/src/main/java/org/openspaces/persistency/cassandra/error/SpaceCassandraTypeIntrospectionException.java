@@ -19,7 +19,7 @@ package org.openspaces.persistency.cassandra.error;
  * A runtime exception to denote exceptions that occured during reflection based
  * type introspection
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class SpaceCassandraTypeIntrospectionException extends SpaceCassandraException {

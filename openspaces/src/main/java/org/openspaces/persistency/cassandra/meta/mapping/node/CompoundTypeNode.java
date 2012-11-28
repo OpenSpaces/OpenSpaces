@@ -24,7 +24,7 @@ import com.gigaspaces.entry.VirtualEntry;
 /**
  * Extension to {@link TypeNode} to denote compound type nodes (POJOs, {@link VirtualEntry})
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public interface CompoundTypeNode extends TypeNode {

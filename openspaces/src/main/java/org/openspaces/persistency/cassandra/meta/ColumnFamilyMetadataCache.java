@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentMap;
 
 /**
  * A simple {@link ConcurrentMap} based cache to store {@link ColumnFamilyMetadata} in-memory.
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class ColumnFamilyMetadataCache {

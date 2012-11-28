@@ -29,7 +29,7 @@ import com.google.common.collect.MapMaker;
  * Cache for holding fast reflection based getters/setters/constructors.
  * Instance will be created on demand and only once.
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class ProcedureCache {

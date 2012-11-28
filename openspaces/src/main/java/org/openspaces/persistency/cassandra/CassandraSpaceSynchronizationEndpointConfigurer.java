@@ -28,7 +28,7 @@ import com.gigaspaces.document.SpaceDocument;
  * 
  *  A configurer for creating {@link CassandraSpaceSynchronizationEndpoint} instances.
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class CassandraSpaceSynchronizationEndpointConfigurer {

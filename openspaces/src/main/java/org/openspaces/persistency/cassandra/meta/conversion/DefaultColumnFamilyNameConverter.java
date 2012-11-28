@@ -26,7 +26,7 @@ import com.gigaspaces.security.encoding.md5.Md5Encrypter;
  * If the above also exceeds a 48 characters length, the simple name will be truncated to its first 42
  * characters and concatenated with the MD5 suffix mentioned above. 
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class DefaultColumnFamilyNameConverter implements ColumnFamilyNameConverter {

@@ -22,7 +22,7 @@ import com.gigaspaces.metadata.SpaceDocumentSupport;
  * A {@link DocumentObjectConverter} that does not fail if a type is missing during conversion.
  * Instead, it will return the original document.
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class CassandraDocumentObjectConverter extends DocumentObjectConverter {

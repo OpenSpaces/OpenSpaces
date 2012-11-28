@@ -23,7 +23,7 @@ import me.prettyprint.hector.api.Serializer;
 /**
  * A common interface for column based {@link TypeNode} implementations.
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public interface ColumnMetadata {

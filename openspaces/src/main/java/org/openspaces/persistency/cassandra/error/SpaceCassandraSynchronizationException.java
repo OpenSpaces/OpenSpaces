@@ -19,7 +19,7 @@ package org.openspaces.persistency.cassandra.error;
 /**
  * A runtime exception for cassandra data synchonization related runtime exceptions
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class SpaceCassandraSynchronizationException extends SpaceCassandraException {

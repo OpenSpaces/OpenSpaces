@@ -27,7 +27,7 @@ import org.openspaces.persistency.cassandra.meta.mapping.node.SpaceDocumentTopLe
 /**
  * A singleton instance of {@link ColumnFamilyMetadata} for the column family used internally on Cassandra
  * to store all introduced types as {@link ColumnFamilyMetadata} blobs.
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class ColumnFamilyMetadataMetadata extends ColumnFamilyMetadata {

@@ -27,7 +27,7 @@ import org.springframework.beans.factory.InitializingBean;
  * A {@link FactoryBean} for creating a singleton instance of
  * {@link CassandraSpaceDataSource}.
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class CassandraSpaceDataSourceFactoryBean implements 

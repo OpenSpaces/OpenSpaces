@@ -25,7 +25,7 @@ import com.gigaspaces.document.SpaceDocument;
  * An enum containing {@link CassandraSpaceDataSource#getDataIterator(com.gigaspaces.datasource.DataSourceQuery)}
  * failure reasons.
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public enum GetDataIteratorErrorReason {

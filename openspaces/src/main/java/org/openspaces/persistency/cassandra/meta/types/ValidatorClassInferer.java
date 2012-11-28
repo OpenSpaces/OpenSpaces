@@ -23,7 +23,7 @@ import me.prettyprint.hector.api.ddl.ComparatorType;
 
 /**
  * Helper class to deal with validators that hector doesn't take into consideration
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class ValidatorClassInferer {

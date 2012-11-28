@@ -26,7 +26,7 @@ import com.gigaspaces.metadata.SpaceTypeDescriptor;
 /**
  * An interface for mapping types to column families and for mapping space documents 
  * to column family rows.
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public interface SpaceDocumentColumnFamilyMapper {

@@ -44,7 +44,7 @@ import me.prettyprint.hector.api.Serializer;
 /**
  * A map based {@link Serializer} provider inspired by hector's {@link SerializerTypeInferer}
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class SerializerProvider {

@@ -19,7 +19,7 @@ package org.openspaces.persistency.cassandra.meta.mapping.filter;
  * A {@link FlattenedPropertiesFilter} implementation that will return <code>true</code> for 
  * all fixed properties and <code>false</code> for all dynamic properties.
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class DefaultFlattenedPropertiesFilter implements FlattenedPropertiesFilter {

@@ -23,7 +23,7 @@ import org.openspaces.persistency.cassandra.meta.DynamicColumnMetadata;
 /**
  * A data holder for a column data and metadata, used for both read and write operations.
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class ColumnData {

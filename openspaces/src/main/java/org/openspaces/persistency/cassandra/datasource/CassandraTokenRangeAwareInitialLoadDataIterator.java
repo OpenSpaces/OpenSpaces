@@ -26,7 +26,7 @@ import com.gigaspaces.datasource.DataIterator;
 import com.gigaspaces.document.SpaceDocument;
 
 /**
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class CassandraTokenRangeAwareInitialLoadDataIterator implements DataIterator<Object> {

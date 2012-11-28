@@ -21,7 +21,7 @@ import java.io.Externalizable;
  * Tag for {@link TypeNode} implementations that should be persisted to 
  * the internal cassandra metadata column family. (only applies for fixed properties)
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public interface ExternalizableTypeNode extends TypeNode, Externalizable {

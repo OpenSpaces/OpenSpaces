@@ -19,7 +19,7 @@ package org.openspaces.persistency.cassandra.meta.mapping.filter;
  * An interface used to denote whether a given property should be flattened.
  * @see #shouldFlatten(String, String, Class, boolean)
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public interface FlattenedPropertiesFilter {

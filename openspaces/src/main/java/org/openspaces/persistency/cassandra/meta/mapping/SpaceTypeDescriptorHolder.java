@@ -29,7 +29,7 @@ import com.gigaspaces.metadata.SpaceTypeDescriptorVersionedSerializationUtils;
  * A {@link SpaceTypeDescriptor} holder which serializes/deserializes its underlying {@link SpaceTypeDescriptor}
  * In a version compatible manner.
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class SpaceTypeDescriptorHolder implements Externalizable {

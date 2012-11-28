@@ -27,7 +27,7 @@ import com.j_spaces.kernel.pool.IResourceFactory;
  * A {@link IResourceFactory} for obtaining {@link ConnectionResource} instances.
  * Uses a {@link DataSource} as the underlying method of obtaining new connections.
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class ConnectionResourceFactory

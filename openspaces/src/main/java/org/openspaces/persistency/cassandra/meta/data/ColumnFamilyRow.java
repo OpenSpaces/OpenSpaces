@@ -27,7 +27,7 @@ import org.openspaces.persistency.cassandra.meta.ColumnFamilyMetadata;
 /**
  * A data holder for holding the row columns and the matching column family metadata.
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class ColumnFamilyRow {

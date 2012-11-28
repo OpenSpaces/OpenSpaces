@@ -28,7 +28,7 @@ import com.gigaspaces.sync.DataSyncOperation;
  * {@link CassandraSpaceSynchronizationEndpoint#onOperationsBatchSynchronization(com.gigaspaces.sync.OperationsBatchData)}
  * could not be operated on.
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public enum InvalidDataSyncOperationReason {

@@ -19,7 +19,7 @@ import java.nio.ByteBuffer;
 
 /**
  * An interface used for conversion of objects to/from {@link ByteBuffer}.
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public interface PropertyValueSerializer {

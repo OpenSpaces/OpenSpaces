@@ -43,7 +43,7 @@ import me.prettyprint.cassandra.serializers.IntegerSerializer;
  * 
  * {@link Object}/{@link BigInteger}/{@link BigDecimal} serialization logic borrowed from hector serializers,
  * rest is a modification of {@link https://gist.github.com/850865}
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class DynamicPropertyValueSerializer implements PropertyValueSerializer {

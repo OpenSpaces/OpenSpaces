@@ -56,7 +56,7 @@ import com.j_spaces.kernel.pool.ResourcePool;
  * 
  * A Cassandra implementation of {@link com.gigaspaces.datasource.SpaceDataSource}.
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class CassandraSpaceDataSource

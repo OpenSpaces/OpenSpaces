@@ -28,7 +28,7 @@ import com.gigaspaces.metadata.SpaceTypeDescriptor;
  * A utility class used for sorting {@link SpaceTypeDescriptor} instances.
  * @see #getSortedList(Map)
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class TypeHierarcyTopologySorter {

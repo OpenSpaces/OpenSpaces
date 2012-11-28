@@ -22,7 +22,7 @@ import com.gigaspaces.datasource.DataIterator;
 /**
  * A simple adapter from {@link Iterator} to {@link DataIterator}
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class DataIteratorAdapter<T>

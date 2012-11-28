@@ -20,7 +20,7 @@ package org.openspaces.persistency.cassandra.meta.conversion;
  * Note to implementations: The returned name's length should not exceed 48, should not contain dots
  * and should only contain valid filename characters.
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public interface ColumnFamilyNameConverter {

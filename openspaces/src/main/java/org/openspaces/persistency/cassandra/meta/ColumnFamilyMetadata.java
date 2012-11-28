@@ -34,7 +34,7 @@ import org.openspaces.persistency.cassandra.meta.types.SerializerProvider;
 import com.gigaspaces.internal.io.IOUtils;
 
 /**
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class ColumnFamilyMetadata implements Externalizable {

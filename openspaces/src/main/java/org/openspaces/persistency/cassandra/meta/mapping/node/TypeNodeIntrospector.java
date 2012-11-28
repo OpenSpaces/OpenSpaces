@@ -36,7 +36,7 @@ import com.gigaspaces.metadata.SpacePropertyDescriptor;
 import com.gigaspaces.metadata.SpaceTypeDescriptor;
 
 /**
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class TypeNodeIntrospector {

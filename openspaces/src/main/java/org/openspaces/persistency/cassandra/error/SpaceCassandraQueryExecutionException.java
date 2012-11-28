@@ -19,7 +19,7 @@ package org.openspaces.persistency.cassandra.error;
  * A runtime exception for exceptions that occur during queries or
  * during iteration over a result set.
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class SpaceCassandraQueryExecutionException extends SpaceCassandraException {

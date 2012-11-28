@@ -30,7 +30,7 @@ import com.gigaspaces.internal.metadata.pojo.PojoTypeInfoRepository;
  * type have a default no-args constructors and at lease 1 property with both
  * getter and setter methods.
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class PojoTypeFlattenPropertiesFilter implements FlattenedPropertiesFilter {

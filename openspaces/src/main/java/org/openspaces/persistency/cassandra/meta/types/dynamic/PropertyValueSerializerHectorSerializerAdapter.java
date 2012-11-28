@@ -23,7 +23,7 @@ import me.prettyprint.hector.api.Serializer;
 /**
  * An adapter from {@link PropertyValueSerializer} to hector's {@link Serializer}.
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class PropertyValueSerializerHectorSerializerAdapter extends AbstractSerializer<Object> {

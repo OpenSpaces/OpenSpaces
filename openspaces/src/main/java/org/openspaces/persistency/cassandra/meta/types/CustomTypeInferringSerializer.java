@@ -26,7 +26,7 @@ import me.prettyprint.hector.api.Serializer;
  * float type and double type, to avoid possible NullPointerException and to use the map based
  * {@link SerializerProvider} instead of hectors {@link SerializerTypeInferer}.
  * 
- * @since 9.5
+ * @since 9.1.1
  * @author Dan Kilman
  */
 public class CustomTypeInferringSerializer<T>
