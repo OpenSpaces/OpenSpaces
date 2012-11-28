@@ -65,7 +65,7 @@ public class HibernateIteratorUtils {
     }
 
     public static Query createQueryFromDataSourceSQLQuery(DataSourceSQLQuery<?> dataSourceSQLQuery, Session session) {
-        String select = dataSourceSQLQuery.getQuery();
+        String select = dataSourceSQLQuery.getFromQuery();
         Query query = session.createQuery(select);
         Object[] preparedValues = dataSourceSQLQuery.getQueryParameters();
         if (preparedValues != null) {
@@ -78,7 +78,7 @@ public class HibernateIteratorUtils {
     }
     
     public static Query createQueryFromDataSourceSQLQuery(DataSourceSQLQuery<?> dataSourceSQLQuery, StatelessSession session) {
-        String select = dataSourceSQLQuery.getQuery();
+        String select = dataSourceSQLQuery.getFromQuery();
         Query query = session.createQuery(select);
         Object[] preparedValues = dataSourceSQLQuery.getQueryParameters();
         if (preparedValues != null) {
