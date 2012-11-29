@@ -71,7 +71,7 @@ public class MockDataSourceQuery implements DataSourceQuery
     }
 
     @Override
-    public int getMaxResults()
+    public int getBatchSize()
     {
         return _maxResults;
     }

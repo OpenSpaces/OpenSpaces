@@ -177,7 +177,7 @@ public class CassandraSpaceDataSource
         if (performIdQuery) {
             return new SingleEntryDataIterator(getByIdImpl(metadata.getTypeName(), keyValue));
         } else {
-            int queryMaxResults = keyValue != null ? 1 : query.getMaxResults();
+            int queryMaxResults = keyValue != null ? 1 : query.getBatchSize();
             int iteratorMaxResults = Integer.MAX_VALUE;
             int actualBatchLimit = (queryMaxResults < batchLimit) ? queryMaxResults : batchLimit;
             return new CassandraTokenRangeAwareDataIterator(mapper,
