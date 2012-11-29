@@ -28,6 +28,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
 import com.gigaspaces.datasource.DataSourceException;
+import com.gigaspaces.document.SpaceDocument;
 import com.gigaspaces.metadata.SpaceTypeDescriptor;
 import com.gigaspaces.sync.DataSyncOperation;
 import com.gigaspaces.sync.OperationsBatchData;
@@ -123,8 +124,9 @@ public class DefaultHibernateSpaceSynchronizationEndpoint extends AbstractHibern
         final SpaceTypeDescriptor typeDescriptor = dataSyncOperation.getTypeDescriptor();
         final String typeName = typeDescriptor.getTypeName();
         // filter non mapped properties 
+        SpaceDocument spaceDocument = dataSyncOperation.getDataAsDocument();
         final Map<String, Object> itemValues = filterItemValue(typeName,
-                dataSyncOperation.getDataAsDocument().getProperties());
+                spaceDocument.getProperties());
         
         
         final String hql = getPartialUpdateHQL(dataSyncOperation, itemValues);
@@ -134,7 +136,7 @@ public class DefaultHibernateSpaceSynchronizationEndpoint extends AbstractHibern
         for (Map.Entry<String, Object> updateEntry : itemValues.entrySet()) {
             query.setParameter(updateEntry.getKey(), updateEntry.getValue());
         }
-        query.setParameter("id_" + typeDescriptor.getIdPropertyName() ,dataSyncOperation.getDataAsDocument().getProperty(typeDescriptor.getIdPropertyName()));
+        query.setParameter("id_" + typeDescriptor.getIdPropertyName() ,spaceDocument.getProperty(typeDescriptor.getIdPropertyName()));
         query.executeUpdate();
     }
 
