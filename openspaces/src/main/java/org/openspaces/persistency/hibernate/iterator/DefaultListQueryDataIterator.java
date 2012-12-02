@@ -16,9 +16,8 @@
 
 package org.openspaces.persistency.hibernate.iterator;
 
-import com.gigaspaces.datasource.DataIterator;
-import com.gigaspaces.datasource.DataSourceSQLQuery;
-import com.j_spaces.core.client.SQLQuery;
+import java.util.Iterator;
+
 import org.hibernate.CacheMode;
 import org.hibernate.Criteria;
 import org.hibernate.FlushMode;
@@ -27,7 +26,9 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
-import java.util.Iterator;
+import com.gigaspaces.datasource.DataIterator;
+import com.gigaspaces.datasource.DataSourceSQLQuery;
+import com.j_spaces.core.client.SQLQuery;
 
 /**
  * A simple iterator that iterates over a {@link com.j_spaces.core.client.SQLQuery} by creating
@@ -39,7 +40,7 @@ public class DefaultListQueryDataIterator implements DataIterator {
 
     protected final SQLQuery<?> sqlQuery;
     
-    protected final DataSourceSQLQuery<?> dataSourceSQLQuery;
+    protected final DataSourceSQLQuery dataSourceSQLQuery;
 
     protected final String entityName;
 

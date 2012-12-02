@@ -39,7 +39,7 @@ public class StatelessListQueryDataIterator implements DataIterator {
 
     protected final SQLQuery<?> sqlQuery;
     
-    protected final DataSourceSQLQuery<?> dataSourceSQLQuery;
+    protected final DataSourceSQLQuery dataSourceSQLQuery;
 
     protected final SessionFactory sessionFactory;
 

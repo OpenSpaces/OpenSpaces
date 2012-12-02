@@ -93,7 +93,7 @@ public class DefaultHibernateSpaceDataSource extends AbstractHibernateSpaceDataS
         if (!query.supportsAsSQLQuery())
             return null;
         
-        DataSourceSQLQuery<Object> sqlQuery = query.getAsSQLQuery();
+        DataSourceSQLQuery sqlQuery = query.getAsSQLQuery();
         
         if (!isManagedEntry(query.getTypeDescriptor().getTypeName())) {
             if (logger.isTraceEnabled()) {

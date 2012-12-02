@@ -3,7 +3,7 @@ package org.openspaces.itest.persistency.cassandra.mock;
 import com.gigaspaces.datasource.DataSourceSQLQuery;
 
 public class MockDataSourceSqlQuery
-        implements DataSourceSQLQuery<Object>
+        implements DataSourceSQLQuery
 {
     private final String _query;
     private final Object[] _parameters;

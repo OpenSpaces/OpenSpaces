@@ -154,7 +154,7 @@ public class BasicCQLQueriesCassandraTest extends AbstractCassandraTest
         String query = queryBuilder.toString();
         
         SpaceTypeDescriptor typeDescriptor = createMockSpaceTypeDescriptor();
-        DataSourceSQLQuery<Object> sqlQuery = 
+        DataSourceSQLQuery sqlQuery = 
                 new MockDataSourceSqlQuery(query, properties.values().toArray(new Object[properties.size()]));
         DataSourceQuery dataSourceQuery = new MockDataSourceQuery(typeDescriptor,
                                                                   sqlQuery,

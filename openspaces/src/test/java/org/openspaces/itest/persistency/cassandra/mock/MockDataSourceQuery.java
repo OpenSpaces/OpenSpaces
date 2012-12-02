@@ -10,7 +10,7 @@ public class MockDataSourceQuery implements DataSourceQuery
     private final SpaceDocument _query;
     private final SpaceTypeDescriptor _typeDescriptor;
     private final int _maxResults;
-    private final DataSourceSQLQuery<Object> _sqlQuery;
+    private final DataSourceSQLQuery _sqlQuery;
     
     public MockDataSourceQuery(SpaceTypeDescriptor typeDescriptor, SpaceDocument query, int maxResults)
     {
@@ -20,7 +20,7 @@ public class MockDataSourceQuery implements DataSourceQuery
         _sqlQuery = null;
     }
 
-    public MockDataSourceQuery(SpaceTypeDescriptor typeDescriptor, DataSourceSQLQuery<Object> sqlQuery, int maxResults)
+    public MockDataSourceQuery(SpaceTypeDescriptor typeDescriptor, DataSourceSQLQuery sqlQuery, int maxResults)
     {
         _typeDescriptor = typeDescriptor;
         _maxResults = maxResults;
@@ -29,7 +29,7 @@ public class MockDataSourceQuery implements DataSourceQuery
     }
     
     @Override
-    public DataSourceSQLQuery<Object> getAsSQLQuery()
+    public DataSourceSQLQuery getAsSQLQuery()
     {
         return _sqlQuery;
     }

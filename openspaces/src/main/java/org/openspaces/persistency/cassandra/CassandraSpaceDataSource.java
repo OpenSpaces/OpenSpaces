@@ -164,7 +164,7 @@ public class CassandraSpaceDataSource
             Map<String, Object> properties = templateDocument.getProperties();
             queryContext = new CQLQueryContext(properties, null, null);
         } else if (query.supportsAsSQLQuery()) {
-            DataSourceSQLQuery<Object> sqlQuery = query.getAsSQLQuery();
+            DataSourceSQLQuery sqlQuery = query.getAsSQLQuery();
             Object[] params = sqlQuery.getQueryParameters();
             queryContext = new CQLQueryContext(null, sqlQuery.getQuery(), params);
         } else {

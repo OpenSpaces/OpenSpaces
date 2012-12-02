@@ -98,7 +98,7 @@ public class StatelessHibernateSpaceDataSource extends AbstractHibernateSpaceDat
         if (!query.supportsAsSQLQuery())
             return null;
         
-        DataSourceSQLQuery<Object> sqlQuery = query.getAsSQLQuery();
+        DataSourceSQLQuery sqlQuery = query.getAsSQLQuery();
         
         if (!isManagedEntry(query.getTypeDescriptor().getTypeName())) {
             if (logger.isTraceEnabled()) {
