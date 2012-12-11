@@ -292,6 +292,10 @@ public class DefaultAdmin implements InternalAdmin {
             eventsExecutorServices[i] = createThreadPoolExecutor("admin-event-executor-tread", 1, singleThreadedEventListeners);
             eventsQueue[i] = new LinkedList<Runnable>();
         }
+        
+        if (logger.isDebugEnabled()) {
+            logger.debug("Admin created " + this.hashCode());
+        }
     }
     
     @Override
@@ -500,7 +504,13 @@ public class DefaultAdmin implements InternalAdmin {
     @Override
     public void close() {
         if (!closeStarted.compareAndSet(false, true)) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Not closing admin, since close() has already been called " + this.hashCode());
+            }
             return;
+        }
+        if (logger.isDebugEnabled()) {
+            logger.debug("Closing admin " + this.hashCode());
         }
         discoveryService.stop();
         if (scheduledProcessingUnitMonitorFuture != null) { 
@@ -517,6 +527,10 @@ public class DefaultAdmin implements InternalAdmin {
             executorService.shutdownNow();
         }
         closeEnded.set(true);
+        
+        if (logger.isDebugEnabled()) {
+            logger.debug("Admin closed " + this.hashCode());
+        }
     }
 
     @Override
@@ -1575,7 +1589,12 @@ public class DefaultAdmin implements InternalAdmin {
                         // GSM is down, continue
                         continue;
                     }
-                    logger.warn("Failed to get GSM details", e);
+                    else if (closeStarted.get()) {
+                        // Admin close in progress, ignore
+                    }
+                    else {
+                        logger.warn("Failed to get GSM details", e);
+                    }
                 }
             }
             
@@ -1611,9 +1630,14 @@ public class DefaultAdmin implements InternalAdmin {
                 }
             } catch (AdminException e) {
                 if (e.getCause() != null && NetworkExceptionHelper.isConnectOrCloseException(e.getCause())) {
-                    // ESM is down, continue
+                    // ESM is down, ignore
                 }
-                logger.warn("Failed to get ESM details", e);
+                else  if (closeStarted.get()) {
+                    // Admin close in progress, ignore
+                }
+                else {
+                    logger.warn("Failed to get ESM details", e);
+                }
             }
             
             final Events scaleStrategyEvents = scaleStrategyEvents1;
@@ -1916,7 +1940,7 @@ public class DefaultAdmin implements InternalAdmin {
         @Override
         public void run() {
             if (closeEnded.get()) {
-                Exception e = new AdminClosedException("Not executing: " + runnable + " - Admin already closed. executorService.shutdownNow should have been called.");
+                Exception e = new AdminClosedException("Not executing: " + runnable + " - Admin " + this.hashCode() + " already closed. executorService.shutdownNow should have been called.");
                 if (logger.isDebugEnabled()) {
                     logger.debug(e.getMessage(), e);
                 }
@@ -1932,10 +1956,10 @@ public class DefaultAdmin implements InternalAdmin {
 
                     if (logger.isDebugEnabled()) {
                         if (closeEnded.get()) {
-                            logger.debug("Failed to execute: " + runnable + " since admin is already closed - " + e, e);
+                            logger.debug("Failed to execute: " + runnable + " since admin " + this.hashCode() + " has already closed - " + e, e);
                         }
                         else {
-                            logger.debug("Failed to execute: " + runnable + " since admin is being closed - " + e, e);
+                            logger.debug("Failed to execute: " + runnable + " since admin " + this.hashCode() + " is being closed - " + e, e);
                         }
                     }
                 }
