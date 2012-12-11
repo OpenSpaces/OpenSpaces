@@ -15,6 +15,7 @@
  *******************************************************************************/
 package org.openspaces.persistency.cassandra.datasource;
 
+import java.nio.ByteBuffer;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -144,6 +145,11 @@ public class CassandraTokenRangeJDBCDataIterator implements DataIterator<Object>
                     columnMetadata = new DynamicColumnMetadata(columnName,
                                                                mapper.getTypeNodeIntrospector().getDynamicPropertyValueSerializer());
                 }   
+                
+                if (columnValue instanceof ByteBuffer) {
+                    columnValue = columnMetadata.getSerializer().fromByteBuffer((ByteBuffer) columnValue);
+                }
+                
                 columns.add(new ColumnData(columnValue, columnMetadata));
             }
         }

@@ -100,7 +100,7 @@ public class SpaceDocumentTopLevelTypeNode extends SpaceDocumentTypeNode
     public SpaceDocument readFromColumnFamilyRow(ColumnFamilyRow row, TypeNodeContext context) {
         ColumnFamilyMetadata metadata = row.getColumnFamilyMetadata();
         SpaceDocument result = super.readFromColumnFamilyRow(row, context);
-        Object keyValue = row.getDeserializedKeyValue();
+        Object keyValue = row.getKeyValue();
               
         result.setProperty(metadata.getKeyName(), keyValue);
 
@@ -130,7 +130,7 @@ public class SpaceDocumentTopLevelTypeNode extends SpaceDocumentTypeNode
                 propertyName = columnName.substring(lastDotIndex + 1);
             }
             
-            Object value = dynamicColumn.getDeserializedValue();
+            Object value = dynamicColumn.getValue();
             value = createCompoundColumnIfNecessary(compoundProperties, columnName, value, context);
             
             Object propertyParent = getPropertyParent(compoundProperties, propertyParentPath, context);

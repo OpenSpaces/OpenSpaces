@@ -40,6 +40,6 @@ abstract public class AbstractColumnMetadata implements ColumnMetadata, TypeNode
             return null;
         }
         
-        return column.getDeserializedValue();
+        return column.getValue();
     }
 }

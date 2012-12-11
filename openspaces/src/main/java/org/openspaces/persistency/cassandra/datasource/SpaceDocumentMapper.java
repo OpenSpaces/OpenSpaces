@@ -61,7 +61,8 @@ public class SpaceDocumentMapper
                                                            mapper.getTypeNodeIntrospector()
                                                                  .getDynamicPropertyValueSerializer());
             }
-            row.addColumnData(new ColumnData(rs.getColumn(columnName).getValueBytes(), columnMetadata));
+            Object columnValue = columnMetadata.getSerializer().fromByteBuffer(rs.getColumn(columnName).getValueBytes());
+            row.addColumnData(new ColumnData(columnValue, columnMetadata));
         }
         
         return mapper.toDocument(row);

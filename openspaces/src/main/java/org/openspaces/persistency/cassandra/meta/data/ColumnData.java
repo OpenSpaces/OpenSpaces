@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.openspaces.persistency.cassandra.meta.data;
 
-import java.nio.ByteBuffer;
-
 import org.openspaces.persistency.cassandra.meta.ColumnMetadata;
 import org.openspaces.persistency.cassandra.meta.DynamicColumnMetadata;
 
@@ -37,23 +35,12 @@ public class ColumnData {
     }
 
     /**
-     * @return Retures the value as read from cassandra. Might be in serialized form (i.e {@link ByteBuffer})
+     * @return Retures the column value.
      */
     public Object getValue() {
         return value;
     }
 
-    /**
-     * @return Retures the value as read from cassandra in a deserialized form.
-     */
-    public Object getDeserializedValue() {
-        if (isValueDeserialized()) {
-            return value;
-        }
-        
-        return columnMetadata.getSerializer().fromByteBuffer(((ByteBuffer) value).duplicate());
-    }
-    
     /**
      * @return The matching column metadata
      */
@@ -68,8 +55,4 @@ public class ColumnData {
         return columnMetadata instanceof DynamicColumnMetadata;
     }
 
-    private boolean isValueDeserialized() {
-        return !(value instanceof ByteBuffer);
-    }
-    
 }

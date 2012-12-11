@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.openspaces.persistency.cassandra.meta.data;
 
-import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -89,26 +88,11 @@ public class ColumnFamilyRow {
 
     /**
      * @return The key value of this row. 
-     * If {@link #getRowType()} == Read, the key value might be in a serialized form (i.e. {@link ByteBuffer})
      */
     public Object getKeyValue() {
         return keyValue;
     }
 
-    /**
-     * @return The key value in a deserialized form.
-     */
-    public Object getDeserializedKeyValue() {
-        if (isKeyDeserilized()) {
-            return keyValue;
-        }
-        return columnFamilyMetadata.getKeySerializer().fromByteBuffer(((ByteBuffer) keyValue).duplicate());
-    }
-    
-    private boolean isKeyDeserilized() {
-        return !(keyValue instanceof ByteBuffer);
-    }
-    
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
