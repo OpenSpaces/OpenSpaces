@@ -195,7 +195,7 @@ public class TestCassandaraArchiveOperationHandler {
 
 	private void verifyDocumentInCassandra() {
 		
-		Cluster cluster = HFactory.getOrCreateCluster("test-localhost:"+server.getPort(), server.getHost()+ ":" + server.getPort());
+		Cluster cluster = HFactory.getOrCreateCluster("test-localhost_"+server.getPort(), server.getHost()+ ":" + server.getPort());
 		Keyspace keyspace = HFactory.createKeyspace(server.getKeySpaceName(), cluster);
 		
 		String columnFamilyName = SPACEDOCUMENT_TYPENAME; // as long as shorter than 40 bytes

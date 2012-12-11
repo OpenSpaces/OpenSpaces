@@ -114,7 +114,9 @@ public class CassandraArchiveOperationHandler implements ArchiveOperationHandler
 			port = DEFAULT_CASSANDRA_PORT;
 		}
 		
-		final String hectorClusterName = ""+host+":"+port;
+		//This is a unique key used by hector to cache client instances
+		//cannot use ":" since also used as JMX names
+		final String hectorClusterName = ""+host+"_"+port; 
         hectorClient = new HectorCassandraClient(host, port, keyspace, hectorClusterName);
 	}
 
