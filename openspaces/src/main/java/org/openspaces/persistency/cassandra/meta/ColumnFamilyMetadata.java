@@ -26,6 +26,8 @@ import java.util.Set;
 
 import me.prettyprint.hector.api.Serializer;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openspaces.persistency.cassandra.meta.conversion.ColumnFamilyNameConverter;
 import org.openspaces.persistency.cassandra.meta.mapping.SpaceTypeDescriptorHolder;
 import org.openspaces.persistency.cassandra.meta.mapping.node.TopLevelTypeNode;
@@ -38,6 +40,8 @@ import com.gigaspaces.internal.io.IOUtils;
  * @author Dan Kilman
  */
 public class ColumnFamilyMetadata implements Externalizable {
+    
+    private static final Log                                 logger           = LogFactory.getLog(ColumnFamilyMetadata.class);
     
     private static final long                                serialVersionUID = 1L;
     private static final byte                                SERIAL_VER       = Byte.MIN_VALUE;
@@ -153,4 +157,16 @@ public class ColumnFamilyMetadata implements Externalizable {
         initFieldsFromTopLevelTypeNode();
     }
 
+    @Override
+    public String toString() {
+        return "ColumnFamilyMetadata [" +
+                    "  typeName="+typeName + 
+                    ", columnFamilyName="+columnFamilyName + 
+                    ", keyName="+keyName + 
+                    ", keyType="+keyType + 
+                    ", indexes="+indexes + 
+            		", " + (logger.isTraceEnabled() ? "columns=" + columns.values() : "columnsSize=" + columns.size()) + 
+                " ]";
+    }
+    
 }

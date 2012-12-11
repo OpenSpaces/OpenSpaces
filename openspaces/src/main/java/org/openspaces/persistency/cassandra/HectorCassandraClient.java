@@ -24,18 +24,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.openspaces.persistency.cassandra.datasource.SpaceDocumentMapper;
-import org.openspaces.persistency.cassandra.error.SpaceCassandraSchemaUpdateException;
-import org.openspaces.persistency.cassandra.meta.ColumnFamilyMetadata;
-import org.openspaces.persistency.cassandra.meta.ColumnFamilyMetadataCache;
-import org.openspaces.persistency.cassandra.meta.ColumnFamilyMetadataMetadata;
-import org.openspaces.persistency.cassandra.meta.TypedColumnMetadata;
-import org.openspaces.persistency.cassandra.meta.data.ColumnData;
-import org.openspaces.persistency.cassandra.meta.data.ColumnFamilyRow;
-import org.openspaces.persistency.cassandra.meta.mapping.SpaceDocumentColumnFamilyMapper;
-import org.openspaces.persistency.cassandra.meta.types.CustomTypeInferringSerializer;
-import org.openspaces.persistency.cassandra.meta.types.ValidatorClassInferer;
-
 import me.prettyprint.cassandra.model.BasicColumnDefinition;
 import me.prettyprint.cassandra.model.ConfigurableConsistencyLevel;
 import me.prettyprint.cassandra.serializers.ObjectSerializer;
@@ -63,6 +51,20 @@ import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.mutation.Mutator;
 import me.prettyprint.hector.api.query.RangeSlicesQuery;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.openspaces.persistency.cassandra.datasource.SpaceDocumentMapper;
+import org.openspaces.persistency.cassandra.error.SpaceCassandraSchemaUpdateException;
+import org.openspaces.persistency.cassandra.meta.ColumnFamilyMetadata;
+import org.openspaces.persistency.cassandra.meta.ColumnFamilyMetadataCache;
+import org.openspaces.persistency.cassandra.meta.ColumnFamilyMetadataMetadata;
+import org.openspaces.persistency.cassandra.meta.TypedColumnMetadata;
+import org.openspaces.persistency.cassandra.meta.data.ColumnData;
+import org.openspaces.persistency.cassandra.meta.data.ColumnFamilyRow;
+import org.openspaces.persistency.cassandra.meta.mapping.SpaceDocumentColumnFamilyMapper;
+import org.openspaces.persistency.cassandra.meta.types.CustomTypeInferringSerializer;
+import org.openspaces.persistency.cassandra.meta.types.ValidatorClassInferer;
+
 import com.gigaspaces.document.SpaceDocument;
 
 /**
@@ -72,6 +74,8 @@ import com.gigaspaces.document.SpaceDocument;
  * @author Dan Kilman
  */
 public class HectorCassandraClient {
+    
+    private static final Log                                                  logger          = LogFactory.getLog(HectorCassandraClient.class);
     
     private final NamedLockProvider                                           namedLock       = new NamedLockProvider();
     private final ConcurrentMap<String, ColumnFamilyTemplate<Object, String>> templates       = new ConcurrentHashMap<String, ColumnFamilyTemplate<Object, String>>();
@@ -249,6 +253,10 @@ public class HectorCassandraClient {
                 String validationClass = ValidatorClassInferer.getBytesTypeValidationClass();
                 addColumnDefinitionToColumnFamilyDefinition(metadata, cfDef, index, validationClass);
             }
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("Creating column family: " + metadata);
+            }
             
             try {
                 cluster.addColumnFamily(cfDef, true);
@@ -324,6 +332,11 @@ public class HectorCassandraClient {
                 }
             }
             
+            if (logger.isDebugEnabled()) {
+                logger.debug("Adding indexes to columns: " + columnNames + " of type: " +
+                        metadata.getTypeName() + ", column family: " + metadata.getColumnFamilyName());
+            }
+            
             try {
                 cluster.updateColumnFamily(thriftCfDef, true);
             } catch (HectorException e) {
@@ -368,6 +381,10 @@ public class HectorCassandraClient {
     }
     
     private void persistColumnFamilyMetadata(ColumnFamilyMetadata metadata) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Adding metadata for type " + metadata.getTypeName() + " to internal metadata column family");
+        }
+        
         try {
             ColumnFamilyTemplate<Object, String> template = getTemplate(ColumnFamilyMetadataMetadata.INSTANCE);
             ColumnFamilyUpdater<Object, String> updater = template.createUpdater(metadata.getTypeName());

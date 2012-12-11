@@ -122,4 +122,9 @@ public class TypedColumnMetadata extends AbstractColumnMetadata
         initFields();
     }
 
+    @Override
+    public String toString() {
+        return "TypedColumnMetadata [fullName=" + fullName + ", type=" + type + "]";
+    }
+    
 }
