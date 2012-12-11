@@ -31,7 +31,7 @@ public class ColumnFamilyMetadataCache {
      * @param typeName The type name matching to requested {@link ColumnFamilyMetadata}
      * @return the matching {@link ColumnFamilyMetadata} or null if not found.
      */
-    public ColumnFamilyMetadata getColumnFamily(String typeName) {
+    public ColumnFamilyMetadata getColumnFamilyMetadata(String typeName) {
         return knownColumnFamilies.get(typeName);
     }
     
@@ -41,7 +41,7 @@ public class ColumnFamilyMetadataCache {
      * @param typeName the type name.
      * @param metadata the metadata.
      */
-    public void addColumnFamily(String typeName, ColumnFamilyMetadata metadata) {
+    public void addColumnFamilyMetadata(String typeName, ColumnFamilyMetadata metadata) {
         knownColumnFamilies.put(typeName, metadata);
     }
     
@@ -49,7 +49,7 @@ public class ColumnFamilyMetadataCache {
      * @return A map from type name to column family metadata of all currently in-memory
      * {@link ColumnFamilyMetadata}.
      */
-    public ConcurrentMap<String, ColumnFamilyMetadata> getKnownColumnFamilies() {
+    public ConcurrentMap<String, ColumnFamilyMetadata> getColumnFamiliesMetadata() {
         return knownColumnFamilies;
     }
     

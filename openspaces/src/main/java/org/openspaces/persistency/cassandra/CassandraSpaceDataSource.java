@@ -150,7 +150,7 @@ public class CassandraSpaceDataSource
         String typeName = query.getTypeDescriptor().getTypeName();
         ColumnFamilyMetadata metadata = hectorClient.getColumnFamilyMetadata(typeName);
         if (metadata == null) {
-            metadata = hectorClient.fetchKnownColumnFamily(typeName, mapper);
+            metadata = hectorClient.fetchColumnFamilyMetadata(typeName, mapper);
             if (metadata == null) {
                 return null;
             }
@@ -228,7 +228,7 @@ public class CassandraSpaceDataSource
     @Override
     public DataIterator<SpaceTypeDescriptor> initialMetadataLoad() {
         
-        Map<String, ColumnFamilyMetadata> columnFamilies = hectorClient.populateKnownColumnFamilies(mapper);
+        Map<String, ColumnFamilyMetadata> columnFamilies = hectorClient.populateColumnFamiliesMetadata(mapper);
         Map<String, SpaceTypeDescriptorHolder> typeDescriptors = new HashMap<String, SpaceTypeDescriptorHolder>();
         
         for (ColumnFamilyMetadata metadata : columnFamilies.values()) {
@@ -243,7 +243,7 @@ public class CassandraSpaceDataSource
     @Override
     public DataIterator<Object> initialDataLoad() {
         
-        Collection<ColumnFamilyMetadata> columnFamilies = hectorClient.getKnownColumnFamilies().values();
+        Collection<ColumnFamilyMetadata> columnFamilies = hectorClient.getColumnFamiliesMetadata().values();
         return new CassandraTokenRangeAwareInitialLoadDataIterator(mapper,
                                                                    columnFamilies,
                                                                    connectionPool.getResource(),

@@ -216,7 +216,7 @@ public class HectorCassandraClient {
         
             final boolean columnFamilyExists = isColumnFamilyExists(metadata);
             if (metadata != ColumnFamilyMetadataMetadata.INSTANCE) {
-                metadataCache.addColumnFamily(metadata.getTypeName(), metadata);
+                metadataCache.addColumnFamilyMetadata(metadata.getTypeName(), metadata);
                 if (shouldPersist && !columnFamilyExists)
                     persistColumnFamilyMetadata(metadata);
             }
@@ -273,9 +273,9 @@ public class HectorCassandraClient {
             String typeName, 
             List<String> columnNames, 
             SpaceDocumentColumnFamilyMapper mapper) {
-        ColumnFamilyMetadata metadata = metadataCache.getColumnFamily(typeName);
+        ColumnFamilyMetadata metadata = metadataCache.getColumnFamilyMetadata(typeName);
         if (metadata == null) {
-            metadata = fetchKnownColumnFamily(typeName, mapper);
+            metadata = fetchColumnFamilyMetadata(typeName, mapper);
             if (metadata == null) {
                 throw new SpaceCassandraSchemaUpdateException("Failed finding column family metadata for " +
                     typeName, null, false);
@@ -390,7 +390,7 @@ public class HectorCassandraClient {
      * @param mapper
      * @return The {@link ColumnFamilyMetadata} instance if found, null otherwise.
      */
-    public ColumnFamilyMetadata fetchKnownColumnFamily(String typeName, SpaceDocumentColumnFamilyMapper mapper) {
+    public ColumnFamilyMetadata fetchColumnFamilyMetadata(String typeName, SpaceDocumentColumnFamilyMapper mapper) {
         ColumnFamilyTemplate<Object, String> template = getTemplate(ColumnFamilyMetadataMetadata.INSTANCE);
         if (!template.isColumnsExist(typeName)) {
             return null;
@@ -410,7 +410,7 @@ public class HectorCassandraClient {
      * @return A {@link Map} from type name to its matching {@link ColumnFamilyMetadata}.
      * Of all the currently known column families.
      */
-    public Map<String,ColumnFamilyMetadata> populateKnownColumnFamilies(SpaceDocumentColumnFamilyMapper mapper) {
+    public Map<String,ColumnFamilyMetadata> populateColumnFamiliesMetadata(SpaceDocumentColumnFamilyMapper mapper) {
         RangeSlicesQuery<String, String, Object> rangeQuery = HFactory.createRangeSlicesQuery(keyspace, 
               StringSerializer.get(), 
               StringSerializer.get(), 
@@ -428,7 +428,7 @@ public class HectorCassandraClient {
             initMetadataAndAddToCache(mapper, metadata);
         }
         
-        return metadataCache.getKnownColumnFamilies();
+        return metadataCache.getColumnFamiliesMetadata();
     }
 
     private void initMetadataAndAddToCache(SpaceDocumentColumnFamilyMapper mapper,
@@ -439,7 +439,7 @@ public class HectorCassandraClient {
         if (fixedPropertyValueSerializer != null) {
             metadata.setFixedPropertySerializerForTypedColumn(fixedPropertyValueSerializer);
         }
-        metadataCache.addColumnFamily(metadata.getTypeName(), metadata);
+        metadataCache.addColumnFamilyMetadata(metadata.getTypeName(), metadata);
     }
     
     /**
@@ -453,9 +453,9 @@ public class HectorCassandraClient {
             SpaceDocumentColumnFamilyMapper mapper,
             String typeName, 
             Object keyValue) {
-        ColumnFamilyMetadata metadata = metadataCache.getColumnFamily(typeName);
+        ColumnFamilyMetadata metadata = metadataCache.getColumnFamilyMetadata(typeName);
         if (metadata == null) {
-            metadata = fetchKnownColumnFamily(typeName, mapper);
+            metadata = fetchColumnFamilyMetadata(typeName, mapper);
             
             if (metadata == null) {
                 return null;
@@ -508,14 +508,14 @@ public class HectorCassandraClient {
      * @return The {@link ColumnFamilyMetadata} instance if found, null otherwise.
      */
     public ColumnFamilyMetadata getColumnFamilyMetadata(String typeName) {
-        return metadataCache.getColumnFamily(typeName);
+        return metadataCache.getColumnFamilyMetadata(typeName);
     }
     
     /**
      * @return All currently available in cache column families metadata.
      */
-    public Map<String,ColumnFamilyMetadata> getKnownColumnFamilies() {
-        return metadataCache.getKnownColumnFamilies();
+    public Map<String,ColumnFamilyMetadata> getColumnFamiliesMetadata() {
+        return metadataCache.getColumnFamiliesMetadata();
     }
 
 }

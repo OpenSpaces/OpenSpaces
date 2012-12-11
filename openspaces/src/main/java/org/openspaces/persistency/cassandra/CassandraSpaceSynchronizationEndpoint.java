@@ -98,7 +98,7 @@ public class CassandraSpaceSynchronizationEndpoint
             ColumnFamilyMetadata metadata = hectorClient.getColumnFamilyMetadata(typeName);
 
             if (metadata == null) {
-                metadata = hectorClient.fetchKnownColumnFamily(typeName, mapper);
+                metadata = hectorClient.fetchColumnFamilyMetadata(typeName, mapper);
                 if (metadata == null) {
                     throw new SpaceCassandraDataSourceException("Could not find column family for type name: "
                             + typeName, null);
