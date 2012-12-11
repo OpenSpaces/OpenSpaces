@@ -15,9 +15,9 @@
  *******************************************************************************/
 package org.openspaces.persistency.cassandra.meta.mapping.filter;
 
+import java.util.Collection;
 import java.util.Map;
 
-import org.hibernate.mapping.Collection;
 import org.openspaces.persistency.cassandra.meta.types.SerializerProvider;
 
 import com.gigaspaces.internal.metadata.pojo.PojoPropertyInfo;
