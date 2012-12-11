@@ -25,6 +25,7 @@ import org.junit.Test;
 import org.openspaces.itest.persistency.cassandra.CassandraTestServer;
 import org.openspaces.itest.persistency.cassandra.mock.MockIntroduceTypeData;
 import org.openspaces.itest.persistency.cassandra.mock.MockOperationsBatchDataBuilder;
+import org.openspaces.persistency.cassandra.CassandraConsistencyLevel;
 import org.openspaces.persistency.cassandra.CassandraSpaceDataSource;
 import org.openspaces.persistency.cassandra.CassandraSpaceSynchronizationEndpoint;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
@@ -73,6 +74,8 @@ public class CassandaraFactoryBeansTest {
     	properties.setProperty("cassandra.ds.maxconnections", String.valueOf(5));
     	properties.setProperty("cassandra.ds.batchlimit", String.valueOf(100));
     	properties.setProperty("cassandra.hector.gcgrace", String.valueOf(60 * 60 * 24 * 10));
+    	properties.setProperty("cassandra.hector.read.consistency.level", CassandraConsistencyLevel.QUORUM.name());
+    	properties.setProperty("cassandra.hector.write.consistency.level", CassandraConsistencyLevel.ONE.name());
     	propertyConfigurer.setProperties(properties);
     	context.addBeanFactoryPostProcessor(propertyConfigurer);
     	context.refresh();

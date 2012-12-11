@@ -31,6 +31,8 @@
 		<property name="keyspaceName" value="${cassandra.keyspace}"></property>
 		<property name="clusterName" value="${cassandra.ds.cluster}"></property>
 		<property name="columnFamilyGcGraceSeconds" value="${cassandra.hector.gcgrace}"></property>
+		<property name="readConsistencyLevel" value="${cassandra.hector.read.consistency.level}"></property>
+		<property name="writeConsistencyLevel" value="${cassandra.hector.write.consistency.level}"></property>
 	</bean>
 
 	<bean id="syncEndpointHectorClient" class="org.openspaces.persistency.cassandra.HectorCassandraClientFactoryBean">
@@ -39,6 +41,8 @@
 		<property name="keyspaceName" value="${cassandra.keyspace}"></property>
 		<property name="clusterName" value="${cassandra.sync.cluster}"></property>
 		<property name="columnFamilyGcGraceSeconds" value="${cassandra.hector.gcgrace}"></property>
+		<property name="readConsistencyLevel" value="${cassandra.hector.read.consistency.level}"></property>
+		<property name="writeConsistencyLevel" value="${cassandra.hector.write.consistency.level}"></property>
 	</bean>
 	
 	<bean id="cassandraSpaceDataSource" class="org.openspaces.persistency.cassandra.CassandraSpaceDataSourceFactoryBean">

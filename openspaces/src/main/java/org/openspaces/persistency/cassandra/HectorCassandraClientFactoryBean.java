@@ -65,6 +65,20 @@ public class HectorCassandraClientFactoryBean implements
         configurer.columnFamilyGcGraceSeconds(columnFamilyGcGraceSeconds);
     }
     
+    /**
+     * @see HectorCassandraClientConfigurer#readConsistencyLevel(CassandraConsistencyLevel)
+     */
+    public void setReadConsistencyLevel(CassandraConsistencyLevel readConsistencyLevel) {
+        configurer.readConsistencyLevel(readConsistencyLevel);
+    }
+    
+    /**
+     * @see HectorCassandraClientConfigurer#writeConsistencyLevel(CassandraConsistencyLevel)
+     */
+    public void setWriteConsistencyLevel(CassandraConsistencyLevel writeConsistencyLevel) {
+        configurer.writeConsistencyLevel(writeConsistencyLevel);
+    }
+    
     @Override
     public void afterPropertiesSet() throws Exception {
         hectorCassandraClient = configurer.create();

@@ -28,6 +28,7 @@ import com.gigaspaces.logger.GSLogConfigLoader;
     CustomSerializersCassandraTest.class,
     MultiTypeCassandraTest.class,
     MultiTypeNestedPropertiesCassandraTest.class,
+    DifferentConsistencyLevelsCassandraTest.class,
     InitialDataLoadCassandraTest.class
 })
 public class CassandraTestSuite 

@@ -88,6 +88,9 @@ public class HectorCassandraClient {
 
     private final Object                                                      lock            = new Object();
     private boolean                                                           closed          = false;
+
+    private final CassandraConsistencyLevel                                   readConsistencyLevel;
+    private final CassandraConsistencyLevel                                   writeConsistencyLevel;
     
     /**
      * @see HectorCassandraClientConfigurer#create()
@@ -96,7 +99,9 @@ public class HectorCassandraClient {
             final CassandraHostConfigurator config, 
             final String keyspaceName, 
             final String clusterName,
-            final Integer columnFamilyGcGraceSeconds) {
+            final Integer columnFamilyGcGraceSeconds,
+            final CassandraConsistencyLevel readConsistencyLevel,
+            final CassandraConsistencyLevel writeConsistencyLevel) {
 
         if (config == null) {
             throw new IllegalArgumentException("config cannot be null");
@@ -111,6 +116,24 @@ public class HectorCassandraClient {
         }
         
         this.columnFamilyGcGraceSeconds = columnFamilyGcGraceSeconds;
+
+        if (readConsistencyLevel == CassandraConsistencyLevel.ANY) {
+            throw new IllegalArgumentException(readConsistencyLevel + "consistency is not supported as read " +
+                    " consistency level");
+        }
+        
+        CassandraConsistencyLevel actualReadConsistencyLevel = readConsistencyLevel;
+        if (actualReadConsistencyLevel == null) {
+            actualReadConsistencyLevel = CassandraConsistencyLevel.QUORUM;
+        }
+        
+        CassandraConsistencyLevel actualWriteConsistencyLevel = writeConsistencyLevel;
+        if (actualWriteConsistencyLevel == null) {
+            actualWriteConsistencyLevel = CassandraConsistencyLevel.QUORUM;
+        }
+        
+        this.readConsistencyLevel = actualReadConsistencyLevel;
+        this.writeConsistencyLevel = actualWriteConsistencyLevel;
         
         String hectorClusterName = clusterName;
         if (hectorClusterName == null) {
@@ -127,6 +150,8 @@ public class HectorCassandraClient {
         mappping.put(ColumnFamilyMetadataMetadata.NAME, HConsistencyLevel.QUORUM);
         policy.setReadCfConsistencyLevels(mappping);
         policy.setWriteCfConsistencyLevels(mappping);
+        policy.setDefaultReadConsistencyLevel(HConsistencyLevel.valueOf(readConsistencyLevel.name()));
+        policy.setDefaultWriteConsistencyLevel(HConsistencyLevel.valueOf(writeConsistencyLevel.name()));
         return policy;
     }
     
@@ -574,5 +599,19 @@ public class HectorCassandraClient {
      */
     public Map<String,ColumnFamilyMetadata> getColumnFamiliesMetadata() {
         return metadataCache.getColumnFamiliesMetadata();
+    }
+
+    /**
+     * @return the readConsistencyLevel
+     */
+    public CassandraConsistencyLevel getReadConsistencyLevel() {
+        return readConsistencyLevel;
+    }
+
+    /**
+     * @return the writeConsistencyLevel
+     */
+    public CassandraConsistencyLevel getWriteConsistencyLevel() {
+        return writeConsistencyLevel;
     }
 }

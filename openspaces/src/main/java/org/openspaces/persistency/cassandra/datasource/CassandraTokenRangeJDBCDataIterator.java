@@ -36,6 +36,7 @@ import me.prettyprint.hector.api.Serializer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openspaces.persistency.cassandra.CassandraConsistencyLevel;
 import org.openspaces.persistency.cassandra.error.SpaceCassandraQueryExecutionException;
 import org.openspaces.persistency.cassandra.meta.ColumnFamilyMetadata;
 import org.openspaces.persistency.cassandra.meta.ColumnMetadata;
@@ -71,6 +72,7 @@ public class CassandraTokenRangeJDBCDataIterator implements DataIterator<Object>
     private final SpaceDocumentColumnFamilyMapper mapper;
     private final ColumnFamilyMetadata            columnFamilyMetadata;
     private final int                             limit;
+    private final CassandraConsistencyLevel       readConsistencyLevel;
     private final ConnectionResource              connectionResource;
     private final PreparedStatement               preparedStatement;
     private final ResultSet                       resultSet;
@@ -78,6 +80,7 @@ public class CassandraTokenRangeJDBCDataIterator implements DataIterator<Object>
     private Object                                currentLastToken;
     private SpaceDocument                         currentResultInResultSet;
     private int                                   currentTotalCount       = 0;
+
     
     public CassandraTokenRangeJDBCDataIterator(
             SpaceDocumentColumnFamilyMapper mapper, 
@@ -85,7 +88,8 @@ public class CassandraTokenRangeJDBCDataIterator implements DataIterator<Object>
             ConnectionResource connectionResource, 
             CQLQueryContext queryContext,
             Object lastToken, 
-            int limit) {
+            int limit, 
+            CassandraConsistencyLevel readConsistencyLevel) {
         
         if (logger.isTraceEnabled()) {
             logger.trace("Creating range data iterator for query: " + queryContext + " for type: " + columnFamilyMetadata.getTypeName() +
@@ -96,6 +100,8 @@ public class CassandraTokenRangeJDBCDataIterator implements DataIterator<Object>
         this.columnFamilyMetadata = columnFamilyMetadata;
         this.connectionResource = connectionResource;
         this.limit = limit;
+        this.readConsistencyLevel = readConsistencyLevel;
+        
         Connection connection = connectionResource.getConnection();
         
         PreparedStatementData statementData = generateSqlQuery(queryContext);
@@ -242,6 +248,9 @@ public class CassandraTokenRangeJDBCDataIterator implements DataIterator<Object>
         StringBuilder sqlQuery = new StringBuilder();
         sqlQuery.append("SELECT * FROM ").append(StringUtils.quote(columnFamilyMetadata.getColumnFamilyName()));
         
+        // set consistency level 
+        sqlQuery.append(" USING CONSISTENCY ").append(readConsistencyLevel.name());
+        
         // query will be null when we got here through initial data load
         if (queryContext == null) {
             result.query = sqlQuery.toString();
@@ -304,6 +313,7 @@ public class CassandraTokenRangeJDBCDataIterator implements DataIterator<Object>
     
     private void prepareRangeAndLimitStatement(PreparedStatementData statementData, Object lastToken, long limit) {
         StringBuilder newQuery = new StringBuilder(statementData.query);
+        
         if (lastToken != null) {
             if (statementData.query.toUpperCase().contains(" WHERE ")) {
                 newQuery.append(" AND ");
@@ -317,6 +327,7 @@ public class CassandraTokenRangeJDBCDataIterator implements DataIterator<Object>
             statementData.serializers.add(getSerializer(columnFamilyMetadata.getKeyName()));
         }
         
+        // set limit
         newQuery.append(" LIMIT ").append(limit);
         
         statementData.query = newQuery.toString();

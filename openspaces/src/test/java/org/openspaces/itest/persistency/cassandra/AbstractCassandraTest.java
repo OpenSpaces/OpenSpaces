@@ -29,7 +29,7 @@ abstract public class AbstractCassandraTest
     private static final String                           LOCALHOST     = "127.0.0.1";
     private static final String                           DEFAULT_AUTH  = "default";
     
-    private final CassandraTestServer server = new CassandraTestServer();
+    protected final CassandraTestServer server = new CassandraTestServer();
     protected CassandraSpaceSynchronizationEndpoint _syncInterceptor;
     protected CassandraSpaceDataSource _dataSource;
     private HectorCassandraClient _syncInterceptorHectorClient;

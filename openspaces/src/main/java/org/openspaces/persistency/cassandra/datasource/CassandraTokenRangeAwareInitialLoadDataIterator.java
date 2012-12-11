@@ -18,6 +18,7 @@ package org.openspaces.persistency.cassandra.datasource;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.openspaces.persistency.cassandra.CassandraConsistencyLevel;
 import org.openspaces.persistency.cassandra.meta.ColumnFamilyMetadata;
 import org.openspaces.persistency.cassandra.meta.mapping.SpaceDocumentColumnFamilyMapper;
 import org.openspaces.persistency.cassandra.pool.ConnectionResource;
@@ -35,6 +36,7 @@ public class CassandraTokenRangeAwareInitialLoadDataIterator implements DataIter
     private final Iterator<ColumnFamilyMetadata>  metadata;
     private final ConnectionResource              connectionResource;
     private final int                             batchLimit;
+    private final CassandraConsistencyLevel       readConsistencyLevel;
 
     private CassandraTokenRangeAwareDataIterator  currentIterator;
     
@@ -42,10 +44,12 @@ public class CassandraTokenRangeAwareInitialLoadDataIterator implements DataIter
             SpaceDocumentColumnFamilyMapper mapper, 
             Collection<ColumnFamilyMetadata> metadata,
             ConnectionResource connectionResource,
-            int batchLimit) {
+            int batchLimit, 
+            CassandraConsistencyLevel readConsistencyLevel) {
         this.mapper = mapper;
         this.batchLimit = batchLimit;
         this.connectionResource = connectionResource;
+        this.readConsistencyLevel = readConsistencyLevel;
         this.metadata = metadata.iterator();
         this.currentIterator = nextDataIterator();
     }
@@ -86,7 +90,8 @@ public class CassandraTokenRangeAwareInitialLoadDataIterator implements DataIter
                                                             null /* the null value will be interperted as 
                                                             select all */,
                                                             Integer.MAX_VALUE,
-                                                            batchLimit);
+                                                            batchLimit,
+                                                            readConsistencyLevel);
         } else {
             return null;
         }

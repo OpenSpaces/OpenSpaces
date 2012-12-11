@@ -17,6 +17,7 @@ package org.openspaces.persistency.cassandra.datasource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openspaces.persistency.cassandra.CassandraConsistencyLevel;
 import org.openspaces.persistency.cassandra.CassandraSpaceDataSource;
 import org.openspaces.persistency.cassandra.meta.ColumnFamilyMetadata;
 import org.openspaces.persistency.cassandra.meta.mapping.SpaceDocumentColumnFamilyMapper;
@@ -39,10 +40,12 @@ public class CassandraTokenRangeAwareDataIterator implements DataIterator<Object
     private final int                             maxResults;
     private final int                             batchLimit;
     private final CQLQueryContext                 queryContext;
+    private final CassandraConsistencyLevel       readConsistencyLevel;
 
     private CassandraTokenRangeJDBCDataIterator   currentIterator;
     private Object                                currentLastToken   = null;
     private int                                   currentResultCount = 0;
+
 
     public CassandraTokenRangeAwareDataIterator(
             SpaceDocumentColumnFamilyMapper mapper, 
@@ -50,7 +53,8 @@ public class CassandraTokenRangeAwareDataIterator implements DataIterator<Object
             ConnectionResource connectionResource, 
             CQLQueryContext queryContext,
             int maxResults,
-            int batchLimit) {
+            int batchLimit, 
+            CassandraConsistencyLevel readConsistencyLevel) {
         if (logger.isTraceEnabled()) {
             logger.trace("Creating data iterator for query: " + queryContext + " for type: " + columnFamilyMetadata.getTypeName() +
                     ", batchLimit="+batchLimit);
@@ -62,7 +66,8 @@ public class CassandraTokenRangeAwareDataIterator implements DataIterator<Object
         this.queryContext = queryContext;
         this.maxResults = maxResults;
         this.batchLimit = batchLimit;
-        currentIterator = nextDataIterator();
+        this.readConsistencyLevel = readConsistencyLevel;
+        this.currentIterator = nextDataIterator();
     }
     
     @Override
@@ -117,7 +122,8 @@ public class CassandraTokenRangeAwareDataIterator implements DataIterator<Object
                                                        connectionResource,
                                                        queryContext,
                                                        currentLastToken /* last token is used */,
-                                                       calculateRemainingResults());
+                                                       calculateRemainingResults(),
+                                                       readConsistencyLevel);
     }
 
     private int calculateRemainingResults() {

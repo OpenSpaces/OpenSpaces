@@ -33,6 +33,8 @@ public class HectorCassandraClientConfigurer {
     private String  clusterName;
     private String  keyspaceName;
     private Integer columnFamilyGcGraceSeconds;
+    private CassandraConsistencyLevel readConsistencyLevel;
+    private CassandraConsistencyLevel writeConsistencyLevel;
     
     /**
      * Cassandra hosts
@@ -91,6 +93,28 @@ public class HectorCassandraClientConfigurer {
     }
     
     /**
+     * (Optional)
+     * @param readConsistencyLevel The consistencly level used for read by id operations.
+     * (default: {@link CassandraConsistencyLevel#QUORUM})
+     * @return {@code this} instance.
+     */
+    public HectorCassandraClientConfigurer readConsistencyLevel(CassandraConsistencyLevel readConsistencyLevel) {
+        this.readConsistencyLevel = readConsistencyLevel;
+        return this;
+    }
+
+    /**
+     * (Optional)
+     * @param writeConsistencyLevel The consistencly level used for write/update/remove operations.
+     * (default: {@link CassandraConsistencyLevel#QUORUM})
+     * @return
+     */
+    public HectorCassandraClientConfigurer writeConsistencyLevel(CassandraConsistencyLevel writeConsistencyLevel) {
+        this.writeConsistencyLevel = writeConsistencyLevel;
+        return this;
+    }
+    
+    /**
      * @return An instance of {@link HectorCassandraClient} matching this configurer
      * configuration.
      */
@@ -115,7 +139,13 @@ public class HectorCassandraClientConfigurer {
         config.setHosts(hosts);
         config.setPort(port);
 
-        return new HectorCassandraClient(config, keyspaceName, clusterName, columnFamilyGcGraceSeconds);
+        return new HectorCassandraClient(
+                config, 
+                keyspaceName, 
+                clusterName, 
+                columnFamilyGcGraceSeconds,
+                readConsistencyLevel,
+                writeConsistencyLevel);
     }
     
 }

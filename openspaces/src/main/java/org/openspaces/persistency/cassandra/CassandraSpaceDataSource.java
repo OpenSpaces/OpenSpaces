@@ -71,16 +71,19 @@ public class CassandraSpaceDataSource
     private final HectorCassandraClient             hectorClient;
 
     private final int                               batchLimit;
+    private final CassandraConsistencyLevel         readConsistencyLevel;
 
     private final Object                            lock         = new Object();
     private boolean                                 closed       = false;
+
     
     public CassandraSpaceDataSource(
             PropertyValueSerializer fixedPropertyValueSerializer,
             PropertyValueSerializer dynamicPropertyValueSerializer,
             CassandraDataSource cassandraDataSource,
             HectorCassandraClient hectorClient,
-            int minimumNumberOfConnections, int maximumNumberOfConnections,
+            int minimumNumberOfConnections, 
+            int maximumNumberOfConnections,
             int batchLimit) {
         
         if (hectorClient == null) {
@@ -108,6 +111,7 @@ public class CassandraSpaceDataSource
             throw new IllegalArgumentException("batchSize must be a positive number");
         }
         
+        this.readConsistencyLevel = hectorClient.getReadConsistencyLevel();
         this.batchLimit = batchLimit;
         this.hectorClient = hectorClient;
         this.hectorClient.createMetadataColumnFamilyColumnFamilyIfNecessary();
@@ -184,7 +188,8 @@ public class CassandraSpaceDataSource
                                                             connectionPool.getResource(), 
                                                             queryContext, 
                                                             iteratorMaxResults,
-                                                            actualBatchLimit);
+                                                            actualBatchLimit,
+                                                            readConsistencyLevel);
         }
     }
 
@@ -248,7 +253,8 @@ public class CassandraSpaceDataSource
         return new CassandraTokenRangeAwareInitialLoadDataIterator(mapper,
                                                                    columnFamilies,
                                                                    connectionPool.getResource(),
-                                                                   batchLimit);
+                                                                   batchLimit,
+                                                                   readConsistencyLevel);
     }
     
     /**
