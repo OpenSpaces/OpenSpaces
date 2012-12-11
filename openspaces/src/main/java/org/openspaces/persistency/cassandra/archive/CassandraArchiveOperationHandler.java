@@ -21,6 +21,8 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openspaces.archive.ArchiveOperationHandler;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.persistency.cassandra.HectorCassandraClient;
@@ -53,9 +55,10 @@ import com.gigaspaces.metadata.SpaceTypeDescriptorBuilder;
 public class CassandraArchiveOperationHandler implements ArchiveOperationHandler {
 
     private static final int DEFAULT_MAX_NESTING_LEVEL = 10;
-
 	private static final int DEFAULT_CASSANDRA_PORT = 9160;
-    
+
+	private final Log logger = LogFactory.getLog(this.getClass());
+	
     //injected (required)
     private GigaSpace gigaSpace;
     
@@ -72,6 +75,7 @@ public class CassandraArchiveOperationHandler implements ArchiveOperationHandler
     private HectorCassandraClient hectorClient;
     private DefaultSpaceDocumentColumnFamilyMapper mapper;
 
+    
 
     @Required
     public void setGigaSpace(GigaSpace gigaSpace) {
@@ -186,7 +190,9 @@ public class CassandraArchiveOperationHandler implements ArchiveOperationHandler
                                              false);
             rows.add(columnFamilyRow);
         }
-
+        if (logger.isTraceEnabled()) {
+            logger.trace("Writing to cassandra " + rows.size() + " objects");
+        }
         hectorClient.performBatchOperation(rows);
     }
 
