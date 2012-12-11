@@ -22,8 +22,6 @@ import org.openspaces.persistency.cassandra.meta.mapping.filter.FlattenedPropert
 import org.openspaces.persistency.cassandra.meta.types.dynamic.DynamicPropertyValueSerializer;
 import org.openspaces.persistency.cassandra.meta.types.dynamic.PropertyValueSerializer;
 
-import com.gigaspaces.document.SpaceDocument;
-
 /**
  * 
  *  A configurer for creating {@link CassandraSpaceSynchronizationEndpoint} instances.
@@ -33,24 +31,11 @@ import com.gigaspaces.document.SpaceDocument;
  */
 public class CassandraSpaceSynchronizationEndpointConfigurer {
 
-    private int                                   maxNestingLevel = 10;
     private PropertyValueSerializer               fixedPropertyValueSerializer;
     private PropertyValueSerializer               dynamicPropertyValueSerializer;
     private FlattenedPropertiesFilter             flattenedPropertiesFilter;
     private ColumnFamilyNameConverter             columnFamilyNameConverter;
     private HectorCassandraClient                 hectorClient;
-    
-    /**
-     * @param maxNestingLevel This property defines are deep does POJO and {@link SpaceDocument} introspection
-     * should go before deciding to stop digging deeper in this path. 
-     * i.e. If a POJO property is found at the max nesting level than it will be serialized as a blob.
-     * (default: 10)
-     * @return {@code this} instance.
-     */
-    public CassandraSpaceSynchronizationEndpointConfigurer maxNestingLevel(int maxNestingLevel) {
-        this.maxNestingLevel = maxNestingLevel;
-        return this;
-    }
     
     /**
      * Optional. If set, all fixed properties with a type that is not primitive nor a common 
@@ -122,12 +107,11 @@ public class CassandraSpaceSynchronizationEndpointConfigurer {
      * matching this configurer configuration.
      */
     public CassandraSpaceSynchronizationEndpoint create() {
-        return new CassandraSpaceSynchronizationEndpoint(maxNestingLevel,
-                                                               fixedPropertyValueSerializer,
-                                                               dynamicPropertyValueSerializer,
-                                                               flattenedPropertiesFilter,
-                                                               columnFamilyNameConverter,
-                                                               hectorClient);
+        return new CassandraSpaceSynchronizationEndpoint(fixedPropertyValueSerializer,
+                                                         dynamicPropertyValueSerializer,
+                                                         flattenedPropertiesFilter,
+                                                         columnFamilyNameConverter,
+                                                         hectorClient);
     }
     
 }

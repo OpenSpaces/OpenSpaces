@@ -17,7 +17,6 @@ package org.openspaces.persistency.cassandra.meta.mapping.filter;
 
 /**
  * An interface used to denote whether a given property should be flattened.
- * @see #shouldFlatten(String, String, Class, boolean)
  * 
  * @since 9.1.1
  * @author Dan Kilman
@@ -25,18 +24,8 @@ package org.openspaces.persistency.cassandra.meta.mapping.filter;
 public interface FlattenedPropertiesFilter {
     
     /**
-     * @param pathToProperty the path to this property. For example if the root entry contains a POJO property
-     *  named <code>x</code> and this pojo contains another POJO property named <code>y</code> and 
-     *  this property is part of the <code>y</code> property, then the path will be <code>x.y</code>
-     * @param propertyName the property name as it appears in its parent.
-     * @param propertyType the property type
-     * @param isDynamicProperty true if this property is not part of the static fixed properties
-     *  column family metadata
+     * @see {@link PropertyContext}
      * @return Should an attempt to flatten this entry be made.
      */
-    boolean shouldFlatten(
-            String pathToProperty, 
-            String propertyName, 
-            Class<?> propertyType, 
-            boolean isDynamicProperty);
+    boolean shouldFlatten(PropertyContext propertyContext);
 }

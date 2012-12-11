@@ -15,6 +15,7 @@ import org.openspaces.persistency.cassandra.CassandraSpaceSynchronizationEndpoin
 import org.openspaces.persistency.cassandra.HectorCassandraClient;
 import org.openspaces.persistency.cassandra.HectorCassandraClientConfigurer;
 import org.openspaces.persistency.cassandra.meta.mapping.filter.FlattenedPropertiesFilter;
+import org.openspaces.persistency.cassandra.meta.mapping.filter.PropertyContext;
 
 import com.gigaspaces.document.SpaceDocument;
 import com.gigaspaces.metadata.SpaceTypeDescriptorBuilder;
@@ -88,9 +89,8 @@ abstract public class AbstractCassandraTest
         CassandraSpaceSynchronizationEndpoint syncInterceptor = 
                 new CassandraSpaceSynchronizationEndpointConfigurer()
                     .flattenedPropertiesFilter(new FlattenedPropertiesFilter() {
-                        public boolean shouldFlatten(String pathToProperty, String propertyName,
-                                Class<?> propertyType, boolean isDynamicProperty) {
-                            return true;
+                        public boolean shouldFlatten(PropertyContext context) {
+                            return context.getCurrentNestingLevel() <= 10;
                         }
                     })
                     .hectorClient(hectorClient).create();

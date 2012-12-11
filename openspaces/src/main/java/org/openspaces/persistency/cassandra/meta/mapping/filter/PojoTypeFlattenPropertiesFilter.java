@@ -35,11 +35,8 @@ import com.gigaspaces.internal.metadata.pojo.PojoTypeInfoRepository;
  */
 public class PojoTypeFlattenPropertiesFilter implements FlattenedPropertiesFilter {
     @Override
-    public boolean shouldFlatten(
-            String pathToProperty, 
-            String propertyName, 
-            Class<?> propertyType, 
-            boolean isDynamicProperty) {
+    public boolean shouldFlatten(PropertyContext propertyContext) {
+        Class<?> propertyType = propertyContext.getType();
         // quick reject
         boolean isCandidate = !SerializerProvider.isCommonJavaType(propertyType) &&
                               !propertyType.isSynthetic() &&

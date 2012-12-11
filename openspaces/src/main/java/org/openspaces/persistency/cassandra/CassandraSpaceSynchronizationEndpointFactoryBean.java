@@ -39,13 +39,6 @@ public class CassandraSpaceSynchronizationEndpointFactoryBean implements
     private CassandraSpaceSynchronizationEndpoint cassandraSynchronizationEndpointInterceptor;
     
     /**
-     * @see CassandraSpaceSynchronizationEndpointConfigurer#maxNestingLevel(int)
-     */
-    public void setMaxNestingLevel(int maxNestingLevel) {
-        configurer.maxNestingLevel(maxNestingLevel);
-    }
-
-    /**
      * @see CassandraSpaceSynchronizationEndpointConfigurer#fixedPropertyValueSerializer(PropertyValueSerializer)
      */
     public void setFixedPropertyValueSerializer(

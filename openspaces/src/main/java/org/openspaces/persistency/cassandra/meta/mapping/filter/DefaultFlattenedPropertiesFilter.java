@@ -24,10 +24,12 @@ package org.openspaces.persistency.cassandra.meta.mapping.filter;
  */
 public class DefaultFlattenedPropertiesFilter implements FlattenedPropertiesFilter {
 
+    private static final int MAX_NESTING_LEVEL = 10;
+    
     @Override
-    public boolean shouldFlatten(String pathToProperty, String propertyName,
-            Class<?> propertyType, boolean isDynamicProperty) {
-        return !isDynamicProperty;
+    public boolean shouldFlatten(PropertyContext propertyContext) {
+        return !propertyContext.isDynamic() && 
+               !(propertyContext.getCurrentNestingLevel() > MAX_NESTING_LEVEL);
     }
 
 }

@@ -4,7 +4,6 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import junit.framework.Assert;
-
 import me.prettyprint.cassandra.serializers.ObjectSerializer;
 
 import org.apache.cassandra.cql.jdbc.CassandraDataSource;
@@ -17,6 +16,7 @@ import org.openspaces.persistency.cassandra.CassandraSpaceDataSource;
 import org.openspaces.persistency.cassandra.CassandraSpaceSynchronizationEndpoint;
 import org.openspaces.persistency.cassandra.HectorCassandraClient;
 import org.openspaces.persistency.cassandra.meta.mapping.filter.FlattenedPropertiesFilter;
+import org.openspaces.persistency.cassandra.meta.mapping.filter.PropertyContext;
 import org.openspaces.persistency.cassandra.meta.types.dynamic.PropertyValueSerializer;
 
 import com.gigaspaces.datasource.DataIterator;
@@ -99,8 +99,7 @@ public class CustomSerializersCassandraTest extends AbstractCassandraTest
     
     private final FlattenedPropertiesFilter _simpleFilter = new FlattenedPropertiesFilter()
     {
-        public boolean shouldFlatten(String pathToProperty, String propertyName,
-                Class<?> propertyType, boolean isDynamicProperty)
+        public boolean shouldFlatten(PropertyContext context)
         {
             return false;
         }
@@ -125,12 +124,11 @@ public class CustomSerializersCassandraTest extends AbstractCassandraTest
             HectorCassandraClient hectorClient)
     {
         CassandraSpaceSynchronizationEndpoint syncInterceptor = 
-                new CassandraSpaceSynchronizationEndpoint(10,
-                                                                _simpleSerializer,
-                                                                _simpleSerializer,
-                                                                _simpleFilter,
-                                                                null,
-                                                                hectorClient);
+                new CassandraSpaceSynchronizationEndpoint(_simpleSerializer,
+                                                          _simpleSerializer,
+                                                          _simpleFilter,
+                                                          null,
+                                                          hectorClient);
         return syncInterceptor;
     }
     

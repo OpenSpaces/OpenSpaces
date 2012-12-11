@@ -53,12 +53,10 @@ public class DefaultSpaceDocumentColumnFamilyMapper
             PropertyValueSerializer fixedPropertyValueSerializer, 
             PropertyValueSerializer dynamicPropertyValueSerializer, 
             FlattenedPropertiesFilter flattenePropertiesFilter,
-            ColumnFamilyNameConverter columnFamilyNameConverter,
-            int maxNestingLevel) {
+            ColumnFamilyNameConverter columnFamilyNameConverter) {
         typeNodeIntrospector = new TypeNodeIntrospector(fixedPropertyValueSerializer,
                                                          dynamicPropertyValueSerializer,
-                                                         flattenePropertiesFilter, 
-                                                         maxNestingLevel);
+                                                         flattenePropertiesFilter);
         
         if (columnFamilyNameConverter == null) {
             this.columnFamilyNameConverter = new DefaultColumnFamilyNameConverter();
@@ -74,8 +72,7 @@ public class DefaultSpaceDocumentColumnFamilyMapper
         this(fixedPropertyValueSerializer, 
              dynamicPropertyValueSerializer, 
              null, 
-             null, 
-             -1);
+             null);
     }
 
     @Override

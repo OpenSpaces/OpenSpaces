@@ -56,7 +56,7 @@ public class CassandraSpaceSynchronizationEndpoint
     private final SpaceDocumentColumnFamilyMapper mapper;
     private final HectorCassandraClient           hectorClient;
 
-    public CassandraSpaceSynchronizationEndpoint(int maxNestingLevel,
+    public CassandraSpaceSynchronizationEndpoint(
             PropertyValueSerializer fixedPropertyValueSerializer,
             PropertyValueSerializer dynamicPropertyValueSerializer,
             FlattenedPropertiesFilter flattenedPropertiesFilter,
@@ -73,8 +73,7 @@ public class CassandraSpaceSynchronizationEndpoint
         mapper = new DefaultSpaceDocumentColumnFamilyMapper(fixedPropertyValueSerializer,
                                                             dynamicPropertyValueSerializer,                                                             
                                                             flattenedPropertiesFilter, 
-                                                            columnFamilyNameConverter,
-                                                            maxNestingLevel);
+                                                            columnFamilyNameConverter);
     }
 
     @Override

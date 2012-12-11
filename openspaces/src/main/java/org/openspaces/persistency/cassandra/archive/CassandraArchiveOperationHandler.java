@@ -55,15 +55,12 @@ import com.gigaspaces.metadata.SpaceTypeDescriptorBuilder;
  */
 public class CassandraArchiveOperationHandler implements ArchiveOperationHandler {
 
-    private static final int DEFAULT_MAX_NESTING_LEVEL = 10;
-
 	private final Log logger = LogFactory.getLog(this.getClass());
-	
+
     //injected (required)
     private GigaSpace gigaSpace;
     
     //injected (overrides default value)
-    private Integer maxNestingLevel;
     private PropertyValueSerializer fixedPropertyValueSerializer;
     private FlattenedPropertiesFilter flattenedPropertiesFilter;
     private ColumnFamilyNameConverter columnFamilyNameConverter;
@@ -78,10 +75,6 @@ public class CassandraArchiveOperationHandler implements ArchiveOperationHandler
     @Required
     public void setGigaSpace(GigaSpace gigaSpace) {
         this.gigaSpace = gigaSpace;
-    }
-
-    public void setMaxNestingLevel(Integer maxNestingLevel) {
-        this.maxNestingLevel = maxNestingLevel;
     }
 
     /**
@@ -132,19 +125,14 @@ public class CassandraArchiveOperationHandler implements ArchiveOperationHandler
 	}
 
 	private void createMapper() {
-		if (maxNestingLevel == null) {
-            //default value
-            maxNestingLevel = DEFAULT_MAX_NESTING_LEVEL;
-        }
-        
         final PropertyValueSerializer dynamicPropertyValueSerializer = null;
         
         mapper = new DefaultSpaceDocumentColumnFamilyMapper(
         		fixedPropertyValueSerializer, // can be null
         		dynamicPropertyValueSerializer, //not used, can be null                                         
                 flattenedPropertiesFilter, // can be null
-                columnFamilyNameConverter, // can be null
-                maxNestingLevel);
+                columnFamilyNameConverter // can be null
+        );
 	}
     
     @PreDestroy

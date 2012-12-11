@@ -15,13 +15,16 @@
  *******************************************************************************/
 package org.openspaces.persistency.cassandra.meta.mapping.node;
 
+import org.openspaces.persistency.cassandra.meta.mapping.filter.FlattenedPropertiesFilter;
+import org.openspaces.persistency.cassandra.meta.mapping.filter.PropertyContext;
+
 /**
  * Context used during type introspection and during read/write operations
  * 
  * @since 9.1.1
  * @author Dan Kilman
  */
-public class TypeNodeContext {
+public class TypeNodeContext implements PropertyContext {
     
     private final TypeNodeIntrospector typeNodeIntrospector;
     private final boolean              useDynamicPropertySerializerForDynamicColumns;
@@ -29,6 +32,9 @@ public class TypeNodeContext {
     private boolean                    isDynamic;
     private int                        currentNestingLevel = 0;
 
+    private String                     currentPropertyPath = null;
+    private String                     currentPropertyName = null;
+    private Class<?>                   currentPropertyType = null;
 
     public TypeNodeContext() {
         this(null, true);
@@ -45,6 +51,7 @@ public class TypeNodeContext {
     /**
      * @return Current nesting level (used during type introspection and during write operations).
      */
+    @Override
     public int getCurrentNestingLevel() {
         return currentNestingLevel; 
     }
@@ -64,17 +71,10 @@ public class TypeNodeContext {
     }
 
     /**
-     * @return <code>true</code> if the current nesting level is bigger than
-     * the configured maximum allowed nesting level.
-     */
-    public boolean surpassedLastAllowedNestingLevel() {
-        return currentNestingLevel > typeNodeIntrospector.getMaxNestingLevel();
-    }
-    
-    /**
      * @return Whether the current location in the type introspaction hierarcy is a descendent of a dynamic type node
      * property.
      */
+    @Override
     public boolean isDynamic() {
         return isDynamic;
     }
@@ -98,5 +98,38 @@ public class TypeNodeContext {
      */
     public boolean isUseDynamicPropertySerializerForDynamicColumns() {
         return useDynamicPropertySerializerForDynamicColumns;
+    }
+
+    /**
+     * Sets the current property context information (used in {@link FlattenedPropertiesFilter})
+     */
+    public void setCurrentPropertyContext(String propertyPath, String propertyName, Class<?> propertyType) {
+        this.currentPropertyPath = propertyPath;;
+        this.currentPropertyName = propertyName;
+        this.currentPropertyType = propertyType;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.openspaces.persistency.cassandra.meta.mapping.filter.PropertyContext#getPath()
+     */
+    @Override
+    public String getPath() {
+        return currentPropertyPath;
+    }
+
+    /* (non-Javadoc)
+     * @see org.openspaces.persistency.cassandra.meta.mapping.filter.PropertyContext#getName()
+     */
+    @Override
+    public String getName() {
+        return currentPropertyName;
+    }
+
+    /* (non-Javadoc)
+     * @see org.openspaces.persistency.cassandra.meta.mapping.filter.PropertyContext#getType()
+     */
+    @Override
+    public Class<?> getType() {
+        return currentPropertyType;
     }
 }

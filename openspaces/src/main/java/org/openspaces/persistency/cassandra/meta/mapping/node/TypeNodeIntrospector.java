@@ -41,8 +41,6 @@ import com.gigaspaces.metadata.SpaceTypeDescriptor;
  */
 public class TypeNodeIntrospector {
     
-    private static final int                DEFAULT_MAX_NESTING_LEVEL = 10;
-
     private final CassandraDocumentObjectConverter documentConverter = new CassandraDocumentObjectConverter();
     
     private final ProcedureCache procedureCache = new ProcedureCache();
@@ -52,8 +50,6 @@ public class TypeNodeIntrospector {
 
     private final FlattenedPropertiesFilter flattenedPropertiesFilter;
 
-    private final int maxNestingLevel;
-
     private final Serializer<Object> fixedPropertyValueSerializer;
 
     private final Serializer<Object> dynamicPropertyValueSerializer;
@@ -61,8 +57,7 @@ public class TypeNodeIntrospector {
     public TypeNodeIntrospector(
             PropertyValueSerializer fixedPropertyValueSerializer, 
             PropertyValueSerializer dynamicPropertyValueSerializer, 
-            FlattenedPropertiesFilter flattenedPropertiesFilter,
-            int maxNestingLevel) {
+            FlattenedPropertiesFilter flattenedPropertiesFilter) {
         
         // if this is null it means we infer the serializer for type
         // using SerializerProvider
@@ -83,12 +78,6 @@ public class TypeNodeIntrospector {
         } else {
             this.flattenedPropertiesFilter = flattenedPropertiesFilter;
         }
-
-        if (maxNestingLevel <= 0) {
-            this.maxNestingLevel = DEFAULT_MAX_NESTING_LEVEL;
-        } else {
-            this.maxNestingLevel = maxNestingLevel;
-        }
     }
 
     public Serializer<Object> getDynamicPropertyValueSerializer() {
@@ -97,10 +86,6 @@ public class TypeNodeIntrospector {
 
     public Serializer<Object> getFixedPropertyValueSerializer() {
         return fixedPropertyValueSerializer;
-    }
-    
-    public int getMaxNestingLevel() {
-        return maxNestingLevel;
     }
     
     public TopLevelTypeNode introspectTypeDescriptor(SpaceTypeDescriptor typeDescriptor) {
@@ -139,22 +124,15 @@ public class TypeNodeIntrospector {
     }
     
     public TypeNode introspect(String parentFullName, String name, Object value, TypeNodeContext context) {
-        final boolean shouldFlatten = 
-                !context.surpassedLastAllowedNestingLevel() &&
-                flattenedPropertiesFilter.shouldFlatten(parentFullName,
-                                                         name,
-                                                         value.getClass(),
-                                                         context.isDynamic());
+        context.setCurrentPropertyContext(parentFullName, name, value.getClass());
+        final boolean shouldFlatten = flattenedPropertiesFilter.shouldFlatten(context);
 
         if (shouldFlatten && value instanceof SpaceDocument) {
             return introspectSpaceDocument(parentFullName,
                                           name,
                                           ((SpaceDocument) value).getTypeName(),
                                           context);
-        } else if (shouldFlatten && pojoTypeFilter.shouldFlatten(parentFullName,
-                                                               name,
-                                                               value.getClass(),
-                                                               context.isDynamic())) {
+        } else if (shouldFlatten && pojoTypeFilter.shouldFlatten(context)) {
                 return introspectPojo(parentFullName,
                                       name,
                                       value.getClass(),
@@ -166,19 +144,12 @@ public class TypeNodeIntrospector {
 
     public TypeNode introspect(String parentFullName, String name, Class<?> type, TypeNodeContext context)
     {
-        final boolean shouldFlatten = 
-                !context.surpassedLastAllowedNestingLevel() &&
-                flattenedPropertiesFilter.shouldFlatten(parentFullName,
-                                                         name,
-                                                         type,
-                                                         context.isDynamic());
+        context.setCurrentPropertyContext(parentFullName, name, type);
+        final boolean shouldFlatten = flattenedPropertiesFilter.shouldFlatten(context);
         
         if (shouldFlatten && SpaceDocument.class.isAssignableFrom(type)) {
             return introspectSpaceDocument(parentFullName, name, type, context);
-        } else if (shouldFlatten && pojoTypeFilter.shouldFlatten(parentFullName,
-                                                               name,
-                                                               type,
-                                                               context.isDynamic())) {
+        } else if (shouldFlatten && pojoTypeFilter.shouldFlatten(context)) {
                 return introspectPojo(parentFullName, name, type, context);
         } else {
                 return introspectLeafTypeNode(parentFullName,
