@@ -162,11 +162,8 @@ public class SpaceDocumentTopLevelTypeNode extends SpaceDocumentTypeNode
                 try {
                     value = createPojoFromTypeName(compoundProperties, columnName, typeName, context);
                 } catch (Exception e) {
-                    if (logger.isWarnEnabled()) {
-                        logger.warn("could not convert " + typeName + " to pojo. " +
-                        		"falling back to a document based instance");
-                    }
-                    value = createDocumentFromTypeName(compoundProperties, columnName, typeName);
+                    throw new SpaceCassandraTypeIntrospectionException("Could not create new instance for type name: " +
+                            typeName, e);
                 }
             }
         }
