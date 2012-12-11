@@ -246,9 +246,9 @@ public class SpaceDocumentTopLevelTypeNode extends SpaceDocumentTypeNode
                         }
                     }
                     
-                    // TODO CAS: Should we allow such fallback or throw an exception
                     if (currentParent == null) {
-                        currentParent = new HashMap<String, Object>();
+                        throw new SpaceCassandraTypeIntrospectionException("Could not find value parent node for " +
+                        		"path: " + currentPath.toString(), null);
                     }
                         
                     compoundProperties.put(currentPath.toString(), currentParent);
