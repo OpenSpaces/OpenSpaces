@@ -21,7 +21,6 @@ import com.gigaspaces.logger.GSLogConfigLoader;
     DifferentTypesQueryCassandraTest.class,
     BasicCQLQueriesCassandraTest.class,
     VeryLongTypeNameCassandraTest.class,
-//    MaxResultsCassandraTest.class,
     WriteAndRemoveCassandraTest.class,
     CyclicReferencePropertyCassandraTest.class,
     ColumnFamilyMetadataSpaceTypeDescriptorConversionTest.class,

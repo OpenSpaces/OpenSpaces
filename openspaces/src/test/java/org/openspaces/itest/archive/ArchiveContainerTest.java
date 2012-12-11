@@ -51,7 +51,7 @@ import com.j_spaces.core.IJSpace;
  * @author Itai Frenkel
  * @since 9.1.1
  */
-public class TestArchiveContainer {
+public class ArchiveContainerTest {
 
     private final Log logger = LogFactory.getLog(this.getClass());
     
@@ -135,7 +135,7 @@ public class TestArchiveContainer {
      */
     @Test
     public void testConfigurer() throws Exception {
-        configurerTest(TemplateToTest.TEMPLATE);
+        configurerTest(TestTemplate.TEMPLATE);
     }
 
     /**
@@ -144,7 +144,7 @@ public class TestArchiveContainer {
     @Test
     public void testConfigurerAtomic() throws Exception {
         final boolean atomic = true;
-        configurerTest(TemplateToTest.TEMPLATE, atomic);
+        configurerTest(TestTemplate.TEMPLATE, atomic);
     }
 
     /**
@@ -155,7 +155,7 @@ public class TestArchiveContainer {
         final boolean atomic = true;
         final boolean remote = false;
         final int batchSize = 2;
-        configurerTest(TemplateToTest.TEMPLATE, atomic, remote, batchSize);
+        configurerTest(TestTemplate.TEMPLATE, atomic, remote, batchSize);
     }
     
     /**
@@ -163,7 +163,7 @@ public class TestArchiveContainer {
      */
     @Test
     public void testConfigurerDynamicTemplateInterface() throws Exception {
-        configurerTest(TemplateToTest.DYNAMIC_TEMPLATE_INTERFACE);
+        configurerTest(TestTemplate.DYNAMIC_TEMPLATE_INTERFACE);
     }
     
     /**
@@ -171,7 +171,7 @@ public class TestArchiveContainer {
      */
     @Test
     public void testConfigurerDynamicTemplateAnnotation() throws Exception {
-        configurerTest(TemplateToTest.DYNAMIC_TEMPLATE_ANNOTATION);
+        configurerTest(TestTemplate.DYNAMIC_TEMPLATE_ANNOTATION);
     }
     
     /**
@@ -179,46 +179,46 @@ public class TestArchiveContainer {
      */
     @Test
     public void testConfigurerDynamicTemplateMethod() throws Exception {
-        configurerTest(TemplateToTest.DYNAMIC_TEMPLATE_METHOD);
+        configurerTest(TestTemplate.DYNAMIC_TEMPLATE_METHOD);
     }
     
     @Test
     public void testConfigurerClustered() throws Exception {
         final boolean atomic = false;
         final boolean clustered = true;
-        configurerTest(TemplateToTest.TEMPLATE, atomic, clustered);
+        configurerTest(TestTemplate.TEMPLATE, atomic, clustered);
     }
     
     @Test
     public void testConfigurerAtomicClustered() throws Exception {
         final boolean atomic = true;
         final boolean clustered = true;
-        configurerTest(TemplateToTest.TEMPLATE, atomic, clustered);
+        configurerTest(TestTemplate.TEMPLATE, atomic, clustered);
     }
     
-    enum TemplateToTest {
+    enum TestTemplate {
         TEMPLATE,
         DYNAMIC_TEMPLATE_INTERFACE,
         DYNAMIC_TEMPLATE_ANNOTATION,
         DYNAMIC_TEMPLATE_METHOD
     }
     
-    private void configurerTest(TemplateToTest templateToTest) throws Exception {
+    private void configurerTest(TestTemplate templateToTest) throws Exception {
         final boolean atomic = false;
         configurerTest(templateToTest, atomic);
     }
     
-    private void configurerTest(TemplateToTest templateToTest, boolean atomic) throws Exception {
+    private void configurerTest(TestTemplate templateToTest, boolean atomic) throws Exception {
         final boolean remote = false;
         configurerTest(templateToTest, atomic, remote);
     }
     
-    private void configurerTest(TemplateToTest templateToTest, boolean atomic, boolean remote) throws Exception {
+    private void configurerTest(TestTemplate templateToTest, boolean atomic, boolean remote) throws Exception {
         final Integer batchSize = null;
         configurerTest(templateToTest, atomic, remote, batchSize);
     }
     
-    private void configurerTest(TemplateToTest templateToTest, boolean atomic, boolean clustered, Integer batchSize) throws Exception {
+    private void configurerTest(TestTemplate templateToTest, boolean atomic, boolean clustered, Integer batchSize) throws Exception {
        
         UrlSpaceConfigurer urlSpaceConfigurer = new UrlSpaceConfigurer("/./space").clusterInfo(new ClusterInfo("partitioned-sync2backup",1,null,1,0));
         UrlSpaceConfigurer remoteUrlSpaceConfigurer = new UrlSpaceConfigurer("jini://*/*/space");
@@ -285,7 +285,7 @@ public class TestArchiveContainer {
         }
     }
     
-    private void configureTemplate(ArchivePollingContainerConfigurer containerConfigurer, TemplateToTest templateToTest) {
+    private void configureTemplate(ArchivePollingContainerConfigurer containerConfigurer, TestTemplate templateToTest) {
         switch (templateToTest) {
         case TEMPLATE:
             // template is called once
