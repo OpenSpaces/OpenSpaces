@@ -67,7 +67,7 @@ public class CassandraTokenRangeJDBCDataIterator implements DataIterator<Object>
     
     private Object                                currentLastToken;
     private SpaceDocument                         currentResultInResultSet;
-    private int                                   currentCount       = 0;
+    private int                                   currentTotalCount       = 0;
     
     public CassandraTokenRangeJDBCDataIterator(
             SpaceDocumentColumnFamilyMapper mapper, 
@@ -154,13 +154,11 @@ public class CassandraTokenRangeJDBCDataIterator implements DataIterator<Object>
     
     private SpaceDocument getNextValidDocument() throws SQLException {
         while (resultSet.next()) {
+            currentTotalCount++;
             SpaceDocument document = getNextDocument();
+            Object currentTokenValue = document.getProperty(columnFamilyMetadata.getKeyName());
+            currentLastToken = currentTokenValue;
             if (document.getProperties().size() > 1) {
-                // token should never be null!
-                Object currentTokenValue = document.getProperty(columnFamilyMetadata.getKeyName());
-
-                currentLastToken = currentTokenValue;
-                
                 return document;
             }
         }
@@ -174,13 +172,9 @@ public class CassandraTokenRangeJDBCDataIterator implements DataIterator<Object>
         if (currentResultInResultSet != null) {
             result = currentResultInResultSet;
             currentResultInResultSet = null;
-            currentCount++;
         } else {
             try {
                 result = getNextValidDocument();
-                if (result != null) {
-                    currentCount++;
-                }
             } catch (SQLException e) {
                 throw new SpaceCassandraQueryExecutionException("Failed retrieving next entry", e);
             }
@@ -311,12 +305,12 @@ public class CassandraTokenRangeJDBCDataIterator implements DataIterator<Object>
         return currentLastToken;
     }
     
-    public int getCurrentCount() {
-        return currentCount;
-    }
-
     public int getLimit() {
         return limit;
+    }
+
+    public int getCurrentTotalCount() {
+        return currentTotalCount;
     }
 
     private static class PreparedStatementData {

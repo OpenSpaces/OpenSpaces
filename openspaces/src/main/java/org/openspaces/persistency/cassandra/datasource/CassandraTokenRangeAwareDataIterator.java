@@ -92,7 +92,7 @@ public class CassandraTokenRangeAwareDataIterator implements DataIterator<Object
         } else {
             currentLastToken = currentIterator.getLastToken();
             if (currentLastToken == null ||
-                currentIterator.getCurrentCount() < currentIterator.getLimit()) {
+                currentIterator.getCurrentTotalCount() < currentIterator.getLimit()) {
                 // finish iteration condition
                 return null;
             } else {
