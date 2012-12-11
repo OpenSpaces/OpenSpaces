@@ -21,7 +21,7 @@
 
 	<os-archive:cassandra-archive-handler id="cassandraArchiveHandler" 
 		giga-space="gigaSpace"
-		host="${cassandra.host}"
+		hosts="${cassandra.hosts}"
 		port="${cassandra.port}"  
 		keyspace="${cassandra.keyspace}"
 	/>

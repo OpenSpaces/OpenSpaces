@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import org.openspaces.archive.ArchiveOperationHandler;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.persistency.cassandra.HectorCassandraClient;
+import org.openspaces.persistency.cassandra.HectorCassandraClientConfigurer;
 import org.openspaces.persistency.cassandra.error.SpaceCassandraException;
 import org.openspaces.persistency.cassandra.meta.ColumnFamilyMetadata;
 import org.openspaces.persistency.cassandra.meta.conversion.ColumnFamilyNameConverter;
@@ -55,7 +56,6 @@ import com.gigaspaces.metadata.SpaceTypeDescriptorBuilder;
 public class CassandraArchiveOperationHandler implements ArchiveOperationHandler {
 
     private static final int DEFAULT_MAX_NESTING_LEVEL = 10;
-	private static final int DEFAULT_CASSANDRA_PORT = 9160;
 
 	private final Log logger = LogFactory.getLog(this.getClass());
 	
@@ -67,15 +67,13 @@ public class CassandraArchiveOperationHandler implements ArchiveOperationHandler
     private PropertyValueSerializer fixedPropertyValueSerializer;
     private FlattenedPropertiesFilter flattenedPropertiesFilter;
     private ColumnFamilyNameConverter columnFamilyNameConverter;
-    private String host;
+    private String hosts;
     private Integer port;
     private String keyspace;
     
     //lifecycle objects
     private HectorCassandraClient hectorClient;
     private DefaultSpaceDocumentColumnFamilyMapper mapper;
-
-    
 
     @Required
     public void setGigaSpace(GigaSpace gigaSpace) {
@@ -86,11 +84,20 @@ public class CassandraArchiveOperationHandler implements ArchiveOperationHandler
         this.maxNestingLevel = maxNestingLevel;
     }
 
+    /**
+     * @param hosts - 
+     *      Comma separated list of Cassandra servers (ipaddresses or hostnames).
+     */
     @Required
-	public void setHost(String host) {
-		this.host = host;
+	public void setHosts(String hosts) {
+		this.hosts = hosts;
 	}
 
+    /**
+     * @param port - 
+     *  Cassandra server ports. Assumes same port for all servers.
+     *  null means default port is used.
+     */
 	public void setPort(Integer port) {
 		this.port = port;
 	}
@@ -113,19 +120,15 @@ public class CassandraArchiveOperationHandler implements ArchiveOperationHandler
     }
 
 	private void createHectorClient() {
-
-		if (port == null) {
-			port = DEFAULT_CASSANDRA_PORT;
-		}
-
-		// passing null so default value set by the Cassandra cluster
-		// will be used.
-		Integer columnFamilyGcGraceSeconds = null;
-		
-		//This is a unique key used by hector to cache client instances
-		//cannot use ":" since also used as JMX names
-		final String hectorClusterName = ""+host+"_"+port; 
-        hectorClient = new HectorCassandraClient(host, port, keyspace, hectorClusterName, columnFamilyGcGraceSeconds);
+        
+        String clusterName = createHectorDefaultClusterName(hosts, port);
+        hectorClient = 
+            new HectorCassandraClientConfigurer()
+            .hosts(hosts)
+            .port(port)
+            .keyspaceName(keyspace)
+            .clusterName(clusterName)
+            .create();
 	}
 
 	private void createMapper() {
@@ -221,5 +224,12 @@ public class CassandraArchiveOperationHandler implements ArchiveOperationHandler
     @Override
     public boolean supportsBatchArchiving() {
         return true;
+    }
+
+    
+    private static String createHectorDefaultClusterName(String hosts, Integer port) {
+        //This is a unique key used by hector to cache client instances
+        //cannot use special chars since also used as JMX name
+        return hosts.replace(",","_").replace(" ","") + (port == null ? "" : port);
     }
 }

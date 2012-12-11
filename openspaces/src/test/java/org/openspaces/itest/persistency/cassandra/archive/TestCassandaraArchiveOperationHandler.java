@@ -120,7 +120,7 @@ public class TestCassandaraArchiveOperationHandler {
             archiveHandler = 
             	new CassandraArchiveOperationHandlerConfigurer()
 	            .keyspace(server.getKeySpaceName())
-	        	.host(server.getHost())
+	        	.hosts(server.getHost())
 	        	.port(server.getPort())
 	        	.gigaSpace(gigaSpace)
 	            .create();
@@ -146,7 +146,7 @@ public class TestCassandaraArchiveOperationHandler {
     	PropertyPlaceholderConfigurer propertyConfigurer = new PropertyPlaceholderConfigurer();
     	Properties properties = new Properties();
     	properties.put("cassandra.keyspace", server.getKeySpaceName());
-    	properties.put("cassandra.host", server.getHost());
+    	properties.put("cassandra.hosts", server.getHost());
     	properties.put("cassandra.port", ""+server.getPort());
     	propertyConfigurer.setProperties(properties);
     	context.addBeanFactoryPostProcessor(propertyConfigurer);

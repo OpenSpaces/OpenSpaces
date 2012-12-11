@@ -29,6 +29,7 @@ import me.prettyprint.cassandra.model.ConfigurableConsistencyLevel;
 import me.prettyprint.cassandra.serializers.ObjectSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.service.BatchSizeHint;
+import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.cassandra.service.ThriftCfDef;
 import me.prettyprint.cassandra.service.template.ColumnFamilyResult;
 import me.prettyprint.cassandra.service.template.ColumnFamilyTemplate;
@@ -88,31 +89,38 @@ public class HectorCassandraClient {
     private final Object                                                      lock            = new Object();
     private boolean                                                           closed          = false;
     
-    public HectorCassandraClient(String host, int port, String keyspaceName, String clusterName, Integer columnFamilyGcGraceSeconds) {
+    /**
+     * @see HectorCassandraClientConfigurer#create()
+     */
+    public HectorCassandraClient(
+            final CassandraHostConfigurator config, 
+            final String keyspaceName, 
+            final String clusterName,
+            final Integer columnFamilyGcGraceSeconds) {
+
+        if (config == null) {
+            throw new IllegalArgumentException("config cannot be null");
+        }
         
-        if (host == null) {
-            throw new IllegalArgumentException("host must be set");
-        }
-        if (port <= 0) {
-            throw new IllegalArgumentException("port must be positive number");
-        }
         if (keyspaceName == null) {
             throw new IllegalArgumentException("keyspacename must be set");
         }
+
         if (columnFamilyGcGraceSeconds != null && columnFamilyGcGraceSeconds < 0) {
             throw new IllegalArgumentException("columnFamilyGcGraceSeconds must be a non negative");
         }
         
-        if (clusterName == null) {
-            clusterName = "cluster";
-        }
-        
         this.columnFamilyGcGraceSeconds = columnFamilyGcGraceSeconds;
-        this.cluster = HFactory.getOrCreateCluster(clusterName, host + ":" + port);
-        this.keyspace = HFactory.createKeyspace(keyspaceName, cluster, createConsistencyLevelPolicy());
+        
+        String hectorClusterName = clusterName;
+        if (hectorClusterName == null) {
+            hectorClusterName = "cluster";
+        }
+        cluster = HFactory.getOrCreateCluster(hectorClusterName, config);
+        keyspace = HFactory.createKeyspace(keyspaceName, cluster, createConsistencyLevelPolicy());
         validateKeyspaceExists();
     }
-
+    
     private ConsistencyLevelPolicy createConsistencyLevelPolicy() {
         ConfigurableConsistencyLevel policy = new ConfigurableConsistencyLevel();
         Map<String, HConsistencyLevel> mappping = new HashMap<String, HConsistencyLevel>();
@@ -565,5 +573,4 @@ public class HectorCassandraClient {
     public Map<String,ColumnFamilyMetadata> getColumnFamiliesMetadata() {
         return metadataCache.getColumnFamiliesMetadata();
     }
-
 }

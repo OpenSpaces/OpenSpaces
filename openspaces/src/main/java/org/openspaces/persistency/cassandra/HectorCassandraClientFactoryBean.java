@@ -31,10 +31,10 @@ public class HectorCassandraClientFactoryBean implements
     private HectorCassandraClient hectorCassandraClient;
     
     /**
-     * @see HectorCassandraClientConfigurer#host(String)
+     * @see HectorCassandraClientConfigurer#hosts(String)
      */
-    public void setHost(String host) {
-        configurer.host(host);
+    public void setHosts(String hosts) {
+        configurer.hosts(hosts);
     }
     
     /**

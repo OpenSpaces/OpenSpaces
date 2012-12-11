@@ -240,28 +240,28 @@
 	                            </tool:annotation>
 	                        </xsd:appinfo>
 	                        <xsd:documentation>
-	                            The GigaSpace which controls which Space this archive handler will read entry type metadata from.
+	                            The GigaSpace which controls which Space this archive handler will read entry type metadata from. Required.
 	                        </xsd:documentation>
 	                    </xsd:annotation>
 	                </xsd:attribute>
 	                <xsd:attribute name="keyspace" type="xsd:string" use="required">
 			            <xsd:annotation>
 			                <xsd:documentation>
-			                    Specify the cassandra keyspace name
+			                    Specify the cassandra keyspace name. Required.
 			                </xsd:documentation>
 			            </xsd:annotation>
         			</xsd:attribute>
-        			<xsd:attribute name="host" type="xsd:string" use="required">
+        			<xsd:attribute name="hosts" type="xsd:string" use="required">
 			            <xsd:annotation>
 			                <xsd:documentation>
-			                    Specify the cassandra host name or ip address.
+			                    Specify comma delimited list of cassandra host names or ip addresses.
 			                </xsd:documentation>
 			            </xsd:annotation>
         			</xsd:attribute>
         			<xsd:attribute name="port" type="xsd:string" use="optional">
 			            <xsd:annotation>
 			                <xsd:documentation>
-			                    Specify the cassandra port.
+			                    Specify the cassandra port. Assumes same port for all cassandra hosts. If not specified uses default cassandra port.
 			                </xsd:documentation>
 			            </xsd:annotation>
         			</xsd:attribute>

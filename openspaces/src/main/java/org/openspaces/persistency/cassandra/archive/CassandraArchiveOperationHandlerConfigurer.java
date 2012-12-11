@@ -20,10 +20,10 @@ public class CassandraArchiveOperationHandlerConfigurer {
 	}
 
 	/**
-	 * @see CassandraArchiveOperationHandler#setHost(String)
+	 * @see CassandraArchiveOperationHandler#setHosts(String)
 	 */
-	public CassandraArchiveOperationHandlerConfigurer host(String host) {
-		handler.setHost(host);
+	public CassandraArchiveOperationHandlerConfigurer hosts(String hosts) {
+		handler.setHosts(hosts);
 		return this;
 	}
 

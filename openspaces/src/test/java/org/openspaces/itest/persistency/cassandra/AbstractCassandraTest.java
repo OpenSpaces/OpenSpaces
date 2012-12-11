@@ -13,6 +13,7 @@ import org.openspaces.persistency.cassandra.CassandraSpaceDataSource;
 import org.openspaces.persistency.cassandra.CassandraSpaceSynchronizationEndpoint;
 import org.openspaces.persistency.cassandra.CassandraSpaceSynchronizationEndpointConfigurer;
 import org.openspaces.persistency.cassandra.HectorCassandraClient;
+import org.openspaces.persistency.cassandra.HectorCassandraClientConfigurer;
 import org.openspaces.persistency.cassandra.meta.mapping.filter.FlattenedPropertiesFilter;
 
 import com.gigaspaces.document.SpaceDocument;
@@ -70,11 +71,14 @@ abstract public class AbstractCassandraTest
     
     protected HectorCassandraClient createCassandraHectorClient(String clusterName)
     {
-        HectorCassandraClient hectorClient = new HectorCassandraClient(LOCALHOST,
-                                                                       server.getPort(),
-                                                                       server.getKeySpaceName(),
-                                                                       clusterName,
-                                                                       60 * 60 * 1000);
+        HectorCassandraClient hectorClient = 
+                new HectorCassandraClientConfigurer()
+                .hosts(LOCALHOST)
+                .port(server.getPort())
+                .keyspaceName(server.getKeySpaceName())
+                .clusterName(clusterName)
+                .create();
+        
         return hectorClient;
     }
     

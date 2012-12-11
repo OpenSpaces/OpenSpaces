@@ -18,7 +18,7 @@ public class CassandraArchiveOperationHandlerBeanDefinitionParser extends Abstra
 
 	private static final String GIGA_SPACE = "giga-space";
 	private static final String CASSANDRA_KEYSPACE="keyspace";
-	private static final String CASSANDRA_HOST="host";
+	private static final String CASSANDRA_HOSTS="hosts";
 	private static final String CASSANDRA_PORT="port";
 	
 	@Override
@@ -40,9 +40,9 @@ public class CassandraArchiveOperationHandlerBeanDefinitionParser extends Abstra
         	builder.addPropertyValue("keyspace", keyspace);
         }
         
-        String host = element.getAttribute(CASSANDRA_HOST);
-        if (StringUtils.hasLength(host)) {
-        	builder.addPropertyValue("host", host);
+        String hosts = element.getAttribute(CASSANDRA_HOSTS);
+        if (StringUtils.hasLength(hosts)) {
+        	builder.addPropertyValue("hosts", hosts);
         }
         
         String port = element.getAttribute(CASSANDRA_PORT);
