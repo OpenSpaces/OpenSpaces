@@ -24,7 +24,7 @@ import org.openspaces.events.ListenerExecutionFailedException;
  * @author Itai Frenkel
  * @since 9.1.1
  */
-public class TestArchiveContainerExceptionHandler {
+public class ArchiveContainerExceptionHandlerTest {
 
     @Test
     public void testFilteringByMessage() {

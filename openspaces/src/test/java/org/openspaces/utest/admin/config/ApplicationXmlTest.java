@@ -34,7 +34,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * @since 9.0.1
  */
 
-public class TestApplicationXml extends TestCase {
+public class ApplicationXmlTest extends TestCase {
 
     private final String TEST_APPLICATION_RAW_XML = "/org/openspaces/utest/admin/config/test-application-raw.xml";
     private final String TEST_APPLICATION_XML = "/org/openspaces/utest/admin/config/test-application.xml";
