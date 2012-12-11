@@ -73,7 +73,8 @@ abstract public class AbstractCassandraTest
         HectorCassandraClient hectorClient = new HectorCassandraClient(LOCALHOST,
                                                                        server.getPort(),
                                                                        server.getKeySpaceName(),
-                                                                       clusterName);
+                                                                       clusterName,
+                                                                       60 * 60 * 1000);
         return hectorClient;
     }
     

@@ -81,13 +81,14 @@ public class HectorCassandraClient {
     private final ConcurrentMap<String, SpaceDocumentMapper>                  mapperTemplates = new ConcurrentHashMap<String, SpaceDocumentMapper>();
     private final ColumnFamilyMetadataCache                                   metadataCache   = new ColumnFamilyMetadataCache();
 
+    private final Integer                                                     columnFamilyGcGraceSeconds;
     private final Keyspace                                                    keyspace;
     private final Cluster                                                     cluster;
 
     private final Object                                                      lock            = new Object();
     private boolean                                                           closed          = false;
     
-    public HectorCassandraClient(String host, int port, String keyspaceName, String clusterName) {
+    public HectorCassandraClient(String host, int port, String keyspaceName, String clusterName, Integer columnFamilyGcGraceSeconds) {
         
         if (host == null) {
             throw new IllegalArgumentException("host must be set");
@@ -98,12 +99,17 @@ public class HectorCassandraClient {
         if (keyspaceName == null) {
             throw new IllegalArgumentException("keyspacename must be set");
         }
+        if (columnFamilyGcGraceSeconds != null && columnFamilyGcGraceSeconds <= 0) {
+            throw new IllegalArgumentException("columnFamilyGcGraceSeconds must be a positive number");
+        }
+        
         if (clusterName == null) {
             clusterName = "cluster";
         }
         
-        cluster = HFactory.getOrCreateCluster(clusterName, host + ":" + port);
-        keyspace = HFactory.createKeyspace(keyspaceName, cluster, createConsistencyLevelPolicy());
+        this.columnFamilyGcGraceSeconds = columnFamilyGcGraceSeconds;
+        this.cluster = HFactory.getOrCreateCluster(clusterName, host + ":" + port);
+        this.keyspace = HFactory.createKeyspace(keyspaceName, cluster, createConsistencyLevelPolicy());
     }
 
     private ConsistencyLevelPolicy createConsistencyLevelPolicy() {
@@ -241,6 +247,10 @@ public class HectorCassandraClient {
             cfDef.setKeyAlias(StringSerializer.get().toByteBuffer(metadata.getKeyName()));
             cfDef.setKeyValidationClass(ValidatorClassInferer.infer(metadata.getKeyType()));
             cfDef.setComment(metadata.getTypeName());
+            
+            if (columnFamilyGcGraceSeconds != null) {
+                cfDef.setGcGraceSeconds(columnFamilyGcGraceSeconds);
+            }
             
             for (TypedColumnMetadata columnMetadata : metadata.getColumns().values()) {
                 String validationClass = ValidatorClassInferer.infer(columnMetadata.getType());

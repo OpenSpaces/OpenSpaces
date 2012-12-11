@@ -23,10 +23,11 @@ package org.openspaces.persistency.cassandra;
  */
 public class HectorCassandraClientConfigurer {
 
-    private String host;
-    private int    port;
-    private String clusterName;
-    private String keyspaceName;
+    private String  host;
+    private int     port;
+    private String  clusterName;
+    private String  keyspaceName;
+    private Integer columnFamilyGcGraceSeconds;
     
     /**
      * Sets the host name of the Cassandra cluster to connect to.
@@ -60,10 +61,11 @@ public class HectorCassandraClientConfigurer {
     }
     
     /**
+     * (Optional)
      * Sets the cluster name used internally by the hector library.
      * Use this if you plan to connect to more than one cassandra cluster
      * in the same JVM.
-     * @param clusterName (Optional) The cluster 'tag' name.
+     * @param clusterName The cluster 'tag' name.
      * @return {@code this} instance.
      */
     public HectorCassandraClientConfigurer clusterName(String clusterName) {
@@ -72,11 +74,23 @@ public class HectorCassandraClientConfigurer {
     }
     
     /**
+     * (Optional)
+     * Sets the gcGraceSeconds that will be used when creating column families for types.
+     * If not set will use default value 
+     * @param columnFamilyGcGraceSeconds
+     * @return {@code this} instance.
+     */
+    public HectorCassandraClientConfigurer columnFamilyGcGraceSeconds(int columnFamilyGcGraceSeconds) {
+        this.columnFamilyGcGraceSeconds = columnFamilyGcGraceSeconds;
+        return this;
+    }
+    
+    /**
      * @return An instance of {@link HectorCassandraClient} matching this configurer
      * configuration.
      */
     public HectorCassandraClient create() {
-        return new HectorCassandraClient(host, port, keyspaceName, clusterName);
+        return new HectorCassandraClient(host, port, keyspaceName, clusterName, columnFamilyGcGraceSeconds);
     }
     
 }

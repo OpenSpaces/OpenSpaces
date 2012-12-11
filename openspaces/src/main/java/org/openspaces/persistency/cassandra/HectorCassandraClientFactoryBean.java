@@ -58,6 +58,13 @@ public class HectorCassandraClientFactoryBean implements
         configurer.clusterName(clusterName);
     }
     
+    /**
+     * @see HectorCassandraClientConfigurer#columnFamilyGcGraceSeconds(int)
+     */
+    public void setColumnFamilyGcGraceSeconds(int columnFamilyGcGraceSeconds) {
+        configurer.columnFamilyGcGraceSeconds(columnFamilyGcGraceSeconds);
+    }
+    
     @Override
     public void afterPropertiesSet() throws Exception {
         hectorCassandraClient = configurer.create();

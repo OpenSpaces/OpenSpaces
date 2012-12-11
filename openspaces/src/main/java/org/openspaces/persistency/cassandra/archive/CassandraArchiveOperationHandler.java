@@ -109,15 +109,19 @@ public class CassandraArchiveOperationHandler implements ArchiveOperationHandler
     }
 
 	private void createHectorClient() {
-		
+
 		if (port == null) {
 			port = DEFAULT_CASSANDRA_PORT;
 		}
+
+		// passing null so default value set by the Cassandra cluster
+		// will be used.
+		Integer columnFamilyGcGraceSeconds = null;
 		
 		//This is a unique key used by hector to cache client instances
 		//cannot use ":" since also used as JMX names
 		final String hectorClusterName = ""+host+"_"+port; 
-        hectorClient = new HectorCassandraClient(host, port, keyspace, hectorClusterName);
+        hectorClient = new HectorCassandraClient(host, port, keyspace, hectorClusterName, columnFamilyGcGraceSeconds);
 	}
 
 	private void createMapper() {
