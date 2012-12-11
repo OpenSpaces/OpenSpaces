@@ -272,6 +272,14 @@
 			                </xsd:documentation>
 			            </xsd:annotation>
         			</xsd:attribute>
+        			<xsd:attribute name="write-consistency" type="xsd:string" use="optional">
+			            <xsd:annotation>
+			                <xsd:documentation>
+			                    Specify the cassandra write consistency level. 
+			                    Supported values are ONE, QUORUM, ALL, ANY, EACH_QUORUM, LOCAL_QUORUM
+			                </xsd:documentation>
+			            </xsd:annotation>
+        			</xsd:attribute>
         		</xsd:extension>
             </xsd:complexContent>
         </xsd:complexType>

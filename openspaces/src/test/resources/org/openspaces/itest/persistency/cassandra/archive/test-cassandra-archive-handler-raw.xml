@@ -24,6 +24,7 @@
 		<property name="hosts" value="${cassandra.hosts}" />
 		<property name="port" value="${cassandra.port}" />
 		<property name="keyspace" value="${cassandra.keyspace}" />
+		<property name="writeConsistency" value="${cassandra.write-consistency}" />
 	</bean>
 
 </beans>

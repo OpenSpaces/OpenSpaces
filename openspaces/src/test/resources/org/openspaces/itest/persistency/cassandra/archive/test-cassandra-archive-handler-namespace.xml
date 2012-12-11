@@ -24,5 +24,6 @@
 		hosts="${cassandra.hosts}"
 		port="${cassandra.port}"  
 		keyspace="${cassandra.keyspace}"
+		write-consistency="${cassandra.write-consistency}"
 	/>
 </beans>

@@ -38,6 +38,7 @@ import org.openspaces.core.GigaSpace;
 import org.openspaces.core.GigaSpaceConfigurer;
 import org.openspaces.core.space.UrlSpaceConfigurer;
 import org.openspaces.itest.persistency.cassandra.CassandraTestServer;
+import org.openspaces.persistency.cassandra.CassandraConsistencyLevel;
 import org.openspaces.persistency.cassandra.archive.CassandraArchiveOperationHandler;
 import org.openspaces.persistency.cassandra.archive.CassandraArchiveOperationHandlerConfigurer;
 import org.openspaces.persistency.cassandra.error.SpaceCassandraException;
@@ -157,12 +158,14 @@ public class TestCassandaraArchiveOperationHandler {
     	properties.put("cassandra.keyspace", server.getKeySpaceName());
     	properties.put("cassandra.hosts", server.getHost());
     	properties.put("cassandra.port", ""+server.getPort());
+    	properties.put("cassandra.write-consistency", "ALL");
     	propertyConfigurer.setProperties(properties);
     	context.addBeanFactoryPostProcessor(propertyConfigurer);
     	context.refresh();
     	
         try {
             final CassandraArchiveOperationHandler archiveHandler = context.getBean(CassandraArchiveOperationHandler.class);
+            Assert.assertEquals(CassandraConsistencyLevel.ALL, archiveHandler.getWriteConsistency());
             final GigaSpace gigaSpace = context.getBean(org.openspaces.core.GigaSpace.class);
             test(archiveHandler, gigaSpace);
         } finally {

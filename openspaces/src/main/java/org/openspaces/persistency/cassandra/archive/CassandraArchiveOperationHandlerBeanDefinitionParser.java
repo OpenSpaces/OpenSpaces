@@ -20,6 +20,7 @@ public class CassandraArchiveOperationHandlerBeanDefinitionParser extends Abstra
 	private static final String CASSANDRA_KEYSPACE="keyspace";
 	private static final String CASSANDRA_HOSTS="hosts";
 	private static final String CASSANDRA_PORT="port";
+	private static final String CASSANDRA_CONSISTENCY="write-consistency";
 	
 	@Override
     protected Class<CassandraArchiveOperationHandler> getBeanClass(Element element) {
@@ -48,6 +49,11 @@ public class CassandraArchiveOperationHandlerBeanDefinitionParser extends Abstra
         String port = element.getAttribute(CASSANDRA_PORT);
         if (StringUtils.hasLength(port)) {
         	builder.addPropertyValue("port", port);
+        }
+        
+        String consistency = element.getAttribute(CASSANDRA_CONSISTENCY);
+        if (StringUtils.hasLength(consistency)) {
+            builder.addPropertyValue("writeConsistency", consistency);
         }
 	}
 

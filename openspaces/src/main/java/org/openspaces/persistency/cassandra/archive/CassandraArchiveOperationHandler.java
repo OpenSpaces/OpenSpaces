@@ -25,6 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.archive.ArchiveOperationHandler;
 import org.openspaces.core.GigaSpace;
+import org.openspaces.persistency.cassandra.CassandraConsistencyLevel;
 import org.openspaces.persistency.cassandra.HectorCassandraClient;
 import org.openspaces.persistency.cassandra.HectorCassandraClientConfigurer;
 import org.openspaces.persistency.cassandra.error.SpaceCassandraException;
@@ -72,6 +73,8 @@ public class CassandraArchiveOperationHandler implements ArchiveOperationHandler
     private HectorCassandraClient hectorClient;
     private DefaultSpaceDocumentColumnFamilyMapper mapper;
 
+    private CassandraConsistencyLevel writeConsistency;
+
     @Required
     public void setGigaSpace(GigaSpace gigaSpace) {
         this.gigaSpace = gigaSpace;
@@ -80,6 +83,7 @@ public class CassandraArchiveOperationHandler implements ArchiveOperationHandler
     /**
      * @param hosts - 
      *      Comma separated list of Cassandra servers (ipaddresses or hostnames).
+     * @see HectorCassandraClientConfigurer#hosts(String)
      */
     @Required
 	public void setHosts(String hosts) {
@@ -90,14 +94,32 @@ public class CassandraArchiveOperationHandler implements ArchiveOperationHandler
      * @param port - 
      *  Cassandra server ports. Assumes same port for all servers.
      *  null means default port is used.
+     * @see HectorCassandraClientConfigurer#port(Integer)
      */
 	public void setPort(Integer port) {
 		this.port = port;
 	}
 
+	/**
+	 * @param keyspace - the Cassandra keyspace name to connect to.
+	 * @see HectorCassandraClientConfigurer#keyspaceName(String)
+	 */
 	@Required
 	public void setKeyspace(String keyspace) {
 		this.keyspace = keyspace;
+	}
+	
+	public CassandraConsistencyLevel getWriteConsistency() {
+	    return writeConsistency;
+	}
+	
+	/**
+	 * @param writeConsistency - defines the consistency level used when writing to Cassandra.
+	 * default is null (which is mapped to {@link CassandraConsistencyLevel#QUORUM} )
+	 * @see HectorCassandraClientConfigurer#writeConsistencyLevel(CassandraConsistencyLevel)
+	 */
+	public void setWriteConsistency(CassandraConsistencyLevel writeConsistency) {
+	    this.writeConsistency = writeConsistency;
 	}
 	
     @PostConstruct
@@ -121,6 +143,7 @@ public class CassandraArchiveOperationHandler implements ArchiveOperationHandler
             .port(port)
             .keyspaceName(keyspace)
             .clusterName(clusterName)
+            .writeConsistencyLevel(writeConsistency)
             .create();
 	}
 
