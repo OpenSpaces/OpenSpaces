@@ -99,8 +99,8 @@ public class HectorCassandraClient {
         if (keyspaceName == null) {
             throw new IllegalArgumentException("keyspacename must be set");
         }
-        if (columnFamilyGcGraceSeconds != null && columnFamilyGcGraceSeconds <= 0) {
-            throw new IllegalArgumentException("columnFamilyGcGraceSeconds must be a positive number");
+        if (columnFamilyGcGraceSeconds != null && columnFamilyGcGraceSeconds < 0) {
+            throw new IllegalArgumentException("columnFamilyGcGraceSeconds must be a non negative");
         }
         
         if (clusterName == null) {
