@@ -18,11 +18,11 @@ package org.openspaces.itest.archive.statictemplate;
 import org.openspaces.archive.Archive;
 import org.openspaces.archive.ArchiveOperationHandler;
 import org.openspaces.events.EventTemplate;
-import org.openspaces.itest.events.pojos.MockPojo;
+import org.openspaces.itest.events.pojos.MockPojoFifoGrouping;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Archives {@link MockPojo} to the {@link ArchiveOperationHandler}
+ * Archives {@link MockPojoFifoGrouping} to the {@link ArchiveOperationHandler}
  * 
  * Tests the archive @EventTemplate annotation and 
  * tests the archiveHandler attribute of the @Archive annotation
@@ -30,13 +30,13 @@ import org.springframework.transaction.annotation.Transactional;
  * @since 9.1.1
  * 
  */
-@Archive(batchSize=2, archiveHandler="mockArchiveHandler")
+@Archive(batchSize=2, archiveHandler="mockArchiveHandler", useFifoGrouping=true)
 @Transactional
 public class MockArchiveContainer {
     
     @EventTemplate
-    MockPojo getTemplate() {
-        MockPojo template = new MockPojo();
+    MockPojoFifoGrouping getTemplate() {
+        MockPojoFifoGrouping template = new MockPojoFifoGrouping();
         template.setProcessed(false);
         return template;
     }

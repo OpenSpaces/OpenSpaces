@@ -22,6 +22,7 @@ import org.openspaces.archive.Archive;
 import org.openspaces.archive.ArchiveOperationHandler;
 import org.openspaces.events.DynamicEventTemplate;
 import org.openspaces.itest.events.pojos.MockPojo;
+import org.openspaces.itest.events.pojos.MockPojoFifoGrouping;
 
 /**
  * Archives {@link MockPojo} to the {@link ArchiveOperationHandler}
@@ -30,15 +31,15 @@ import org.openspaces.itest.events.pojos.MockPojo;
  * @since 9.1.1
  * 
  */
-@Archive
+@Archive(useFifoGrouping=true)
 public class MockDynamicArchiveContainer {
 
     private final Logger logger = Logger.getLogger(this.getClass().getName());
     private final AtomicInteger routing = new AtomicInteger();
     
     @DynamicEventTemplate
-    MockPojo getDynamicTemplate() {
-        MockPojo template = new MockPojo();
+    MockPojoFifoGrouping getDynamicTemplate() {
+        MockPojoFifoGrouping template = new MockPojoFifoGrouping();
         template.setProcessed(false);
         template.setRouting(routing.incrementAndGet());
         logger.info("getDynamicTemplate() returns " + template);

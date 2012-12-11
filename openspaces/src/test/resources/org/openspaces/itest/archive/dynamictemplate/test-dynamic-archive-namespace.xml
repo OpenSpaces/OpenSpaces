@@ -17,7 +17,7 @@
 	
 	<os-core:giga-space id="gigaSpace" space="space" tx-manager="transactionManager"/>
 	
-	<os-archive:archive-container id="archiveContainer" giga-space="gigaSpace" archive-handler="mockArchiveHandler">
+	<os-archive:archive-container id="archiveContainer" giga-space="gigaSpace" archive-handler="mockArchiveHandler" use-fifo-grouping="true">
     	<os-archive:dynamic-template ref="mockDynamicTemplate" />
     </os-archive:archive-container>
 	

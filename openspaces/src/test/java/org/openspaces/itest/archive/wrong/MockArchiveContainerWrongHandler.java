@@ -18,11 +18,11 @@ package org.openspaces.itest.archive.wrong;
 import org.openspaces.archive.Archive;
 import org.openspaces.archive.ArchiveOperationHandler;
 import org.openspaces.events.EventTemplate;
-import org.openspaces.itest.events.pojos.MockPojo;
+import org.openspaces.itest.events.pojos.MockPojoFifoGrouping;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Archives {@link MockPojo} to the {@link ArchiveOperationHandler}
+ * Archives {@link MockPojoFifoGrouping} to the {@link ArchiveOperationHandler}
  * 
  * Tests a wrong archiveHandler attribute of the @Archive annotation
  * @author Itai Frenkel
@@ -34,8 +34,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class MockArchiveContainerWrongHandler {
     
     @EventTemplate
-    MockPojo getTemplate() {
-        MockPojo template = new MockPojo();
+    MockPojoFifoGrouping getTemplate() {
+        MockPojoFifoGrouping template = new MockPojoFifoGrouping();
         template.setProcessed(false);
         return template;
     }

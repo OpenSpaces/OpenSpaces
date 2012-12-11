@@ -17,7 +17,7 @@
 	
 	<os-core:giga-space id="gigaSpace" space="space" tx-manager="transactionManager"/>
 	
-	<os-archive:archive-container id="archiveContainer" giga-space="gigaSpace" batch-size="2" archive-handler="mockArchiveHandler">
+	<os-archive:archive-container id="archiveContainer" giga-space="gigaSpace" batch-size="2" archive-handler="mockArchiveHandler" use-fifo-grouping="true">
     	<os-core:template ref="mockTemplate" />
     	<os-archive:tx-support tx-manager="transactionManager"/>
     </os-archive:archive-container>
@@ -27,7 +27,7 @@
 		<property name="atomicArchiveOfMultipleObjects" value="true" />
 	</bean>
    
-   	<bean id="mockTemplate" class="org.openspaces.itest.events.pojos.MockPojo">
+   	<bean id="mockTemplate" class="org.openspaces.itest.events.pojos.MockPojoFifoGrouping">
         <property name="processed" value="false"/>
     </bean>
 </beans>

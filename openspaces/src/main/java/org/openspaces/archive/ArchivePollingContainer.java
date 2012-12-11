@@ -39,6 +39,7 @@ public class ArchivePollingContainer
     private ArchiveOperationHandler archiveHandler;
     private int batchSize = 50; // == MultiTakeReceiveOperationHandler#DEFAULT_MAX_ENTRIES;
     private long nonBlockingSleep = 100;
+    private boolean useFifoGrouping = false;
     
     public ArchivePollingContainer() {
         super.setEventListener(this);
@@ -71,6 +72,7 @@ public class ArchivePollingContainer
               receiveHandler.setNonBlocking(true);
               receiveHandler.setNonBlockingFactor(calcNonBlockingFactor());
             }
+            receiveHandler.setUseFifoGrouping(isUseFifoGrouping());
             super.setReceiveOperationHandler(receiveHandler);
             super.setPassArrayAsIs(true);
         }
@@ -80,6 +82,7 @@ public class ArchivePollingContainer
                 //remote clustered proxy does not support blocking take
                 receiveHandler.setNonBlocking(true);
                 receiveHandler.setNonBlockingFactor(calcNonBlockingFactor());
+                receiveHandler.setUseFifoGrouping(isUseFifoGrouping());
             }
             super.setReceiveOperationHandler(receiveHandler);
         }
@@ -131,5 +134,16 @@ public class ArchivePollingContainer
      */
     public void setNonBlockingSleep(long nonBlockingSleepMilliseconds) {
         this.nonBlockingSleep = nonBlockingSleepMilliseconds;
+    }
+
+    public boolean isUseFifoGrouping() {
+        return useFifoGrouping;
+    }
+
+    /**
+     * Enables take operations that are performed with FIFO Grouping enabled
+     */
+    public void setUseFifoGrouping(boolean useFifoGrouping) {
+        this.useFifoGrouping = useFifoGrouping;
     }
 }

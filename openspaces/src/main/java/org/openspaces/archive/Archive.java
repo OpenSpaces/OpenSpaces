@@ -142,5 +142,11 @@ public @interface Archive {
      * defined in the application context, it will be used.
      */
     String archiveHandler() default "";
+
+
+    /**
+     * @see org.openspaces.archive.ArchivePollingContainer#setUseFifoGrouping(boolean)
+     */
+    boolean useFifoGrouping() default false;
 }
 

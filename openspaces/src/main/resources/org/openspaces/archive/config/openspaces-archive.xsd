@@ -49,7 +49,7 @@
                     	<xsd:element name="tx-support" type="os-events:txEventSupport" minOccurs="0" maxOccurs="1">
                             <xsd:annotation>
                                 <xsd:documentation>
-                                    Configures the polling container to work under a transaction. The transaction
+                                    Configures the archive container to work under a transaction. The transaction
                                     manager will be used to start and commit (on success) or rollback (on failure) a
                                     transaction.
 
@@ -91,7 +91,7 @@
 	                                    The template provider that will be called before each receive operation handler to take/read/... event data from the Space.
 	                                </xsd:documentation>
 	                            </xsd:annotation>
-	                        </xsd:element>
+	                        </xsd:element>                        
                         </xsd:choice>
                     </xsd:choice>
                     <xsd:attribute name="archive-handler" type="archiveHandlerRefType" use="required">
@@ -217,6 +217,13 @@
      							See also {@link ArchiveOperationHandler#supportsAtomicBatchArchiving()}
                             </xsd:documentation>
                         </xsd:annotation>
+                    </xsd:attribute>
+                    <xsd:attribute name="use-fifo-grouping" type="xsd:boolean">
+                      <xsd:annotation>
+                          <xsd:documentation>
+                              Configures the archive container to work with FIFO grouping enabled.
+                          </xsd:documentation>
+                      </xsd:annotation>
                     </xsd:attribute>
                 </xsd:extension>
             </xsd:complexContent>

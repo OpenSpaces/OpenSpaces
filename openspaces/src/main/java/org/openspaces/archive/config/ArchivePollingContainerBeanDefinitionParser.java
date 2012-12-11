@@ -45,7 +45,9 @@ public class ArchivePollingContainerBeanDefinitionParser
         private static final String ARCHIVE_HANDLER = "archive-handler";
         
         private static final String BATCH_SIZE = "batch-size";
-        
+
+        private static final String CASSANDRA_USE_FIFO_GROUPING = "use-fifo-grouping";
+
         @Override
         protected Class<ArchivePollingContainer> getBeanClass(Element element) {
             return ArchivePollingContainer.class;
@@ -92,6 +94,11 @@ public class ArchivePollingContainerBeanDefinitionParser
             String batchSize = element.getAttribute(BATCH_SIZE);
             if (StringUtils.hasLength(batchSize)) {
                 builder.addPropertyValue("batchSize", batchSize);
+            }
+            
+            String useFifoGrouping = element.getAttribute(CASSANDRA_USE_FIFO_GROUPING);
+            if (StringUtils.hasLength(useFifoGrouping)) {
+                builder.addPropertyValue("useFifoGrouping", useFifoGrouping);
             }
         }
     }

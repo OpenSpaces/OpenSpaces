@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 import org.openspaces.events.DynamicEventTemplateProvider;
-import org.openspaces.itest.events.pojos.MockPojo;
+import org.openspaces.itest.events.pojos.MockPojoFifoGrouping;
 
 /**
  * Standalone bean implementing a dynamic template
@@ -33,7 +33,7 @@ public class MockDynamicEventTemplateProvider implements DynamicEventTemplatePro
     
     @Override
     public Object getDynamicTemplate() {
-        final MockPojo template = new MockPojo();
+        final MockPojoFifoGrouping template = new MockPojoFifoGrouping();
         template.setProcessed(false);
         template.setRouting(routing.incrementAndGet());
         logger.info("getDynamicTemplate() returns " + template);

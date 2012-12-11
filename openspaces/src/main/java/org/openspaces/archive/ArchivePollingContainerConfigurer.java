@@ -210,4 +210,12 @@ public class ArchivePollingContainerConfigurer {
         archiveContainer.setNonBlockingSleep(nonBlockingSleepMilliseconds);
         return this;
     }
+    
+    /**
+     * @see ArchivePollingContainer#setUseFifoGrouping(boolean)
+     */
+    public ArchivePollingContainerConfigurer useFifoGrouping(boolean useFifoGrouping) {
+        archiveContainer.setUseFifoGrouping(useFifoGrouping);
+        return this;
+    }
 }

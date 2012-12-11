@@ -22,6 +22,7 @@
 
 	    <property name="archiveHandler" ref="mockArchiveHandler" />
 
+		<property name="useFifoGrouping" value="true" />
 	</bean>
 	
 	<!--  test mocks -->
@@ -29,7 +30,7 @@
 		<property name="atomicArchiveOfMultipleObjects" value="false" />
 	</bean>
 	
-	<bean id="mockTemplate" class="org.openspaces.itest.events.pojos.MockPojo">
+	<bean id="mockTemplate" class="org.openspaces.itest.events.pojos.MockPojoFifoGrouping">
         <property name="processed" value="false"/>
     </bean>
 </beans>

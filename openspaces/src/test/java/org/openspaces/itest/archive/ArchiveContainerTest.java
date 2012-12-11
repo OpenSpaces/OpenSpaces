@@ -34,7 +34,7 @@ import org.openspaces.events.DynamicEventTemplate;
 import org.openspaces.events.DynamicEventTemplateProvider;
 import org.openspaces.events.support.AnnotationProcessorUtils;
 import org.openspaces.events.support.EventContainersBus;
-import org.openspaces.itest.events.pojos.MockPojo;
+import org.openspaces.itest.events.pojos.MockPojoFifoGrouping;
 import org.openspaces.itest.utils.TestUtils;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -249,6 +249,7 @@ public class ArchiveContainerTest {
             ArchivePollingContainerConfigurer containerConfigurer = 
                     new ArchivePollingContainerConfigurer(gigaSpace)           
                     .archiveHandler(archiveHandler);
+                        
             configureTemplate(containerConfigurer, templateToTest);
 
             if (atomic) {
@@ -289,7 +290,7 @@ public class ArchiveContainerTest {
         switch (templateToTest) {
         case TEMPLATE:
             // template is called once
-            final MockPojo template = new MockPojo();
+            final MockPojoFifoGrouping template = new MockPojoFifoGrouping();
             template.setProcessed(false);
             containerConfigurer.template(template);
             break;
@@ -300,7 +301,7 @@ public class ArchiveContainerTest {
                 final AtomicInteger routing = new AtomicInteger();
                 @Override
                 public Object getDynamicTemplate() {
-                    final MockPojo template = new MockPojo();
+                    final MockPojoFifoGrouping template = new MockPojoFifoGrouping();
                     template.setProcessed(false);
                     template.setRouting(routing.incrementAndGet());
                     logger.info("getDynamicTemplate() returns " + template);
@@ -318,7 +319,7 @@ public class ArchiveContainerTest {
                 @SuppressWarnings("unused")
                 @DynamicEventTemplate
                 public Object getDynamicTemplate() {
-                    final MockPojo template = new MockPojo();
+                    final MockPojoFifoGrouping template = new MockPojoFifoGrouping();
                     template.setProcessed(false);
                     template.setRouting(routing.incrementAndGet());
                     logger.info("getDynamicTemplate() returns " + template);
@@ -335,7 +336,7 @@ public class ArchiveContainerTest {
                 
                 @SuppressWarnings("unused")
                 public Object getDynamicTemplateMethod() {
-                    final MockPojo template = new MockPojo();
+                    final MockPojoFifoGrouping template = new MockPojoFifoGrouping();
                     template.setProcessed(false);
                     template.setRouting(routing.incrementAndGet());
                     logger.info("getDynamicTemplate() returns " + template);
@@ -357,6 +358,7 @@ public class ArchiveContainerTest {
             final MockArchiveOperationsHandler archiveHandler = context.getBean(MockArchiveOperationsHandler.class);
             final GigaSpace gigaSpace = context.getBean(org.openspaces.core.GigaSpace.class);
             ArchivePollingContainer container = getArchivePollingContainer(context);
+            Assert.assertTrue("Expected archive container to be configured with use-fifo-grouping=true", container.isUseFifoGrouping());
             test(archiveHandler, gigaSpace, container, expectedBatchSize);
         } finally {
             context.close();
@@ -390,16 +392,15 @@ public class ArchiveContainerTest {
             Assert.assertEquals(expectedBatchSize, actualBatchSize);
             Assert.assertTrue("Atomic test must be performed with a space that uses a transaction manager", !atomic || gigaSpace.getTxProvider() != null);
             Assert.assertTrue("Atomic test must be performed with a container that uses a transaction manager", !atomic || container.getTransactionManagerName() != null);
-            
+
             test(archiveHandler, gigaSpace, actualBatchSize);
     }
 
     private void test(final MockArchiveOperationsHandler archiveHandler, GigaSpace gigaSpace, final int batchSize)
             throws InterruptedException {
 
-        
         // TODO: Make it transactional by default?
-        final MockPojo[] entries = new MockPojo[] { new MockPojo(false, 1), new MockPojo(false, 2), new MockPojo(false, 3), new MockPojo(false, 4), new MockPojo(false, 5) };
+        final MockPojoFifoGrouping[] entries = new MockPojoFifoGrouping[] { new MockPojoFifoGrouping(false, 1), new MockPojoFifoGrouping(false, 2), new MockPojoFifoGrouping(false, 3), new MockPojoFifoGrouping(false, 4), new MockPojoFifoGrouping(false, 5) };
         final int numberOfEntries = entries.length;
         gigaSpace.writeMultiple(entries);
         TestUtils.repetitive(new Runnable() {
