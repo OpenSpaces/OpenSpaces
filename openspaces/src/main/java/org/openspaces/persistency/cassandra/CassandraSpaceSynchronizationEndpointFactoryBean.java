@@ -18,7 +18,6 @@ package org.openspaces.persistency.cassandra;
 import org.openspaces.persistency.cassandra.meta.conversion.ColumnFamilyNameConverter;
 import org.openspaces.persistency.cassandra.meta.mapping.filter.FlattenedPropertiesFilter;
 import org.openspaces.persistency.cassandra.meta.types.dynamic.PropertyValueSerializer;
-import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
@@ -32,7 +31,7 @@ import org.springframework.beans.factory.InitializingBean;
  * @author Dan Kilman
  */
 public class CassandraSpaceSynchronizationEndpointFactoryBean implements 
-    FactoryBean<CassandraSpaceSynchronizationEndpoint>, InitializingBean, DisposableBean {
+    FactoryBean<CassandraSpaceSynchronizationEndpoint>, InitializingBean {
 
     private final CassandraSpaceSynchronizationEndpointConfigurer configurer =
             new CassandraSpaceSynchronizationEndpointConfigurer();
@@ -103,11 +102,6 @@ public class CassandraSpaceSynchronizationEndpointFactoryBean implements
     @Override
     public boolean isSingleton() {
         return true;
-    }
-
-    @Override
-    public void destroy() throws Exception {
-        cassandraSynchronizationEndpointInterceptor.close();
     }
 
 }

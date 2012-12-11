@@ -131,7 +131,6 @@ public class CassandraSpaceDataSource
             if (closed) {
                 return;
             }
-            
             connectionPool.forAllResources(new IResourceProcedure<ConnectionResource>() {
                 public void invoke(ConnectionResource resource) {
                     try {
@@ -141,7 +140,6 @@ public class CassandraSpaceDataSource
                     }
                 }
             });
-            hectorClient.close();
             closed = true;
         }
     }

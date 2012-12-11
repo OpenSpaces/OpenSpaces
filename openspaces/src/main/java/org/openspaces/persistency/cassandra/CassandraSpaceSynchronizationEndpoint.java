@@ -73,13 +73,6 @@ public class CassandraSpaceSynchronizationEndpoint
                                                             maxNestingLevel);
     }
 
-    /**
-     * Closes the hector client connection pools.
-     */
-    public void close() {
-        hectorClient.close();
-    }
-    
     @Override
     public void onTransactionSynchronization(TransactionData transactionData) {
         doSynchronization(transactionData.getTransactionParticipantDataItems());

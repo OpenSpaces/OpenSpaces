@@ -27,10 +27,11 @@ abstract public class AbstractCassandraTest
     private static final String                           LOCALHOST     = "127.0.0.1";
     private static final String                           DEFAULT_AUTH  = "default";
     
+    private final CassandraTestServer server = new CassandraTestServer();
     protected CassandraSpaceSynchronizationEndpoint _syncInterceptor;
-    protected CassandraSpaceDataSource                    _dataSource;
-    
-    private CassandraTestServer server = new CassandraTestServer();
+    protected CassandraSpaceDataSource _dataSource;
+    private HectorCassandraClient _syncInterceptorHectorClient;
+    private HectorCassandraClient _dataSourceHectorClient;
     
     @Before
     public void initialSetup()
@@ -38,16 +39,22 @@ abstract public class AbstractCassandraTest
        
     	server.initialize(isEmbedded());
     	
-        _syncInterceptor = createCassandraSyncEndpointInterceptor(createCassandraHectorClient("cluster-sync"));
-        _dataSource = createCassandraSpaceDataSource(createCassandraHectorClient("cluster-datasource"));
+        _syncInterceptorHectorClient = createCassandraHectorClient("cluster-sync");
+        _syncInterceptor = createCassandraSyncEndpointInterceptor(_syncInterceptorHectorClient);
+        _dataSourceHectorClient = createCassandraHectorClient("cluster-datasource");
+        _dataSource = createCassandraSpaceDataSource(_dataSourceHectorClient);
     }
     
     @After
     public void finalTeardown()
     {
-    	if (_syncInterceptor != null) {
-    		_syncInterceptor.close();
+    	if (_syncInterceptorHectorClient != null) {
+    	    _syncInterceptorHectorClient.close();
     	}
+    	
+        if (_dataSourceHectorClient != null) {
+            _dataSourceHectorClient.close();
+        }
     	
     	if (_dataSource != null) {
     		_dataSource.close();
