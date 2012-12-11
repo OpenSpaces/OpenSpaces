@@ -88,10 +88,6 @@ public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
 
     public void enforceSla() throws SlaEnforcementInProgressException {
         
-        if (!isScaleInProgress()) {
-            return;
-        }
-        
         if (getProcessingUnit().getInstances().length == 0) {
             puInstanceProvisioningCompletedEvent();
         }
@@ -178,7 +174,7 @@ public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
 
     @Override
     protected void recoverStateOnEsmStart() throws MachinesSlaEnforcementInProgressException, SomeProcessingUnitsHaveNotCompletedStateRecoveryException, NeedToWaitUntilAllGridServiceAgentsDiscoveredException, UndeployInProgressException {
-        
+
         for (ZonesConfig zones : machinesEndpoint.getGridServiceAgentsZones()) {
             final CapacityMachinesSlaPolicy sla = getMachinesSlaPolicy(zones);
             machinesEndpoint.recoverStateOnEsmStart(sla);

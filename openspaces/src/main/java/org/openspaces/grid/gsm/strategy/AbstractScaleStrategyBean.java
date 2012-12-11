@@ -359,6 +359,11 @@ public abstract class AbstractScaleStrategyBean implements
     @Override
     public void run() {
 
+        if (!isScaleInProgress() && isUndeploying()) {
+            // undeploy bean should run only once
+            return;
+        }
+        
         try {
             recoverOnStartBeforeEnforceSLA();
 
@@ -396,7 +401,7 @@ public abstract class AbstractScaleStrategyBean implements
             validateCorrectThread();
             validateAtLeastOneLookupServiceDiscovered();
             validateOnlyOneESMRunning();
-    
+            
             if (!isRecoveredStateOnEsmStart()) {
                 if (getLogger().isInfoEnabled()) {
                     getLogger().info("recovering state on ESM start.");
