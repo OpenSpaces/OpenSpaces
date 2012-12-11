@@ -125,6 +125,8 @@ public class HectorCassandraClient {
         ConfigurableConsistencyLevel policy = new ConfigurableConsistencyLevel();
         Map<String, HConsistencyLevel> mappping = new HashMap<String, HConsistencyLevel>();
         mappping.put(ColumnFamilyMetadataMetadata.NAME, HConsistencyLevel.QUORUM);
+        policy.setReadCfConsistencyLevels(mappping);
+        policy.setWriteCfConsistencyLevels(mappping);
         return policy;
     }
     
