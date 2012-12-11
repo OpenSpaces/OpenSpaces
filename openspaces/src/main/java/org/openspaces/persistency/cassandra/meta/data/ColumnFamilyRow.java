@@ -102,11 +102,25 @@ public class ColumnFamilyRow {
         if (isKeyDeserilized()) {
             return keyValue;
         }
-        return columnFamilyMetadata.getKeySerializer().fromByteBuffer((ByteBuffer) keyValue);
+        return columnFamilyMetadata.getKeySerializer().fromByteBuffer(((ByteBuffer) keyValue).duplicate());
     }
     
     private boolean isKeyDeserilized() {
         return !(keyValue instanceof ByteBuffer);
+    }
+    
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("ColumnFamilyRow[ ");
+        sb.append(rowType).append(" ");
+        sb.append("typeName: ").append(columnFamilyMetadata.getTypeName()).append(", ");
+        sb.append("key: ").append(keyValue).append(", ");
+        sb.append("column names: ").append(columns.keySet());
+        sb.append(" ]");
+        return sb.toString();
     }
     
     /**

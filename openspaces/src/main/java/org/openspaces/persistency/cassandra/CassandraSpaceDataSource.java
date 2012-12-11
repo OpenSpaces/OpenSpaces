@@ -152,6 +152,9 @@ public class CassandraSpaceDataSource
         if (metadata == null) {
             metadata = hectorClient.fetchColumnFamilyMetadata(typeName, mapper);
             if (metadata == null) {
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Column family for type: " + typeName + " not found.");
+                }
                 return null;
             }
         }
@@ -173,6 +176,9 @@ public class CassandraSpaceDataSource
         boolean performIdQuery = keyValue != null && !templateHasPropertyOtherThanKey(queryContext, metadata);
         
         if (performIdQuery) {
+            if (logger.isTraceEnabled()) {
+                logger.trace("Performing single entry query for key: " + keyValue);
+            }
             return new SingleEntryDataIterator(getByIdImpl(metadata.getTypeName(), keyValue));
         } else {
             int queryMaxResults = keyValue != null ? 1 : query.getBatchSize();

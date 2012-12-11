@@ -15,6 +15,7 @@
  *******************************************************************************/
 package org.openspaces.persistency.cassandra.datasource;
 
+import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -60,4 +61,15 @@ public class CQLQueryContext {
     public Object[] getParameters() {
         return parameters;
     }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return " [properties=" + properties + ", sqlQuery=" + sqlQuery + ", parameters="
+                + Arrays.toString(parameters) + "]";
+    }
+    
+        
 }

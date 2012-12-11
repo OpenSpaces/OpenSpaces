@@ -76,6 +76,12 @@ public class CassandraTokenRangeJDBCDataIterator implements DataIterator<Object>
             CQLQueryContext queryContext,
             Object lastToken, 
             int limit) {
+        
+        if (logger.isTraceEnabled()) {
+            logger.trace("Creating range data iterator for query: " + queryContext + " for type: " + columnFamilyMetadata.getTypeName() +
+                    ", limit="+limit + ", starting from token(" + (lastToken != null ? lastToken : "FIRST_IN_RING") + ")");
+        }
+        
         this.mapper = mapper;
         this.columnFamilyMetadata = columnFamilyMetadata;
         this.connectionResource = connectionResource;
@@ -160,7 +166,7 @@ public class CassandraTokenRangeJDBCDataIterator implements DataIterator<Object>
             currentLastToken = currentTokenValue;
             if (document.getProperties().size() > 1) {
                 return document;
-            }
+            } 
         }
         return null;
     }

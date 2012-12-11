@@ -51,7 +51,7 @@ public class ColumnData {
             return value;
         }
         
-        return columnMetadata.getSerializer().fromByteBuffer((ByteBuffer) value);
+        return columnMetadata.getSerializer().fromByteBuffer(((ByteBuffer) value).duplicate());
     }
     
     /**

@@ -15,6 +15,9 @@
  *******************************************************************************/
 package org.openspaces.persistency.cassandra.datasource;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.openspaces.persistency.cassandra.CassandraSpaceDataSource;
 import org.openspaces.persistency.cassandra.meta.ColumnFamilyMetadata;
 import org.openspaces.persistency.cassandra.meta.mapping.SpaceDocumentColumnFamilyMapper;
 import org.openspaces.persistency.cassandra.pool.ConnectionResource;
@@ -27,6 +30,8 @@ import com.gigaspaces.document.SpaceDocument;
  * @author Dan Kilman
  */
 public class CassandraTokenRangeAwareDataIterator implements DataIterator<Object> {
+    
+    private static final Log                      logger             = LogFactory.getLog(CassandraSpaceDataSource.class);
     
     private final ConnectionResource              connectionResource;
     private final SpaceDocumentColumnFamilyMapper mapper;
@@ -46,6 +51,11 @@ public class CassandraTokenRangeAwareDataIterator implements DataIterator<Object
             CQLQueryContext queryContext,
             int maxResults,
             int batchLimit) {
+        if (logger.isTraceEnabled()) {
+            logger.trace("Creating data iterator for query: " + queryContext + " for type: " + columnFamilyMetadata.getTypeName() +
+                    ", batchLimit="+batchLimit);
+        }
+        
         this.mapper = mapper;
         this.columnFamilyMetadata = columnFamilyMetadata;
         this.connectionResource = connectionResource;

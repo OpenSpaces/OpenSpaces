@@ -18,6 +18,8 @@ package org.openspaces.persistency.cassandra;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openspaces.persistency.cassandra.error.SpaceCassandraDataSourceException;
 import org.openspaces.persistency.cassandra.error.SpaceCassandraSynchronizationException;
 import org.openspaces.persistency.cassandra.meta.ColumnFamilyMetadata;
@@ -48,6 +50,8 @@ import com.gigaspaces.sync.TransactionData;
  */
 public class CassandraSpaceSynchronizationEndpoint
         extends SpaceSynchronizationEndpoint {
+    
+    private static final Log                      logger = LogFactory.getLog(CassandraSpaceSynchronizationEndpoint.class);
     
     private final SpaceDocumentColumnFamilyMapper mapper;
     private final HectorCassandraClient           hectorClient;
@@ -84,6 +88,10 @@ public class CassandraSpaceSynchronizationEndpoint
     }
 
     private void doSynchronization(DataSyncOperation[] dataSyncOperations) {
+        
+        if (logger.isTraceEnabled()) {
+            logger.trace("Starting batch operation");
+        }
         
         List<ColumnFamilyRow> rows = new LinkedList<ColumnFamilyRow>();
         
@@ -142,9 +150,17 @@ public class CassandraSpaceSynchronizationEndpoint
                 }
             }
             
+            if (logger.isTraceEnabled()) {
+                logger.trace("Adding row: " + columnFamilyRow + " to current batch");
+            }
+            
             rows.add(columnFamilyRow);
         }
 
+        if (logger.isTraceEnabled()) {
+            logger.trace("Peforming batch operation");
+        }
+        
         hectorClient.performBatchOperation(rows);
     }
 

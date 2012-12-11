@@ -258,8 +258,8 @@ public class HectorCassandraClient {
                 addColumnDefinitionToColumnFamilyDefinition(metadata, cfDef, index, validationClass);
             }
 
-            if (logger.isDebugEnabled()) {
-                logger.debug("Creating column family: " + metadata);
+            if (logger.isInfoEnabled()) {
+                logger.info("Creating column family: " + metadata);
             }
             
             try {
@@ -345,8 +345,8 @@ public class HectorCassandraClient {
                 }
             }
             
-            if (logger.isDebugEnabled()) {
-                logger.debug("Adding indexes to columns: " + columnNames + " of type: " +
+            if (logger.isInfoEnabled()) {
+                logger.info("Adding indexes to columns: " + columnNames + " of type: " +
                         metadata.getTypeName() + ", column family: " + metadata.getColumnFamilyName());
             }
             
