@@ -39,11 +39,6 @@ public class ConnectionResource extends Resource
     private static final Log logger = LogFactory.getLog(ConnectionResource.class);
 
     /**
-     * lock for connection
-     */
-    private final Object lock = new Object();
-    
-    /**
      * We use the data source to create a new underlying connection when
      * some exception occures that requires a need connection to be created.
      * this will will only happen for connections that are part of the pool,
@@ -51,6 +46,11 @@ public class ConnectionResource extends Resource
      * the resource is cleared.
      */
     private final DataSource dataSource;
+    
+    /*
+     * Intentionally left unvolatile. worst case scenario, the user will get a connection exception
+     */
+    private boolean closed;
     
     private Connection connection;
 
@@ -62,7 +62,7 @@ public class ConnectionResource extends Resource
     @Override
     public void clear() {   
         if (!isFromPool()) {
-            closeCurrentConnection();
+            closeUnderlyingConnection();
         }
     }
 
@@ -70,37 +70,42 @@ public class ConnectionResource extends Resource
      * @return The underlying {@link Connection} represented by this {@link ConnectionResource}
      */
     public Connection getConnection() {
-        Connection result = connection;
-        if (result == null) {
-            synchronized (lock) {
-                if (connection == null) {
-                    try {
-                        connection = dataSource.getConnection();
-                    } catch (SQLException e) {
-                        throw new SpaceCassandraDataSourceException("Could not create a new connection", e);
-                    }
-                }
-                result = connection;
+        if (closed) {
+            throw new SpaceCassandraDataSourceException("Resource already closed");
+        }
+        
+        if (connection == null) {
+            try {
+                connection = dataSource.getConnection();
+            } catch (SQLException e) {
+                throw new SpaceCassandraDataSourceException("Could not create a new connection", e);
             }
         }
-        return result;
+        return connection;
     }
     
+    /**
+     * Must be called by the resource owner
+     */
     public void closeCurrentConnection() {
         if (connection != null) {
-            synchronized (lock) {
-                if (connection != null) {
-                    try {
-                        connection.close();
-                    } catch (SQLException e) {
-                        if (logger.isWarnEnabled()) {
-                            logger.warn("Failed closing jdbc connection", e);
-                        }
-                    }
-                    connection = null;
-                }
+            closeUnderlyingConnection();
+            connection = null;
+        }
+    }
+
+    private void closeUnderlyingConnection() {
+        try {
+            connection.close();
+        } catch (SQLException e) {
+            if (logger.isWarnEnabled()) {
+                logger.warn("Failed closing jdbc connection", e);
             }
         }
     }
     
+    public void close() {
+        closeUnderlyingConnection();
+        closed = true;
+    }
 }

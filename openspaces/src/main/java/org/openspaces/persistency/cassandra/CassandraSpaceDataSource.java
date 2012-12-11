@@ -136,7 +136,7 @@ public class CassandraSpaceDataSource
             }
             connectionPool.forAllResources(new IResourceProcedure<ConnectionResource>() {
                 public void invoke(ConnectionResource resource) {
-                    resource.closeCurrentConnection();
+                    resource.close();
                 }
             });
             closed = true;

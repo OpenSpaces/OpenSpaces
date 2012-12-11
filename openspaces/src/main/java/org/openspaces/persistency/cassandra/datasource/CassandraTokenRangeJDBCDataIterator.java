@@ -21,8 +21,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.SQLNonTransientConnectionException;
-import java.sql.SQLRecoverableException;
 import java.sql.SQLSyntaxErrorException;
 import java.sql.SQLTransientConnectionException;
 import java.util.ArrayList;
@@ -115,11 +113,6 @@ public class CassandraTokenRangeJDBCDataIterator implements DataIterator<Object>
             // no need to replace underlying connection in pool
             throw new SpaceCassandraQueryExecutionException("Failed preparing statement " +
                     statementData.query, e);
-        } catch (SQLNonTransientConnectionException e) {
-            // need to restart connection
-            connectionResource.closeCurrentConnection();
-            throw new SpaceCassandraQueryExecutionException("Failed preparing statement " +
-                    statementData.query, e);
         } catch (SQLException e) {
             // need to restart connection
             connectionResource.closeCurrentConnection();
@@ -133,20 +126,10 @@ public class CassandraTokenRangeJDBCDataIterator implements DataIterator<Object>
             // no need to replace underlying connection in pool
             throw new SpaceCassandraQueryExecutionException("Failed executing statement " +
                     statementData.query, e);
-        } catch (SQLNonTransientConnectionException e) {
-            // need to restart connection
-            connectionResource.closeCurrentConnection();
-            throw new SpaceCassandraQueryExecutionException("Failed executing statement " +
-                    statementData.query, e);        
         } catch (SQLTransientConnectionException e) {
             // no need to replace underlying connection in pool
             throw new SpaceCassandraQueryExecutionException("Failed executing statement " +
                     statementData.query, e);
-        } catch (SQLRecoverableException e) {
-            // need to restart connection
-            connectionResource.closeCurrentConnection();
-            throw new SpaceCassandraQueryExecutionException("Failed executing statement " +
-                    statementData.query, e);     
         } catch (SQLException e) {
             // need to restart connection
             connectionResource.closeCurrentConnection();

@@ -30,4 +30,8 @@ public class SpaceCassandraDataSourceException extends SpaceCassandraException {
         super(message, e);
     }
 
+    public SpaceCassandraDataSourceException(String message) {
+        super(message);
+    }
+
 }
