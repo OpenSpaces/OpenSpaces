@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.openspaces.persistency.cassandra;
 
-import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -133,11 +132,7 @@ public class CassandraSpaceDataSource
             }
             connectionPool.forAllResources(new IResourceProcedure<ConnectionResource>() {
                 public void invoke(ConnectionResource resource) {
-                    try {
-                        resource.getConnection().close();
-                    } catch (SQLException e) {
-                        logger.debug("Failed closing data source connection", e);
-                    }
+                    resource.closeCurrentConnection();
                 }
             });
             closed = true;

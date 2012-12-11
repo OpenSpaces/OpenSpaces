@@ -21,6 +21,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.SQLNonTransientConnectionException;
+import java.sql.SQLRecoverableException;
+import java.sql.SQLSyntaxErrorException;
+import java.sql.SQLTransientConnectionException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -48,6 +52,11 @@ import com.gigaspaces.document.SpaceDocument;
 import com.gigaspaces.internal.utils.StringUtils;
 
 /**
+ * Note: the underlying cassandra jdbc implementation brings the entire batch when calling 
+ * execute, so SQLException exceptions will actually only be thrown during prepare statement and execute statment
+ * Moreover, the iteration over the results is currently only logical because the entire result set
+ * already lies in memory after execute statement returns.
+ * 
  * @since 9.1.1
  * @author Dan Kilman
  */
@@ -96,14 +105,45 @@ public class CassandraTokenRangeJDBCDataIterator implements DataIterator<Object>
             // this is where cassandra validates this query
             preparedStatement = connection.prepareStatement(statementData.query);
             setPreparedStatementParameters(statementData);
+        } catch (SQLSyntaxErrorException e) {
+            // no need to replace underlying connection in pool
+            throw new SpaceCassandraQueryExecutionException("Failed preparing statement " +
+                    statementData.query, e);
+        } catch (SQLNonTransientConnectionException e) {
+            // need to restart connection
+            connectionResource.closeCurrentConnection();
+            throw new SpaceCassandraQueryExecutionException("Failed preparing statement " +
+                    statementData.query, e);
         } catch (SQLException e) {
+            // need to restart connection
+            connectionResource.closeCurrentConnection();
             throw new SpaceCassandraQueryExecutionException("Failed preparing statement " +
                     statementData.query, e);
         }
         
         try {
             resultSet = preparedStatement.executeQuery();
+        } catch (SQLSyntaxErrorException e) {
+            // no need to replace underlying connection in pool
+            throw new SpaceCassandraQueryExecutionException("Failed executing statement " +
+                    statementData.query, e);
+        } catch (SQLNonTransientConnectionException e) {
+            // need to restart connection
+            connectionResource.closeCurrentConnection();
+            throw new SpaceCassandraQueryExecutionException("Failed executing statement " +
+                    statementData.query, e);        
+        } catch (SQLTransientConnectionException e) {
+            // no need to replace underlying connection in pool
+            throw new SpaceCassandraQueryExecutionException("Failed executing statement " +
+                    statementData.query, e);
+        } catch (SQLRecoverableException e) {
+            // need to restart connection
+            connectionResource.closeCurrentConnection();
+            throw new SpaceCassandraQueryExecutionException("Failed executing statement " +
+                    statementData.query, e);     
         } catch (SQLException e) {
+            // need to restart connection
+            connectionResource.closeCurrentConnection();
             throw new SpaceCassandraQueryExecutionException("Failed executing statement " +
                     statementData.query, e);
         }
@@ -144,7 +184,7 @@ public class CassandraTokenRangeJDBCDataIterator implements DataIterator<Object>
                 if (columnMetadata == null) {
                     columnMetadata = new DynamicColumnMetadata(columnName,
                                                                mapper.getTypeNodeIntrospector().getDynamicPropertyValueSerializer());
-                }   
+                }
                 
                 if (columnValue instanceof ByteBuffer) {
                     columnValue = columnMetadata.getSerializer().fromByteBuffer((ByteBuffer) columnValue);

@@ -18,8 +18,11 @@ package org.openspaces.persistency.cassandra.pool;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import javax.sql.DataSource;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openspaces.persistency.cassandra.error.SpaceCassandraDataSourceException;
 
 import com.j_spaces.kernel.pool.IResource;
 import com.j_spaces.kernel.pool.Resource;
@@ -35,22 +38,31 @@ public class ConnectionResource extends Resource
     
     private static final Log logger = LogFactory.getLog(ConnectionResource.class);
 
-    private final Connection connection;
+    /**
+     * lock for connection
+     */
+    private final Object lock = new Object();
+    
+    /**
+     * We use the data source to create a new underlying connection when
+     * some exception occures that requires a need connection to be created.
+     * this will will only happen for connections that are part of the pool,
+     * because connections that are not part of the pool will be closed when
+     * the resource is cleared.
+     */
+    private final DataSource dataSource;
+    
+    private Connection connection;
 
-    public ConnectionResource(Connection connection) {
+    public ConnectionResource(Connection connection, DataSource dataSource) {
         this.connection = connection;
+        this.dataSource = dataSource;
     }
     
     @Override
     public void clear() {   
         if (!isFromPool()) {
-            try {
-                connection.close();
-            } catch (SQLException e) {
-                if (logger.isWarnEnabled()) {
-                    logger.warn("Failed closing jdbc connection", e);
-                }
-            }
+            closeCurrentConnection();
         }
     }
 
@@ -58,6 +70,37 @@ public class ConnectionResource extends Resource
      * @return The underlying {@link Connection} represented by this {@link ConnectionResource}
      */
     public Connection getConnection() {
-        return connection;
+        Connection result = connection;
+        if (result == null) {
+            synchronized (lock) {
+                if (connection == null) {
+                    try {
+                        connection = dataSource.getConnection();
+                    } catch (SQLException e) {
+                        throw new SpaceCassandraDataSourceException("Could not create a new connection", e);
+                    }
+                }
+                result = connection;
+            }
+        }
+        return result;
     }
+    
+    public void closeCurrentConnection() {
+        if (connection != null) {
+            synchronized (lock) {
+                if (connection != null) {
+                    try {
+                        connection.close();
+                    } catch (SQLException e) {
+                        if (logger.isWarnEnabled()) {
+                            logger.warn("Failed closing jdbc connection", e);
+                        }
+                    }
+                    connection = null;
+                }
+            }
+        }
+    }
+    
 }

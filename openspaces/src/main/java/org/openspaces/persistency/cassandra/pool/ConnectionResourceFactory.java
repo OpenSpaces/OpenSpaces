@@ -42,7 +42,7 @@ public class ConnectionResourceFactory
     @Override
     public ConnectionResource allocate() {
         try {
-            return new ConnectionResource(dataSource.getConnection());
+            return new ConnectionResource(dataSource.getConnection(), dataSource);
         } catch (SQLException e) {
             throw new SpaceCassandraDataSourceException("Could not allocate a new connection", e);
         }
