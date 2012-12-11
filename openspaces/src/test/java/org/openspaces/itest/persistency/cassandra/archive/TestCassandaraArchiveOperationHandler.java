@@ -72,6 +72,7 @@ public class TestCassandaraArchiveOperationHandler {
 	private final Log logger = LogFactory.getLog(this.getClass());
     
     private final String TEST_NAMESPACE_XML = "/org/openspaces/itest/persistency/cassandra/archive/test-cassandra-archive-handler-namespace.xml";
+    private final String TEST_RAW_XML = "/org/openspaces/itest/persistency/cassandra/archive/test-cassandra-archive-handler-raw.xml";
     
     private final CassandraTestServer server = new CassandraTestServer();
 
@@ -85,6 +86,14 @@ public class TestCassandaraArchiveOperationHandler {
     @After
     public void stopServer() {
     	server.destroy();
+    }
+    
+    /**
+     * Tests archiver with namespace spring bean xml
+     */
+    @Test 
+    public void testXmlRaw() {
+        xmlTest(TEST_RAW_XML); 
     }
     
     /**
