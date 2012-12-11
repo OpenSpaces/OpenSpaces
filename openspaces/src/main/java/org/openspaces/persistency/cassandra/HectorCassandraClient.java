@@ -110,6 +110,7 @@ public class HectorCassandraClient {
         this.columnFamilyGcGraceSeconds = columnFamilyGcGraceSeconds;
         this.cluster = HFactory.getOrCreateCluster(clusterName, host + ":" + port);
         this.keyspace = HFactory.createKeyspace(keyspaceName, cluster, createConsistencyLevelPolicy());
+        validateKeyspaceExists();
     }
 
     private ConsistencyLevelPolicy createConsistencyLevelPolicy() {
@@ -131,6 +132,13 @@ public class HectorCassandraClient {
                 HFactory.shutdownCluster(cluster);
             }
             closed = true;
+        }
+    }
+    
+    private void validateKeyspaceExists() {
+        KeyspaceDefinition keyspaceDefinition = cluster.describeKeyspace(keyspace.getKeyspaceName());
+        if (keyspaceDefinition == null) {
+            throw new IllegalArgumentException("Keyspace: " + keyspace.getKeyspaceName() + " does not exits.");
         }
     }
     
