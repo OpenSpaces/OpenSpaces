@@ -24,8 +24,6 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.openspaces.persistency.cassandra.CassandraPersistencyConstants;
 import org.openspaces.persistency.cassandra.error.SpaceCassandraTypeIntrospectionException;
 import org.openspaces.persistency.cassandra.meta.DynamicColumnMetadata;
@@ -49,8 +47,6 @@ public class PojoTypeNode extends AbstractCompoundTypeNode
     private static final long                   serialVersionUID = 1L;
     public static final byte                    SERIAL_VER       = Byte.MIN_VALUE;
 
-    private static final Log                    logger          = LogFactory.getLog(TypeNode.class);
-    
     // _name if this is a direct child of the top level type node
     // path from top level type node otherwise
     private String                              fullName;

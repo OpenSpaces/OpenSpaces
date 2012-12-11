@@ -23,8 +23,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.openspaces.persistency.cassandra.CassandraPersistencyConstants;
 import org.openspaces.persistency.cassandra.error.SpaceCassandraTypeIntrospectionException;
 import org.openspaces.persistency.cassandra.meta.ColumnFamilyMetadata;
@@ -48,8 +46,6 @@ public class SpaceDocumentTopLevelTypeNode extends SpaceDocumentTypeNode
     
     private static final long serialVersionUID = 1L;
     public static final byte  SERIAL_VER       = Byte.MIN_VALUE;
-
-    private static final Log  logger           = LogFactory.getLog(TypeNode.class);
 
     private Class<?>          keyType;
     
