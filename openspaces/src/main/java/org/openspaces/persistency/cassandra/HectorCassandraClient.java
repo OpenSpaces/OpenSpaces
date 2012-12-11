@@ -46,7 +46,6 @@ import me.prettyprint.hector.api.ddl.ColumnDefinition;
 import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
 import me.prettyprint.hector.api.ddl.ColumnIndexType;
 import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
-import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.mutation.Mutator;
 import me.prettyprint.hector.api.query.RangeSlicesQuery;
@@ -219,13 +218,18 @@ public class HectorCassandraClient {
         try {
         
             final boolean columnFamilyExists = isColumnFamilyExists(metadata);
-            if (metadata != ColumnFamilyMetadataMetadata.INSTANCE) {
-                metadataCache.addColumnFamilyMetadata(metadata.getTypeName(), metadata);
-                if (shouldPersist && !columnFamilyExists)
-                    persistColumnFamilyMetadata(metadata);
-            }
             
             if (columnFamilyExists) {
+                if (metadata != ColumnFamilyMetadataMetadata.INSTANCE) {
+                    metadataCache.addColumnFamilyMetadata(metadata.getTypeName(), metadata);
+                    // we persist the metadata again here, because it is possible
+                    // that the table creation was successful but writing the internal metadata
+                    // failed. without this, we will never write the internal metadata.
+                    // the assumption here is that we write the exact same metadata.
+                    if (shouldPersist) {
+                        persistColumnFamilyMetadata(metadata);
+                    }
+                }
                 return;
             }
             
@@ -259,8 +263,17 @@ public class HectorCassandraClient {
             }
             
             try {
+                // first create the actual column family
                 cluster.addColumnFamily(cfDef, true);
-            } catch (HectorException e) {
+                
+                if (metadata != ColumnFamilyMetadataMetadata.INSTANCE) {
+                    metadataCache.addColumnFamilyMetadata(metadata.getTypeName(), metadata);
+                    if (shouldPersist) {
+                        persistColumnFamilyMetadata(metadata);
+                    }
+                }
+                
+            } catch (Exception e) {
                 throw new SpaceCassandraSchemaUpdateException("Failed adding column family definition to cassandra", e, true);
             }
         } finally {
@@ -339,7 +352,7 @@ public class HectorCassandraClient {
             
             try {
                 cluster.updateColumnFamily(thriftCfDef, true);
-            } catch (HectorException e) {
+            } catch (Exception e) {
                 throw new SpaceCassandraSchemaUpdateException("Failed adding column family definition to cassandra", null, true);
             }
         
@@ -391,7 +404,7 @@ public class HectorCassandraClient {
             updater.setByteBuffer(ColumnFamilyMetadataMetadata.BLOB_COLUMN_NAME,
                                   ObjectSerializer.get().toByteBuffer(metadata));
             template.update(updater);
-        } catch (HectorException e) {
+        } catch (Exception e) {
             throw new SpaceCassandraSchemaUpdateException("Failed persisting column family metadata for " +
                     metadata.getTypeName(), e, true);
         }
