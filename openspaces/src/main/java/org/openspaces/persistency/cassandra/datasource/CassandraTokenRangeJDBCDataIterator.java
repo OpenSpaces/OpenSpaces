@@ -334,8 +334,12 @@ public class CassandraTokenRangeJDBCDataIterator implements DataIterator<Object>
 
     public void closeSelfResources() {
         try {
-            resultSet.close();
-            preparedStatement.close();
+            if (!resultSet.isClosed()) {
+                resultSet.close();
+            }
+            if (!preparedStatement.isClosed()) {
+                preparedStatement.close();
+            }
         } catch (SQLException e) {
             logger.debug("Failed closing result set or prepared statement", e);
         }

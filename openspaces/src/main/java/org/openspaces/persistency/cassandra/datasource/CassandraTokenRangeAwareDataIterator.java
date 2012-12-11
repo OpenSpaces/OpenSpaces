@@ -140,6 +140,7 @@ public class CassandraTokenRangeAwareDataIterator implements DataIterator<Object
     public void closeSelfResources() {
         if (currentIterator != null) {
             currentIterator.closeSelfResources();
+            currentIterator = null;
         }
     }
     
