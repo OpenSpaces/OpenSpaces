@@ -52,7 +52,6 @@
 	</bean>
 
 	<bean id="cassandraSpaceSyncEndpoint" class="org.openspaces.persistency.cassandra.CassandraSpaceSynchronizationEndpointFactoryBean">
-		<property name="maxNestingLevel" value="${cassandra.sync.nesting}"></property>
 		<property name="hectorClient" ref="syncEndpointHectorClient" ></property>
 		<property name="flattenedPropertiesFilter" ref="flattenedPropertiesFilter"></property>
 		<property name="columnFamilyNameConverter" ref="cfNameConverter"></property>

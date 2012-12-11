@@ -69,7 +69,6 @@ public class CassandaraFactoryBeansTest {
     	properties.setProperty("cassandra.password", "default");
     	properties.setProperty("cassandra.ds.cluster", "ds_cluster");
     	properties.setProperty("cassandra.sync.cluster", "sync_cluster");
-    	properties.setProperty("cassandra.sync.nesting", String.valueOf(10));
     	properties.setProperty("cassandra.ds.minconnections", String.valueOf(1));
     	properties.setProperty("cassandra.ds.maxconnections", String.valueOf(5));
     	properties.setProperty("cassandra.ds.batchlimit", String.valueOf(100));
