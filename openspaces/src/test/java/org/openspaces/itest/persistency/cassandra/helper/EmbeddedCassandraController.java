@@ -8,6 +8,7 @@ import org.github.jamm.MemoryMeter;
 import org.jini.rio.boot.BootUtil;
 import org.openspaces.itest.persistency.cassandra.helper.config.CassandraConfigUtils;
 import org.openspaces.test.client.executor.Executor;
+import org.openspaces.test.client.executor.ExecutorUtils;
 import org.openspaces.test.client.executor.RemoteAsyncCommandResult;
 import org.openspaces.test.client.executor.RemoteJavaCommand;
 
@@ -47,11 +48,11 @@ public class EmbeddedCassandraController
                 RemoteJavaCommand<IEmbeddedCassandra> cmd = 
                         new RemoteJavaCommand<IEmbeddedCassandra>(EmbeddedCassandra.class, null);
                 cmd.addJVMArg("-ea");
-                cmd.addJVMArg("-javaagent:\"" + 
+                cmd.addJVMArg("-javaagent:" + wrapWithQuotesIfWindows(
                     new File(MemoryMeter.class.getProtectionDomain()
                                               .getCodeSource()
                                               .getLocation()
-                                              .getPath()) + "\"");
+                                              .getPath()).getAbsolutePath()));
                 cmd.addJVMArg("-Xms1G");
                 cmd.addJVMArg("-Xmx1G");
                 cmd.addJVMArg("-XX:+HeapDumpOnOutOfMemoryError");
@@ -76,6 +77,14 @@ public class EmbeddedCassandraController
                 throw new RuntimeException(e);
             }
         }
+    }
+    
+    private static String wrapWithQuotesIfWindows(String string) 
+    {
+        if (ExecutorUtils.isUnixOS())
+            return string;
+        
+        return "\"" + string + "\"";
     }
     
     public void createKeySpace(String keySpaceName)
