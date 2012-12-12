@@ -1,6 +1,7 @@
 package org.openspaces.persistency.cassandra.archive;
 
 import org.openspaces.core.GigaSpace;
+import org.openspaces.persistency.cassandra.CassandraConsistencyLevel;
 
 public class CassandraArchiveOperationHandlerConfigurer {
 
@@ -35,6 +36,17 @@ public class CassandraArchiveOperationHandlerConfigurer {
 		return this;
 	}
 
+	/**
+	 * @see CassandraArchiveOperationHandler#setWriteConsistency(CassandraConsistencyLevel)
+	 */
+	public CassandraArchiveOperationHandlerConfigurer writeConsistency(CassandraConsistencyLevel writeConsistency) {
+		handler.setWriteConsistency(writeConsistency);
+		return this;
+	}
+	
+	/**
+	 * @see CassandraArchiveOperationHandler#setGigaSpace(GigaSpace)
+	 */
 	public CassandraArchiveOperationHandlerConfigurer gigaSpace(GigaSpace gigaSpace) {
 		handler.setGigaSpace(gigaSpace);
 		return this;
