@@ -109,10 +109,6 @@ public class CassandraArchiveOperationHandler implements ArchiveOperationHandler
 		this.keyspace = keyspace;
 	}
 	
-	public CassandraConsistencyLevel getWriteConsistency() {
-	    return writeConsistency;
-	}
-	
 	/**
 	 * @param writeConsistency - defines the consistency level used when writing to Cassandra.
 	 * default is null (which is mapped to {@link CassandraConsistencyLevel#QUORUM} )
@@ -121,7 +117,28 @@ public class CassandraArchiveOperationHandler implements ArchiveOperationHandler
 	public void setWriteConsistency(CassandraConsistencyLevel writeConsistency) {
 	    this.writeConsistency = writeConsistency;
 	}
-	
+
+	/**
+	 * @see PropertyValueSerializer
+	 */
+    public void setFixedPropertyValueSerializer(PropertyValueSerializer fixedPropertyValueSerializer) {
+        this.fixedPropertyValueSerializer = fixedPropertyValueSerializer;
+    }
+
+    /**
+     * @see FlattenedPropertiesFilter
+     */
+    public void setFlattenedPropertiesFilter(FlattenedPropertiesFilter flattenedPropertiesFilter) {
+        this.flattenedPropertiesFilter = flattenedPropertiesFilter;
+    }
+
+    /**
+     * @see ColumnFamilyNameConverter
+     */
+    public void setColumnFamilyNameConverter(ColumnFamilyNameConverter columnFamilyNameConverter) {
+        this.columnFamilyNameConverter = columnFamilyNameConverter;
+    }
+    
     @PostConstruct
     public void afterPropertiesSet() {
         
