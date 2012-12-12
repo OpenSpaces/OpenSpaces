@@ -45,6 +45,7 @@ import com.gigaspaces.datasource.DataSourceQuery;
 import com.gigaspaces.datasource.DataSourceSQLQuery;
 import com.gigaspaces.datasource.SpaceDataSource;
 import com.gigaspaces.document.SpaceDocument;
+import com.gigaspaces.internal.utils.StringUtils;
 import com.gigaspaces.metadata.SpaceTypeDescriptor;
 import com.j_spaces.kernel.pool.IResourceFactory;
 import com.j_spaces.kernel.pool.IResourcePool;
@@ -235,6 +236,19 @@ public class CassandraSpaceDataSource
     public DataIterator<SpaceTypeDescriptor> initialMetadataLoad() {
         
         Map<String, ColumnFamilyMetadata> columnFamilies = hectorClient.populateColumnFamiliesMetadata(mapper);
+        
+        if (logger.isDebugEnabled()) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("Loaded the following types from Cassandra for initial metadata load:")
+              .append(StringUtils.NEW_LINE);
+            
+            for (ColumnFamilyMetadata metadata : columnFamilies.values()) {
+                sb.append("\t").append(metadata).append(StringUtils.NEW_LINE);
+            }
+            
+            logger.debug(sb.toString());
+        }
+        
         Map<String, SpaceTypeDescriptorHolder> typeDescriptors = new HashMap<String, SpaceTypeDescriptorHolder>();
         
         for (ColumnFamilyMetadata metadata : columnFamilies.values()) {
