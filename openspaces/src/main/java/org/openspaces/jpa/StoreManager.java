@@ -410,7 +410,7 @@ public class StoreManager extends AbstractStoreManager {
         if (typeDescriptor.isAutoGenerateId())
             template = TemplatePacketFactory.createUidPacket((String) ids[0], null, 0, QueryResultTypeInternal.OBJECT_JAVA);
         else
-            template = TemplatePacketFactory.createIdPacket(ids[0], null, 0, typeDescriptor, QueryResultTypeInternal.OBJECT_JAVA);
+            template = TemplatePacketFactory.createIdPacket(ids[0], null, 0, typeDescriptor, QueryResultTypeInternal.OBJECT_JAVA, null);
         result = (IEntryPacket) proxy.read(template, _transaction, 0, readModifier);
         return result;
     }
@@ -552,7 +552,7 @@ public class StoreManager extends AbstractStoreManager {
                 if (typeDescriptor.isAutoGenerateId())
                     template = TemplatePacketFactory.createUidPacket((String) ids[0], routing, 0, QueryResultTypeInternal.OBJECT_JAVA);
                 else
-                    template = TemplatePacketFactory.createIdPacket(ids[0], routing, 0, typeDescriptor, QueryResultTypeInternal.OBJECT_JAVA);
+                    template = TemplatePacketFactory.createIdPacket(ids[0], routing, 0, typeDescriptor, QueryResultTypeInternal.OBJECT_JAVA, null);
                 
                 int result = proxy.clear(template, _transaction, 0);
                 if (result != 1)
