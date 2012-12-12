@@ -138,7 +138,39 @@ public class CassandraArchiveOperationHandler implements ArchiveOperationHandler
     public void setColumnFamilyNameConverter(ColumnFamilyNameConverter columnFamilyNameConverter) {
         this.columnFamilyNameConverter = columnFamilyNameConverter;
     }
-    
+
+    public GigaSpace getGigaSpace() {
+        return gigaSpace;
+    }
+
+    public PropertyValueSerializer getPropertyValueSerializer() {
+        return propertyValueSerializer;
+    }
+
+    public FlattenedPropertiesFilter getFlattenedPropertiesFilter() {
+        return flattenedPropertiesFilter;
+    }
+
+    public ColumnFamilyNameConverter getColumnFamilyNameConverter() {
+        return columnFamilyNameConverter;
+    }
+
+    public String getHosts() {
+        return hosts;
+    }
+
+    public Integer getPort() {
+        return port;
+    }
+
+    public String getKeyspace() {
+        return keyspace;
+    }
+
+    public CassandraConsistencyLevel getWriteConsistency() {
+        return writeConsistency;
+    }
+
     @PostConstruct
     public void afterPropertiesSet() {
         
