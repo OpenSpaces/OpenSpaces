@@ -49,7 +49,7 @@ public class HectorCassandraClientConfigurer {
     /**
      * Sets the port matching the host name of the Cassandra cluster to
      * connect to.
-     * @param port The cassandra port. Set null to use the default port number.
+     * @param port The cassandra port. Set null to use the default port number {@link CassandraHost#DEFAULT_PORT}
      * @return {@code this} instance.
      */
     public HectorCassandraClientConfigurer port(Integer port) {
