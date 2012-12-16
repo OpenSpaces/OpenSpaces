@@ -42,6 +42,7 @@ public class CassandraTokenRangeAwareDataIterator implements DataIterator<Object
     private final CQLQueryContext                 queryContext;
     private final CassandraConsistencyLevel       readConsistencyLevel;
 
+    private boolean                               closed             = false;
     private CassandraTokenRangeJDBCDataIterator   currentIterator;
     private Object                                currentLastToken   = null;
     private int                                   currentResultCount = 0;
@@ -146,7 +147,15 @@ public class CassandraTokenRangeAwareDataIterator implements DataIterator<Object
     
     @Override
     public void close() {
-        closeSelfResources();
-        connectionResource.release();
+        if (closed) {
+            return;
+        }
+        
+        try {
+            closeSelfResources();
+            connectionResource.release();
+        } finally {
+            closed = true;
+        }
     }
 }
