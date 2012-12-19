@@ -176,7 +176,8 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
     @Override
     public void discovered(final DiscoveryEvent disEvent) {
         for (final ServiceRegistrar registrar : disEvent.getRegistrars()) {
-            try {
+            final ServiceID serviceID = registrar.getServiceID();
+			try {
 
                 final JVMDetails jvmDetails = ((JVMInfoProvider) registrar.getRegistrar()).getJVMDetails();
                 if( !AdminFilterHelper.acceptJvm( admin.getAdminFilter(), jvmDetails ) ){
@@ -184,11 +185,11 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 }
                 
                 final InternalLookupService lookupService = new DefaultLookupService(registrar,
-                        registrar.getServiceID(), admin, ((AgentIdAware) registrar.getRegistrar()).getAgentId(),
+                        serviceID, admin, ((AgentIdAware) registrar.getRegistrar()).getAgentId(),
                         ((AgentIdAware) registrar.getRegistrar()).getGSAServiceID(), jvmDetails);
                 
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Service Added [LUS] with uid [" + registrar.getServiceID() + "]");
+                    logger.debug("Service Added [LUS] with uid [" + serviceID + "]");
                 }
                 
                 final NIODetails nioDetails = lookupService.getNIODetails();
@@ -202,9 +203,12 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                         admin.addLookupService(lookupService, nioDetails, osDetails, jvmDetails, jmxUrl, zones);
                         }
                 });
-
+        	} catch (AdminClosedException e) {
+        		if (logger.isDebugEnabled()) {
+                    logger.debug("Failed to add lookup service with id [" + serviceID + "] since admin is already closed", e);
+                }
             } catch (Exception e) {
-                logger.warn("Failed to add lookup service with id [" + registrar.getServiceID() + "]", e);
+                logger.warn("Failed to add lookup service with id [" + serviceID + "]", e);
             }
         }
 
@@ -213,12 +217,20 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
     @Override
     public void discarded(final DiscoveryEvent e) {
         for (final ServiceRegistrar registrar : e.getRegistrars()) {
-            admin.scheduleNonBlockingStateChange(new Runnable() {
-                @Override
-                public void run() {
-                    admin.removeLookupService(registrar.getServiceID().toString());
+            final String serviceId = registrar.getServiceID().toString();
+            try {
+                admin.scheduleNonBlockingStateChange(new Runnable() {
+                    @Override
+                    public void run() {
+                        admin.removeLookupService(serviceId);
+                    }
+                });
+            } catch (AdminClosedException ex) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Failed to remove lookup service with id ["
+                            + serviceId + "] since admin is already closed", ex);
                 }
-            });
+            }
         }
     }
 
@@ -521,11 +533,12 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
 
     @Override
     public void serviceRemoved(final ServiceDiscoveryEvent event) {
-        admin.scheduleNonBlockingStateChange(new Runnable() {
+    	final Object service = event.getPreEventServiceItem().service;
+    	final ServiceID serviceID = event.getPreEventServiceItem().serviceID;
+    	try {
+    	admin.scheduleNonBlockingStateChange(new Runnable() {
             @Override
             public void run() {
-                Object service = event.getPreEventServiceItem().service;
-                ServiceID serviceID = event.getPreEventServiceItem().serviceID;
                 if (service instanceof GSM) {
                     if (logger.isDebugEnabled()) {
                         logger.debug("Service Removed [GSM] with uid [" + serviceID + "]");
@@ -559,6 +572,14 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 }
             }
         });
+        } catch (AdminClosedException e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug(
+                        "Failed to remove service " + service.getClass()
+                                + " id " + serviceID
+                                + " since admin is already closed", e);
+            }
+        }
     }
 
     @Override
