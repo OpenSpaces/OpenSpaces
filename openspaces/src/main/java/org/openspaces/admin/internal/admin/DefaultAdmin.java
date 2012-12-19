@@ -294,7 +294,7 @@ public class DefaultAdmin implements InternalAdmin {
         }
         
         if (logger.isDebugEnabled()) {
-            logger.debug("Admin created " + this.hashCode());
+            logger.debug("Admin created " + this.hashCode() + "discoveryService=" + this.discoveryService.toString());
         }
     }
     

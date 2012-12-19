@@ -31,6 +31,7 @@ import net.jini.core.lookup.ServiceTemplate;
 import net.jini.discovery.DiscoveryEvent;
 import net.jini.discovery.DiscoveryListener;
 import net.jini.discovery.DiscoveryLocatorManagement;
+import net.jini.discovery.DiscoveryManagement;
 import net.jini.discovery.LookupDiscoveryManager;
 import net.jini.discovery.dynamic.DynamicLookupLocatorDiscovery;
 import net.jini.lookup.LookupCache;
@@ -660,4 +661,9 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
         return BootUtil.toLookupLocators(locators);
     }
 
+    @Override
+    public String toString() {
+        DiscoveryManagement ldm = sdm.getDiscoveryManager();
+        return super.toString() + "hashCode= sdm=" + Integer.toHexString(sdm.hashCode()) +" ldm=" + Integer.toHexString(ldm.hashCode());
+    }
 }
