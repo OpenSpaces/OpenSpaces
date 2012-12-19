@@ -144,7 +144,7 @@ public class CassandraArchiveOperationHandler implements ArchiveOperationHandler
     }
 
     public PropertyValueSerializer getPropertyValueSerializer() {
-        return fixedPropertyValueSerializer;
+        return propertyValueSerializer;
     }
 
     public FlattenedPropertiesFilter getFlattenedPropertiesFilter() {
