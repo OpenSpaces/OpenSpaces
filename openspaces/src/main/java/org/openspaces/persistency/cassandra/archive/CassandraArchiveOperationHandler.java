@@ -62,7 +62,7 @@ public class CassandraArchiveOperationHandler implements ArchiveOperationHandler
     private GigaSpace gigaSpace;
     
     //injected (overrides default value)
-    private PropertyValueSerializer fixedPropertyValueSerializer;
+    private PropertyValueSerializer propertyValueSerializer;
     private FlattenedPropertiesFilter flattenedPropertiesFilter;
     private ColumnFamilyNameConverter columnFamilyNameConverter;
     private String hosts;
@@ -121,8 +121,8 @@ public class CassandraArchiveOperationHandler implements ArchiveOperationHandler
 	/**
 	 * @see PropertyValueSerializer
 	 */
-    public void setFixedPropertyValueSerializer(PropertyValueSerializer fixedPropertyValueSerializer) {
-        this.fixedPropertyValueSerializer = fixedPropertyValueSerializer;
+    public void setPropertyValueSerializer(PropertyValueSerializer propertyValueSerializer) {
+        this.propertyValueSerializer = propertyValueSerializer;
     }
 
     /**
@@ -200,7 +200,7 @@ public class CassandraArchiveOperationHandler implements ArchiveOperationHandler
         final PropertyValueSerializer dynamicPropertyValueSerializer = null;
         
         mapper = new DefaultSpaceDocumentColumnFamilyMapper(
-        		fixedPropertyValueSerializer, // can be null
+        		propertyValueSerializer, // can be null
         		dynamicPropertyValueSerializer, //not used, can be null                                         
                 flattenedPropertiesFilter, // can be null
                 columnFamilyNameConverter // can be null
@@ -246,11 +246,12 @@ public class CassandraArchiveOperationHandler implements ArchiveOperationHandler
             }
             ColumnFamilyRow columnFamilyRow;
         
-            columnFamilyRow = 
+            boolean useDynamicPropertySerializerForDynamicColumns = false;
+			columnFamilyRow = 
                     mapper.toColumnFamilyRow(metadata, 
                                              spaceDoc, 
                                              ColumnFamilyRowType.Write,
-                                             false);
+                                             useDynamicPropertySerializerForDynamicColumns);
             rows.add(columnFamilyRow);
         }
         if (logger.isTraceEnabled()) {
