@@ -294,7 +294,7 @@ public class DefaultAdmin implements InternalAdmin {
         }
         
         if (logger.isDebugEnabled()) {
-            logger.debug("Admin created " + this.hashCode() + "discoveryService=" + this.discoveryService.toString());
+            logger.debug("Admin created " + this.hashCode());
         }
     }
     
@@ -386,6 +386,11 @@ public class DefaultAdmin implements InternalAdmin {
                 new ScheduledProcessingUnitMonitor(), scheduledProcessingUnitMonitorInterval, scheduledProcessingUnitMonitorInterval, TimeUnit.MILLISECONDS);
         scheduledAgentProcessessMonitorFuture = scheduleWithFixedDelay(new ScheduledAgentProcessessMonitor(),
                 scheduledAgentProcessessMonitorInterval, scheduledAgentProcessessMonitorInterval, TimeUnit.MILLISECONDS);
+        
+        if (logger.isDebugEnabled()) {
+            logger.debug("Admin started " + this.hashCode() + "discoveryService=" + this.discoveryService.toString());
+        }
+
         
     }
 
