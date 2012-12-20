@@ -664,6 +664,6 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
     @Override
     public String toString() {
         DiscoveryManagement ldm = sdm.getDiscoveryManager();
-        return super.toString() + "hashCode= sdm=" + Integer.toHexString(sdm.hashCode()) +" ldm=" + Integer.toHexString(ldm.hashCode());
+        return super.toString() + " sdm=" + Integer.toHexString(sdm.hashCode()) +" ldm=" + Integer.toHexString(ldm.hashCode());
     }
 }
