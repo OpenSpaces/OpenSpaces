@@ -168,6 +168,9 @@ public class CassandraTokenRangeJDBCDataIterator implements DataIterator<Object>
             Object columnValue = resultSet.getObject(i);
             if (columnFamilyMetadata.getKeyName().equals(columnName)) {
                 keyValue = columnValue;
+                if (keyValue instanceof ByteBuffer) {
+                    keyValue = columnFamilyMetadata.getKeySerializer().fromByteBuffer((ByteBuffer) keyValue);
+                }
             } else {
                 ColumnMetadata columnMetadata = columnFamilyMetadata.getColumns().get(columnName);
                 if (columnMetadata == null) {
