@@ -148,7 +148,8 @@
 			<directory>${project.build.directory}/dependency</directory>
 			<outputDirectory>/lib/platform/jpa</outputDirectory>
 			<includes>
-				<include>openjpa-all-*</include>
+				<include>openjpa-*</include>
+				<include>commons-collections-*</include>
 			</includes>
 		</fileSet>	
 		<!--  Add javadoc file to package -->
