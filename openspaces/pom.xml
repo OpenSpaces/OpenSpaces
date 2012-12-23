@@ -551,6 +551,12 @@
 			<artifactId>jmock-cglib</artifactId>
 			<version>1.1.0</version>
 			<scope>provided</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>cglib</groupId>
+					<artifactId>cglib-full</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.codehaus.groovy</groupId>
