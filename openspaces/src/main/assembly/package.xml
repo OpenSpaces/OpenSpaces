@@ -156,7 +156,7 @@
 			<outputDirectory>/lib/platform/commons</outputDirectory>
 			<includes>
 				<include>commons-collections-*</include>
-				<include>commons-pull-*</include>
+				<include>commons-pool-*</include>
 				<include>commons-lang-*</include>
 			</includes>
 		</fileSet>	
