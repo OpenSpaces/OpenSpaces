@@ -141,7 +141,7 @@
 			<directory>${project.build.directory}/dependency</directory>
 			<outputDirectory>/lib/platform/velocity</outputDirectory>
 			<includes>
-				<include>velocity-dep-*</include>
+				<include>velocity-*</include>
 			</includes>
 		</fileSet>
 		<fileSet>
