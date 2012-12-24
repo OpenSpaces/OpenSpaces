@@ -24,6 +24,8 @@ import org.openspaces.admin.pu.DeploymentStatus;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.grid.gsm.autoscaling.exceptions.AutoScalingTemporarilyDisabledCooldownException;
 
+import com.j_spaces.kernel.time.SystemTime;
+
 /**
  * Validates the cooldown period of auto-scaling rules.
  * If an instance was added the increase cooldown period is in place
@@ -63,7 +65,7 @@ public class AutomaticCapacityCooldownValidator {
      * @throws AutoScalingTemporarilyDisabledCooldownException
      */
     public void validate() throws AutoScalingTemporarilyDisabledCooldownException {
-        validate(processingUnit.getStatus(), getInstancesUids(), System.currentTimeMillis());
+        validate(processingUnit.getStatus(), getInstancesUids(), SystemTime.timeMillis());
     }
     
     /**

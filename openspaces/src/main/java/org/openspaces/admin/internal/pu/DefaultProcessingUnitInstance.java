@@ -82,6 +82,7 @@ import com.gigaspaces.lrmi.LRMIMonitoringDetails;
 import com.gigaspaces.lrmi.nio.async.FutureContext;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOStatistics;
+import com.j_spaces.kernel.time.SystemTime;
 
 /**
  * @author kimchy
@@ -548,7 +549,7 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
     }
     
     public synchronized ProcessingUnitInstanceStatistics getStatistics() {
-        long currentTime = System.currentTimeMillis();
+        long currentTime = SystemTime.timeMillis();
         if ((currentTime - lastStatisticsTimestamp) < statisticsInterval) {
             return lastStatistics;
         }

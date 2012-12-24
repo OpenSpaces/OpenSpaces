@@ -77,6 +77,7 @@ import com.j_spaces.core.admin.StatisticsAdmin;
 import com.j_spaces.core.client.SpaceURL;
 import com.j_spaces.core.client.SpaceURLParser;
 import com.j_spaces.core.filters.StatisticsHolder;
+import com.j_spaces.kernel.time.SystemTime;
 
 /**
  * @author kimchy
@@ -419,7 +420,7 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
     private static final SpaceInstanceStatistics NA_STATISTICS = new DefaultSpaceInstanceStatistics(new StatisticsHolder(new long[]{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}), null, 0, -1);
 
     public synchronized SpaceInstanceStatistics getStatistics() {
-        long currentTime = System.currentTimeMillis();
+        long currentTime = SystemTime.timeMillis();
         if ((currentTime - lastStatisticsTimestamp) < statisticsInterval) {
             return lastStatistics;
         }

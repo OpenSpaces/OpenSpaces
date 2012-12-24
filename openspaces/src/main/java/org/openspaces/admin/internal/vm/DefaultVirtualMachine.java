@@ -68,6 +68,7 @@ import org.openspaces.admin.vm.events.VirtualMachineStatisticsChangedEventManage
 import org.openspaces.core.util.ConcurrentHashSet;
 
 import com.gigaspaces.internal.jvm.JVMDetails;
+import com.j_spaces.kernel.time.SystemTime;
 
 /**
  * @author kimchy
@@ -294,7 +295,7 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
     private static final VirtualMachineStatistics NA_STATS = new DefaultVirtualMachineStatistics();
 
     public synchronized VirtualMachineStatistics getStatistics() {
-        long currentTime = System.currentTimeMillis();
+        long currentTime = SystemTime.timeMillis();
         if ((currentTime - lastStatisticsTimestamp) < statisticsInterval) {
             return lastStatistics;
         }

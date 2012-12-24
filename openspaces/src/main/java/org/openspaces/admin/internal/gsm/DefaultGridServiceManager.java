@@ -97,6 +97,7 @@ import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOStatistics;
 import com.gigaspaces.security.SecurityException;
 import com.gigaspaces.security.directory.User;
+import com.j_spaces.kernel.time.SystemTime;
 
 /**
  * @author kimchy
@@ -184,7 +185,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
     
     private ProcessingUnit deploy(ProcessingUnitConfig puConfig, String applicationName, long timeout, TimeUnit timeUnit) {
         
-        long end = System.currentTimeMillis() + timeUnit.toMillis(timeout);
+        long end = SystemTime.timeMillis() + timeUnit.toMillis(timeout);
         
         Deploy deploy = new Deploy();
         Deploy.setDisableInfoLogging(true);
@@ -250,7 +251,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         
         if (!puConfig.getElasticProperties().isEmpty()) {
             // wait until elastic scale strategy is being enforced
-            while (System.currentTimeMillis() < end) {
+            while (SystemTime.timeMillis() < end) {
                 InternalGridServiceManager gridServiceManager = (InternalGridServiceManager)pu.getManagingGridServiceManager();
                 if (gridServiceManager != null && gridServiceManager.isManagedByElasticServiceManager(pu)) {
                     break;
@@ -610,7 +611,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
     @Override
     public Application deploy(ApplicationConfig applicationConfig, long timeout, TimeUnit timeUnit)
             throws ApplicationAlreadyDeployedException, ProcessingUnitAlreadyDeployedException {
-        long end = System.currentTimeMillis()  + timeUnit.toMillis(timeout);
+        long end = SystemTime.timeMillis()  + timeUnit.toMillis(timeout);
         String applicationName = applicationConfig.getName();
         if (applicationName == null) {
             throw new IllegalArgumentException("Application Name cannot be null");
@@ -641,7 +642,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         Set<String> deployedPuNames = new HashSet<String>();
         for (ProcessingUnitConfigHolder puConfigHolder : processingUnitConfigHolders) {
             try {
-                long remaining = end - System.currentTimeMillis();
+                long remaining = end - SystemTime.timeMillis();
                 if (remaining <= 0) {
                     timedOut = true;
                     break;
@@ -735,7 +736,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
     }
 
     private void undeployProcessingUnitsAndWaitInternal(ProcessingUnit[] processingUnits, long timeout, TimeUnit timeUnit) throws TimeoutException, InterruptedException {
-        long end = System.currentTimeMillis() + timeUnit.toMillis(timeout);
+        long end = SystemTime.timeMillis() + timeUnit.toMillis(timeout);
          
         List<GridServiceContainer> containersPendingRemoval = new ArrayList<GridServiceContainer>();
         List<ProcessingUnitInstance> puInstancesPendingRemoval = new ArrayList<ProcessingUnitInstance>();
@@ -776,7 +777,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         admin.getProcessingUnits().getProcessingUnitRemoved().add(listener);
         try {
             for (final ProcessingUnit pu : processingUnits) {
-                long gsmTimeout = end - System.currentTimeMillis();
+                long gsmTimeout = end - SystemTime.timeMillis();
                 if (gsmTimeout < 0) {
                     throw new TimeoutException("Timeout expired before udeploying processing unit " + pu);
                 }
@@ -793,7 +794,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
                 });
             }
             for (ProcessingUnit pu : processingUnits) {
-                long puRemovedTimeout = end - System.currentTimeMillis();
+                long puRemovedTimeout = end - SystemTime.timeMillis();
                 if (puRemovedTimeout < 0) {
                     throw new TimeoutException("Timeout expired before waiting for processing unit " + pu + " to undeploy");
                 }
@@ -817,7 +818,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
                 break;
             }
             catch (TimeoutException e) {
-                long sleepDuration = end - System.currentTimeMillis();
+                long sleepDuration = end - SystemTime.timeMillis();
                 if (sleepDuration < 0) {
                     throw e;
                 }

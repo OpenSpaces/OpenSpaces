@@ -62,6 +62,7 @@ import org.openspaces.security.AdminFilterHelper;
 
 import com.gigaspaces.internal.jvm.JVMDetails;
 import com.j_spaces.kernel.SizeConcurrentHashMap;
+import com.j_spaces.kernel.time.SystemTime;
 
 /**
  * @author kimchy
@@ -423,14 +424,14 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
             return true;
         }
 
-        long end = System.currentTimeMillis() + timeUnit.toMillis(timeout);
+        long end = SystemTime.timeMillis() + timeUnit.toMillis(timeout);
         InternalGridServiceManager gridServiceManager = (InternalGridServiceManager) waitForAtLeastOne(timeout, timeUnit);
         if (gridServiceManager == null) {
             throw new AdminException(
                     "Timeout waiting for Grid Service Manager when undeploying [" + processingUnits[0].getName() + "]. "+
                     "Timeout is " + timeout + " " + timeUnit);
         }
-        long remaining = Math.max(0, end - System.currentTimeMillis());
+        long remaining = Math.max(0, end - SystemTime.timeMillis());
         return gridServiceManager.undeployProcessingUnitsAndWait(processingUnits, remaining, TimeUnit.MILLISECONDS);
     }
 

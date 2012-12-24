@@ -89,6 +89,7 @@ import com.j_spaces.core.filters.ReplicationStatistics.OutgoingChannel;
 import com.j_spaces.core.filters.StatisticsHolder;
 import com.j_spaces.kernel.JSpaceUtilities;
 import com.j_spaces.kernel.SizeConcurrentHashMap;
+import com.j_spaces.kernel.time.SystemTime;
 
 /**
  * @author kimchy
@@ -305,7 +306,7 @@ public class DefaultSpace implements InternalSpace {
     }
 
     public synchronized SpaceStatistics getStatistics() {
-        long currentTime = System.currentTimeMillis();
+        long currentTime = SystemTime.timeMillis();
         if ((currentTime - lastStatisticsTimestamp) < statisticsInterval) {
             return lastStatistics;
         }
@@ -319,7 +320,7 @@ public class DefaultSpace implements InternalSpace {
     }
 
     public synchronized SpaceStatistics getPrimariesStatistics() {
-        long currentTime = System.currentTimeMillis();
+        long currentTime = SystemTime.timeMillis();
         if ((currentTime - lastPrimariesStatisticsTimestamp) < statisticsInterval) {
             return lastPrimariesStatistics;
         }
@@ -335,7 +336,7 @@ public class DefaultSpace implements InternalSpace {
     }
 
     public synchronized SpaceStatistics getBackupsStatistics() {
-        long currentTime = System.currentTimeMillis();
+        long currentTime = SystemTime.timeMillis();
         if ((currentTime - lastBackupsStatisticsTimestamp) < statisticsInterval) {
             return lastStatistics;
         }

@@ -34,6 +34,7 @@ import org.openspaces.admin.space.SpaceInstanceTransactionDetails;
 
 import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
 import com.j_spaces.core.admin.SpaceRuntimeInfo;
+import com.j_spaces.kernel.time.SystemTime;
 
 public class DefaultSpaceInstanceRuntimeDetails implements SpaceInstanceRuntimeDetails {
 
@@ -42,11 +43,11 @@ public class DefaultSpaceInstanceRuntimeDetails implements SpaceInstanceRuntimeD
     private final DefaultSpaceInstanceTransactionDetails spaceInstanceTransactionDetails;
     private final DefaultSpaceInstanceConnectionDetails spaceInstanceConnectionDetails;
     
-    private long statisticsInterval = StatisticsMonitor.DEFAULT_MONITOR_INTERVAL;
+    private final long statisticsInterval = StatisticsMonitor.DEFAULT_MONITOR_INTERVAL;
 
     private long lastStatisticsTimestamp = 0;
     
-    private Object monitor = new Object();
+    private final Object monitor = new Object();
 
     private volatile SpaceRuntimeInfo lastSpaceRuntimeInfo;
     
@@ -136,7 +137,7 @@ public class DefaultSpaceInstanceRuntimeDetails implements SpaceInstanceRuntimeD
  
         synchronized( monitor ){
 
-            long currentTime = System.currentTimeMillis();
+            long currentTime = SystemTime.timeMillis();
             if( ( currentTime - lastStatisticsTimestamp ) < statisticsInterval ) {
                 return lastSpaceRuntimeInfo;
             }

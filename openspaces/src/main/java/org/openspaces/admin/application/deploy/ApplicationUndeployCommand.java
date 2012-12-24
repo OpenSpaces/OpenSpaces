@@ -22,6 +22,8 @@ import org.openspaces.admin.Admin;
 import org.openspaces.admin.application.Application;
 import org.openspaces.admin.gsm.GridServiceManager;
 
+import com.j_spaces.kernel.time.SystemTime;
+
 /**
  * @author itaif
  * @since 9.0.1
@@ -53,7 +55,7 @@ public class ApplicationUndeployCommand extends AbstractApplicationCommand{
                 
                 String name = args[args.length-1];
                 
-                long end = System.currentTimeMillis() + getTimeout();
+                long end = SystemTime.timeMillis() + getTimeout();
                 
                 Application application = waitForApplication(gsm.getAdmin(), name, getTimeout(), TimeUnit.MILLISECONDS);
                 
@@ -83,7 +85,7 @@ public class ApplicationUndeployCommand extends AbstractApplicationCommand{
 
 
         private long remainingMilliseconds(String name, long end) throws TimeoutException {
-            final long remaining = end - System.currentTimeMillis();
+            final long remaining = end - SystemTime.timeMillis();
             if (remaining < 0) {
                 throw new TimeoutException("Application " + name + " deployment timed out");
             }

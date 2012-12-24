@@ -99,6 +99,7 @@ import com.j_spaces.core.client.SpaceURL;
 import com.j_spaces.core.service.ServiceConfigLoader;
 import com.j_spaces.kernel.PlatformVersion;
 import com.j_spaces.kernel.SystemProperties;
+import com.j_spaces.kernel.time.SystemTime;
 
 /**
  */
@@ -239,11 +240,11 @@ public class Deploy {
         Configuration config = ServiceConfigLoader.getConfiguration();
         deployAdmin.deploy(opString, (ServiceProvisionListener) ExporterConfig.getExporter(config, "com.gigaspaces.transport", "defaultExporter").export(listener));
         info("Waiting "+ (deployTimeout!=Long.MAX_VALUE?deployTimeout+" ms":"indefinitely") +" for [" + totalPlanned + "] processing unit instances to be deployed...");
-        long expireDeployTimeout = (deployTimeout!=Long.MAX_VALUE ? System.currentTimeMillis() + deployTimeout : Long.MAX_VALUE);
-        while (listener.getTotalEvents() < totalPlanned && System.currentTimeMillis() < expireDeployTimeout) {
+        long expireDeployTimeout = (deployTimeout!=Long.MAX_VALUE ? SystemTime.timeMillis() + deployTimeout : Long.MAX_VALUE);
+        while (listener.getTotalEvents() < totalPlanned && SystemTime.timeMillis() < expireDeployTimeout) {
             Thread.sleep(200);
         }
-        if (System.currentTimeMillis() >= expireDeployTimeout) {
+        if (SystemTime.timeMillis() >= expireDeployTimeout) {
             info("Timed-out deploying [" + totalPlanned + "] processing unit instances");
         } else {
             info("Finished deploying [" + totalPlanned + "] processing unit instances");

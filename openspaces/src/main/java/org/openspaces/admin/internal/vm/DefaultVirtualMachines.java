@@ -18,6 +18,8 @@
 package org.openspaces.admin.internal.vm;
 
 import com.j_spaces.kernel.SizeConcurrentHashMap;
+import com.j_spaces.kernel.time.SystemTime;
+
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.internal.admin.InternalAdmin;
@@ -123,7 +125,7 @@ public class DefaultVirtualMachines implements InternalVirtualMachines {
     }
 
     public synchronized VirtualMachinesStatistics getStatistics() {
-        long currentTime = System.currentTimeMillis();
+        long currentTime = SystemTime.timeMillis();
         if ((currentTime - lastStatisticsTimestamp) < statisticsInterval) {
             return lastStatistics;
         }

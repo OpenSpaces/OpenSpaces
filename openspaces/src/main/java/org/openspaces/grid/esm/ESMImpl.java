@@ -91,6 +91,7 @@ import com.gigaspaces.security.SecurityException;
 import com.gigaspaces.security.directory.UserDetails;
 import com.gigaspaces.security.service.SecurityContext;
 import com.gigaspaces.start.SystemBoot;
+import com.j_spaces.kernel.time.SystemTime;
 import com.sun.jini.start.LifeCycle;
 
 public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRemovedEventListener, ProcessingUnitAddedEventListener,MachineLifecycleEventListener
@@ -132,7 +133,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
                 new Runnable() {
                     long timestamp = 0;
                     public void run() {
-                        long now = System.currentTimeMillis();
+                        long now = SystemTime.timeMillis();
                         if (timestamp == 0 || 
                                 now-timestamp - delay < delayError) {
                         }

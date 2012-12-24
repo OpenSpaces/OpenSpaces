@@ -125,6 +125,7 @@ import org.openspaces.pu.sla.requirement.ZoneRequirement;
 import com.gigaspaces.grid.gsm.PUDetails;
 import com.gigaspaces.internal.utils.StringUtils;
 import com.gigaspaces.internal.utils.collections.ConcurrentHashSet;
+import com.j_spaces.kernel.time.SystemTime;
 
 /**
  * @author kimchy
@@ -916,7 +917,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     
     @Override
     public boolean scaleAndWait(ScaleStrategyConfig strategyConfig, long timeout, TimeUnit timeunit) {
-        long end = System.currentTimeMillis() + timeunit.toMillis(timeout);
+        long end = SystemTime.timeMillis() + timeunit.toMillis(timeout);
         scale(strategyConfig);
         
         while (true) {
@@ -934,7 +935,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
                 }
             }
         
-            long sleepDuration = end - System.currentTimeMillis();
+            long sleepDuration = end - SystemTime.timeMillis();
             if (sleepDuration <= 0) {
                 //timeout
                 return false;
@@ -1100,7 +1101,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     @Override
     public synchronized ProcessingUnitStatistics getStatistics() {
         
-        long currentTime = System.currentTimeMillis();
+        long currentTime = SystemTime.timeMillis();
         if ((currentTime - lastStatisticsTimestamp) < statisticsInterval) {
             if (lastStatistics == null) {
                 throw new IllegalStateException("lastStatistics cannot be null here");

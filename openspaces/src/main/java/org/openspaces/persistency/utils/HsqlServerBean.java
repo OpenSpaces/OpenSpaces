@@ -24,6 +24,8 @@ import org.hsqldb.persist.HsqlProperties;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 
+import com.j_spaces.kernel.time.SystemTime;
+
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -126,8 +128,8 @@ public class HsqlServerBean implements InitializingBean, DisposableBean {
         }
         server.signalCloseAllServerConnections();
         int status = server.stop();
-        long timeout = System.currentTimeMillis() + 5000;
-        while (status != ServerConstants.SERVER_STATE_SHUTDOWN && System.currentTimeMillis() < timeout) {
+        long timeout = SystemTime.timeMillis() + 5000;
+        while (status != ServerConstants.SERVER_STATE_SHUTDOWN && SystemTime.timeMillis() < timeout) {
             try {
                 Thread.sleep(100);
                 status = server.getState();

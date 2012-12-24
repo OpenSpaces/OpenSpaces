@@ -33,6 +33,8 @@ import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnits;
 import org.openspaces.admin.pu.topology.ProcessingUnitDeploymentTopology;
 
+import com.j_spaces.kernel.time.SystemTime;
+
 public class DefaultApplication implements InternalApplication {
 
     private final InternalProcessingUnits processingUnits;
@@ -83,7 +85,7 @@ public class DefaultApplication implements InternalApplication {
     @Override
     public boolean undeployAndWait(long timeout, TimeUnit timeUnit) {
         
-        long end = System.currentTimeMillis()  + timeUnit.toMillis(timeout);
+        long end = SystemTime.timeMillis()  + timeUnit.toMillis(timeout);
         boolean timedOut = false;
         
         final Map<String, List<String>> puReverseDependencies = getReverseDependencies();
@@ -119,7 +121,7 @@ public class DefaultApplication implements InternalApplication {
                 throw new AdminException("Application undeployment does not support cyclic dependencies");
             }
             
-            long remaining = end - System.currentTimeMillis();
+            long remaining = end - SystemTime.timeMillis();
             if (remaining <= 0) {
                 timedOut = true;
                 break;

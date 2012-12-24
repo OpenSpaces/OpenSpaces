@@ -24,6 +24,8 @@ import org.openspaces.events.EventExceptionHandler;
 import org.openspaces.events.ListenerExecutionFailedException;
 import org.springframework.transaction.TransactionStatus;
 
+import com.j_spaces.kernel.time.SystemTime;
+
 /**
  * @author Itai Frenkel
  *
@@ -68,7 +70,7 @@ public class DefaultArchivePollingContainerExceptionHandler implements EventExce
     public void onException(ListenerExecutionFailedException exception, Object data, GigaSpace gigaSpace,
             TransactionStatus txStatus, Object source) throws RuntimeException {
         
-        long now = System.currentTimeMillis();
+        long now = SystemTime.timeMillis();
         if (logger.isWarnEnabled() && shouldLog(exception, now)) {
             logger.warn("Failed to archive data", exception);
             storeLastException(exception, now);

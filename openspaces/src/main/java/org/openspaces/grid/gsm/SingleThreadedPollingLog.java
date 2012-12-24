@@ -23,6 +23,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 
+import com.j_spaces.kernel.time.SystemTime;
+
 /**
  * A log that silently discards some log entries if they have been printed
  * in the past minute already.
@@ -166,7 +168,7 @@ public class SingleThreadedPollingLog implements Log {
     }
 
     private void flushHistory() {
-        long now = System.currentTimeMillis();
+        long now = SystemTime.timeMillis();
         if (lastFlushMilliseconds + discardPeriodMilliseconds <= now) {
             lastFlushMilliseconds = now;
             traceHistory.clear();

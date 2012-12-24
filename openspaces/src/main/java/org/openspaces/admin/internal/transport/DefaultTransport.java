@@ -42,6 +42,7 @@ import com.gigaspaces.lrmi.LRMIOutboundMonitoringDetails;
 import com.gigaspaces.lrmi.LRMIProxyMonitoringDetails;
 import com.gigaspaces.lrmi.LRMIServiceMonitoringDetails;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
+import com.j_spaces.kernel.time.SystemTime;
 
 /**
  * @author kimchy
@@ -137,7 +138,7 @@ public class DefaultTransport implements InternalTransport, TransportLRMIMonitor
     private static final TransportStatistics NA_TRANSPORT_STATS = new DefaultTransportStatistics();
 
     public synchronized TransportStatistics getStatistics() {
-        long currentTime = System.currentTimeMillis();
+        long currentTime = SystemTime.timeMillis();
         if ((currentTime - lastStatisticsTimestamp) < statisticsInterval) {
             return lastStatistics;
         }

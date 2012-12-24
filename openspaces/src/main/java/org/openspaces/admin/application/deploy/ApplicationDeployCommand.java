@@ -28,6 +28,8 @@ import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.config.UserDetailsConfig;
 import org.openspaces.admin.pu.topology.ProcessingUnitConfigHolder;
 
+import com.j_spaces.kernel.time.SystemTime;
+
 
 /**
  * @author itaif
@@ -61,7 +63,7 @@ public class ApplicationDeployCommand extends AbstractApplicationCommand {
                 
                 File applicationFolder = new File(args[args.length-1]);
                 
-                long end = System.currentTimeMillis() + getTimeout();
+                long end = SystemTime.timeMillis() + getTimeout();
                 
                 ApplicationConfig applicationConfig = new ApplicationFileDeployment(applicationFolder).create();
                 
@@ -84,7 +86,7 @@ public class ApplicationDeployCommand extends AbstractApplicationCommand {
                 Application dataApp = gsm.deploy(applicationConfig);
                 
                 for (ProcessingUnit pu : dataApp.getProcessingUnits()) {
-                    long remaining = end - System.currentTimeMillis();
+                    long remaining = end - SystemTime.timeMillis();
                     if (remaining < 0 ||
                         !pu.waitFor(pu.getTotalNumberOfInstances(), remaining, TimeUnit.MILLISECONDS)) {
                         throw new TimeoutException("Application " + name + " deployment timed out after " + TimeUnit.SECONDS.convert(getTimeout(), TimeUnit.MILLISECONDS) + " seconds");

@@ -26,6 +26,8 @@ import org.openspaces.pu.container.jee.JeeServiceDetails;
 import org.openspaces.pu.service.ServiceMonitors;
 import org.openspaces.pu.service.ServiceMonitorsProvider;
 
+import com.j_spaces.kernel.time.SystemTime;
+
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -69,13 +71,13 @@ public class RequestStatisticsFilter implements Filter, ServiceMonitorsProvider 
     }
 
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        long now = System.currentTimeMillis();
+        long now = SystemTime.timeMillis();
         try {
             reqeustsActive.incrementAndGet();
             filterChain.doFilter(servletRequest, servletResponse);
         } finally {
             reqeustsActive.decrementAndGet();
-            long requestDuration = System.currentTimeMillis() - now;
+            long requestDuration = SystemTime.timeMillis() - now;
             requestsDurationTotal.getAndAdd(requestDuration);
             requests.incrementAndGet();
         }
