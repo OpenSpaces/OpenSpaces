@@ -149,6 +149,7 @@
 			<outputDirectory>/lib/platform/jpa</outputDirectory>
 			<includes>
 				<include>openjpa-*</include>
+				<include>geronimo-jpa*</include>
 			</includes>
 		</fileSet>
 		<fileSet>
