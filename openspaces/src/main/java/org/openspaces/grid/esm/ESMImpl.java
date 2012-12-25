@@ -518,6 +518,10 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
 
     public void processingUnitRemoved(final ProcessingUnit pu) {
 
+        if (logger.isLoggable(Level.FINE)) {
+            logger.fine("Processing Unit Removed " + pu.getName());
+        }
+        
         pendingElasticPropertiesUpdatePerProcessingUnit.remove(pu.getName());
         final ScaleBeanServer beanServer = scaleBeanServerPerProcessingUnit.get(pu);        
         if (beanServer != null) {
@@ -529,6 +533,10 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
 
     public void processingUnitAdded(ProcessingUnit pu) {
 
+        if (logger.isLoggable(Level.FINE)) {
+            logger.fine("Processing Unit Added " + pu.getName());
+        }
+        
         ScaleBeanServer undeployedBeanServer = scaleBeanServerPerProcessingUnit.remove(pu);
         if (undeployedBeanServer != null) {
             //TODO: Check isSlaMet() and handle this case ?!@
@@ -596,6 +604,11 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
     }
 
     private void processingUnitElasticPropertiesChanged(String puName, Map<String,String> elasticProperties) {
+
+        if (logger.isLoggable(Level.FINE)) {
+            logger.fine("Processing Unit Elastic Properties Changed for " + puName);
+        }
+        
         elasticPropertiesPerProcessingUnit.put(puName,elasticProperties);
         ProcessingUnit pu = admin.getProcessingUnits().getProcessingUnit(puName);
         if (pu != null) {
