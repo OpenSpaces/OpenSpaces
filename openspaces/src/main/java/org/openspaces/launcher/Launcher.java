@@ -27,6 +27,8 @@ import org.eclipse.jetty.webapp.WebAppContext;
 import org.openspaces.pu.container.support.CommandLineParser;
 
 import com.gigaspaces.admin.cli.RuntimeInfo;
+import com.gigaspaces.internal.io.FileUtils;
+import com.gigaspaces.internal.utils.StringUtils;
 import com.gigaspaces.logger.GSLogConfigLoader;
 
 /**
@@ -41,8 +43,7 @@ public class Launcher {
         String name = System.getProperty("org.openspaces.launcher.name", "launcher");
         String path = System.getProperty("org.openspaces.launcher.path", null);
         String work = System.getProperty("org.openspaces.launcher.work", "./work");
-        String logger = System.getProperty("org.openspaces.launcher.logger", "org.openspaces.launcher"); 
-        boolean help  = false;
+        String loggerName = System.getProperty("org.openspaces.launcher.logger", "org.openspaces.launcher"); 
         CommandLineParser.Parameter[] params = CommandLineParser.parse(args);
         for (CommandLineParser.Parameter param : params) {
             String paramName = param.getName();
@@ -55,16 +56,19 @@ public class Launcher {
             else if ("work".equals(paramName))
                 work = param.getArguments()[0];
             else if ("logger".equals(paramName))
-                logger = param.getArguments()[0];
-            else if("help".equals(paramName) || "h".equals(paramName))
-                help = true;
+            	loggerName = param.getArguments()[0];
+            else if("help".equals(paramName) || "h".equals(paramName)) {
+            	printHelpMessage();
+            	return;
+            }
         }
-        if(path==null || help){
-            System.out.println("Launcher -path <path> [-work <work>] [-port <port>] [-name <name>] [-logger <logger>]");
-            return;
-        }
+
         GSLogConfigLoader.getLoader(name);
         GSLogConfigLoader.getLoader();
+        final Logger logger = Logger.getLogger(loggerName);
+        final String warFilePath = getWarFilePath(path, logger);
+        if (warFilePath == null)
+        	return;
         
         Server server = new Server();
         SelectChannelConnector connector = new SelectChannelConnector();
@@ -74,7 +78,7 @@ public class Launcher {
         
         WebAppContext webAppContext = new WebAppContext();
         webAppContext.setContextPath("/");
-        webAppContext.setWar(path);
+        webAppContext.setWar(warFilePath);
         File tempDir = new File(work);
         tempDir.mkdirs();
         webAppContext.setTempDirectory(tempDir);
@@ -83,10 +87,45 @@ public class Launcher {
 
         server.setHandler(webAppContext);
         
-        Logger.getLogger(logger).info(RuntimeInfo.getShortEnvironmentInfo());
+		logger.info(RuntimeInfo.getShortEnvironmentInfo());
         server.start();
-        webAppContext.start();
-        
-        Logger.getLogger(logger).info(name + " server started on port [" + port + "]");
+        webAppContext.start();        
+        logger.info(name + " server started on port [" + port + "]");
+    }
+
+    private static void printHelpMessage() {
+        System.out.println("Launcher -path <path> [-work <work>] [-port <port>] [-name <name>] [-logger <logger>]");
+    }
+    private static String getWarFilePath(String path, Logger logger) {
+    	// Verify path is not empty:
+    	if (!StringUtils.hasLength(path)) {
+    		printHelpMessage();
+    		return null;
+    	}
+    	// Verify path exists:
+    	final File file = new File(path);
+    	if (!file.exists()) {
+    		System.out.println("Path does not exist: " + path);
+    		printHelpMessage();
+    		return null;
+    	}
+    	// If File is an actual file, return it:
+		if (file.isFile())
+			return path;
+		// If file is a directory, Get the 1st war file (if any):
+		if (file.isDirectory()) {
+			File[] warFiles = FileUtils.findFiles(file, null, ".war");
+			if (warFiles.length == 0) {
+	    		System.out.println("Path does not contain any war files: " + path);
+	    		printHelpMessage();
+	    		return null;
+			}
+			final String warFile = warFiles[0].getPath(); 
+			if (warFiles.length > 1)
+				logger.warning("Found " + warFiles.length + " war files in " + path + ", using " + warFile);
+			return warFile;
+		}
+		System.out.println("Path is neither file nor folder: " + path);
+		return null;
     }
 }
