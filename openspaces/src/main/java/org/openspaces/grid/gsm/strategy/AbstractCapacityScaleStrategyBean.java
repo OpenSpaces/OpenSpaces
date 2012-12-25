@@ -50,6 +50,7 @@ import org.openspaces.grid.gsm.containers.exceptions.ContainersSlaEnforcementPen
 import org.openspaces.grid.gsm.machines.CapacityMachinesSlaPolicy;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpointAware;
+import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementState.RecoveryState;
 import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcementPendingContainerDeallocationException;
 import org.openspaces.grid.gsm.machines.exceptions.MachinesSlaEnforcementInProgressException;
@@ -599,8 +600,8 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
     }
 
     @Override
-    protected boolean isRecoveredStateOnEsmStart(ProcessingUnit otherPu) {
-        return machinesEndpoint.isRecoveredStateOnEsmStart(otherPu);
+    protected RecoveryState getRecoveredStateOnEsmStart(ProcessingUnit otherPu) {
+        return machinesEndpoint.getRecoveredStateOnEsmStart(otherPu);
     }
 
     public CapacityRequirementsPerZones getAllocatedCapacity() throws MachinesSlaEnforcementInProgressException {

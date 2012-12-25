@@ -30,6 +30,7 @@ import org.openspaces.grid.gsm.containers.exceptions.ContainersSlaEnforcementInP
 import org.openspaces.grid.gsm.machines.CapacityMachinesSlaPolicy;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpointAware;
+import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementState.RecoveryState;
 import org.openspaces.grid.gsm.machines.UndeployMachinesSlaPolicy;
 import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.machines.exceptions.MachinesSlaEnforcementInProgressException;
@@ -183,7 +184,7 @@ public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
     }
 
     @Override
-    protected boolean isRecoveredStateOnEsmStart(ProcessingUnit otherPu) {
-        return machinesEndpoint.isRecoveredStateOnEsmStart(otherPu);
+    protected RecoveryState getRecoveredStateOnEsmStart(ProcessingUnit otherPu) {
+        return machinesEndpoint.getRecoveredStateOnEsmStart(otherPu);
     }
 }

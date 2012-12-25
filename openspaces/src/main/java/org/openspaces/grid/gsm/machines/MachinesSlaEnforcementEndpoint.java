@@ -22,6 +22,7 @@ import java.util.Set;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.zone.config.ZonesConfig;
 import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerAgent;
+import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementState.RecoveryState;
 import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.machines.exceptions.MachinesSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.machines.exceptions.NeedToWaitUntilAllGridServiceAgentsDiscoveredException;
@@ -70,9 +71,9 @@ public interface MachinesSlaEnforcementEndpoint extends ServiceLevelAgreementEnf
 
     /**
      * @return true if the specified processing unit has recovered state
-     * @since 9.1.0
+     * @since 9.5
      */
-    boolean isRecoveredStateOnEsmStart(ProcessingUnit processingUnit);
+    RecoveryState getRecoveredStateOnEsmStart(ProcessingUnit processingUnit);
 
     /**
      * @return a list of zones that are being tracked for the specified processing unit

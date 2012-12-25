@@ -49,6 +49,7 @@ import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerAgent;
 import org.openspaces.grid.gsm.capacity.MemoryCapacityRequirement;
 import org.openspaces.grid.gsm.capacity.NumberOfMachinesCapacityRequirement;
 import org.openspaces.grid.gsm.containers.ContainersSlaUtils;
+import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementState.RecoveryState;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementState.StateKey;
 import org.openspaces.grid.gsm.machines.exceptions.CannotDetermineIfNeedToStartMoreMachinesException;
 import org.openspaces.grid.gsm.machines.exceptions.DelayingScaleInUntilAllMachinesHaveStartedException;
@@ -1455,8 +1456,8 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
     }
 
     @Override
-    public boolean isRecoveredStateOnEsmStart(ProcessingUnit otherPu) {
-        return state.isRecoveredStateOnEsmStart(otherPu);
+    public RecoveryState getRecoveredStateOnEsmStart(ProcessingUnit otherPu) {
+        return state.getRecoveredStateOnEsmStart(otherPu);
     }
 
     @Override

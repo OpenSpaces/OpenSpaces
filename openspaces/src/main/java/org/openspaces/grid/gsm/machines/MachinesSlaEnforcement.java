@@ -67,5 +67,7 @@ public class MachinesSlaEnforcement implements
         return endpoints.get(pu) == null;
     }
 
-   
+    public void failedRecoveredStateOnEsmStart(ProcessingUnit pu) {
+        this.state.failedRecoveredStateOnEsmStart(pu);
+    }
 }

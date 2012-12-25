@@ -32,6 +32,7 @@ import org.openspaces.grid.gsm.containers.exceptions.ContainersSlaEnforcementPen
 import org.openspaces.grid.gsm.machines.EagerMachinesSlaPolicy;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpointAware;
+import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementState.RecoveryState;
 import org.openspaces.grid.gsm.machines.exceptions.FailedToDiscoverMachinesException;
 import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcementPendingContainerDeallocationException;
@@ -240,7 +241,7 @@ public class EagerScaleStrategyBean extends AbstractScaleStrategyBean
     }
 
     @Override
-    protected boolean isRecoveredStateOnEsmStart(ProcessingUnit otherPu) {
-        return machinesEndpoint.isRecoveredStateOnEsmStart(otherPu);
+    protected RecoveryState getRecoveredStateOnEsmStart(ProcessingUnit otherPu) {
+        return machinesEndpoint.getRecoveredStateOnEsmStart(otherPu);
     }
 }

@@ -53,6 +53,7 @@ import org.openspaces.grid.gsm.LogPerProcessingUnit;
 import org.openspaces.grid.gsm.ProcessingUnitAware;
 import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.containers.exceptions.ContainersSlaEnforcementInProgressException;
+import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementState.RecoveryState;
 import org.openspaces.grid.gsm.machines.MachinesSlaUtils;
 import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.machines.exceptions.MachinesSlaEnforcementInProgressException;
@@ -401,8 +402,14 @@ public abstract class AbstractScaleStrategyBean implements
             validateCorrectThread();
             validateAtLeastOneLookupServiceDiscovered();
             validateOnlyOneESMRunning();
-            
-            if (!isRecoveredStateOnEsmStart()) {
+    
+            RecoveryState recoveryState = getRecoveredStateOnEsmStart();
+            if (recoveryState.equals(RecoveryState.RECOVERY_FAILED)) {
+                List<ProcessingUnit> pusNotCompletedStateRecovery = new ArrayList<ProcessingUnit>();
+                pusNotCompletedStateRecovery.add(getProcessingUnit());
+                throw new SomeProcessingUnitsHaveNotCompletedStateRecoveryException(getProcessingUnit(), pusNotCompletedStateRecovery);
+            }
+            if (recoveryState.equals(RecoveryState.NOT_RECOVERED)) {
                 if (getLogger().isInfoEnabled()) {
                     getLogger().info("recovering state on ESM start.");
                 }
@@ -411,6 +418,11 @@ public abstract class AbstractScaleStrategyBean implements
                 
                 if (getLogger().isInfoEnabled()) {
                     getLogger().info("recovered state on ESM start.");
+                }
+                
+                RecoveryState newRecoveryState = getRecoveredStateOnEsmStart();
+                if(!getRecoveredStateOnEsmStart().equals(RecoveryState.RECOVERY_SUCCESS)) {
+                    throw new IllegalStateException("PU " + getProcessingUnit().getName() + " recovery state is " + newRecoveryState + " instead of " + RecoveryState.RECOVERY_SUCCESS);
                 }
             }
             validateAllProcessingUnitsRecoveredStateOnEsmStart();
@@ -425,11 +437,11 @@ public abstract class AbstractScaleStrategyBean implements
         ((InternalAdmin)admin).assertStateChangesPermitted();
     }
 
-    private boolean isRecoveredStateOnEsmStart() {
-        return isRecoveredStateOnEsmStart(pu);
+    private RecoveryState getRecoveredStateOnEsmStart() {
+        return getRecoveredStateOnEsmStart(pu);
     }
 
-    protected abstract boolean isRecoveredStateOnEsmStart(ProcessingUnit otherPu);
+    protected abstract RecoveryState getRecoveredStateOnEsmStart(ProcessingUnit otherPu);
     protected abstract void recoverStateOnEsmStart() throws MachinesSlaEnforcementInProgressException, SomeProcessingUnitsHaveNotCompletedStateRecoveryException, NeedToWaitUntilAllGridServiceAgentsDiscoveredException, UndeployInProgressException;
     
         
@@ -447,7 +459,7 @@ public abstract class AbstractScaleStrategyBean implements
         for (ProcessingUnit otherPu : admin.getProcessingUnits()) {
             Map<String, String> elasticProperties = ((InternalProcessingUnit)otherPu).getElasticProperties();
             if (!elasticProperties.isEmpty() &&
-                !isRecoveredStateOnEsmStart(otherPu)){   
+                getRecoveredStateOnEsmStart(otherPu).equals(RecoveryState.NOT_RECOVERED)){   
                   // found an elastic PU that has not completed state recovery
                   pusNotCompletedStateRecovery.add(otherPu);
             }

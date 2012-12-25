@@ -208,7 +208,11 @@ public class MachinesSlaEnforcementState {
     
     private final Map<StateKey,StateValue> state;
 
-    private final Set<ProcessingUnit> recoveredStatePerProcessingUnit;
+    public enum RecoveryState {
+        NOT_RECOVERED, RECOVERY_SUCCESS, RECOVERY_FAILED
+    }
+    
+    private final Map<ProcessingUnit, RecoveryState> recoveredStatePerProcessingUnit;
     private final Set<ProcessingUnit> validatedUndeployNotInProgressPerProcessingUnit;
     
     public MachinesSlaEnforcementState() {
@@ -217,7 +221,7 @@ public class MachinesSlaEnforcementState {
                         LogFactory.getLog(DefaultMachinesSlaEnforcementEndpoint.class));
         
         state = new HashMap<StateKey,StateValue>();
-        recoveredStatePerProcessingUnit = new HashSet<ProcessingUnit>();
+        recoveredStatePerProcessingUnit = new HashMap<ProcessingUnit, MachinesSlaEnforcementState.RecoveryState>();
         validatedUndeployNotInProgressPerProcessingUnit = new HashSet<ProcessingUnit>();
     }
 
@@ -553,11 +557,19 @@ public class MachinesSlaEnforcementState {
     }
 
     public void recoveredStateOnEsmStart(ProcessingUnit otherPu) {
-        recoveredStatePerProcessingUnit.add(otherPu);
+        recoveredStatePerProcessingUnit.put(otherPu,RecoveryState.RECOVERY_SUCCESS);
+    }
+    
+    public void failedRecoveredStateOnEsmStart(ProcessingUnit otherPu) {
+        recoveredStatePerProcessingUnit.put(otherPu,RecoveryState.RECOVERY_FAILED);
     }
 
-    public boolean isRecoveredStateOnEsmStart(ProcessingUnit pu) {
-        return recoveredStatePerProcessingUnit.contains(pu);
+    public RecoveryState getRecoveredStateOnEsmStart(ProcessingUnit pu) {
+        RecoveryState recoveryState = recoveredStatePerProcessingUnit.get(pu);
+        if (recoveryState == null) {
+            recoveryState = RecoveryState.NOT_RECOVERED;
+        }
+        return recoveryState; 
     }
 
     public Set<ZonesConfig> getGridServiceAgentsZones(ProcessingUnit pu) {

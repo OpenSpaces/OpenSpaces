@@ -590,7 +590,8 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
             logger.info("Elastic properties for pu " + pu.getName() + " are being enforced.");
         }
         catch (BeanConfigException e) {
-            logger.log(Level.SEVERE,"Error configuring elasitc scale bean.",e);
+            machinesSlaEnforcement.failedRecoveredStateOnEsmStart(pu);
+            logger.log(Level.SEVERE,"Error configuring elastic scale bean for pu " + pu.getName(),e);
         }
     }
 
