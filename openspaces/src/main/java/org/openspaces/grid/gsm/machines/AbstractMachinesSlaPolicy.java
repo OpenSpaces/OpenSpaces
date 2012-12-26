@@ -60,7 +60,7 @@ public abstract class AbstractMachinesSlaPolicy extends ServiceLevelAgreementPol
     }
     
     public long getReservedMemoryCapacityPerMachineInMB() {
-        return MachinesSlaUtils.getMemoryInMB(machineProvisioning.getConfig().getReservedCapacityPerMachine());
+        return MachinesSlaUtils.getMemoryInMB(getReservedCapacityPerMachine());
     }
     
     public void setContainerMemoryCapacityInMB(long containerMemoryCapacityInMB) {

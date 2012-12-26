@@ -115,7 +115,7 @@ public class MachinesSlaUtils {
             GridServiceAgent agent,
             AbstractMachinesSlaPolicy sla) {
 
-        return new MachineCapacityRequirements(agent.getMachine()).subtractOrZero(sla.getReservedCapacityPerMachine());
+        return new MachineCapacityRequirements(agent.getMachine()).subtractOrZero(getReservedCapacity(sla, agent));
     }
 
     public static Fraction convertCpuCoresFromDoubleToFraction(double cpu) {
@@ -253,5 +253,12 @@ public class MachinesSlaUtils {
             logger.debug("Provisioned Agents: " + MachinesSlaUtils.machinesToString(sortedFilteredAgents));
         }
         return sortedFilteredAgents;
+    }
+
+
+    public static CapacityRequirements getReservedCapacity(
+            AbstractMachinesSlaPolicy sla, GridServiceAgent agent) {
+        
+        return sla.getReservedCapacityPerMachine();
     }
 }

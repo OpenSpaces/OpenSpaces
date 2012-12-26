@@ -84,7 +84,7 @@ public class NeedToStartMoreGridServiceAgentsException extends GridServiceAgentS
             // add to the report the amount of reserved capacity per machine
             //"reserved-capacity", sla.getReservedCapacityPerMachine());
             String ipAddress = MachinesSlaUtils.machineToString(agent.getMachine());
-            CapacityRequirements reserved = sla.getReservedCapacityPerMachine();
+            CapacityRequirements reserved = MachinesSlaUtils.getReservedCapacity(sla,agent);
             message
                 .append("\"").append(ipAddress).append("\":{")
                 .append("total:{").append(total).append("},")
