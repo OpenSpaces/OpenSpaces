@@ -441,7 +441,7 @@ public class GigaSessionManager extends AbstractSessionManager {
     }
 
     protected SessionData fetch(String sessionId) throws Exception {
-        return (SessionData) space.readById(SESSION_DATA_CLASSNAME, sessionId, sessionId, null, 0, 0, false, QueryResultTypeInternal.OBJECT_JAVA);
+        return (SessionData) space.readById(SESSION_DATA_CLASSNAME, sessionId, sessionId, null, 0, 0, false, QueryResultTypeInternal.OBJECT_JAVA, null);
     }
 
     protected Object[] findExpiredSessions(long timestamp) throws Exception {

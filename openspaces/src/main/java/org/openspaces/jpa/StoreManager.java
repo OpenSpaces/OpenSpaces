@@ -221,7 +221,7 @@ public class StoreManager extends AbstractStoreManager {
         ISpaceProxy proxy = (ISpaceProxy) getConfiguration().getSpace();
         try {
             Object result = proxy.readById(cm.getDescribedType().getName(), ids[0], null, _transaction,
-                    0, ReadModifiers.DIRTY_READ, false, QueryResultTypeInternal.EXTERNAL_ENTRY);
+                    0, ReadModifiers.DIRTY_READ, false, QueryResultTypeInternal.EXTERNAL_ENTRY, null);
             return result != null;
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
