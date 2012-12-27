@@ -842,9 +842,10 @@
 						<include>**/*Tests.java</include>
 						<include>**/*TestCase.java</include>
 						<include>**/*TestSuite.java</include>
+						<include>**/Test*.java</include>
 					</includes>
 					<excludes>
-						<exclude>**/Abstract*</exclude>
+						<exclude>**/*Abstract*</exclude>
 						<exclude>**/PersistentQueueTests*</exclude>
 						<exclude>**/PersistentSedaTests*</exclude>
 					</excludes>
