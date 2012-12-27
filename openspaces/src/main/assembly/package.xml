@@ -159,6 +159,7 @@
 				<include>commons-collections-*</include>
 				<include>commons-pool-*</include>
 				<include>commons-lang-*</include>
+				<include>commons-dbcp-*</include>
 			</includes>
 		</fileSet>	
 		<!--  Add javadoc file to package -->
