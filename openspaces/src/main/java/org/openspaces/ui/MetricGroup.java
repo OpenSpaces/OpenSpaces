@@ -30,22 +30,22 @@ public class MetricGroup implements Serializable {
 	public MetricGroup() {
 		super();
 	}
-	public MetricGroup(String name, List<Object> metrics) {
+	public <T> MetricGroup(String name, List<T> metrics) {
 		super();
 		this.name = name;
 		this.metrics = metrics;
 	}
-	private List<Object> metrics;
+	private List<?> metrics;
 	public String getName() {
 		return name;
 	}
 	public void setName(String name) {
 		this.name = name;
 	}
-	public List<Object> getMetrics() {
-		return metrics;
+	public <T> List<T> getMetrics() {
+		return (List<T>) metrics;
 	}
-	public void setMetrics(List<Object> metrics) {
+	public <T> void setMetrics(List<T> metrics) {
 		this.metrics = metrics;
 	}
 }
