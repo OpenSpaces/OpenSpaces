@@ -66,8 +66,15 @@ public class DefaultGateway implements Gateway {
         List<GatewayProcessingUnit> result = new LinkedList<GatewayProcessingUnit>();
         for (ProcessingUnit processingUnit : admin.getProcessingUnits()) {
             ProcessingUnitInstance puInstance = GatewayUtils.extractInstanceIfPuOfGateway(gatewayName, processingUnit);
-            if (puInstance != null)
-                result.add(new DefaultGatewayProcessingUnit(admin, this, puInstance));
+            if (puInstance != null){
+            	GatewayProcessingUnit gatewayProcessingUnit = 
+            		admin.getGatewayProcessingUnits().getGatewayProcessingUnit( puInstance.getUid() );
+            	if( gatewayProcessingUnit == null ){
+            		throw new IllegalStateException( "GatewayProcessingUnit cannot be null" );
+            	}
+
+           		result.add( gatewayProcessingUnit ); 
+            }
         } 
         return result.toArray(new GatewayProcessingUnit[result.size()]);
     }
@@ -118,8 +125,17 @@ public class DefaultGateway implements Gateway {
         //TODO WAN: calculate new timeout
         ProcessingUnit processingUnit = admin.getProcessingUnits().waitFor(processingUnitName, timeout, timeUnit);
         if (processingUnit.waitFor(1, timeout, timeUnit)){
-            if (GatewayUtils.isPuInstanceOfGateway(gatewayName, processingUnit.getInstances()[0]))
-                return new DefaultGatewayProcessingUnit(admin, this, processingUnit.getInstances()[0]);
+            if (GatewayUtils.isPuInstanceOfGateway(gatewayName, processingUnit.getInstances()[0])){
+            	GatewayProcessingUnit gatewayProcessingUnit = 
+            			admin.getGatewayProcessingUnits().getGatewayProcessingUnit( 
+        				processingUnit.getInstances()[0].getUid() );
+            	
+            	if( gatewayProcessingUnit == null ){
+            		throw new IllegalStateException( "GatewayProcessingUnit cannot be null" );
+            	}
+            	
+            	return gatewayProcessingUnit;
+            }
             throw new IllegalArgumentException("requested processing unit is not part of this gateway [" + processingUnitName + "]");
         }
         return null;
@@ -132,8 +148,15 @@ public class DefaultGateway implements Gateway {
         if (instances == null || instances.length == 0)
             return null;
         
-        if (GatewayUtils.isPuInstanceOfGateway(gatewayName, instances[0]))
-            return new DefaultGatewayProcessingUnit(admin, this, instances[0]);
+        if (GatewayUtils.isPuInstanceOfGateway(gatewayName, instances[0])){
+        	GatewayProcessingUnit  gatewayProcessingUnit = 
+        			admin.getGatewayProcessingUnits().getGatewayProcessingUnit( instances[0].getUid() );
+        	if( gatewayProcessingUnit == null ){
+        		throw new IllegalStateException( "GatewayProcessingUnit cannot be null" );
+        	}
+        	
+        	return gatewayProcessingUnit;
+        }
         throw new IllegalArgumentException("requested processing unit is not part of this gateway [" + processingUnitName + "]");
     }
 
@@ -170,7 +193,11 @@ public class DefaultGateway implements Gateway {
             @Override
             public void processingUnitInstanceAdded(ProcessingUnitInstance processingUnitInstance) {
                 if (GatewayUtils.isPuInstanceOfGateway(gatewayName, processingUnitInstance)){
-                    DefaultGatewayProcessingUnit tempPUI = new DefaultGatewayProcessingUnit(admin, DefaultGateway.this, processingUnitInstance);
+                    GatewayProcessingUnit tempPUI =
+                    		admin.getGatewayProcessingUnits().getGatewayProcessingUnit( processingUnitInstance.getUid() );
+                	if( tempPUI == null ){
+                		throw new IllegalStateException( "GatewayProcessingUnit cannot be null" );
+                	}                                        
                     GatewaySink sink = tempPUI.getSink();
                     if (sink != null && sink.containsSource(sourceGatewayName)){
                         latch.countDown(sink);
@@ -238,7 +265,11 @@ public class DefaultGateway implements Gateway {
             @Override
             public void processingUnitInstanceAdded(ProcessingUnitInstance processingUnitInstance) {
                 if (GatewayUtils.isPuInstanceOfGateway(gatewayName, processingUnitInstance)){
-                    DefaultGatewayProcessingUnit tempPUI = new DefaultGatewayProcessingUnit(admin, DefaultGateway.this, processingUnitInstance);
+                    GatewayProcessingUnit tempPUI =
+                    		admin.getGatewayProcessingUnits().getGatewayProcessingUnit( processingUnitInstance.getUid() );
+                	if( tempPUI == null ){
+                		throw new IllegalStateException( "GatewayProcessingUnit cannot be null" );
+                	}                    
                     GatewayDelegator delegator = tempPUI.getDelegator();
                     if (delegator != null && delegator.containsTarget(targetGatewayName)){
                         latch.countDown(delegator);

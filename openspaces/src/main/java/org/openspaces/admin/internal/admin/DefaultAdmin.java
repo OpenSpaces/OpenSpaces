@@ -63,6 +63,8 @@ import org.openspaces.admin.dump.DumpProvider;
 import org.openspaces.admin.dump.DumpResult;
 import org.openspaces.admin.esm.ElasticServiceManager;
 import org.openspaces.admin.esm.ElasticServiceManagers;
+import org.openspaces.admin.gateway.GatewayProcessingUnit;
+import org.openspaces.admin.gateway.GatewayProcessingUnits;
 import org.openspaces.admin.gateway.Gateways;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsa.GridServiceAgents;
@@ -79,7 +81,9 @@ import org.openspaces.admin.internal.discovery.DiscoveryService;
 import org.openspaces.admin.internal.esm.DefaultElasticServiceManagers;
 import org.openspaces.admin.internal.esm.InternalElasticServiceManager;
 import org.openspaces.admin.internal.esm.InternalElasticServiceManagers;
+import org.openspaces.admin.internal.gateway.DefaultGatewayProcessingUnits;
 import org.openspaces.admin.internal.gateway.DefaultGateways;
+import org.openspaces.admin.internal.gateway.InternalGatewayProcessingUnits;
 import org.openspaces.admin.internal.gsa.DefaultGridServiceAgents;
 import org.openspaces.admin.internal.gsa.InternalGridServiceAgent;
 import org.openspaces.admin.internal.gsa.InternalGridServiceAgents;
@@ -215,6 +219,8 @@ public class DefaultAdmin implements InternalAdmin {
     private final InternalVirtualMachines virtualMachines = new DefaultVirtualMachines(this);
 
     private final InternalProcessingUnits processingUnits = new DefaultProcessingUnits(this);
+    
+    private final InternalGatewayProcessingUnits gatewayProcessingUnits = new DefaultGatewayProcessingUnits(this);
 
     private final InternalProcessingUnitInstances processingUnitInstances = new DefaultProcessingUnitInstances(this);
 
@@ -629,7 +635,13 @@ public class DefaultAdmin implements InternalAdmin {
     public ProcessingUnits getProcessingUnits() {
         return this.processingUnits;
     }
+    
 
+    @Override
+	public GatewayProcessingUnits getGatewayProcessingUnits() {
+		return gatewayProcessingUnits;
+	}
+    
     @Override
     public Spaces getSpaces() {
         return this.spaces;
@@ -1133,8 +1145,10 @@ public class DefaultAdmin implements InternalAdmin {
                 removedProcessingUnitInstances.add(processingUnitInstance);
                 
                 processingUnitInstance.setDiscovered(false);
-                ((InternalProcessingUnit) processingUnitInstance.getProcessingUnit()).removeProcessingUnitInstance(uid);
-                Application application = processingUnitInstance.getProcessingUnit().getApplication();
+                InternalProcessingUnit processingUnit = 
+                		(InternalProcessingUnit) processingUnitInstance.getProcessingUnit();
+                processingUnit.removeProcessingUnitInstance(uid);
+                Application application = processingUnit.getApplication();
                 if (application != null) {
                     ((InternalProcessingUnitInstanceRemovedEventManager) application.getProcessingUnits().getProcessingUnitInstanceRemoved()).processingUnitInstanceRemoved(processingUnitInstance);
                 }
@@ -1160,6 +1174,9 @@ public class DefaultAdmin implements InternalAdmin {
                             logger.debug("removed space instance " + serviceDetails.getName() +" id:"+serviceDetails.getServiceID());
                         }
                     }
+                }
+                if( processingUnit.getType() == ProcessingUnitType.GATEWAY ){
+                	gatewayProcessingUnits.removeGatewayProcessingUnit( uid );
                 }
             }
     
@@ -2069,4 +2086,16 @@ public class DefaultAdmin implements InternalAdmin {
     public AdminFilter getAdminFilter(){
         return adminFilter;
     }
+
+	@Override
+	public void addGatewayProcessingUnit( GatewayProcessingUnit gatewayProcessingUnit ) {
+
+		gatewayProcessingUnits.addGatewayProcessingUnit(gatewayProcessingUnit);
+	}
+
+	@Override
+	public void removeGatewayProcessingUnit( String uid ) {
+
+		gatewayProcessingUnits.removeGatewayProcessingUnit( uid );
+	}
 }

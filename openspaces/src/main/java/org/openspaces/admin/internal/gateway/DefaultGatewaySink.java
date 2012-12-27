@@ -30,6 +30,7 @@ import org.openspaces.admin.gateway.BootstrapResult;
 import org.openspaces.admin.gateway.GatewayProcessingUnit;
 import org.openspaces.admin.gateway.GatewaySink;
 import org.openspaces.admin.gateway.GatewaySinkSource;
+import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.pu.InternalProcessingUnitInstance;
 import org.openspaces.core.gateway.GatewaySinkServiceDetails;
 
@@ -121,7 +122,8 @@ public class DefaultGatewaySink implements GatewaySink {
 
         @Override
         public BootstrapResult bootstrapFromGatewayAndWait() {
-            return bootstrapFromGatewayAndWait(gatewayProcessingUnit.getAdmin().getDefaultTimeout(), gatewayProcessingUnit.getAdmin().getDefaultTimeoutTimeUnit());
+            return bootstrapFromGatewayAndWait(((InternalAdmin)gatewayProcessingUnit.getAdmin()).getDefaultTimeout(), 
+            		((InternalAdmin)gatewayProcessingUnit.getAdmin()).getDefaultTimeoutTimeUnit());
         }
 
         @Override

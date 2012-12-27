@@ -28,6 +28,7 @@ import org.openspaces.admin.dump.DumpGeneratedListener;
 import org.openspaces.admin.dump.DumpProvider;
 import org.openspaces.admin.dump.DumpResult;
 import org.openspaces.admin.esm.ElasticServiceManagers;
+import org.openspaces.admin.gateway.GatewayProcessingUnits;
 import org.openspaces.admin.gateway.Gateways;
 import org.openspaces.admin.gsa.GridServiceAgents;
 import org.openspaces.admin.gsc.GridServiceContainers;
@@ -168,6 +169,13 @@ public interface Admin extends StatisticsMonitor, DumpProvider {
      * @since 8.0.4
      */
     Gateways getGateways();
+    
+    
+    /**
+     * Returns the Gateway Processing Units discovered.
+     * @since 9.5
+     */
+    GatewayProcessingUnits getGatewayProcessingUnits();
 
     /**
      * Returns the Grid Component represented by this UID; e.g. ESM, GSA, LUS, GSM, GSC

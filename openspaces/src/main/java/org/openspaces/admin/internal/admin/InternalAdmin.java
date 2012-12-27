@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.openspaces.admin.Admin;
+import org.openspaces.admin.gateway.GatewayProcessingUnit;
 import org.openspaces.admin.internal.esm.InternalElasticServiceManager;
 import org.openspaces.admin.internal.gsa.InternalGridServiceAgent;
 import org.openspaces.admin.internal.gsc.InternalGridServiceContainer;
@@ -97,6 +98,10 @@ public interface InternalAdmin extends Admin {
     void removeSpaceInstance(String uid);
 
     void assertStateChangesPermitted();
+    
+    void addGatewayProcessingUnit( GatewayProcessingUnit gatewayProcessingUnit );
+    
+    void removeGatewayProcessingUnit( String uid );
     
     /**
      * Any internal admin objects state change must be scheduled using this method.

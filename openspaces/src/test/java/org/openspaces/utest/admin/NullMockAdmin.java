@@ -35,6 +35,8 @@ import org.openspaces.admin.dump.DumpGeneratedListener;
 import org.openspaces.admin.dump.DumpProvider;
 import org.openspaces.admin.dump.DumpResult;
 import org.openspaces.admin.esm.ElasticServiceManagers;
+import org.openspaces.admin.gateway.GatewayProcessingUnit;
+import org.openspaces.admin.gateway.GatewayProcessingUnits;
 import org.openspaces.admin.gateway.Gateways;
 import org.openspaces.admin.gsa.GridServiceAgents;
 import org.openspaces.admin.gsc.GridServiceContainers;
@@ -430,4 +432,22 @@ public class NullMockAdmin implements InternalAdmin {
         // TODO Auto-generated method stub
         return null;
     }
+
+	@Override
+	public GatewayProcessingUnits getGatewayProcessingUnits() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void addGatewayProcessingUnit( GatewayProcessingUnit gatewayProcessingUnit ) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void removeGatewayProcessingUnit( String uid ) {
+		// TODO Auto-generated method stub
+		
+	}
 }

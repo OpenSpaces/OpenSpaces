@@ -19,11 +19,12 @@ package org.openspaces.admin.internal.gateway;
 
 import java.util.Map;
 
+import org.openspaces.admin.Admin;
 import org.openspaces.admin.gateway.Gateway;
 import org.openspaces.admin.gateway.GatewayDelegator;
 import org.openspaces.admin.gateway.GatewayProcessingUnit;
 import org.openspaces.admin.gateway.GatewaySink;
-import org.openspaces.admin.internal.admin.DefaultAdmin;
+import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.os.OperatingSystem;
 import org.openspaces.admin.pu.ProcessingUnit;
@@ -43,11 +44,11 @@ import org.openspaces.pu.service.ServiceDetails;
  */
 public class DefaultGatewayProcessingUnit implements GatewayProcessingUnit {
 
-    private final DefaultGateway gateway;
+    private final Gateway gateway;
     private final ProcessingUnitInstance processingUnitInstance;
-    private final DefaultAdmin admin;
+    private final InternalAdmin admin;
 
-    public DefaultGatewayProcessingUnit(DefaultAdmin admin, DefaultGateway gateway, ProcessingUnitInstance processingUnitInstance) {
+    public DefaultGatewayProcessingUnit(InternalAdmin admin, Gateway gateway, ProcessingUnitInstance processingUnitInstance) {
         this.admin = admin;
         this.gateway = gateway;
         this.processingUnitInstance = processingUnitInstance;
@@ -68,7 +69,7 @@ public class DefaultGatewayProcessingUnit implements GatewayProcessingUnit {
     }
 
     @Override
-    public DefaultAdmin getAdmin() {
+    public Admin getAdmin() {
         return admin;
     }
 

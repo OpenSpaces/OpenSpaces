@@ -44,10 +44,14 @@ import org.apache.commons.logging.LogFactory;
 import org.jini.rio.boot.BootUtil;
 import org.jini.rio.resources.servicecore.Service;
 import org.openspaces.admin.AdminException;
+import org.openspaces.admin.gateway.Gateway;
+import org.openspaces.admin.gateway.GatewayProcessingUnit;
 import org.openspaces.admin.internal.admin.AdminClosedException;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.esm.DefaultElasticServiceManager;
 import org.openspaces.admin.internal.esm.InternalElasticServiceManager;
+import org.openspaces.admin.internal.gateway.DefaultGatewayProcessingUnit;
+import org.openspaces.admin.internal.gateway.InternalGatewayProcessingUnits;
 import org.openspaces.admin.internal.gsa.DefaultGridServiceAgent;
 import org.openspaces.admin.internal.gsa.InternalGridServiceAgent;
 import org.openspaces.admin.internal.gsc.DefaultGridServiceContainer;
@@ -60,6 +64,7 @@ import org.openspaces.admin.internal.pu.DefaultProcessingUnitInstance;
 import org.openspaces.admin.internal.pu.InternalProcessingUnitInstance;
 import org.openspaces.admin.internal.space.DefaultSpaceInstance;
 import org.openspaces.admin.internal.space.InternalSpaceInstance;
+import org.openspaces.core.gateway.GatewayUtils;
 import org.openspaces.core.space.SpaceServiceDetails;
 import org.openspaces.grid.esm.ESM;
 import org.openspaces.pu.container.servicegrid.PUDetails;
@@ -348,7 +353,19 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                                 admin.addSpaceInstance(spaceInstance, nioDetails, osDetails, jvmDetails, jmxUrl, zones);
                             }
                         }
-    
+                        
+                        String gatewayName = GatewayUtils.extractGatewayName( processingUnitInstance );
+                        if( gatewayName != null ){
+                        	
+                        	Gateway gateway = admin.getGateways().getGateway( gatewayName );
+                        	if( gateway != null ){
+                        		GatewayProcessingUnit gatewayProcessingUnit = 
+                        				new DefaultGatewayProcessingUnit( admin, gateway, processingUnitInstance );
+                        		InternalGatewayProcessingUnits gatewayProcessingUnits =
+                        				( InternalGatewayProcessingUnits )admin.getGatewayProcessingUnits();
+                        		gatewayProcessingUnits.addGatewayProcessingUnit( gatewayProcessingUnit );
+                        	}
+                        }
                     }
                 });
             }

@@ -24,6 +24,8 @@ import org.openspaces.admin.application.events.ApplicationAddedEventListener;
 import org.openspaces.admin.application.events.ApplicationRemovedEventListener;
 import org.openspaces.admin.esm.events.ElasticServiceManagerAddedEventListener;
 import org.openspaces.admin.esm.events.ElasticServiceManagerRemovedEventListener;
+import org.openspaces.admin.gateway.events.GatewayProcessingUnitAddedEventListener;
+import org.openspaces.admin.gateway.events.GatewayProcessingUnitRemovedEventListener;
 import org.openspaces.admin.gsa.events.ElasticGridServiceAgentProvisioningFailureEventListener;
 import org.openspaces.admin.gsa.events.ElasticGridServiceAgentProvisioningProgressChangedEventListener;
 import org.openspaces.admin.gsa.events.GridServiceAgentAddedEventListener;
@@ -181,7 +183,14 @@ public abstract class EventRegistrationHelper {
         if (eventListener instanceof BackupGridServiceManagerChangedEventListener) {
             admin.getProcessingUnits().getBackupGridServiceManagerChanged().add((BackupGridServiceManagerChangedEventListener) eventListener);
         }
-        
+        if (eventListener instanceof GatewayProcessingUnitAddedEventListener) {
+            admin.getGatewayProcessingUnits().getGatewayProcessingUnitAdded().add(
+            		(GatewayProcessingUnitAddedEventListener) eventListener);
+        }
+        if (eventListener instanceof GatewayProcessingUnitRemovedEventListener) {
+            admin.getGatewayProcessingUnits().getGatewayProcessingUnitRemoved().add(
+            		(GatewayProcessingUnitRemovedEventListener) eventListener);
+        }        
         /*
          * Application listeners
          */
@@ -470,5 +479,13 @@ public abstract class EventRegistrationHelper {
             admin.getProcessingUnits().getElasticAutoScalingFailure().remove(
                     (ElasticAutoScalingFailureEventListener) eventListener);
         }
+        if (eventListener instanceof GatewayProcessingUnitAddedEventListener) {
+            admin.getGatewayProcessingUnits().getGatewayProcessingUnitAdded().remove(
+            		(GatewayProcessingUnitAddedEventListener) eventListener);
+        }
+        if (eventListener instanceof GatewayProcessingUnitRemovedEventListener) {
+            admin.getGatewayProcessingUnits().getGatewayProcessingUnitRemoved().remove(
+            		(GatewayProcessingUnitRemovedEventListener) eventListener);
+        }           
     }
 }
