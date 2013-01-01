@@ -17,8 +17,6 @@
 package org.openspaces.events.adapter;
 
 import com.j_spaces.core.client.UpdateModifiers;
-import net.jini.core.lease.Lease;
-import net.jini.space.JavaSpace;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.events.SpaceDataEventListener;
 import org.springframework.dao.DataAccessException;
@@ -35,11 +33,11 @@ import org.springframework.transaction.TransactionStatus;
  */
 public abstract class AbstractResultEventListenerAdapter implements SpaceDataEventListener {
 
-    private long writeLease = Lease.FOREVER;
+    private long writeLease = Long.MAX_VALUE;
 
     private boolean updateOrWrite = true;
 
-    private long updateTimeout = JavaSpace.NO_WAIT;
+    private long updateTimeout = 0;
 
     /**
      * The lease time the result will be written under (in milliseconds). Defaults to
