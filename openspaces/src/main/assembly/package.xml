@@ -150,6 +150,7 @@
 			<includes>
 				<include>openjpa-*</include>
 				<include>geronimo-jpa*</include>
+				<include>geronimo-jta*</include>
 			</includes>
 		</fileSet>
 		<fileSet>
