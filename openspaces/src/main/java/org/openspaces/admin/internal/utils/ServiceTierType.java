@@ -27,6 +27,6 @@ public enum ServiceTierType {
 	ESB_SERVER,
 	MESSAGE_BUS,
 	DATABASE,
-	NOSQL_DB;
-
+	NOSQL_DB,
+	CACHE;
 }
