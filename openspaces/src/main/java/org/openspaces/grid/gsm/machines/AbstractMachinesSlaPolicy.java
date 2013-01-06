@@ -98,7 +98,10 @@ public abstract class AbstractMachinesSlaPolicy extends ServiceLevelAgreementPol
     public CapacityRequirements getReservedCapacityPerMachine() {
         return machineProvisioning.getConfig().getReservedCapacityPerMachine();
     }
-
+    
+	public CapacityRequirements getReservedCapacityPerManagementMachine() {
+		return machineProvisioning.getConfig().getReservedCapacityPerManagementMachine();
+	}
 
     public void setMaximumNumberOfContainersPerMachine(int maxNumberOfContainersPerMachine) {
         this.maxNumberOfContainersPerMachine = maxNumberOfContainersPerMachine;

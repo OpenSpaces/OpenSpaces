@@ -53,6 +53,12 @@ public class DiscoveredMachineProvisioningConfig implements ElasticMachineProvis
     private static final String MACHINE_AGENT_ZONES_KEY = "machine-agent-zones";
     private static final String[] MACHINE_AGENT_ZONES_DEFAULT = new String[] {};
     private static final String RESERVED_MEMORY_CAPACITY_PER_MACHINE_MEGABYTES_KEY = "reserved-memory-capacity-per-machine-megabytes";
+    
+	private static final String RESERVED_MEMORY_CAPACITY_PER_MANAGEMENT_MACHINE_MEGABYTES_KEY =
+			"reserved-memory-capacity-per-management-machine-megabytes";
+
+	private static final long RESERVED_MEMORY_CAPACITY_PER_MANAGEMENT_MACHINE_MEGABYTES_DEFAULT = 1024;
+    
     private static final long RESERVED_MEMORY_CAPACITY_PER_MACHINE_MEGABYTES_DEFAULT = 1024;
     private static final String DEDICATED_MANAGEMENT_MACHINES_KEY = "dedicated-management-machines";
     private static final boolean DEDICATED_MANAGEMENT_MACHINES_DEFAULT = false;
@@ -146,6 +152,24 @@ public class DiscoveredMachineProvisioningConfig implements ElasticMachineProvis
         this.properties.putLong(RESERVED_MEMORY_CAPACITY_PER_MACHINE_MEGABYTES_KEY,reservedInMB);
     }
     
+    /**
+     * Sets the expected amount of memory per management machine that is reserved for processes other than grid containers.
+     * These include Grid Service Manager, Lookup Service or any other daemon running on the system.
+     * 
+     * Default value is 1280 MB. 
+     * 
+     * For example, by default, a 16GB server  
+     * can run 3 containers 5GB each, since it approximately leaves 1024MB memory free.
+     * 
+     * @param reservedInMB - amount of reserved memory in MB
+     * 
+     * @since 9.5.0
+     * @see #setReservedCapacityPerMachine(CapacityRequirements)
+     */
+    public void setReservedMemoryCapacityPerManagementMachineInMB(long reservedInMB) {
+		this.properties.putLong(RESERVED_MEMORY_CAPACITY_PER_MANAGEMENT_MACHINE_MEGABYTES_KEY, reservedInMB);
+	}
+    
     public Map<String,Long> getReservedDriveCapacityPerMachineInMB() {
         Map<String,String> reserved = 
             this.properties.getKeyValuePairs(
@@ -204,18 +228,20 @@ public class DiscoveredMachineProvisioningConfig implements ElasticMachineProvis
     public void setReservedCpuCapacityPerMachineInMB(double reservedCpu) {
         this.properties.putDouble(RESERVED_CPU_PER_MACHINE_KEY, reservedCpu);
     }
-    
-    public CapacityRequirements getReservedCapacityPerMachine() {
-        List<CapacityRequirement> requirements = new ArrayList<CapacityRequirement>();
-        requirements.add(new MemoryCapacityRequirement(getReservedMemoryCapacityPerMachineInMB()));
-        requirements.add(new CpuCapacityRequirement(getReservedCpuCapacityPerMachine()));
-        Map<String,Long> reservedDriveCapacity = getReservedDriveCapacityPerMachineInMB();
-        for (Entry<String, Long> pair : reservedDriveCapacity.entrySet()) {
-            String drive = pair.getKey();
-            requirements.add(new DriveCapacityRequirement(drive,pair.getValue()));
-        }
-        return new CapacityRequirements(requirements.toArray(new CapacityRequirement[requirements.size()]));
-    }
+        
+	@Override
+	public CapacityRequirements getReservedCapacityPerMachine() {
+		final List<CapacityRequirement> requirements = createReservedCapacityPerMachine(false);
+		return new CapacityRequirements(requirements.toArray(new CapacityRequirement[requirements.size()]));
+
+	}
+	
+	@Override
+	public CapacityRequirements getReservedCapacityPerManagementMachine() {
+		final List<CapacityRequirement> requirements = createReservedCapacityPerMachine(true);		
+		return new CapacityRequirements(requirements.toArray(new CapacityRequirement[requirements.size()]));
+	}
+
     
     /**
      * Sets the expected amount of memory, cpu, drive space (per machine) that is reserved for processes other than processing units.
@@ -315,4 +341,26 @@ public class DiscoveredMachineProvisioningConfig implements ElasticMachineProvis
     private static double getNumberOfCpuCores(Machine machine) {
         return machine.getOperatingSystem().getDetails().getAvailableProcessors();
     }
+    
+	private List<CapacityRequirement> createReservedCapacityPerMachine(final boolean management) {
+		final List<CapacityRequirement> requirements = new ArrayList<CapacityRequirement>();
+		if (management) {
+			requirements.add(new MemoryCapacityRequirement(getReservedMemoryCapacityPerManagementMachineInMB()));
+		} else {
+			requirements.add(new MemoryCapacityRequirement(getReservedMemoryCapacityPerMachineInMB()));
+		}
+		requirements.add(new CpuCapacityRequirement(getReservedCpuCapacityPerMachine()));
+		final Map<String, Long> reservedDriveCapacity = getReservedDriveCapacityPerMachineInMB();
+		for (final Entry<String, Long> entry : reservedDriveCapacity.entrySet()) {
+			final String drive = entry.getKey();
+			requirements.add(new DriveCapacityRequirement(drive, entry.getValue()));
+		}
+		return requirements;
+	}
+	
+	private Long getReservedMemoryCapacityPerManagementMachineInMB() {
+		return this.properties.getLong(
+				RESERVED_MEMORY_CAPACITY_PER_MANAGEMENT_MACHINE_MEGABYTES_KEY,
+				RESERVED_MEMORY_CAPACITY_PER_MANAGEMENT_MACHINE_MEGABYTES_DEFAULT);
+	}
 }

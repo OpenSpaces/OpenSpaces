@@ -97,4 +97,14 @@ public interface ElasticMachineProvisioningConfig extends BeanConfig {
      */
     @Deprecated
     boolean isGridServiceAgentZoneMandatory();
+
+    /**
+     * Gets the expected amount of memory,cpu,disk,etc... per management machine that is reserved for processes other than grid containers.
+     * These include Grid Service Manager, Lookup Service or any other daemon running on the system.
+     * 
+     * For example, a machine with a 16GB server and 1GB reserved can run 3 containers 5GB each.
+     * 
+     * @since 9.5.0
+     */
+	CapacityRequirements getReservedCapacityPerManagementMachine();
 }

@@ -258,7 +258,14 @@ public class MachinesSlaUtils {
 
     public static CapacityRequirements getReservedCapacity(
             AbstractMachinesSlaPolicy sla, GridServiceAgent agent) {
-        
-        return sla.getReservedCapacityPerMachine();
+        if (isManagementRunningOnMachine(agent.getMachine())) {        	        	
+        	CapacityRequirements reservedCapacityPerManagementMachine = sla.getReservedCapacityPerManagementMachine();
+			return reservedCapacityPerManagementMachine;
+        	
+        } else {        	
+        	CapacityRequirements reservedCapacityPerMachine = sla.getReservedCapacityPerMachine();
+        	return reservedCapacityPerMachine;        	
+        }
+    	
     }
 }
