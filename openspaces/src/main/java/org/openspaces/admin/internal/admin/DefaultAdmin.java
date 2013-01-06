@@ -1595,6 +1595,9 @@ public class DefaultAdmin implements InternalAdmin {
                             holders.put(holder.name, holder);
                         }
                         if (detail.isManaging()) {
+                            if (logger.isDebugEnabled() && holder.managingGSM != null) {
+                                logger.debug("Detected two managing GSMs for PU" + holder.name +": existing GSM "+ holder.managingGSM.getUid() + " is overriden by " + gsm.getUid());
+                            }
                             holder.detail = detail;
                             holder.managingGSM = gsm;
                         } else {
