@@ -20,7 +20,6 @@ package org.openspaces.admin.internal.discovery;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringTokenizer;
 
 import net.jini.core.discovery.LookupLocator;
 import net.jini.core.entry.Entry;
@@ -81,6 +80,7 @@ import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
 import com.gigaspaces.internal.jvm.JVMDetails;
 import com.gigaspaces.internal.jvm.JVMInfoProvider;
 import com.gigaspaces.internal.os.OSDetails;
+import com.gigaspaces.internal.utils.StringUtils;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.management.entry.JMXConnection;
 import com.j_spaces.core.IJSpace;
@@ -613,12 +613,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 groupsProperty = System.getenv("LOOKUPGROUPS");
             }
             if (groupsProperty != null) {
-                StringTokenizer tokenizer = new StringTokenizer(groupsProperty);
-                int count = tokenizer.countTokens();
-                groups = new String[count];
-                for (int i = 0; i < count; i++) {
-                    groups[i] = tokenizer.nextToken();
-                }
+            	groups = StringUtils.commaDelimitedListToStringArray( groupsProperty );
             } else {
                 groups = new String[] { "gigaspaces-" + PlatformVersion.getVersionNumber() };
             }
