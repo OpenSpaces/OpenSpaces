@@ -16,9 +16,10 @@
 
 package org.openspaces.events.polling.receive;
 
-import com.j_spaces.core.client.ReadModifiers;
 import org.openspaces.core.GigaSpace;
 import org.springframework.dao.DataAccessException;
+
+import com.gigaspaces.client.ReadModifiers;
 
 /**
  * First tries and perform a {@link org.openspaces.core.GigaSpace#readMultiple(Object,int,int)} using
@@ -55,11 +56,11 @@ public class MultiExclusiveReadReceiveOperationHandler extends AbstractFifoGroup
      */
     @Override
     protected Object doReceiveBlocking(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException {
-        int modifiers = gigaSpace.getDefaultReadModifiers().getCode() | ReadModifiers.EXCLUSIVE_READ_LOCK;
+        ReadModifiers modifiers = gigaSpace.getDefaultReadModifiers().add(ReadModifiers.EXCLUSIVE_READ_LOCK);
         if(useFifoGrouping)
-            modifiers |= ReadModifiers.FIFO_GROUPING_POLL;
+            modifiers = modifiers.add(ReadModifiers.FIFO_GROUPING_POLL);
         if (useMemoryOnlySearch)
-            modifiers |= ReadModifiers.MEMORY_ONLY_SEARCH;
+            modifiers = modifiers.add(ReadModifiers.MEMORY_ONLY_SEARCH);
         
         Object[] results = gigaSpace.readMultiple(template, maxEntries, modifiers);
         if (results != null && results.length > 0) {
@@ -77,11 +78,11 @@ public class MultiExclusiveReadReceiveOperationHandler extends AbstractFifoGroup
      */
     @Override
     protected Object doReceiveNonBlocking(Object template, GigaSpace gigaSpace) throws DataAccessException {
-        int modifiers = gigaSpace.getDefaultReadModifiers().getCode() | ReadModifiers.EXCLUSIVE_READ_LOCK;
+        ReadModifiers modifiers = gigaSpace.getDefaultReadModifiers().add(ReadModifiers.EXCLUSIVE_READ_LOCK);
         if(useFifoGrouping)
-            modifiers |= ReadModifiers.FIFO_GROUPING_POLL;
+            modifiers = modifiers.add(ReadModifiers.FIFO_GROUPING_POLL);
         if (useMemoryOnlySearch)
-            modifiers |= ReadModifiers.MEMORY_ONLY_SEARCH;
+            modifiers = modifiers.add(ReadModifiers.MEMORY_ONLY_SEARCH);
         
         Object[] results = gigaSpace.readMultiple(template, maxEntries, modifiers);
         if (results != null && results.length > 0) {

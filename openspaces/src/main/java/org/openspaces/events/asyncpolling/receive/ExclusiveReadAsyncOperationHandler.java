@@ -16,11 +16,12 @@
 
 package org.openspaces.events.asyncpolling.receive;
 
-import com.gigaspaces.async.AsyncFuture;
-import com.gigaspaces.async.AsyncFutureListener;
-import com.j_spaces.core.client.ReadModifiers;
 import org.openspaces.core.GigaSpace;
 import org.springframework.dao.DataAccessException;
+
+import com.gigaspaces.async.AsyncFuture;
+import com.gigaspaces.async.AsyncFutureListener;
+import com.gigaspaces.client.ReadModifiers;
 
 /**
  * Performs a single take usign {@link org.openspaces.core.GigaSpace#asyncRead(Object)} under exclusive
@@ -35,6 +36,6 @@ public class ExclusiveReadAsyncOperationHandler implements AsyncOperationHandler
      * read lock.
      */
     public AsyncFuture asyncReceive(Object template, GigaSpace gigaSpace, long receiveTimeout, AsyncFutureListener listener) throws DataAccessException {
-        return gigaSpace.asyncRead(template, receiveTimeout, gigaSpace.getDefaultReadModifiers().getCode() | ReadModifiers.EXCLUSIVE_READ_LOCK, listener);
+        return gigaSpace.asyncRead(template, receiveTimeout, gigaSpace.getDefaultReadModifiers().add(ReadModifiers.EXCLUSIVE_READ_LOCK), listener);
     }
 }
