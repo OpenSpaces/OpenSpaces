@@ -35,6 +35,6 @@ public class ExclusiveReadAsyncOperationHandler implements AsyncOperationHandler
      * read lock.
      */
     public AsyncFuture asyncReceive(Object template, GigaSpace gigaSpace, long receiveTimeout, AsyncFutureListener listener) throws DataAccessException {
-        return gigaSpace.asyncRead(template, receiveTimeout, gigaSpace.getModifiersForIsolationLevel() | ReadModifiers.EXCLUSIVE_READ_LOCK, listener);
+        return gigaSpace.asyncRead(template, receiveTimeout, gigaSpace.getDefaultReadModifiers().getCode() | ReadModifiers.EXCLUSIVE_READ_LOCK, listener);
     }
 }

@@ -55,7 +55,7 @@ public class MultiExclusiveReadReceiveOperationHandler extends AbstractFifoGroup
      */
     @Override
     protected Object doReceiveBlocking(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException {
-        int modifiers = gigaSpace.getModifiersForIsolationLevel() | ReadModifiers.EXCLUSIVE_READ_LOCK;
+        int modifiers = gigaSpace.getDefaultReadModifiers().getCode() | ReadModifiers.EXCLUSIVE_READ_LOCK;
         if(useFifoGrouping)
             modifiers |= ReadModifiers.FIFO_GROUPING_POLL;
         if (useMemoryOnlySearch)
@@ -77,7 +77,7 @@ public class MultiExclusiveReadReceiveOperationHandler extends AbstractFifoGroup
      */
     @Override
     protected Object doReceiveNonBlocking(Object template, GigaSpace gigaSpace) throws DataAccessException {
-        int modifiers = gigaSpace.getModifiersForIsolationLevel() | ReadModifiers.EXCLUSIVE_READ_LOCK;
+        int modifiers = gigaSpace.getDefaultReadModifiers().getCode() | ReadModifiers.EXCLUSIVE_READ_LOCK;
         if(useFifoGrouping)
             modifiers |= ReadModifiers.FIFO_GROUPING_POLL;
         if (useMemoryOnlySearch)
