@@ -45,7 +45,6 @@ import org.jini.rio.monitor.event.EventsStore;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.bean.BeanConfigException;
 import org.openspaces.admin.bean.BeanConfigurationException;
-import org.openspaces.admin.internal.InternalAdminFactory;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.gsm.InternalGridServiceManager;
 import org.openspaces.admin.internal.pu.InternalProcessingUnit;
@@ -101,11 +100,11 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
     private static final long CHECK_SINGLE_THREAD_EVENT_PUMP_EVERY_SECONDS=60;
     private static final String CONFIG_COMPONENT = "org.openspaces.grid.esm";
     private static final Logger logger = Logger.getLogger(CONFIG_COMPONENT);
-    private final Admin admin;
-    private final MachinesSlaEnforcement machinesSlaEnforcement;
-    private final ContainersSlaEnforcement containersSlaEnforcement;
-    private final RebalancingSlaEnforcement rebalancingSlaEnforcement;
-    private final AutoScalingSlaEnforcement autoScalingSlaEnforcement;
+    private Admin admin;
+    private MachinesSlaEnforcement machinesSlaEnforcement;
+    private ContainersSlaEnforcement containersSlaEnforcement;
+    private RebalancingSlaEnforcement rebalancingSlaEnforcement;
+    private AutoScalingSlaEnforcement autoScalingSlaEnforcement;
     private final Map<ProcessingUnit,ScaleBeanServer> scaleBeanServerPerProcessingUnit;
     private final Map<String,Map<String,String>> elasticPropertiesPerProcessingUnit;
     private final Map<String, PendingElasticPropertiesUpdate> pendingElasticPropertiesUpdatePerProcessingUnit;
@@ -113,6 +112,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
     private String[] configArgs;
     private final NonBlockingElasticMachineProvisioningAdapterFactory nonBlockingAdapterFactory;
     private final EventsStore eventsStore;
+    private final AtomicBoolean adminInitialized = new AtomicBoolean(false);
     private final AtomicBoolean destroyStarted = new AtomicBoolean(false);
     
     /**
@@ -124,43 +124,44 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
         scaleBeanServerPerProcessingUnit = new HashMap<ProcessingUnit,ScaleBeanServer>();
         elasticPropertiesPerProcessingUnit = new ConcurrentHashMap<String, Map<String,String>>();
         pendingElasticPropertiesUpdatePerProcessingUnit = new ConcurrentHashMap<String, PendingElasticPropertiesUpdate>();
-
-        admin = new InternalAdminFactory().singleThreadedEventListeners().createAdmin();
-        
-        final long delay = CHECK_SINGLE_THREAD_EVENT_PUMP_EVERY_SECONDS*1000/2;
-        final long delayError = delay; 
-        ((InternalAdmin)admin).scheduleWithFixedDelayNonBlockingStateChange(
-                new Runnable() {
-                    long timestamp = 0;
-                    public void run() {
-                        long now = SystemTime.timeMillis();
-                        if (timestamp == 0 || 
-                                now-timestamp - delay < delayError) {
-                        }
-                        else {
-                            logger.warning(
-                                    "Single threaded admin keep alive event has been delayed by " + 
-                                    (now-timestamp-delay)/1000 + " seconds.");
-                        }
-                        timestamp = now;
-                    }
-                }
-                , 0, delay, TimeUnit.MILLISECONDS);
-        machinesSlaEnforcement = new MachinesSlaEnforcement();
-        containersSlaEnforcement = new ContainersSlaEnforcement(admin);
-        rebalancingSlaEnforcement = new RebalancingSlaEnforcement();
-        autoScalingSlaEnforcement = new AutoScalingSlaEnforcement(admin);
-        
         eventsStore = new EventsStore();
         //Discovery warm-up period
-        new ESMImplInitializer(admin, new Runnable() {
+        new ESMImplInitializer(new ESMImplInitializer.AdminCreatedEventListener() {
 
             @Override
-            public void run() {
+            public void adminCreated(Admin admin) {
+
+                ESMImpl.this.admin = admin;
+                final long delay = CHECK_SINGLE_THREAD_EVENT_PUMP_EVERY_SECONDS*1000/2;
+                final long delayError = delay; 
+                ((InternalAdmin)admin).scheduleWithFixedDelayNonBlockingStateChange(
+                        new Runnable() {
+                            long timestamp = 0;
+                            public void run() {
+                                long now = SystemTime.timeMillis();
+                                if (timestamp == 0 || 
+                                        now-timestamp - delay < delayError) {
+                                }
+                                else {
+                                    logger.warning(
+                                            "Single threaded admin keep alive event has been delayed by " + 
+                                            (now-timestamp-delay)/1000 + " seconds.");
+                                }
+                                timestamp = now;
+                            }
+                        }
+                        , 0, delay, TimeUnit.MILLISECONDS);
+                ESMImpl.this.machinesSlaEnforcement = new MachinesSlaEnforcement();
+                ESMImpl.this.containersSlaEnforcement = new ContainersSlaEnforcement(admin);
+                ESMImpl.this.rebalancingSlaEnforcement = new RebalancingSlaEnforcement();
+                ESMImpl.this.autoScalingSlaEnforcement = new AutoScalingSlaEnforcement(admin);
+                
                 //triggers initialization of all PU SLA beans
-                ESMImpl eventListener = ESMImpl.this;
-                admin.getProcessingUnits().getProcessingUnitAdded().add(eventListener);
-                admin.getProcessingUnits().getProcessingUnitRemoved().add(eventListener);
+                admin.getProcessingUnits().getProcessingUnitAdded().add(ESMImpl.this);
+                admin.getProcessingUnits().getProcessingUnitRemoved().add(ESMImpl.this);
+                
+                logger.info("ESM is now listening for Processing Unit events");
+                adminInitialized.set(true);
             }
             
         });
@@ -424,7 +425,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
             });
         }
         catch (IllegalStateException e) {
-            if (destroyStarted.get()) {
+            if (destroyStarted.get() || e instanceof EsmNotInitializedException) {
                 //going down, gracefully return no events
                 return new Events(cursor,new Event[] {});
             }
@@ -449,6 +450,9 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
     
     @SuppressWarnings("unchecked")
     <T> T submitAndWait(final Callable<T> task) {
+        if (!adminInitialized.get()) {
+            throw new EsmNotInitializedException();
+        }
         final AtomicReference<Object> future = new AtomicReference<Object>();
         final CountDownLatch latch = new CountDownLatch(1);
         ((InternalAdmin)admin).scheduleNonBlockingStateChange(

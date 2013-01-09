@@ -22,6 +22,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,6 +31,7 @@ import java.util.logging.Logger;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.esm.ElasticServiceManager;
 import org.openspaces.admin.gsm.GridServiceManager;
+import org.openspaces.admin.internal.InternalAdminFactory;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.gsm.InternalGridServiceManager;
 import org.openspaces.admin.lus.LookupService;
@@ -37,6 +40,7 @@ import org.openspaces.admin.pu.ProcessingUnit;
 import com.gigaspaces.grid.gsm.GSM;
 import com.gigaspaces.grid.gsm.PUDetails;
 import com.gigaspaces.grid.gsm.PUsDetails;
+import com.gigaspaces.internal.utils.concurrent.GSThreadFactory;
 /**
  * The purpose of this class is to make sure that admin API
  * view of the PUs and instances is based on the GSM and not the LUS.
@@ -48,21 +52,44 @@ import com.gigaspaces.grid.gsm.PUsDetails;
  */
 public class ESMImplInitializer {
     
+    public interface AdminCreatedEventListener {
+        void adminCreated(Admin admin);
+    }
+    
     private static final long DISCOVERY_POLLING_PERIOD_SECONDS = 20;
     
     private static final Logger logger = Logger.getLogger(ESMImplInitializer.class.getName());
     
-    private final InternalAdmin admin;
+    private InternalAdmin admin;
 
-    private final Runnable esmInitializer;
+    private final AdminCreatedEventListener esmInitializer;
+
+    private ExecutorService executor;
     
-    public ESMImplInitializer (Admin admin, Runnable esmInitializer) {
-       this.admin = (InternalAdmin) admin;
-       this.esmInitializer = esmInitializer;
-       schedule(0, TimeUnit.SECONDS);
+    public ESMImplInitializer(ESMImplInitializer.AdminCreatedEventListener adminCreatedEventListener) {
+        this.esmInitializer = adminCreatedEventListener;
+        final ClassLoader correctClassLoader = Thread.currentThread().getContextClassLoader();
+        final boolean useDaemonThreads = true;
+        executor = Executors.newSingleThreadExecutor(
+                new GSThreadFactory("GS-EsmImplInitializer",useDaemonThreads) {
+                    @Override
+                    public Thread newThread(Runnable r) {
+                        Thread thread = super.newThread(r);
+                        thread.setContextClassLoader(correctClassLoader);
+                        return thread;
+                     }});
+        boolean restartAdmin = false;
+        schedule(restartAdmin, 0, TimeUnit.SECONDS);
     }
     
-    private void schedule(long delay, TimeUnit timeunit) {
+    private void schedule(boolean restartAdmin, long delay, TimeUnit timeunit) {
+        
+        if (restartAdmin) {
+            closeAdminIfNotNull();
+        }
+        
+        createAdminIfNull();
+        
         
         if (delay > 0) {
             logger.info("Waiting " + timeunit.toSeconds(delay) + " seconds for all grid components to register with lookup service");
@@ -73,6 +100,14 @@ public class ESMImplInitializer {
             @Override
             public void run() {
               
+                if (!isManagementDiscovered(admin)) {
+                    // retry, give admin more time to discover management machines
+                    boolean restartAdmin = false;
+                    schedule(restartAdmin, DISCOVERY_POLLING_PERIOD_SECONDS, TimeUnit.SECONDS);
+                    return;
+                }
+                
+                //accessing the data from a single threaded admin is done on this NonBlockingStateChange event thread
                 final Map<String,Integer> numberOfInstancesPerProcessingUnit = new HashMap<String,Integer>();
                 for (ProcessingUnit pu : admin.getProcessingUnits()) {
                     numberOfInstancesPerProcessingUnit.put(pu.getName(), pu.getInstances().length);
@@ -83,33 +118,49 @@ public class ESMImplInitializer {
                     gridServiceManagers.add(((InternalGridServiceManager)gsm).getGSM());
                 }
               
-              ((InternalAdmin)admin).scheduleAdminOperation(new Runnable() {
+              //performing blocking network action is done on a separate thread
+              executor.submit(new Runnable() {
                  
                 @Override
                 public void run() {
-                    
-                    if (isManagementDiscovered(admin) &&
-                        isLookupDiscoverySyncedWithGsm(gridServiceManagers, numberOfInstancesPerProcessingUnit)) {
-                        esmInitializer.run();
+                    try { 
+                        if (isLookupDiscoverySyncedWithGsm(gridServiceManagers, numberOfInstancesPerProcessingUnit)) {
+                            esmInitializer.adminCreated(admin);
+                            return;
+                        }
                     }
-                    else {
-                        //retry
-                        schedule(DISCOVERY_POLLING_PERIOD_SECONDS, TimeUnit.SECONDS);
+                    catch(Throwable t) {
+                        logger.log(Level.SEVERE, "Unexpected error while initializing ESM", t);
                     }
                     
+                    //retry, restart admin since something is wrong
+                    boolean restartAdmin = true;
+                    schedule(restartAdmin, DISCOVERY_POLLING_PERIOD_SECONDS, TimeUnit.SECONDS);   
                 }
             });
             }
           }, 
         delay,timeunit);
     }
-    
+
+    private void closeAdminIfNotNull() {
+        if (admin != null) {
+            admin.close();
+            admin = null;
+        }
+    }
+
+    private void createAdminIfNull() {
+        if (admin == null) {
+            admin = (InternalAdmin) (new InternalAdminFactory().singleThreadedEventListeners().createAdmin());
+        }
+    }
 
     /**
      * Makes sure that data arriving from Lookup Service into Admin API cache
      * conforms to the data reported from the GSM.
      */
-    private boolean isLookupDiscoverySyncedWithGsm(Set<GSM> gridServiceManagers, Map<String,Integer> numberOfInstancesPerProcessingUnit) {
+    private static boolean isLookupDiscoverySyncedWithGsm(Set<GSM> gridServiceManagers, Map<String,Integer> numberOfInstancesPerProcessingUnit) {
 
         Set<String> managedPus = new HashSet<String>();
         
@@ -166,7 +217,7 @@ public class ESMImplInitializer {
      * @param admin
      * @return
      */
-    private boolean isManagementDiscovered(InternalAdmin admin) {
+    private static boolean isManagementDiscovered(InternalAdmin admin) {
            
         LookupService[] lookupServices = admin.getLookupServices().getLookupServices();
         if (lookupServices.length == 0) {
