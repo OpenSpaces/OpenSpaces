@@ -22,6 +22,8 @@ import java.io.ObjectOutput;
 
 import org.openspaces.pu.service.PlainServiceDetails;
 
+import com.gigaspaces.internal.query.QueryUtils;
+
 /**
  * A generic event container service details.
  *
@@ -34,6 +36,7 @@ public class EventContainerServiceDetails extends PlainServiceDetails {
 
     public static class Attributes {
         public static final String TEMPLATE = "template";
+        public static final String QUERY_DESCRIPTION = "query-description";
         public static final String PERFORM_SNAPSHOT = "perform-snapshot";
         public static final String GIGA_SPACE = "giga-space";
         public static final String TRANSACTION_MANAGER = "transaction-manager";
@@ -47,6 +50,7 @@ public class EventContainerServiceDetails extends PlainServiceDetails {
                                         Object template, boolean performSnapshot, String transctionManager) {
         super(id, SERVICE_TYPE, serviceSubType, description, longDescription);
         getAttributes().put(Attributes.TEMPLATE, template);
+        getAttributes().put(Attributes.QUERY_DESCRIPTION, QueryUtils.getQueryDescription(template));
         getAttributes().put(Attributes.GIGA_SPACE, gigaSpace);
         getAttributes().put(Attributes.PERFORM_SNAPSHOT, performSnapshot);
         getAttributes().put(Attributes.TRANSACTION_MANAGER, transctionManager);
@@ -54,6 +58,10 @@ public class EventContainerServiceDetails extends PlainServiceDetails {
 
     public Object getTemplate() {
         return getAttributes().get(Attributes.TEMPLATE);
+    }
+
+    public String getQueryDescription() {
+        return (String)getAttributes().get(Attributes.QUERY_DESCRIPTION);
     }
 
     public Boolean isPerformSnapshot() {
