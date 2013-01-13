@@ -185,6 +185,12 @@ public abstract class EventRegistrationHelper {
         if (eventListener instanceof BackupGridServiceManagerChangedEventListener) {
             admin.getProcessingUnits().getBackupGridServiceManagerChanged().add((BackupGridServiceManagerChangedEventListener) eventListener);
         }
+        if (eventListener instanceof GatewayAddedEventListener) {
+            admin.getGateways().getGatewayAdded().add((GatewayAddedEventListener)eventListener);
+        }
+        if (eventListener instanceof GatewayRemovedEventListener) {
+            admin.getGateways().getGatewayRemoved().add((GatewayRemovedEventListener)eventListener);
+        }        
         if (eventListener instanceof GatewayProcessingUnitAddedEventListener) {
             admin.getGatewayProcessingUnits().getGatewayProcessingUnitAdded().add(
             		(GatewayProcessingUnitAddedEventListener) eventListener);
@@ -193,12 +199,7 @@ public abstract class EventRegistrationHelper {
             admin.getGatewayProcessingUnits().getGatewayProcessingUnitRemoved().add(
             		(GatewayProcessingUnitRemovedEventListener) eventListener);
         }
-        if (eventListener instanceof GatewayAddedEventListener) {
-            admin.getGateways().getGatewayAdded().add((GatewayAddedEventListener)eventListener);
-        }
-        if (eventListener instanceof GatewayRemovedEventListener) {
-            admin.getGateways().getGatewayRemoved().add((GatewayRemovedEventListener)eventListener);
-        }        
+        
         /*
          * Application listeners
          */
@@ -500,6 +501,6 @@ public abstract class EventRegistrationHelper {
         }
         if (eventListener instanceof GatewayRemovedEventListener) {
             admin.getGateways().getGatewayRemoved().remove( ( GatewayRemovedEventListener)eventListener );
-        }                   
+        }        
     }
 }
