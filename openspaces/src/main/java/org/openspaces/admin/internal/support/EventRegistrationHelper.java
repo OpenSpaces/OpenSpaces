@@ -24,8 +24,10 @@ import org.openspaces.admin.application.events.ApplicationAddedEventListener;
 import org.openspaces.admin.application.events.ApplicationRemovedEventListener;
 import org.openspaces.admin.esm.events.ElasticServiceManagerAddedEventListener;
 import org.openspaces.admin.esm.events.ElasticServiceManagerRemovedEventListener;
+import org.openspaces.admin.gateway.events.GatewayAddedEventListener;
 import org.openspaces.admin.gateway.events.GatewayProcessingUnitAddedEventListener;
 import org.openspaces.admin.gateway.events.GatewayProcessingUnitRemovedEventListener;
+import org.openspaces.admin.gateway.events.GatewayRemovedEventListener;
 import org.openspaces.admin.gsa.events.ElasticGridServiceAgentProvisioningFailureEventListener;
 import org.openspaces.admin.gsa.events.ElasticGridServiceAgentProvisioningProgressChangedEventListener;
 import org.openspaces.admin.gsa.events.GridServiceAgentAddedEventListener;
@@ -190,6 +192,12 @@ public abstract class EventRegistrationHelper {
         if (eventListener instanceof GatewayProcessingUnitRemovedEventListener) {
             admin.getGatewayProcessingUnits().getGatewayProcessingUnitRemoved().add(
             		(GatewayProcessingUnitRemovedEventListener) eventListener);
+        }
+        if (eventListener instanceof GatewayAddedEventListener) {
+            admin.getGateways().getGatewayAdded().add((GatewayAddedEventListener)eventListener);
+        }
+        if (eventListener instanceof GatewayRemovedEventListener) {
+            admin.getGateways().getGatewayRemoved().add((GatewayRemovedEventListener)eventListener);
         }        
         /*
          * Application listeners
@@ -486,6 +494,12 @@ public abstract class EventRegistrationHelper {
         if (eventListener instanceof GatewayProcessingUnitRemovedEventListener) {
             admin.getGatewayProcessingUnits().getGatewayProcessingUnitRemoved().remove(
             		(GatewayProcessingUnitRemovedEventListener) eventListener);
-        }           
+        }
+        if (eventListener instanceof GatewayAddedEventListener) {
+            admin.getGateways().getGatewayAdded().remove( ( GatewayAddedEventListener )eventListener );
+        }
+        if (eventListener instanceof GatewayRemovedEventListener) {
+            admin.getGateways().getGatewayRemoved().remove( ( GatewayRemovedEventListener)eventListener );
+        }                   
     }
 }

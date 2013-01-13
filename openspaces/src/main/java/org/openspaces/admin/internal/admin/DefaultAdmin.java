@@ -63,9 +63,11 @@ import org.openspaces.admin.dump.DumpProvider;
 import org.openspaces.admin.dump.DumpResult;
 import org.openspaces.admin.esm.ElasticServiceManager;
 import org.openspaces.admin.esm.ElasticServiceManagers;
+import org.openspaces.admin.gateway.Gateway;
 import org.openspaces.admin.gateway.GatewayProcessingUnit;
 import org.openspaces.admin.gateway.GatewayProcessingUnits;
 import org.openspaces.admin.gateway.Gateways;
+import org.openspaces.admin.gateway.InternalGateways;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsa.GridServiceAgents;
 import org.openspaces.admin.gsc.GridServiceContainer;
@@ -160,6 +162,7 @@ import org.openspaces.admin.vm.VirtualMachines;
 import org.openspaces.admin.zone.Zone;
 import org.openspaces.admin.zone.ZoneAware;
 import org.openspaces.admin.zone.Zones;
+import org.openspaces.core.gateway.GatewayUtils;
 import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.core.space.SpaceServiceDetails;
 import org.openspaces.pu.service.ServiceMonitors;
@@ -210,7 +213,7 @@ public class DefaultAdmin implements InternalAdmin {
 
     private final InternalGridServiceContainers gridServiceContainers = new DefaultGridServiceContainers(this);
 
-    private final Gateways gateways = new DefaultGateways(this);
+    private final InternalGateways gateways = new DefaultGateways(this);
     
     private final InternalTransports transports = new DefaultTransports(this);
 
@@ -1164,6 +1167,7 @@ public class DefaultAdmin implements InternalAdmin {
                 processVirtualMachineOnServiceRemoval(processingUnitInstance, processingUnitInstance, processingUnitInstance);
                 processMachineOnServiceRemoval(processingUnitInstance, processingUnitInstance);
                 processZonesOnServiceRemoval(processingUnitInstance.getUid(), processingUnitInstance);
+                processGatewaysOnProcessingUnitInstanceRemoval( processingUnitInstance.getUid(), processingUnitInstance );
                 if (logger.isDebugEnabled()) {
                     logger.debug("removed processing unit instance " + processingUnitInstance.getProcessingUnitInstanceName() +" uid:"+uid);
                 }
@@ -1184,7 +1188,7 @@ public class DefaultAdmin implements InternalAdmin {
         }
     }
 
-    @Override
+	@Override
     public void addSpaceInstance(InternalSpaceInstance spaceInstance, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones) {
         assertStateChangesPermitted();
         synchronized (DefaultAdmin.this) {
@@ -1482,6 +1486,45 @@ public class DefaultAdmin implements InternalAdmin {
         }
     }
 
+    private void processGatewaysOnProcessingUnitInstanceRemoval( 
+    			String removedPuInstanceUid, ProcessingUnitInstance removedProcessingUnitInstance) {
+
+		String gatewayName = GatewayUtils.extractGatewayName( removedProcessingUnitInstance );
+		if( gatewayName != null ){
+
+			GatewayProcessingUnit removedGatewayProcessingUnit = 
+					gatewayProcessingUnits.removeGatewayProcessingUnit( removedPuInstanceUid );
+
+			if( logger.isDebugEnabled() ){
+				if( removedGatewayProcessingUnit != null ){
+					logger.debug("Gateway Processing Unit removed with uid [" + 
+													removedPuInstanceUid + "]");
+				}
+				else{
+					logger.debug("Gateway Processing Unit [" + 
+													removedPuInstanceUid + "] not removed");
+				}
+	        }
+			if( removedGatewayProcessingUnit != null ){
+				Gateway gateway = removedGatewayProcessingUnit.getGateway();
+				//check if there are more Gateway Processing units within Specific Gateway 
+				if( gateway.isEmpty() ){
+					Gateway removedGateway = gateways.removeGateway( gatewayName );
+    				if( logger.isDebugEnabled() ){
+    					if( removedGateway != null ){
+    						logger.debug("Gateway [" + gatewayName + "] removed");
+    					}
+    					else{
+    						logger.debug("Gateway [" + gatewayName + "] not removed");
+    					}
+    		        }    						
+				}
+			}
+		}
+		
+	}
+    
+    
     @Override
     public DumpResult generateDump(final Set<DumpProvider> dumpProviders, final DumpGeneratedListener listener, final String cause, final Map<String, Object> context, final String... processor) throws AdminException {
         CompoundDumpResult dumpResult = new CompoundDumpResult();

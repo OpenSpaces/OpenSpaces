@@ -33,7 +33,7 @@ import org.openspaces.admin.gateway.GatewayDelegator;
 import org.openspaces.admin.gateway.GatewayProcessingUnit;
 import org.openspaces.admin.gateway.GatewaySink;
 import org.openspaces.admin.gateway.GatewaySinkSource;
-import org.openspaces.admin.internal.admin.DefaultAdmin;
+import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventListener;
@@ -49,9 +49,9 @@ import com.gigaspaces.internal.utils.concurrent.ExchangeCountDownLatch;
 public class DefaultGateway implements Gateway {
 
     private final String gatewayName;
-    private final DefaultAdmin admin;
+    private final InternalAdmin admin;
 
-    public DefaultGateway(DefaultAdmin admin, String gatewayName) {
+    public DefaultGateway(InternalAdmin admin, String gatewayName) {
         this.admin = admin;
         this.gatewayName = gatewayName;
     }

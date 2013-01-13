@@ -6,5 +6,5 @@ import org.openspaces.admin.gateway.GatewayProcessingUnits;
 public interface InternalGatewayProcessingUnits extends GatewayProcessingUnits{
 
 	void addGatewayProcessingUnit(GatewayProcessingUnit gatewayProcessingUnit);
-	void removeGatewayProcessingUnit(String uid);
+	GatewayProcessingUnit removeGatewayProcessingUnit(String uid);
 }

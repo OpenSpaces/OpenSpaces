@@ -22,6 +22,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminAware;
+import org.openspaces.admin.gateway.events.GatewayAddedEventManager;
+import org.openspaces.admin.gateway.events.GatewayLifecycleEventListener;
+import org.openspaces.admin.gateway.events.GatewayRemovedEventManager;
 
 /**
  * Gateways holds all the different {@link Gateway}s that are currently
@@ -71,6 +74,27 @@ public interface Gateways extends AdminAware, Iterable<Gateway> {
      * Returns <code>true</code> if there are no gateways, <code>false</code> otherwise.
      */
     boolean isEmpty();
+    
+    
+    /**
+     * Returns an event manager allowing to register {@link org.openspaces.admin.gateway.events.GatewayAddedEventListener}s.
+     */
+    GatewayAddedEventManager getGatewayAdded();
+
+    /**
+     * Returns an event manager allowing to register {@link org.openspaces.admin.gateway.events.GatewayRemovedEventListener}s.
+     */
+    GatewayRemovedEventManager getGatewayRemoved();
+
+    /**
+     * Allows to add a {@link GatewayLifecycleEventListener}.
+     */
+    void addLifecycleListener(GatewayLifecycleEventListener eventListener);
+
+    /**
+     * Allows to remove a {@link GatewayLifecycleEventListener}.
+     */
+    void removeLifecycleListener(GatewayLifecycleEventListener eventListener);
     
     //Events for addition and removal of gateways?
     

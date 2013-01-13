@@ -76,12 +76,14 @@ public class DefaultGatewayProcessingUnits implements InternalGatewayProcessingU
     }
     
     @Override
-    public void removeGatewayProcessingUnit( String uid ) {
+    public GatewayProcessingUnit removeGatewayProcessingUnit( String uid ) {
         assertStateChangesPermitted();
         final GatewayProcessingUnit existingGatewayProcessingUnit = gatewayProcessingUnits.remove( uid );
         if (existingGatewayProcessingUnit != null) {
             gatewayProcessingUnitRemovedEventManager.gatewayProcessingUnitRemoved(existingGatewayProcessingUnit);
         }
+        
+        return existingGatewayProcessingUnit;
     }    
     
     private void assertStateChangesPermitted() {

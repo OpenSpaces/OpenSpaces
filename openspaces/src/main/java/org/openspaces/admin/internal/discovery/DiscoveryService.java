@@ -45,10 +45,13 @@ import org.jini.rio.resources.servicecore.Service;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.gateway.Gateway;
 import org.openspaces.admin.gateway.GatewayProcessingUnit;
+import org.openspaces.admin.gateway.Gateways;
+import org.openspaces.admin.gateway.InternalGateways;
 import org.openspaces.admin.internal.admin.AdminClosedException;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.esm.DefaultElasticServiceManager;
 import org.openspaces.admin.internal.esm.InternalElasticServiceManager;
+import org.openspaces.admin.internal.gateway.DefaultGateway;
 import org.openspaces.admin.internal.gateway.DefaultGatewayProcessingUnit;
 import org.openspaces.admin.internal.gateway.InternalGatewayProcessingUnits;
 import org.openspaces.admin.internal.gsa.DefaultGridServiceAgent;
@@ -357,14 +360,19 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                         String gatewayName = GatewayUtils.extractGatewayName( processingUnitInstance );
                         if( gatewayName != null ){
                         	
-                        	Gateway gateway = admin.getGateways().getGateway( gatewayName );
-                        	if( gateway != null ){
-                        		GatewayProcessingUnit gatewayProcessingUnit = 
-                        				new DefaultGatewayProcessingUnit( admin, gateway, processingUnitInstance );
-                        		InternalGatewayProcessingUnits gatewayProcessingUnits =
-                        				( InternalGatewayProcessingUnits )admin.getGatewayProcessingUnits();
-                        		gatewayProcessingUnits.addGatewayProcessingUnit( gatewayProcessingUnit );
-                        	}
+                    		Gateways gateways = admin.getGateways();
+                    		Gateway gateway = gateways.getGateway( gatewayName );
+                    		//check if Gateway already exists, if not create it only once within if
+                    		if( gateway == null ){
+                    			gateway = new DefaultGateway( admin, gatewayName );
+                    			( ( InternalGateways )gateways ).addGateway( gateway );
+                    		}
+
+                    		GatewayProcessingUnit gatewayProcessingUnit = 
+                    			new DefaultGatewayProcessingUnit( admin, gateway, processingUnitInstance );
+                    		InternalGatewayProcessingUnits gatewayProcessingUnits =
+                    			( InternalGatewayProcessingUnits )admin.getGatewayProcessingUnits();
+                    		gatewayProcessingUnits.addGatewayProcessingUnit( gatewayProcessingUnit );
                         }
                     }
                 });
@@ -529,7 +537,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
             logger.warn("Failed to add [GSM] with uid [" + serviceID + "]", e);
         }        
     }
-
+    
     /**
      * Get the String value found in the JMXConnection entry, or null if the attribute
      * set does not include a JMXConnection

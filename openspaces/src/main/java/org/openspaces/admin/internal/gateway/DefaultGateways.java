@@ -18,34 +18,47 @@
 package org.openspaces.admin.internal.gateway;
 
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.gateway.Gateway;
-import org.openspaces.admin.gateway.Gateways;
+import org.openspaces.admin.gateway.InternalGateways;
+import org.openspaces.admin.gateway.events.DefaultGatewayAddedEventManager;
+import org.openspaces.admin.gateway.events.DefaultGatewayRemovedEventManager;
+import org.openspaces.admin.gateway.events.GatewayAddedEventListener;
+import org.openspaces.admin.gateway.events.GatewayAddedEventManager;
+import org.openspaces.admin.gateway.events.GatewayLifecycleEventListener;
+import org.openspaces.admin.gateway.events.GatewayRemovedEventManager;
+import org.openspaces.admin.gateway.events.InternalGatewayAddedEventManager;
+import org.openspaces.admin.gateway.events.InternalGatewayRemovedEventManager;
 import org.openspaces.admin.internal.admin.DefaultAdmin;
-import org.openspaces.admin.pu.ProcessingUnit;
-import org.openspaces.admin.pu.ProcessingUnitInstance;
-import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventListener;
-import org.openspaces.core.gateway.GatewayUtils;
+
+import com.j_spaces.kernel.SizeConcurrentHashMap;
 
 /**
  * 
  * @author eitany
  * @since 8.0.4
  */
-public class DefaultGateways implements Gateways {
+public class DefaultGateways implements InternalGateways {
 
     private final DefaultAdmin admin;
+    
+    private final Map<String, Gateway> gateways = new SizeConcurrentHashMap<String, Gateway>();
+
+    private final InternalGatewayAddedEventManager gatewayAddedEventManager;
+
+    private final InternalGatewayRemovedEventManager gatewayRemovedEventManager;    
 
     public DefaultGateways(DefaultAdmin admin) {
         this.admin = admin;
+        this.gatewayAddedEventManager = new DefaultGatewayAddedEventManager(this);
+        this.gatewayRemovedEventManager = new DefaultGatewayRemovedEventManager(this);        
     }
 
     @Override
@@ -60,33 +73,17 @@ public class DefaultGateways implements Gateways {
 
     @Override
     public Gateway[] getGateways() {
-        List<Gateway> gateways = new LinkedList<Gateway>();
-        for (ProcessingUnit processingUnit : admin.getProcessingUnits()) {
-            String gatewayName = GatewayUtils.extractGatewayNameIfExists(processingUnit);
-            if (gatewayName != null)
-                gateways.add(new DefaultGateway(admin, gatewayName));
-        }
-        return gateways.toArray(new Gateway[gateways.size()]);
+		return gateways.values().toArray( new Gateway[ gateways.size() ] );    	
     }
 
     @Override
     public Gateway getGateway(String gatewayName) {
-        for (ProcessingUnit processingUnit : admin.getProcessingUnits()) {
-            for (ProcessingUnitInstance processingUnitInstance : processingUnit) {
-              if (GatewayUtils.isPuInstanceOfGateway(gatewayName, processingUnitInstance))
-                  return new DefaultGateway(admin, gatewayName);
-            } 
-        }
-        return null;
+    	return gateways.get( gatewayName );    	
     }
 
     @Override
     public Map<String, Gateway> getNames() {
-        Map<String, Gateway> names = new HashMap<String, Gateway>();
-        for (Gateway gateway : this) {
-            names.put(gateway.getName(), gateway);
-        }
-        return names;
+    	return Collections.unmodifiableMap(gateways);
     }
 
     @Override
@@ -96,36 +93,85 @@ public class DefaultGateways implements Gateways {
 
     @Override
     public Gateway waitFor(final String gatewayName, long timeout, TimeUnit timeUnit) {
+    	
         final CountDownLatch latch = new CountDownLatch(1);
-        ProcessingUnitInstanceAddedEventListener added = new ProcessingUnitInstanceAddedEventListener() {
-            
-            @Override
-            public void processingUnitInstanceAdded(ProcessingUnitInstance processingUnitInstance) {
-                if (GatewayUtils.isPuInstanceOfGateway(gatewayName, processingUnitInstance))
+        final AtomicReference<Gateway> ref = new AtomicReference<Gateway>();
+        GatewayAddedEventListener added = new GatewayAddedEventListener() {
+        	@Override
+            public void gatewayAdded(Gateway gateway) {
+                if (gatewayName.equals(gateway.getName())) {
+                    ref.set(gateway);
                     latch.countDown();
+                }
             }
         };
-        
-        admin.getProcessingUnits().getProcessingUnitInstanceAdded().add(added);
+        getGatewayAdded().add(added);
         try {
-            if (latch.await(timeout, timeUnit))
-                return new DefaultGateway(admin, gatewayName);
-            return null;
+            latch.await(timeout, timeUnit);
+            return ref.get();
         } catch (InterruptedException e) {
             return null;
         } finally {
-            admin.getProcessingUnits().getProcessingUnitInstanceAdded().remove(added);
-        }
+            getGatewayAdded().remove(added);
+        }    	
     }
 
     @Override
     public int getSize() {
-        return getGateways().length;
+        return gateways.size();
     }
 
     @Override
     public boolean isEmpty() {
-        return getSize() == 0;
+        return gateways.isEmpty();
     }
 
+	@Override
+	public GatewayAddedEventManager getGatewayAdded() {
+		return gatewayAddedEventManager;
+	}
+
+	@Override
+	public GatewayRemovedEventManager getGatewayRemoved() {
+		return gatewayRemovedEventManager;
+	}
+
+	@Override
+	public void addLifecycleListener(GatewayLifecycleEventListener eventListener) {
+
+        getGatewayAdded().add(eventListener);
+        getGatewayRemoved().add(eventListener);
+	}
+
+	@Override
+	public void removeLifecycleListener( GatewayLifecycleEventListener eventListener ) {
+		
+        getGatewayAdded().remove(eventListener);
+        getGatewayRemoved().remove(eventListener);		
+	}
+
+	@Override
+	public void addGateway(Gateway gateway) {
+        assertStateChangesPermitted();
+        String name = gateway.getName();
+        Gateway existingGateway = gateways.put( name, gateway );
+        if( existingGateway == null ) {
+            gatewayAddedEventManager.gatewayAdded( gateway );
+        }
+	}
+
+	@Override
+	public Gateway removeGateway(String name) {
+
+        assertStateChangesPermitted();
+        final Gateway existingGateway = gateways.remove( name );
+        if (existingGateway != null) {
+            gatewayRemovedEventManager.gatewayRemoved( existingGateway );
+        }
+        return existingGateway;
+	}
+	
+    private void assertStateChangesPermitted() {
+        admin.assertStateChangesPermitted();
+    }	
 }
