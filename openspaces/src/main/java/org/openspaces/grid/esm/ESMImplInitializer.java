@@ -29,7 +29,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.openspaces.admin.Admin;
-import org.openspaces.admin.esm.ElasticServiceManager;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.internal.InternalAdminFactory;
 import org.openspaces.admin.internal.admin.InternalAdmin;
@@ -241,24 +240,6 @@ public class ESMImplInitializer {
         for (GridServiceManager gsm : gsms) {
             if (gsm.isDiscovered() && gsm.getAgentId() != -1 && gsm.getGridServiceAgent() == null) {
                 logger.log(Level.INFO, "Waiting to discover GSA that started GSM " + gsm.getUid());
-                return false;
-            }
-        }
-
-        ElasticServiceManager[] esms = admin.getElasticServiceManagers().getManagers();
-        if (esms.length == 0) {
-            logger.log(Level.INFO, "Waiting to discover one ESM");
-            return false;
-        }
-
-        if (esms.length > 1) {
-            logger.log(Level.INFO, "Waiting for one of the ESMs to stop. Currently running " + esms.length + " ESMs");
-            return false;
-        }
-
-        for (ElasticServiceManager esm : admin.getElasticServiceManagers()) {
-            if (esm.isDiscovered() && esm.getAgentId() != -1 && esm.getGridServiceAgent() == null) {
-                logger.log(Level.INFO, "Waiting to discover GSA that started ESM " + esm.getUid());
                 return false;
             }
         }

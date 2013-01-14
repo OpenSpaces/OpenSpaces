@@ -45,6 +45,7 @@ import org.jini.rio.monitor.event.EventsStore;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.bean.BeanConfigException;
 import org.openspaces.admin.bean.BeanConfigurationException;
+import org.openspaces.admin.esm.ElasticServiceManager;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.gsm.InternalGridServiceManager;
 import org.openspaces.admin.internal.pu.InternalProcessingUnit;
@@ -156,12 +157,42 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
                 ESMImpl.this.rebalancingSlaEnforcement = new RebalancingSlaEnforcement();
                 ESMImpl.this.autoScalingSlaEnforcement = new AutoScalingSlaEnforcement(admin);
                 
+                adminInitialized.set(true);
+                
+                while (!isEsmDiscovered(admin)) {
+                    try {
+                        Thread.sleep(5000);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+
                 //triggers initialization of all PU SLA beans
                 admin.getProcessingUnits().getProcessingUnitAdded().add(ESMImpl.this);
                 admin.getProcessingUnits().getProcessingUnitRemoved().add(ESMImpl.this);
                 
                 logger.info("ESM is now listening for Processing Unit events");
-                adminInitialized.set(true);
+            }
+
+            private boolean isEsmDiscovered(Admin admin) {
+                ElasticServiceManager[] esms = admin.getElasticServiceManagers().getManagers();
+                if (esms.length == 0) {
+                    logger.log(Level.INFO, "Waiting to discover one ESM");
+                    return false;
+                }
+
+                if (esms.length > 1) {
+                    logger.log(Level.INFO, "Waiting for one of the ESMs to stop. Currently running " + esms.length + " ESMs");
+                    return false;
+                }
+
+                for (ElasticServiceManager esm : admin.getElasticServiceManagers()) {
+                    if (esm.isDiscovered() && esm.getAgentId() != -1 && esm.getGridServiceAgent() == null) {
+                        logger.log(Level.INFO, "Waiting to discover GSA that started ESM " + esm.getUid());
+                        return false;
+                    }
+                }
+                return true;
             }
             
         });
@@ -222,6 +253,12 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
 
     @Override
     public synchronized void initialize(ServiceBeanContext context) throws Exception {
+        while (!adminInitialized.get()) {
+            if (logger.isLoggable(Level.FINE)) {
+                logger.fine("Waiting for ESM initializer to complete");
+            }
+            Thread.sleep(1000);
+        }
         logger.info("Starting ESM ...");
         super.initialize(context);
 
