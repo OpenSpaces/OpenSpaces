@@ -43,17 +43,10 @@ import org.apache.commons.logging.LogFactory;
 import org.jini.rio.boot.BootUtil;
 import org.jini.rio.resources.servicecore.Service;
 import org.openspaces.admin.AdminException;
-import org.openspaces.admin.gateway.Gateway;
-import org.openspaces.admin.gateway.GatewayProcessingUnit;
-import org.openspaces.admin.gateway.Gateways;
-import org.openspaces.admin.gateway.InternalGateways;
 import org.openspaces.admin.internal.admin.AdminClosedException;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.esm.DefaultElasticServiceManager;
 import org.openspaces.admin.internal.esm.InternalElasticServiceManager;
-import org.openspaces.admin.internal.gateway.DefaultGateway;
-import org.openspaces.admin.internal.gateway.DefaultGatewayProcessingUnit;
-import org.openspaces.admin.internal.gateway.InternalGatewayProcessingUnits;
 import org.openspaces.admin.internal.gsa.DefaultGridServiceAgent;
 import org.openspaces.admin.internal.gsa.InternalGridServiceAgent;
 import org.openspaces.admin.internal.gsc.DefaultGridServiceContainer;
@@ -66,7 +59,6 @@ import org.openspaces.admin.internal.pu.DefaultProcessingUnitInstance;
 import org.openspaces.admin.internal.pu.InternalProcessingUnitInstance;
 import org.openspaces.admin.internal.space.DefaultSpaceInstance;
 import org.openspaces.admin.internal.space.InternalSpaceInstance;
-import org.openspaces.core.gateway.GatewayUtils;
 import org.openspaces.core.space.SpaceServiceDetails;
 import org.openspaces.grid.esm.ESM;
 import org.openspaces.pu.container.servicegrid.PUDetails;
@@ -355,24 +347,6 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                                         serviceDetails, admin, jvmDetails );
                                 admin.addSpaceInstance(spaceInstance, nioDetails, osDetails, jvmDetails, jmxUrl, zones);
                             }
-                        }
-                        
-                        String gatewayName = GatewayUtils.extractGatewayName( processingUnitInstance );
-                        if( gatewayName != null ){
-                        	
-                    		Gateways gateways = admin.getGateways();
-                    		Gateway gateway = gateways.getGateway( gatewayName );
-                    		//check if Gateway already exists, if not create it only once within if
-                    		if( gateway == null ){
-                    			gateway = new DefaultGateway( admin, gatewayName );
-                    			( ( InternalGateways )gateways ).addGateway( gateway );
-                    		}
-
-                    		GatewayProcessingUnit gatewayProcessingUnit = 
-                    			new DefaultGatewayProcessingUnit( admin, gateway, processingUnitInstance );
-                    		InternalGatewayProcessingUnits gatewayProcessingUnits =
-                    			( InternalGatewayProcessingUnits )admin.getGatewayProcessingUnits();
-                    		gatewayProcessingUnits.addGatewayProcessingUnit( gatewayProcessingUnit );
                         }
                     }
                 });

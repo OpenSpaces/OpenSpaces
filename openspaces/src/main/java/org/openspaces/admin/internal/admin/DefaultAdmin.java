@@ -83,6 +83,8 @@ import org.openspaces.admin.internal.discovery.DiscoveryService;
 import org.openspaces.admin.internal.esm.DefaultElasticServiceManagers;
 import org.openspaces.admin.internal.esm.InternalElasticServiceManager;
 import org.openspaces.admin.internal.esm.InternalElasticServiceManagers;
+import org.openspaces.admin.internal.gateway.DefaultGateway;
+import org.openspaces.admin.internal.gateway.DefaultGatewayProcessingUnit;
 import org.openspaces.admin.internal.gateway.DefaultGatewayProcessingUnits;
 import org.openspaces.admin.internal.gateway.DefaultGateways;
 import org.openspaces.admin.internal.gateway.InternalGatewayProcessingUnits;
@@ -1328,8 +1330,23 @@ public class DefaultAdmin implements InternalAdmin {
                     addSpaceInstanceIfMatching(spaceInstance, processingUnitInstance);
                 }
             }
-    
+
             processingUnitInstances.addInstance(processingUnitInstance);
+            
+            String gatewayName = GatewayUtils.extractGatewayName( processingUnitInstance );
+            if( gatewayName != null ){
+            	
+        		Gateway gateway = gateways.getGateway( gatewayName );
+        		//check if Gateway already exists, if not create it only once within if
+        		if( gateway == null ){
+        			gateway = new DefaultGateway( this, gatewayName );
+        			gateways.addGateway( gateway );
+        		}
+
+        		GatewayProcessingUnit gatewayProcessingUnit = 
+        			new DefaultGatewayProcessingUnit( this, gateway, processingUnitInstance );
+        		gatewayProcessingUnits.addGatewayProcessingUnit( gatewayProcessingUnit );
+            }
             
             if (logger.isDebugEnabled()) {
                 logger.debug(processingUnitInstance.getProcessingUnitInstanceName() + " has been added");
