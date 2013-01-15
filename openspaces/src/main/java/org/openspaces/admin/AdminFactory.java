@@ -54,11 +54,25 @@ public class AdminFactory {
     private boolean discoverUnmanagedSpaces = false;
     private AdminFilter adminFilter;
     
+    /**
+     * By default the Admin finds in classpath the GS logging config file. This file is used for the setting
+     * GS logging configuration. This file is searched under /config/gs_logging.properties
+     * User can set system property: -Djava.util.logging.config.file to use his own java logging configuration.
+     * GS logger will not overwrite it.
+     * 
+     * Call this method with false to disable loading of gs_logging.properties by the admin API
+     */
     public AdminFactory useGsLogging(boolean useGsLogging) {
         this.useGsLogging = useGsLogging;
         return this;
     }
 
+    /**
+     * For backwards comparability reasons, all Admin worker threads are not daemon threads.
+     * That means that creating a new admin object without closing it will leave non-daemon threads, 
+     * which will prevent the JVM from shutting down.
+     * It is recommended to call this method with true in order to set all worker threads as daemon threads. 
+     */
     public AdminFactory useDaemonThreads(boolean useDaemonThreads) {
         this.useDaemonThreads = useDaemonThreads;
         return this;
