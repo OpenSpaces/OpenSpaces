@@ -17,6 +17,7 @@ package org.openspaces.persistency.patterns;
 
 import com.gigaspaces.datasource.DataIterator;
 import com.gigaspaces.datasource.DataSourceIdQuery;
+import com.gigaspaces.datasource.DataSourceIdsQuery;
 import com.gigaspaces.datasource.DataSourceQuery;
 import com.gigaspaces.datasource.SpaceDataSource;
 import com.gigaspaces.metadata.SpaceTypeDescriptor;
@@ -64,6 +65,16 @@ public class SpaceDataSourceExceptionHandler extends SpaceDataSource {
         }
     }
 
+    public DataIterator<Object> getDataIteratorByIds(DataSourceIdsQuery idsQuery)
+    {
+        try {        
+            return dataSource.getDataIteratorByIds(idsQuery);
+        } catch(Exception e){
+            exceptionHandler.onException(e, idsQuery);
+            return null;
+        }
+    }
+    
     public boolean supportsInheritance() {
         return dataSource.supportsInheritance();
     }

@@ -17,6 +17,7 @@ package org.openspaces.persistency.cassandra;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -27,7 +28,6 @@ import org.apache.commons.logging.LogFactory;
 import org.openspaces.persistency.cassandra.datasource.CQLQueryContext;
 import org.openspaces.persistency.cassandra.datasource.CassandraTokenRangeAwareDataIterator;
 import org.openspaces.persistency.cassandra.datasource.CassandraTokenRangeAwareInitialLoadDataIterator;
-import org.openspaces.persistency.cassandra.datasource.DataIteratorAdapter;
 import org.openspaces.persistency.cassandra.datasource.SingleEntryDataIterator;
 import org.openspaces.persistency.cassandra.error.SpaceCassandraDataSourceException;
 import org.openspaces.persistency.cassandra.meta.ColumnFamilyMetadata;
@@ -40,7 +40,9 @@ import org.openspaces.persistency.cassandra.pool.ConnectionResource;
 import org.openspaces.persistency.cassandra.pool.ConnectionResourceFactory;
 
 import com.gigaspaces.datasource.DataIterator;
+import com.gigaspaces.datasource.DataIteratorAdapter;
 import com.gigaspaces.datasource.DataSourceIdQuery;
+import com.gigaspaces.datasource.DataSourceIdsQuery;
 import com.gigaspaces.datasource.DataSourceQuery;
 import com.gigaspaces.datasource.DataSourceSQLQuery;
 import com.gigaspaces.datasource.SpaceDataSource;
@@ -226,6 +228,16 @@ public class CassandraSpaceDataSource
         String typeName = idQuery.getTypeDescriptor().getTypeName();
         Object id = idQuery.getId();
         return getByIdImpl(typeName, id);
+    }
+    
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Override
+    public DataIterator<Object> getDataIteratorByIds(DataSourceIdsQuery idsQuery)
+    {
+        String typeName = idsQuery.getTypeDescriptor().getTypeName();
+        Object[] ids = idsQuery.getIds();
+        Map<Object, SpaceDocument> documentsByKeys = hectorClient.readDocumentsByKeys(mapper, typeName, ids);
+        return new DataIteratorAdapter<Object>((Iterator)documentsByKeys.values().iterator());
     }
     
     private Object getByIdImpl(String typeName, Object id) {

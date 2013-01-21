@@ -17,6 +17,7 @@ import com.gigaspaces.logger.GSLogConfigLoader;
 {
     DataIteratorWithPropertyAddedLaterCassandraTest.class,
     ReadByIdWithPropertyAddedLaterCassandraTest.class,
+    ReadByIdsCassandraTest.class,
     PojoWithPrimitiveTypesCassandraTest.class,
     DifferentTypesQueryCassandraTest.class,
     BasicCQLQueriesCassandraTest.class,

@@ -17,6 +17,8 @@ package org.openspaces.persistency.cassandra;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +36,7 @@ import me.prettyprint.cassandra.service.ThriftCfDef;
 import me.prettyprint.cassandra.service.template.ColumnFamilyResult;
 import me.prettyprint.cassandra.service.template.ColumnFamilyTemplate;
 import me.prettyprint.cassandra.service.template.ColumnFamilyUpdater;
+import me.prettyprint.cassandra.service.template.MappedColumnFamilyResult;
 import me.prettyprint.cassandra.service.template.ThriftColumnFamilyTemplate;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.ConsistencyLevelPolicy;
@@ -560,6 +563,46 @@ public class HectorCassandraClient {
         }
     }
     
+    /**
+     * Reads the entries matching the typeName and key values from the matching column family.
+     * @param mapper
+     * @param typeName The typeName describing the matching column family.
+     * @param keyValues The keys of the requested entry.
+     * @return A map from key to SpaceDocument, including found entries.
+     */
+    public Map<Object, SpaceDocument> readDocumentsByKeys(
+            SpaceDocumentColumnFamilyMapper mapper,
+            String typeName, 
+            Object[] keyValues) {
+        Map<Object, SpaceDocument> result = Collections.emptyMap();
+        ColumnFamilyMetadata metadata = metadataCache.getColumnFamilyMetadata(typeName);
+        if (metadata == null) {
+            metadata = fetchColumnFamilyMetadata(typeName, mapper);
+            if (metadata == null) {
+                return result;
+            }
+        }
+        
+        ColumnFamilyTemplate<Object, String> template = getTemplate(metadata);
+        SpaceDocumentMapper hectorMapper = getMapperTemplate(metadata, mapper);
+        MappedColumnFamilyResult<Object,String,SpaceDocument> queryResult = 
+                template.queryColumns(Arrays.asList(keyValues), hectorMapper);
+
+        for (int i = 0; i < keyValues.length; i++) {
+            if (queryResult.hasResults()) {
+                if (result.isEmpty()) {
+                    result = new HashMap<Object, SpaceDocument>();
+                }
+                result.put(queryResult.getKey(), queryResult.getRow());
+            }
+            if (i < keyValues.length - 1) {
+                queryResult.next();
+            }
+        }
+        
+        return result;
+    }
+
     @SuppressWarnings("unchecked")
     private ColumnFamilyTemplate<Object, String> getTemplate(ColumnFamilyMetadata metadata) {
         ColumnFamilyTemplate<Object, String> template = templates.get(metadata.getTypeName());

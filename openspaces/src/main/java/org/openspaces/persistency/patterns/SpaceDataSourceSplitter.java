@@ -24,6 +24,7 @@ import org.openspaces.persistency.support.SerialMultiDataIterator;
 
 import com.gigaspaces.datasource.DataIterator;
 import com.gigaspaces.datasource.DataSourceIdQuery;
+import com.gigaspaces.datasource.DataSourceIdsQuery;
 import com.gigaspaces.datasource.DataSourceQuery;
 import com.gigaspaces.datasource.SpaceDataSource;
 import com.gigaspaces.metadata.SpaceTypeDescriptor;
@@ -38,7 +39,7 @@ public class SpaceDataSourceSplitter extends SpaceDataSource {
     
     private final ManagedEntriesSpaceDataSource[] dataSources;
     
-    private Map<String, SpaceDataSource> entriesToDataSource = new HashMap<String, SpaceDataSource>();
+    private final Map<String, SpaceDataSource> entriesToDataSource = new HashMap<String, SpaceDataSource>();
     
     private int initalLoadThreadPoolSize = 10;
 
@@ -111,6 +112,17 @@ public class SpaceDataSourceSplitter extends SpaceDataSource {
         if (dataSource == null)
             return null;
         return dataSource.getById(idQuery);
+    }
+    
+    /**
+     * Delegates the query to the corresponding data source
+     */
+    @Override
+    public DataIterator<Object> getDataIteratorByIds(DataSourceIdsQuery idsQuery) {
+        SpaceDataSource dataSource = getDataSource(idsQuery.getTypeDescriptor().getTypeName());
+        if (dataSource == null)
+            return null;
+        return dataSource.getDataIteratorByIds(idsQuery);
     }
     
 }
