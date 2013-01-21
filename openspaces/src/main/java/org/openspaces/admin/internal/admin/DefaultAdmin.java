@@ -233,7 +233,7 @@ public class DefaultAdmin implements InternalAdmin {
 
     private final InternalSpaces spaces = new DefaultSpaces(this);
 
-    private ExecutorService[] eventsExecutorServices;
+    private final ExecutorService[] eventsExecutorServices;
 
     private final ExecutorService longRunningExecutorService;
     
@@ -542,6 +542,9 @@ public class DefaultAdmin implements InternalAdmin {
         for (ExecutorService executorService : eventsExecutorServices) {
             executorService.shutdownNow();
         }
+        
+        longRunningExecutorService.shutdownNow();
+        
         closeEnded.set(true);
         
         if (logger.isDebugEnabled()) {
@@ -744,7 +747,7 @@ public class DefaultAdmin implements InternalAdmin {
    
     @Override
     public void scheduleAdminOperation(Runnable command) {
-        longRunningExecutorService.submit(command);
+        longRunningExecutorService.submit(toLoggerRunnable(command));
     }
     
     @Override
