@@ -83,7 +83,7 @@ public class DefaultSpaceInstanceStatistics implements SpaceInstanceStatistics {
     }
 
     public long getWriteCount() {
-        return statisticsHolder.getOperationsCount()[0];
+        return statisticsHolder.getWriteCount();
     }
 
     public double getWritePerSecond() {
@@ -95,7 +95,7 @@ public class DefaultSpaceInstanceStatistics implements SpaceInstanceStatistics {
 
     public long getReadCount() {
         // read and read multiple
-        return statisticsHolder.getOperationsCount()[1] + statisticsHolder.getOperationsCount()[6];
+        return statisticsHolder.getReadCount() + statisticsHolder.getReadMultipleCount();
     }
 
     public double getReadPerSecond() {
@@ -107,7 +107,7 @@ public class DefaultSpaceInstanceStatistics implements SpaceInstanceStatistics {
 
     public long getTakeCount() {
         // take and take multiple
-        return statisticsHolder.getOperationsCount()[2] + statisticsHolder.getOperationsCount()[7];
+        return statisticsHolder.getTakeCount() + statisticsHolder.getTakeMultipleCount();
     }
 
     public double getTakePerSecond() {
@@ -118,7 +118,7 @@ public class DefaultSpaceInstanceStatistics implements SpaceInstanceStatistics {
     }
 
     public long getNotifyRegistrationCount() {
-        return statisticsHolder.getOperationsCount()[3];
+        return statisticsHolder.getNotificationsRegistrationsCount();
     }
 
     public double getNotifyRegistrationPerSecond() {
@@ -129,7 +129,7 @@ public class DefaultSpaceInstanceStatistics implements SpaceInstanceStatistics {
     }
 
     public long getCleanCount() {
-        return statisticsHolder.getOperationsCount()[4];
+        return statisticsHolder.getCleanCount();
     }
 
     public double getCleanPerSecond() {
@@ -140,7 +140,7 @@ public class DefaultSpaceInstanceStatistics implements SpaceInstanceStatistics {
     }
 
     public long getUpdateCount() {
-        return statisticsHolder.getOperationsCount()[5];
+        return statisticsHolder.getUpdateCount();
     }
 
     public double getUpdatePerSecond() {
@@ -151,7 +151,7 @@ public class DefaultSpaceInstanceStatistics implements SpaceInstanceStatistics {
     }
 
     public long getNotifyTriggerCount() {
-        return statisticsHolder.getOperationsCount()[8];
+        return statisticsHolder.getNotificationsTriggeredCount();
     }
 
     public double getNotifyTriggerPerSecond() {
@@ -162,7 +162,7 @@ public class DefaultSpaceInstanceStatistics implements SpaceInstanceStatistics {
     }
 
     public long getNotifyAckCount() {
-        return statisticsHolder.getOperationsCount()[9];
+        return statisticsHolder.getNotificationsAcksCount();
     }
 
     public double getNotifyAckPerSecond() {
@@ -173,7 +173,7 @@ public class DefaultSpaceInstanceStatistics implements SpaceInstanceStatistics {
     }
 
     public long getExecuteCount() {
-        return statisticsHolder.getOperationsCount()[10];
+        return statisticsHolder.getTaskExecutionsCount();
     }
 
     public double getExecutePerSecond() {
@@ -187,7 +187,7 @@ public class DefaultSpaceInstanceStatistics implements SpaceInstanceStatistics {
      * Remove happens when an entry is removed due to lease expiration or lease cancel.
      */
     public long getRemoveCount() {
-        return statisticsHolder.getOperationsCount()[11];
+        return statisticsHolder.getLeaseExpiredOrCanceledCount();
     }
 
     public double getRemovePerSecond() {
