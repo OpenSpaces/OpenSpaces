@@ -32,7 +32,7 @@ import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementDecision;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementInProgressException;
-import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementLogStackTrace;
+import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementLoggerBehavior;
 
 import com.gigaspaces.logger.GSSimpleFormatter;
 
@@ -70,8 +70,9 @@ public class ScaleStrategyProgressEventState {
     public void enqueuProvisioningInProgressEvent(SlaEnforcementInProgressException e, ZonesConfig zones) {
         
         if (e instanceof SlaEnforcementDecision) {
-            
-            if (this.lastInProgressException == null || !this.lastInProgressException.equals(e)) {
+        
+            boolean isDuplicateException = this.lastInProgressException != null && this.lastInProgressException.equals(e);
+            if (isAlwaysLogDuplicateException(e) || !isDuplicateException) {
                 this.lastInProgressException = e;
             
                 InternalElasticProcessingUnitDecisionEvent event = createDecisionEvent((SlaEnforcementDecision)e, zones);
@@ -84,35 +85,19 @@ public class ScaleStrategyProgressEventState {
         else {
             enqueuDefaultProvisioningInProgressEvent(e, zones);
             if (e instanceof SlaEnforcementFailure) {
-                if (this.lastInProgressException == null || !this.lastInProgressException.equals(e)) {
+                                
+                boolean isDuplicateException = this.lastInProgressException != null && this.lastInProgressException.equals(e);
+                if (isAlwaysLogDuplicateException(e) || !isDuplicateException) {
                     this.lastInProgressException = e;
                 
-                    InternalElasticProcessingUnitFailureEvent event = createFailureEvent((SlaEnforcementFailure)e, zones);
-                    
-                    if (logger.isWarnEnabled()) {
-                        StringBuilder message = new StringBuilder();
-                        appendPuPrefix(message, event.getProcessingUnitName());
-                        String failureDescription = event.getFailureDescription();
-                        if (failureDescription == null) {
-                            throw new IllegalStateException("event " + event.getClass() + " failure description cannot be null");
-                        }
-                        message.append(failureDescription);
-                        if (e instanceof SlaEnforcementLogStackTrace) {
-                            appendStackTrace(message, e);
-                            logger.warn(message);
-                        }
-                        else {
-                            logger.warn(message,e);
-                        }
-                    }
-                    eventStore.addEvent(event);
+                    enqueuProvisioningFailureEvent(e, zones, isDuplicateException);
                 }
             }
             else if (logger.isDebugEnabled()) {
                 StringBuilder message = new StringBuilder();
                 appendPuPrefix(message, e.getProcessingUnitName());
                 message.append("SLA in progress");
-                if (e instanceof SlaEnforcementLogStackTrace) {
+                if (isAlwaysLogStackTrace(e)) {
                     appendStackTrace(message, e);
                     filteredLogger.debug(message);
                 }
@@ -121,6 +106,50 @@ public class ScaleStrategyProgressEventState {
                 }
             }
         }
+    }
+
+    private void enqueuProvisioningFailureEvent(
+            SlaEnforcementInProgressException e, ZonesConfig zones,
+            boolean isDuplicateException) {
+        final InternalElasticProcessingUnitFailureEvent event = createFailureEvent((SlaEnforcementFailure)e, zones);
+        
+        if (logger.isWarnEnabled()) {
+            final StringBuilder message = new StringBuilder();
+            appendPuPrefix(message, event.getProcessingUnitName());
+            final String failureDescription = event.getFailureDescription();
+            if (failureDescription == null) {
+                throw new IllegalStateException("event " + event.getClass() + " failure description cannot be null");
+            }
+            message.append(failureDescription);
+            if (isAlwaysLogStackTrace(e)) {
+                appendStackTrace(message, e);
+                logger.warn(message);
+            }
+            else {
+                logger.warn(message,e);
+            }
+        }
+        if (!isDuplicateException) {
+            eventStore.addEvent(event);
+        }
+    }
+
+    private boolean isAlwaysLogStackTrace(Throwable t) {
+        boolean logStackTrace = false;
+        if (t != null && t instanceof SlaEnforcementLoggerBehavior) {
+            SlaEnforcementLoggerBehavior loggerBehavior = (SlaEnforcementLoggerBehavior) t;
+            logStackTrace = loggerBehavior.isAlwaysLogStackTrace();
+        }
+        return logStackTrace;
+    }
+
+    private boolean isAlwaysLogDuplicateException(Throwable t) {
+        boolean logAlways = false;
+        if (t != null && t instanceof SlaEnforcementLoggerBehavior) {
+            SlaEnforcementLoggerBehavior loggerBehavior = (SlaEnforcementLoggerBehavior) t;
+            logAlways = loggerBehavior.isAlwaysLogDuplicateException();
+        }
+        return logAlways;
     }
 
     private void enqueuProvisioningInProgressEvent(
@@ -141,7 +170,7 @@ public class ScaleStrategyProgressEventState {
             if (t == null) {
                 logger.info(message);
             }
-            else if (t instanceof SlaEnforcementLogStackTrace) {
+            else if (isAlwaysLogStackTrace(t)) {
                 appendStackTrace(message, t);
                 logger.info(message);
             }
@@ -151,7 +180,7 @@ public class ScaleStrategyProgressEventState {
             logged = true;
         }
         
-        if (decisionEvent || !this.inProgressEventRaised) {
+        if (isAlwaysLogDuplicateException(t) || decisionEvent || !this.inProgressEventRaised) {
             this.completedEventRaised = false;
             this.inProgressEventRaised = true;
             
@@ -159,7 +188,7 @@ public class ScaleStrategyProgressEventState {
             
             if (!logged && logger.isInfoEnabled()) {
                 StringBuilder message = new StringBuilder(event.toString());
-                if (t instanceof SlaEnforcementLogStackTrace) {
+                if (isAlwaysLogStackTrace(t)) {
                     appendStackTrace(message, t);
                     logger.info(message);
                 }

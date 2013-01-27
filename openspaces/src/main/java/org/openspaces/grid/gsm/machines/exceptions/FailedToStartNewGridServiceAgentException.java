@@ -21,14 +21,14 @@ import org.openspaces.admin.internal.gsa.events.DefaultElasticGridServiceAgentPr
 import org.openspaces.admin.internal.pu.elastic.events.InternalElasticProcessingUnitFailureEvent;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
-import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementLogStackTrace;
+import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementLoggerBehavior;
 
 /**
  * @author Itai Frenkel
  * @since 9.1.0
  */
 public class FailedToStartNewGridServiceAgentException extends GridServiceAgentSlaEnforcementInProgressException 
-    implements SlaEnforcementFailure , SlaEnforcementLogStackTrace{
+    implements SlaEnforcementFailure , SlaEnforcementLoggerBehavior{
 
     private static final long serialVersionUID = 1L;
     
@@ -42,5 +42,15 @@ public class FailedToStartNewGridServiceAgentException extends GridServiceAgentS
         event.setFailureDescription(getMessage());
         event.setProcessingUnitName(getProcessingUnitName());
         return event;
+    }
+
+    @Override
+    public boolean isAlwaysLogStackTrace() {
+        return true;
+    }
+
+    @Override
+    public boolean isAlwaysLogDuplicateException() {
+        return true;
     }
 }

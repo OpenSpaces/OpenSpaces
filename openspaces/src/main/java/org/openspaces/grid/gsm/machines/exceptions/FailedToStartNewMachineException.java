@@ -21,9 +21,9 @@ import org.openspaces.admin.internal.machine.events.DefaultElasticMachineProvisi
 import org.openspaces.admin.internal.pu.elastic.events.InternalElasticProcessingUnitFailureEvent;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
-import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementLogStackTrace;
+import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementLoggerBehavior;
 
-public class FailedToStartNewMachineException extends MachinesSlaEnforcementInProgressException implements SlaEnforcementFailure , SlaEnforcementLogStackTrace{
+public class FailedToStartNewMachineException extends MachinesSlaEnforcementInProgressException implements SlaEnforcementFailure , SlaEnforcementLoggerBehavior{
 
     private static final long serialVersionUID = 1L;
     
@@ -37,5 +37,14 @@ public class FailedToStartNewMachineException extends MachinesSlaEnforcementInPr
         event.setFailureDescription(getMessage());
         event.setProcessingUnitName(getProcessingUnitName());
         return event;
+    }
+    @Override
+    public boolean isAlwaysLogStackTrace() {
+        return true;
+    }
+
+    @Override
+    public boolean isAlwaysLogDuplicateException() {
+        return true;
     }
 }

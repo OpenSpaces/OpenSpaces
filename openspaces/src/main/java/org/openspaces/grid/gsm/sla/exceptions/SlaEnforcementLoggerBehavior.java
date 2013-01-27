@@ -21,6 +21,18 @@ package org.openspaces.grid.gsm.sla.exceptions;
  * 
  * This interface marks an exception that need to log its stack trace on any loggin level.
  */
-public interface SlaEnforcementLogStackTrace {
+public interface SlaEnforcementLoggerBehavior {
+
+    /**
+     * @return true - if exception stack trace should always be logged, regardless of the logging level
+     *         false - exception stack trace is logged depending on logging level
+     */
+    boolean isAlwaysLogStackTrace();
+
+    /**
+     * @return  true - if exception should be logged, even if the last exception logged equals this exception
+     *          false - exception is logged only if not equals last logged exception
+     */
+    boolean isAlwaysLogDuplicateException();
 
 }
