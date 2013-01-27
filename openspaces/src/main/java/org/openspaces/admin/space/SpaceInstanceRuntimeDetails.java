@@ -21,6 +21,9 @@ import java.util.Map;
 
 import org.openspaces.core.GigaSpace;
 
+import com.gigaspaces.management.space.LocalCacheDetails;
+import com.gigaspaces.management.space.LocalViewDetails;
+
 /**
  * API for accessing Space runtime details - classes, templates, count, etc.
  * <p>
@@ -84,4 +87,18 @@ public interface SpaceInstanceRuntimeDetails {
      */
     @Deprecated
     SpaceInstanceConnectionDetails getConnectionDetails();
+
+    /**
+     * Returns a map of {@link com.gigaspaces.management.space.LocalCacheDetails} keyed by their
+     * {@link com.gigaspaces.management.space.LocalCacheDetails#getId()}.
+     * @since 9.5.0
+     */
+    Map<String, LocalCacheDetails> getLocalCacheDetails();
+
+    /**
+     * Returns a map of {@link com.gigaspaces.management.space.LocalViewDetails} keyed by their
+     * {@link com.gigaspaces.management.space.LocalViewDetails#getId()}.
+     * @since 9.5.0
+     */
+    Map<String, LocalViewDetails> getLocalViewDetails();
 }

@@ -24,36 +24,28 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.openspaces.admin.StatisticsMonitor;
-import org.openspaces.admin.internal.admin.DefaultAdmin;
 import org.openspaces.admin.space.SpaceInstanceConnectionDetails;
 import org.openspaces.admin.space.SpaceInstanceRuntimeDetails;
 import org.openspaces.admin.space.SpaceInstanceTransactionDetails;
 
+import com.gigaspaces.management.space.LocalCacheDetails;
+import com.gigaspaces.management.space.LocalViewDetails;
 import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
 import com.j_spaces.core.admin.SpaceRuntimeInfo;
-import com.j_spaces.kernel.time.SystemTime;
 
 public class DefaultSpaceInstanceRuntimeDetails implements SpaceInstanceRuntimeDetails {
 
-    private static final Log logger = LogFactory.getLog(DefaultAdmin.class);
-    private final DefaultSpaceInstance defaultSpaceInstance;
+    private final SpaceRuntimeInfoCache spaceRuntimeInfoCache;
+    private final LocalCacheDetailsCache localCacheDetailsCache;
+    private final LocalViewDetailsCache localViewDetailsCache;
+    
     private final DefaultSpaceInstanceTransactionDetails spaceInstanceTransactionDetails;
     private final DefaultSpaceInstanceConnectionDetails spaceInstanceConnectionDetails;
     
-    private final long statisticsInterval = StatisticsMonitor.DEFAULT_MONITOR_INTERVAL;
-
-    private long lastStatisticsTimestamp = 0;
-    
-    private final Object monitor = new Object();
-
-    private volatile SpaceRuntimeInfo lastSpaceRuntimeInfo;
-    
-
     public DefaultSpaceInstanceRuntimeDetails(DefaultSpaceInstance defaultSpaceInstance) {
-        this.defaultSpaceInstance = defaultSpaceInstance;
+        this.spaceRuntimeInfoCache = new SpaceRuntimeInfoCache(defaultSpaceInstance);
+        this.localCacheDetailsCache = new LocalCacheDetailsCache(defaultSpaceInstance);
+        this.localViewDetailsCache = new LocalViewDetailsCache(defaultSpaceInstance);
         this.spaceInstanceTransactionDetails = new DefaultSpaceInstanceTransactionDetails(defaultSpaceInstance);
         this.spaceInstanceConnectionDetails = new DefaultSpaceInstanceConnectionDetails(defaultSpaceInstance);
     }
@@ -61,13 +53,10 @@ public class DefaultSpaceInstanceRuntimeDetails implements SpaceInstanceRuntimeD
     @Override
     public int getCount() {
         int count = 0;
-        IInternalRemoteJSpaceAdmin spaceAdmin = defaultSpaceInstance.getSpaceAdmin();
-        if (spaceAdmin != null) {
-            SpaceRuntimeInfo spaceRuntimeInfo = getCachedSpaceRuntimeInfo( spaceAdmin );
-            if( spaceRuntimeInfo != null ){
-                for( Integer num : spaceRuntimeInfo.m_NumOFEntries ) {
-                    count += num.intValue();
-                }
+        SpaceRuntimeInfo spaceRuntimeInfo = spaceRuntimeInfoCache.get();
+        if (spaceRuntimeInfo != null) {
+            for( Integer num : spaceRuntimeInfo.m_NumOFEntries ) {
+                count += num.intValue();
             }
         }
         return count;
@@ -75,15 +64,11 @@ public class DefaultSpaceInstanceRuntimeDetails implements SpaceInstanceRuntimeD
 
     @Override
     public String[] getClassNames() {
-        IInternalRemoteJSpaceAdmin spaceAdmin = defaultSpaceInstance.getSpaceAdmin();
-        if(spaceAdmin != null) {
-            SpaceRuntimeInfo spaceRuntimeInfo = getCachedSpaceRuntimeInfo( spaceAdmin );
-            if( spaceRuntimeInfo != null ){
-                ArrayList<String> classNames = 
-                    new ArrayList<String>( spaceRuntimeInfo.m_ClassNames );
-                Collections.sort(classNames);
-                return classNames.toArray(new String[classNames.size()]);
-            }
+        SpaceRuntimeInfo spaceRuntimeInfo = spaceRuntimeInfoCache.get();
+        if (spaceRuntimeInfo != null) {
+            ArrayList<String> classNames =  new ArrayList<String>(spaceRuntimeInfo.m_ClassNames);
+            Collections.sort(classNames);
+            return classNames.toArray(new String[classNames.size()]);
         }
 
         return new String[0];
@@ -92,15 +77,12 @@ public class DefaultSpaceInstanceRuntimeDetails implements SpaceInstanceRuntimeD
     @Override
     public Map<String, Integer> getCountPerClassName() {
         Map<String, Integer> mapping = new HashMap<String, Integer>();
-        IInternalRemoteJSpaceAdmin spaceAdmin = defaultSpaceInstance.getSpaceAdmin();
-        if (spaceAdmin != null) {
-            SpaceRuntimeInfo spaceRuntimeInfo = getCachedSpaceRuntimeInfo( spaceAdmin );
-            if( spaceRuntimeInfo != null ){
-                List<String> classNames = spaceRuntimeInfo.m_ClassNames;
-                List<Integer> numOfEntries = spaceRuntimeInfo.m_NumOFEntries;
-                for (int i=0; i<classNames.size(); ++i) {
-                    mapping.put(classNames.get(i), numOfEntries.get(i));
-                }
+        SpaceRuntimeInfo spaceRuntimeInfo = spaceRuntimeInfoCache.get();
+        if (spaceRuntimeInfo != null) {
+            List<String> classNames = spaceRuntimeInfo.m_ClassNames;
+            List<Integer> numOfEntries = spaceRuntimeInfo.m_NumOFEntries;
+            for (int i=0; i<classNames.size(); ++i) {
+                mapping.put(classNames.get(i), numOfEntries.get(i));
             }
         }
         
@@ -110,15 +92,12 @@ public class DefaultSpaceInstanceRuntimeDetails implements SpaceInstanceRuntimeD
     @Override
     public Map<String, Integer> getNotifyTemplateCountPerClassName() {
         Map<String, Integer> mapping = new HashMap<String, Integer>();
-        IInternalRemoteJSpaceAdmin spaceAdmin = defaultSpaceInstance.getSpaceAdmin();
-        if( spaceAdmin != null ) {
-            SpaceRuntimeInfo spaceRuntimeInfo = getCachedSpaceRuntimeInfo( spaceAdmin );
-            if( spaceRuntimeInfo != null ){
-                List<String> classNames = spaceRuntimeInfo.m_ClassNames;
-                List<Integer> numOfTemplates = spaceRuntimeInfo.m_NumOFTemplates;
-                for( int i=0; i<classNames.size(); ++i ) {
-                    mapping.put( classNames.get(i), numOfTemplates.get(i) );
-                }
+        SpaceRuntimeInfo spaceRuntimeInfo = spaceRuntimeInfoCache.get();
+        if (spaceRuntimeInfo != null) {
+            List<String> classNames = spaceRuntimeInfo.m_ClassNames;
+            List<Integer> numOfTemplates = spaceRuntimeInfo.m_NumOFTemplates;
+            for( int i=0; i<classNames.size(); ++i ) {
+                mapping.put( classNames.get(i), numOfTemplates.get(i) );
             }
         }
         return mapping;
@@ -133,30 +112,59 @@ public class DefaultSpaceInstanceRuntimeDetails implements SpaceInstanceRuntimeD
         return spaceInstanceConnectionDetails;
     }
     
-    private SpaceRuntimeInfo getCachedSpaceRuntimeInfo( IInternalRemoteJSpaceAdmin spaceAdmin ){
- 
-        synchronized( monitor ){
 
-            long currentTime = SystemTime.timeMillis();
-            if( ( currentTime - lastStatisticsTimestamp ) < statisticsInterval ) {
-                return lastSpaceRuntimeInfo;
-            }
+	@Override
+	public Map<String, LocalCacheDetails> getLocalCacheDetails() {
+		return null;
+	}
 
-            lastStatisticsTimestamp = currentTime;
+	@Override
+	public Map<String, LocalViewDetails> getLocalViewDetails() {
+		return null;
+	}
 
-            SpaceRuntimeInfo spaceRuntimeInfo;
-            try {
-                spaceRuntimeInfo = spaceAdmin.getRuntimeInfo();
-                this.lastSpaceRuntimeInfo = spaceRuntimeInfo;
-            } 
-            catch( RemoteException e ) {
+    private static class SpaceRuntimeInfoCache extends RemoteOperationTimeBasedCache<SpaceRuntimeInfo> {
 
-                logger.debug(
-                        "RemoteException caught while trying to retrieve Space Runtime Info " +
-                        "from space admin.", e );
-            }
-            
-            return this.lastSpaceRuntimeInfo;
-        }
+    	private final DefaultSpaceInstance spaceInstance;
+    	
+    	public SpaceRuntimeInfoCache(DefaultSpaceInstance spaceInstance) {
+    		this.spaceInstance = spaceInstance;
+    	}
+    	
+		@Override
+		protected SpaceRuntimeInfo load() throws RemoteException {
+	        IInternalRemoteJSpaceAdmin spaceAdmin = spaceInstance.getSpaceAdmin();
+	        return spaceAdmin != null ? spaceAdmin.getRuntimeInfo() : null;
+		}   	
+    }
+    
+    private static class LocalCacheDetailsCache extends RemoteOperationTimeBasedCache<Map<String, LocalCacheDetails>> {
+
+    	private final DefaultSpaceInstance spaceInstance;
+    	
+    	public LocalCacheDetailsCache(DefaultSpaceInstance spaceInstance) {
+    		this.spaceInstance = spaceInstance;
+    	}
+    	
+		@Override
+		protected Map<String, LocalCacheDetails> load() throws RemoteException {
+	        IInternalRemoteJSpaceAdmin spaceAdmin = spaceInstance.getSpaceAdmin();
+	        return spaceAdmin != null ? spaceAdmin.getLocalCacheDetails() : null;
+		}   	
+    }
+    
+    private static class LocalViewDetailsCache extends RemoteOperationTimeBasedCache<Map<String, LocalViewDetails>> {
+
+    	private final DefaultSpaceInstance spaceInstance;
+    	
+    	public LocalViewDetailsCache(DefaultSpaceInstance spaceInstance) {
+    		this.spaceInstance = spaceInstance;
+    	}
+    	
+		@Override
+		protected Map<String, LocalViewDetails> load() throws RemoteException {
+	        IInternalRemoteJSpaceAdmin spaceAdmin = spaceInstance.getSpaceAdmin();
+	        return spaceAdmin != null ? spaceAdmin.getLocalViewDetails() : null;
+		}   	
     }
 }
