@@ -107,6 +107,7 @@ public class DefaultSpaceInstanceRuntimeDetails implements SpaceInstanceRuntimeD
     public SpaceInstanceTransactionDetails getTransactionDetails() {
         return spaceInstanceTransactionDetails;
     }
+    
     @Override
     public SpaceInstanceConnectionDetails getConnectionDetails() {
         return spaceInstanceConnectionDetails;
@@ -115,12 +116,12 @@ public class DefaultSpaceInstanceRuntimeDetails implements SpaceInstanceRuntimeD
 
 	@Override
 	public Map<String, LocalCacheDetails> getLocalCacheDetails() {
-		return null;
+		return localCacheDetailsCache.get();
 	}
 
 	@Override
 	public Map<String, LocalViewDetails> getLocalViewDetails() {
-		return null;
+		return localViewDetailsCache.get();
 	}
 
     private static class SpaceRuntimeInfoCache extends RemoteOperationTimeBasedCache<SpaceRuntimeInfo> {
