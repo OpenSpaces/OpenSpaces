@@ -17,6 +17,7 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.machines;
 
+import com.gigaspaces.grid.gsa.AgentProcessDetails;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -26,7 +27,6 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.GridComponent;
@@ -36,14 +36,14 @@ import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig;
+import org.openspaces.admin.zone.config.ExactZonesConfig;
+import org.openspaces.admin.zone.config.ZonesConfig;
 import org.openspaces.core.internal.commons.math.ConvergenceException;
 import org.openspaces.core.internal.commons.math.fraction.Fraction;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.MachineCapacityRequirements;
 import org.openspaces.grid.gsm.capacity.MemoryCapacityRequirement;
 import org.openspaces.grid.gsm.containers.ContainersSlaUtils;
-
-import com.gigaspaces.grid.gsa.AgentProcessDetails;
 
 public class MachinesSlaUtils {
 
@@ -199,7 +199,7 @@ public class MachinesSlaUtils {
      * @return true if specified agent matches the machineProvisioningConfig management process (GSM/LUS/ESM) machine isolation criteria.
      */
     private static boolean managementFilter(GridServiceAgent agent, ElasticMachineProvisioningConfig machineProvisioningConfig) {
-        return (!machineProvisioningConfig.isDedicatedManagementMachines() || 
+        return (!machineProvisioningConfig.isDedicatedManagementMachines() ||
          !MachinesSlaUtils.isManagementRunningOnMachine(agent.getMachine()));
     }
 
@@ -236,7 +236,23 @@ public class MachinesSlaUtils {
             }
             else if (!MachinesSlaUtils.isAgentConformsToMachineProvisioningConfig(agent, machineProvisioningConfig)) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Agent " + MachinesSlaUtils.machineToString(agent.getMachine()) + " does not conform to machine provisioning SLA.");
+                    agent.getExactZones().isStasfies(machineProvisioningConfig.getGridServiceAgentZones());
+
+                    ExactZonesConfig agentZones = agent.getExactZones();
+                    ZonesConfig puZones = machineProvisioningConfig.getGridServiceAgentZones();
+                    boolean isDedicatedManagedmentMachines = machineProvisioningConfig.isDedicatedManagementMachines();
+                    boolean isManagementRunningOnMachine = MachinesSlaUtils.isManagementRunningOnMachine(agent.getMachine());
+
+                    StringBuilder logMessage = new StringBuilder();
+                    logMessage.append("Agent ")
+                              .append(MachinesSlaUtils.machineToString(agent.getMachine()))
+                              .append(" does not conform to machine provisioning SLA. ")
+                              .append("Agent zones: ").append(agentZones).append(",")
+                              .append("PU zones: ").append(puZones).append(", ")
+                              .append("Is dedicated management machines: ").append(isDedicatedManagedmentMachines).append(", ")
+                              .append("Is management running on machine: ").append(isManagementRunningOnMachine);
+
+                    logger.debug(logMessage.toString());
                 }
             }
             else {
