@@ -17,6 +17,7 @@
  ******************************************************************************/
 package org.openspaces.grid.esm;
 
+import com.j_spaces.kernel.SystemProperties;
 import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -55,7 +56,7 @@ public class ESMImplInitializer {
         void adminCreated(Admin admin);
     }
     
-    private static final long DISCOVERY_POLLING_PERIOD_SECONDS = 20;
+    private static final long DISCOVERY_POLLING_PERIOD_SECONDS = Integer.getInteger(SystemProperties.ESM_DISCOVERY_POLLING_INTERVAL, 20);
     
     private static final Logger logger = Logger.getLogger(ESMImplInitializer.class.getName());
     
