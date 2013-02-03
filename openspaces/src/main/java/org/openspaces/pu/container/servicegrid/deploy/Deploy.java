@@ -944,6 +944,10 @@ public class Deploy {
     }
 
     private void uploadPU(String puPath, File puFile) throws IOException {
+        if (puFile.length() > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException
+                ("File " + puFile.getPath()  + " is too big: " + puFile.length() + " bytes");
+        }
         byte[] buffer = new byte[4098];
         String codebase = getCodebase(deployAdmin);
         info("Uploading [" + puPath + "] to [" + codebase + "]");
@@ -953,8 +957,10 @@ public class Deploy {
         conn.setAllowUserInteraction(false);
         conn.setUseCaches(false);
         conn.setRequestMethod("PUT");
-        conn.setRequestProperty("Content-Length", "" + puFile.length());
         conn.setRequestProperty("Extract", "true");
+        //Sets the Content-Length request property
+        //And disables buffering of file in memory (pure streaming)
+        conn.setFixedLengthStreamingMode((int)puFile.length());
         conn.connect();
         OutputStream out = new BufferedOutputStream(conn.getOutputStream());
         InputStream in = new BufferedInputStream(new FileInputStream(puFile));
