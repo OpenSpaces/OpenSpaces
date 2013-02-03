@@ -38,6 +38,6 @@ public class DefaultElasticAutoScalingProgressChangedEvent
 
    @Override
    public String toString() {
-       return toStringHelper("automatic scaling rules");
+       return toStringHelper("capacity plannning");
    }
 }
