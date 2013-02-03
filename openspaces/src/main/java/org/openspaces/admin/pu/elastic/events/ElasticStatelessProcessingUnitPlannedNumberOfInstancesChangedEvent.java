@@ -160,12 +160,22 @@ public class ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent
                 desc.append("below low threshold (" + rule.getLowThreshold() +"). ");
             }
         }
+        if (oldPlannedNumberOfInstances != newPlannedNumberOfInstances) {
+            desc
+            .append("Number of planned instances changed from ")
+            .append(oldPlannedNumberOfInstances)
+            .append(" to ")
+            .append(newPlannedNumberOfInstances)
+            .append(". ");
+        }
+        else {
+            desc
+            .append("Number of planned instances is ")
+            .append(newPlannedNumberOfInstances)
+            .append(". ");
+        }
+        
         desc
-        .append("Number of planned instances changed from ")
-        .append(oldPlannedNumberOfInstances)
-        .append(" to ")
-        .append(newPlannedNumberOfInstances)
-        .append(". ")
         .append("Actual number of instances is ")
         .append(actualNumberOfInstances)
         .append(". ");
