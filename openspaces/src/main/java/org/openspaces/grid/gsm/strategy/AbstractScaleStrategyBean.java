@@ -45,6 +45,7 @@ import org.openspaces.admin.machine.events.ElasticMachineProvisioningProgressCha
 import org.openspaces.admin.machine.events.ElasticMachineProvisioningProgressChangedEventListener;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
+import org.openspaces.admin.pu.elastic.events.ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent;
 import org.openspaces.admin.zone.config.ZonesConfig;
 import org.openspaces.core.bean.Bean;
 import org.openspaces.core.internal.commons.math.fraction.Fraction;
@@ -552,5 +553,11 @@ public abstract class AbstractScaleStrategyBean implements
 
     protected void capacityPlanningInProgressEvent(AutoScalingSlaEnforcementInProgressException e, ZonesConfig zones) {
         capacityPlanningEventState.enqueuProvisioningInProgressEvent(e, zones);
+    }
+
+    public void capacityPlanningInProgressEvent(
+            ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent event) {
+        
+        capacityPlanningEventState.enqueuProvisioningInProgressEvent(event);
     }
 }

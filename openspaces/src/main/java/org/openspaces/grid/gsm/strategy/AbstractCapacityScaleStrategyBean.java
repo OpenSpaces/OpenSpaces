@@ -34,6 +34,7 @@ import org.openspaces.admin.pu.elastic.config.CapacityRequirementsPerZonesConfig
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyAgentZonesAwareConfig;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyCapacityRequirementConfig;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
+import org.openspaces.admin.pu.elastic.events.ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent;
 import org.openspaces.admin.zone.config.ExactZonesConfig;
 import org.openspaces.admin.zone.config.RequiredZonesConfig;
 import org.openspaces.admin.zone.config.ZonesConfig;
@@ -143,11 +144,12 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
         if (getLogger().isDebugEnabled()) {
             getLogger().debug("Setting planned capacity to " + newPlannedCapacity + " (old planned capacity = " + this.plannedCapacity + ")");
         }
+        CapacityRequirementsPerZonesConfig oldPlannedCapacity = plannedCapacity;
         this.plannedCapacity = newPlannedCapacity;
         
         // round up memory
         long roundedMemoryInMB = calcRoundedTotalMemoryInMB();
-        long totalMemoryInMB = getTotalMemoryInMB();
+        long totalMemoryInMB = getTotalPlannedMemoryInMB();
         if (totalMemoryInMB > roundedMemoryInMB) {
             throw new IllegalStateException("totalMemoryInMB ("+totalMemoryInMB +") cannot be bigger than roundedTotalMemoryInMB ("+ roundedMemoryInMB +")");
         }
@@ -165,7 +167,22 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
             );
             this.plannedCapacity = newPlannedCapacity;
         }
+        
+        capacityPlannedNumberOfInstancesChangedEvent(oldPlannedCapacity);
+        
         return true;
+    }
+
+    private void capacityPlannedNumberOfInstancesChangedEvent(
+            CapacityRequirementsPerZonesConfig oldPlannedCapacity) {
+        if (!isStatefulProcessingUnit()) {
+            final boolean log = false;
+            int newPlannedNumberOfInstances = calcTargetNumberOfContainersForStateless(this.plannedCapacity, log);
+            int oldPlannedNumberOfInstances = calcTargetNumberOfContainersForStateless(oldPlannedCapacity, log);
+            int actualNumberOfInstances = getProcessingUnit().getInstances().length;
+            ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent event = new ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent(actualNumberOfInstances,oldPlannedNumberOfInstances,newPlannedNumberOfInstances);
+            super.capacityPlanningInProgressEvent(event);
+        }
     }
 
     protected CapacityRequirementsPerZonesConfig getPlannedCapacity() {
@@ -217,6 +234,8 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
             throw new IllegalStateException("scaleStrategy cannot be null");
         }
         
+        super.capacityPlanningCompletedEvent(null);
+        
         CapacityRequirementsPerAgent totalAllocatedCapacity = new CapacityRequirementsPerAgent();
         PerZonesMachinesSlaEnforcementInProgressException pendingMachinesExceptions = new PerZonesMachinesSlaEnforcementInProgressException(getProcessingUnit());
         PerZonesGridServiceAgentSlaEnforcementInProgressException pendingAgentsExceptions = new PerZonesGridServiceAgentSlaEnforcementInProgressException(getProcessingUnit());
@@ -238,7 +257,7 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
                 pendingAgentsExceptions.addReason(zones,e);
             }
             catch (GridServiceAgentSlaEnforcementInProgressException e) {
-                if (getSchemaConfig().isPartitionedSync2BackupSchema()) {
+                if (isStatefulProcessingUnit()) {
                     // do not support space rebalancing
                     // unless all GSAs are available on all zones
                     throw e;
@@ -247,7 +266,7 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
                 pendingAgentsExceptions.addReason(zones,e);
             }
             catch (MachinesSlaEnforcementInProgressException e) {
-                if (getSchemaConfig().isPartitionedSync2BackupSchema()) {
+                if (isStatefulProcessingUnit()) {
                     // do not support space rebalancing
                     // unless all GSAs are available on all zones
                     throw e;
@@ -445,8 +464,8 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
     }
     
     private int calcTargetNumberOfContainers() {
-        if (getTotalMemoryInMB() > 0) {
-            if (getSchemaConfig().isPartitionedSync2BackupSchema()) {
+        if (getTotalPlannedMemoryInMB() > 0) {
+            if (isStatefulProcessingUnit()) {
                 return calcTargetNumberOfContainersForPartitionedSchema();
             } else {
                 return calcTargetNumberOfContainersForStateless();
@@ -456,29 +475,45 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
         }
     }
 
-    private long getTotalMemoryInMB() {
+    private boolean isStatefulProcessingUnit() {
+        return getSchemaConfig().isPartitionedSync2BackupSchema();
+    }
+
+    private long getTotalPlannedMemoryInMB() {
+        return getTotalMemoryInMB(this.plannedCapacity);
+    }
+    
+    private static long getTotalMemoryInMB(CapacityRequirementsPerZonesConfig plannedCapacity) {
         CapacityRequirementsConfig totalCapacity = new CapacityRequirementsConfig(plannedCapacity.toCapacityRequirementsPerZones().getTotalAllocatedCapacity());
         return totalCapacity.getMemoryCapacityInMB();
     }
 
     private int calcTargetNumberOfContainersForStateless() {
-        int requiredNumberOfContainers = (int)Math.ceil(1.0 * getTotalMemoryInMB() / containersConfig.getMaximumMemoryCapacityInMB());
-        int targetNumberOfContainers = Math.max(
+        final boolean log = true;
+        return calcTargetNumberOfContainersForStateless(this.plannedCapacity, log);
+    }
+
+    private int calcTargetNumberOfContainersForStateless(CapacityRequirementsPerZonesConfig plannedCapacity, boolean log) {
+        final long totalMemoryInMB = getTotalPlannedMemoryInMB();
+        final int requiredNumberOfContainers = (int)Math.ceil(1.0 * totalMemoryInMB / containersConfig.getMaximumMemoryCapacityInMB());
+        final int targetNumberOfContainers = Math.max(
                 getMinimumNumberOfMachines(),
                 requiredNumberOfContainers);
         
-        getLogger().info(
-                "targetNumberOfContainers= "+
-                "max(minimumNumberOfMachines, ceil(memory/jvm-size))= "+
-                "max("+ 
-                    getMinimumNumberOfMachines() + "," +
-                    "ceil("+
-                        getTotalMemoryInMB() + "/" +
-                        containersConfig.getMaximumMemoryCapacityInMB() + ")= " +
-                "max("+ 
-                    getMinimumNumberOfMachines() + "," + 
-                    requiredNumberOfContainers+")= "+
-                targetNumberOfContainers);
+        if (log) {
+            getLogger().info(
+                    "targetNumberOfContainers= "+
+                    "max(minimumNumberOfMachines, ceil(memory/jvm-size))= "+
+                    "max("+ 
+                        getMinimumNumberOfMachines() + "," +
+                        "ceil("+
+                            totalMemoryInMB + "/" +
+                            containersConfig.getMaximumMemoryCapacityInMB() + ")= " +
+                    "max("+ 
+                        getMinimumNumberOfMachines() + "," + 
+                        requiredNumberOfContainers+")= "+
+                    targetNumberOfContainers);
+        }
         
         return targetNumberOfContainers;
     }
@@ -499,19 +534,20 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
     
     private int calcTargetNumberOfContainersForPartitionedSchema() {
         
-        double totalNumberOfInstances = getProcessingUnit().getTotalNumberOfInstances();
-        double avgInstanceCapacityInMB = getTotalMemoryInMB()/totalNumberOfInstances;
+        final double totalNumberOfInstances = getProcessingUnit().getTotalNumberOfInstances();
+        final long totalMemoryInMB = getTotalPlannedMemoryInMB();
+        final double avgInstanceCapacityInMB = totalMemoryInMB/totalNumberOfInstances;
         getLogger().info(
                 "instanceCapacityInMB= "+
                 "memoryCapacityInMB/(numberOfInstances*(1+numberOfBackups))= "+
-                getTotalMemoryInMB()+"/"+totalNumberOfInstances+"= " +
+                totalMemoryInMB+"/"+totalNumberOfInstances+"= " +
                 avgInstanceCapacityInMB);
         
-        double containerCapacityInMB = containersConfig.getMaximumMemoryCapacityInMB();
+        final double containerCapacityInMB = containersConfig.getMaximumMemoryCapacityInMB();
         
         if (containerCapacityInMB < avgInstanceCapacityInMB) {
             throw new BeanConfigurationException(
-                    "Reduce total capacity from " + getTotalMemoryInMB() +"MB to " + containerCapacityInMB*totalNumberOfInstances+"MB. " +
+                    "Reduce total capacity from " + totalMemoryInMB +"MB to " + containerCapacityInMB*totalNumberOfInstances+"MB. " +
                     "Container capacity is " + containerCapacityInMB+"MB , "+
                     "given " + totalNumberOfInstances + " instances, the total capacity =" 
                     +containerCapacityInMB+"MB *"+totalNumberOfInstances + "= " + 
@@ -540,11 +576,11 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
                 "The total memory of all containers equals or bigger than the requested memory");
           */
         
-        int targetNumberOfContainers = (int)Math.ceil(1.0 *getTotalMemoryInMB() / containerCapacityInMB);
+        final int targetNumberOfContainers = (int)Math.ceil(1.0 *totalMemoryInMB / containerCapacityInMB);
         getLogger().info(
                 "targetNumberOfContainers= "+
                 "ceil(memoryCapacity/containerCapacityInMB)= "+
-                "ceil("+getTotalMemoryInMB() +"/"+ containerCapacityInMB+") =" +
+                "ceil("+totalMemoryInMB +"/"+ containerCapacityInMB+") =" +
                 targetNumberOfContainers);
         
         int numberOfBackups = getProcessingUnit().getNumberOfBackups();
@@ -552,7 +588,7 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
          // raise exception if min number of containers conflicts with the specified memory capacity.
             int recommendedMemoryCapacityInMB = (int)((numberOfBackups +1) * containerCapacityInMB);
             throw new BeanConfigurationException(
-                    targetNumberOfContainers + " containers are needed in order to scale to " + getTotalMemoryInMB() + "m , "+
+                    targetNumberOfContainers + " containers are needed in order to scale to " + totalMemoryInMB + "m , "+
                     "which cannot support " + (numberOfBackups==1?"one backup":numberOfBackups+" backups") + " per partition. "+
                     "Increase the memory capacity to " + recommendedMemoryCapacityInMB +"m");
         }
