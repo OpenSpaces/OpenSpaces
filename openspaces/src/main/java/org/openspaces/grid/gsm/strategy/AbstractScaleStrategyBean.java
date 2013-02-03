@@ -37,6 +37,7 @@ import org.openspaces.admin.internal.machine.events.DefaultElasticMachineProvisi
 import org.openspaces.admin.internal.pu.InternalProcessingUnit;
 import org.openspaces.admin.internal.pu.elastic.ProcessingUnitSchemaConfig;
 import org.openspaces.admin.internal.pu.elastic.ScaleStrategyConfigUtils;
+import org.openspaces.admin.internal.pu.elastic.events.DefaultElasticAutoScalingProgressChangedEvent;
 import org.openspaces.admin.internal.pu.elastic.events.DefaultElasticProcessingUnitInstanceProvisioningProgressChangedEvent;
 import org.openspaces.admin.internal.pu.elastic.events.DefaultElasticProcessingUnitScaleProgressChangedEvent;
 import org.openspaces.admin.internal.pu.elastic.events.InternalElasticProcessingUnitProgressChangedEvent;
@@ -52,6 +53,7 @@ import org.openspaces.grid.gsm.ElasticMachineProvisioningAware;
 import org.openspaces.grid.gsm.LogPerProcessingUnit;
 import org.openspaces.grid.gsm.ProcessingUnitAware;
 import org.openspaces.grid.gsm.SingleThreadedPollingLog;
+import org.openspaces.grid.gsm.autoscaling.exceptions.AutoScalingSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.containers.exceptions.ContainersSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementState.RecoveryState;
 import org.openspaces.grid.gsm.machines.MachinesSlaUtils;
@@ -103,6 +105,7 @@ public abstract class AbstractScaleStrategyBean implements
     private ScaleStrategyProgressEventState containerProvisioningEventState;
     private ScaleStrategyProgressEventState puProvisioningEventState;
     private ScaleStrategyProgressEventState scaleEventState;
+    private ScaleStrategyProgressEventState capacityPlanningEventState;
     
     private EventsStore eventsStore;
 
@@ -217,7 +220,7 @@ public abstract class AbstractScaleStrategyBean implements
         containerProvisioningEventState = new ScaleStrategyProgressEventState(eventsStore, isUndeploying(), pu.getName(), DefaultElasticGridServiceContainerProvisioningProgressChangedEvent.class);
         puProvisioningEventState = new ScaleStrategyProgressEventState(eventsStore, isUndeploying(), pu.getName(), DefaultElasticProcessingUnitInstanceProvisioningProgressChangedEvent.class);
         scaleEventState = new ScaleStrategyProgressEventState(eventsStore, isUndeploying(), pu.getName(), DefaultElasticProcessingUnitScaleProgressChangedEvent.class);
-        
+        capacityPlanningEventState = new ScaleStrategyProgressEventState(eventsStore, isUndeploying(), pu.getName(), DefaultElasticAutoScalingProgressChangedEvent.class);
         
         minimumNumberOfMachines = calcMinimumNumberOfMachines();
         provisionedMachines = new ElasticMachineProvisioningDiscoveredMachinesCache(pu,machineProvisioning, discoveryQuiteMode, getPollingIntervalSeconds());
@@ -542,7 +545,12 @@ public abstract class AbstractScaleStrategyBean implements
         puProvisioningEventState.enqueuProvisioningInProgressEvent(e, zones);
     }
     
-    protected EventsStore getEventsStore() {
-        return this.eventsStore;
+
+    protected void capacityPlanningCompletedEvent(ZonesConfig zones) {
+        capacityPlanningEventState.enqueuProvisioningCompletedEvent(zones);
+    }
+
+    protected void capacityPlanningInProgressEvent(AutoScalingSlaEnforcementInProgressException e, ZonesConfig zones) {
+        capacityPlanningEventState.enqueuProvisioningInProgressEvent(e, zones);
     }
 }

@@ -20,7 +20,6 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.openspaces.admin.bean.BeanConfigurationException;
-import org.openspaces.admin.internal.pu.elastic.events.DefaultElasticAutoScalingProgressChangedEvent;
 import org.openspaces.admin.pu.elastic.config.AutomaticCapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.config.AutomaticCapacityScaleRuleConfig;
 import org.openspaces.admin.pu.elastic.config.CapacityRequirementsConfig;
@@ -70,7 +69,6 @@ implements AutoScalingSlaEnforcementEndpointAware {
     private AutomaticCapacityCooldownValidator cooldownValidator;
 
     // events state
-    private ScaleStrategyProgressEventState autoScalingEventState;
     private CapacityRequirementsPerZones enforced;
 
     @Override
@@ -97,13 +95,6 @@ implements AutoScalingSlaEnforcementEndpointAware {
         if (initialCapacity == null) {   
             initialCapacity = config.getMinCapacity();
         }
-
-        autoScalingEventState = 
-                new ScaleStrategyProgressEventState(
-                        getEventsStore(), 
-                        isUndeploying(),
-                        getProcessingUnit().getName(),
-                        DefaultElasticAutoScalingProgressChangedEvent.class);
 
         //inject initial manual scale capacity
         super.setPlannedCapacity(initialCapacity);
@@ -355,15 +346,15 @@ implements AutoScalingSlaEnforcementEndpointAware {
                 CapacityRequirements oldPlan = plannedPerZones.getZonesCapacityOrZero(zones);
                 e.setOldPlan(oldPlan);
                 // Change plan event which would also raise an alert
-                autoScalingInProgressEvent(e, zones);
+                capacityPlanningInProgressEvent(e, zones);
                 throw e;
             }
         } 
         catch (AutoScalingSlaEnforcementInProgressException e) {
-            autoScalingInProgressEvent(e, zones);
+            capacityPlanningInProgressEvent(e, zones);
             throw e;
         }
-        autoScalingCompletedEvent(zones);
+        capacityPlanningCompletedEvent(zones);
     }
 
     private void validateRulesConfig() {
@@ -444,13 +435,5 @@ implements AutoScalingSlaEnforcementEndpointAware {
 
     private void disablePuStatistics() {
         getProcessingUnit().stopStatisticsMonitor();
-    }
-
-    private void autoScalingCompletedEvent(ZonesConfig zones) {
-        autoScalingEventState.enqueuProvisioningCompletedEvent(zones);
-    }
-
-    private void autoScalingInProgressEvent(AutoScalingSlaEnforcementInProgressException e, ZonesConfig zones) {
-        autoScalingEventState.enqueuProvisioningInProgressEvent(e, zones);
     }
 }
