@@ -52,6 +52,19 @@ public class ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent
      * @param actualNumberOfInstances - number of instances currently deployed
      * @param oldPlannedNumberOfInstances - planned number of instances before rule breached
      * @param newPlannedNumberOfInstances - planned number of instances after rule breached
+     */
+    public ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent(
+            int actualNumberOfInstances, 
+            int oldPlannedNumberOfInstances,
+            int newPlannedNumberOfInstances) {
+       
+        this (actualNumberOfInstances, oldPlannedNumberOfInstances, newPlannedNumberOfInstances, null, false, null); 
+    }
+            
+    /**
+     * @param actualNumberOfInstances - number of instances currently deployed
+     * @param oldPlannedNumberOfInstances - planned number of instances before rule breached
+     * @param newPlannedNumberOfInstances - planned number of instances after rule breached
      * @param rule - the rule that was breached
      * @param highThresholdBreached - true means high threshold breached, false means low threshold breached
      * @param metricValue - the metric value that breached the threshold as a string.
@@ -105,7 +118,13 @@ public class ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent
     }
     
     private void writeRule(ObjectOutput out, AutomaticCapacityScaleRuleConfig rule) throws IOException {
-        IOUtils.writeMapStringString(out, rule.getProperties());
+        
+        final Map<String, String> properties = null;
+        if (rule != null) {
+            rule.getProperties();
+        }
+        
+        IOUtils.writeMapStringString(out, properties);
     }
 
     private static AutomaticCapacityScaleRuleConfig readRule(ObjectInput in) throws IOException, ClassNotFoundException {
@@ -128,18 +147,19 @@ public class ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent
             desc.append("Scaling in. ");
         }
         
-        desc.append(rule.getStatistics().getMetric())
-        .append(" (")
-        .append(metricValue)
-        .append(") is ");
-        
-        if (highThresholdBreached) {
-            desc.append("above high threshold (" + rule.getHighThreshold() +"). ");
+        if (rule != null) {
+            desc.append(rule.getStatistics().getMetric())
+            .append(" (")
+            .append(metricValue)
+            .append(") is ");
+            
+            if (highThresholdBreached) {
+                desc.append("above high threshold (" + rule.getHighThreshold() +"). ");
+            }
+            else {
+                desc.append("below low threshold (" + rule.getLowThreshold() +"). ");
+            }
         }
-        else {
-            desc.append("below low threshold (" + rule.getLowThreshold() +"). ");
-        }
-        
         desc
         .append("Number of planned instances changed from ")
         .append(oldPlannedNumberOfInstances)
@@ -158,11 +178,11 @@ public class ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent
     }
 
     public boolean isHighThresholdBreached() {
-        return highThresholdBreached;
+        return rule != null && highThresholdBreached;
     }
 
     public boolean isLowThresholdBreached() {
-        return !highThresholdBreached;
+        return rule != null && !highThresholdBreached;
     }
     
     public String getMetricValue() {
