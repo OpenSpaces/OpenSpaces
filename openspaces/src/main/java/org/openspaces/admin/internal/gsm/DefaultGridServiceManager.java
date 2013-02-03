@@ -698,7 +698,14 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         }
         finally {
             if (tempDirectory != null) {
-                FileUtils.deleteFileOrDirectory(tempDirectory);
+                try {
+                    FileUtils.deleteFileOrDirectory(tempDirectory);
+                }
+                catch (AdminException e) {
+                    logger.warn("Failed to delete " + tempDirectory +" will attempt to delete on exit",e);
+                    tempDirectory.deleteOnExit();
+                    //do not throw since we may be hiding other exceptions that lock the files in tempDirectory in the first place
+                }
             }
         }
     }
