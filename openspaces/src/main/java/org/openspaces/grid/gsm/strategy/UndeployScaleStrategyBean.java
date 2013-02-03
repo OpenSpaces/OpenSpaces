@@ -20,6 +20,7 @@ package org.openspaces.grid.gsm.strategy;
 import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
+import org.openspaces.admin.pu.elastic.events.ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent;
 import org.openspaces.admin.zone.config.ZonesConfig;
 import org.openspaces.grid.gsm.GridServiceContainerConfigAware;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpoint;
@@ -58,6 +59,7 @@ public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
     private MachinesSlaEnforcementEndpoint machinesEndpoint;
     private ContainersSlaEnforcementEndpoint containersEndpoint;
     private GridServiceContainerConfig containersConfig;
+    private boolean plannedNumberOfInstancesEventFired;
     
     public void setMachinesSlaEnforcementEndpoint(MachinesSlaEnforcementEndpoint endpoint) {
         this.machinesEndpoint = endpoint;
@@ -89,6 +91,8 @@ public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
 
     public void enforceSla() throws SlaEnforcementInProgressException {
         
+        capacityPlannedNumberOfInstancesChangedEvent();
+        
         if (getProcessingUnit().getInstances().length == 0) {
             puInstanceProvisioningCompletedEvent();
         }
@@ -110,6 +114,22 @@ public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
         machinesEndpoint.afterUndeployedProcessingUnit(getProcessingUnit());
     }
 
+    private void capacityPlannedNumberOfInstancesChangedEvent() {
+        if (!plannedNumberOfInstancesEventFired && !isStatefulProcessingUnit()) {
+
+            int newPlannedNumberOfInstances = 0;
+            int oldPlannedNumberOfInstances = getProcessingUnit().getNumberOfInstances(); // approx based on GSM
+            int actualNumberOfInstances = getProcessingUnit().getInstances().length;      // approx based on LUS
+            ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent event = new ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent(actualNumberOfInstances,oldPlannedNumberOfInstances,newPlannedNumberOfInstances);
+            super.capacityPlanningInProgressEvent(event);
+            plannedNumberOfInstancesEventFired = true;
+        }
+    }
+    
+    private boolean isStatefulProcessingUnit() {
+        return getSchemaConfig().isPartitionedSync2BackupSchema();
+    }
+    
     private void enforceMachinesSla(final CapacityMachinesSlaPolicy sla) throws WaitingForDiscoveredMachinesException, MachinesSlaEnforcementInProgressException, GridServiceAgentSlaEnforcementInProgressException {
         
         if (getLogger().isDebugEnabled()) {

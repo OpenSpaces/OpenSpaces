@@ -179,7 +179,7 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
             final boolean log = false;
             int newPlannedNumberOfInstances = calcTargetNumberOfContainersForStateless(this.plannedCapacity, log);
             int oldPlannedNumberOfInstances = calcTargetNumberOfContainersForStateless(oldPlannedCapacity, log);
-            int actualNumberOfInstances = getProcessingUnit().getInstances().length;
+            int actualNumberOfInstances = getProcessingUnit().getInstances().length;    //aprox using LUS
             ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent event = new ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent(actualNumberOfInstances,oldPlannedNumberOfInstances,newPlannedNumberOfInstances);
             super.capacityPlanningInProgressEvent(event);
         }
