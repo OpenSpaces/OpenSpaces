@@ -121,6 +121,10 @@ public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
             int oldPlannedNumberOfInstances = getProcessingUnit().getNumberOfInstances(); // approx based on GSM
             int actualNumberOfInstances = getProcessingUnit().getInstances().length;      // approx based on LUS
             ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent event = new ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent(actualNumberOfInstances,oldPlannedNumberOfInstances,newPlannedNumberOfInstances);
+            event.setComplete(false);
+            event.setUndeploying(true);
+            event.setProcessingUnitName(getProcessingUnit().getName());
+            event.setGridServiceAgentZones(null);
             super.capacityPlanningInProgressEvent(event);
             plannedNumberOfInstancesEventFired = true;
         }
