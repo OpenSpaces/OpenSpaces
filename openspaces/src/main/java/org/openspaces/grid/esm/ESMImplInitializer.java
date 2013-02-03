@@ -17,6 +17,10 @@
  ******************************************************************************/
 package org.openspaces.grid.esm;
 
+import com.gigaspaces.grid.gsm.GSM;
+import com.gigaspaces.grid.gsm.PUDetails;
+import com.gigaspaces.grid.gsm.PUsDetails;
+import com.gigaspaces.internal.utils.concurrent.GSThreadFactory;
 import com.j_spaces.kernel.SystemProperties;
 import java.rmi.RemoteException;
 import java.util.HashMap;
@@ -28,19 +32,14 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.openspaces.admin.Admin;
+import org.openspaces.admin.esm.ElasticServiceManager;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.internal.InternalAdminFactory;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.gsm.InternalGridServiceManager;
 import org.openspaces.admin.lus.LookupService;
 import org.openspaces.admin.pu.ProcessingUnit;
-
-import com.gigaspaces.grid.gsm.GSM;
-import com.gigaspaces.grid.gsm.PUDetails;
-import com.gigaspaces.grid.gsm.PUsDetails;
-import com.gigaspaces.internal.utils.concurrent.GSThreadFactory;
 /**
  * The purpose of this class is to make sure that admin API
  * view of the PUs and instances is based on the GSM and not the LUS.
@@ -106,7 +105,13 @@ public class ESMImplInitializer {
                     schedule(restartAdmin, DISCOVERY_POLLING_PERIOD_SECONDS, TimeUnit.SECONDS);
                     return;
                 }
-                
+
+                if (isOtherESMRunning(admin)) {
+                    boolean restartAdmin = true;
+                    schedule(restartAdmin, DISCOVERY_POLLING_PERIOD_SECONDS, TimeUnit.SECONDS);
+                    return;
+                }
+
                 //accessing the data from a single threaded admin is done on this NonBlockingStateChange event thread
                 final Map<String,Integer> numberOfInstancesPerProcessingUnit = new HashMap<String,Integer>();
                 for (ProcessingUnit pu : admin.getProcessingUnits()) {
@@ -208,6 +213,15 @@ public class ESMImplInitializer {
         }
      
         return true;
+    }
+
+    private static boolean isOtherESMRunning(InternalAdmin admin) {
+        ElasticServiceManager[] elasticServiceManagers = admin.getElasticServiceManagers().getManagers();
+        if (elasticServiceManagers.length > 0) {
+            logger.log(Level.INFO, "Waiting for other ESM to terminate: " + elasticServiceManagers[0].getUid());
+            return true;
+        }
+        return false;
     }
 
     /**
