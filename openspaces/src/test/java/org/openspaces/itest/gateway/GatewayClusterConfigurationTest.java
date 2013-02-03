@@ -60,24 +60,28 @@ public class GatewayClusterConfigurationTest extends AbstractDependencyInjection
         Assert.assertEquals(3, policy.getGatewayPolicies()[0].getPendingOperationThreshold());
         Assert.assertEquals(4L, policy.getGatewayPolicies()[0].getMaxRedoLogCapacity());
         Assert.assertEquals(RedoLogCapacityExceededPolicy.DROP_OLDEST, policy.getGatewayPolicies()[0].getOnRedoLogCapacityExceeded());
+        Assert.assertTrue(policy.getGatewayPolicies()[0].isReplicateChangeAsUpdate());
         //
         Assert.assertEquals(10, policy.getGatewayPolicies()[1].getBulkSize());
         Assert.assertEquals(20L, policy.getGatewayPolicies()[1].getIdleTimeThreshold());
         Assert.assertEquals(30, policy.getGatewayPolicies()[1].getPendingOperationThreshold());
         Assert.assertEquals(40L, policy.getGatewayPolicies()[1].getMaxRedoLogCapacity());
         Assert.assertEquals(RedoLogCapacityExceededPolicy.DROP_OLDEST, policy.getGatewayPolicies()[1].getOnRedoLogCapacityExceeded());
+        Assert.assertTrue(policy.getGatewayPolicies()[1].isReplicateChangeAsUpdate());
         //
         Assert.assertEquals(9991, policy.getGatewayPolicies()[2].getBulkSize());
         Assert.assertEquals(200L, policy.getGatewayPolicies()[2].getIdleTimeThreshold());
         Assert.assertEquals(GatewaysPolicy.PENDING_OPERATION_THRESHOLD_DEFAULT, policy.getGatewayPolicies()[2].getPendingOperationThreshold());
         Assert.assertEquals(400L, policy.getGatewayPolicies()[2].getMaxRedoLogCapacity());
         Assert.assertEquals(RedoLogCapacityExceededPolicy.DROP_OLDEST, policy.getGatewayPolicies()[2].getOnRedoLogCapacityExceeded());
+        Assert.assertTrue(policy.getGatewayPolicies()[2].isReplicateChangeAsUpdate());
         //
         Assert.assertEquals(9991, policy.getGatewayPolicies()[3].getBulkSize());
         Assert.assertEquals(9992L, policy.getGatewayPolicies()[3].getIdleTimeThreshold());
         Assert.assertEquals(GatewaysPolicy.PENDING_OPERATION_THRESHOLD_DEFAULT, policy.getGatewayPolicies()[3].getPendingOperationThreshold());
         Assert.assertEquals(-1L, policy.getGatewayPolicies()[3].getMaxRedoLogCapacity());
         Assert.assertEquals(RedoLogCapacityExceededPolicy.BLOCK_OPERATIONS, policy.getGatewayPolicies()[3].getOnRedoLogCapacityExceeded());
+        Assert.assertFalse(policy.getGatewayPolicies()[3].isReplicateChangeAsUpdate());
     }
 
 
