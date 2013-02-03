@@ -55,9 +55,8 @@ public class GatewaySinkConfigurationTest extends AbstractDependencyInjectionSpr
         assertEquals(1, serviceDetails.length);
         
         GatewaySinkServiceDetails sinkDetails = (GatewaySinkServiceDetails) serviceDetails[0];
-        assertEquals(2, sinkDetails.getGatewaySourceNames().length);
-        assertEquals("localGateway", sinkDetails.getGatewaySourceNames()[0]);        
-        assertEquals("targetGateway", sinkDetails.getGatewaySourceNames()[1]);
+        assertEquals(1, sinkDetails.getGatewaySourceNames().length);
+        assertEquals("targetGateway", sinkDetails.getGatewaySourceNames()[0]);
     }
 
 
