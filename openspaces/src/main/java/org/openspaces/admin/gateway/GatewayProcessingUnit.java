@@ -47,4 +47,20 @@ public interface GatewayProcessingUnit extends GridComponent{
      * Returns the delegator of this gateway or <code>null</code> if no delegator exists in this gateway. 
      */
     GatewayDelegator getDelegator();
+    
+    /**
+     * Returns the communication port this gateway processing unit is using.
+     */
+    int getCommunicationPort();
+    
+    /**
+     * Returns the discovery port this gateway processing unit is using to publish it self.
+     */
+    int getDiscoveryPort();
+    
+    /**
+     * Returns whether this gateway processing unit is starting an embedded lookup service for cross gateway discovery purpose. 
+     */
+    boolean isStartEmbeddedLus();
+    
 }

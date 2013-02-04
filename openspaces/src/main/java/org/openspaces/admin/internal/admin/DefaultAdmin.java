@@ -164,6 +164,7 @@ import org.openspaces.admin.vm.VirtualMachines;
 import org.openspaces.admin.zone.Zone;
 import org.openspaces.admin.zone.ZoneAware;
 import org.openspaces.admin.zone.Zones;
+import org.openspaces.core.gateway.GatewayServiceDetails;
 import org.openspaces.core.gateway.GatewayUtils;
 import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.core.space.SpaceServiceDetails;
@@ -1335,10 +1336,11 @@ public class DefaultAdmin implements InternalAdmin {
             }
 
             processingUnitInstances.addInstance(processingUnitInstance);
+            final GatewayServiceDetails gatewayDetails = GatewayUtils.extractGatewayDetails( processingUnitInstance );
             
-            String gatewayName = GatewayUtils.extractGatewayName( processingUnitInstance );
-            if( gatewayName != null ){
+            if( gatewayDetails != null ){
             	
+                String gatewayName = gatewayDetails.getLocalGatewayName();
         		Gateway gateway = gateways.getGateway( gatewayName );
         		//check if Gateway already exists, if not create it only once within if
         		if( gateway == null ){
@@ -1347,7 +1349,7 @@ public class DefaultAdmin implements InternalAdmin {
         		}
 
         		GatewayProcessingUnit gatewayProcessingUnit = 
-        			new DefaultGatewayProcessingUnit( this, gateway, processingUnitInstance );
+        			new DefaultGatewayProcessingUnit( this, gateway, processingUnitInstance, gatewayDetails );
         		gatewayProcessingUnits.addGatewayProcessingUnit( gatewayProcessingUnit );
             }
             
@@ -1509,8 +1511,9 @@ public class DefaultAdmin implements InternalAdmin {
     private void processGatewaysOnProcessingUnitInstanceRemoval( 
     			String removedPuInstanceUid, ProcessingUnitInstance removedProcessingUnitInstance) {
 
-		String gatewayName = GatewayUtils.extractGatewayName( removedProcessingUnitInstance );
-		if( gatewayName != null ){
+        GatewayServiceDetails gatewayDetails = GatewayUtils.extractGatewayDetails(removedProcessingUnitInstance);
+		if( gatewayDetails != null ){
+		    String gatewayName = gatewayDetails.getLocalGatewayName();
 
 			GatewayProcessingUnit removedGatewayProcessingUnit = 
 					gatewayProcessingUnits.removeGatewayProcessingUnit( removedPuInstanceUid );

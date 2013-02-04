@@ -47,11 +47,13 @@ public class DefaultGatewayProcessingUnit implements GatewayProcessingUnit {
     private final Gateway gateway;
     private final ProcessingUnitInstance processingUnitInstance;
     private final InternalAdmin admin;
+    private final GatewayServiceDetails gatewayServiceDetails;
 
-    public DefaultGatewayProcessingUnit(InternalAdmin admin, Gateway gateway, ProcessingUnitInstance processingUnitInstance) {
+    public DefaultGatewayProcessingUnit(InternalAdmin admin, Gateway gateway, ProcessingUnitInstance processingUnitInstance, GatewayServiceDetails gatewayServiceDetails) {
         this.admin = admin;
         this.gateway = gateway;
         this.processingUnitInstance = processingUnitInstance;
+        this.gatewayServiceDetails = gatewayServiceDetails;
     }
 
     public ProcessingUnitInstance getProcessingUnitInstance() {
@@ -126,6 +128,24 @@ public class DefaultGatewayProcessingUnit implements GatewayProcessingUnit {
                 return new DefaultGatewayDelegator(this, (GatewayDelegatorServiceDetails)serviceDetails);
         }
         return null;
+    }
+
+    @Override
+    public int getCommunicationPort()
+    {
+        return gatewayServiceDetails.getCommunicationPort();
+    }
+
+    @Override
+    public int getDiscoveryPort()
+    {
+        return gatewayServiceDetails.getDiscoveryPort();
+    }
+
+    @Override
+    public boolean isStartEmbeddedLus()
+    {
+        return gatewayServiceDetails.isStartEmbeddedLus();
     }
 
 }
