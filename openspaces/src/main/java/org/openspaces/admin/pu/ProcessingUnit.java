@@ -77,6 +77,8 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
     String getName();
 
     /**
+     * @deprecated - since 9.5.0 - please use {@link #getPlannedNumberOfInstances()} }
+     *
      * Returns the number of required instances as defined in the processing unit's SLA.
      * If there are backups, it will only return the number of primary instances and not the
      * number of backup. To get the total number of instances please use the method {@link #getTotalNumberOfInstances()}.
@@ -84,7 +86,24 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
      * instances for the processing unit. To count the number of active processing unit instances please use the method
      * {@link #getInstances()}.   
      */
+    @Deprecated
     int getNumberOfInstances();
+
+    /**
+     *
+     * @return the number of required instances as defined in the processing unit's SLA.
+     * If there are backups, it will only return the number of primary instances and not the
+     * number of backup. To get the total number of instances please use the method {@link #getTotalNumberOfInstances()}.
+     * Note that this method does not count the number of running instances, but rather the number of planned
+     * instances for the processing unit. To count the number of active processing unit instances please use the method
+     * {@link #getInstances()}.
+     * If the processing unit is elastic return value may reflect updated planned number of instances based on
+     * scaling rules.
+     *
+     * @since 9.5.0
+     * @author guym
+     **/
+    int getPlannedNumberOfInstances();
 
     /**
      * Returns the number of backups (if the topology is a backup one) per instance, as defined in the

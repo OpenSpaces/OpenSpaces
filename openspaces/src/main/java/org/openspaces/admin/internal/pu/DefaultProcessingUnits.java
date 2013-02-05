@@ -342,7 +342,13 @@ public class DefaultProcessingUnits implements InternalProcessingUnits {
     }
     
     @Override
-    public void processElasticScaleStrategyEvent(ElasticProcessingUnitEvent event) {
+    public void processElasticScaleStrategyEvent(final ElasticProcessingUnitEvent event) {
+
+        final InternalProcessingUnit pu = ( InternalProcessingUnit ) this.getProcessingUnit( event.getProcessingUnitName() );
+        if ( pu != null ){
+            pu.processElasticScaleStrategyEvent( event );
+        }
+
         if (event instanceof ElasticAutoScalingFailureEvent) {
             elasticAutoScalingFailureEventManager.elasticAutoScalingFailure((ElasticAutoScalingFailureEvent)event);
         }
