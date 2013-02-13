@@ -27,7 +27,12 @@ import org.springframework.beans.factory.InitializingBean;
 public class DefaultHibernateSpaceSynchronizationEndpointFactoryBean implements
         FactoryBean<DefaultHibernateSpaceSynchronizationEndpoint>, InitializingBean {
 
-    private final DefaultHibernateSpaceSynchronizationEndpointConfigurer synchronizationEndpointInterceptorConfigurer = new DefaultHibernateSpaceSynchronizationEndpointConfigurer();
+    private final DefaultHibernateSpaceSynchronizationEndpointConfigurer synchronizationEndpointInterceptorConfigurer = getConfigurer();
+
+    protected DefaultHibernateSpaceSynchronizationEndpointConfigurer getConfigurer()
+    {
+        return new DefaultHibernateSpaceSynchronizationEndpointConfigurer();
+    }
     
     private DefaultHibernateSpaceSynchronizationEndpoint synchronizationEndpointInterceptor;
     

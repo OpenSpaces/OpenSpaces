@@ -27,7 +27,13 @@ import org.springframework.beans.factory.InitializingBean;
 public class StatelessHibernateSpaceSynchronizationEndpointFactoryBean implements
         FactoryBean<StatelessHibernateSpaceSynchronizationEndpoint>, InitializingBean {
 
-    private final StatelessHibernateSpaceSynchronizationEndpointConfigurer synchronizationEndpointInterceptorConfigurer = new StatelessHibernateSpaceSynchronizationEndpointConfigurer();
+    private final StatelessHibernateSpaceSynchronizationEndpointConfigurer synchronizationEndpointInterceptorConfigurer = getConfigurer();
+    
+    protected StatelessHibernateSpaceSynchronizationEndpointConfigurer getConfigurer()
+    {
+        return new StatelessHibernateSpaceSynchronizationEndpointConfigurer();
+    }
+    
     private StatelessHibernateSpaceSynchronizationEndpoint synchronizationEndpointInterceptor;
     /**
      * Injects the Hibernate SessionFactory to be used with this synchronization endpoint interceptor.
