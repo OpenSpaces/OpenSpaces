@@ -27,7 +27,12 @@ import org.springframework.beans.factory.InitializingBean;
 public class StatelessHibernateSpaceDataSourceFactoryBean implements FactoryBean<StatelessHibernateSpaceDataSource>,
         InitializingBean {
 
-    private final StatelessHibernateSpaceDataSourceConfigurer dataSourceConfigurer = new StatelessHibernateSpaceDataSourceConfigurer();
+    private final StatelessHibernateSpaceDataSourceConfigurer dataSourceConfigurer = getConfigurer();
+
+    protected StatelessHibernateSpaceDataSourceConfigurer getConfigurer()
+    {
+        return new StatelessHibernateSpaceDataSourceConfigurer();
+    }
     
     private StatelessHibernateSpaceDataSource hibernateSpaceDataSource;
     

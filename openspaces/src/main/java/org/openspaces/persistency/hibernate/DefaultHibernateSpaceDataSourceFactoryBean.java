@@ -27,7 +27,12 @@ import org.springframework.beans.factory.InitializingBean;
 public class DefaultHibernateSpaceDataSourceFactoryBean implements FactoryBean<DefaultHibernateSpaceDataSource>, InitializingBean {
 
     
-    private final DefaultHibernateSpaceDataSourceConfigurer dataSourceConfigurer = new DefaultHibernateSpaceDataSourceConfigurer();
+    private final DefaultHibernateSpaceDataSourceConfigurer dataSourceConfigurer = getConfigurer();
+
+    protected DefaultHibernateSpaceDataSourceConfigurer getConfigurer()
+    {
+        return new DefaultHibernateSpaceDataSourceConfigurer();
+    }
     
     private DefaultHibernateSpaceDataSource hibernateSpaceDataSource;
     
