@@ -196,6 +196,19 @@ public class DefaultSpaceInstanceStatistics implements SpaceInstanceStatistics {
         }
         return StatisticsUtils.computePerSecond(getRemoveCount(), getPrevious().getRemoveCount(), getTimestamp(), getPreviousTimestamp());
     }
+    
+    @Override
+    public long getChangeCount() {
+        return statisticsHolder.getChangeCount();
+    }
+    
+    @Override
+    public double getChangePerSecond() {
+        if (previousStats == null) {
+            return -1;
+        }
+        return StatisticsUtils.computePerSecond(getChangeCount(), getPrevious().getChangeCount(), getTimestamp(), getPreviousTimestamp());
+    }
 
     public ReplicationStatistics getReplicationStatistics() {
         return statisticsHolder.getReplicationStatistics();

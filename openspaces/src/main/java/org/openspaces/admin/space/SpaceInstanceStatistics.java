@@ -105,6 +105,16 @@ public interface SpaceInstanceStatistics {
     long getExecuteCount();
 
     double getExecutePerSecond();
+    
+    /**
+     * @since 9.5
+     */
+    long getChangeCount();
+    
+    /**
+     * @since 9.5
+     */
+    double getChangePerSecond();
 
     /**
      * Remove happens when an entry is removed due to lease expiration or lease cancel.
