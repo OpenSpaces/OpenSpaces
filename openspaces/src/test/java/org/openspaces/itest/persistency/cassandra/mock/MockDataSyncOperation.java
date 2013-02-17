@@ -59,4 +59,18 @@ public class MockDataSyncOperation
         return true;
     }
 
+    @Override
+    public Object getId()
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public boolean supportsGetId()
+    {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
 }
