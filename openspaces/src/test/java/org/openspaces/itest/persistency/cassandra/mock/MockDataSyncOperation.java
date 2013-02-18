@@ -60,14 +60,14 @@ public class MockDataSyncOperation
     }
 
     @Override
-    public Object getId()
+    public Object getSpaceId()
     {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public boolean supportsGetId()
+    public boolean supportsGetSpaceId()
     {
         // TODO Auto-generated method stub
         return false;
