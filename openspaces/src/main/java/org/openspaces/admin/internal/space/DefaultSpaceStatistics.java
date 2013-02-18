@@ -48,10 +48,12 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
         }
     }
 
+    @Override
     public boolean isNA() {
         return stats == null || stats.length == 0 || stats[0].isNA();
     }
 
+    @Override
     public SpaceStatistics getPrevious() {
         return previous;
     }
@@ -60,14 +62,17 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
         this.previous = previous;
     }
 
+    @Override
     public int getSize() {
         return stats.length;
     }
 
+    @Override
     public long getTimestamp() {
         return this.timestamp;
     }
 
+    @Override
     public long getWriteCount() {
         long total = 0;
         for (SpaceInstanceStatistics stat : stats) {
@@ -78,6 +83,7 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
         return total;
     }
 
+    @Override
     public double getWritePerSecond() {
         double total = 0;
         for (SpaceInstanceStatistics stat : stats) {
@@ -88,6 +94,7 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
         return total;
     }
 
+    @Override
     public long getReadCount() {
         long total = 0;
         for (SpaceInstanceStatistics stat : stats) {
@@ -98,6 +105,7 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
         return total;
     }
 
+    @Override
     public double getReadPerSecond() {
         double total = 0;
         for (SpaceInstanceStatistics stat : stats) {
@@ -108,6 +116,7 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
         return total;
     }
 
+    @Override
     public long getTakeCount() {
         long total = 0;
         for (SpaceInstanceStatistics stat : stats) {
@@ -118,6 +127,7 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
         return total;
     }
 
+    @Override
     public double getTakePerSecond() {
         double total = 0;
         for (SpaceInstanceStatistics stat : stats) {
@@ -128,6 +138,7 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
         return total;
     }
 
+    @Override
     public long getNotifyRegistrationCount() {
         long total = 0;
         for (SpaceInstanceStatistics stat : stats) {
@@ -138,6 +149,7 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
         return total;
     }
 
+    @Override
     public double getNotifyRegistrationPerSecond() {
         double total = 0;
         for (SpaceInstanceStatistics stat : stats) {
@@ -148,6 +160,7 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
         return total;
     }
 
+    @Override
     public long getCleanCount() {
         long total = 0;
         for (SpaceInstanceStatistics stat : stats) {
@@ -158,6 +171,7 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
         return total;
     }
 
+    @Override
     public double getCleanPerSecond() {
         double total = 0;
         for (SpaceInstanceStatistics stat : stats) {
@@ -168,6 +182,7 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
         return total;
     }
 
+    @Override
     public long getUpdateCount() {
         long total = 0;
         for (SpaceInstanceStatistics stat : stats) {
@@ -178,6 +193,7 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
         return total;
     }
 
+    @Override
     public double getUpdatePerSecond() {
         double total = 0;
         for (SpaceInstanceStatistics stat : stats) {
@@ -188,6 +204,7 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
         return total;
     }
 
+    @Override
     public long getNotifyTriggerCount() {
         long total = 0;
         for (SpaceInstanceStatistics stat : stats) {
@@ -198,6 +215,7 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
         return total;
     }
 
+    @Override
     public double getNotifyTriggerPerSecond() {
         double total = 0;
         for (SpaceInstanceStatistics stat : stats) {
@@ -208,6 +226,7 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
         return total;
     }
 
+    @Override
     public long getNotifyAckCount() {
         long total = 0;
         for (SpaceInstanceStatistics stat : stats) {
@@ -218,6 +237,7 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
         return total;
     }
 
+    @Override
     public double getNotifyAckPerSecond() {
         double total = 0;
         for (SpaceInstanceStatistics stat : stats) {
@@ -228,6 +248,7 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
         return total;
     }
 
+    @Override
     public long getExecuteCount() {
         long total = 0;
         for (SpaceInstanceStatistics stat : stats) {
@@ -238,6 +259,7 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
         return total;
     }
 
+    @Override
     public double getExecutePerSecond() {
         double total = 0;
         for (SpaceInstanceStatistics stat : stats) {
@@ -248,6 +270,7 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
         return total;
     }
 
+    @Override
     public long getRemoveCount() {
         long total = 0;
         for (SpaceInstanceStatistics stat : stats) {
@@ -257,7 +280,8 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
         }
         return total;
     }
-
+    
+    @Override
     public double getRemovePerSecond() {
         double total = 0;
         for (SpaceInstanceStatistics stat : stats) {
@@ -267,6 +291,28 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
         }
         return total;
     }
+    
+    @Override
+    public long getChangeCount() {
+        long total = 0;
+        for (SpaceInstanceStatistics stat : stats) {
+            if (!stat.isNA()) {
+                total += stat.getChangeCount();
+            }
+        }
+        return total;
+    }
+
+    @Override
+    public double getChangePerSecond() {
+        double total = 0;
+        for (SpaceInstanceStatistics stat : stats) {
+            if (!stat.isNA()) {
+                total += stat.getChangePerSecond();
+            }
+        }
+        return total;
+    }    
     
     @Override
     public long getObjectCount() {

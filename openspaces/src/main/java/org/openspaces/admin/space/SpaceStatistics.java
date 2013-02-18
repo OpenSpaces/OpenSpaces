@@ -105,6 +105,16 @@ public interface SpaceStatistics {
     double getRemovePerSecond();
     
     /**
+    * @since 9.5.0
+    */
+    long getChangeCount();
+    
+    /**
+     * @since 9.5.0
+     */
+    double getChangePerSecond();    
+    
+    /**
      * @since 9.1.0
      * @return count of all the objects in this Space instance.
      */
