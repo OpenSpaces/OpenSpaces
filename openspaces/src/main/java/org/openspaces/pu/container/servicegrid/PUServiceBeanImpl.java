@@ -572,7 +572,9 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                 // add pu-common jar files
                 String gsLibOpt = System.getProperty(Locator.GS_LIB_OPTIONAL);
                 String gsPuCommon = System.getProperty("com.gs.pu-common", gsLibOpt + "pu-common");
-                libUrls.addAll(Arrays.asList(BootUtil.toURLs(new String[] {gsPuCommon, gsLibOpt + "security"})));
+                
+                final String gsLibOptSecurity = System.getProperty(Locator.GS_LIB_OPTIONAL_SECURITY, gsLibOpt + "security");
+                libUrls.addAll(Arrays.asList(BootUtil.toURLs(new String[] {gsPuCommon, gsLibOptSecurity})));
 
                 ((ServiceClassLoader) contextClassLoader).setSlashPath(deployPath.toURI().toURL());
                 ((ServiceClassLoader) contextClassLoader).setLibPath(libUrls.toArray(new URL[libUrls.size()]));
