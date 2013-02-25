@@ -28,6 +28,7 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.rmi.MarshalledObject;
 import java.rmi.RemoteException;
 import java.text.NumberFormat;
@@ -44,6 +45,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
 import net.jini.core.lookup.ServiceID;
@@ -502,7 +504,8 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         }
 
         final boolean disableManifestClassPathJars = Boolean.getBoolean("com.gs.pu.manifest.classpath.disable");
-        
+        final boolean disableManifestClassPathCommonPuJars = Boolean.getBoolean("com.gs.pu.manifest.classpath.common.disable");
+
         // this is used to inject the manifest jars to the webapp classloader (if exists)
         List<URL> manifestClassPathJars = new ArrayList<URL>();
         
@@ -519,12 +522,12 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             }
             
             if (!disableManifestClassPathJars) {
-                File manifestFile = new File(deployPath, "META-INF/MANIFEST.MF");
+                File manifestFile = new File(deployPath, JarFile.MANIFEST_NAME);
                 
                 if (manifestFile.isFile()) {
                     try {
                         InputStream manifestStream = new FileInputStream(manifestFile);
-                        manifestClassPathJars = getManifestClassPathJars(puName, libUrls, manifestStream);
+                        manifestClassPathJars = getManifestClassPathJars(puName, manifestStream);
                         libUrls.addAll(manifestClassPathJars);
                     } catch (IOException e) {
                         if (logger.isWarnEnabled()) {
@@ -576,6 +579,17 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                 final String gsLibOptSecurity = System.getProperty(Locator.GS_LIB_OPTIONAL_SECURITY, gsLibOpt + "security");
                 libUrls.addAll(Arrays.asList(BootUtil.toURLs(new String[] {gsPuCommon, gsLibOptSecurity})));
 
+                if (!disableManifestClassPathJars &&
+                    !disableManifestClassPathCommonPuJars) {
+                    URLClassLoader urlClassLoader = new URLClassLoader(BootUtil.toURLs(new String[] {gsPuCommon}), null /* parent */);
+                    InputStream puCommonManifestMF = urlClassLoader.getResourceAsStream(JarFile.MANIFEST_NAME);
+                    if (puCommonManifestMF != null) {
+                        List<URL> manifestClassPathComonPuJars = getManifestClassPathJars(puName, puCommonManifestMF);
+                        manifestClassPathJars.addAll(manifestClassPathComonPuJars);
+                        libUrls.addAll(manifestClassPathComonPuJars);
+                    }
+                }
+
                 ((ServiceClassLoader) contextClassLoader).setSlashPath(deployPath.toURI().toURL());
                 ((ServiceClassLoader) contextClassLoader).setLibPath(libUrls.toArray(new URL[libUrls.size()]));
                 if (logger.isDebugEnabled()) {
@@ -599,7 +613,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             if (!disableManifestClassPathJars) {
                 InputStream manifestStream = readManifestFromCodeServer(puName, puPath, codeserver, workLocation);
                 if (manifestStream != null) {
-                    manifestClassPathJars = getManifestClassPathJars(puName, libUrls, manifestStream);
+                    manifestClassPathJars = getManifestClassPathJars(puName, manifestStream);
                     libUrls.addAll(manifestClassPathJars);
                 }
             }
@@ -731,7 +745,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
     private InputStream readManifestFromCodeServer(String puName, String puPath, String codeserver, File workLocation) {
         try {
-            URL manifestURL = new URL(codeserver + puPath + "/META-INF/MANIFEST.MF");
+            URL manifestURL = new URL(codeserver + puPath + "/" + JarFile.MANIFEST_NAME);
             return manifestURL.openStream();
         } catch (IOException e) {
             if (logger.isDebugEnabled()) {
@@ -741,7 +755,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         }
     }
 
-    private List<URL> getManifestClassPathJars(String puName, List<URL> libUrls, InputStream manifestStream) {
+    private List<URL> getManifestClassPathJars(String puName, InputStream manifestStream) {
         List<URL> exportedManifestUrls = new ArrayList<URL>();
         try {
             
@@ -809,7 +823,6 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                     }
                     
                     URL urlToAdd = file.toURI().toURL();
-                    libUrls.add(urlToAdd);
                     exportedManifestUrls.add(urlToAdd);
                 }
             }
