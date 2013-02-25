@@ -12,6 +12,12 @@
 	      <url>http://maven-repository.openspaces.org</url>
 	    </repository>
 	</repositories>
+	<pluginRepositories>
+		<pluginRepository>
+			<id>org.openspaces</id>
+			<url>http://maven-repository.openspaces.org</url>
+		</pluginRepository>
+	</pluginRepositories>
 	<properties>
 		<gsVersion>${pluginVersion}</gsVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
