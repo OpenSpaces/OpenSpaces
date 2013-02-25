@@ -271,7 +271,7 @@ implements AutoScalingSlaEnforcementEndpointAware {
 
         // no need to call AbstractCapacityScaleStrategyBean#enforePlannedCapacity if no capacity change is needed.
         boolean planChanged = setPlannedCapacity(new CapacityRequirementsPerZonesConfig(newPlanned));
-
+        
         if (pendingEnforcePlannedCapacityException != null) {
             // throw pending exception of previous manual scale capacity.
             // otherwise it could be lost when calling it again.
@@ -282,6 +282,8 @@ implements AutoScalingSlaEnforcementEndpointAware {
             // exceptions during autoscaling sla enforcement per zone
             throw pendingAutoscaleInProgressExceptions;
         }
+        
+        capacityPlanningCompletedEvent();
         
         if (planChanged) {
             // enforce new capacity requirements as soon as possible.
@@ -354,7 +356,6 @@ implements AutoScalingSlaEnforcementEndpointAware {
             capacityPlanningInProgressEvent(e, zones);
             throw e;
         }
-        capacityPlanningCompletedEvent(zones);
     }
 
     private void validateRulesConfig() {

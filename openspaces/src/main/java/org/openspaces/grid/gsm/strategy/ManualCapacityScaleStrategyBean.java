@@ -35,8 +35,9 @@ public class ManualCapacityScaleStrategyBean extends AbstractCapacityScaleStrate
         super.afterPropertiesSet();
         
         ManualCapacityScaleConfig manualCapacityScaleConfig = getConfig();
-        setPlannedCapacity(manualCapacityScaleConfig);
-        setScaleStrategyConfig(manualCapacityScaleConfig);
+        super.setPlannedCapacity(manualCapacityScaleConfig);
+        super.capacityPlanningCompletedEvent();
+        super.setScaleStrategyConfig(manualCapacityScaleConfig);
         
         if (getLogger().isDebugEnabled()) {
             getLogger().debug("isGridServiceAgentZonesAware="+isGridServiceAgentZonesAware());
@@ -45,7 +46,7 @@ public class ManualCapacityScaleStrategyBean extends AbstractCapacityScaleStrate
 
     @Override
     public void enforceSla() throws SlaEnforcementInProgressException {
-        super.enforcePlannedCapacity();
+    	super.enforcePlannedCapacity();
     }
     
     @Override

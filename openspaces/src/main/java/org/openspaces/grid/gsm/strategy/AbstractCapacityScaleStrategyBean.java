@@ -238,8 +238,6 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
             throw new IllegalStateException("scaleStrategy cannot be null");
         }
         
-        super.capacityPlanningCompletedEvent(null);
-        
         CapacityRequirementsPerAgent totalAllocatedCapacity = new CapacityRequirementsPerAgent();
         PerZonesMachinesSlaEnforcementInProgressException pendingMachinesExceptions = new PerZonesMachinesSlaEnforcementInProgressException(getProcessingUnit());
         PerZonesGridServiceAgentSlaEnforcementInProgressException pendingAgentsExceptions = new PerZonesGridServiceAgentSlaEnforcementInProgressException(getProcessingUnit());

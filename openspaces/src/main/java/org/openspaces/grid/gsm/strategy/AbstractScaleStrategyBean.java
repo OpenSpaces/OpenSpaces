@@ -547,7 +547,8 @@ public abstract class AbstractScaleStrategyBean implements
     }
     
 
-    protected void capacityPlanningCompletedEvent(ZonesConfig zones) {
+    protected void capacityPlanningCompletedEvent() {
+    	final ZonesConfig zones = null;
         capacityPlanningEventState.enqueuProvisioningCompletedEvent(zones);
     }
 

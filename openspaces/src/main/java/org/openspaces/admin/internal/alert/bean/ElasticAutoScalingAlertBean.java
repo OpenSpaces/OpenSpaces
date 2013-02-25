@@ -73,9 +73,11 @@ public class ElasticAutoScalingAlertBean extends AbstractElasticProcessingUnitAl
      */
     @Override
     public void elasticAutoScalingProgressChanged(ElasticAutoScalingProgressChangedEvent event) {
-        for (Alert baseAlert : createResolvedAlerts(event)) {
-            ElasticAutoScalingAlert alert = new ElasticAutoScalingAlert(baseAlert);
-            super.raiseAlert(alert);
+        if (event.isComplete()) {
+	    	for (Alert baseAlert : createResolvedAlerts(event)) {
+	            ElasticAutoScalingAlert alert = new ElasticAutoScalingAlert(baseAlert);
+	            super.raiseAlert(alert);
+	        }
         }
     }
 }

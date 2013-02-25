@@ -32,6 +32,7 @@ public class ManualCapacityPerZonesScaleStrategyBean extends AbstractCapacitySca
         ManualCapacityPerZonesScaleConfig manualCapacityPerZonesScaleConfig = getConfig();
         
         super.setPlannedCapacity(manualCapacityPerZonesScaleConfig.getCapacityRequirementsPerZonesConfig());
+        super.capacityPlanningCompletedEvent();
         super.setScaleStrategyConfig(manualCapacityPerZonesScaleConfig);
         
         if (getLogger().isDebugEnabled()) {
@@ -42,7 +43,7 @@ public class ManualCapacityPerZonesScaleStrategyBean extends AbstractCapacitySca
     
     @Override
     public void enforceSla() throws SlaEnforcementInProgressException {
-        super.enforcePlannedCapacity();
+    	super.enforcePlannedCapacity();
     }
 
     @Override
