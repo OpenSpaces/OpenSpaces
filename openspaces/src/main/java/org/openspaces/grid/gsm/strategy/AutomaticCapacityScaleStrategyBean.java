@@ -356,6 +356,7 @@ implements AutoScalingSlaEnforcementEndpointAware {
             capacityPlanningInProgressEvent(e, zones);
             throw e;
         }
+        capacityPlanningCompletedEvent(zones);
     }
 
     private void validateRulesConfig() {
