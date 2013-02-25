@@ -552,6 +552,11 @@ public abstract class AbstractScaleStrategyBean implements
         capacityPlanningEventState.enqueuProvisioningCompletedEvent(zones);
     }
 
+    protected void capacityPlanningCompletedEvent(ZonesConfig zones) {
+        capacityPlanningEventState.enqueuProvisioningCompletedEvent(zones);
+    }
+
+
     protected void capacityPlanningInProgressEvent(AutoScalingSlaEnforcementInProgressException e, ZonesConfig zones) {
         capacityPlanningEventState.enqueuProvisioningInProgressEvent(e, zones);
     }
