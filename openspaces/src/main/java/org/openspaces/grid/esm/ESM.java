@@ -17,6 +17,7 @@
  ******************************************************************************/
 package org.openspaces.grid.esm;
 
+import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Map;
 
@@ -36,4 +37,6 @@ public interface ESM extends com.gigaspaces.grid.esm.ESM {
     ScaleStrategyConfig getProcessingUnitScaleStrategyConfig(String processingUnitName) throws RemoteException;
     
     Events getScaleStrategyEvents(final long cursor, final int maxNumberOfEvents) throws RemoteException;
+    
+    Remote getStorageApi(final String processingUnitName) throws RemoteException;
 }

@@ -18,6 +18,7 @@
 package org.openspaces.grid.esm;
 
 import java.io.IOException;
+import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -32,6 +33,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import net.jini.export.Exporter;
 
 import org.jini.rio.boot.BootUtil;
 import org.jini.rio.core.ClassBundle;
@@ -64,6 +67,8 @@ import org.openspaces.grid.gsm.containers.ContainersSlaEnforcement;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcement;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioningAdapterFactory;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcement;
+import org.openspaces.grid.gsm.strategy.AbstractCapacityScaleStrategyBean;
+import org.openspaces.grid.gsm.strategy.AbstractScaleStrategyBean;
 import org.openspaces.grid.gsm.strategy.ScaleStrategyBean;
 import org.openspaces.grid.gsm.strategy.UndeployScaleStrategyBean;
 
@@ -82,6 +87,7 @@ import com.gigaspaces.internal.os.OSStatistics;
 import com.gigaspaces.log.LogEntries;
 import com.gigaspaces.log.LogEntryMatcher;
 import com.gigaspaces.log.LogProcessType;
+import com.gigaspaces.lrmi.GenericExporter;
 import com.gigaspaces.lrmi.LRMIMonitoringDetails;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOInfoHelper;
@@ -580,6 +586,29 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
         
         ScaleBeanServer undeployedBeanServer = scaleBeanServerPerProcessingUnit.remove(pu);
         if (undeployedBeanServer != null) {
+        	ScaleStrategyBean scaleStrategyBean = getScaleStrategyBean(pu.getName());
+        	Remote cloudStorage = null;
+            if (scaleStrategyBean != null && scaleStrategyBean instanceof AbstractCapacityScaleStrategyBean) {
+            	try {
+            		cloudStorage = ((AbstractScaleStrategyBean)scaleStrategyBean).getStorageApi();
+            		if (cloudStorage != null) {
+            			if (logger.isLoggable(Level.FINE)) {
+            				logger.fine("Unexporting storage api of processing unit " + pu.getName() + ". hasCode=" + cloudStorage.hashCode());
+            			}
+            			Exporter exporter = getExporter();
+            			if (exporter instanceof GenericExporter) {
+            				((GenericExporter)exporter).unexport(cloudStorage);
+            			} else {
+            				throw new IllegalStateException("exporter must be an instance of GenericExporter");
+            			}
+            		}
+            	}
+            	catch (Exception e) {
+            		if (cloudStorage != null) {
+            			logger.log(Level.WARNING, "Failed unexporting storage api instance with hashCode=" + cloudStorage.hashCode() + " : " + e.getMessage(), e);
+            		}
+            	}
+            }
             //TODO: Check isSlaMet() and handle this case ?!@
             undeployedBeanServer.destroy();
         }
@@ -756,4 +785,30 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
         });
     }
 
+    @Override
+    public Remote getStorageApi(final String processingUnitName) throws RemoteException {
+    	return submitAndWait(new Callable<Remote>() {
+            @Override
+            public Remote call() throws Exception {
+                ScaleStrategyBean scaleStrategyBean = getScaleStrategyBean(processingUnitName);
+                Remote cloudStorage = null;
+                if (scaleStrategyBean != null && scaleStrategyBean instanceof AbstractCapacityScaleStrategyBean) {
+                	try {
+                		cloudStorage = ((AbstractCapacityScaleStrategyBean)scaleStrategyBean).getStorageApi();
+                		if (cloudStorage != null) {
+                			if (logger.isLoggable(Level.FINE)) {
+                				logger.fine("Exporting storage api of processing unit " + processingUnitName + ". hasCode=" + cloudStorage.hashCode());
+                			}
+                			return getExporter().export(cloudStorage);  
+                		}
+                	} catch (Exception e) {
+                		if (cloudStorage != null) {
+                			logger.log(Level.WARNING, "Failed exporting cloud storage api instance with hashCode=" + cloudStorage.hashCode() + " : " + e.getMessage() , e);
+                		}
+                	}
+                }
+                return null;
+            }
+        });
+   }
 }

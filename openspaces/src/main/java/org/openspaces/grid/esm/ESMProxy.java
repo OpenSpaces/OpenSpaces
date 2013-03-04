@@ -18,6 +18,7 @@
 package org.openspaces.grid.esm;
 
 import java.io.Serializable;
+import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Map;
 
@@ -102,4 +103,8 @@ public class ESMProxy extends AbstractProxy implements ESM, Serializable {
         return esmServer.getScaleStrategyEvents(cursor, maxNumberOfEvents);
     }
 
+	@Override
+	public Remote getStorageApi(String processingUnitName) throws RemoteException {
+		return esmServer.getStorageApi(processingUnitName);
+	}
 }

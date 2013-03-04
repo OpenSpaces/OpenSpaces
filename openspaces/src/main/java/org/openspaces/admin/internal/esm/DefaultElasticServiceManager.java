@@ -18,6 +18,7 @@
 package org.openspaces.admin.internal.esm;
 
 import java.io.IOException;
+import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -265,5 +266,15 @@ public class DefaultElasticServiceManager extends AbstractAgentGridComponent imp
             }
         }
     }
+
+	@Override
+	public Remote getStorageApi(String processingUnitName) {
+	       try {
+	            return esm.getStorageApi(processingUnitName);
+	        }
+	        catch (RemoteException e) {
+	            throw new AdminException("Failed to get storage Api for processing unit " + processingUnitName,e);
+	        }
+	}
     
 }

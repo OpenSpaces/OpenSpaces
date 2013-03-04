@@ -17,6 +17,8 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.strategy;
 
+import java.lang.reflect.Method;
+import java.rmi.Remote;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -65,7 +67,9 @@ import org.openspaces.grid.gsm.machines.exceptions.SomeProcessingUnitsHaveNotCom
 import org.openspaces.grid.gsm.machines.exceptions.UndeployInProgressException;
 import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIsolation;
 import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIsolationAware;
+import org.openspaces.grid.gsm.machines.plugins.ElasticMachineProvisioning;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
+import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioningAdapter;
 import org.openspaces.grid.gsm.rebalancing.exceptions.RebalancingSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.sla.exceptions.DisconnectedFromLookupServiceException;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementInProgressException;
@@ -80,7 +84,11 @@ public abstract class AbstractScaleStrategyBean implements
     Bean,
     Runnable{
     
-    private static final int MAX_NUMBER_OF_MACHINES = 1000; // a very large number representing max number of machines per pu, but that would not overflow when multiplied by container capacity in MB
+    private static final String CLOUDIFY_ADAPTER_CLASS = "org.cloudifysource.esc.driver.provisioning.ElasticMachineProvisioningCloudifyAdapter";
+
+	private static final String GET_STORAGE_IMPL = "getStorageImpl";
+
+	private static final int MAX_NUMBER_OF_MACHINES = 1000; // a very large number representing max number of machines per pu, but that would not overflow when multiplied by container capacity in MB
     
     // injected 
     private InternalAdmin admin;
@@ -565,5 +573,19 @@ public abstract class AbstractScaleStrategyBean implements
             ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent event) {
         
         capacityPlanningEventState.enqueuProvisioningInProgressEvent(event);
+    }
+    
+    public Remote getStorageApi() throws Exception {
+        NonBlockingElasticMachineProvisioning nonBlockingElasticMachineProvisioning = getMachineProvisioning();
+        if (nonBlockingElasticMachineProvisioning instanceof NonBlockingElasticMachineProvisioningAdapter) {
+            ElasticMachineProvisioning emp = ((NonBlockingElasticMachineProvisioningAdapter)nonBlockingElasticMachineProvisioning).getElasticMachineProvisioning();
+            if (emp.getClass().getName().equals(CLOUDIFY_ADAPTER_CLASS)) {    
+            	Method method = emp.getClass().getDeclaredMethod(GET_STORAGE_IMPL);
+            	return (Remote)method.invoke(emp);
+            } else {
+            	throw new IllegalStateException("ElasticMachineProvisioning instance (" + emp + ") is not an instance of " + CLOUDIFY_ADAPTER_CLASS);
+            }
+        }
+        throw new IllegalStateException("NonBlockingElasticMachineProvisioning instance (" + nonBlockingElasticMachineProvisioning + ") is not an instance of NonBlockingElasticMachineProvisioningAdapter");
     }
 }

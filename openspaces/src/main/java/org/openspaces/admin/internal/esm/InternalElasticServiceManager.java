@@ -17,6 +17,7 @@
  ******************************************************************************/
 package org.openspaces.admin.internal.esm;
 
+import java.rmi.Remote;
 import java.util.Map;
 
 import net.jini.core.lookup.ServiceID;
@@ -74,5 +75,13 @@ public interface InternalElasticServiceManager extends ElasticServiceManager, In
      * @since 8.0.6
      */
     void processElasticScaleStrategyEvent(ElasticProcessingUnitEvent event);   
-    
+
+    /**
+     * expose cloud storage API
+     * @return an instance of a class implementing specific cloud storage API's.
+     * @param processingUnitName - the processing unit name the cloud driver belongs to. 
+     * @since 9.5.0
+     * @author elip
+     */
+    Remote getStorageApi(final String processingUnitName);
 }

@@ -432,5 +432,9 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
             ElasticGridServiceAgentProvisioningProgressChangedEventListener agentEventListener) {
         machineProvisioning.setElasticGridServiceAgentProvisioningProgressEventListener(agentEventListener);
     }
+
+    public ElasticMachineProvisioning getElasticMachineProvisioning() {
+        return machineProvisioning;
+    }
     
 }
