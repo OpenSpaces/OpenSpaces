@@ -85,8 +85,8 @@ import org.openspaces.grid.gsm.machines.plugins.exceptions.ElasticMachineProvisi
  */
 class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEndpoint {
 
-    private static final int START_AGENT_TIMEOUT_SECONDS = 30*60;
-    private static final long STOP_AGENT_TIMEOUT_SECONDS = 10*60;
+    private static final long START_AGENT_TIMEOUT_SECONDS = Long.getLong("org.openspaces.grid.start-agent-timeout-seconds", 30*60L);
+    private static final long STOP_AGENT_TIMEOUT_SECONDS = Long.getLong("org.openspaces.grid.stop-agent-timeout-seconds", 10*60L);
 
     private final ProcessingUnit pu;
     private final Log logger;
