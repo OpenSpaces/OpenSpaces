@@ -157,7 +157,11 @@ public class ESMImplInitializer {
 
     private void createAdminIfNull() {
         if (admin == null) {
-            admin = (InternalAdmin) (new InternalAdminFactory().singleThreadedEventListeners().createAdmin());
+            admin = (InternalAdmin) 
+            		new InternalAdminFactory()
+            		.singleThreadedEventListeners()
+            		.useDaemonThreads(true)
+            		.createAdmin();
         }
     }
 
