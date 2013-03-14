@@ -33,8 +33,12 @@ import org.springframework.beans.factory.InitializingBean;
 public class CassandraSpaceDataSourceFactoryBean implements 
     FactoryBean<CassandraSpaceDataSource>, InitializingBean, DisposableBean {
 
-    private final CassandraSpaceDataSourceConfigurer configurer = new CassandraSpaceDataSourceConfigurer();
-    
+    private final CassandraSpaceDataSourceConfigurer configurer = getConfigurer();
+
+    protected CassandraSpaceDataSourceConfigurer getConfigurer() {
+        return new CassandraSpaceDataSourceConfigurer();
+    }
+
     private CassandraSpaceDataSource cassandraSpaceDataSource;
 
     /**

@@ -26,8 +26,12 @@ import org.springframework.beans.factory.InitializingBean;
 public class HectorCassandraClientFactoryBean implements
     FactoryBean<HectorCassandraClient>, InitializingBean, DisposableBean {
 
-    private final HectorCassandraClientConfigurer configurer = new HectorCassandraClientConfigurer();
-    
+    private final HectorCassandraClientConfigurer configurer = getConfigurer();
+
+    protected HectorCassandraClientConfigurer getConfigurer() {
+        return new HectorCassandraClientConfigurer();
+    }
+
     private HectorCassandraClient hectorCassandraClient;
     
     /**

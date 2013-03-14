@@ -27,8 +27,12 @@ import org.springframework.beans.factory.InitializingBean;
 public class CriteriaHibernateSpaceDataSourceFactoryBean implements FactoryBean<CriteriaHibernateSpaceDataSource>, InitializingBean {
 
     
-    private final CriteriaHibernateSpaceDataSourceConfigurer dataSourceConfigurer = new CriteriaHibernateSpaceDataSourceConfigurer();
-    
+    private final CriteriaHibernateSpaceDataSourceConfigurer dataSourceConfigurer = getConfigurer();
+
+    protected CriteriaHibernateSpaceDataSourceConfigurer getConfigurer() {
+        return new CriteriaHibernateSpaceDataSourceConfigurer();
+    }
+
     private CriteriaHibernateSpaceDataSource hibernateSpaceDataSource;
     
     /**

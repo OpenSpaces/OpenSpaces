@@ -33,9 +33,12 @@ import org.springframework.beans.factory.InitializingBean;
 public class CassandraSpaceSynchronizationEndpointFactoryBean implements 
     FactoryBean<CassandraSpaceSynchronizationEndpoint>, InitializingBean {
 
-    private final CassandraSpaceSynchronizationEndpointConfigurer configurer =
-            new CassandraSpaceSynchronizationEndpointConfigurer();
-    
+    private final CassandraSpaceSynchronizationEndpointConfigurer configurer = getConfigurer();
+
+    protected CassandraSpaceSynchronizationEndpointConfigurer getConfigurer() {
+        return new CassandraSpaceSynchronizationEndpointConfigurer();
+    }
+
     private CassandraSpaceSynchronizationEndpoint cassandraSynchronizationEndpointInterceptor;
     
     /**
