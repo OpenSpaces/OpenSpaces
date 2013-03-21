@@ -1084,12 +1084,17 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         if (newAgent == null) {
             throw new IllegalStateException("Machine provisioning future is done without exception, but returned a null agent");
         }
-        GSAReservationId reservationId = ((InternalGridServiceAgent)newAgent).getReservationId();
-        if (reservationId == null) {
+        
+        GSAReservationId actualReservationId = ((InternalGridServiceAgent)newAgent).getReservationId();
+        if (actualReservationId == null) {
             throw new IllegalStateException("Machine provisioning future is done without exception, but returned a null reservationId from the agent");
         }
-        if (!reservationId.equals(futureAgent.getReservationId())) {
-            throw new IllegalStateException("Machine provisioning future is done without exception, but returned an agent with the wrong reservationId");
+        GSAReservationId expectedReservationId = futureAgent.getReservationId();
+        if (!actualReservationId.equals(expectedReservationId)) {
+        	final String ipAddress = newAgent.getMachine().getHostAddress();
+            throw new IllegalStateException(
+            		"Machine provisioning future is done without exception, but returned an agent(ip="+ipAddress+") "+
+            		"with the wrong reservationId: expected="+expectedReservationId+ " actual="+actualReservationId);
         }
         
         if (!newAgent.isDiscovered()) {
