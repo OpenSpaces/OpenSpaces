@@ -17,21 +17,29 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.machines.plugins;
 
+
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 
 import com.gigaspaces.internal.utils.concurrent.GSThreadFactory;
+import com.j_spaces.kernel.SystemProperties;
+import com.j_spaces.kernel.threadpool.DynamicExecutors;
 
 public class NonBlockingElasticMachineProvisioningAdapterFactory {
 
-    private ExecutorService service = Executors
-    .newCachedThreadPool(new GSThreadFactory(this.getClass().getName(),true));
+	private static final int MIN_THREADS = 1;
+	private static final int MAX_THREADS = Integer.getInteger(SystemProperties.ESM_MACHINE_PROVISIONING_MAX_THREADS, 64);
+	private static final long KEEP_ALIVE_TIME = TimeUnit.SECONDS.toMillis(60);
+
+	private final ThreadFactory threadFactory = new GSThreadFactory(this.getClass().getName(), /*daemonThreads=*/ true);
+    private ExecutorService service = DynamicExecutors.newScalingThreadPool(MIN_THREADS, MAX_THREADS, KEEP_ALIVE_TIME, threadFactory);
    
     private ScheduledThreadPoolExecutor scheduledExecutorService = 
-        (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(
-                1,
-                new GSThreadFactory(this.getClass().getName(),true));
+        (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(1, threadFactory);
     
     public NonBlockingElasticMachineProvisioningAdapter create(ElasticMachineProvisioning machineProvisioning) {
         return new NonBlockingElasticMachineProvisioningAdapter(machineProvisioning, service, scheduledExecutorService);
