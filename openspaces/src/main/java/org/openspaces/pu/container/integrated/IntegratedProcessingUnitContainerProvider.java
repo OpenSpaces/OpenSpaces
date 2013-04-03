@@ -18,7 +18,6 @@ package org.openspaces.pu.container.integrated;
 
 import java.io.File;
 import java.io.IOException;
-import java.rmi.MarshalledObject;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,9 +40,11 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
+import com.gigaspaces.security.directory.CredentialsProvider;
+import com.gigaspaces.security.directory.CredentialsProviderHelper;
+import com.gigaspaces.security.directory.DefaultCredentialsProvider;
 import com.gigaspaces.security.directory.User;
 import com.gigaspaces.security.directory.UserDetails;
-import com.j_spaces.core.Constants;
 import com.j_spaces.core.client.SpaceURL;
 
 /**
@@ -84,6 +85,8 @@ public class IntegratedProcessingUnitContainerProvider implements ApplicationCon
     private ClassLoader classLoader;
 
     private UserDetails userDetails;
+    
+    private CredentialsProvider credentialsProvider;
 
     private Boolean secured;
 
@@ -136,12 +139,22 @@ public class IntegratedProcessingUnitContainerProvider implements ApplicationCon
         this.configResources.add(resource);
     }
 
+    @Deprecated
     public void setUserDetails(UserDetails userDetails) {
         this.userDetails = userDetails;
     }
 
+    @Deprecated
     public void setUserDetails(String username, String password) {
         this.userDetails = new User(username, password);
+    }
+    
+    public void setCredentials(String username, String password) {
+        this.credentialsProvider = new DefaultCredentialsProvider(username, password);
+    }
+    
+    public void setCredentialsProvider(CredentialsProvider credentialsProvider) {
+        this.credentialsProvider = credentialsProvider;
     }
 
     public void setSecured(Boolean secured) {
@@ -244,9 +257,9 @@ public class IntegratedProcessingUnitContainerProvider implements ApplicationCon
         }
 
         // handle security
-        if (userDetails != null) {
+        if (userDetails != null || credentialsProvider != null) {
             try {
-                beanLevelProperties.getContextProperties().put(Constants.Security.USER_DETAILS, new MarshalledObject(userDetails));
+                CredentialsProviderHelper.appendMarshalledCredentials(beanLevelProperties.getContextProperties(), userDetails, credentialsProvider);
             } catch (IOException e) {
                 throw new CannotCreateContainerException("Failed to marhsall user details", e);
             }

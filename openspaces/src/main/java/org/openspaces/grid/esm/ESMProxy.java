@@ -29,7 +29,7 @@ import org.jini.rio.resources.servicecore.AbstractProxy;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
 
 import com.gigaspaces.security.SecurityException;
-import com.gigaspaces.security.directory.UserDetails;
+import com.gigaspaces.security.directory.CredentialsProvider;
 import com.gigaspaces.security.service.SecurityContext;
 
 public class ESMProxy extends AbstractProxy implements ESM, Serializable {
@@ -70,8 +70,8 @@ public class ESMProxy extends AbstractProxy implements ESM, Serializable {
         return esmServer.isServiceSecured();
     }
 
-    public SecurityContext login(UserDetails userDetails) throws SecurityException, RemoteException {
-        return esmServer.login( userDetails );
+    public SecurityContext login(CredentialsProvider credentialsProvider) throws SecurityException, RemoteException {
+        return esmServer.login(credentialsProvider);
     }
 
     public void setProcessingUnitElasticProperties(String processingUnitName, Map<String, String> properties)

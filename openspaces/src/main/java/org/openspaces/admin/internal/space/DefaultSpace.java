@@ -78,6 +78,7 @@ import com.gigaspaces.cluster.activeelection.SpaceMode;
 import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
 import com.gigaspaces.internal.cluster.node.impl.gateway.GatewayPolicy;
 import com.gigaspaces.internal.version.PlatformLogicalVersion;
+import com.gigaspaces.security.service.SecuredService;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.ISpaceState;
 import com.j_spaces.core.admin.IRemoteJSpaceAdmin;
@@ -491,9 +492,7 @@ public class DefaultSpace implements InternalSpace {
             
             try {
                 space = ((ISpaceProxy) ((InternalSpaceInstance) firstInstance).getIJSpace()).getClusteredSpace();
-                if (space.isSecured()) {
-                    ((ISpaceProxy)space).login(admin.getUserDetails());
-                }
+                admin.login((SecuredService)space);
             } catch (AdminException e) {
                 throw e;
             } catch (Exception e) {

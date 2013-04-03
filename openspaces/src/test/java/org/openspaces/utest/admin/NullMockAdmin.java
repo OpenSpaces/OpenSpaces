@@ -17,6 +17,7 @@
  ******************************************************************************/
 package org.openspaces.utest.admin;
 
+import java.rmi.RemoteException;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ScheduledFuture;
@@ -63,7 +64,8 @@ import org.openspaces.security.AdminFilter;
 import com.gigaspaces.internal.jvm.JVMDetails;
 import com.gigaspaces.internal.os.OSDetails;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
-import com.gigaspaces.security.directory.UserDetails;
+import com.gigaspaces.security.SecurityException;
+import com.gigaspaces.security.service.SecuredService;
 
 public class NullMockAdmin implements InternalAdmin {
 
@@ -305,10 +307,10 @@ public class NullMockAdmin implements InternalAdmin {
         // TODO Auto-generated method stub
         return null;
     }
-
-    public UserDetails getUserDetails() {
-        // TODO Auto-generated method stub
-        return null;
+        
+    @Override
+    public void login(SecuredService service) throws SecurityException, RemoteException {
+        // TODO Auto-generated method stub        
     }
 
     public void pushEvent(Object listener, Runnable notifier) {

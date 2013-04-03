@@ -17,6 +17,7 @@
  ******************************************************************************/
 package org.openspaces.admin.internal.admin;
 
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -181,7 +182,9 @@ import com.gigaspaces.internal.os.OSDetails;
 import com.gigaspaces.internal.utils.StringUtils;
 import com.gigaspaces.internal.utils.concurrent.GSThreadFactory;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
-import com.gigaspaces.security.directory.UserDetails;
+import com.gigaspaces.security.SecurityException;
+import com.gigaspaces.security.directory.CredentialsProvider;
+import com.gigaspaces.security.service.SecuredService;
 
 /**
  * @author kimchy
@@ -255,7 +258,7 @@ public class DefaultAdmin implements InternalAdmin {
     private final AtomicBoolean closeStarted = new AtomicBoolean(false);
     private final AtomicBoolean closeEnded = new AtomicBoolean(false);
 
-    private volatile UserDetails userDetails;
+    private volatile CredentialsProvider credentialsProvider;
 
     private long defaultTimeout = Long.MAX_VALUE;
 
@@ -326,12 +329,13 @@ public class DefaultAdmin implements InternalAdmin {
     }
 
     @Override
-    public UserDetails getUserDetails() {
-        return userDetails;
+    public void login(SecuredService service) throws SecurityException, RemoteException {
+        if (service.isServiceSecured())
+            service.login(credentialsProvider);
     }
 
-    public void setUserDetails(UserDetails userDetails) {
-        this.userDetails = userDetails;
+    public void setCredentialsProvider(CredentialsProvider credentialsProvider) {
+        this.credentialsProvider = credentialsProvider;
     }
 
     public void addGroup(String group) {

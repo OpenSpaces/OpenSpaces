@@ -19,6 +19,7 @@ package org.openspaces.pu.container.servicegrid.deploy;
 
 import com.gigaspaces.grid.gsm.GSM;
 import com.gigaspaces.logger.GSLogConfigLoader;
+import com.gigaspaces.security.directory.CredentialsProvider;
 import com.gigaspaces.security.directory.UserDetails;
 import org.jini.rio.core.OperationalString;
 import org.jini.rio.core.ServiceProvisionListener;
@@ -68,12 +69,22 @@ public class MemcachedDeploy {
         deploy.setSecured(secured);
     }
 
+    @Deprecated
     public void setUserDetails(UserDetails userDetails) {
         deploy.setUserDetails(userDetails);
     }
 
+    @Deprecated
     public void setUserDetails(String userName, String password) {
         deploy.setUserDetails(userName, password);
+    }
+
+    public void setCredentials(String userName, String password) {
+        deploy.setCredentials(userName, password);
+    }
+
+    public void setCredentialsProvider(CredentialsProvider credentialsProvider) {
+        deploy.setCredentialsProvider(credentialsProvider);
     }
 
     public void setLookupTimeout(int lookupTimeout) {

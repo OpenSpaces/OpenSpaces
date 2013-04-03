@@ -335,9 +335,7 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
         if (this.ijspace == null) {
             try {
                 setIJSpace((ISpaceProxy) puService.getSpaceDirect(serviceID));
-                if (this.ijspace.isSecured()) {
-                    this.ijspace.login(admin.getUserDetails());
-                }
+                admin.login(ijspace);
             } catch (RemoteException e) {
                 throw new AdminException("Failed to fetch space", e);
             }

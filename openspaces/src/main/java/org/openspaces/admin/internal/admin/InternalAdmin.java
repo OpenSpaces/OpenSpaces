@@ -17,6 +17,7 @@
  ******************************************************************************/
 package org.openspaces.admin.internal.admin;
 
+import java.rmi.RemoteException;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -36,7 +37,8 @@ import org.openspaces.security.AdminFilter;
 import com.gigaspaces.internal.jvm.JVMDetails;
 import com.gigaspaces.internal.os.OSDetails;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
-import com.gigaspaces.security.directory.UserDetails;
+import com.gigaspaces.security.SecurityException;
+import com.gigaspaces.security.service.SecuredService;
 
 /**
  * @author kimchy
@@ -54,7 +56,7 @@ public interface InternalAdmin extends Admin {
     long getDefaultTimeout();
     TimeUnit getDefaultTimeoutTimeUnit();
 
-    UserDetails getUserDetails();
+    void login(SecuredService service) throws SecurityException, RemoteException;
     
     AdminFilter getAdminFilter();
 

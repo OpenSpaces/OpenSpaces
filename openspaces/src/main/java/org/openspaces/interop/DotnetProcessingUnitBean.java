@@ -17,7 +17,6 @@
  ******************************************************************************/
 package org.openspaces.interop;
 
-import java.rmi.MarshalledObject;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
@@ -50,6 +49,8 @@ import org.openspaces.remoting.RemotingServiceMonitors.RemoteServiceStats;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 
+import com.gigaspaces.security.directory.CredentialsProvider;
+import com.gigaspaces.security.directory.CredentialsProviderHelper;
 import com.gigaspaces.security.directory.UserDetails;
 import com.gigaspaces.serialization.pbs.commands.processingunit.PUDetailsHolder;
 import com.gigaspaces.serialization.pbs.commands.processingunit.ServicesDetails;
@@ -150,12 +151,12 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
             
             this.customProperties.putAll(beanLevelProperties.getMergedBeanProperties("space"));
             //Insert security details if needed
-            MarshalledObject marshalledUserDetails = (MarshalledObject)customProperties.remove(Constants.Security.USER_DETAILS);
-            if (marshalledUserDetails != null)
+            CredentialsProvider credentialsProvider = CredentialsProviderHelper.extractMarshalledCredentials(customProperties, true);
+            if (credentialsProvider != null)
             {
-                UserDetails userDetails = (UserDetails) marshalledUserDetails.get();
-                this.customProperties.put(Constants.Security.USERNAME, userDetails.getUsername());
-                this.customProperties.put(Constants.Security.PASSWORD, userDetails.getPassword());
+                UserDetails credentials = credentialsProvider.getUserDetails();
+                this.customProperties.put(Constants.Security.USERNAME, credentials.getUsername());
+                this.customProperties.put(Constants.Security.PASSWORD, credentials.getPassword());
             }
         }
         //Create identifier for this bean

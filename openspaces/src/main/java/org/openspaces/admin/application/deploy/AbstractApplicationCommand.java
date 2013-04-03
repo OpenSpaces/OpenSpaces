@@ -26,6 +26,7 @@ import org.openspaces.admin.AdminFactory;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.pu.container.support.CommandLineParser;
 
+import com.gigaspaces.security.directory.CredentialsProvider;
 import com.gigaspaces.security.directory.User;
 import com.gigaspaces.security.directory.UserDetails;
 
@@ -40,14 +41,14 @@ public abstract class AbstractApplicationCommand {
 
         private String[] groups;
 
-        private UserDetails adminUser;
+        private CredentialsProvider credentialsProvider;
 
         public Boolean getSecured() {
             return secured;
         }
 
-        public void setAdminUserDetails(UserDetails user) {
-            this.adminUser = user;
+        public void setCredentialsProvider(CredentialsProvider credentialsProvider) {
+            this.credentialsProvider = credentialsProvider;
         }
         
         public void setSecured(Boolean secured) {
@@ -246,8 +247,8 @@ public abstract class AbstractApplicationCommand {
                 }
             }
             
-            if (adminUser != null) {
-                adminFactory.userDetails(adminUser);
+            if (credentialsProvider != null) {
+                adminFactory.credentialsProvider(credentialsProvider);
             }
             
             final Admin admin = adminFactory.create();
@@ -257,7 +258,7 @@ public abstract class AbstractApplicationCommand {
         @Override
         public String toString() {
             return this.getClass().getName() + " [" + (groups != null ? "groups=" + Arrays.toString(groups) + ", " : "")
-                    + (adminUser != null ? "adminUser=" + adminUser + ", " : "")
+                    + (credentialsProvider != null ? "credentialsProvider=" + credentialsProvider + ", " : "")
                     + (locators != null ? "locators=" + locators + ", " : "") + "lookupTimeout=" + lookupTimeout
                     + ", timeout=" + timeout + ", sout=" + sout + ", disableInfoLogging=" + disableInfoLogging + ", "
                     + (secured != null ? "secured=" + secured + ", " : "")

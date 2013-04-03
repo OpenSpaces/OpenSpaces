@@ -25,7 +25,8 @@ import org.openspaces.admin.internal.admin.DefaultAdmin;
 import org.openspaces.security.AdminFilter;
 
 import com.gigaspaces.logger.GSLogConfigLoader;
-import com.gigaspaces.security.directory.User;
+import com.gigaspaces.security.directory.CredentialsProvider;
+import com.gigaspaces.security.directory.DefaultCredentialsProvider;
 import com.gigaspaces.security.directory.UserDetails;
 
 /**
@@ -35,7 +36,7 @@ import com.gigaspaces.security.directory.UserDetails;
  * from the lookup service of components added and removed. It will monitor all components
  * that work within the specified group and locator.
  *
- * <p>Allows to set the username and password that will be used to authenticate when secured
+ * <p>Allows to set the credentials that will be used to authenticate when secured
  * services are discovered.
  *
  * @author kimchy
@@ -50,7 +51,7 @@ public class AdminFactory {
     private boolean singleThreadedEventListeners = false;
     private final List<String> groups = new ArrayList<String>();
     private final List<String> locators = new ArrayList<String>();
-    private UserDetails userDetails = null;
+    private CredentialsProvider credentialsProvider = null;
     private boolean discoverUnmanagedSpaces = false;
     private AdminFilter adminFilter;
     
@@ -122,16 +123,34 @@ public class AdminFactory {
 
     /**
      * Sets the username and password for discovery of secured services.
+     * @deprecated Use {@link AdminFactory#credentials(String, String) instead.}
      */
+    @Deprecated
     public AdminFactory userDetails(String userName, String password) {
-        return userDetails(new User(userName, password));
+        return credentials(userName, password);
     }
 
     /**
      * Sets the user details that will be used when discovering secured services.
+     * @deprecated Use {@link AdminFactory#credentialsProvider(CredentialsProvider) instead.} 
      */
+    @Deprecated
     public AdminFactory userDetails(UserDetails userDetails) {
-        this.userDetails = userDetails;
+        return credentialsProvider(new DefaultCredentialsProvider(userDetails));
+    }
+
+    /**
+     * Sets the username and password for discovery of secured services.
+     */
+    public AdminFactory credentials(String userName, String password) {
+        return credentialsProvider(new DefaultCredentialsProvider(userName, password));
+    }
+
+    /**
+     * Sets the credentials provider that will be used when discovering secured services.
+     */
+    public AdminFactory credentialsProvider(CredentialsProvider credentialsProvider) {
+        this.credentialsProvider = credentialsProvider;
         return this;
     }
 
@@ -172,7 +191,7 @@ public class AdminFactory {
             GSLogConfigLoader.getLoader();
         }
         DefaultAdmin admin = new DefaultAdmin(useDaemonThreads, singleThreadedEventListeners);
-        admin.setUserDetails(userDetails);
+        admin.setCredentialsProvider(credentialsProvider);
         admin.setAdminFilter(adminFilter);
         for (String group : groups) {
             admin.addGroup(group);

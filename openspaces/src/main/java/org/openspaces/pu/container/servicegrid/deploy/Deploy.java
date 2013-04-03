@@ -68,6 +68,7 @@ import org.openspaces.core.properties.BeanLevelPropertyPlaceholderConfigurer;
 import org.openspaces.pu.container.support.BeanLevelPropertiesParser;
 import org.openspaces.pu.container.support.ClusterInfoParser;
 import org.openspaces.pu.container.support.CommandLineParser;
+import org.openspaces.pu.container.support.CommandLineParser.Parameter;
 import org.openspaces.pu.container.support.RequiredDependenciesCommandLineParser;
 import org.openspaces.pu.container.support.ResourceApplicationContext;
 import org.openspaces.pu.sla.InstanceSLA;
@@ -92,6 +93,9 @@ import org.springframework.util.StringUtils;
 import com.gigaspaces.grid.gsm.GSM;
 import com.gigaspaces.grid.zone.ZoneHelper;
 import com.gigaspaces.logger.GSLogConfigLoader;
+import com.gigaspaces.security.directory.CredentialsProvider;
+import com.gigaspaces.security.directory.CredentialsProviderHelper;
+import com.gigaspaces.security.directory.DefaultCredentialsProvider;
 import com.gigaspaces.security.directory.User;
 import com.gigaspaces.security.directory.UserDetails;
 import com.j_spaces.core.Constants;
@@ -210,15 +214,27 @@ public class Deploy {
     }
     
     private UserDetails userDetails;
+    
+    private CredentialsProvider credentialsProvider;
 
     private String applicationName;
 
+    @Deprecated
     public void setUserDetails(UserDetails userDetails) {
         this.userDetails = userDetails;
     }
 
+    @Deprecated
     public void setUserDetails(String userName, String password) {
         this.userDetails = new User(userName, password);
+    }
+
+    public void setCredentials(String userName, String password) {
+        this.credentialsProvider = new DefaultCredentialsProvider(userName, password);
+    }
+
+    public void setCredentialsProvider(CredentialsProvider credentialsProvider) {
+        this.credentialsProvider = credentialsProvider;
     }
     
     public void setDeployTimeout(long deployTimeout) {
@@ -516,11 +532,37 @@ public class Deploy {
                 }
             }
         }
-
+        
         if (logger.isDebugEnabled()) {
             logger.debug("Using SLA " + sla);
         }
 
+        processSecurityParameters(beanLevelProperties, params);
+        
+        //Get elastic properties
+        Map<String, String> elasticProperties = new HashMap<String, String>();
+        for (CommandLineParser.Parameter param : params) {
+            if (param.getName().equalsIgnoreCase("elastic-properties")) {
+                for (String argument : param.getArguments()) {
+                    int indexOfEqual = argument.indexOf("=");                    
+                    String name = argument.substring(0, indexOfEqual);
+                    String value = argument.substring(indexOfEqual + 1);
+                    elasticProperties.put(name, value);
+                }
+            }
+        }
+        
+        //get pu type
+        String puType = guessProcessingUnitType(puPath, puFile, root, puString, sla, beanLevelProperties);
+        beanLevelProperties.getContextProperties().put("pu.type", puType);
+
+        //deploy to sg
+        return loadDeployment(puString, codeserver, sla, puPath, overridePuName, beanLevelProperties, elasticProperties, instanceDeploymentDependencies, instanceStartDependencies, applicationName);
+    }
+        
+    private void processSecurityParameters(BeanLevelProperties beanLevelProperties, Parameter[] params) 
+            throws IOException {
+        
         // detive the user details if they provided using deploy time properties
         String userName = null;
         String password = null;
@@ -548,33 +590,14 @@ public class Deploy {
                 setUserDetails(userName, password);
             }
         }
+
         // init the user detalis
-        if (userDetails != null) {
+        if (userDetails != null || credentialsProvider != null) {
             beanLevelProperties.getContextProperties().setProperty(SpaceURL.SECURED, "true");
-            beanLevelProperties.getContextProperties().put(Constants.Security.USER_DETAILS, new MarshalledObject<UserDetails>(userDetails));
+            CredentialsProviderHelper.appendMarshalledCredentials(beanLevelProperties.getContextProperties(), userDetails, credentialsProvider);
         } else if (secured != null && secured) {
             beanLevelProperties.getContextProperties().setProperty(SpaceURL.SECURED, "true");
         }
-        
-        //Get elastic properties
-        Map<String, String> elasticProperties = new HashMap<String, String>();
-        for (CommandLineParser.Parameter param : params) {
-            if (param.getName().equalsIgnoreCase("elastic-properties")) {
-                for (String argument : param.getArguments()) {
-                    int indexOfEqual = argument.indexOf("=");                    
-                    String name = argument.substring(0, indexOfEqual);
-                    String value = argument.substring(indexOfEqual + 1);
-                    elasticProperties.put(name, value);
-                }
-            }
-        }
-        
-        //get pu type
-        String puType = guessProcessingUnitType(puPath, puFile, root, puString, sla, beanLevelProperties);
-        beanLevelProperties.getContextProperties().put("pu.type", puType);
-
-        //deploy to sg
-        return loadDeployment(puString, codeserver, sla, puPath, overridePuName, beanLevelProperties, elasticProperties, instanceDeploymentDependencies, instanceStartDependencies, applicationName);
     }
 
     private String guessProcessingUnitType(String puPath, File puFile, URL root, String puString, SLA sla, BeanLevelProperties beanLevelProperties) {

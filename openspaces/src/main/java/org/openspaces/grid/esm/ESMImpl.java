@@ -94,7 +94,7 @@ import com.gigaspaces.lrmi.nio.info.NIOInfoHelper;
 import com.gigaspaces.lrmi.nio.info.NIOStatistics;
 import com.gigaspaces.management.entry.JMXConnection;
 import com.gigaspaces.security.SecurityException;
-import com.gigaspaces.security.directory.UserDetails;
+import com.gigaspaces.security.directory.CredentialsProvider;
 import com.gigaspaces.security.service.SecurityContext;
 import com.gigaspaces.start.SystemBoot;
 import com.j_spaces.kernel.time.SystemTime;
@@ -419,7 +419,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
         return false;
     }
 
-    public SecurityContext login(UserDetails userDetails) throws SecurityException, RemoteException {
+    public SecurityContext login(CredentialsProvider credentialsProvider) throws SecurityException, RemoteException {
         return null;
     }
 

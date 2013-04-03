@@ -259,14 +259,10 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
             logger.debug("Service Added [Space Instance] with uid [" + serviceID + "]");
         }
         try {
-            if (clusteredIjspace.isServiceSecured()) {
-                clusteredIjspace.login(admin.getUserDetails());
-            }
+            admin.login(clusteredIjspace);
 
             ISpaceProxy direcyIjspace = (ISpaceProxy)clusteredIjspace.getClusterMember();
-            if (direcyIjspace.isServiceSecured()) {
-                direcyIjspace.login(admin.getUserDetails());
-            }
+            admin.login(direcyIjspace);
 
             final IInternalRemoteJSpaceAdmin spaceAdmin = (IInternalRemoteJSpaceAdmin) direcyIjspace.getAdmin();
 
@@ -371,9 +367,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 return;
             }
             
-            if (gsc.isServiceSecured()) {
-                gsc.login(admin.getUserDetails());
-            }
+            admin.login(gsc);
             
             final InternalGridServiceContainer gridServiceContainer = new DefaultGridServiceContainer(
                     serviceID, gsc, admin, gsc.getAgentId(), gsc.getGSAServiceID(), jvmDetails);
@@ -410,9 +404,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 return;
             }            
             
-            if (gsa.isServiceSecured()) {
-                gsa.login(admin.getUserDetails());
-            }
+            admin.login(gsa);
             
             AgentProcessesDetails processesDetails = gsa.getDetails();
             final InternalGridServiceAgent gridServiceAgent = new DefaultGridServiceAgent(serviceID, 
@@ -480,9 +472,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
             logger.debug("Service Added [GSM] with uid [" + serviceID + "]");
         }
         try {
-            if (gsm.isServiceSecured()) {
-                gsm.login(admin.getUserDetails());
-            }
+            admin.login(gsm);
 
             final JVMDetails jvmDetails = gsm.getJVMDetails();
             final InternalGridServiceManager gridServiceManager = new DefaultGridServiceManager(serviceID, gsm,
