@@ -594,6 +594,7 @@ public class Deploy {
         // init the user detalis
         if (userDetails != null || credentialsProvider != null) {
             beanLevelProperties.getContextProperties().setProperty(SpaceURL.SECURED, "true");
+            // Backwards protection - preserve either userDetails or credentials in case versions are mixed.
             CredentialsProviderHelper.appendMarshalledCredentials(beanLevelProperties.getContextProperties(), userDetails, credentialsProvider);
         } else if (secured != null && secured) {
             beanLevelProperties.getContextProperties().setProperty(SpaceURL.SECURED, "true");

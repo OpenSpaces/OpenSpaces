@@ -43,7 +43,6 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import com.gigaspaces.security.directory.CredentialsProvider;
 import com.gigaspaces.security.directory.CredentialsProviderHelper;
 import com.gigaspaces.security.directory.DefaultCredentialsProvider;
-import com.gigaspaces.security.directory.User;
 import com.gigaspaces.security.directory.UserDetails;
 import com.j_spaces.core.client.SpaceURL;
 
@@ -83,8 +82,6 @@ public class IntegratedProcessingUnitContainerProvider implements ApplicationCon
     private ClusterInfo clusterInfo;
 
     private ClassLoader classLoader;
-
-    private UserDetails userDetails;
     
     private CredentialsProvider credentialsProvider;
 
@@ -141,12 +138,12 @@ public class IntegratedProcessingUnitContainerProvider implements ApplicationCon
 
     @Deprecated
     public void setUserDetails(UserDetails userDetails) {
-        this.userDetails = userDetails;
+        this.credentialsProvider = new DefaultCredentialsProvider(userDetails);
     }
 
     @Deprecated
     public void setUserDetails(String username, String password) {
-        this.userDetails = new User(username, password);
+        setCredentials(username, password);
     }
     
     public void setCredentials(String username, String password) {
@@ -257,9 +254,9 @@ public class IntegratedProcessingUnitContainerProvider implements ApplicationCon
         }
 
         // handle security
-        if (userDetails != null || credentialsProvider != null) {
+        if (credentialsProvider != null) {
             try {
-                CredentialsProviderHelper.appendMarshalledCredentials(beanLevelProperties.getContextProperties(), userDetails, credentialsProvider);
+                CredentialsProviderHelper.appendMarshalledCredentials(beanLevelProperties.getContextProperties(), null, credentialsProvider);
             } catch (IOException e) {
                 throw new CannotCreateContainerException("Failed to marhsall user details", e);
             }
