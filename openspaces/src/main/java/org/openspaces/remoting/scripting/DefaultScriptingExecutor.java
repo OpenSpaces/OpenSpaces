@@ -83,6 +83,8 @@ public class DefaultScriptingExecutor implements ScriptingExecutor, ApplicationC
 
     private Map<String, Object> parameters;
 
+    private Map<String, Class<?>> parameterTypes;
+    
     private Map<String, LocalScriptExecutor> executors = new HashMap<String, LocalScriptExecutor>();
 
     private LocalScriptExecutor jsr223Executor;
@@ -91,7 +93,7 @@ public class DefaultScriptingExecutor implements ScriptingExecutor, ApplicationC
 
     private CompiledScriptCache nonThreadSafeCopmiledScriptCache;
 
-    private Map<String, GigaSpace> gigaSpacesBeans = new HashMap<String, GigaSpace>();
+    private final Map<String, GigaSpace> gigaSpacesBeans = new HashMap<String, GigaSpace>();
 
     private ClusterInfo clusterInfo;
 
@@ -111,6 +113,14 @@ public class DefaultScriptingExecutor implements ScriptingExecutor, ApplicationC
         this.parameters = parameters;
     }
 
+    /**
+     * Sets parameter types for parameters that will be added to each script. The key of the map is the parameter name
+     * (a String) and the value is a class representing that static type for the key name.
+     */
+    public void setParameterTypes(Map<String, Class<?>> parameterTypes) {
+        this.parameterTypes = parameterTypes;
+    }
+    
     public void setExecutors(Map<String, LocalScriptExecutor> executors) {
         this.executors = executors;
     }
@@ -210,17 +220,7 @@ public class DefaultScriptingExecutor implements ScriptingExecutor, ApplicationC
                 throw new ScriptingException("Failed to find executor for type [" + script.getType() + "]");
             }
         }
-        Object compiledScript;
-        if (script.shouldCache()) {
-            if (localScriptExecutor.isThreadSafe()) {
-                compiledScript = threadSafeCompiledScriptCache.get(script.getName(), localScriptExecutor, script);
-            } else {
-                compiledScript = nonThreadSafeCopmiledScriptCache.get(script.getName(), localScriptExecutor, script);
-            }
-        } else {
-            compiledScript = localScriptExecutor.compile(script);
-        }
-
+        
         Map<String, Object> scriptParams = new HashMap<String, Object>();
         if (parameters != null) {
             scriptParams.putAll(parameters);
@@ -232,6 +232,40 @@ public class DefaultScriptingExecutor implements ScriptingExecutor, ApplicationC
             scriptParams.putAll(script.getParameters());
         }
         
+        if (script instanceof TypedScript) {
+            TypedScript typedScript = (TypedScript) script;
+            Map<String, Class<?>> scriptParameterTypes = typedScript.getParameterTypes();
+            if (scriptParameterTypes == null) {
+                throw new ScriptingException("paramterTypes cannot be null for typed script");
+            }
+            if (parameterTypes != null) {
+                for (Map.Entry<String, Class<?>> entry : parameterTypes.entrySet()) {
+                    if (scriptParameterTypes.containsKey(entry.getKey())) {
+                        continue;
+                    }
+                    scriptParameterTypes.put(entry.getKey(), entry.getValue());
+                }
+            }
+            for (Map.Entry<String, Object> entry : scriptParams.entrySet()) {
+                if (scriptParameterTypes.containsKey(entry.getKey())) {
+                    continue;
+                }
+                Class<?> paramType = entry.getValue() != null ? entry.getValue().getClass() : Object.class;
+                scriptParameterTypes.put(entry.getKey(), paramType);
+            }
+        }
+        
+        Object compiledScript;
+        if (script.shouldCache()) {
+            if (localScriptExecutor.isThreadSafe()) {
+                compiledScript = threadSafeCompiledScriptCache.get(script.getName(), localScriptExecutor, script);
+            } else {
+                compiledScript = nonThreadSafeCopmiledScriptCache.get(script.getName(), localScriptExecutor, script);
+            }
+        } else {
+            compiledScript = localScriptExecutor.compile(script);
+        }
+
         try {
             return localScriptExecutor.execute(script, compiledScript, scriptParams);
         } finally {
