@@ -174,11 +174,9 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
     private Boolean durable;
     
     /**
-     * See {@link #setComTypeName(String)}.
-     *
-     * @see #COM_TYPE_MULTIPLEX
-     * @see #COM_TYPE_UNICAST
+     * @deprecated This configuration is redundant and has no affect. 
      */
+    @Deprecated
     public void setComType(int comType) {
         this.comType = comType;
     }
@@ -188,10 +186,7 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
     }
 
     /**
-     * Sets the communication protocol for the notification registration.
-     *
-     * @see #COM_TYPE_MULTIPLEX
-     * @see #COM_TYPE_UNICAST
+     * @deprecated This configuration is redundant and has no affect. 
      */
     public void setComTypeName(String comTypeName) {
         Assert.notNull(comTypeName, "comTypeName cannot be null");

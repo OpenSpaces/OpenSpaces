@@ -88,8 +88,9 @@ public @interface Notify {
     boolean durable() default false;
     
     /**
-     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setComType(int)
+     * @deprecated This configuration is redundant and has no affect.
      */
+    @Deprecated
     NotifyComType commType() default org.openspaces.events.notify.NotifyComType.UNICAST;
 
     /**
