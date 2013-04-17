@@ -667,9 +667,18 @@ public class DefaultAdmin implements InternalAdmin {
 
     @Override
     public void addEventListener(AdminEventListener eventListener) {
-        EventRegistrationHelper.addEventListener(this, eventListener);
-        eventListenersCount.incrementAndGet();
+    	addEventListener( eventListener, true, true );
     }
+    
+    @Override
+    public void addEventListener( AdminEventListener eventListener, boolean withStatisticsHistory ) {
+        addEventListener( eventListener, withStatisticsHistory, false );
+    }
+    
+    private void addEventListener( AdminEventListener eventListener, boolean withStatisticsHistory, boolean supportBackwards ) {
+        EventRegistrationHelper.addEventListener( this, eventListener, withStatisticsHistory, supportBackwards );
+        eventListenersCount.incrementAndGet();
+    }    
 
     @Override
     public void removeEventListener(AdminEventListener eventListener) {

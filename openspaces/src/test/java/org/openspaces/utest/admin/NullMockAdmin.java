@@ -78,6 +78,13 @@ public class NullMockAdmin implements InternalAdmin {
         // TODO Auto-generated method stub
 
     }
+    
+	@Override
+	public void addEventListener(AdminEventListener eventListener,
+			boolean withStatisticsHistory) {
+		// TODO Auto-generated method stub
+		
+	}    
 
     public void close() {
         // TODO Auto-generated method stub

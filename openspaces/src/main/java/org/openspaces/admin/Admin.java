@@ -242,6 +242,15 @@ public interface Admin extends StatisticsMonitor, DumpProvider {
      * @see #removeEventListener(AdminEventListener)
      */
     void addEventListener(AdminEventListener eventListener);
+    
+    /**
+     * Smart addition of event listeners. Will automatically add to the correct place any interface
+     * that extends the {@link org.openspaces.admin.AdminEventListener} interface.
+     *
+     * @param withStatisticsHistory if all statistics histories will be fired on registration statistics listener
+     * @see #removeEventListener(AdminEventListener)
+     */
+    void addEventListener( AdminEventListener eventListener, boolean withStatisticsHistory );    
 
     /**
      * Smart removal of event listeners. Will automatically remove to the correct place any interface

@@ -81,7 +81,14 @@ import org.openspaces.admin.zone.events.ZoneRemovedEventListener;
  */
 public abstract class EventRegistrationHelper {
     
-    public static void addEventListener( final InternalAdmin admin, final AdminEventListener eventListener) {
+	public static void addEventListener( final InternalAdmin admin, final AdminEventListener eventListener ){
+		
+		addEventListener( admin, eventListener, true, true );
+	}
+	
+    public static void addEventListener( final InternalAdmin admin, final AdminEventListener eventListener, 
+    							final boolean withStatisticsHistory, final boolean supportBackwards ) {
+    	
         if (eventListener instanceof ZoneAddedEventListener) {
             admin.getZones().getZoneAdded().add((ZoneAddedEventListener) eventListener);
         }
@@ -223,12 +230,13 @@ public abstract class EventRegistrationHelper {
                 
                 @Override
                 public void run() {
-                    addStatisticsListeners( admin, eventListener );
+                	
+                    addStatisticsListeners( admin, eventListener, withStatisticsHistory, supportBackwards );
                 }
             }   , statisticsListenerRegistrationDelay, TimeUnit.MILLISECONDS );
         }
         else{
-            addStatisticsListeners( admin, eventListener );
+            addStatisticsListeners( admin, eventListener, withStatisticsHistory, supportBackwards );
         }
         
         /**
@@ -269,15 +277,16 @@ public abstract class EventRegistrationHelper {
     }
     
 
-    private static void addStatisticsListeners(InternalAdmin admin, AdminEventListener eventListener) {
+    private static void addStatisticsListeners(InternalAdmin admin, AdminEventListener eventListener, 
+    									boolean withHistory, boolean supportBackwards ) {
 
         if (eventListener instanceof VirtualMachineStatisticsChangedEventListener) {
             admin.getVirtualMachines().getVirtualMachineStatisticsChanged().add(
-                    (VirtualMachineStatisticsChangedEventListener) eventListener, true);
+                    (VirtualMachineStatisticsChangedEventListener) eventListener, withHistory );
         }
         if (eventListener instanceof VirtualMachinesStatisticsChangedEventListener) {
             admin.getVirtualMachines().getStatisticsChanged().add(
-                    (VirtualMachinesStatisticsChangedEventListener) eventListener, true);
+                    (VirtualMachinesStatisticsChangedEventListener) eventListener, withHistory );
         }
         if (eventListener instanceof TransportsStatisticsChangedEventListener) {
             admin.getTransports().getStatisticsChanged().add(
@@ -289,11 +298,13 @@ public abstract class EventRegistrationHelper {
         }
         if (eventListener instanceof OperatingSystemsStatisticsChangedEventListener) {
             admin.getOperatingSystems().getStatisticsChanged().add(
-                    (OperatingSystemsStatisticsChangedEventListener) eventListener);
+                    (OperatingSystemsStatisticsChangedEventListener) eventListener,
+                    withHistory && !supportBackwards );
         }
         if (eventListener instanceof OperatingSystemStatisticsChangedEventListener) {
             admin.getOperatingSystems().getOperatingSystemStatisticsChanged().add(
-                    (OperatingSystemStatisticsChangedEventListener) eventListener);
+                    (OperatingSystemStatisticsChangedEventListener) eventListener, 
+                    withHistory && !supportBackwards );
         }
         if( eventListener instanceof ProcessingUnitInstanceStatisticsChangedEventListener ){
             admin.getProcessingUnits().getProcessingUnitInstanceStatisticsChanged().add(
