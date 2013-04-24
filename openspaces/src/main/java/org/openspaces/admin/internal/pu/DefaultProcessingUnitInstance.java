@@ -560,7 +560,7 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
         try {
             puMonitors = puServiceBean.getPUMonitors();
         } catch (RemoteException e) {
-            throw new AdminException("Failed to get montiors for processing unit instance [" + getProcessingUnitInstanceName() + "]", e);
+            throw new AdminException("Failed to get monitors for processing unit instance [" + getProcessingUnitInstanceName() + "]", e);
         }
         for (Object monitor : puMonitors.getMonitors()) {
             ServiceMonitors serviceMonitors = (ServiceMonitors) monitor;

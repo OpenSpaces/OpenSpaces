@@ -96,7 +96,7 @@ public class SLABeanDefinitionParser extends AbstractSingleBeanDefinitionParser 
             builder.addPropertyValue("memberAliveIndicator", parserContext.getDelegate().parsePropertySubElement(memberAliveIndicatorEle, builder.getRawBeanDefinition()));
         }
 
-        // montiors
+        // monitors
         Element monitorsEle = DomUtils.getChildElementByTagName(element, "monitors");
         if (monitorsEle != null) {
             List monitors = parserContext.getDelegate().parseListElement(monitorsEle, builder.getRawBeanDefinition());
