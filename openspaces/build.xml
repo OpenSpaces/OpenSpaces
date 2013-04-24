@@ -90,7 +90,7 @@
 
     <target name="buildmain" description="Compile main source tree java files into class files">
     	<exec executable="${env.M2_HOME}\bin\${mvn.executable}" failonerror="true"> 
-			<arg line="package -DskipTests ${maven.repo.local}" />
+			<arg line="install -DskipTests ${maven.repo.local}" />
 		</exec>
     </target>
 
