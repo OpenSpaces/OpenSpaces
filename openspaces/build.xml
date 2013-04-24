@@ -90,7 +90,7 @@
 
     <target name="buildmain" description="Compile main source tree java files into class files">
     	<exec executable="${env.M2_HOME}\bin\${mvn.executable}" failonerror="true"> 
-			<arg line="compile -DskipTests ${maven.repo.local}" />
+			<arg line="package -DskipTests ${maven.repo.local}" />
 		</exec>
     	<exec executable="${env.M2_HOME}\bin\${mvn.executable}"> 
 			<arg line="install:install-file -DgroupId=com.gigaspaces -DartifactId=gs-openspaces -DcreateChecksum=true -Dversion=${productversion} -Dpackaging=jar -DpomFile=${basedir}/pom.xml -Dfile=${target.dir}/gs-openspaces.jar ${maven.repo.local}"/>
