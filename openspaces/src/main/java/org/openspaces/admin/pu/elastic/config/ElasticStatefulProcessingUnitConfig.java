@@ -24,8 +24,6 @@ import org.openspaces.admin.internal.pu.elastic.config.AbstractElasticProcessing
 import org.openspaces.admin.pu.config.ProcessingUnitConfig;
 import org.openspaces.admin.pu.topology.ElasticStatefulProcessingUnitConfigHolder;
 
-import com.gigaspaces.internal.client.spaceproxy.router.SpaceProxyRouter;
-
 /**
  * @author itaif
  * @since 9.0.1
@@ -51,13 +49,6 @@ public class ElasticStatefulProcessingUnitConfig
         
         // add an elastic property indicating the cluster schema partitioned-sync2backup
         new ProcessingUnitSchemaConfig(super.getElasticProperties()).setPartitionedSync2BackupSchema();        
-
-        if (!SpaceProxyRouter.UseNewSpaceProxyRouter) {
-            // this default context property ensures that during active-election (primary relocations) 
-            // the proxy keeps retrying 20 times.
-            // see also the wiki documentation on the active election property: cluster-config.groups.group.fail-over-policy.active-election.yield-time
-            super.addContextPropertyDefault("space-config.proxy-settings.connection-retries","20");
-        }
     }
     
     @Override
