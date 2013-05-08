@@ -32,6 +32,8 @@
 
 package org.openspaces.admin.space;
 
+import java.util.List;
+
 import com.gigaspaces.cluster.replication.async.mirror.MirrorStatistics;
 import com.j_spaces.core.filters.ReplicationStatistics;
 
@@ -162,4 +164,11 @@ public interface SpaceInstanceStatistics {
      * @return count of all the active transactions (of all types) in this Space instance.
      */
     long getActiveTransactionCount();
+    
+    /**
+     * Returns the timeline (from newest to oldest) history statistics, including this one.
+     * @param fromTimestamp brings statistics starting from this timestamp ( not included )
+     * @since 9.6
+     */
+    List<SpaceInstanceStatistics> getTimelineFromTimestamp( long fromTimestamp );    
 }

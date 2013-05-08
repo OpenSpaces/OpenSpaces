@@ -32,6 +32,8 @@
 
 package org.openspaces.admin.space;
 
+import java.util.List;
+
 /**
  * An aggregated statistics of all the currently discovered {@link org.openspaces.admin.space.SpaceInstance}s.
  *
@@ -137,4 +139,11 @@ public interface SpaceStatistics {
      * @return count of all the active transactions (of all types) in this Space instance.
      */
     long getActiveTransactionCount();
+    
+    /**
+     * Returns the timeline (from newest to oldest) history statistics, including this one.
+     * @param fromTimestamp brings statistics starting from this timestamp ( not included )
+     * @since 9.6
+     */
+    List<SpaceStatistics> getTimelineFromTimestamp( long fromTimestamp );    
 }

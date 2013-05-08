@@ -17,6 +17,9 @@
  ******************************************************************************/
 package org.openspaces.admin.internal.space;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.openspaces.admin.space.SpaceInstanceStatistics;
 import org.openspaces.admin.support.StatisticsUtils;
 
@@ -244,4 +247,15 @@ public class DefaultSpaceInstanceStatistics implements SpaceInstanceStatistics {
     public long getActiveTransactionCount() {
         return statisticsHolder.getRuntimeStatisticsHolder().getActiveTransactionCount();
     }
+
+	@Override
+	public List<SpaceInstanceStatistics> getTimelineFromTimestamp( long fromTimestamp ) {
+        List<SpaceInstanceStatistics> timeline = new ArrayList<SpaceInstanceStatistics>();
+        SpaceInstanceStatistics current = this;
+        while( current != null && !current.isNA() && current.getTimestamp() > fromTimestamp ) {
+            timeline.add(current);
+            current = current.getPrevious();
+        }
+        return timeline;
+	}
 }

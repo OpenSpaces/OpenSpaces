@@ -17,6 +17,7 @@
  ******************************************************************************/
 package org.openspaces.admin.pu;
 
+import java.util.List;
 import java.util.Map;
 
 import org.openspaces.events.EventContainerServiceMonitors;
@@ -94,4 +95,10 @@ public interface ProcessingUnitInstanceStatistics extends Iterable<ServiceMonito
      */
     ProcessingUnitInstanceStatistics getPrevious();
 
+    /**
+     * Returns the timeline (from newest to oldest) history statistics, including this one.
+     * @param fromTimestamp brings statistics starting from this timestamp ( not included )
+     * @since 9.6 
+     */
+    List<ProcessingUnitInstanceStatistics> getTimelineFromTimestamp( long fromTimestamp );    
 }

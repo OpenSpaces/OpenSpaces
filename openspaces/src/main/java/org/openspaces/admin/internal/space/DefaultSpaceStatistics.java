@@ -17,6 +17,9 @@
  ******************************************************************************/
 package org.openspaces.admin.internal.space;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.openspaces.admin.space.SpaceInstanceStatistics;
 import org.openspaces.admin.space.SpaceStatistics;
 
@@ -357,4 +360,15 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
         }
         return total;
     }
+
+	@Override
+	public List<SpaceStatistics> getTimelineFromTimestamp( long fromTimestamp ) {
+        List<SpaceStatistics> timeline = new ArrayList<SpaceStatistics>();
+        SpaceStatistics current = this;
+        while( current != null && !current.isNA() && current.getTimestamp() > fromTimestamp ) {
+            timeline.add(current);
+            current = current.getPrevious();
+        }
+        return timeline;
+	}
 }

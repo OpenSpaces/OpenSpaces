@@ -17,9 +17,11 @@
  ******************************************************************************/
 package org.openspaces.admin.internal.pu;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.openspaces.admin.pu.ProcessingUnitInstanceStatistics;
@@ -195,4 +197,16 @@ public class DefaultProcessingUnitInstanceServiceStatistics implements Processin
             serviceMonitorsById.put(serviceMonitors.getId(), serviceMonitors);
         }
     }
+
+	@Override
+	public List<ProcessingUnitInstanceStatistics> getTimelineFromTimestamp( long fromTimestamp ) {
+        List<ProcessingUnitInstanceStatistics> timeline = new ArrayList<ProcessingUnitInstanceStatistics>();
+        
+        ProcessingUnitInstanceStatistics current = this;
+        while( current != null && current.getTimestamp() > fromTimestamp ) {
+            timeline.add(current);
+            current = current.getPrevious();
+        }
+        return timeline;
+	}
 }
