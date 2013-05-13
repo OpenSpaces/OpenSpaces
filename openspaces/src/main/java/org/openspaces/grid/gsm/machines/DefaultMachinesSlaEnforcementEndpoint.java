@@ -1076,7 +1076,8 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             
             if (exception != null) {
                 
-                if (exception instanceof ElasticGridServiceAgentProvisioningException) {
+                if (exception.getCause() != null &&
+                	exception.getCause() instanceof ElasticGridServiceAgentProvisioningException) {
                     throw new FailedToStartNewGridServiceAgentException(pu, exception);
                 }
                 throw new FailedToStartNewMachineException(pu, exception);
