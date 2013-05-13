@@ -854,7 +854,8 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
 
                 }
                 removeFutureStoppedMachine(sla, futureStoppedMachine);
-                if (exception instanceof ElasticGridServiceAgentProvisioningException) {
+                if (exception.getCause() != null && 
+                    exception.getCause() instanceof ElasticGridServiceAgentProvisioningException) {
                     throw new FailedToStopGridServiceAgentException(pu, agent,exception);
                 }
                 throw new FailedToStopMachineException(pu, agent, exception);
