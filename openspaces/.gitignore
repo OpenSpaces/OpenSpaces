@@ -10,7 +10,7 @@
 target
 dist
 docs
-
+bin
 /lib/optional/openspaces
 /etarget
 transaction.log
