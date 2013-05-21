@@ -25,12 +25,10 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.net.JarURLConnection;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.net.URLConnection;
 import java.rmi.MarshalledObject;
 import java.rmi.RemoteException;
 import java.text.NumberFormat;
@@ -38,7 +36,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -180,8 +177,6 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     private volatile boolean stopping = false;
 
     private static final String LINE_SEPARATOR = System.getProperty("line.separator", "\n");
-    
-    private static List<URLConnection> urlConns = new LinkedList<URLConnection>();
     
     public PUServiceBeanImpl() {
         super();
@@ -522,8 +517,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             if (libDir.exists()) {
                 File[] libFiles = BootIOUtils.listFiles(libDir);
                 for (File libFile : libFiles) {
-                    URL lfu = fileToUrl(libFile);
-                    libUrls.add(lfu);
+                    libUrls.add(libFile.toURI().toURL());
                 }
             }
             
@@ -757,21 +751,6 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         }
     }
 
-    protected URL fileToUrl(File libFile)
-    {
-        //GS-11139: http://abondar-howto.blogspot.com/2010/06/howto-unload-jar-files-loaded-by.html
-        URL lfu = null; 
-        try {
-            lfu = new URL("jar", "", -1, libFile.toURI().toString()
-                    + "!/");
-            urlConns.add(lfu.openConnection());
-        } catch (Exception e) {
-            logger.warn(logMessage("failed to create or add URLConnection!"),
-                        e);
-        }
-        return lfu;
-    }
-
     private InputStream readManifestFromCodeServer(String puName, String puPath, String codeserver, File workLocation) {
         try {
             URL manifestURL = new URL(codeserver + puPath + "/" + JarFile.MANIFEST_NAME);
@@ -851,8 +830,8 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                                 " read from MANIFEST.MF to processing unit: " + puName + " classpath");
                     }
                     
-                    URL lfu = fileToUrl(file);
-                    exportedManifestUrls.add(lfu);
+                    URL urlToAdd = file.toURI().toURL();
+                    exportedManifestUrls.add(urlToAdd);
                 }
             }
         } catch (IOException e) {
@@ -1089,13 +1068,6 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         // clean the deploy path directory
         if (deployPath != null) {
             boolean deleted = false;
-            for (URLConnection urlConn : urlConns) { 
-                try { 
-                    ((JarURLConnection) urlConn).getJarFile().close(); 
-                } catch (Exception e) { 
-                    logger.warn(logMessage("failed to close jar:" + urlConn.getURL().getFile()), e); 
-                } 
-            }
             for (int i = 0; i < 2; i++) {
                 deleted = FileSystemUtils.deleteRecursively(deployPath);
                 if (deleted) {
