@@ -34,19 +34,15 @@ public class OutputVersion {
     public static String computeVersion() {
         
         if (PlatformVersion.getBuildNumber().indexOf("-") != -1) {
-            return PlatformVersion.getVersion() + "-SNAPSHOT";
+            return PlatformVersion.getVersion() + "-SNAPSHOT-" + PlatformVersion.getBuildTimestamp();
         }
-        
-        if(PlatformVersion.getBuildType().contains("patch")) {
-            return PlatformVersion.getVersion() + "-RELEASE-" + PlatformVersion.getBuildNumber();
-        }
-        
+  
         if (PlatformVersion.getMilestone().equalsIgnoreCase("GA")) {
-            return PlatformVersion.getVersion() + "-RELEASE";
+            return PlatformVersion.getVersion() + "-RELEASE-" + PlatformVersion.getBuildTimestamp();
         }
         
         if (PlatformVersion.getBuildNumber().indexOf("-") == -1) {
-            return PlatformVersion.getVersion() + "-" + PlatformVersion.getMilestone().toUpperCase();
+            return PlatformVersion.getVersion() + "-" + PlatformVersion.getMilestone().toUpperCase() + "-" + PlatformVersion.getBuildTimestamp();
         }
         
         return "";
@@ -58,19 +54,15 @@ public class OutputVersion {
         XapVersion xapVersion = new XapVersion();
         
         if (xapVersion.getBuildNumber().indexOf("-") != -1) {
-            return xapVersion.getVersion() + "-SNAPSHOT";
-        }
-        
-        if(xapVersion.getBuildType().contains("patch")) {
-            return xapVersion.getVersion() + "-RELEASE-" + xapVersion.getBuildNumber();
+            return xapVersion.getVersion() + "-SNAPSHOT-" + xapVersion.getBuildTimestamp();
         }
         
         if (xapVersion.getMilestone().equalsIgnoreCase("GA")) {
-            return xapVersion.getVersion() + "-RELEASE";
+            return xapVersion.getVersion() + "-RELEASE-" + xapVersion.getBuildTimestamp();
         }
         
         if (xapVersion.getBuildNumber().indexOf("-") == -1) {
-            return xapVersion.getVersion() + "-" + xapVersion.getMilestone().toUpperCase();
+            return xapVersion.getVersion() + "-" + xapVersion.getMilestone().toUpperCase() + "-" + xapVersion.getBuildTimestamp();
         }
         
         return "";
