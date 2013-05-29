@@ -43,6 +43,9 @@ public class LazyLoadingRemoteInvocationAspect implements RemoteInvocationAspect
      * exception, which then the script will be loaded and executed again.
      */
     public Object invoke(MethodInvocation methodInvocation, RemotingInvoker remotingInvoker) throws Throwable {
+        if (methodInvocation.getMethod().getName().equals("toString")) {
+            return remotingInvoker.toString();
+        }
         if (methodInvocation.getArguments().length == 0) {
             throw new ScriptingException("Lazy loading aspect only supports ScriptingExecution");
         }
