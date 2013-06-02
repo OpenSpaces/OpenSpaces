@@ -80,7 +80,7 @@
         <!-- Just kill target dir (it's safer). No need at this point to keep it. -->
         <delete dir="${target.dir}"/>
     	<exec executable="${env.M2_HOME}\bin\${mvn.executable}"> 
-			<arg line="clean ${maven.repo.local}"/>
+			<arg line="clean -Dmaven.repo.local=${maven.repo.local}"/>
 		</exec>
     </target>
 
@@ -90,10 +90,10 @@
 
     <target name="buildmain" description="Compile main source tree java files into class files">
     	<exec executable="${env.M2_HOME}\bin\${mvn.executable}" failonerror="true"> 
-			<arg line="package -DskipTests ${maven.repo.local}" />
+			<arg line="package -DskipTests -Dmaven.repo.local=${maven.repo.local}" />
 		</exec>
     	<exec executable="${env.M2_HOME}\bin\${mvn.executable}"> 
-			<arg line="install:install-file -DgroupId=com.gigaspaces -DartifactId=gs-openspaces -DcreateChecksum=true -Dversion=${productversion} -Dpackaging=jar -DpomFile=${basedir}/pom.xml -Dfile=${target.dir}/gs-openspaces.jar ${maven.repo.local}"/>
+			<arg line="install:install-file -DgroupId=com.gigaspaces -DartifactId=gs-openspaces -DcreateChecksum=true -Dversion=${productversion} -Dpackaging=jar -DpomFile=${basedir}/pom.xml -Dfile=${target.dir}/gs-openspaces.jar -Dmaven.repo.local=${maven.repo.local}"/>
 		</exec>
     </target>
 
@@ -184,7 +184,7 @@
             depends="build_1_5, javadoc, install.maven"
             description="Creates the OpenSpaces distribution">
     	<exec executable="${env.M2_HOME}\bin\${mvn.executable}"> 
-			<arg line="assembly:single ${maven.repo.local}"/>
+			<arg line="assembly:single -Dmaven.repo.local=${maven.repo.local}"/>
 		</exec>
     </target>
 	
@@ -200,13 +200,13 @@
 		<echo message="${productversion}" />
     	<!-- Install newly created jar in local maven repository -->
 		<exec executable="${env.M2_HOME}\bin\${mvn.executable}"> 
-			<arg line="install:install-file -DgroupId=com.gigaspaces -DartifactId=gs-openspaces -DcreateChecksum=true -Dversion=${productversion} -Dpackaging=jar -DpomFile=${basedir}/pom.xml -Dfile=${target.dir}/gs-openspaces.jar -Djavadoc=${target.dir}/xap-javadoc.zip -Dsources=${target.dir}/gs-openspaces-sources.jar ${maven.repo.local}"/>
+			<arg line="install:install-file -DgroupId=com.gigaspaces -DartifactId=gs-openspaces -DcreateChecksum=true -Dversion=${productversion} -Dpackaging=jar -DpomFile=${basedir}/pom.xml -Dfile=${target.dir}/gs-openspaces.jar -Djavadoc=${target.dir}/xap-javadoc.zip -Dsources=${target.dir}/gs-openspaces-sources.jar -Dmaven.repo.local=${maven.repo.local}"/>
 		</exec>
 		<exec executable="${env.M2_HOME}\bin\${mvn.executable}"> 
-			<arg line="install:install-file -DgroupId=com.gigaspaces -DartifactId=gs-openspaces -DcreateChecksum=true -Dversion=${productversion} -Dpackaging=jar -DpomFile=${basedir}/pom.xml -Dfile=${target.dir}/gs-openspaces-${productversion}-tests.jar -Dclassifier=tests -Djavadoc=${target.dir}/xap-javadoc.zip -Dsources=${target.dir}/gs-openspaces-sources.jar ${maven.repo.local}"/>
+			<arg line="install:install-file -DgroupId=com.gigaspaces -DartifactId=gs-openspaces -DcreateChecksum=true -Dversion=${productversion} -Dpackaging=jar -DpomFile=${basedir}/pom.xml -Dfile=${target.dir}/gs-openspaces-${productversion}-tests.jar -Dclassifier=tests -Djavadoc=${target.dir}/xap-javadoc.zip -Dsources=${target.dir}/gs-openspaces-sources.jar -Dmaven.repo.local=${maven.repo.local}"/>
 		</exec>
 		<exec executable="${env.M2_HOME}\bin\${mvn.executable}"> 
-			<arg line="install:install-file -DgroupId=com.gigaspaces -DartifactId=jetty-os -DcreateChecksum=true -Dversion=${productversion} -Dpackaging=jar -DpomFile=${maven.tmp.dir}/jetty-os-pom.xml -Dfile=${target.dir}/gs-openspaces-jetty.jar ${maven.repo.local}"/>
+			<arg line="install:install-file -DgroupId=com.gigaspaces -DartifactId=jetty-os -DcreateChecksum=true -Dversion=${productversion} -Dpackaging=jar -DpomFile=${maven.tmp.dir}/jetty-os-pom.xml -Dfile=${target.dir}/gs-openspaces-jetty.jar -Dmaven.repo.local=${maven.repo.local}"/>
 		</exec>
 		
 		<replaceregexp file="${basedir}/tools/alert-integration/pom.xml"
@@ -292,7 +292,7 @@
       <target name="testsummary" description="Run tests and generate test summary">
 
       	<exec executable="${env.M2_HOME}\bin\${mvn.executable}"> 
-			<arg line="test ${maven.repo.local}"/>
+			<arg line="test -Dmaven.repo.local=${maven.repo.local}"/>
 		</exec>
     </target>
 	
