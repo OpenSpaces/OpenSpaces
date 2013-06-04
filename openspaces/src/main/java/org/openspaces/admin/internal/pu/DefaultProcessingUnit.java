@@ -418,7 +418,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         if ( isElastic() && getType() != ProcessingUnitType.STATEFUL ){
             return plannedNumberOfInstances.get();
         }
-        return getNumberOfInstances();
+        return getTotalNumberOfInstances();
     }
 
     private boolean isElastic() {
@@ -442,6 +442,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         this.numberOfBackups = numberOfBackups;
     }
 
+    @Deprecated
     @Override
     public int getTotalNumberOfInstances() {
         return getNumberOfInstances() * (getNumberOfBackups() + 1);

@@ -113,6 +113,8 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
     int getNumberOfBackups();
 
     /**
+     * @deprecated - since 9.6.0 - please use {@link #getPlannedNumberOfInstances()} }
+     * 
      * Returns the total required number of instances as defined in the processing SLA.
      * If there are no backups, will return{@link #getNumberOfInstances()}. If there are backups,
      * will return {@link #getNumberOfInstances()} * ({@link #getNumberOfBackups()}  + 1)
@@ -120,6 +122,7 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
      * instances for the processing unit. To count the number of active processing unit instances please use the method
      * {@link #getInstances()}.  
      */
+    @Deprecated
     int getTotalNumberOfInstances();
 
     /**
