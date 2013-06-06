@@ -95,6 +95,9 @@
     	<exec executable="${env.M2_HOME}\bin\${mvn.executable}"> 
 			<arg line="install:install-file -DgroupId=com.gigaspaces -DartifactId=gs-openspaces -DcreateChecksum=true -Dversion=${productversion} -Dpackaging=jar -DpomFile=${basedir}/pom.xml -Dfile=${target.dir}/gs-openspaces.jar -Dmaven.repo.local=${maven.repo.local}"/>
 		</exec>
+    	<exec executable="${env.M2_HOME}\bin\${mvn.executable}"> 
+			<arg line="install:install-file -DgroupId=com.gigaspaces -DartifactId=gs-openspaces -DcreateChecksum=true -Dversion=${productversion} -Dpackaging=jar -DpomFile=${basedir}/pom.xml -Dclassifier=tests -Dfile=${target.dir}/gs-openspaces-${productversion}-tests.jar -Dmaven.repo.local=${maven.repo.local}"/>
+		</exec>
     </target>
 
 
