@@ -52,6 +52,7 @@ import org.openspaces.grid.gsm.containers.ContainersSlaUtils;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementState.RecoveryState;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementState.StateKey;
 import org.openspaces.grid.gsm.machines.exceptions.CannotDetermineIfNeedToStartMoreMachinesException;
+import org.openspaces.grid.gsm.machines.exceptions.CloudCleanupFailedException;
 import org.openspaces.grid.gsm.machines.exceptions.DelayingScaleInUntilAllMachinesHaveStartedException;
 import org.openspaces.grid.gsm.machines.exceptions.FailedToDiscoverMachinesException;
 import org.openspaces.grid.gsm.machines.exceptions.FailedToStartNewGridServiceAgentException;
@@ -1502,7 +1503,8 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         }
 		
 		FutureCleanupCloudResources future = state.getCleanupFuture(pu);
-        if (!future.isDone()) {
+		
+		if (!future.isDone()) {
         	throw new MachinesSlaEnforcementInProgressException(getProcessingUnit(), "Cloud cleanup is in progress");       	
         }
 		Exception exception = null;
@@ -1525,8 +1527,9 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             exception = e;
         }
 
-        if (exception != null) {
-            throw new MachinesSlaEnforcementInProgressException(pu, "Failed to cleanup cloud", exception);
+        if (exception != null && !future.isMarked()) {
+        	future.mark(); // throw exception only once, complete undeployment even though there was one failure.
+            throw new CloudCleanupFailedException(pu, exception);
         }
 	}
 }

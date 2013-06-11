@@ -456,6 +456,8 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
         
         return new FutureCleanupCloudResources() {
             
+        	boolean mark;
+        	
             @Override
             public boolean isTimedOut() {
                 Throwable exception = atomicExceptionRef.get();
@@ -496,6 +498,16 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
                     throw getException();                    
                 }
             }
+
+			@Override
+			public boolean isMarked() {
+				return mark;
+			}
+
+			@Override
+			public void mark() {
+				mark = true;
+			}
         };
     	
     }

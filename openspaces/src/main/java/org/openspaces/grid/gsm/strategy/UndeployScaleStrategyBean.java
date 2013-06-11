@@ -112,7 +112,7 @@ public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
             enforceMachinesSla(sla);    // fires completed event, does nothing more
         }
         
-        machinesEndpoint.afterUndeployedProcessingUnit(getProcessingUnit(), super.getMachineProvisioning());
+       	machinesEndpoint.afterUndeployedProcessingUnit(getProcessingUnit(), super.getMachineProvisioning());
     }
 
     private void capacityPlannedNumberOfInstancesChangedEvent() {

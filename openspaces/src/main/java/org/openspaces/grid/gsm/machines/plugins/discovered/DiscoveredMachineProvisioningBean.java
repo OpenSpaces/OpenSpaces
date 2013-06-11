@@ -175,7 +175,9 @@ public class DiscoveredMachineProvisioningBean implements NonBlockingElasticMach
         
         return new FutureCleanupCloudResources() {
             
-            @Override
+            private boolean mark;
+
+			@Override
             public boolean isTimedOut() {
                 return false;
             }
@@ -199,6 +201,16 @@ public class DiscoveredMachineProvisioningBean implements NonBlockingElasticMach
             public Void get() throws ExecutionException, IllegalStateException, TimeoutException {
                 return null;
             }
+
+			@Override
+			public boolean isMarked() {
+				return mark;
+			}
+
+			@Override
+			public void mark() {
+				mark = true;
+			}
         };
 	}
 }
