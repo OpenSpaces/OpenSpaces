@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -61,6 +62,7 @@ import org.openspaces.admin.pu.elastic.events.ElasticAutoScalingFailureEventMana
 import org.openspaces.admin.pu.elastic.events.ElasticAutoScalingProgressChangedEvent;
 import org.openspaces.admin.pu.elastic.events.ElasticAutoScalingProgressChangedEventManager;
 import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitEvent;
+import org.openspaces.admin.pu.elastic.events.ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent;
 import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEventManager;
 import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitAddedEventListener;
@@ -114,6 +116,8 @@ public class DefaultProcessingUnits implements InternalProcessingUnits {
     private volatile int statisticsHistorySize = StatisticsMonitor.DEFAULT_HISTORY_SIZE;
 
     private volatile boolean scheduledStatisticsMonitor = false;
+
+	private Map<String, Integer> plannedNumberOfInstances = new ConcurrentHashMap<String, Integer>();
 
     public DefaultProcessingUnits(InternalAdmin admin) {
         this.admin = admin;
@@ -344,9 +348,15 @@ public class DefaultProcessingUnits implements InternalProcessingUnits {
     @Override
     public void processElasticScaleStrategyEvent(final ElasticProcessingUnitEvent event) {
 
-        final InternalProcessingUnit pu = ( InternalProcessingUnit ) this.getProcessingUnit( event.getProcessingUnitName() );
-        if ( pu != null ){
-            pu.processElasticScaleStrategyEvent( event );
+    	if ( event instanceof ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent ) {
+            ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent puEvent = ( ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent ) event;
+            if ( puEvent.getGridServiceAgentZones() == null && puEvent.getProcessingUnitName() != null)
+            {
+                // total # of instances - without per-zone plan
+                final int newPlan = puEvent.getNewPlannedNumberOfInstances();
+                assertStateChangesPermitted();
+                plannedNumberOfInstances.put( event.getProcessingUnitName(), newPlan );
+            }
         }
 
         if (event instanceof ElasticAutoScalingFailureEvent) {
@@ -367,4 +377,13 @@ public class DefaultProcessingUnits implements InternalProcessingUnits {
         }
         return null;
     }
+    
+    /**
+     * @return The planned number of instances for the specified pu name, regardless of the GSM and the LUS status of this pu. Or null if not managed by ESM.
+     */
+    @Override
+	public Integer getPlannedNumberOfInstances(final ProcessingUnit pu) {
+		return plannedNumberOfInstances.get(pu.getName());
+	}
+
 }

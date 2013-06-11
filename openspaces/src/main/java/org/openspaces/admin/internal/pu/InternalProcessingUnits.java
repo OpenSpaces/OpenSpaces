@@ -44,4 +44,10 @@ public interface InternalProcessingUnits extends ProcessingUnits, InternalProces
      * @since 9.1.0
      */
     ProcessingUnit removeEmbeddedSpace(InternalSpace space);
+
+    /**
+     * @return The planned number of instances. Works only for an elastic processing unit, returns null if no information is available.
+     * @see ProcessingUnit#getPlannedNumberOfInstances()
+     */
+	Integer getPlannedNumberOfInstances(ProcessingUnit pu);
 }

@@ -31,7 +31,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.logging.Log;
@@ -85,8 +84,6 @@ import org.openspaces.admin.pu.ProvisionStatus;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependencies;
 import org.openspaces.admin.pu.dependency.ProcessingUnitDependency;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
-import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitEvent;
-import org.openspaces.admin.pu.elastic.events.ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent;
 import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEvent;
 import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEventManager;
 import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEvent;
@@ -146,8 +143,6 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     private final String simpleName;
 
     private volatile int numberOfInstances;
-
-    private AtomicInteger plannedNumberOfInstances;
 
     private volatile int numberOfBackups;
 
@@ -225,7 +220,6 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         this.name = details.getName();
         this.numberOfInstances = details.getNumberOfInstances();
         this.numberOfBackups = details.getNumberOfBackups();
-        this.plannedNumberOfInstances = new AtomicInteger( 0 ); // until we receive an event from esm.
         
         ProcessingUnitType type = ProcessingUnitType.UNKNOWN;
         try {
@@ -415,8 +409,11 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
 
     @Override
     public int getPlannedNumberOfInstances(){
-        if ( isElastic() && getType() != ProcessingUnitType.STATEFUL ){
-            return plannedNumberOfInstances.get();
+    	if ( isElastic() && getType() != ProcessingUnitType.STATEFUL ){
+        	Integer planned = ((InternalProcessingUnits)this.getProcessingUnits()).getPlannedNumberOfInstances(this);
+        	if (planned != null) {
+        		return planned;
+        	}
         }
         return getTotalNumberOfInstances();
     }
@@ -1255,8 +1252,6 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         return new ExactZonesConfig(); // GSC was not started by a GSA
     }
 
-
-
     @Override
     public void addStatisticsCalculation(ProcessingUnitStatisticsId statisticsId) {
         statisticsId.validate();
@@ -1283,18 +1278,4 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         return new AtLeastOneZoneConfigurer().addZones(requiredZones).create();
     }
 
-    @Override
-    public void processElasticScaleStrategyEvent( ElasticProcessingUnitEvent event ) {
-        if ( event instanceof ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent ) {
-            ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent puEvent = ( ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent ) event;
-            if ( puEvent.getGridServiceAgentZones() == null )
-            {
-                // total # of instances - without per-zone plan
-                final int newPlan = puEvent.getNewPlannedNumberOfInstances();
-                assertStateChangesPermitted();
-
-                plannedNumberOfInstances.set( newPlan );
-            }
-        }
-    }
 }

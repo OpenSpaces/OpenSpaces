@@ -27,7 +27,6 @@ import org.openspaces.admin.internal.application.InternalApplicationAware;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
-import org.openspaces.admin.pu.elastic.events.ElasticProcessingUnitEvent;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
 import org.openspaces.admin.space.Space;
 import org.openspaces.admin.zone.config.ExactZonesConfig;
@@ -142,11 +141,4 @@ public interface InternalProcessingUnit extends ProcessingUnit, InternalProcessi
      * @since 9.1.0
      */
     ExactZonesConfig getHostingGridServiceAgentZones(ProcessingUnitInstance processingUnitInstance) throws AdminException;
-
-    /**
-     * If relevant raises events to relevant subscribers
-     * @author guym
-     * @since 9.5.0
-     */
-    void processElasticScaleStrategyEvent( ElasticProcessingUnitEvent event );
 }
