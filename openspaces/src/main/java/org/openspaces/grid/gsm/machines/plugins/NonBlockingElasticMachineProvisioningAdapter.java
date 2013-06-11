@@ -435,10 +435,9 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
                 
                 logger.info("Cleaning cloud resources");
                 try {
-                    if (NonBlockingElasticMachineProvisioningAdapter.this.machineProvisioning.cleanupMachineResources(duration, unit)) {
-                    	logger.info("Cleaned cloud resources cleane up cloud resources");
-                        atomicDone.set(true);
-                    }
+                    NonBlockingElasticMachineProvisioningAdapter.this.machineProvisioning.cleanupMachineResources(duration, unit);
+                	logger.info("Cleaned cloud resources.");
+                    atomicDone.set(true);
                 } catch (ElasticMachineProvisioningException e) {
 					atomicExceptionRef.set(e);
                 } catch (InterruptedException e) {

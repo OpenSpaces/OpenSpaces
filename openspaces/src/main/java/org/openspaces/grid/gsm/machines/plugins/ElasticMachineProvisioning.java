@@ -143,7 +143,7 @@ public interface ElasticMachineProvisioning extends
      * This method is called once after the processing unit has undeployed and all machines have been stopped.
      * @since 9.7.0
      */
-	boolean cleanupMachineResources(long duration, TimeUnit unit) throws ElasticMachineProvisioningException, InterruptedException, TimeoutException;
+	void cleanupMachineResources(long duration, TimeUnit unit) throws ElasticMachineProvisioningException, InterruptedException, TimeoutException;
 	
     /**
      * @return the configuration used by this object
