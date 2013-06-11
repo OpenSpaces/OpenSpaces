@@ -71,8 +71,10 @@ import org.openspaces.grid.gsm.machines.plugins.ElasticMachineProvisioning;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioningAdapter;
 import org.openspaces.grid.gsm.rebalancing.exceptions.RebalancingSlaEnforcementInProgressException;
+import org.openspaces.grid.gsm.sla.exceptions.CannotDiscoverEsmException;
 import org.openspaces.grid.gsm.sla.exceptions.DisconnectedFromLookupServiceException;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementInProgressException;
+import org.openspaces.grid.gsm.sla.exceptions.TooManyEsmComponentsException;
 import org.openspaces.grid.gsm.sla.exceptions.WrongNumberOfESMComponentsException;
 
 public abstract class AbstractScaleStrategyBean implements 
@@ -497,8 +499,14 @@ public abstract class AbstractScaleStrategyBean implements
     private void validateOnlyOneESMRunning() throws WrongNumberOfESMComponentsException {
         final int numberOfEsms = admin.getElasticServiceManagers().getSize();
         if (numberOfEsms != 1) {
-            
-            final WrongNumberOfESMComponentsException e = new WrongNumberOfESMComponentsException(numberOfEsms, this.getProcessingUnit().getName());
+        	WrongNumberOfESMComponentsException e;
+        	if (numberOfEsms == 0) {
+        		// this exception is monitored by the GSA, and causes the ESM process to restart itself.
+        		e = new CannotDiscoverEsmException(this.getProcessingUnit().getName());
+        	}
+        	else {
+        		e = new TooManyEsmComponentsException(numberOfEsms, this.getProcessingUnit().getName());
+        	}
             //eventually raises a machines alert. That's good enough
             ZonesConfig zones = null; // gsa zones not relevant for this error
             machineProvisioningEventState.enqueuProvisioningInProgressEvent(e, zones);
