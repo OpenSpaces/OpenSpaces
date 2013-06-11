@@ -35,6 +35,7 @@ import org.openspaces.admin.zone.config.ExactZonesConfig;
 import org.openspaces.core.bean.Bean;
 import org.openspaces.grid.gsm.ProcessingUnitAware;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
+import org.openspaces.grid.gsm.machines.FutureCleanupCloudResources;
 import org.openspaces.grid.gsm.machines.FutureGridServiceAgent;
 import org.openspaces.grid.gsm.machines.FutureGridServiceAgents;
 import org.openspaces.grid.gsm.machines.FutureStoppedMachine;
@@ -165,4 +166,39 @@ public class DiscoveredMachineProvisioningBean implements NonBlockingElasticMach
             ElasticGridServiceAgentProvisioningProgressChangedEventListener agentEventListener) {
         //not used
     }
+
+	@Override
+	public FutureCleanupCloudResources cleanupCloudResources(long duration,
+			TimeUnit unit) {
+	    //does nothing
+		final long start = System.currentTimeMillis();
+        
+        return new FutureCleanupCloudResources() {
+            
+            @Override
+            public boolean isTimedOut() {
+                return false;
+            }
+            
+            @Override
+            public boolean isDone() {
+                return true;
+            }
+            
+            @Override
+            public Date getTimestamp() {
+                return new Date(start);
+            }
+            
+            @Override
+            public ExecutionException getException() {
+                return null;
+            }
+            
+            @Override
+            public Void get() throws ExecutionException, IllegalStateException, TimeoutException {
+                return null;
+            }
+        };
+	}
 }

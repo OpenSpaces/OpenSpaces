@@ -138,10 +138,17 @@ public interface ElasticMachineProvisioning extends
 	 */
 	boolean stopMachine(GridServiceAgent agent, long duration, TimeUnit unit) throws ElasticMachineProvisioningException, ElasticGridServiceAgentProvisioningException, InterruptedException, TimeoutException;
 	
+	/**
+     * Cleanup all cloud resources.
+     * This method is called once after the processing unit has undeployed and all machines have been stopped.
+     * @since 9.7.0
+     */
+	boolean cleanupMachineResources(long duration, TimeUnit unit) throws ElasticMachineProvisioningException, InterruptedException, TimeoutException;
 	
     /**
      * @return the configuration used by this object
      * @since 8.0.1
      */
     ElasticMachineProvisioningConfig getConfig();
+
 }

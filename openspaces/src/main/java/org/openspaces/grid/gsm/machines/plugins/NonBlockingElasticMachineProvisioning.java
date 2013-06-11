@@ -24,6 +24,7 @@ import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig;
 import org.openspaces.admin.zone.config.ExactZonesConfig;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
+import org.openspaces.grid.gsm.machines.FutureCleanupCloudResources;
 import org.openspaces.grid.gsm.machines.FutureGridServiceAgent;
 import org.openspaces.grid.gsm.machines.FutureGridServiceAgents;
 import org.openspaces.grid.gsm.machines.FutureStoppedMachine;
@@ -118,4 +119,10 @@ public interface NonBlockingElasticMachineProvisioning
 	 */
 	FutureStoppedMachine stopMachineAsync(GridServiceAgent agent, long duration, TimeUnit unit);
 	
+	/**
+     * Cleanup all cloud resources.
+     * This method is called once after the processing unit has undeployed and all machines have been stopped.
+     * @since 9.7.0
+     */
+    public FutureCleanupCloudResources cleanupCloudResources(final long duration, final TimeUnit unit);
 }

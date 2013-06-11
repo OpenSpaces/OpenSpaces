@@ -28,6 +28,7 @@ import org.openspaces.grid.gsm.machines.exceptions.MachinesSlaEnforcementInProgr
 import org.openspaces.grid.gsm.machines.exceptions.NeedToWaitUntilAllGridServiceAgentsDiscoveredException;
 import org.openspaces.grid.gsm.machines.exceptions.SomeProcessingUnitsHaveNotCompletedStateRecoveryException;
 import org.openspaces.grid.gsm.machines.exceptions.UndeployInProgressException;
+import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpoint;
 
 
@@ -99,9 +100,12 @@ public interface MachinesSlaEnforcementEndpoint extends ServiceLevelAgreementEnf
     void beforeUndeployedProcessingUnit(ProcessingUnit pu);
     
     /**
-     * Erases all Allocated (state) that is related to the specified processing unit
+     * Calls cloud driver {@link NonBlockingElasticMachineProvisioning#cleanupCloudResources(long, java.util.concurrent.TimeUnit)}
+     * Erases all Allocated (state) that is related to the specified processing unit.
+     * @param nonBlockingElasticMachineProvisioning 
+     * @throws MachinesSlaEnforcementInProgressException 
      * @since 9.1.0
      */
-    void afterUndeployedProcessingUnit(ProcessingUnit pu);
+    void afterUndeployedProcessingUnit(ProcessingUnit pu, NonBlockingElasticMachineProvisioning nonBlockingElasticMachineProvisioning) throws MachinesSlaEnforcementInProgressException;
     
 }

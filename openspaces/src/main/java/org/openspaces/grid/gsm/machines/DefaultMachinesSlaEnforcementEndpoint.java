@@ -87,6 +87,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
 
     private static final long START_AGENT_TIMEOUT_SECONDS = Long.getLong("org.openspaces.grid.start-agent-timeout-seconds", 30*60L);
     private static final long STOP_AGENT_TIMEOUT_SECONDS = Long.getLong("org.openspaces.grid.stop-agent-timeout-seconds", 10*60L);
+    private static final long CLEANUP_CLOUD_TIMEOUT_SECONDS = Long.getLong("org.openspaces.grid.cleanup-cloud-timeout-seconds", 10*60L);
 
     private final ProcessingUnit pu;
     private final Log logger;
@@ -1488,7 +1489,44 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
     }
         
     @Override
-    public void afterUndeployedProcessingUnit(ProcessingUnit pu) {
-        state.afterUndeployProcessingUnit(pu);
+    public void afterUndeployedProcessingUnit(ProcessingUnit pu, NonBlockingElasticMachineProvisioning machineProvisioning) throws MachinesSlaEnforcementInProgressException {
+        cleanupCloud(pu, machineProvisioning);
+    	state.afterUndeployProcessingUnit(pu);
     }
+
+	private void cleanupCloud(ProcessingUnit pu,
+			NonBlockingElasticMachineProvisioning machineProvisioning) throws MachinesSlaEnforcementInProgressException {
+		if (state.getCleanupFuture(pu) == null) {
+			FutureCleanupCloudResources future = machineProvisioning.cleanupCloudResources(CLEANUP_CLOUD_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        	state.setCleanupFuture(pu, future);
+        }
+		
+		FutureCleanupCloudResources future = state.getCleanupFuture(pu);
+        if (!future.isDone()) {
+        	throw new MachinesSlaEnforcementInProgressException(getProcessingUnit(), "Cloud cleanup is in progress");       	
+        }
+		Exception exception = null;
+        try {
+            future.get();       
+        } catch (ExecutionException e) {
+            // if runtime or error propagate exception "as-is"
+            Throwable cause = e.getCause();
+            if (cause instanceof TimeoutException || 
+                cause instanceof ElasticMachineProvisioningException || 
+                cause instanceof InterruptedException) {
+                // expected exception
+                exception = e;
+            }
+            else {
+                throw new IllegalStateException("Unexpected Exception from machine provisioning.",e);
+            }
+        } catch (TimeoutException e) {
+            // expected exception
+            exception = e;
+        }
+
+        if (exception != null) {
+            throw new MachinesSlaEnforcementInProgressException(pu, "Failed to cleanup cloud", exception);
+        }
+	}
 }

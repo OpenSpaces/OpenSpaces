@@ -37,6 +37,7 @@ import org.openspaces.admin.zone.config.ExactZonesConfig;
 import org.openspaces.grid.gsm.capacity.CapacityRequirement;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.NumberOfMachinesCapacityRequirement;
+import org.openspaces.grid.gsm.machines.FutureCleanupCloudResources;
 import org.openspaces.grid.gsm.machines.FutureGridServiceAgent;
 import org.openspaces.grid.gsm.machines.FutureGridServiceAgents;
 import org.openspaces.grid.gsm.machines.FutureStoppedMachine;
@@ -416,6 +417,89 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
         return maxNumberOfMachines;
     }
 
+    @Override
+    public FutureCleanupCloudResources cleanupCloudResources(final long duration, final TimeUnit unit) {
+    	final AtomicReference<Throwable> atomicExceptionRef = new AtomicReference<Throwable>();
+        final AtomicBoolean atomicDone = new AtomicBoolean(false);
+        
+        if (!isStartMachineSupported()) {
+            throw new UnsupportedOperationException();
+        }
+
+        final long start = System.currentTimeMillis();
+        final long end = System.currentTimeMillis() + unit.toMillis(duration);
+        submit(new Runnable() {
+
+            @Override
+            public void run() {
+                
+                logger.info("Cleaning cloud resources");
+                try {
+                    if (NonBlockingElasticMachineProvisioningAdapter.this.machineProvisioning.cleanupMachineResources(duration, unit)) {
+                    	logger.info("Cleaned cloud resources cleane up cloud resources");
+                        atomicDone.set(true);
+                    }
+                } catch (ElasticMachineProvisioningException e) {
+					atomicExceptionRef.set(e);
+                } catch (InterruptedException e) {
+					atomicExceptionRef.set(e);
+                } catch (TimeoutException e) {
+					atomicExceptionRef.set(e);
+                } catch (NoClassDefFoundError e) {
+                    atomicExceptionRef.set((new NoClassDefFoundElasticMachineProvisioningException(e)));
+                } catch (Throwable e) {
+                    atomicExceptionRef.set(e);
+                }
+            }
+            
+        });
+        
+        return new FutureCleanupCloudResources() {
+            
+            @Override
+            public boolean isTimedOut() {
+                Throwable exception = atomicExceptionRef.get();
+                return (exception instanceof TimeoutException) || (!isDone() && System.currentTimeMillis() > end);
+            }
+            
+            @Override
+            public boolean isDone() {
+                return atomicDone.get() || (atomicExceptionRef.get() != null);
+            }
+            
+            @Override
+            public Date getTimestamp() {
+                return new Date(start);
+            }
+            
+            @Override
+            public ExecutionException getException() {
+                ExecutionException executionException = null;
+                if (atomicExceptionRef.get() != null) {
+                    executionException = new ExecutionException(atomicExceptionRef.get());
+                }
+                return executionException;
+            }
+            
+            @Override
+            public Void get() throws ExecutionException, IllegalStateException, TimeoutException {
+               
+                if (!isDone()) {
+                    // dont allow calling get() before isDone returns true.
+                    throw new IllegalStateException("Async operation has not completed yet");
+                }                
+
+                if (isDone() && getException() == null) {
+                    // all is ok
+                    return null;
+                } else {
+                    throw getException();                    
+                }
+            }
+        };
+    	
+    }
+    
     @Override
     public void setElasticProcessingUnitMachineIsolation(ElasticProcessingUnitMachineIsolation isolation) {
         machineProvisioning.setElasticProcessingUnitMachineIsolation(isolation);

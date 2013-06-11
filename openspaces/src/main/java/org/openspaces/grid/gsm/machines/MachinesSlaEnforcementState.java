@@ -214,6 +214,7 @@ public class MachinesSlaEnforcementState {
     
     private final Map<ProcessingUnit, RecoveryState> recoveredStatePerProcessingUnit;
     private final Set<ProcessingUnit> validatedUndeployNotInProgressPerProcessingUnit;
+    private final Map<ProcessingUnit, FutureCleanupCloudResources> cloudCleanupPerProcessingUnit;
     
     public MachinesSlaEnforcementState() {
         this.logger = 
@@ -223,6 +224,7 @@ public class MachinesSlaEnforcementState {
         state = new HashMap<StateKey,StateValue>();
         recoveredStatePerProcessingUnit = new HashMap<ProcessingUnit, MachinesSlaEnforcementState.RecoveryState>();
         validatedUndeployNotInProgressPerProcessingUnit = new HashSet<ProcessingUnit>();
+        cloudCleanupPerProcessingUnit = new HashMap<ProcessingUnit, FutureCleanupCloudResources>();
     }
 
     public boolean isHoldingStateForProcessingUnit(ProcessingUnit pu) {
@@ -684,6 +686,7 @@ public class MachinesSlaEnforcementState {
             }
         }
         recoveredStatePerProcessingUnit.remove(pu);
+        cloudCleanupPerProcessingUnit.remove(pu);
     }
 
     public Map<StateKey, StateValue> getStateForProcessingUnit(ProcessingUnit pu) {
@@ -733,4 +736,12 @@ public class MachinesSlaEnforcementState {
         }
         return false;
     }
+
+	public FutureCleanupCloudResources getCleanupFuture(ProcessingUnit pu) {
+		return cloudCleanupPerProcessingUnit.get(pu);
+	}
+
+	public void setCleanupFuture(ProcessingUnit pu, FutureCleanupCloudResources future) {
+		cloudCleanupPerProcessingUnit.put(pu, future);
+	}
 }
