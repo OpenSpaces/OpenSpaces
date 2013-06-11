@@ -350,6 +350,9 @@ public class DefaultProcessingUnits implements InternalProcessingUnits {
 
     	if ( event instanceof ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent ) {
             ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent puEvent = ( ElasticStatelessProcessingUnitPlannedNumberOfInstancesChangedEvent ) event;
+        	//If the event.zone is not null, then the planned number of instances reflects the plan in the specified GSA zone,
+            //and does not reflect the total planned number of instances.
+            //If the event.zone is null, it reflects the total number of planned instances (sum of all zones).
             if ( puEvent.getGridServiceAgentZones() == null && puEvent.getProcessingUnitName() != null)
             {
                 // total # of instances - without per-zone plan
@@ -382,7 +385,7 @@ public class DefaultProcessingUnits implements InternalProcessingUnits {
      * @return The planned number of instances for the specified pu name, regardless of the GSM and the LUS status of this pu. Or null if not managed by ESM.
      */
     @Override
-	public Integer getPlannedNumberOfInstances(final ProcessingUnit pu) {
+	public Integer getPlannedNumberOfInstancesOfElasticPU(final ProcessingUnit pu) {
 		return plannedNumberOfInstances.get(pu.getName());
 	}
 

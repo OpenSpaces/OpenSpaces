@@ -49,5 +49,5 @@ public interface InternalProcessingUnits extends ProcessingUnits, InternalProces
      * @return The planned number of instances. Works only for an elastic processing unit, returns null if no information is available.
      * @see ProcessingUnit#getPlannedNumberOfInstances()
      */
-	Integer getPlannedNumberOfInstances(ProcessingUnit pu);
+	Integer getPlannedNumberOfInstancesOfElasticPU(ProcessingUnit pu);
 }

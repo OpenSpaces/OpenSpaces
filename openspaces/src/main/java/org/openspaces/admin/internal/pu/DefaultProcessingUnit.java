@@ -406,14 +406,21 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     public int getNumberOfInstances() {
         return this.numberOfInstances;
     }
+    
+    @Override
+    public int getPlannedNumberOfPartitions() {
+        return getNumberOfInstances();
+    }
 
     @Override
     public int getPlannedNumberOfInstances(){
     	if ( isElastic() && getType() != ProcessingUnitType.STATEFUL ){
-        	Integer planned = ((InternalProcessingUnits)this.getProcessingUnits()).getPlannedNumberOfInstances(this);
+        	Integer planned = ((InternalProcessingUnits)this.getProcessingUnits()).getPlannedNumberOfInstancesOfElasticPU(this);
         	if (planned != null) {
         		return planned;
         	}
+        	// we do not throw an exception since historically #getTotalNumberOfInstances() does not throw exception.
+        	// we fall-back to an estimate of planned number of instances as reflected by the GSM
         }
         return getTotalNumberOfInstances();
     }

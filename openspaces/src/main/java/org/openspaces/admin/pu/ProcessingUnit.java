@@ -77,7 +77,10 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
     String getName();
 
     /**
-     * @deprecated - since 9.5.0 - please use {@link #getPlannedNumberOfInstances()} }
+     * @deprecated - since 9.5.0 - 
+     * For retrieving planned number of stateless pu instances use {@link #getPlannedNumberOfInstances()}. 
+     * For retrieving planned number of primary space instances use {@link #getPlannedNumberOfParitions()}.
+     * For retrieving planned number of all space instances (primary+backup) use {@link #getPlannedNumberOfInstances()}
      *
      * Returns the number of required instances as defined in the processing unit's SLA.
      * If there are backups, it will only return the number of primary instances and not the
@@ -88,6 +91,17 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
      */
     @Deprecated
     int getNumberOfInstances();
+
+   /**
+    * Returns the number of primary instances excluding backup instances.
+    * Note that this method does not count the number of running instances, but rather the number of planned
+    * primary instances for the processing unit. To count the number of active processing unit partitions please use the method
+    * {@link #getPartitions()}.
+    * 
+    * @since 9.6
+    * @author itaif
+    */
+    int getPlannedNumberOfPartitions();
 
     /**
      *
