@@ -34,7 +34,7 @@ public class OutputVersion {
     public static String computeVersion() {
         
         if (PlatformVersion.getBuildNumber().indexOf("-") != -1) {
-            return PlatformVersion.getVersion() + "-SNAPSHOT";
+            return PlatformVersion.getVersion() + "-" + PlatformVersion.getBuildTimestamp() + "-SNAPSHOT";
         }
   
         if (PlatformVersion.getMilestone().equalsIgnoreCase("GA")) {
@@ -54,7 +54,7 @@ public class OutputVersion {
         XapVersion xapVersion = new XapVersion();
         
         if (xapVersion.getBuildNumber().indexOf("-") != -1) {
-            return xapVersion.getVersion() + "-SNAPSHOT";
+            return xapVersion.getVersion() + "-" + xapVersion.getBuildTimestamp() + "-SNAPSHOT";
         }
         
         if (xapVersion.getMilestone().equalsIgnoreCase("GA")) {
