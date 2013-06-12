@@ -34,15 +34,15 @@ public class OutputVersion {
     public static String computeVersion() {
         
         if (PlatformVersion.getBuildNumber().indexOf("-") != -1) {
-            return PlatformVersion.getVersion() + "-SNAPSHOT-" + PlatformVersion.getBuildTimestamp();
+            return PlatformVersion.getVersion() + "-" + PlatformVersion.getBuildTimestamp() + "-SNAPSHOT";
         }
   
         if (PlatformVersion.getMilestone().equalsIgnoreCase("GA")) {
-            return PlatformVersion.getVersion() + "-RELEASE-" + PlatformVersion.getBuildTimestamp();
+            return PlatformVersion.getVersion() + "-" + PlatformVersion.getBuildTimestamp() + "-RELEASE";
         }
         
         if (PlatformVersion.getBuildNumber().indexOf("-") == -1) {
-            return PlatformVersion.getVersion() + "-" + PlatformVersion.getMilestone().toUpperCase() + "-" + PlatformVersion.getBuildTimestamp();
+            return PlatformVersion.getVersion() + "-" + PlatformVersion.getBuildTimestamp() + "-" + PlatformVersion.getMilestone().toUpperCase();
         }
         
         return "";
@@ -54,15 +54,15 @@ public class OutputVersion {
         XapVersion xapVersion = new XapVersion();
         
         if (xapVersion.getBuildNumber().indexOf("-") != -1) {
-            return xapVersion.getVersion() + "-SNAPSHOT-" + xapVersion.getBuildTimestamp();
+            return xapVersion.getVersion() + "-" + xapVersion.getBuildTimestamp() + "-SNAPSHOT";
         }
         
         if (xapVersion.getMilestone().equalsIgnoreCase("GA")) {
-            return xapVersion.getVersion() + "-RELEASE-" + xapVersion.getBuildTimestamp();
+            return xapVersion.getVersion() + "-" + xapVersion.getBuildTimestamp() + "-RELEASE";
         }
         
         if (xapVersion.getBuildNumber().indexOf("-") == -1) {
-            return xapVersion.getVersion() + "-" + xapVersion.getMilestone().toUpperCase() + "-" + xapVersion.getBuildTimestamp();
+            return xapVersion.getVersion() + "-" + xapVersion.getBuildTimestamp() + "-" + xapVersion.getMilestone().toUpperCase();
         }
         
         return "";
