@@ -1992,7 +1992,7 @@ public class DefaultAdmin implements InternalAdmin {
                     Integer state = (Integer)serviceMonitors.getMonitors().get(CloudifyConstants_USM_MONITORS_STATE_ID); 
                     if (!USMState_RUNNING.equals(state)) {
                         if (logger.isDebugEnabled()) {
-                            logger.debug("processing unit " + processingUnit.getName() + " state is scheduled because the USM state is " + state + " instead of " + CloudifyConstants_USM_MONITORS_STATE_ID + " for instance " + instance.getUid());
+                            logger.debug("processing unit " + processingUnit.getName() + " state is scheduled because the USM state is " + state + " instead of " + USMState_RUNNING + " for instance " + instance.getUid());
                         }
                         status = OperationalString.SCHEDULED;
                         break;
