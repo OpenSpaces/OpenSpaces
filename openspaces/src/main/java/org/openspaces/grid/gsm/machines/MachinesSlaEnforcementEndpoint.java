@@ -100,12 +100,19 @@ public interface MachinesSlaEnforcementEndpoint extends ServiceLevelAgreementEnf
     void beforeUndeployedProcessingUnit(ProcessingUnit pu);
     
     /**
-     * Calls cloud driver {@link NonBlockingElasticMachineProvisioning#cleanupCloudResources(long, java.util.concurrent.TimeUnit)}
      * Erases all Allocated (state) that is related to the specified processing unit.
-     * @param nonBlockingElasticMachineProvisioning 
-     * @throws MachinesSlaEnforcementInProgressException 
      * @since 9.1.0
      */
-    void afterUndeployedProcessingUnit(ProcessingUnit pu, NonBlockingElasticMachineProvisioning nonBlockingElasticMachineProvisioning) throws MachinesSlaEnforcementInProgressException;
-    
+    void afterUndeployedProcessingUnit(ProcessingUnit pu);
+
+    /**
+     * Erases all Allocated (state) that is related to the specified processing unit.
+     * Calls cloud driver {@link NonBlockingElasticMachineProvisioning#cleanupCloudResources(long, java.util.concurrent.TimeUnit)}
+     * @param pu - the processing unit in which the cloud resources needs to be cleaned.
+     * @param machineProvisioning 
+     * @throws MachinesSlaEnforcementInProgressException
+     * @since 9.6 
+     */
+	void cleanupCloud(ProcessingUnit pu,
+			NonBlockingElasticMachineProvisioning machineProvisioning) throws MachinesSlaEnforcementInProgressException;
 }

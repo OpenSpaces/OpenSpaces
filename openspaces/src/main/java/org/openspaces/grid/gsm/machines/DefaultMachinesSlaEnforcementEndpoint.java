@@ -1490,12 +1490,12 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
     }
         
     @Override
-    public void afterUndeployedProcessingUnit(ProcessingUnit pu, NonBlockingElasticMachineProvisioning machineProvisioning) throws MachinesSlaEnforcementInProgressException {
-        cleanupCloud(pu, machineProvisioning);
+    public void afterUndeployedProcessingUnit(ProcessingUnit pu) {
     	state.afterUndeployProcessingUnit(pu);
     }
 
-	private void cleanupCloud(ProcessingUnit pu,
+    @Override
+	public void cleanupCloud(ProcessingUnit pu,
 			NonBlockingElasticMachineProvisioning machineProvisioning) throws MachinesSlaEnforcementInProgressException {
 		if (state.getCleanupFuture(pu) == null) {
 			FutureCleanupCloudResources future = machineProvisioning.cleanupCloudResources(CLEANUP_CLOUD_TIMEOUT_SECONDS, TimeUnit.SECONDS);

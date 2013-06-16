@@ -112,10 +112,27 @@ public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
             enforceMachinesSla(sla);    // fires completed event, does nothing more
         }
         
-       	machinesEndpoint.afterUndeployedProcessingUnit(getProcessingUnit(), super.getMachineProvisioning());
+        enforceCloudCleanup();
+        
+       	machinesEndpoint.afterUndeployedProcessingUnit(getProcessingUnit());
     }
 
-    private void capacityPlannedNumberOfInstancesChangedEvent() {
+    private void enforceCloudCleanup() throws MachinesSlaEnforcementInProgressException {
+    	
+    	if (getLogger().isDebugEnabled()) {
+            getLogger().debug("Cleanup Cloud for " + getProcessingUnit().getName());
+        }
+        
+        try {
+        	machinesEndpoint.cleanupCloud(getProcessingUnit(), getMachineProvisioning());
+            machineProvisioningCompletedEvent(null);
+        } catch (MachinesSlaEnforcementInProgressException e) {
+            machineProvisioningInProgressEvent(e, null);
+            throw e;
+        }
+	}
+
+	private void capacityPlannedNumberOfInstancesChangedEvent() {
         if (!plannedNumberOfInstancesEventFired && !isStatefulProcessingUnit()) {
 
             int newPlannedNumberOfInstances = 0;
