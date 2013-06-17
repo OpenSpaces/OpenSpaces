@@ -42,6 +42,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.gigaspaces.security.AuthenticationException;
 import net.jini.core.discovery.LookupLocator;
 import net.jini.core.lookup.ServiceID;
 
@@ -330,8 +331,11 @@ public class DefaultAdmin implements InternalAdmin {
 
     @Override
     public void login(SecuredService service) throws SecurityException, RemoteException {
-        if (service.isServiceSecured())
+        if (service.isServiceSecured()) {
+            if (credentialsProvider == null)
+                throw new AuthenticationException("No authentication details were supplied");
             service.login(credentialsProvider);
+        }
     }
 
     public void setCredentialsProvider(CredentialsProvider credentialsProvider) {
