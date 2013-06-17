@@ -130,7 +130,8 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
                 public ExecutionException getException() {
                     Object result = ref.get();
                     if (result != null && result instanceof Throwable) {
-                        return new ExecutionException((Throwable)result);
+                    	Throwable throwable = (Throwable) result;
+                        return new ExecutionException(throwable.getMessage(), throwable);
                     }
                     return null;
                 }
@@ -251,8 +252,9 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
             @Override
             public ExecutionException getException() {
                 ExecutionException executionException = null;
-                if (atomicExceptionRef.get() != null) {
-                    executionException = new ExecutionException(atomicExceptionRef.get());
+                Throwable throwable = atomicExceptionRef.get();
+                if (throwable != null) {
+                    executionException = new ExecutionException(throwable.getMessage(), throwable);
                 }
                 return executionException;
             }
@@ -333,7 +335,8 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
             public ExecutionException getException() {
                 Object result = ref.get();
                 if (result != null && result instanceof Throwable) {
-                    return new ExecutionException((Throwable)result);
+                    Throwable throwable = (Throwable)result;
+                    return new ExecutionException(throwable.getMessage(), throwable);
                 }
                 return null;
             }
@@ -476,8 +479,9 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
             @Override
             public ExecutionException getException() {
                 ExecutionException executionException = null;
-                if (atomicExceptionRef.get() != null) {
-                    executionException = new ExecutionException(atomicExceptionRef.get());
+                Throwable throwable = atomicExceptionRef.get();
+                if (throwable != null) {
+                    executionException = new ExecutionException(throwable.getMessage(), throwable);
                 }
                 return executionException;
             }

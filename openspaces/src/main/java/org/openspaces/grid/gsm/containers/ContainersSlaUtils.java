@@ -101,7 +101,8 @@ public class ContainersSlaUtils {
             public ExecutionException getException() {
                 Object result = ref.get();
                 if (result != null && result instanceof Throwable) {
-                    return new ExecutionException((Throwable)result);
+                    Throwable throwable = (Throwable)result;
+                    return new ExecutionException(throwable.getMessage(), throwable);
                 }
                 return null;
             }

@@ -20,12 +20,13 @@ import org.openspaces.admin.internal.machine.events.DefaultElasticMachineProvisi
 import org.openspaces.admin.internal.pu.elastic.events.InternalElasticProcessingUnitFailureEvent;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
+import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementLoggerBehavior;
 
 /**
  * @author elip
  *
  */
-public class FailedToStopMachineException extends MachinesSlaEnforcementInProgressException implements SlaEnforcementFailure {
+public class FailedToStopMachineException extends MachinesSlaEnforcementInProgressException implements SlaEnforcementFailure, SlaEnforcementLoggerBehavior {
 
     /**
      * 
@@ -84,5 +85,16 @@ public class FailedToStopMachineException extends MachinesSlaEnforcementInProgre
                 + "Shutdown this machine manually";
         return errorMessage;
     }
+    
+    @Override
+    public boolean isAlwaysLogStackTrace() {
+        return true;
+    }
+
+    @Override
+    public boolean isAlwaysLogDuplicateException() {
+        return true;
+    }
+
 
 }

@@ -127,8 +127,9 @@ public class RebalancingUtils {
                public ExecutionException getException() {
 
                    end();
-                   if (throwable.get() != null) {
-                       return new ExecutionException(throwable.get());
+                   Throwable t = throwable.get();
+                   if (t != null) {
+                       return new ExecutionException(t.getMessage(), t);
                    }
                    return null;
                }
@@ -326,7 +327,7 @@ public class RebalancingUtils {
 
                 endRelocation();
                 if (throwable != null) {
-                    return new ExecutionException(throwable);
+                    return new ExecutionException(throwable.getMessage(), throwable);
                 }
                 return null;
             }
