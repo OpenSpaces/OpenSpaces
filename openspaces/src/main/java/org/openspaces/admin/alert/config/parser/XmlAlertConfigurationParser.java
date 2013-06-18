@@ -94,8 +94,11 @@ public class XmlAlertConfigurationParser implements AlertConfigurationParser {
         InputStream resourceAsStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(resourceName);
         if (resourceAsStream == null) {
             //look for config/alerts/alerts.xml
-            resourceName = DEFAULT_ALERT_CONFIG_DIRECTORY+DEFAULT_ALERT_RESOURCE_NAME;
-            resourceAsStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(resourceName);
+        	String altResourceName = DEFAULT_ALERT_CONFIG_DIRECTORY+DEFAULT_ALERT_RESOURCE_NAME;
+        	if (logger.isDebugEnabled()) {
+                logger.debug("Failed to locate " + resourceName +". Trying to locate " + altResourceName + " in classpath");
+            }
+            resourceAsStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(altResourceName);
         }
         
         if (resourceAsStream == null) {
