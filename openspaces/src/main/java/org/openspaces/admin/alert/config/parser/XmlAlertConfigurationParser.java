@@ -180,8 +180,8 @@ public class XmlAlertConfigurationParser implements AlertConfigurationParser {
                 alertConfiguration.setProperties(properties);
                 alertConfigurations.add(alertConfiguration);
             }
-        } catch (Exception e) {
-            throw new AlertConfigurationParserException("Failed to parse configuration file", e);
+        } catch (Throwable t) {
+            throw new AlertConfigurationParserException("Failed to parse configuration file", t);
         } finally {
             try {
                 is.close();
