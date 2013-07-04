@@ -89,6 +89,9 @@ to the application root directory will result in importing the three modules.
 If this is a fresh Eclipse installation, the M2_REPO needs be defined and pointed to the local 
 maven repository (which resides under USER_HOME/.m2/repository).
 
+After generating the projects, configure them to work with maven:
+for each project, right click on it and select Configure > Convert to Maven Project.
+
   The application itself comes with built in launch targets allowing to run the mirror, processor 
 and the feeder using Eclipse run (or debug) targets.
 
