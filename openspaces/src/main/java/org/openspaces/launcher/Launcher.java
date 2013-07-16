@@ -22,6 +22,7 @@ import java.util.logging.Logger;
 
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.SessionManager;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.openspaces.pu.container.support.CommandLineParser;
@@ -43,7 +44,9 @@ public class Launcher {
         String name = System.getProperty("org.openspaces.launcher.name", "launcher");
         String path = System.getProperty("org.openspaces.launcher.path", null);
         String work = System.getProperty("org.openspaces.launcher.work", "./work");
-        String loggerName = System.getProperty("org.openspaces.launcher.logger", "org.openspaces.launcher"); 
+        String loggerName = System.getProperty("org.openspaces.launcher.logger", "org.openspaces.launcher");
+        String sessionManagerStr = System.getProperty( "org.openspaces.launcher.jetty.session.manager" );
+        
         CommandLineParser.Parameter[] params = CommandLineParser.parse(args);
         for (CommandLineParser.Parameter param : params) {
             String paramName = param.getName();
@@ -84,6 +87,23 @@ public class Launcher {
         webAppContext.setTempDirectory(tempDir);
         webAppContext.setCopyWebDir(false);
         webAppContext.setParentLoaderPriority(true);
+        
+        if( sessionManagerStr != null ){
+            //change default session manager implementation ( in order to change "JSESSIONID" )
+        	//GS-10830, CLOUDIFY-1797
+        	try{
+        		Class sessionManagerClass = Class.forName( sessionManagerStr );
+        		SessionManager sessionManagerImpl = ( SessionManager )sessionManagerClass.newInstance();
+        		webAppContext.getSessionHandler().setSessionManager( sessionManagerImpl );
+        	}
+        	catch( Throwable t ){
+        		System.out.println( "Session Manager [" + sessionManagerStr + "] was not set cause following exception:" + t.toString() );
+        		t.printStackTrace();
+        	}
+        }
+        else{
+        	System.out.println( "Session Manager was not provided" );
+        }
 
         server.setHandler(webAppContext);
         

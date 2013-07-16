@@ -24,6 +24,7 @@ import org.eclipse.jetty.jmx.MBeanContainer;
 import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.server.handler.HandlerWrapper;
+import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.util.log.JavaUtilLog;
 import org.eclipse.jetty.util.resource.FileResource;
 import org.eclipse.jetty.webapp.WebAppContext;
@@ -501,6 +502,15 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
             }
             
             webAppContext.setClassLoader(webAppClassLoader);
+            
+            SessionManager sessionManager = ( SessionManager )applicationContext.getBean("sessionManager");
+            if( sessionManager != null ){
+            	SessionHandler sessionHandler = webAppContext.getSessionHandler();
+            	if( sessionHandler != null ){
+            		//fix for GS-10830 , CLOUDIFY-1797
+            		sessionHandler.setSessionManager( sessionManager );
+            	}
+            }            
 
             HandlerContainer container = jettyHolder.getServer();
 
