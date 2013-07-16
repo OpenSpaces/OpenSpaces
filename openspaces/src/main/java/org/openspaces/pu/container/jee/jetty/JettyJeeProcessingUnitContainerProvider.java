@@ -503,14 +503,18 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
             
             webAppContext.setClassLoader(webAppClassLoader);
             
-            SessionManager sessionManager = ( SessionManager )applicationContext.getBean("sessionManager");
-            if( sessionManager != null ){
-            	SessionHandler sessionHandler = webAppContext.getSessionHandler();
-            	if( sessionHandler != null ){
-            		//fix for GS-10830 , CLOUDIFY-1797
-            		sessionHandler.setSessionManager( sessionManager );
-            	}
-            }            
+            final String SESSION_MANAGER_BEAN = "sessionManager";
+            if( applicationContext.containsBean( SESSION_MANAGER_BEAN ) ){
+            	SessionManager sessionManager = 
+            		( SessionManager )applicationContext.getBean( SESSION_MANAGER_BEAN );
+            	if( sessionManager != null ){
+            		SessionHandler sessionHandler = webAppContext.getSessionHandler();
+            		if( sessionHandler != null ){
+            			//fix for GS-10830 , CLOUDIFY-1797
+            			sessionHandler.setSessionManager( sessionManager );
+            		}
+            	}            
+            }
 
             HandlerContainer container = jettyHolder.getServer();
 
