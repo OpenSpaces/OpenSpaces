@@ -760,7 +760,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     private boolean shouldWrapWithUrlConnection(
             String processingUnitContainerProviderClass)
     {
-        if (Boolean.getBoolean("com.gs.processingunit.classpath.disable-explicit-close-jar"))
+        if (!Boolean.getBoolean("com.gs.processingunit.classpath.enable-explicit-close-jar"))
             return false;
 
         if (processingUnitContainerProviderClass.contains("JeeProcessingUnitContainerProvider"))
