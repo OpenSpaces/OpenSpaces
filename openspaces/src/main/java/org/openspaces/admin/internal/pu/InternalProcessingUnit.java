@@ -141,4 +141,14 @@ public interface InternalProcessingUnit extends ProcessingUnit, InternalProcessi
      * @since 9.1.0
      */
     ExactZonesConfig getHostingGridServiceAgentZones(ProcessingUnitInstance processingUnitInstance) throws AdminException;
+
+    /**
+     * @param isBackupInSync - true if backup GSM is in sync with primary GSM, false if out of sync.
+     */
+	void setBackupGsmInSync(boolean isBackupInSync);
+	
+	/**
+     * @param isBackupInSync - true if backup GSM is in sync with primary GSM, false if out of sync or no backup gsm.
+     */
+	boolean isBackupGsmInSync();
 }

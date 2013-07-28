@@ -1832,6 +1832,22 @@ public class DefaultAdmin implements InternalAdmin {
 
                     newProcessingUnit = true;
                 }
+                
+            	if (holder.backupDetail == null) {
+            		processingUnit.setBackupGsmInSync(false);
+            	}
+            	else if (holder.detail.getNumberOfInstances() != holder.backupDetail.getNumberOfInstances()) {
+            		if (logger.isDebugEnabled()) {
+                        logger.debug(
+                        		"GSMs not in sync yet. Number of planned instances of " + processingUnit.getName() + " is " + holder.detail.getNumberOfInstances() + 
+                        		" but backup gsm planned still reports " + holder.backupDetail.getNumberOfInstances());
+                    }
+            		processingUnit.setBackupGsmInSync(false);
+            	}
+            	else {
+            		processingUnit.setBackupGsmInSync(true);
+            	}
+
                 // we always update the number of instances and backups since they might increate/decrease
                 processingUnit.setNumberOfInstances(details.getNumberOfInstances());
                 processingUnit.setNumberOfBackups(details.getNumberOfBackups());

@@ -145,6 +145,8 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     private volatile int numberOfInstances;
 
     private volatile int numberOfBackups;
+    
+    private volatile boolean backupGsmIsInSync;
 
     private final BeanLevelProperties beanLevelProperties;
 
@@ -1284,5 +1286,14 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         }
         return new AtLeastOneZoneConfigurer().addZones(requiredZones).create();
     }
-
+    
+    @Override
+    public boolean isBackupGsmInSync() {
+    	return backupGsmIsInSync;
+    }
+    
+    @Override
+    public void setBackupGsmInSync(boolean backupGsmIsInSync) {
+    	this.backupGsmIsInSync = backupGsmIsInSync;
+    }
 }

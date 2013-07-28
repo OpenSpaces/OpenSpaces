@@ -44,6 +44,7 @@ import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsa.GridServiceAgents;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.pu.InternalProcessingUnit;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.pu.DeploymentStatus;
 import org.openspaces.admin.pu.ProcessingUnit;
@@ -187,8 +188,13 @@ public class RebalancingUtils {
                    if (targetNumberOfInstances.get() == numberOfInstances+1) {
                        if (logger.isInfoEnabled()) {
                            logger.info(uuid+
-                                  "Waiting for pu.numberOfInstances to increment from "+numberOfInstances + " to " + targetNumberOfInstances.get() + ". "+
+                                  " Waiting for pu.numberOfInstances to increment from "+numberOfInstances + " to " + targetNumberOfInstances.get() + ". "+
                                   "Number of relevant containers " + maxNumberOfInstances);
+                       }
+                   }
+                   else if (admin.getGridServiceManagers().getSize() > 1 && !((InternalProcessingUnit)pu).isBackupGsmInSync() ) {
+                	   if (logger.isInfoEnabled()) {
+                           logger.info(uuid+" Waiting for backup gsm to sync with active gsm");
                        }
                    }
                    else {
