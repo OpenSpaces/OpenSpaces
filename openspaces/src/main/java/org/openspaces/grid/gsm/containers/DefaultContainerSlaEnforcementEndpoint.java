@@ -52,8 +52,9 @@ import com.gigaspaces.grid.gsa.AgentProcessDetails;
 
 class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcementEndpoint {
 
-    private static final int START_CONTAINER_TIMEOUT_FAILURE_SECONDS = 60;
-    private static final int START_CONTAINER_TIMEOUT_FAILURE_FORGET_SECONDS = 120;
+	// enough time for the GSC also to register with the Lookup Service.
+    private static final long START_CONTAINER_TIMEOUT_FAILURE_SECONDS = Long.getLong("org.openspaces.grid.start-container-timeout-seconds", 2*60L);
+    private static final long START_CONTAINER_TIMEOUT_FAILURE_FORGET_SECONDS = START_CONTAINER_TIMEOUT_FAILURE_SECONDS + Long.getLong("org.openspaces.grid.wait-before-start-container-again-seconds", 1*60L);
 
     private final ProcessingUnit pu;
     private final Log logger;
