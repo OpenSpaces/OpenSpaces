@@ -140,7 +140,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             }
             else {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Found llocated capacity on agent that is no longer discovered " + agentUid);
+                    logger.debug("Found allocated capacity on agent that is no longer discovered " + agentUid);
                 }
             }
         }
