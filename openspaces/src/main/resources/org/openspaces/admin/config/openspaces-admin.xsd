@@ -229,6 +229,12 @@
 					</xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
+			<xsd:attribute name="primary-zone" type="xsd:string" use="optional">
+				<xsd:annotation>
+					<xsd:documentation>Defines the zone where primary space instances should eb allocated.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
 			<xsd:attribute name="secured" type="xsd:boolean" use="optional">
 				<xsd:annotation>
 					<xsd:documentation>Will deploy a secured processing unit. Note, by
@@ -448,6 +454,12 @@
 					</xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
+			<xsd:attribute name="primary-zone" type="xsd:string" use="optional">
+				<xsd:annotation>
+					<xsd:documentation>Defines the zone where primary space instances should eb allocated.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
 			<xsd:attribute name="secured" type="xsd:boolean" use="optional">
 				<xsd:annotation>
 					<xsd:documentation>Will deploy a secured processing unit. Note, by
@@ -555,6 +567,12 @@
 				<xsd:annotation>
 					<xsd:documentation>Zone that define which Container the processing
 						unit is allowed to be deployed on.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="primary-zone" type="xsd:string" use="optional">
+				<xsd:annotation>
+					<xsd:documentation>Defines the zone where primary space instances should eb allocated.
 					</xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>

@@ -531,6 +531,11 @@ public class Deploy {
                     info("Adding SLA required zone with [" + arg + "]");
                 }
             }
+            if (param.getName().equalsIgnoreCase("primary-zone")) {
+                String primaryZone = param.getArguments()[0];
+                sla.setPrimaryZone(primaryZone);
+                info("Overriding SLA primaryZone with [" + primaryZone + "]");
+            }
         }
         
         if (logger.isDebugEnabled()) {
@@ -859,6 +864,7 @@ public class Deploy {
         // add pu names, path and code server so it can be used on the service bean side
         element.getServiceBeanConfig().addInitParameter("puName", puName);
         element.getServiceBeanConfig().addInitParameter("puPath", puPath);
+        element.getServiceBeanConfig().addInitParameter("primaryZone", sla.getPrimaryZone());
         
         //this is the MOST IMPORTANT part
         if (sla.getInstanceSLAs() != null && sla.getInstanceSLAs().size() > 0) {

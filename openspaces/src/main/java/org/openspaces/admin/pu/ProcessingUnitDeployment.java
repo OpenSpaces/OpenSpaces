@@ -213,6 +213,14 @@ public class ProcessingUnitDeployment implements ProcessingUnitDeploymentTopolog
     }
 
     /**
+     * Set the primary zone where the processing unit is allowed to be deployed on.
+     */
+    public ProcessingUnitDeployment primaryZone(String zone) {
+        config.setPrimaryZone(zone);
+        return this;
+    }
+
+    /**
      * Sets a context deploy time property overriding any <code>${...}</code> defined within a processing
      * unit configuration.
      */

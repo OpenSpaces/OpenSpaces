@@ -79,6 +79,9 @@ public class SLA implements Serializable {
     private String clusterSchema;
 
     private Policy policy;
+    //property is transient - because backwards compatibility
+    // serialized via ServiceBeanConfig initParameters
+    private transient String primaryZone;
 
     private List<Requirement> requirements = new ArrayList<Requirement>();
 
@@ -242,6 +245,17 @@ public class SLA implements Serializable {
      */
     public void setRequirements(List<Requirement> requirements) {
         this.requirements = requirements;
+    }
+
+ 
+    public String getPrimaryZone()
+    {
+        return primaryZone;
+    }
+
+    public void setPrimaryZone(String primaryZone)
+    {
+        this.primaryZone = primaryZone;
     }
 
     /**

@@ -302,7 +302,15 @@
                         machine. Format is: "zone1/1", and several zones is: "zoneX/1,zoneY/2".
                     </xsd:documentation>
                 </xsd:annotation>
-            </xsd:attribute>
+		    </xsd:attribute>
+			<xsd:attribute name="primary-zone" type="xsd:string" use="optional">
+				<xsd:annotation>
+					<xsd:documentation>
+						Defines the zone where primary instances should
+						be allocated.  
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
         </xsd:complexType>
     </xsd:element>
 

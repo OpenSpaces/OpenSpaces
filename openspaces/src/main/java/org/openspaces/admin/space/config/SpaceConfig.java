@@ -194,6 +194,16 @@ public class SpaceConfig implements ProcessingUnitConfigHolder {
         config.setMaxInstancesPerZone(maxInstancesPerZoneConfig.getZone(), maxInstancesPerZoneConfig.getMaxNumberOfInstances());
     }
         
+    public String getPrimaryZone()
+    {
+        return config.getPrimaryZone();
+    }
+
+    public void setPrimaryZone(String primaryZone)
+    {
+        config.setPrimaryZone(primaryZone);
+    }
+
     /**
      * @see ProcessingUnitDeployment#secured(boolean)
      */

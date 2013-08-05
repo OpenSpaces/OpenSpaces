@@ -64,6 +64,7 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigHolder {
     private Map<String, Integer> maxInstancesPerZone = new HashMap<String, Integer>();
 
     private List<String> zones = new ArrayList<String>();
+    private String primaryZone;
 
     private Map<String,String> contextProperties = new HashMap<String,String>();
 
@@ -301,6 +302,10 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigHolder {
                 deployOptions.add(requiredZone);
             }
         }
+        if (primaryZone != null) {
+            deployOptions.add("-primary-zone");
+            deployOptions.add(primaryZone);
+        }
         if (!elasticProperties.isEmpty()){
             deployOptions.add("-elastic-properties");
             for (Map.Entry<String, String> elasticProp : elasticProperties.entrySet()){
@@ -493,6 +498,11 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigHolder {
                 return false;
         } else if (!zones.equals(other.zones))
             return false;
+        if (primaryZone == null) {
+            if (other.primaryZone != null)
+                return false;
+        } else if (!primaryZone.equals(other.primaryZone))
+            return false;
         return true;
     }
     
@@ -507,12 +517,23 @@ public class ProcessingUnitConfig implements ProcessingUnitConfigHolder {
                 + (maxInstancesPerMachine != null ? "maxInstancesPerMachine=" + maxInstancesPerMachine + ", " : "")
                 + (maxInstancesPerZone != null ? "maxInstancesPerZone=" + maxInstancesPerZone + ", " : "")
                 + (zones != null ? "zones=" + zones + ", " : "")
+                + (primaryZone != null ? "primaryZone=" + primaryZone + ", " : "")
                 + (contextProperties != null ? "contextProperties=" + contextProperties + ", " : "")
                 + (userDetails != null ? "userDetails=" + userDetails + ", " : "")
                 + (slaLocation != null ? "slaLocation=" + slaLocation + ", " : "")
                 + (secured != null ? "secured=" + secured + ", " : "")
                 + (elasticProperties != null ? "elasticProperties=" + elasticProperties + ", " : "")
                 + (dependencies != null ? "dependencies=" + dependencies : "") + "]";
+    }
+
+    public String getPrimaryZone()
+    {
+        return primaryZone;
+    }
+
+    public void setPrimaryZone(String primaryZone)
+    {
+        this.primaryZone = primaryZone;
     }
 
     @Override

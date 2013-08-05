@@ -75,6 +75,10 @@ public class SLABeanDefinitionParser extends AbstractSingleBeanDefinitionParser 
         if (StringUtils.hasLength(maxInstancesPerZone)) {
             builder.addPropertyValue("maxInstancesPerZoneAsString", maxInstancesPerZone);
         }
+        String primaryZone = element.getAttribute("primary-zone");
+        if (StringUtils.hasLength(primaryZone)) {
+            builder.addPropertyValue("primaryZone", primaryZone);
+        }
     }
 
     @Override

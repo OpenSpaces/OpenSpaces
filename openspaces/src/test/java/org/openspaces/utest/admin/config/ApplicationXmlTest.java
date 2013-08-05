@@ -70,6 +70,7 @@ public class ApplicationXmlTest extends TestCase {
                         .create())
                 .addZone("zone1")
                 .addZone("zone2")
+                .primaryZone("zone1")
                 .maxInstancesPerZone("zone", 1)
                 .secured(true)
                 .setContextProperty("key", "value")

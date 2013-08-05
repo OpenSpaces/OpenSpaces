@@ -30,6 +30,7 @@
       				</property>
 					
 					<property name="zones" value="zone1,zone2"/>
+					<property name="primaryZone" value="zone1"/>
 					<property name="secured" value="true" />
 					<property name="slaLocation" value="slaLocation" />
 					<property name="deploymentDependencies">
