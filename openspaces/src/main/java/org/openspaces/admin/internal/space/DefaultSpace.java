@@ -32,6 +32,7 @@ import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.StatisticsMonitor;
+import org.openspaces.admin.internal.admin.AdminClosedException;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.space.events.DefaultReplicationStatusChangedEventManager;
 import org.openspaces.admin.internal.space.events.DefaultSpaceInstanceAddedEventManager;
@@ -767,6 +768,10 @@ public class DefaultSpace implements InternalSpace {
                     logger.debug("Failed to get runtime information", e);
                 } else {
                     logger.warn("Failed to get runtime information", e);
+                }
+            } catch (AdminClosedException e) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Failed to get runtime information since admin is already closed", e);
                 }
             } catch (Exception e) {
                 if (NetworkExceptionHelper.isConnectOrCloseException(e)) {
