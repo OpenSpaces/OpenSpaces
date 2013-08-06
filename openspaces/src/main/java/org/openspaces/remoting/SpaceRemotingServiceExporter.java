@@ -16,9 +16,18 @@
 
 package org.openspaces.remoting;
 
-import com.gigaspaces.internal.reflection.IMethod;
-import com.gigaspaces.internal.reflection.ReflectionUtil;
-import com.gigaspaces.internal.reflection.standard.StandardMethod;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jini.rio.boot.ServiceClassLoader;
@@ -45,12 +54,9 @@ import org.springframework.remoting.RemoteLookupFailureException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.Assert;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.*;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
+import com.gigaspaces.internal.reflection.IMethod;
+import com.gigaspaces.internal.reflection.ReflectionUtil;
+import com.gigaspaces.internal.reflection.standard.StandardMethod;
 
 /**
  * Exports a list of services (beans) as remote services with the Space as the transport layer. All
@@ -653,6 +659,11 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Spac
 
         public Object invoke(Object obj, Object... args) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
             return method.invoke(obj, args);
+        }
+
+        @Override
+        public Method getMethod() {
+        	return method.getMethod();
         }
     }
 }

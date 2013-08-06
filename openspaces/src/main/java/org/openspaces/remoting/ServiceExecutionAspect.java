@@ -17,6 +17,7 @@
 package org.openspaces.remoting;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 /**
  * A service execution callback allows to wrap the execution of "server side" service. If
@@ -45,6 +46,17 @@ public interface ServiceExecutionAspect {
      * based method invocation.
      */
     interface MethodInvocation {
+    	/**
+    	 * Invokes this execution on the specified service using the supplied arguments.
+    	 * @param service the service to invoke the method on.
+    	 * @param args the arguments of the invocation.
+    	 * @return invocation result.
+    	 */
         Object invoke(Object service, Object... args) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException;
+        
+        /**
+         * Gets the underlying method of this invocation 
+         */
+        Method getMethod();
     }
 }
