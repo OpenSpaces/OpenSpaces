@@ -33,6 +33,12 @@ public interface SpaceAddedEventManager {
      * {@link org.openspaces.admin.space.Space}s.
      */
     void add(SpaceAddedEventListener eventListener);
+    
+    /**
+     * Adds an event listener allowing to control using the <code>includeExisting</code> if events
+     * will be fired for existing spaces as well.
+     */
+    void add(SpaceAddedEventListener eventListener, boolean includeExisting);    
 
     /**
      * Removes an event listener.

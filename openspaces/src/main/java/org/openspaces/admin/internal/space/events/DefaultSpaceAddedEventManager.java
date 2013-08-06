@@ -17,14 +17,14 @@
  ******************************************************************************/
 package org.openspaces.admin.internal.space.events;
 
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.space.InternalSpaces;
 import org.openspaces.admin.internal.support.GroovyHelper;
 import org.openspaces.admin.space.Space;
 import org.openspaces.admin.space.events.SpaceAddedEventListener;
-
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @author kimchy
@@ -41,7 +41,8 @@ public class DefaultSpaceAddedEventManager implements InternalSpaceAddedEventMan
         this.spaces = spaces;
         this.admin = (InternalAdmin) spaces.getAdmin();
     }
-
+    
+    @Override
     public void spaceAdded(final Space space) {
         for (final SpaceAddedEventListener listener : listeners) {
             admin.pushEvent(listener, new Runnable() {
@@ -51,7 +52,8 @@ public class DefaultSpaceAddedEventManager implements InternalSpaceAddedEventMan
             });
         }
     }
-
+    
+    @Override
     public void add(final SpaceAddedEventListener eventListener) {
         admin.raiseEvent(eventListener, new Runnable() {
             public void run() {
@@ -62,7 +64,22 @@ public class DefaultSpaceAddedEventManager implements InternalSpaceAddedEventMan
         });
         listeners.add(eventListener);
     }
+    
+    @Override
+    public void add(final SpaceAddedEventListener eventListener, boolean includeExisting) {
+        if( includeExisting ) {
+            admin.raiseEvent(eventListener, new Runnable() {
+                public void run() {
+                    for (Space space : spaces) {
+                        eventListener.spaceAdded(space);
+                    }
+                }
+            });
+        }
+        listeners.add(eventListener);
+    }    
 
+    @Override
     public void remove(SpaceAddedEventListener eventListener) {
         listeners.remove(eventListener);
     }
