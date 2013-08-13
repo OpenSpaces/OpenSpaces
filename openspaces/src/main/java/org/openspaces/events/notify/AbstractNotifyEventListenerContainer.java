@@ -16,7 +16,6 @@
 
 package org.openspaces.events.notify;
 
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 
 import net.jini.core.event.EventRegistration;
@@ -36,7 +35,6 @@ import org.springframework.util.Assert;
 
 import com.gigaspaces.events.DataEventSession;
 import com.gigaspaces.events.EventSessionConfig;
-import com.gigaspaces.events.EventSessionFactory;
 import com.gigaspaces.events.NotifyActionType;
 import com.gigaspaces.events.batching.BatchRemoteEvent;
 import com.j_spaces.core.client.EntryArrivedRemoteEvent;
@@ -671,14 +669,6 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
         }
     }
 
-
-    /**
-     * Creates a new event session factory based on the space provided.
-     */
-    protected EventSessionFactory createEventSessionFactory() {
-        return EventSessionFactory.getFactory(getGigaSpace().getSpace());
-    }
-
     /**
      * Creates a new {@link com.gigaspaces.events.EventSessionConfig} based on the different
      * parameters this container accepts.
@@ -725,19 +715,6 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
             eventSessionConfig.setDurableNotifications(durable);
         }
         return eventSessionConfig;
-    }
-
-    /**
-     * Creates a new {@link com.gigaspaces.events.DataEventSession} based on the provided factory.
-     * Uses {@link #createEventSessionConfig()} in order to create the session configuration.
-     */
-    protected DataEventSession createDataEventSession(EventSessionFactory factory) throws DataAccessException {
-        EventSessionConfig config = createEventSessionConfig();
-        try {
-            return factory.newDataEventSession(config);
-        } catch (RemoteException e) {
-            throw new CannotCreateNotifySessionException("Failed to create new data event session", config, e);
-        }
     }
 
     /**

@@ -18,7 +18,6 @@ package org.openspaces.events.notify;
 
 import com.gigaspaces.cluster.activeelection.SpaceInitializationIndicator;
 import com.gigaspaces.events.DataEventSession;
-import com.gigaspaces.events.EventSessionFactory;
 import com.gigaspaces.events.batching.BatchRemoteEvent;
 import com.gigaspaces.events.batching.BatchRemoteEventListener;
 import com.gigaspaces.internal.dump.InternalDump;
@@ -156,8 +155,7 @@ public class SimpleNotifyEventListenerContainer extends AbstractNotifyEventListe
         }
         SpaceInitializationIndicator.setInitializer();
         try {
-            EventSessionFactory factory = createEventSessionFactory();
-            dataEventSession = createDataEventSession(factory);
+            dataEventSession = getGigaSpace().newDataEventSession(createEventSessionConfig());
             try {
                 if (isBatchEnabled()) {
                     eventRegistration = registerListener(dataEventSession, new BatchNotifyListenerDelegate());
