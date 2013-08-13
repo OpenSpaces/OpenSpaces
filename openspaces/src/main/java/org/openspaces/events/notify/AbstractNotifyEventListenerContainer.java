@@ -43,9 +43,7 @@ import com.j_spaces.core.client.INotifyDelegatorFilter;
 /**
  * Base class for notifications based containers allowing to register listener that will be
  * triggered by the space if notifications occur. Provides all the necessary parameters that are
- * used by {@link com.gigaspaces.events.EventSessionConfig} and support methods for creating
- * {@link com.gigaspaces.events.EventSessionFactory} and
- * {@link com.gigaspaces.events.DataEventSession} objects.
+ * used by {@link com.gigaspaces.events.EventSessionConfig}.
  * <p/>
  * <p>The container allows to set the template object used for the notify registration. Note, this can
  * be a Pojo based template, or one of GigaSpace's query classes such as
@@ -91,7 +89,6 @@ import com.j_spaces.core.client.INotifyDelegatorFilter;
  *
  * @author kimchy
  * @see com.gigaspaces.events.EventSessionConfig
- * @see com.gigaspaces.events.EventSessionFactory
  * @see com.gigaspaces.events.DataEventSession
  */
 public abstract class AbstractNotifyEventListenerContainer extends AbstractTransactionalEventListenerContainer {
