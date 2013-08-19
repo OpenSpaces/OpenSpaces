@@ -146,6 +146,7 @@ set _ARGS=%_ARGS:6*=6-s%
 set _ARGS=%_ARGS:7*=7-s%
 set _ARGS=%_ARGS:8*=8-s%
 set _ARGS=%_ARGS:9*=9-s%
+set _ARGS=%_ARGS:\*=\-s%
 
 rem prequote all args for 'for' statement
 set _ARGS="%_ARGS%"
