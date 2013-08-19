@@ -205,6 +205,9 @@ public class ESMImplInitializer {
                         logger.log(Level.INFO, "Waiting for PU " + puName + " instances to be discovered. Discovered " + discoveredNumberOfInstances + " expected " + numberOfInstancesAccordingToGsm);
                         return false;
                     }
+                    else {
+                    		logger.log(Level.INFO, "Discovered "+ discoveredNumberOfInstances + " " + puName + " instances.");
+                    }
                 }
             }
         }
