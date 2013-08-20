@@ -21,6 +21,7 @@ import com.gigaspaces.grid.gsm.GSM;
 import com.gigaspaces.grid.gsm.PUDetails;
 import com.gigaspaces.grid.gsm.PUsDetails;
 import com.gigaspaces.internal.utils.concurrent.GSThreadFactory;
+import com.gigaspaces.security.service.SecurityResolver;
 import com.j_spaces.kernel.SystemProperties;
 import java.rmi.RemoteException;
 import java.util.HashMap;
@@ -33,6 +34,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.openspaces.admin.Admin;
+import org.openspaces.admin.AdminFactory;
 import org.openspaces.admin.esm.ElasticServiceManager;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.internal.InternalAdminFactory;
@@ -157,11 +159,15 @@ public class ESMImplInitializer {
 
     private void createAdminIfNull() {
         if (admin == null) {
-            admin = (InternalAdmin) 
-            		new InternalAdminFactory()
-            		.singleThreadedEventListeners()
-            		.useDaemonThreads(true)
-            		.createAdmin();
+            AdminFactory factory = new InternalAdminFactory()
+                    .singleThreadedEventListeners()
+                    .useDaemonThreads(true);
+            if (SecurityResolver.isSecurityEnabled()) {
+                String username = System.getProperty(SystemProperties.ESM_USERNAME);
+                String password = System.getProperty(SystemProperties.ESM_PASSWORD);
+                factory.credentials(username, password);
+            }
+            admin = (InternalAdmin)factory.createAdmin();
         }
     }
 
