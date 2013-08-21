@@ -187,21 +187,20 @@ public class RebalancingUtils {
                 if (numberOfInstances < maxNumberOfInstances) {
                    if (targetNumberOfInstances.get() == numberOfInstances+1) {
                        if (logger.isInfoEnabled()) {
-                           logger.info(uuid+
-                                  " Waiting for pu.numberOfInstances to increment from "+numberOfInstances + " to " + targetNumberOfInstances.get() + ". "+
+                           logger.info("Waiting for pu.numberOfInstances to increment from "+numberOfInstances + " to " + targetNumberOfInstances.get() + ". "+
                                   "Number of relevant containers " + maxNumberOfInstances);
                        }
                    }
                    else if (admin.getGridServiceManagers().getSize() > 1 && !((InternalProcessingUnit)pu).isBackupGsmInSync() ) {
                 	   if (logger.isInfoEnabled()) {
-                           logger.info(uuid+" Waiting for backup gsm to sync with active gsm");
+                           logger.info("Waiting for backup gsm to sync with active gsm");
                        }
                    }
                    else {
                        targetNumberOfInstances.set(numberOfInstances+1);
                        if (logger.isInfoEnabled()) {
                            logger.info(uuid+
-                                  "Planning to increment pu.numberOfInstances from "+numberOfInstances + " to " + targetNumberOfInstances.get() + ". "+
+                                  " Planning to increment pu.numberOfInstances from "+numberOfInstances + " to " + targetNumberOfInstances.get() + ". "+
                                   "Number of relevant containers " + maxNumberOfInstances);
                        }
                        ((InternalAdmin) admin).scheduleAdminOperation(new Runnable() {
@@ -211,12 +210,12 @@ public class RebalancingUtils {
                                    // pu.getNumberOfInstances() still shows the old value.
                                    pu.incrementInstance();
                                    if (logger.isInfoEnabled()) {
-                                       logger.info(uuid+"pu.incrementInstance() called");
+                                       logger.info(uuid+" pu.incrementInstance() called");
                                    }
                                } catch (AdminException e) {
                                    throwable.set(e);
                                } catch (Throwable e) {
-                                   logger.error(uuid+"Unexpected Exception: " + e.getMessage(),e);
+                                   logger.error(uuid+" Unexpected Exception: " + e.getMessage(),e);
                                    throwable.set(e);
                                }
                            }
