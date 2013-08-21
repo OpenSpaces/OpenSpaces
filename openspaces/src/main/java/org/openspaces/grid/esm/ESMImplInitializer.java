@@ -17,7 +17,6 @@
  ******************************************************************************/
 package org.openspaces.grid.esm;
 
-import com.gigaspaces.grid.gsm.GSM;
 import com.gigaspaces.grid.gsm.PUDetails;
 import com.gigaspaces.grid.gsm.PUsDetails;
 import com.gigaspaces.internal.utils.concurrent.GSThreadFactory;
@@ -35,11 +34,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminFactory;
+import org.openspaces.admin.GridComponent;
 import org.openspaces.admin.esm.ElasticServiceManager;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.internal.InternalAdminFactory;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.gsm.InternalGridServiceManager;
+import org.openspaces.admin.internal.vm.InternalVirtualMachineInfoProvider;
 import org.openspaces.admin.lus.LookupService;
 import org.openspaces.admin.pu.ProcessingUnit;
 /**
@@ -60,7 +61,11 @@ public class ESMImplInitializer {
     private static final long DISCOVERY_POLLING_PERIOD_SECONDS = Integer.getInteger(SystemProperties.ESM_DISCOVERY_POLLING_INTERVAL, 20);
     
     private static final Logger logger = Logger.getLogger(ESMImplInitializer.class.getName());
-    
+
+    // If any PU is discovered wait until all GSM(s) and LUS(s) are running for at least 1 minute.
+    private static final long WAITFOR_GSM_UPTIME_SECONDS = Integer.getInteger(SystemProperties.ESM_WAITFOR_GSM_UPTIME, 60); 
+    private static final long WAITFOR_LUS_UPTIME_SECONDS = Integer.getInteger(SystemProperties.ESM_WAITFOR_LUS_UPTIME, 60);
+	
     private InternalAdmin admin;
 
     private final AdminCreatedEventListener esmInitializer;
@@ -120,18 +125,16 @@ public class ESMImplInitializer {
                     numberOfInstancesPerProcessingUnit.put(pu.getName(), pu.getInstances().length);
                 }
                 
-                final Set<GSM> gridServiceManagers = new HashSet<GSM>();
-                for (GridServiceManager gsm : admin.getGridServiceManagers()) {
-                    gridServiceManagers.add(((InternalGridServiceManager)gsm).getGSM());
-                }
-              
+                final LookupService[] lookupServices = admin.getLookupServices().getLookupServices(); 
+                final GridServiceManager[] gridServiceManagers = admin.getGridServiceManagers().getManagers();
+                
               //performing blocking network action is done on a separate thread
               executor.submit(new Runnable() {
                  
                 @Override
                 public void run() {
                     try { 
-                        if (isLookupDiscoverySyncedWithGsm(gridServiceManagers, numberOfInstancesPerProcessingUnit)) {
+                        if (isLookupDiscoverySyncedWithGsm(lookupServices, gridServiceManagers, numberOfInstancesPerProcessingUnit)) {
                             esmInitializer.adminCreated(admin);
                             return;
                         }
@@ -175,20 +178,20 @@ public class ESMImplInitializer {
      * Makes sure that data arriving from Lookup Service into Admin API cache
      * conforms to the data reported from the GSM.
      */
-    private static boolean isLookupDiscoverySyncedWithGsm(Set<GSM> gridServiceManagers, Map<String,Integer> numberOfInstancesPerProcessingUnit) {
+    private static boolean isLookupDiscoverySyncedWithGsm(LookupService[] lookupServices, GridServiceManager[] gridServiceManagers, Map<String,Integer> numberOfInstancesPerProcessingUnit) {
 
         Set<String> managedPus = new HashSet<String>();
-        
+
         //for each gsm
-        for (final GSM gsm : gridServiceManagers) {
+        for (final GridServiceManager gsm : gridServiceManagers) {
             PUsDetails pusDetails;
             try {
-                pusDetails = gsm.getPUsDetails();
+                pusDetails = ((InternalGridServiceManager)gsm).getGSM().getPUsDetails();
             } catch (final RemoteException e) {
                 logger.log(Level.WARNING, "Failed to get PU details from GSM",e);
                 return false;
             }
-           
+            
             // for each pu
             for (final PUDetails details : pusDetails.getDetails()) {
                 
@@ -225,10 +228,40 @@ public class ESMImplInitializer {
             return false;
         }
      
+        if (!numberOfInstancesPerProcessingUnit.isEmpty()) {
+        	for (GridServiceManager gsm : gridServiceManagers) {
+        		if (!isUptimeEnough("GSM", WAITFOR_GSM_UPTIME_SECONDS, gsm)) {
+        			return false;
+        		}
+        	}
+        	for (LookupService lus : lookupServices) {
+        		if (!isUptimeEnough("LUS", WAITFOR_LUS_UPTIME_SECONDS, lus)) {
+        			return false;
+        		}
+        	}
+        }
         return true;
     }
 
-    private static boolean isOtherESMRunning(InternalAdmin admin) {
+	private static boolean isUptimeEnough(String type, long timeoutSeconds, GridComponent component) {
+		try {
+			final long uptimeSeconds = TimeUnit.MILLISECONDS.toSeconds(((InternalVirtualMachineInfoProvider)component).getJVMStatistics().getUptime());
+			if (uptimeSeconds < timeoutSeconds) {
+				logger.log(Level.INFO, "Waiting for " + type + " " + component.getUid() + " to run for at least " + timeoutSeconds + " but it is running for only " + uptimeSeconds + "seconds.");
+				return false;
+			}
+			else {
+				logger.log(Level.INFO, type + " " + component.getUid() + " uptime is " + uptimeSeconds + " seconds.");
+			}
+		} catch (final RemoteException e) {
+		    logger.log(Level.WARNING, "Failed to get " + type +" " + component.getUid() + " uptime.",e);
+		    return false;
+		}
+		return true;
+	}
+	
+
+	private static boolean isOtherESMRunning(InternalAdmin admin) {
         ElasticServiceManager[] elasticServiceManagers = admin.getElasticServiceManagers().getManagers();
         if (elasticServiceManagers.length > 0) {
             logger.log(Level.INFO, "Waiting for other ESM to terminate: " + elasticServiceManagers[0].getUid());
