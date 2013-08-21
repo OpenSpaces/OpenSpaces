@@ -18,9 +18,13 @@ package org.openspaces.pu.sla;
 
 import org.openspaces.pu.sla.monitor.Monitor;
 import org.openspaces.pu.sla.requirement.Requirement;
+import org.openspaces.pu.sla.requirement.ZoneRequirement;
+import org.springframework.beans.factory.InitializingBean;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
@@ -66,7 +70,7 @@ import com.gigaspaces.grid.zone.ZoneHelper;
  *
  * @author kimchy
  */
-public class SLA implements Serializable {
+public class SLA implements Serializable ,InitializingBean{
 
     private static final long serialVersionUID = -7596100914791517899L;
 
@@ -295,6 +299,58 @@ public class SLA implements Serializable {
     public String toString() {
         return "numberOfInstances [" + numberOfInstances + "] numberOfBackups [" + numberOfBackups
                 + "] clusterSchema [" + clusterSchema + "] policy " + policy;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception
+    {
+        // validate primary zone
+        if (primaryZone != null && !primaryZone.trim().isEmpty())
+        {
+            LinkedHashSet<String> primaryZones = ZoneHelper.parseZones(primaryZone);
+            String[] requiredZones = getRequiredZones();
+
+            for (String primaryZone : primaryZones)
+            {
+                if (!ZoneHelper.zoneExists(primaryZone, requiredZones))
+                    throw new IllegalArgumentException("Primary zone ["
+                            + primaryZone
+                            + "] doesn't exist. Defined zone are - "
+                            + Arrays.toString(requiredZones) + ".");
+
+            }
+
+            // validate number of backups
+            if (numberOfBackups > 1)
+                throw new IllegalArgumentException("Primary zone was set with number-of-backups="
+                        + numberOfBackups
+                        + ", must be set to 1. ");
+            // validate max instances per primary zone
+            for (String primaryZone : primaryZones)
+            {
+                Integer maxInstancesPerPrimaryZone = maxInstancesPerZone.get(primaryZone);
+                if (maxInstancesPerPrimaryZone == null)
+                    throw new IllegalArgumentException("Primary zone ["
+                            + primaryZone
+                            + "] max-instances-per-zone is not defined, must be set to 1.");
+
+                if( maxInstancesPerPrimaryZone > 1)
+                    throw new IllegalArgumentException("Primary zone ["
+                            + primaryZone
+                            + "] max-instances-per-zone="+ maxInstancesPerPrimaryZone +", must be set to 1.");
+
+            }
+        }
+    }
+
+    private String[] getRequiredZones() {
+        ArrayList<String> zones = new ArrayList<String>();
+        for (Requirement req : requirements) {
+            if (req instanceof ZoneRequirement) {
+                zones.add(((ZoneRequirement) req).getZone());
+            }
+        }
+        return zones.toArray(new String[zones.size()]);
     }
 
 }

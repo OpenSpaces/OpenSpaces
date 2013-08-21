@@ -2,7 +2,6 @@ package org.openspaces.pu.sla;
 
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -22,6 +21,8 @@ import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.cluster.ClusterInfoAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+
+import com.gigaspaces.grid.zone.ZoneHelper;
 
 
 /**
@@ -134,7 +135,7 @@ public class PrimaryZoneController
                 return;
             }
 
-            Set<String> primaryZones = getPrimaryZones(primaryZone);
+            Set<String> primaryZones = ZoneHelper.parseZones(primaryZone);
             Set<String> currentBackupZones = getZones(backup);
 
             // if backup is in primary zone, and primary is not,
@@ -166,20 +167,6 @@ public class PrimaryZoneController
                 return true;
         }
         return false;
-    }
-
-    private Set<String> getPrimaryZones(String primaryZone)
-    {
-        HashSet<String> primaryZones = new HashSet<String>();
-        if (primaryZone != null)
-        {
-            String[] zonesArr = primaryZone.split(",");
-            for (String zone : zonesArr)
-            {
-                primaryZones.add(zone.trim());
-            }
-        }
-        return primaryZones;
     }
 
     private Set<String> getZones(ProcessingUnitInstance puInstance)
