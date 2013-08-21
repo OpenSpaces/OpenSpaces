@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
 import java.rmi.ConnectException;
 
+import com.gigaspaces.exception.lrmi.LRMINoSuchObjectException;
+
 /**
  * @author kimchy
  */
@@ -42,6 +44,9 @@ public abstract class NetworkExceptionHelper {
             if (e.getCause().getMessage() != null && e.getCause().getMessage().contains("Connection reset by peer")) {
                 return true;
             }
+        }
+        if(e instanceof LRMINoSuchObjectException) {
+            return true;
         }
         if (e instanceof IOException) {
             if (e.getMessage() != null && e.getMessage().startsWith("Connection reset by peer")) {
