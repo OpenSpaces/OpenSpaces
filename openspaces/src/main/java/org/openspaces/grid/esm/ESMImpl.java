@@ -34,6 +34,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.gigaspaces.security.service.SecurityInterceptor;
+import com.gigaspaces.security.service.SecurityResolver;
 import net.jini.export.Exporter;
 
 import org.jini.rio.boot.BootUtil;
@@ -121,7 +123,8 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
     private final EventsStore eventsStore;
     private final AtomicBoolean adminInitialized = new AtomicBoolean(false);
     private final AtomicBoolean destroyStarted = new AtomicBoolean(false);
-    
+    private SecurityInterceptor securityInterceptor;
+
     /**
      * Create an ESM
      */
@@ -259,6 +262,9 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
 
     @Override
     public synchronized void initialize(ServiceBeanContext context) throws Exception {
+        if (SecurityResolver.isSecurityEnabled())
+            securityInterceptor = new SecurityInterceptor("grid");
+
         while (!adminInitialized.get()) {
             if (logger.isLoggable(Level.FINE)) {
                 logger.fine("Waiting for ESM initializer to complete");
@@ -311,7 +317,12 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
 
     @Override
     protected Object createProxy() {
-        Object proxy = ESMProxy.getInstance((ESM)getExportedProxy(), getUuid());
+        Object proxy;
+        if (securityInterceptor != null) {
+            proxy = ESMProxy.getInstance((ESM)getExportedProxy(), getUuid());
+        } else {
+            proxy = ESMProxy.getInstance((ESM)getExportedProxy(), getUuid());
+        }
         return(proxy);
     }
 
@@ -416,11 +427,11 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
     }
 
     public boolean isServiceSecured() throws RemoteException {
-        return false;
+        return securityInterceptor != null;
     }
 
     public SecurityContext login(CredentialsProvider credentialsProvider) throws SecurityException, RemoteException {
-        return null;
+        throw new SecurityException("Invalid method call."); //this is proxy API
     }
 
     public void setProcessingUnitScaleStrategy(final String puName, final ScaleStrategyConfig scaleStrategyConfig) {
