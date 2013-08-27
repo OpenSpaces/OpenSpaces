@@ -22,6 +22,7 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Map;
 
+import com.gigaspaces.security.authorities.GridAuthority;
 import net.jini.id.Uuid;
 
 import org.jini.rio.monitor.event.Events;
@@ -76,15 +77,20 @@ public class ESMProxy extends AbstractProxy implements ESM, Serializable {
 
     public void setProcessingUnitElasticProperties(String processingUnitName, Map<String, String> properties)
             throws RemoteException {
+        intercept(GridAuthority.GridPrivilege.MANAGE_PU);
+        intercept(GridAuthority.GridPrivilege.MANAGE_GRID);
         esmServer.setProcessingUnitElasticProperties(processingUnitName, properties);
     }
 
     public void setProcessingUnitScaleStrategy(String puName, ScaleStrategyConfig scaleStrategyConfig)
             throws RemoteException {
+        intercept(GridAuthority.GridPrivilege.MANAGE_PU);
+        intercept(GridAuthority.GridPrivilege.MANAGE_GRID);
         esmServer.setProcessingUnitScaleStrategy(puName, scaleStrategyConfig);
     }
 
     public ScaleStrategyConfig getProcessingUnitScaleStrategyConfig(String processingUnitName)throws RemoteException {
+        intercept(GridAuthority.GridPrivilege.MANAGE_PU);
         return esmServer.getProcessingUnitScaleStrategyConfig(processingUnitName);
     }
 
@@ -100,11 +106,13 @@ public class ESMProxy extends AbstractProxy implements ESM, Serializable {
 
     @Override
     public Events getScaleStrategyEvents(long cursor, int maxNumberOfEvents) throws RemoteException {
+        intercept(GridAuthority.GridPrivilege.MANAGE_PU);
         return esmServer.getScaleStrategyEvents(cursor, maxNumberOfEvents);
     }
 
 	@Override
 	public Remote getStorageApi(String processingUnitName) throws RemoteException {
+        intercept(GridAuthority.GridPrivilege.MANAGE_GRID);
 		return esmServer.getStorageApi(processingUnitName);
 	}
 }

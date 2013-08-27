@@ -319,7 +319,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
     protected Object createProxy() {
         Object proxy;
         if (securityInterceptor != null) {
-            proxy = ESMProxy.getInstance((ESM)getExportedProxy(), getUuid());
+            proxy = SecuredESMProxy.getInstance((ESM)getExportedProxy(), getUuid());
         } else {
             proxy = ESMProxy.getInstance((ESM)getExportedProxy(), getUuid());
         }
@@ -552,6 +552,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
         propertiesManager.enableBean(strategyClassName);
     }
 
+    @Override
     public void setProcessingUnitElasticProperties(final String puName, final Map<String, String> properties) throws RemoteException {
         logger.fine("Queuing elastic properties for " + puName);
         submitAndWait(new Callable<Void>() {
@@ -574,6 +575,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
         );
     }
 
+    @Override
     public void processingUnitRemoved(final ProcessingUnit pu) {
 
         if (logger.isLoggable(Level.FINE)) {
@@ -589,6 +591,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
         }
     }
 
+    @Override
     public void processingUnitAdded(ProcessingUnit pu) {
 
         if (logger.isLoggable(Level.FINE)) {
@@ -703,10 +706,12 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
         }
     }
 
+    @Override
     public void machineAdded(Machine machine) {
         machine.getOperatingSystem().startStatisticsMonitor();
     }
 
+    @Override
     public void machineRemoved(Machine machine) {
         machine.getOperatingSystem().stopStatisticsMonitor();
     }
@@ -744,6 +749,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
 
     }
 
+    @Override
     public ScaleStrategyConfig getProcessingUnitScaleStrategyConfig(final String processingUnitName) throws RemoteException {
 
         return submitAndWait( new Callable<ScaleStrategyConfig>() {
