@@ -1,9 +1,6 @@
 package org.openspaces.grid.esm;
 
-import com.gigaspaces.grid.security.gsa.SecuredServiceAdminProxy;
-import com.gigaspaces.grid.security.interceptor.ProxySecurityInterceptor;
 import net.jini.id.Uuid;
-import org.jini.rio.resources.servicecore.ServiceAdmin;
 
 /**
  * @author Niv Ingberg
