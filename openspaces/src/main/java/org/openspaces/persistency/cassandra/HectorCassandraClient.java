@@ -28,7 +28,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import me.prettyprint.cassandra.model.BasicColumnDefinition;
 import me.prettyprint.cassandra.model.ConfigurableConsistencyLevel;
-import me.prettyprint.cassandra.serializers.ObjectSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.service.BatchSizeHint;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
@@ -66,6 +65,7 @@ import org.openspaces.persistency.cassandra.meta.data.ColumnData;
 import org.openspaces.persistency.cassandra.meta.data.ColumnFamilyRow;
 import org.openspaces.persistency.cassandra.meta.mapping.SpaceDocumentColumnFamilyMapper;
 import org.openspaces.persistency.cassandra.meta.types.CustomTypeInferringSerializer;
+import org.openspaces.persistency.cassandra.meta.types.SerializerProvider;
 import org.openspaces.persistency.cassandra.meta.types.ValidatorClassInferer;
 
 import com.gigaspaces.document.SpaceDocument;
@@ -458,7 +458,7 @@ public class HectorCassandraClient {
             ColumnFamilyTemplate<Object, String> template = getTemplate(ColumnFamilyMetadataMetadata.INSTANCE);
             ColumnFamilyUpdater<Object, String> updater = template.createUpdater(metadata.getTypeName());
             updater.setByteBuffer(ColumnFamilyMetadataMetadata.BLOB_COLUMN_NAME,
-                                  ObjectSerializer.get().toByteBuffer(metadata));
+                                  SerializerProvider.getObjectSerializer().toByteBuffer(metadata));
             template.update(updater);
         } catch (Exception e) {
             throw new SpaceCassandraSchemaUpdateException("Failed persisting column family metadata for " +
@@ -484,7 +484,7 @@ public class HectorCassandraClient {
         
         ColumnFamilyResult<Object, String> result = template.queryColumns(typeName);
         HColumn<String, ByteBuffer> column = result.getColumn(ColumnFamilyMetadataMetadata.BLOB_COLUMN_NAME);
-        ColumnFamilyMetadata newMetadata = (ColumnFamilyMetadata) ObjectSerializer.get()
+        ColumnFamilyMetadata newMetadata = (ColumnFamilyMetadata) SerializerProvider.getObjectSerializer()
                 .fromByteBuffer(column.getValueBytes());
         initMetadataAndAddToCache(mapper, newMetadata);
         return newMetadata;
@@ -500,7 +500,7 @@ public class HectorCassandraClient {
         RangeSlicesQuery<String, String, Object> rangeQuery = HFactory.createRangeSlicesQuery(keyspace, 
               StringSerializer.get(), 
               StringSerializer.get(), 
-              ObjectSerializer.get())
+              SerializerProvider.getObjectSerializer())
                   .setColumnFamily(ColumnFamilyMetadataMetadata.NAME)
                   .setColumnNames(ColumnFamilyMetadataMetadata.BLOB_COLUMN_NAME)
                   .setKeys("", "");

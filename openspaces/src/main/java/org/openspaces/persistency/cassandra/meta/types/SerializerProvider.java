@@ -51,6 +51,8 @@ public class SerializerProvider {
     
     private static final Map<Class<?>, Serializer<?>> serializers = new HashMap<Class<?>, Serializer<?>>();
     
+    private static final Serializer<Object> OBJECT_SERIALIZER = new ObjectSerializer(SerializerProvider.class.getClassLoader()); 
+    
     static {
         serializers.put(boolean.class, BooleanSerializer.get());
         serializers.put(Boolean.class, BooleanSerializer.get());
@@ -87,18 +89,25 @@ public class SerializerProvider {
         Serializer serializer = serializers.get(type);
         
         if (serializer == null) {
-            serializer = ObjectSerializer.get();
+            serializer = getObjectSerializer();
         }
             
         return serializer;
     }
 
     /**
+     * @return An object serializer that uses the class loader of this class.
+     */
+    public static Serializer<Object> getObjectSerializer() {
+        return OBJECT_SERIALIZER;
+    }
+    
+    /**
      * @param type The type to test.
      * @return <code>true</code> if this type is serialized using
      * {@link ObjectSerializer}
      */
     public static boolean isCommonJavaType(Class<?> type) {
-        return !(getSerializer(type) == ObjectSerializer.get());
+        return !(getSerializer(type) == getObjectSerializer());
     }
 }

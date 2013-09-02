@@ -17,8 +17,7 @@ package org.openspaces.itest.persistency.cassandra.spring;
 
 import java.nio.ByteBuffer;
 
-import me.prettyprint.cassandra.serializers.ObjectSerializer;
-
+import org.openspaces.persistency.cassandra.meta.types.SerializerProvider;
 import org.openspaces.persistency.cassandra.meta.types.dynamic.PropertyValueSerializer;
 
 /**
@@ -29,12 +28,12 @@ public class MockPropertySerializer implements PropertyValueSerializer {
 
     @Override
     public ByteBuffer toByteBuffer(Object value) {
-        return ObjectSerializer.get().toByteBuffer(value);
+        return SerializerProvider.getObjectSerializer().toByteBuffer(value);
     }
 
     @Override
     public Object fromByteBuffer(ByteBuffer byteBuffer) {
-        return ObjectSerializer.get().fromByteBuffer(byteBuffer);
+        return SerializerProvider.getObjectSerializer().fromByteBuffer(byteBuffer);
     }
 
 }

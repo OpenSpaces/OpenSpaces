@@ -4,7 +4,6 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import junit.framework.Assert;
-import me.prettyprint.cassandra.serializers.ObjectSerializer;
 
 import org.apache.cassandra.cql.jdbc.CassandraDataSource;
 import org.junit.Before;
@@ -17,6 +16,7 @@ import org.openspaces.persistency.cassandra.CassandraSpaceSynchronizationEndpoin
 import org.openspaces.persistency.cassandra.HectorCassandraClient;
 import org.openspaces.persistency.cassandra.meta.mapping.filter.FlattenedPropertiesFilter;
 import org.openspaces.persistency.cassandra.meta.mapping.filter.PropertyContext;
+import org.openspaces.persistency.cassandra.meta.types.SerializerProvider;
 import org.openspaces.persistency.cassandra.meta.types.dynamic.PropertyValueSerializer;
 
 import com.gigaspaces.datasource.DataIterator;
@@ -110,12 +110,12 @@ public class CustomSerializersCassandraTest extends AbstractCassandraTest
         public ByteBuffer toByteBuffer(Object obj)
         {
             toByteBufferHitCount.incrementAndGet();
-            return ObjectSerializer.get().toByteBuffer(obj);
+            return SerializerProvider.getObjectSerializer().toByteBuffer(obj);
         }
         public Object fromByteBuffer(ByteBuffer byteBuffer)
         {
             fromByteBufferHitCount.incrementAndGet();
-            return ObjectSerializer.get().fromByteBuffer(byteBuffer);
+            return SerializerProvider.getObjectSerializer().fromByteBuffer(byteBuffer);
         }
     };
     
