@@ -64,7 +64,8 @@ public class CassandraTokenRangeJDBCDataIterator implements DataIterator<Object>
     private static final Log                      logger             = LogFactory.getLog(CassandraTokenRangeJDBCDataIterator.class);
     
     private static final String                   IDENTIFIER          = "((?:[a-zA-Z_$][a-zA-Z\\d_$]*\\.)*[a-zA-Z_$][a-zA-Z\\d_$]*)";
-    private static final String                   COLUMN_NAME_REGEX   = "(?:" + IDENTIFIER + "\\s*=\\s*?)";
+    private static final String                   OPERATOR            = "(?:=|<|>|<=|>=)";
+    private static final String                   COLUMN_NAME_REGEX   = "(?:" + IDENTIFIER + "\\s*" + OPERATOR + "\\s*?)";
     private static final Pattern                  COLUMN_NAME_PATTERN = Pattern.compile(COLUMN_NAME_REGEX);
 
     private final SpaceDocumentColumnFamilyMapper mapper;
