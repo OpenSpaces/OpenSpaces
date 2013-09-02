@@ -25,6 +25,7 @@ import java.util.Set;
 import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsc.GridServiceContainer;
+import org.openspaces.admin.internal.pu.elastic.GridServiceAgentFailureDetectionConfig;
 import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.elastic.config.AutomaticCapacityScaleConfig;
@@ -39,6 +40,7 @@ import org.openspaces.admin.zone.config.ExactZonesConfig;
 import org.openspaces.admin.zone.config.RequiredZonesConfig;
 import org.openspaces.admin.zone.config.ZonesConfig;
 import org.openspaces.core.util.MemoryUnit;
+import org.openspaces.grid.gsm.GridServiceAgentFailureDetectionConfigAware;
 import org.openspaces.grid.gsm.GridServiceContainerConfigAware;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerAgent;
@@ -77,6 +79,7 @@ import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementInProgressException;
 public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStrategyBean 
     implements 
     GridServiceContainerConfigAware,
+    GridServiceAgentFailureDetectionConfigAware,
     RebalancingSlaEnforcementEndpointAware , 
     ContainersSlaEnforcementEndpointAware, 
     MachinesSlaEnforcementEndpointAware {
@@ -85,6 +88,7 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
     private MachinesSlaEnforcementEndpoint machinesEndpoint;
     private ContainersSlaEnforcementEndpoint containersEndpoint;
     private RebalancingSlaEnforcementEndpoint rebalancingEndpoint;
+    private GridServiceAgentFailureDetectionConfig agentFailureDetectionConfig;
     
     @Override
     public void setMachinesSlaEnforcementEndpoint(MachinesSlaEnforcementEndpoint machinesService) {
@@ -99,6 +103,11 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
     @Override
     public void setRebalancingSlaEnforcementEndpoint(RebalancingSlaEnforcementEndpoint relocationService) {
         this.rebalancingEndpoint = relocationService;
+    }
+    
+    @Override
+    public void setAgentFailureDetectionConfig(GridServiceAgentFailureDetectionConfig agentFailureDetectionConfig) {
+    	this.agentFailureDetectionConfig = agentFailureDetectionConfig;
     }
 
     // created by afterPropertiesSet()
@@ -395,6 +404,7 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
         final CapacityMachinesSlaPolicy sla = new CapacityMachinesSlaPolicy();
         sla.setMachineProvisioning(super.getMachineProvisioning());
         sla.setCapacityRequirements(capacityRequirements);
+        sla.setAgentFailureDetectionConfig(agentFailureDetectionConfig);
         sla.setMinimumNumberOfMachines(minimumNumberOfMachines);
         sla.setMaximumNumberOfMachines(getMaximumNumberOfInstances());
         sla.setMaximumNumberOfContainersPerMachine(getMaximumNumberOfContainersPerMachine());

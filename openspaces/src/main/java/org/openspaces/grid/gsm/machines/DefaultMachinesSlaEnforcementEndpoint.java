@@ -17,6 +17,8 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.machines;
 
+import static org.openspaces.grid.gsm.machines.MachinesSlaUtils.getAgentIpAddress;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -36,6 +38,7 @@ import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsa.GridServiceAgents;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.gsa.InternalGridServiceAgent;
+import org.openspaces.admin.internal.pu.elastic.GridServiceAgentFailureDetectionConfig;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.zone.config.ExactZonesConfig;
@@ -54,6 +57,7 @@ import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementState.StateKey;
 import org.openspaces.grid.gsm.machines.exceptions.CannotDetermineIfNeedToStartMoreMachinesException;
 import org.openspaces.grid.gsm.machines.exceptions.CloudCleanupFailedException;
 import org.openspaces.grid.gsm.machines.exceptions.DelayingScaleInUntilAllMachinesHaveStartedException;
+import org.openspaces.grid.gsm.machines.exceptions.DiscoveredTwoAgentsWithTheSameIpAddress;
 import org.openspaces.grid.gsm.machines.exceptions.FailedToDiscoverMachinesException;
 import org.openspaces.grid.gsm.machines.exceptions.FailedToStartNewGridServiceAgentException;
 import org.openspaces.grid.gsm.machines.exceptions.FailedToStartNewMachineException;
@@ -170,6 +174,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         }
     
         validateProvisionedMachines(sla);
+        validateNoTwoDiscoveredAgentsHaveSameIpAddress(sla);
         setMachineIsolation(sla);
         enforceSlaInternal(sla);
             
@@ -257,7 +262,16 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                                     capacityToAllocateOnAgent));
                 }
             }
-    
+            
+            if (sla instanceof CapacityMachinesSlaPolicy) {
+            	
+            	//not calling sla.getDiscoveredMachinesCache().getDiscoveredAgents() to avoid possible exceptions
+	            final GridServiceAgents agents = admin.getGridServiceAgents();
+	            
+            	//We need to make sure we disable failure detection (affects all PUs) 
+	            //before another pu on the same machine with SLA that does not have failure detection disabled starts a new machine (failover).
+            	updateAgentsWithDisabledFailureDetection((CapacityMachinesSlaPolicy)sla, agents);
+        	}
             completedStateRecovery(sla);
         }
     }
@@ -287,6 +301,76 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         }
     }
 
+    private void validateNoTwoDiscoveredAgentsHaveSameIpAddress(AbstractMachinesSlaPolicy sla) throws GridServiceAgentSlaEnforcementInProgressException, MachinesSlaEnforcementInProgressException {
+    	final Collection<GridServiceAgent> discoveredAgents =sla.getDiscoveredMachinesCache().getDiscoveredAgents();
+    	v(discoveredAgents);
+    }
+
+	private void v(final Collection<GridServiceAgent> discoveredAgents)
+			throws DiscoveredTwoAgentsWithTheSameIpAddress {
+		final Map<String,String> agentUidPerIpAddress = new HashMap<String,String>();
+    	for (GridServiceAgent agent: discoveredAgents) {
+    		final String ipAddress = getAgentIpAddress(agent);
+    		final String agentUid = agent.getUid();
+    		final String otherAgentUid = agentUidPerIpAddress.get(ipAddress);
+    		if (otherAgentUid != null) {
+    			throw new DiscoveredTwoAgentsWithTheSameIpAddress(pu, ipAddress, otherAgentUid, agentUid);
+    		}
+    		agentUidPerIpAddress.put(ipAddress, agentUid);
+    	}
+	}
+
+    /**
+	 * Discovers new agents in machines that have failure detection disabled
+	 * (they were probably restarted and a new GSA was discovered). 
+	 * Enables failure detection if SLA has failure detection enabled, or if timeout expired.
+	 */
+    private void updateAgentsWithDisabledFailureDetection(CapacityMachinesSlaPolicy sla) throws MachinesSlaEnforcementInProgressException {
+    	final Collection<GridServiceAgent> discoveredAgents =sla.getDiscoveredMachinesCache().getDiscoveredAgents();
+    	updateAgentsWithDisabledFailureDetection(sla, discoveredAgents);
+    }
+
+	private void updateAgentsWithDisabledFailureDetection(CapacityMachinesSlaPolicy sla, final Iterable<GridServiceAgent> discoveredAgents) {
+		final GridServiceAgentFailureDetectionConfig failureDetectionConfig = sla.getAgentFailureDetectionConfig();
+
+    	final long now = System.currentTimeMillis();
+    	for (GridServiceAgent agent : discoveredAgents) {
+    		final String ipAddress = getAgentIpAddress(agent);
+    		switch(failureDetectionConfig.getFailureDetectionStatus(ipAddress, now)) {
+    		case ENABLE_FAILURE_DETECTION:
+    			enableAgentFailureDetection(ipAddress);
+    			break;
+    		case DISABLE_FAILURE_DETECTION:
+    			disableFailoverDetectionForAgent(agent);
+    			break;
+    		case DONT_CARE:
+    			//don't care
+    		}
+    	}
+	}
+
+	private void disableFailoverDetectionForAgent(GridServiceAgent agent) {
+		final String agentUid = agent.getUid();
+		final String ipAddress = getAgentIpAddress(agent);
+		final String oldAgentUid = state.disableFailoverDetection(ipAddress, agentUid);
+		if (!agentUid.equals(oldAgentUid)) {
+			logger.info("Disabled failure detection of new agent " + agentUid + " (ip=" + ipAddress+")");
+			if (oldAgentUid != null) {
+				// get rid of any evidence of otherAgentUid, it is no longer relevant since it has been replaced by agentUid
+				state.replaceAllocation(oldAgentUid, agentUid);
+	    		logger.info("Replaced old agent " + oldAgentUid + " with new agent " + agentUid);
+			}
+		}
+	}
+
+    private void enableAgentFailureDetection(String ipAddress) {
+
+    	final String agentUid = state.enableFailoverDetection(ipAddress);
+    	if (agentUid != null) {
+    		logger.info("Enabled failure detection for Agent " + agentUid + " (ip=" + ipAddress+")");
+    	}
+    }
+    
     private void validateSla(AbstractMachinesSlaPolicy sla) {
         
         if (sla == null) {
@@ -350,6 +434,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
     private void enforceSlaInternal(CapacityMachinesSlaPolicy sla)
             throws MachinesSlaEnforcementInProgressException, GridServiceAgentSlaEnforcementInProgressException {
 
+    	updateAgentsWithDisabledFailureDetection(sla);
         updateFailedMachinesState(sla);
         updateFutureAgentsState(sla);
         updateRestrictedMachinesState(sla);
@@ -412,7 +497,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                         GridServiceAgent agent = pu.getAdmin().getGridServiceAgents().getAgentByUID(agentUid);
                         if (agent != null) {
                         logger.info(
-                                "machine agent " + agent.getMachine().getHostAddress() + " " +
+                                "machine agent " + getAgentIpAddress(agent) + " " +
                                 "is no longer marked for deallocation in order to maintain capacity. "+
                                 "Allocated machine agents are: " + getAllocatedCapacity(sla));
                         }
@@ -446,7 +531,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                 if (logger.isInfoEnabled()) {
                     GridServiceAgent agent = pu.getAdmin().getGridServiceAgents().getAgentByUID(agentUid);
                     if (agent != null) {
-                        logger.info("machine agent " + agent.getMachine().getHostAddress() + " is no longer marked for deallocation in order to maintain capacity.");
+                        logger.info("machine agent " + getAgentIpAddress(agent) + " is no longer marked for deallocation in order to maintain capacity.");
                     }
                 }
                 unmarkCapacityForDeallocation(sla, agentUid, requiredCapacity);
@@ -688,7 +773,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             else if (MachinesSlaUtils.getNumberOfChildContainersForProcessingUnit(agent,pu) == 0) {
                     
                 if (!sla.isStopMachineSupported()) {
-                    logger.info("Agent running on machine " + agent.getMachine().getHostAddress()
+                    logger.info("Agent running on machine " + getAgentIpAddress(agent)
                             + " is not stopped since scale strategy " + sla.getScaleStrategyName()
                             + " does not support automatic start/stop of machines");
                     deallocateAgentCapacity(sla, agentUid);
@@ -696,14 +781,14 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                 }
                 
                 if (!MachinesSlaUtils.isAgentAutoShutdownEnabled(agent)) {
-                    logger.info("Agent running on machine " + agent.getMachine().getHostAddress()
+                    logger.info("Agent running on machine " + getAgentIpAddress(agent)
                             + " is not stopped since it does not have the auto-shutdown flag");
                     deallocateAgentCapacity(sla, agentUid);
                     continue;
                 }
                 
                 if (MachinesSlaUtils.isManagementRunningOnMachine(agent.getMachine())) {
-                    logger.info("Agent running on machine " + agent.getMachine().getHostAddress()
+                    logger.info("Agent running on machine " + getAgentIpAddress(agent)
                             + " is not stopped since it is running management processes.");
                     deallocateAgentCapacity(sla, agentUid);
                     continue;
@@ -711,7 +796,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                 
                 if (state.isAgentSharedWithOtherProcessingUnits(pu,agent.getUid())) {
                  // This is a bit like reference counting, the last pu to leave stops the machine
-                    logger.info("Agent running on machine " + agent.getMachine().getHostAddress()
+                    logger.info("Agent running on machine " + getAgentIpAddress(agent)
                             + " is not stopped since it is shared with other processing units.");
                     deallocateAgentCapacity(sla, agentUid);
                     continue;
@@ -806,13 +891,18 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         // mark for deallocation all failed machines
         for(final String agentUid: getAllocatedCapacityUnfiltered(sla).getAgentUids()) {
             if (agents.getAgentByUID(agentUid) == null) {
-                logger.warn("Agent " + agentUid + " was killed unexpectedly.");
-                markAgentCapacityForDeallocation(sla, agentUid);
+            	if (state.isAgentFailoverDisabled(agentUid)) {
+            		logger.debug("Ignored agent " + agentUid + " that was killed since failure detection is disabled.");
+            	}
+            	else {
+            		logger.warn("Agent " + agentUid + " was killed unexpectedly.");
+            		markAgentCapacityForDeallocation(sla, agentUid);
+            	}
             }
         }
     }
 
-    private void cleanMachinesGoingDown(AbstractMachinesSlaPolicy sla) throws FailedToStopMachineException, FailedToStopGridServiceAgentException {
+	private void cleanMachinesGoingDown(AbstractMachinesSlaPolicy sla) throws FailedToStopMachineException, FailedToStopGridServiceAgentException {
         
         for (FutureStoppedMachine futureStoppedMachine : state.getMachinesGoingDown(getKey(sla))) {
             
@@ -1095,7 +1185,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         }
         GSAReservationId expectedReservationId = futureAgent.getReservationId();
         if (!actualReservationId.equals(expectedReservationId)) {
-        	final String ipAddress = newAgent.getMachine().getHostAddress();
+        	final String ipAddress = getAgentIpAddress(newAgent);
             throw new IllegalStateException(
             		"Machine provisioning future is done without exception, but returned an agent(ip="+ipAddress+") "+
             		"with the wrong reservationId: expected="+expectedReservationId+ " actual="+actualReservationId);
@@ -1458,7 +1548,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
     private boolean isCompletedStateRecovery(AbstractMachinesSlaPolicy sla) {
         return state.isCompletedStateRecovery(getKey(sla));
     }
-
+    
     @Override
     public void recoveredStateOnEsmStart(ProcessingUnit otherPu) {
         state.recoveredStateOnEsmStart(otherPu);
@@ -1532,4 +1622,5 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             throw new CloudCleanupFailedException(pu, exception);
         }
 	}
+
 }

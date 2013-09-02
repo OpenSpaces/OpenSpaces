@@ -284,4 +284,8 @@ public class MachinesSlaUtils {
         }
     	
     }
+
+	public static String getAgentIpAddress(GridServiceAgent agent) {
+		return agent.getMachine().getHostAddress();
+	}
 }

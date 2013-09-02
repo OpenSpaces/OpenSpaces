@@ -19,6 +19,7 @@ package org.openspaces.admin.internal.esm;
 
 import java.rmi.Remote;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import net.jini.core.lookup.ServiceID;
 
@@ -84,4 +85,28 @@ public interface InternalElasticServiceManager extends ElasticServiceManager, In
      * @author elip
      */
     Remote getStorageApi(final String processingUnitName);
+    
+    /**
+     * Disables the GSA failure detection of the calling PU instance.
+     * The LRMI layer is used to identify the ip address of the caller to determine the GSA.
+     * If the GSA shuts down, no recovery operation will be performed.
+     * If any other component fails (GSC/PU), recovery operation will be performed as usual.
+     *
+     * This method is called before an agent (or one of its components) decides to reboot the machine.
+     *  
+     * Call {@link #enableAgentFailover(String)} to re-enable agent failure detection functionality after the machine has completed reboot.
+     * Agent failover is enabled automatically once the timeout expires.
+     * 
+     * @param processingUnitName - The name of the calling PU
+     */
+    void disableAgentFailureDetection(final String processingUnitName, final long timeout, final TimeUnit timeunit);
+    
+    /**
+     * Re-Enable the GSA failure detection of the calling PU instance.
+     * The LRMI layer is used to identify the ip address of the caller to determine the GSA.
+     * 
+     * @param processingUnitName - The name of the calling PU
+     * @see #disableAgentFailover(String)
+     */
+    void enableAgentFailureDetection(final String processingUnitName);
 }

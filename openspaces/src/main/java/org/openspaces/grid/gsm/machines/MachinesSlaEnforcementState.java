@@ -161,6 +161,18 @@ public class MachinesSlaEnforcementState {
             markedForDeallocationCapacity = markedForDeallocationCapacity.subtract(agentUid, capacity);
         }
 
+		public void replaceAllocation(String oldAgentUid, String newAgentUid) {
+			final CapacityRequirements agentDeallocationCapacity = markedForDeallocationCapacity.getAgentCapacity(oldAgentUid);
+			if (!agentDeallocationCapacity.equalsZero()) {
+				markedForDeallocationCapacity = markedForDeallocationCapacity.subtractAgent(oldAgentUid).add(newAgentUid, agentDeallocationCapacity);
+			}
+
+			final CapacityRequirements agentAllocatedCapacity = allocatedCapacity.getAgentCapacity(oldAgentUid);
+			if (!agentAllocatedCapacity.equalsZero()) {
+				allocatedCapacity = allocatedCapacity.subtractAgent(oldAgentUid).add(newAgentUid, agentAllocatedCapacity);
+			}
+		}
+		
         public Collection<GridServiceAgentFutures> getAllDoneFutureAgents() {
             final List<GridServiceAgentFutures> doneFutures = new ArrayList<GridServiceAgentFutures>();
             
@@ -215,6 +227,7 @@ public class MachinesSlaEnforcementState {
     private final Map<ProcessingUnit, RecoveryState> recoveredStatePerProcessingUnit;
     private final Set<ProcessingUnit> validatedUndeployNotInProgressPerProcessingUnit;
     private final Map<ProcessingUnit, FutureCleanupCloudResources> cloudCleanupPerProcessingUnit;
+    private final Map<String, String> agentWithFailoverDisabledPerIpAddress;
     
     public MachinesSlaEnforcementState() {
         this.logger = 
@@ -225,6 +238,7 @@ public class MachinesSlaEnforcementState {
         recoveredStatePerProcessingUnit = new HashMap<ProcessingUnit, MachinesSlaEnforcementState.RecoveryState>();
         validatedUndeployNotInProgressPerProcessingUnit = new HashSet<ProcessingUnit>();
         cloudCleanupPerProcessingUnit = new HashMap<ProcessingUnit, FutureCleanupCloudResources>();
+        agentWithFailoverDisabledPerIpAddress = new HashMap<String, String>();
     }
 
     public boolean isHoldingStateForProcessingUnit(ProcessingUnit pu) {
@@ -743,5 +757,31 @@ public class MachinesSlaEnforcementState {
 
 	public void setCleanupFuture(ProcessingUnit pu, FutureCleanupCloudResources future) {
 		cloudCleanupPerProcessingUnit.put(pu, future);
+	}
+
+	/**
+	 * @return true - if was previously not disabled and now is disabled
+	 *         false- if already was disabled
+	 */
+	public String disableFailoverDetection(String ipAddress, String agentUid) {
+		return agentWithFailoverDisabledPerIpAddress.put(ipAddress, agentUid);
+	}
+	
+	public String enableFailoverDetection(String ipAddress) {
+		return agentWithFailoverDisabledPerIpAddress.remove(ipAddress);
+	}
+
+	public boolean isAgentFailoverDisabled(String agentUid) {
+		return agentWithFailoverDisabledPerIpAddress.values().contains(agentUid);
+	}
+	
+	public String getAgentWithDisabledFailoverDetectionForIpAddress(String ipAddress) {
+		return agentWithFailoverDisabledPerIpAddress.get(ipAddress);
+	}
+
+	public void replaceAllocation(String otherAgentUid, String agentUid) {
+		for (StateValue puState : state.values()) {
+			puState.replaceAllocation(otherAgentUid, agentUid);
+		}
 	}
 }

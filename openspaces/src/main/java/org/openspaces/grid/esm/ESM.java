@@ -20,6 +20,7 @@ package org.openspaces.grid.esm;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.jini.rio.monitor.event.Events;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
@@ -39,4 +40,24 @@ public interface ESM extends com.gigaspaces.grid.esm.ESM {
     Events getScaleStrategyEvents(final long cursor, final int maxNumberOfEvents) throws RemoteException;
     
     Remote getStorageApi(final String processingUnitName) throws RemoteException;
+	
+    /**
+     * Disables failure detection for the agent on the machine that called this method.
+     * This suppresses the creation of a new machine instead of the specified GSA if it is no longer running.
+     * It does not suppress the healing of GSCs on that GSA.
+     * 
+     * Once the specified timeout expires, the failure detection is enabled automatically.
+     * 
+     * @since 9.7
+     * @author itaif
+     */
+    void disableAgentFailureDetection(final String processingUnitName, final long timeout, final TimeUnit timeunit) throws RemoteException;
+    
+    /**
+     * Enables failure detection for the agent on the machine that called this method.
+     * 
+     * @since 9.7
+     * @author itaif
+     */
+    void enableAgentFailureDetection(final String processingUnitName) throws RemoteException;
 }

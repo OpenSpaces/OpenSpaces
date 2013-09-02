@@ -17,12 +17,14 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.machines;
 
+import org.openspaces.admin.internal.pu.elastic.GridServiceAgentFailureDetectionConfig;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 
 public class CapacityMachinesSlaPolicy extends AbstractMachinesSlaPolicy {
  
     private CapacityRequirements capacityRequirements;
-
+    private GridServiceAgentFailureDetectionConfig agentFailureDetectionConfig;
+    
     public CapacityRequirements getCapacityRequirements() {
         return capacityRequirements;
     }
@@ -35,6 +37,15 @@ public class CapacityMachinesSlaPolicy extends AbstractMachinesSlaPolicy {
         return true;
     }
 
+	public GridServiceAgentFailureDetectionConfig getAgentFailureDetectionConfig() {
+		return agentFailureDetectionConfig;
+	}
+
+	public void setAgentFailureDetectionConfig(
+			GridServiceAgentFailureDetectionConfig agentFailureDetectionConfig) {
+		this.agentFailureDetectionConfig = agentFailureDetectionConfig;
+	}
+	
     @Override
     public String getScaleStrategyName() {
         return "Manual Capacity Scale Strategy";
@@ -47,6 +58,10 @@ public class CapacityMachinesSlaPolicy extends AbstractMachinesSlaPolicy {
         
         if (this.capacityRequirements == null) {
             throw new IllegalArgumentException ("capacityRequirements cannot be null");
+        }
+        
+        if (agentFailureDetectionConfig == null) {
+        	throw new IllegalArgumentException("disabledAgentFailureDetectionIpAddresses cannot be null");
         }
     }
 }

@@ -18,6 +18,7 @@
 package org.openspaces.grid.esm;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Arrays;
@@ -51,10 +52,12 @@ import org.openspaces.admin.Admin;
 import org.openspaces.admin.bean.BeanConfigException;
 import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.esm.ElasticServiceManager;
+import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.gsm.InternalGridServiceManager;
 import org.openspaces.admin.internal.pu.InternalProcessingUnit;
 import org.openspaces.admin.internal.pu.elastic.ElasticMachineIsolationConfig;
+import org.openspaces.admin.internal.pu.elastic.GridServiceAgentFailureDetectionConfig;
 import org.openspaces.admin.internal.pu.elastic.ProcessingUnitSchemaConfig;
 import org.openspaces.admin.internal.pu.elastic.ScaleStrategyBeanPropertiesManager;
 import org.openspaces.admin.machine.Machine;
@@ -67,6 +70,7 @@ import org.openspaces.grid.gsm.ScaleBeanServer;
 import org.openspaces.grid.gsm.autoscaling.AutoScalingSlaEnforcement;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcement;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcement;
+import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioningAdapterFactory;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcement;
 import org.openspaces.grid.gsm.strategy.AbstractCapacityScaleStrategyBean;
@@ -90,6 +94,7 @@ import com.gigaspaces.log.LogEntries;
 import com.gigaspaces.log.LogEntryMatcher;
 import com.gigaspaces.log.LogProcessType;
 import com.gigaspaces.lrmi.GenericExporter;
+import com.gigaspaces.lrmi.LRMIInvocationContext;
 import com.gigaspaces.lrmi.LRMIMonitoringDetails;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOInfoHelper;
@@ -828,4 +833,59 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
             }
         });
    }
+    
+    /**
+     * @see MachinesSlaEnforcementEndpoint#disableAgentFailureDetection(GridServiceAgent)
+     */
+    @Override
+    public void disableAgentFailureDetection(final String processingUnitName, final long timeout, final TimeUnit timeunit) throws RemoteException {
+    	final long expireTimestamp = System.currentTimeMillis() + timeunit.toMillis(timeout);
+    	changeAgentFailureDetection(processingUnitName, expireTimestamp, false);
+    }
+    
+    /**
+     * @see MachinesSlaEnforcementEndpoint#enableAgentFailureDetection(GridServiceAgent)
+     */
+    @Override
+    public void enableAgentFailureDetection(final String processingUnitName) throws RemoteException {
+    	changeAgentFailureDetection(processingUnitName, null, true);
+    }
+    
+    private void changeAgentFailureDetection(final String processingUnitName, final Long expireTimestamp, final boolean enable) {
+    	final InetSocketAddress clientEndPointAddress = LRMIInvocationContext.getCurrentContext().getClientEndPointAddress();
+		final String ipAddress = clientEndPointAddress.getAddress().getHostAddress();
+    	submitAndWait(new Callable<Void>() {
+            @Override
+            public Void call() throws Exception {
+            	
+            	// validate input
+                final ScaleStrategyBean scaleStrategyBean = getScaleStrategyBean(processingUnitName);
+                if (scaleStrategyBean == null) {
+                	throw new IllegalArgumentException("Not managing " + processingUnitName);
+                }
+                
+                if (!(scaleStrategyBean instanceof AbstractCapacityScaleStrategyBean)) {
+                	throw new IllegalArgumentException(processingUnitName + " does not support disabling of agent failover");
+                }
+                
+                Map<String, String> elasticProperties = elasticPropertiesPerProcessingUnit.get(processingUnitName);
+                if (elasticProperties == null) {
+                	throw new IllegalArgumentException("Could not find conifugration for " + processingUnitName);
+                }
+                
+                // Change pu properties
+                GridServiceAgentFailureDetectionConfig agentFailureDetectionConfig = new GridServiceAgentFailureDetectionConfig(elasticProperties);
+                if (enable) {
+                	agentFailureDetectionConfig.enableFailureDetection(ipAddress);
+                	logger.info("Enabling agent failure detection for " + processingUnitName + " on machine " + clientEndPointAddress);
+                }
+                else {
+                	agentFailureDetectionConfig.disableFailureDetection(ipAddress, expireTimestamp);
+                	logger.info("Disabling agent failure detection for " + processingUnitName + " on machine " + clientEndPointAddress);
+                }
+                processingUnitElasticPropertiesChanged(processingUnitName, elasticProperties);
+				return null;
+            }
+    	});
+    }
 }

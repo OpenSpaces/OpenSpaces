@@ -22,6 +22,7 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 import net.jini.core.lookup.ServiceID;
 
@@ -275,6 +276,26 @@ public class DefaultElasticServiceManager extends AbstractAgentGridComponent imp
 	        catch (RemoteException e) {
 	            throw new AdminException("Failed to get storage Api for processing unit " + processingUnitName,e);
 	        }
+	}
+
+	@Override
+	public void disableAgentFailureDetection(final String processingUnitName, final long timeout, final TimeUnit timeunit) {
+		try {
+            esm.disableAgentFailureDetection(processingUnitName, timeout, timeunit);
+        }
+        catch (RemoteException e) {
+            throw new AdminException("Failed to disable agent failure detection." + processingUnitName,e);
+        }
+	}
+
+	@Override
+	public void enableAgentFailureDetection(final String processingUnitName) {
+		try {
+            esm.enableAgentFailureDetection(processingUnitName);
+        }
+        catch (RemoteException e) {
+        	throw new AdminException("Failed to enable agent failure detection." + processingUnitName,e);
+        }	
 	}
     
 }

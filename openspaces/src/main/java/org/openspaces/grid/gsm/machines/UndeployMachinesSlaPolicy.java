@@ -17,7 +17,10 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.machines;
 
+import java.util.HashMap;
+
 import org.openspaces.admin.Admin;
+import org.openspaces.admin.internal.pu.elastic.GridServiceAgentFailureDetectionConfig;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 
 public class UndeployMachinesSlaPolicy extends CapacityMachinesSlaPolicy {
@@ -26,6 +29,7 @@ public class UndeployMachinesSlaPolicy extends CapacityMachinesSlaPolicy {
         super();
         super.setMinimumNumberOfMachines(0);
         super.setCapacityRequirements(new CapacityRequirements());
+        super.setAgentFailureDetectionConfig(new GridServiceAgentFailureDetectionConfig(new HashMap<String,String>()));
     }
     
     @Override

@@ -21,6 +21,7 @@ import java.io.Serializable;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import com.gigaspaces.security.authorities.GridAuthority;
 import net.jini.id.Uuid;
@@ -114,5 +115,18 @@ public class ESMProxy extends AbstractProxy implements ESM, Serializable {
 	public Remote getStorageApi(String processingUnitName) throws RemoteException {
         intercept(GridAuthority.GridPrivilege.MANAGE_GRID);
 		return esmServer.getStorageApi(processingUnitName);
+	}
+
+	@Override
+	public void disableAgentFailureDetection(String processingUnitName, long timeout, TimeUnit timeunit)
+			throws RemoteException {
+		esmServer.disableAgentFailureDetection(processingUnitName, timeout, timeunit);
+		
+	}
+
+	@Override
+	public void enableAgentFailureDetection(String processingUnitName)
+			throws RemoteException {
+		esmServer.enableAgentFailureDetection(processingUnitName);
 	}
 }
