@@ -1004,6 +1004,15 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                     else {
                         throw e;
                     }
+                } catch (FailedToStartNewGridServiceAgentException e) {
+                    // we remove the future, next time we wont find it
+                    doneFutureAgents.removeFutureAgent(doneFutureAgent);
+                    if (sla.isUndeploying()) {
+                        logger.info("Ignoring failure to start new agent, since undeploy is in progress",e);
+                    }
+                    else {
+                        throw e;
+                    }
                 } catch (UnexpectedShutdownOfNewGridServiceAgentException e) {
                     // we remove the future, next time we wont find it
                     doneFutureAgents.removeFutureAgent(doneFutureAgent);
@@ -1134,13 +1143,14 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
      * @throws UnexpectedShutdownOfNewGridServiceAgentException 
      * @throws MachinesSlaEnforcementInProgressException 
      * @throws FailedToStartNewGridServiceAgentException 
+     * @throws FailedToStartNewMachineException 
      * @throws FailedMachineProvisioningException 
      */
     private void validateHealthyAgent(
             AbstractMachinesSlaPolicy sla, 
             Collection<GridServiceAgent> discoveredAgents, 
             FutureGridServiceAgent futureAgent) 
-                    throws UnexpectedShutdownOfNewGridServiceAgentException, InconsistentMachineProvisioningException, MachinesSlaEnforcementInProgressException, FailedToStartNewGridServiceAgentException  {
+                    throws UnexpectedShutdownOfNewGridServiceAgentException, InconsistentMachineProvisioningException, FailedToStartNewGridServiceAgentException, FailedToStartNewMachineException  {
 
         final NonBlockingElasticMachineProvisioning machineProvisioning = sla.getMachineProvisioning();
         final Collection<String> usedAgentUids = state.getAllUsedAgentUids();
