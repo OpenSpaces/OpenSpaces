@@ -303,10 +303,10 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
 
     private void validateNoTwoDiscoveredAgentsHaveSameIpAddress(AbstractMachinesSlaPolicy sla) throws GridServiceAgentSlaEnforcementInProgressException, MachinesSlaEnforcementInProgressException {
     	final Collection<GridServiceAgent> discoveredAgents =sla.getDiscoveredMachinesCache().getDiscoveredAgents();
-    	v(discoveredAgents);
+    	validateNoTwoDiscoveredAgentsHaveSameIpAddress(discoveredAgents);
     }
 
-	private void v(final Collection<GridServiceAgent> discoveredAgents)
+	private void validateNoTwoDiscoveredAgentsHaveSameIpAddress(final Collection<GridServiceAgent> discoveredAgents)
 			throws DiscoveredTwoAgentsWithTheSameIpAddress {
 		final Map<String,String> agentUidPerIpAddress = new HashMap<String,String>();
     	for (GridServiceAgent agent: discoveredAgents) {
