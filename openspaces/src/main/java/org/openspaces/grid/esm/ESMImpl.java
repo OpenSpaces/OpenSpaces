@@ -18,6 +18,8 @@
 package org.openspaces.grid.esm;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.InetSocketAddress;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -29,14 +31,15 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.gigaspaces.security.service.SecurityInterceptor;
-import com.gigaspaces.security.service.SecurityResolver;
 import net.jini.export.Exporter;
 
 import org.jini.rio.boot.BootUtil;
@@ -83,6 +86,7 @@ import com.gigaspaces.grid.zone.ZoneHelper;
 import com.gigaspaces.internal.dump.InternalDumpException;
 import com.gigaspaces.internal.dump.InternalDumpHelper;
 import com.gigaspaces.internal.dump.InternalDumpResult;
+import com.gigaspaces.internal.dump.thread.ThreadDumpProcessor;
 import com.gigaspaces.internal.jvm.JVMDetails;
 import com.gigaspaces.internal.jvm.JVMHelper;
 import com.gigaspaces.internal.jvm.JVMStatistics;
@@ -90,6 +94,7 @@ import com.gigaspaces.internal.log.InternalLogHelper;
 import com.gigaspaces.internal.os.OSDetails;
 import com.gigaspaces.internal.os.OSHelper;
 import com.gigaspaces.internal.os.OSStatistics;
+import com.gigaspaces.internal.utils.concurrent.GSThreadFactory;
 import com.gigaspaces.log.LogEntries;
 import com.gigaspaces.log.LogEntryMatcher;
 import com.gigaspaces.log.LogProcessType;
@@ -103,6 +108,8 @@ import com.gigaspaces.management.entry.JMXConnection;
 import com.gigaspaces.security.SecurityException;
 import com.gigaspaces.security.directory.CredentialsProvider;
 import com.gigaspaces.security.service.SecurityContext;
+import com.gigaspaces.security.service.SecurityInterceptor;
+import com.gigaspaces.security.service.SecurityResolver;
 import com.gigaspaces.start.SystemBoot;
 import com.j_spaces.kernel.time.SystemTime;
 import com.sun.jini.start.LifeCycle;
@@ -111,7 +118,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
 /*, RemoteSecuredService*//*, ServiceDiscoveryListener*/ {
 
 
-    private static final long CHECK_SINGLE_THREAD_EVENT_PUMP_EVERY_SECONDS=60;
+    private static final long CHECK_SINGLE_THREAD_EVENT_PUMP_EVERY_SECONDS= Long.getLong("org.openspaces.grid.internal-eventloop-keepalive-error-seconds", 1*60L);
     private static final String CONFIG_COMPONENT = "org.openspaces.grid.esm";
     private static final Logger logger = Logger.getLogger(CONFIG_COMPONENT);
     private Admin admin;
@@ -129,7 +136,8 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
     private final AtomicBoolean adminInitialized = new AtomicBoolean(false);
     private final AtomicBoolean destroyStarted = new AtomicBoolean(false);
     private SecurityInterceptor securityInterceptor;
-
+    private AtomicLong keepAlive = new AtomicLong(0);
+    
     /**
      * Create an ESM
      */
@@ -147,25 +155,9 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
             public void adminCreated(Admin admin) {
 
                 ESMImpl.this.admin = admin;
-                final long delay = CHECK_SINGLE_THREAD_EVENT_PUMP_EVERY_SECONDS*1000/2;
-                final long delayError = delay; 
-                ((InternalAdmin)admin).scheduleWithFixedDelayNonBlockingStateChange(
-                        new Runnable() {
-                            long timestamp = 0;
-                            public void run() {
-                                long now = SystemTime.timeMillis();
-                                if (timestamp == 0 || 
-                                        now-timestamp - delay < delayError) {
-                                }
-                                else {
-                                    logger.warning(
-                                            "Single threaded admin keep alive event has been delayed by " + 
-                                            (now-timestamp-delay)/1000 + " seconds.");
-                                }
-                                timestamp = now;
-                            }
-                        }
-                        , 0, delay, TimeUnit.MILLISECONDS);
+                startKeepAlive(admin);
+                startKeepAliveMonitor();
+                
                 ESMImpl.this.machinesSlaEnforcement = new MachinesSlaEnforcement();
                 ESMImpl.this.containersSlaEnforcement = new ContainersSlaEnforcement(admin);
                 ESMImpl.this.rebalancingSlaEnforcement = new RebalancingSlaEnforcement();
@@ -188,6 +180,8 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
                 logger.info("ESM is now listening for Processing Unit events");
             }
 
+			
+            
             private boolean isEsmDiscovered(Admin admin) {
                 ElasticServiceManager[] esms = admin.getElasticServiceManagers().getManagers();
                 if (esms.length == 0) {
@@ -888,4 +882,109 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
             }
     	});
     }
+
+	private void startKeepAlive(Admin admin) {
+		((InternalAdmin) admin).scheduleWithFixedDelayNonBlockingStateChange(
+				new Runnable() {
+					public void run() {
+						try {
+							checkKeepAlive();
+						} catch (InternalKeepAliveEventDelayed e) {
+							// esm.xml will cause the gsa to crash this process
+							// when this is printed.
+							logger.log(Level.SEVERE, "Event loop error", e);
+						} finally {
+							keepAlive.set(System.currentTimeMillis());
+							if (logger.isLoggable(Level.FINEST)) {
+								logger.log(
+										Level.FINEST,
+										"Event Loop Keepalive "
+												+ keepAlive.get());
+							}
+						}
+					}
+				}, 0, CHECK_SINGLE_THREAD_EVENT_PUMP_EVERY_SECONDS / 2,
+				TimeUnit.SECONDS);
+	}
+
+	private void startKeepAliveMonitor() {
+		createKeepAliveMonitorExecutor().scheduleWithFixedDelay(
+				new Runnable() {
+
+					@Override
+					public void run() {
+						try {
+							checkKeepAlive();
+						} catch (InternalKeepAliveEventDelayed e) {
+							logThreads();
+							// esm.xml will cause the gsa to crash this process
+							// when this is printed.
+							logger.log(
+									Level.SEVERE,
+									"Event loop error. Investigate GS-admin-event-executor-thread in the logged thread dump.",
+									e);
+						}
+					}
+				}, 0, CHECK_SINGLE_THREAD_EVENT_PUMP_EVERY_SECONDS / 4,
+				TimeUnit.SECONDS);
+	}
+
+	private void checkKeepAlive() {
+		final long now = SystemTime.timeMillis();
+		final long lastKeepalive = keepAlive.get();
+		if (lastKeepalive != 0) {
+			final long delaySeconds = (now - lastKeepalive) / 1000;
+			if (logger.isLoggable(Level.FINEST)) {
+				logger.log(Level.FINEST, "Event Loop Keepalive delaySeconds="
+						+ delaySeconds + " threshold="
+						+ CHECK_SINGLE_THREAD_EVENT_PUMP_EVERY_SECONDS);
+			}
+			if (delaySeconds > CHECK_SINGLE_THREAD_EVENT_PUMP_EVERY_SECONDS) {
+				logger.log(Level.INFO, "Event Loop was delayed " + delaySeconds
+						+ "seconds.");
+				throw new InternalKeepAliveEventDelayed(delaySeconds);
+			}
+		}
+	}
+
+	private void logThreads() {
+		final ThreadDumpProcessor tdp = new ThreadDumpProcessor();
+		final StringWriter sw = new StringWriter();
+		final PrintWriter pw = new PrintWriter(sw);
+		try {
+			tdp.processDeadlocks(pw);
+			tdp.processAllThreads(pw);
+		} catch (final Exception e) {
+			logger.log(Level.SEVERE, "Failed to dump threads", e);
+		} finally {
+			try {
+				pw.close();
+			} catch (final Exception e) {
+				logger.log(Level.FINE, "Failed to dump threads", e);
+			}
+			logger.info(sw.toString());
+		}
+	}
+
+	private ScheduledThreadPoolExecutor createKeepAliveMonitorExecutor() {
+		return createScheduledThreadPoolExecutor("esm-keep-alive-monitor", 1,
+				true);
+	}
+
+	private ScheduledThreadPoolExecutor createScheduledThreadPoolExecutor(
+			String threadName, int numberOfThreads, boolean useDaemonThreads) {
+		final ClassLoader correctClassLoader = Thread.currentThread()
+				.getContextClassLoader();
+		ScheduledThreadPoolExecutor executorService = (ScheduledThreadPoolExecutor) Executors
+				.newScheduledThreadPool(numberOfThreads, new GSThreadFactory(
+						threadName, useDaemonThreads) {
+					@Override
+					public Thread newThread(Runnable r) {
+						Thread thread = super.newThread(r);
+						thread.setContextClassLoader(correctClassLoader);
+						return thread;
+					}
+				});
+		return executorService;
+	}
 }

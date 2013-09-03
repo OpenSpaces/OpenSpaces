@@ -305,7 +305,7 @@ public class DefaultAdmin implements InternalAdmin {
         this.eventsExecutorServices = new ExecutorService[numberOfThreads];
         eventsQueue = new LinkedList[numberOfThreads];
         for (int i = 0; i < numberOfThreads; i++) {
-            eventsExecutorServices[i] = createThreadPoolExecutor("admin-event-executor-tread", 1, singleThreadedEventListeners);
+            eventsExecutorServices[i] = createThreadPoolExecutor("admin-event-executor-thread", 1, singleThreadedEventListeners);
             eventsQueue[i] = new LinkedList<Runnable>();
         }
         
