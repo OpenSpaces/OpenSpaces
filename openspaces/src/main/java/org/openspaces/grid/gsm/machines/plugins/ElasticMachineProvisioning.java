@@ -136,7 +136,7 @@ public interface ElasticMachineProvisioning extends
 	 * 
 	 * @since 8.0
 	 */
-	boolean stopMachine(GridServiceAgent agent, long duration, TimeUnit unit) throws ElasticMachineProvisioningException, ElasticGridServiceAgentProvisioningException, InterruptedException, TimeoutException;
+	void stopMachine(GridServiceAgent agent, long duration, TimeUnit unit) throws ElasticMachineProvisioningException, ElasticGridServiceAgentProvisioningException, InterruptedException, TimeoutException;
 	
 	/**
      * Cleanup all cloud resources.
