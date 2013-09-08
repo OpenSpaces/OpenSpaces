@@ -58,6 +58,7 @@ import org.openspaces.grid.gsm.machines.exceptions.CannotDetermineIfNeedToStartM
 import org.openspaces.grid.gsm.machines.exceptions.CloudCleanupFailedException;
 import org.openspaces.grid.gsm.machines.exceptions.DelayingScaleInUntilAllMachinesHaveStartedException;
 import org.openspaces.grid.gsm.machines.exceptions.DiscoveredTwoAgentsWithTheSameIpAddress;
+import org.openspaces.grid.gsm.machines.exceptions.ExpectedMachineWithMoreMemoryException;
 import org.openspaces.grid.gsm.machines.exceptions.FailedToDiscoverMachinesException;
 import org.openspaces.grid.gsm.machines.exceptions.FailedToStartNewGridServiceAgentException;
 import org.openspaces.grid.gsm.machines.exceptions.FailedToStartNewMachineException;
@@ -1120,12 +1121,6 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                 logger.info("Agent started and provisioned succesfully on a new machine " + MachinesSlaUtils.machineToString(newAgent.getMachine())+ " has "+ newAgentCapacity);
             }
             
-            if (MachinesSlaUtils.getMemoryInMB(newAgentCapacity) < sla.getContainerMemoryCapacityInMB()) {
-                logger.warn("New agent " + MachinesSlaUtils.machineToString(newAgent.getMachine()) + " has only "
-                        + newAgentCapacity
-                        + " unreserved free resources, which is not enough for even one container that requires "
-                        + sla.getContainerMemoryCapacityInMB() + "MB");
-            }
             unallocatedCapacity = 
                 unallocatedCapacity.add(
                     newAgent.getUid(), 
@@ -1144,13 +1139,14 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
      * @throws MachinesSlaEnforcementInProgressException 
      * @throws FailedToStartNewGridServiceAgentException 
      * @throws FailedToStartNewMachineException 
+     * @throws ExpectedMachineWithMoreMemoryException 
      * @throws FailedMachineProvisioningException 
      */
     private void validateHealthyAgent(
             AbstractMachinesSlaPolicy sla, 
             Collection<GridServiceAgent> discoveredAgents, 
             FutureGridServiceAgent futureAgent) 
-                    throws UnexpectedShutdownOfNewGridServiceAgentException, InconsistentMachineProvisioningException, FailedToStartNewGridServiceAgentException, FailedToStartNewMachineException  {
+                    throws UnexpectedShutdownOfNewGridServiceAgentException, InconsistentMachineProvisioningException, FailedToStartNewGridServiceAgentException, FailedToStartNewMachineException, ExpectedMachineWithMoreMemoryException  {
 
         final NonBlockingElasticMachineProvisioning machineProvisioning = sla.getMachineProvisioning();
         final Collection<String> usedAgentUids = state.getAllUsedAgentUids();
@@ -1196,7 +1192,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         GSAReservationId expectedReservationId = futureAgent.getReservationId();
         if (!actualReservationId.equals(expectedReservationId)) {
         	final String ipAddress = getAgentIpAddress(newAgent);
-            throw new IllegalStateException(
+        	throw new IllegalStateException(
             		"Machine provisioning future is done without exception, but returned an agent(ip="+ipAddress+") "+
             		"with the wrong reservationId: expected="+expectedReservationId+ " actual="+actualReservationId);
         }
@@ -1249,6 +1245,14 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
            
            // providing a grace period for provisionedAgents to update.
            throw new InconsistentMachineProvisioningException(getProcessingUnit(), newAgent);
+        }
+        
+        final long reservedMB = MachinesSlaUtils.getMemoryInMB(MachinesSlaUtils.getReservedCapacity(sla, newAgent));
+        final long totalMB = MachinesSlaUtils.getMemoryInMB(MachinesSlaUtils.getMachineCapacity(newAgent));
+        long availableMB = totalMB - reservedMB;
+		long containerMB = sla.getContainerMemoryCapacityInMB();
+		if (availableMB < containerMB) {
+			throw new ExpectedMachineWithMoreMemoryException(pu, newAgent.getMachine(), totalMB , reservedMB, containerMB); 
         }
     }
 

@@ -115,8 +115,13 @@ public class MachinesSlaUtils {
             GridServiceAgent agent,
             AbstractMachinesSlaPolicy sla) {
 
-        return new MachineCapacityRequirements(agent.getMachine()).subtractOrZero(getReservedCapacity(sla, agent));
+        return getMachineCapacity(agent).subtractOrZero(getReservedCapacity(sla, agent));
     }
+
+
+	public static MachineCapacityRequirements getMachineCapacity(GridServiceAgent agent) {
+		return new MachineCapacityRequirements(agent.getMachine());
+	}
 
     public static Fraction convertCpuCoresFromDoubleToFraction(double cpu) {
         Fraction targetCpuCores;
