@@ -74,10 +74,10 @@ public class GridServiceAgentFailureDetectionConfig {
      
     public FailureDetectionStatus getFailureDetectionStatus(String ipAddress, long now) {
 		final String value = getDisabledFailureDetection().get(ipAddress);
-    	final Long expireTimestamp = Long.valueOf(value);
-		if (value == null) {
+    	if (value == null) {
 			return FailureDetectionStatus.DONT_CARE;
 		}
+    	final Long expireTimestamp = Long.valueOf(value);
 		if (now > expireTimestamp) {
 			return FailureDetectionStatus.DISABLE_FAILURE_DETECTION;
 		}
