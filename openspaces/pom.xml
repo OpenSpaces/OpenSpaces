@@ -972,4 +972,27 @@
 			</plugin>
 		</plugins>
 	</reporting>
+	
+	 
+  <!-- Fix conflict of spring security 3.0.7 with spring 3.2.4 -->
+  <dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-expression</artifactId>
+            <version>${springVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+            <version>${springVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-aop</artifactId>
+            <version>${springVersion}</version>
+        </dependency>
+    </dependencies>
+  </dependencyManagement>
+
 </project>
