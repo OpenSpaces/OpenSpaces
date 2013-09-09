@@ -8,7 +8,6 @@
     <name>maven-openspaces-plugin</name>
     <url>http://www.gigaspaces.com</url>
     <properties>
-        <pluginVersion>9.7.0-SNAPSHOT</pluginVersion>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <dependencies>
@@ -25,7 +24,7 @@
         <dependency>
             <groupId>com.gigaspaces</groupId>
             <artifactId>gs-openspaces</artifactId>
-            <version>${pluginVersion}</version>
+            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>

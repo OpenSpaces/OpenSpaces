@@ -18,13 +18,8 @@
 package org.openspaces.maven.support;
 
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 
@@ -121,63 +116,8 @@ public class POMGenerator {
             writer.close();
         }
         
-        if (args.length > 1) {
-            String directory = args[1];
-            replaceVersionInPluginPom(xapVersion, directory);
-        }
     }
 
-    private static void replaceVersionInPluginPom(String version, String dir) throws IOException {
-        File f = new File(dir, "pom.xml");
-        FileReader fr = new FileReader(f);
-        BufferedReader br = new BufferedReader(fr);
-        StringBuilder sb = new StringBuilder();
-        String line;
-        String openTag = "<pluginVersion>";
-        String closeTag = "</pluginVersion>";
-        String newLine = "\n";
-        int index = 0;
-        boolean firstVersionFound = false;
-        while ((line = br.readLine()) != null) {
-            if ((index = line.indexOf(openTag)) > 0) {
-                sb.append(line.substring(0, index + openTag.length()));
-                sb.append(version);
-                sb.append(closeTag);
-            } else if ((index = line.indexOf("<version>")) > 0 && !firstVersionFound) {
-                firstVersionFound = true;
-                sb.append(line.substring(0, index + "<version>".length()));
-                sb.append(version);
-                sb.append("</version>");
-            } else {
-                sb.append(line);
-            }
-            sb.append(newLine);
-        }
-        File f2 = new File(dir, "pom2.xml");
-        FileWriter fw = new FileWriter(f2);
-        BufferedWriter bw = new BufferedWriter(fw);
-        bw.write(sb.toString());
-        br.close();
-        bw.close();
-        for (int i = 0; i < 5; i++) {
-            if (f.delete()) {
-                break;
-            }
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-            }
-        }
-        for (int i = 0; i < 5; i++) {
-            if (f2.renameTo(f)) {
-                break;
-            }
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-            }
-        }
-    }
 
     public static void printHeader(PrintWriter writer, String version, String groupId, String artifactId) throws Exception {
         writer.println("<project xmlns=\"http://maven.apache.org/POM/4.0.0\"");

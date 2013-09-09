@@ -196,7 +196,6 @@
 		<delete dir="${maven.tmp.dir}"/>
 	 	<java classname="org.openspaces.maven.support.POMGenerator" fork="true">
 	 		<arg value="${maven.tmp.dir}"/>
-	 		<arg value="${basedir}/tools/maven/maven-openspaces-plugin/"/>
 	 		<classpath refid="all-libs"/>
             <classpath location="${target.classes.dir}"/>
 	 	</java>	
