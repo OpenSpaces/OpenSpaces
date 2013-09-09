@@ -6,7 +6,7 @@
 	<version>9.7.0-SNAPSHOT</version>
 
 	<properties>
-		<springVersion>3.1.3.RELEASE</springVersion> 
+		<springVersion>3.2.4.RELEASE</springVersion> 
 		<springSecurityVersion>3.0.7.RELEASE</springSecurityVersion>
 		<jettyVersion>8.1.8.v20121106</jettyVersion>
 		<mavenVersion>3.0.2</mavenVersion>
@@ -139,12 +139,6 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-aop</artifactId>
-			<version>${springVersion}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-asm</artifactId>
 			<version>${springVersion}</version>
 			<scope>provided</scope>
 		</dependency>

@@ -32,7 +32,6 @@
 			<outputDirectory>/lib/required</outputDirectory>
 			<includes>
 				<include>spring-aop-*</include>
-				<include>spring-asm-*</include>
 				<include>spring-aspects-*</include>
 				<include>spring-beans-*</include>
 				<include>spring-context-*</include>
