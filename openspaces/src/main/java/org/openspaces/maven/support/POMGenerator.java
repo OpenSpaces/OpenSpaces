@@ -68,14 +68,14 @@ public class POMGenerator {
         writer = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(dir, "gs-openspaces-pom.xml")))));
         printHeader(writer, xapVersion, POMGenerator.GS_GROUP, "gs-openspaces");
         printDependency(writer, POMGenerator.GS_GROUP, "gs-runtime", xapVersion);
-        printDependency(writer, "org.springframework", "spring-aop", "3.2.4.RELEASE");
-        printDependency(writer, "org.springframework", "spring-aspects", "3.2.4.RELEASE");
-        printDependency(writer, "org.springframework", "spring-beans", "3.2.4.RELEASE");
-        printDependency(writer, "org.springframework", "spring-context", "3.2.4.RELEASE");
-        printDependency(writer, "org.springframework", "spring-context-support", "3.2.4.RELEASE");
-        printDependency(writer, "org.springframework", "spring-core", "3.2.4.RELEASE");
-        printDependency(writer, "org.springframework", "spring-expression", "3.2.4.RELEASE");
-        printDependency(writer, "org.springframework", "spring-tx", "3.2.4.RELEASE");
+        printDependency(writer, "org.springframework", "spring-aop");
+        printDependency(writer, "org.springframework", "spring-aspects");
+        printDependency(writer, "org.springframework", "spring-beans");
+        printDependency(writer, "org.springframework", "spring-context");
+        printDependency(writer, "org.springframework", "spring-context-support");
+        printDependency(writer, "org.springframework", "spring-core");
+        printDependency(writer, "org.springframework", "spring-expression");
+        printDependency(writer, "org.springframework", "spring-tx");
         printDependency(writer, "commons-logging", "commons-logging", "1.1.1");
         // add javax.annotations (@PostConstruct) for JDK 1.5 (no need for 1.6 since it is there)
         if (!JdkVersion.isAtLeastJava16() && JdkVersion.isAtLeastJava15()) {
@@ -132,11 +132,17 @@ public class POMGenerator {
         writer.println("  <dependencies>");
     }
 
+    public static void printDependency(PrintWriter writer, String groupId, String artifactId) {
+    	final String version = null;
+    	printDependency(writer, groupId, artifactId, version);
+    }
     public static void printDependency(PrintWriter writer, String groupId, String artifactId, String version) {
         writer.println("    <dependency>");
         writer.println("      <groupId>" + groupId + "</groupId>");
         writer.println("      <artifactId>" + artifactId + "</artifactId>");
-        writer.println("      <version>" + version + "</version>");
+        if (version != null) {
+        	writer.println("      <version>" + version + "</version>");
+        }
         writer.println("    </dependency>");
     }
 
