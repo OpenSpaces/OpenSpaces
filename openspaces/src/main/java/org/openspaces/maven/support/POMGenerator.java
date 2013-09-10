@@ -32,9 +32,14 @@ import com.j_spaces.kernel.PlatformVersion;
  */
 public class POMGenerator {
 
-    public static final String GS_GROUP = "com.gigaspaces";
+    
+	public static final String GS_GROUP = "com.gigaspaces";
     public static final String CLOUDIFY_GROUP = "org.cloudifysource";
-
+    private static final String SPRING_GROUP = "org.springframework";
+    public static final String SPRING_VERSION = "3.2.4.RELEASE";
+    public static final String SPRING_SECURITY_VERSION = "3.0.7.RELEASE";
+	private static final String SPRING_SECURITY_GROUP = "org.springframework.security";
+    
     public static void main(String[] args) throws Exception {
         String templDir = System.getProperty("java.io.tmpdir");
         if (args.length > 0) {
@@ -53,65 +58,103 @@ public class POMGenerator {
 
         PrintWriter writer = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(dir, "gs-runtime-pom.xml")))));
         printHeader(writer, xapVersion, POMGenerator.GS_GROUP, "gs-runtime");
+        
 
         // jmx
         if (!JdkVersion.isAtLeastJava15()) {
+        	printDependenciesHeader(writer);
             printDependency(writer, "com.sun.jdmk", "jmxtools", "1.2.1");
             printDependency(writer, "javax.management", "jmxremote", "1.0.1_04");
             printDependency(writer, "javax.management", "jmxri", "1.2.1");
             printDependency(writer, "backport-util-concurrent", "backport-util-concurrent", "3.0");
+            printDependenciesFooter(writer);
         }
-
-        printFooter(writer);
+        printProjectFooter(writer);
         writer.close();
 
         writer = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(dir, "gs-openspaces-pom.xml")))));
         printHeader(writer, xapVersion, POMGenerator.GS_GROUP, "gs-openspaces");
+        printDependenciesHeader(writer);
         printDependency(writer, POMGenerator.GS_GROUP, "gs-runtime", xapVersion);
-        printDependency(writer, "org.springframework", "spring-aop");
-        printDependency(writer, "org.springframework", "spring-aspects");
-        printDependency(writer, "org.springframework", "spring-beans");
-        printDependency(writer, "org.springframework", "spring-context");
-        printDependency(writer, "org.springframework", "spring-context-support");
-        printDependency(writer, "org.springframework", "spring-core");
-        printDependency(writer, "org.springframework", "spring-expression");
-        printDependency(writer, "org.springframework", "spring-tx");
+        printDependency(writer, SPRING_GROUP, "spring-aop");
+        printDependency(writer, SPRING_GROUP, "spring-aspects");
+        printDependency(writer, SPRING_GROUP, "spring-beans");
+        printDependency(writer, SPRING_GROUP, "spring-context");
+        printDependency(writer, SPRING_GROUP, "spring-context-support");
+        printDependency(writer, SPRING_GROUP, "spring-core");
+        printDependency(writer, SPRING_GROUP, "spring-expression");
+        printDependency(writer, SPRING_GROUP, "spring-tx");
         printDependency(writer, "commons-logging", "commons-logging", "1.1.1");
         // add javax.annotations (@PostConstruct) for JDK 1.5 (no need for 1.6 since it is there)
         if (!JdkVersion.isAtLeastJava16() && JdkVersion.isAtLeastJava15()) {
             printDependency(writer, "org.apache.geronimo.specs", "geronimo-annotation_1.0_spec", "1.1.1");
         }
-        printFooter(writer);
+        printDependenciesFooter(writer);
+        printDependencyManagementHeader(writer);
+        // spring jars in lib/required
+        printProvidedDependency(writer, SPRING_GROUP, "spring-aop", SPRING_VERSION);
+        printProvidedDependency(writer, SPRING_GROUP, "spring-aspects", SPRING_VERSION);
+        printProvidedDependency(writer, SPRING_GROUP, "spring-beans", SPRING_VERSION);
+        printProvidedDependency(writer, SPRING_GROUP, "spring-context", SPRING_VERSION);
+        printProvidedDependency(writer, SPRING_GROUP, "spring-context-support", SPRING_VERSION);
+        printProvidedDependency(writer, SPRING_GROUP, "spring-core", SPRING_VERSION);
+        printProvidedDependency(writer, SPRING_GROUP, "spring-expression", SPRING_VERSION);
+        printProvidedDependency(writer, SPRING_GROUP, "spring-tx", SPRING_VERSION);
+        // ignore deprecated spring-asm that is needed by older spring-security
+        printProvidedDependency(writer, SPRING_GROUP, "spring-asm", "3.0.6");
+        // spring jars in lib/optional/spring
+        printDependency(writer, SPRING_GROUP, "spring-web", SPRING_VERSION);
+        printDependency(writer, SPRING_GROUP, "spring-jdbc", SPRING_VERSION);
+        printDependency(writer, SPRING_GROUP, "spring-jms", SPRING_VERSION);
+        printDependency(writer, SPRING_GROUP, "spring-orm", SPRING_VERSION);
+        printDependency(writer, SPRING_GROUP, "spring-oxm", SPRING_VERSION);
+        printDependency(writer, SPRING_GROUP, "spring-web", SPRING_VERSION);
+        printDependency(writer, SPRING_GROUP, "spring-webmvc", SPRING_VERSION);
+		printTestDependency(writer, SPRING_GROUP, "spring-test", SPRING_VERSION);
+		printDependency(writer, SPRING_SECURITY_GROUP, "spring-security-core", SPRING_SECURITY_VERSION);
+		printDependency(writer, SPRING_SECURITY_GROUP, "spring-security-web", SPRING_SECURITY_VERSION);
+		printDependency(writer, SPRING_SECURITY_GROUP, "spring-security-config", SPRING_SECURITY_VERSION);
+        printDependenciesHeader(writer);
+        printDependenciesFooter(writer);
+        printDependencyManagementFooter(writer);
+        
+        printProjectFooter(writer);
         writer.close();
 
         writer = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(dir, "mule-os-pom.xml")))));
         printHeader(writer, xapVersion, POMGenerator.GS_GROUP, "mule-os");
-        printFooter(writer);
+        printProjectFooter(writer);
         writer.close();
         
         writer = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(dir, "jetty-os-pom.xml")))));
         printHeader(writer, xapVersion, POMGenerator.GS_GROUP, "jetty-os");
-        printFooter(writer);
+        printProjectFooter(writer);
         writer.close();
         
         if ( isCloudify ) {
             writer = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(dir, "dsl-pom.xml")))));
             printHeader(writer, cloudifyVersion, POMGenerator.CLOUDIFY_GROUP, "dsl");
+            printDependenciesHeader(writer);
             printDependency(writer, POMGenerator.GS_GROUP, "gs-openspaces", xapVersion);
-            printFooter(writer);
+            printDependenciesFooter(writer);           
+            printProjectFooter(writer);
             writer.close();
             
             writer = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(dir, "usm-pom.xml")))));
             printHeader(writer, cloudifyVersion, POMGenerator.CLOUDIFY_GROUP, "usm");
+            printDependenciesHeader(writer);
             printDependency(writer, POMGenerator.GS_GROUP, "gs-openspaces", xapVersion);
             printDependency(writer, POMGenerator.CLOUDIFY_GROUP, "dsl", cloudifyVersion);
-            printFooter(writer);
+            printDependenciesFooter(writer);
+            printProjectFooter(writer);
             writer.close();
             
             writer = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(dir, "esc-pom.xml")))));
             printHeader(writer, cloudifyVersion, POMGenerator.CLOUDIFY_GROUP, "esc");
+            printDependenciesHeader(writer);
             printDependency(writer, POMGenerator.GS_GROUP, "gs-openspaces", xapVersion);
-            printFooter(writer);
+            printDependenciesFooter(writer);
+            printProjectFooter(writer);
             writer.close();
         }
         
@@ -129,25 +172,67 @@ public class POMGenerator {
         writer.println("  <packaging>jar</packaging>");
         writer.println("  <version>" + version + "</version>");
         writer.println("  <url>http://www.gigaspaces.com</url>");
+    }
+    
+    public static void printDependenciesHeader(PrintWriter writer) throws Exception {
         writer.println("  <dependencies>");
     }
-
+    
+    public static void printDependencyManagementHeader(PrintWriter writer) throws Exception {
+        writer.println("  <dependencyManagement>");
+    }
+    
+    public static void printDependencyManagementFooter(PrintWriter writer) throws Exception {
+        writer.println("  </dependencyManagement>");
+    }
+    
+    public static void printProvidedDependency(PrintWriter writer, String groupId, String artifactId, String version) {
+    	final boolean provided = true;
+    	printDependency(writer, groupId, artifactId, version, provided);
+    }
+    
     public static void printDependency(PrintWriter writer, String groupId, String artifactId) {
     	final String version = null;
     	printDependency(writer, groupId, artifactId, version);
     }
+    
     public static void printDependency(PrintWriter writer, String groupId, String artifactId, String version) {
+    	final boolean provided = false;
+    	printDependency(writer, groupId, artifactId, version, provided);
+    }
+    
+    public static void printDependency(PrintWriter writer, String groupId, String artifactId, String version, boolean provided) {
+    	final String scope = null;
+    	printDependency(writer, groupId, artifactId, version, provided, scope);
+    }
+    
+    public static void printTestDependency(PrintWriter writer, String groupId, String artifactId, String version) {
+    	final boolean provided = false;
+    	final String scope = "test";
+    	printDependency(writer, groupId, artifactId, version, provided, scope);
+    }
+    
+    public static void printDependency(PrintWriter writer, String groupId, String artifactId, String version, boolean provided, String scope) {
         writer.println("    <dependency>");
         writer.println("      <groupId>" + groupId + "</groupId>");
         writer.println("      <artifactId>" + artifactId + "</artifactId>");
         if (version != null) {
         	writer.println("      <version>" + version + "</version>");
         }
+        if (scope != null) {
+        	writer.println("      <scope>" + scope + "</scope>");
+        }
+        if (provided) {
+        	writer.println("      <provided>true</provided>");
+        }
         writer.println("    </dependency>");
     }
 
-    public static void printFooter(PrintWriter writer) throws Exception {
+    public static void printDependenciesFooter(PrintWriter writer) throws Exception {
         writer.println("  </dependencies>");
+    }
+    
+    public static void printProjectFooter(PrintWriter writer) throws Exception {
         writer.println("</project>");
     }
 }
