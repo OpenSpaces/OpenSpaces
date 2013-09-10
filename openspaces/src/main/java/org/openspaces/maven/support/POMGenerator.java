@@ -190,33 +190,27 @@ public class POMGenerator {
         writer.println("  </dependencyManagement>");
     }
     
-    public static void printProvidedDependency(PrintWriter writer, String groupId, String artifactId, String version) {
-    	final boolean provided = true;
-    	printDependency(writer, groupId, artifactId, version, provided);
-    }
-    
     public static void printDependency(PrintWriter writer, String groupId, String artifactId) {
     	final String version = null;
     	printDependency(writer, groupId, artifactId, version);
     }
     
     public static void printDependency(PrintWriter writer, String groupId, String artifactId, String version) {
-    	final boolean provided = false;
-    	printDependency(writer, groupId, artifactId, version, provided);
-    }
-    
-    public static void printDependency(PrintWriter writer, String groupId, String artifactId, String version, boolean provided) {
     	final String scope = null;
-    	printDependency(writer, groupId, artifactId, version, provided, scope);
+    	printDependency(writer, groupId, artifactId, version, scope);
     }
     
     public static void printTestDependency(PrintWriter writer, String groupId, String artifactId, String version) {
-    	final boolean provided = false;
     	final String scope = "test";
-    	printDependency(writer, groupId, artifactId, version, provided, scope);
+    	printDependency(writer, groupId, artifactId, version, scope);
+    }
+
+    public static void printProvidedDependency(PrintWriter writer, String groupId, String artifactId, String version) {
+    	final String scope = "provided";
+    	printDependency(writer, groupId, artifactId, version, scope);
     }
     
-    public static void printDependency(PrintWriter writer, String groupId, String artifactId, String version, boolean provided, String scope) {
+    public static void printDependency(PrintWriter writer, String groupId, String artifactId, String version, String scope) {
         writer.println("    <dependency>");
         writer.println("      <groupId>" + groupId + "</groupId>");
         writer.println("      <artifactId>" + artifactId + "</artifactId>");
@@ -225,9 +219,6 @@ public class POMGenerator {
         }
         if (scope != null) {
         	writer.println("      <scope>" + scope + "</scope>");
-        }
-        if (provided) {
-        	writer.println("      <provided>true</provided>");
         }
         writer.println("    </dependency>");
     }
