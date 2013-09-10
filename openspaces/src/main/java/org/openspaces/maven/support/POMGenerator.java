@@ -84,7 +84,7 @@ public class POMGenerator {
         printDependency(writer, SPRING_GROUP, "spring-core");
         printDependency(writer, SPRING_GROUP, "spring-expression");
         printDependency(writer, SPRING_GROUP, "spring-tx");
-        printDependency(writer, "commons-logging", "commons-logging", "1.1.1");
+        printDependency(writer, "commons-logging", "commons-logging");
         // add javax.annotations (@PostConstruct) for JDK 1.5 (no need for 1.6 since it is there)
         if (!JdkVersion.isAtLeastJava16() && JdkVersion.isAtLeastJava15()) {
             printDependency(writer, "org.apache.geronimo.specs", "geronimo-annotation_1.0_spec", "1.1.1");
@@ -102,6 +102,8 @@ public class POMGenerator {
         printProvidedDependency(writer, SPRING_GROUP, "spring-core", SPRING_VERSION);
         printProvidedDependency(writer, SPRING_GROUP, "spring-expression", SPRING_VERSION);
         printProvidedDependency(writer, SPRING_GROUP, "spring-tx", SPRING_VERSION);
+        printProvidedDependency(writer, "commons-logging", "commons-logging", "1.1.3");
+        
         // ignore deprecated spring-asm that is needed by older spring-security
         printProvidedDependency(writer, SPRING_GROUP, "spring-asm", "3.0.6");
         // spring jars in lib/optional/spring
@@ -116,7 +118,8 @@ public class POMGenerator {
 		printDependency(writer, SPRING_SECURITY_GROUP, "spring-security-core", SPRING_SECURITY_VERSION);
 		printDependency(writer, SPRING_SECURITY_GROUP, "spring-security-web", SPRING_SECURITY_VERSION);
 		printDependency(writer, SPRING_SECURITY_GROUP, "spring-security-config", SPRING_SECURITY_VERSION);
-        printDependenciesFooter(writer);
+		
+		printDependenciesFooter(writer);
         printDependencyManagementFooter(writer);
         
         printProjectFooter(writer);
