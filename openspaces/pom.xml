@@ -1004,12 +1004,7 @@
         </dependency>
 		
 		<!-- dependency management for jars in lib/optional/spring -->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
-            <version>${springVersion}</version>
-        </dependency>
-		<dependency>
+   	<dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-jdbc</artifactId>
             <version>${springVersion}</version>
