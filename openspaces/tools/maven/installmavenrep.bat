@@ -26,7 +26,7 @@ FOR /F "usebackq tokens=*" %%i IN (`installmavenrep.bat edition`) DO @set EDITIO
 FOR /F "usebackq tokens=*" %%i IN (`installmavenrep.bat XAP`) DO @set XAP_VERSION=%%i
 
 
-%JAVACMD% -cp %GS_JARS% org.openspaces.maven.support.POMGenerator "%TEMP%" "%JSHOMEDIR%/tools/maven/maven-openspaces-plugin"
+%JAVACMD% -cp %GS_JARS% org.openspaces.maven.support.POMGenerator "%TEMP%"
 
 echo ""
 echo ""

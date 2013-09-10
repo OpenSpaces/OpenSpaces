@@ -13,7 +13,7 @@ export EDITION=`${JAVACMD} -cp ${GS_JARS} org.openspaces.maven.support.OutputVer
 
 export XAP_VERSION=`${JAVACMD} -cp ${GS_JARS} org.openspaces.maven.support.OutputVersion XAP`
 
-${JAVACMD} -cp ${GS_JARS} org.openspaces.maven.support.POMGenerator $TMPDIR "${JSHOMEDIR}/tools/maven/maven-openspaces-plugin"
+${JAVACMD} -cp ${GS_JARS} org.openspaces.maven.support.POMGenerator $TMPDIR
 
 echo ""
 echo ""
