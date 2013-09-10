@@ -1833,7 +1833,12 @@ public class DefaultAdmin implements InternalAdmin {
                     newProcessingUnit = true;
                 }
                 
-            	if (holder.backupDetail == null) {
+                if (holder.detail == null) {
+                	//Primary GSM is probably going down
+            		processingUnit.setBackupGsmInSync(false);
+            	}
+                else if (holder.backupDetail == null) {
+                	// no backup
             		processingUnit.setBackupGsmInSync(false);
             	}
             	else if (holder.detail.getNumberOfInstances() != holder.backupDetail.getNumberOfInstances()) {
