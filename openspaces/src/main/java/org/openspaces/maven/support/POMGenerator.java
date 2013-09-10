@@ -90,7 +90,9 @@ public class POMGenerator {
             printDependency(writer, "org.apache.geronimo.specs", "geronimo-annotation_1.0_spec", "1.1.1");
         }
         printDependenciesFooter(writer);
+        
         printDependencyManagementHeader(writer);
+        printDependenciesHeader(writer);
         // spring jars in lib/required
         printProvidedDependency(writer, SPRING_GROUP, "spring-aop", SPRING_VERSION);
         printProvidedDependency(writer, SPRING_GROUP, "spring-aspects", SPRING_VERSION);
@@ -114,7 +116,6 @@ public class POMGenerator {
 		printDependency(writer, SPRING_SECURITY_GROUP, "spring-security-core", SPRING_SECURITY_VERSION);
 		printDependency(writer, SPRING_SECURITY_GROUP, "spring-security-web", SPRING_SECURITY_VERSION);
 		printDependency(writer, SPRING_SECURITY_GROUP, "spring-security-config", SPRING_SECURITY_VERSION);
-        printDependenciesHeader(writer);
         printDependenciesFooter(writer);
         printDependencyManagementFooter(writer);
         
