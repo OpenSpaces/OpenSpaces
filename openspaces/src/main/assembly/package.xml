@@ -81,7 +81,6 @@
 				<include>spring-oxm-*</include>
 				<include>spring-web-*</include>
 				<include>spring-webmvc-*</include>
-				<include>com.springsource.net.sf.cglib-*</include>
 			</includes>
 		</fileSet>
 		<fileSet>
