@@ -866,9 +866,9 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
                 if (elasticProperties == null) {
                 	throw new IllegalArgumentException("Could not find conifugration for " + processingUnitName);
                 }
-                
-                // Change pu properties
-                GridServiceAgentFailureDetectionConfig agentFailureDetectionConfig = new GridServiceAgentFailureDetectionConfig(elasticProperties);
+
+                // Change pu properties, copy before modifying it.
+                GridServiceAgentFailureDetectionConfig agentFailureDetectionConfig = new GridServiceAgentFailureDetectionConfig(new HashMap<String,String>(elasticProperties));
                 if (enable) {
                 	agentFailureDetectionConfig.enableFailureDetection(ipAddress);
                 	logger.info("Enabling agent failure detection for " + processingUnitName + " on machine " + clientEndPointAddress);
@@ -877,7 +877,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
                 	agentFailureDetectionConfig.disableFailureDetection(ipAddress, expireTimestamp);
                 	logger.info("Disabling agent failure detection for " + processingUnitName + " on machine " + clientEndPointAddress);
                 }
-                processingUnitElasticPropertiesChanged(processingUnitName, elasticProperties);
+                processingUnitElasticPropertiesChanged(processingUnitName, agentFailureDetectionConfig.getProperties());
 				return null;
             }
     	});

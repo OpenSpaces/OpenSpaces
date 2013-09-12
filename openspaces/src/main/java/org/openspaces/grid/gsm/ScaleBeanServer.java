@@ -177,19 +177,20 @@ public class ScaleBeanServer {
     public void setElasticProperties(Map<String,String> elasticProperties) throws BeanConfigException {
         // order of beans is important due to implicit dependency inject order
         // see ScaleBeanFactory
-        setElasticConfig(elasticProperties);
-        setElasticMachineProvisioning(elasticProperties);
-        setElasticScaleStrategy(elasticProperties);
+        boolean changedElasticConfig = setElasticConfig(elasticProperties);
+        boolean changedElasticMachineProvisioning = setElasticMachineProvisioning(elasticProperties);
+        boolean forceScaleStrategy = changedElasticConfig || changedElasticMachineProvisioning;
+        setElasticScaleStrategy(elasticProperties, forceScaleStrategy);
     }
 
-    private void setElasticConfig(Map<String, String> elasticProperties) {
-        beanServer.replaceBeanAssignableTo(
+    private boolean setElasticConfig(Map<String, String> elasticProperties) {
+        return beanServer.replaceBeanAssignableTo(
                 new Class[]{ElasticConfigBean.class}, 
                 ElasticConfigBean.class.getName(),
                 elasticProperties); 
     }
 
-    private void setElasticScaleStrategy(Map<String, String> elasticProperties) {
+    private boolean setElasticScaleStrategy(Map<String, String> elasticProperties, boolean force) {
         
         ScaleStrategyBeanPropertiesManager scaleStrategyBeanPropertiesManager = 
             new ScaleStrategyBeanPropertiesManager(elasticProperties);
@@ -199,16 +200,19 @@ public class ScaleBeanServer {
         if (enabledBeanClassName == null) {
             throw new BeanConfigurationException("scale strategy is not defined");
         }
-    
+        if (force) {
+        	beanServer.disableAllBeansAssignableTo(ScaleStrategyBean.class);
+        }
+        
         Map<String, String> beanProperties = new HashMap<String,String>(scaleStrategyBeanPropertiesManager.getBeanConfig(enabledBeanClassName));
-        beanServer.replaceBeanAssignableTo(
+        return beanServer.replaceBeanAssignableTo(
                 new Class[]{ScaleStrategyBean.class}, 
                 enabledBeanClassName,
                 beanProperties); 
     
     }
         
-    private void setElasticMachineProvisioning(Map<String, String> elasticProperties) {
+    private boolean setElasticMachineProvisioning(Map<String, String> elasticProperties) {
         
         final MachineProvisioningBeanPropertiesManager propertiesManager = 
             new MachineProvisioningBeanPropertiesManager(elasticProperties);
@@ -220,7 +224,7 @@ public class ScaleBeanServer {
         }       
                    
         Map<String, String> beanProperties = new HashMap<String,String>(propertiesManager.getBeanConfig(enabledBeanClassName));
-        beanServer.replaceBeanAssignableTo(
+        return beanServer.replaceBeanAssignableTo(
                 new Class[]{ElasticMachineProvisioning.class,
                             NonBlockingElasticMachineProvisioning.class}, 
                 enabledBeanClassName,
