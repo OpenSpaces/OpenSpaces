@@ -58,7 +58,8 @@ public class ArchiveContainerTest {
     private final String TEST_RAW_XML = "/org/openspaces/itest/archive/statictemplate/test-archive-raw.xml";
     private final String TEST_NAMESPACE_XML = "/org/openspaces/itest/archive/statictemplate/test-archive-namespace.xml";
     private final String TEST_ANNOTATION_XML = "/org/openspaces/itest/archive/statictemplate/test-archive-annotation.xml";
-    private final String TEST_ANNOTATION_WRONG_XML = "/org/openspaces/itest/archive/wrong/test-wrong-archive-annotation.xml";
+    private final String TEST_WRONG_TEMPLATE_ANNOTATION_XML = "/org/openspaces/itest/archive/wrongtemplate/test-wrong-template-archive-annotation.xml";
+    private final String TEST_WRONG_HANDLER_ANNOTATION_XML = "/org/openspaces/itest/archive/wronghandler/test-wrong-handler-archive-annotation.xml";
     
     private final String TEST_DYNAMIC_RAW_XML = "/org/openspaces/itest/archive/dynamictemplate/test-dynamic-archive-raw.xml";
     private final String TEST_DYNAMIC_NAMESPACE_XML = "/org/openspaces/itest/archive/dynamictemplate/test-dynamic-archive-namespace.xml";
@@ -86,11 +87,27 @@ public class ArchiveContainerTest {
     /**
      * Tests archiver with mostly annotations such as @Archive (minimal xml)
      */
-    @Test 
+    @Test() 
     public void testXmlAnnotation() throws InterruptedException {
-        // see @Archive(batchSize=2) annotation and atomic=true in xml file
+    	// see @Archive(batchSize=2) annotation and atomic=true in MockArchiveContainer
         final int expectedBatchSize = 2; 
-        xmlTest(TEST_ANNOTATION_XML , expectedBatchSize); 
+        xmlTest(TEST_ANNOTATION_XML , expectedBatchSize);
+    }
+    
+    /**
+     * Tests archiver with wrong template (processed = true)
+     */
+    //@Test GS-11380  
+    public void testWrongTemplateXmlAnnotation() throws InterruptedException {
+    	// see @Archive(batchSize=2) annotation and atomic=true in MockArchiveContainer
+        final int expectedBatchSize = 2; 
+        try {
+        	xmlTest(TEST_WRONG_TEMPLATE_ANNOTATION_XML , expectedBatchSize);
+        	Assert.fail("Expected exception");
+	    }
+	    catch (AssertionError e) {
+	    	Assert.assertEquals("expected:<5> but was:<0>", e.getMessage());
+	    }
     }
   
     /**
@@ -99,7 +116,7 @@ public class ArchiveContainerTest {
     @Test(expected=BeanCreationException.class)
     public void testXmlWrongAnnotationAttribute() throws InterruptedException {
         final int expectedBatchSize = 2; 
-        xmlTest(TEST_ANNOTATION_WRONG_XML , expectedBatchSize); 
+        xmlTest(TEST_WRONG_HANDLER_ANNOTATION_XML , expectedBatchSize); 
     }
     
     /**
@@ -138,6 +155,20 @@ public class ArchiveContainerTest {
         configurerTest(TestTemplate.TEMPLATE);
     }
 
+    /**
+     * Tests archiver with configurer (wrong template)
+     */
+    @Test
+    public void testWrongTemplateConfigurer() throws Exception {
+    	try {
+        	configurerTest(TestTemplate.WRONG_TEMPLATE);
+        	Assert.fail("Expected exception");
+	    }
+	    catch (AssertionError e) {
+	    	Assert.assertEquals("expected:<5> but was:<0>", e.getMessage());
+	    }
+    }
+    
     /**
      * Tests archiver with atomic archive handler with default batchSize
      */
@@ -198,6 +229,7 @@ public class ArchiveContainerTest {
     
     enum TestTemplate {
         TEMPLATE,
+        WRONG_TEMPLATE,
         DYNAMIC_TEMPLATE_INTERFACE,
         DYNAMIC_TEMPLATE_ANNOTATION,
         DYNAMIC_TEMPLATE_METHOD
@@ -293,6 +325,13 @@ public class ArchiveContainerTest {
             final MockPojoFifoGrouping template = new MockPojoFifoGrouping();
             template.setProcessed(false);
             containerConfigurer.template(template);
+            break;
+        
+        case WRONG_TEMPLATE:
+            // template is called once
+            final MockPojoFifoGrouping wrongTemplate = new MockPojoFifoGrouping();
+            wrongTemplate.setProcessed(true);
+            containerConfigurer.template(wrongTemplate);
             break;
             
         case DYNAMIC_TEMPLATE_INTERFACE:

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.openspaces.itest.archive.wrong;
+package org.openspaces.itest.archive.wrongtemplate;
 
 import org.openspaces.archive.Archive;
 import org.openspaces.archive.ArchiveOperationHandler;
@@ -29,14 +29,16 @@ import org.springframework.transaction.annotation.Transactional;
  * @since 9.1.1
  * 
  */
-@Archive(batchSize=2, archiveHandler="WRONG-mockArchiveHandler")
+@Archive(batchSize=2, archiveHandler="mockArchiveHandler", useFifoGrouping=true)
 @Transactional
-public class MockArchiveContainerWrongHandler {
+public class MockArchiveContainerWrongTemplate {
     
-    @EventTemplate
+    private static final boolean WRONG_PROCESSED_TEMPLATE_VALUE = true;
+
+	@EventTemplate
     MockPojoFifoGrouping getTemplate() {
         MockPojoFifoGrouping template = new MockPojoFifoGrouping();
-        template.setProcessed(false);
+        template.setProcessed(WRONG_PROCESSED_TEMPLATE_VALUE);
         return template;
     }
 }
