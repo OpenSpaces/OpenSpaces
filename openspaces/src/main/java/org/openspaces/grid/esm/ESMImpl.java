@@ -871,11 +871,11 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
                 GridServiceAgentFailureDetectionConfig agentFailureDetectionConfig = new GridServiceAgentFailureDetectionConfig(new HashMap<String,String>(elasticProperties));
                 if (enable) {
                 	agentFailureDetectionConfig.enableFailureDetection(ipAddress);
-                	logger.info("Enabling agent failure detection for " + processingUnitName + " on machine " + clientEndPointAddress);
+                	logger.info("Enabling agent failure detection for " + processingUnitName + " on machine " + ipAddress);
                 }
                 else {
                 	agentFailureDetectionConfig.disableFailureDetection(ipAddress, expireTimestamp);
-                	logger.info("Disabling agent failure detection for " + processingUnitName + " on machine " + clientEndPointAddress);
+                	logger.info("Disabling agent failure detection for " + processingUnitName + " on machine " + ipAddress);
                 }
                 processingUnitElasticPropertiesChanged(processingUnitName, agentFailureDetectionConfig.getProperties());
 				return null;
