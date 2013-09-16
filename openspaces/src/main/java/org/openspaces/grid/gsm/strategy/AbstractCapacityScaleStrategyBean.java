@@ -26,6 +26,7 @@ import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.pu.elastic.GridServiceAgentFailureDetectionConfig;
+import org.openspaces.admin.internal.pu.elastic.GridServiceAgentFailureDetectionConfig.FailureDetectionStatus;
 import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.elastic.config.AutomaticCapacityScaleConfig;
@@ -235,6 +236,16 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
         }
         
         super.afterPropertiesSet();
+        
+        if (getLogger().isInfoEnabled()) {
+	        for (String ipAddress : agentFailureDetectionConfig.getFailureDetectionIpAddresses()) {
+	        	FailureDetectionStatus failureDetectionStatus = 
+	        			agentFailureDetectionConfig.getFailureDetectionStatus(ipAddress, System.currentTimeMillis());
+	        	if (failureDetectionStatus.equals(FailureDetectionStatus.DISABLE_FAILURE_DETECTION)) {
+	        		getLogger().info("Failure detection is disabled for ip " + ipAddress);
+	        	}
+	        }
+        }
     }
 
     protected void enforcePlannedCapacity() throws SlaEnforcementInProgressException {

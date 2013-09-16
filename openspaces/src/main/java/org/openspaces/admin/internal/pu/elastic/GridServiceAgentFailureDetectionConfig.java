@@ -19,6 +19,7 @@ package org.openspaces.admin.internal.pu.elastic;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.openspaces.core.util.StringProperties;
 
@@ -84,6 +85,10 @@ public class GridServiceAgentFailureDetectionConfig {
 		return FailureDetectionStatus.ENABLE_FAILURE_DETECTION;
 	}
     
+    public Set<String> getFailureDetectionIpAddresses() {
+    	return getDisabledFailureDetection().keySet();
+    }
+    
     public Map<String,String> getProperties() {
         return properties.getProperties();
     }
@@ -111,5 +116,5 @@ public class GridServiceAgentFailureDetectionConfig {
         } else if (!properties.equals(other.properties))
             return false;
         return true;
-    }  
+    }
 }
