@@ -1034,9 +1034,9 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             if (healthyAgents.size() > 0) {
                 if (logger.isInfoEnabled()) {
                     logger.info("Agents that were started by " + 
-                            "machineProvisioning class=" + sla.getMachineProvisioning().getClass() + " " +
-                            "new agents: " + MachinesSlaUtils.machinesToString(healthyAgents) + " " +
-                            "provisioned agents:" + MachinesSlaUtils.machinesToString(discoveredAgents));
+                            "machineProvisioning " +
+                            "new agents: " + MachinesSlaUtils.agentsToString(healthyAgents) + " " +
+                            "provisioned agents:" + MachinesSlaUtils.agentsToString(discoveredAgents));
                 }
                 CapacityRequirementsPerAgent unallocatedCapacity = 
                     getUnallocatedCapacityIncludeNewMachines(sla, healthyAgents);

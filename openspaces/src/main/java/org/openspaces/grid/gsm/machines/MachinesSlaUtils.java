@@ -86,10 +86,15 @@ public class MachinesSlaUtils {
     public static String agentToString(Admin admin, String agentUid) {
         GridServiceAgent agent = admin.getGridServiceAgents().getAgentByUID(agentUid);
         if (agent != null) {
-            return machineToString(agent.getMachine()) +" "+agent.getExactZones();
+            return agentToString(agent);
         }
         return "agent uid " + agentUid;
     }
+
+
+	private static String agentToString(GridServiceAgent agent) {
+		return agent.getUid() + " " + machineToString(agent.getMachine()) +" "+agent.getExactZones();
+	}
     
     public static String machineToString(Machine machine) {
         return machine.getHostName() + "/" + machine.getHostAddress();
@@ -292,5 +297,16 @@ public class MachinesSlaUtils {
 
 	public static String getAgentIpAddress(GridServiceAgent agent) {
 		return agent.getMachine().getHostAddress();
+	}
+
+
+	public static String agentsToString(Collection<GridServiceAgent> agents) {
+		final String[] agentsToString = new String[agents.size()];
+        int i =0;
+        for (GridServiceAgent agent: agents) {
+            agentsToString[i] = agentToString(agent);
+            i++;
+        }
+        return Arrays.toString(agentsToString);
 	}
 }
