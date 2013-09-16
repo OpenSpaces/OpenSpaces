@@ -40,6 +40,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.gigaspaces.security.service.RemoteSecuredService;
 import net.jini.export.Exporter;
 
 import org.jini.rio.boot.BootUtil;
@@ -114,7 +115,8 @@ import com.gigaspaces.start.SystemBoot;
 import com.j_spaces.kernel.time.SystemTime;
 import com.sun.jini.start.LifeCycle;
 
-public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRemovedEventListener, ProcessingUnitAddedEventListener,MachineLifecycleEventListener
+public class ESMImpl extends ServiceBeanAdapter implements ESM, RemoteSecuredService, ProcessingUnitRemovedEventListener,
+        ProcessingUnitAddedEventListener,MachineLifecycleEventListener
 /*, RemoteSecuredService*//*, ServiceDiscoveryListener*/ {
 
 
@@ -431,6 +433,14 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
 
     public SecurityContext login(CredentialsProvider credentialsProvider) throws SecurityException, RemoteException {
         throw new SecurityException("Invalid method call."); //this is proxy API
+    }
+
+    @Override
+    public SecurityContext login(SecurityContext securityContext) throws RemoteException {
+        if (isServiceSecured())
+            return securityInterceptor.authenticate(securityContext);
+        else
+            return null;
     }
 
     public void setProcessingUnitScaleStrategy(final String puName, final ScaleStrategyConfig scaleStrategyConfig) {

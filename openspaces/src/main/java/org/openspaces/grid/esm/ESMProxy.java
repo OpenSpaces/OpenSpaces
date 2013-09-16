@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import com.gigaspaces.security.authorities.GridAuthority;
+import com.gigaspaces.security.service.RemoteSecuredService;
 import net.jini.id.Uuid;
 
 import org.jini.rio.monitor.event.Events;
@@ -73,7 +74,7 @@ public class ESMProxy extends AbstractProxy implements ESM, Serializable {
     }
 
     public SecurityContext login(CredentialsProvider credentialsProvider) throws SecurityException, RemoteException {
-        return esmServer.login(credentialsProvider);
+        return login((RemoteSecuredService) server, credentialsProvider);
     }
 
     public void setProcessingUnitElasticProperties(String processingUnitName, Map<String, String> properties)
