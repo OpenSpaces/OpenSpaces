@@ -437,9 +437,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
             logger.debug("Service Added [ESM] with uid [" + serviceID + "]");
         }
         try {
-            // if (esm.isServiceSecured()) {
-            // esm.login(admin.getUserDetails());
-            // }
+            admin.login(esm);
             final JVMDetails jvmDetails = esm.getJVMDetails();
             final InternalElasticServiceManager elasticServiceManager = 
                     new DefaultElasticServiceManager(serviceID, esm, admin, esm.getAgentId(), 
