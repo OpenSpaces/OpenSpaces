@@ -79,7 +79,7 @@ public class GridServiceAgentFailureDetectionConfig {
 			return FailureDetectionStatus.DONT_CARE;
 		}
     	final Long expireTimestamp = Long.valueOf(value);
-		if (now > expireTimestamp) {
+		if (now < expireTimestamp) {
 			return FailureDetectionStatus.DISABLE_FAILURE_DETECTION;
 		}
 		return FailureDetectionStatus.ENABLE_FAILURE_DETECTION;

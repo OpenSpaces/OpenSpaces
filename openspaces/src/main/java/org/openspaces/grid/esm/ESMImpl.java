@@ -878,7 +878,8 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, RemoteSecuredSer
                 }
 
                 // Change pu properties, copy before modifying it.
-                GridServiceAgentFailureDetectionConfig agentFailureDetectionConfig = new GridServiceAgentFailureDetectionConfig(new HashMap<String,String>(elasticProperties));
+                final HashMap<String, String> newProperties = new HashMap<String,String>(elasticProperties);
+				GridServiceAgentFailureDetectionConfig agentFailureDetectionConfig = new GridServiceAgentFailureDetectionConfig(newProperties);
                 if (enable) {
                 	agentFailureDetectionConfig.enableFailureDetection(ipAddress);
                 	logger.info("Enabling agent failure detection for " + processingUnitName + " on machine " + ipAddress);
@@ -887,7 +888,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, RemoteSecuredSer
                 	agentFailureDetectionConfig.disableFailureDetection(ipAddress, expireTimestamp);
                 	logger.info("Disabling agent failure detection for " + processingUnitName + " on machine " + ipAddress);
                 }
-                processingUnitElasticPropertiesChanged(processingUnitName, agentFailureDetectionConfig.getProperties());
+                processingUnitElasticPropertiesChanged(processingUnitName, newProperties);
 				return null;
             }
     	});

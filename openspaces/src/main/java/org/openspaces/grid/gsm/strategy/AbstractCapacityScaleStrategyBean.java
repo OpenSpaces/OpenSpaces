@@ -238,12 +238,17 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
         super.afterPropertiesSet();
         
         if (getLogger().isInfoEnabled()) {
-	        for (String ipAddress : agentFailureDetectionConfig.getFailureDetectionIpAddresses()) {
-	        	FailureDetectionStatus failureDetectionStatus = 
-	        			agentFailureDetectionConfig.getFailureDetectionStatus(ipAddress, System.currentTimeMillis());
-	        	if (failureDetectionStatus.equals(FailureDetectionStatus.DISABLE_FAILURE_DETECTION)) {
-	        		getLogger().info("Failure detection is disabled for ip " + ipAddress);
-	        	}
+	        if (agentFailureDetectionConfig.getFailureDetectionIpAddresses().isEmpty()) {
+	        	getLogger().info("Agent failure detection is enabled");
+	        }
+	        else {
+	        	for (String ipAddress : agentFailureDetectionConfig.getFailureDetectionIpAddresses()) {
+		        	final FailureDetectionStatus failureDetectionStatus = 
+		        			agentFailureDetectionConfig.getFailureDetectionStatus(ipAddress, System.currentTimeMillis());
+		        	if (failureDetectionStatus.equals(FailureDetectionStatus.DISABLE_FAILURE_DETECTION)) {
+		        		getLogger().info("Agent failure detection is disabled for ip " + ipAddress);
+		        	}
+		        }
 	        }
         }
     }
