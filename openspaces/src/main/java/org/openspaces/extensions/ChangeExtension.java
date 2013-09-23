@@ -48,7 +48,7 @@ public class ChangeExtension
      * @param idQuery id the query which is used to locate the entry.
      * @param path the path to the number property which is being modified.
      * @param delta the value to add.
-     * @param timeout time to wait of the entry is locked under a transaction.
+     * @param timeout time to wait if the entry is locked under a transaction.
      * @param timeUnit units for the timeout.
      * @return the updated value, null of no matching entry found for the given id query. Therefore you must use the 
      * primitive wrapper types as the result value (e.g. Integer/Long) otherwise you may get {@link NullPointerException} if no entry was found.
@@ -65,7 +65,7 @@ public class ChangeExtension
      * @param path the path to the number property which is being modified.
      * @param delta the value to add.
      * @param modifiers the change modifiers to use.
-     * @param timeout time to wait of the entry is locked under a transaction.
+     * @param timeout time to wait if the entry is locked under a transaction.
      * @param timeUnit units for the timeout.
      * @return the updated value, null of no matching entry found for the given id query. Therefore you must use the 
      * primitive wrapper types as the result value (e.g. Integer/Long) otherwise you may get {@link NullPointerException} if no entry was found.
