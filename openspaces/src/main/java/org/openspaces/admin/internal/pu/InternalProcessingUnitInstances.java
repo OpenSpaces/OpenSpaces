@@ -17,6 +17,7 @@
  ******************************************************************************/
 package org.openspaces.admin.internal.pu;
 
+import org.openspaces.admin.internal.pu.events.InternalOrphanProcessingUnitInstanceLifecycleEventListener;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
@@ -27,7 +28,7 @@ import java.util.Iterator;
 /**
  * @author kimchy
  */
-public interface InternalProcessingUnitInstances extends InternalProcessingUnitInstancesAware {
+public interface InternalProcessingUnitInstances extends InternalProcessingUnitInstancesAware, InternalOrphanProcessingUnitInstancesAware {
 
     boolean contains(ProcessingUnitInstance processingUnitInstance);
 
@@ -38,8 +39,6 @@ public interface InternalProcessingUnitInstances extends InternalProcessingUnitI
     void addInstance(ProcessingUnitInstance processingUnitInstance);
 
     ProcessingUnitInstance removeInstance(String uid);
-
-    ProcessingUnitInstance[] getOrphaned();
 
     Iterator<ProcessingUnitInstance> getInstancesIt();
 
@@ -56,4 +55,10 @@ public interface InternalProcessingUnitInstances extends InternalProcessingUnitI
     void removeProcessingUnitInstanceLifecycleEventListener(ProcessingUnitInstanceLifecycleEventListener eventListener);
 
     ProcessingUnitInstance getInstanceByUID(String processingUnitInstanceUid);
+    
+    void addOrphanProcessingUnitInstanceLifecycleEventListener(InternalOrphanProcessingUnitInstanceLifecycleEventListener eventListener);
+
+    void removeOrphanProcessingUnitInstanceLifecycleEventListener(InternalOrphanProcessingUnitInstanceLifecycleEventListener eventListener);
+    
+    
 }

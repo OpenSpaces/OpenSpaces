@@ -42,7 +42,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.gigaspaces.security.AuthenticationException;
 import net.jini.core.discovery.LookupLocator;
 import net.jini.core.lookup.ServiceID;
 
@@ -119,6 +118,7 @@ import org.openspaces.admin.internal.pu.InternalProcessingUnit;
 import org.openspaces.admin.internal.pu.InternalProcessingUnitInstance;
 import org.openspaces.admin.internal.pu.InternalProcessingUnitInstances;
 import org.openspaces.admin.internal.pu.InternalProcessingUnits;
+import org.openspaces.admin.internal.pu.events.InternalOrphanProcessingUnitInstanceLifecycleEventListener;
 import org.openspaces.admin.internal.pu.events.InternalProcessingUnitInstanceAddedEventManager;
 import org.openspaces.admin.internal.pu.events.InternalProcessingUnitInstanceRemovedEventManager;
 import org.openspaces.admin.internal.space.DefaultSpace;
@@ -183,6 +183,7 @@ import com.gigaspaces.internal.os.OSDetails;
 import com.gigaspaces.internal.utils.StringUtils;
 import com.gigaspaces.internal.utils.concurrent.GSThreadFactory;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
+import com.gigaspaces.security.AuthenticationException;
 import com.gigaspaces.security.SecurityException;
 import com.gigaspaces.security.directory.CredentialsProvider;
 import com.gigaspaces.security.service.SecuredService;
@@ -1920,7 +1921,7 @@ public class DefaultAdmin implements InternalAdmin {
             // Now, process any orphaned processing unit instances
             assertStateChangesPermitted();
             synchronized (DefaultAdmin.this) {
-                for (ProcessingUnitInstance orphanedX : processingUnitInstances.getOrphaned()) {
+                for (ProcessingUnitInstance orphanedX : processingUnitInstances.getOrphanProcessingUnitInstances()) {
                     InternalProcessingUnitInstance orphaned = (InternalProcessingUnitInstance) orphanedX;
 
                     InternalProcessingUnit processingUnit = (InternalProcessingUnit) processingUnits.getProcessingUnit(orphaned.getName());
@@ -2204,5 +2205,15 @@ public class DefaultAdmin implements InternalAdmin {
 	public void removeGatewayProcessingUnit( String uid ) {
 
 		gatewayProcessingUnits.removeGatewayProcessingUnit( uid );
+	}
+
+	@Override
+	public void addOrphanProcessingUnitInstanceEventListener(InternalOrphanProcessingUnitInstanceLifecycleEventListener eventListener) {
+		processingUnitInstances.addOrphanProcessingUnitInstanceLifecycleEventListener(eventListener);
+	}
+	
+	@Override
+	public void removeOrphanProcessingUnitInstanceEventListener(InternalOrphanProcessingUnitInstanceLifecycleEventListener eventListener) {
+		processingUnitInstances.removeOrphanProcessingUnitInstanceLifecycleEventListener(eventListener);
 	}
 }

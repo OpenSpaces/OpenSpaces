@@ -31,6 +31,7 @@ import org.openspaces.admin.internal.gsc.InternalGridServiceContainer;
 import org.openspaces.admin.internal.gsm.InternalGridServiceManager;
 import org.openspaces.admin.internal.lus.InternalLookupService;
 import org.openspaces.admin.internal.pu.InternalProcessingUnitInstance;
+import org.openspaces.admin.internal.pu.events.InternalOrphanProcessingUnitInstanceLifecycleEventListener;
 import org.openspaces.admin.internal.space.InternalSpaceInstance;
 import org.openspaces.security.AdminFilter;
 
@@ -149,4 +150,9 @@ public interface InternalAdmin extends Admin {
 
     boolean isSingleThreadedEventListeners();
 
+	void addOrphanProcessingUnitInstanceEventListener(
+			InternalOrphanProcessingUnitInstanceLifecycleEventListener eventListener);
+
+	void removeOrphanProcessingUnitInstanceEventListener(
+			InternalOrphanProcessingUnitInstanceLifecycleEventListener eventListener);
 }

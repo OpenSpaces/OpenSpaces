@@ -49,6 +49,7 @@ import org.openspaces.admin.internal.gsc.InternalGridServiceContainer;
 import org.openspaces.admin.internal.gsm.InternalGridServiceManager;
 import org.openspaces.admin.internal.lus.InternalLookupService;
 import org.openspaces.admin.internal.pu.InternalProcessingUnitInstance;
+import org.openspaces.admin.internal.pu.events.InternalOrphanProcessingUnitInstanceLifecycleEventListener;
 import org.openspaces.admin.internal.space.InternalSpaceInstance;
 import org.openspaces.admin.lus.LookupServices;
 import org.openspaces.admin.machine.Machines;
@@ -456,6 +457,20 @@ public class NullMockAdmin implements InternalAdmin {
 
 	@Override
 	public void removeGatewayProcessingUnit( String uid ) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void addOrphanProcessingUnitInstanceEventListener(
+			InternalOrphanProcessingUnitInstanceLifecycleEventListener eventListener) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void removeOrphanProcessingUnitInstanceEventListener(
+			InternalOrphanProcessingUnitInstanceLifecycleEventListener eventListener) {
 		// TODO Auto-generated method stub
 		
 	}
