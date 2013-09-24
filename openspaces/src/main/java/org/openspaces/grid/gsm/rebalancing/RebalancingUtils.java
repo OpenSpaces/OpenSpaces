@@ -943,7 +943,7 @@ public class RebalancingUtils {
     }    
 
     public static FutureStatefulProcessingUnitInstance restartProcessingUnitInstanceAsync(
-            ProcessingUnitInstance candidateInstance, Log logger, int timeout, TimeUnit timeUnit) {
+            ProcessingUnitInstance candidateInstance, Log logger, long timeout, TimeUnit timeUnit) {
         
         return relocateProcessingUnitInstanceAsync(
                 candidateInstance.getGridServiceContainer(), 

@@ -56,9 +56,11 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
 
     //0.01 minimum cpu cores per machine
     private static final Fraction MIN_CPU_CORES_PER_MACHINE_FOR_REBALANCING = new Fraction(1,100); 
-    private static final int DEPLOYMENT_TIMEOUT_FAILURE_SECONDS = 3600; // one hour
-    private static final int DEPLOYMENT_TIMEOUT_FAILURE_FORGET_SECONDS = 3600; // one hour
-
+    private static final long STATEFUL_DEPLOYMENT_TIMEOUT_SECONDS = Long.getLong("org.openspaces.grid.stateful_deployment_timeout_seconds", 60*60L); // one hour
+    private static final long STATELESS_DEPLOYMENT_TIMEOUT_SECONDS = Long.getLong("org.openspaces.grid.stateless_deployment_timeout_seconds", 60*60L); // one hour
+    private static final long STATEFUL_DEPLOYMENT_FAILURE_FORGET_SECONDS = Long.getLong("org.openspaces.grid.stateful_deployment_failure_forget_seconds", 60*60L); // one hour
+    private static final long STATELESS_DEPLOYMENT_FAILURE_FORGET_SECONDS = Long.getLong("org.openspaces.grid.stateless_deployment_failure_forget_seconds", 5*60L); // five minutes
+    
     private final ProcessingUnit pu;
     private final RebalancingSlaEnforcementState state;
     
@@ -200,7 +202,7 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
                     pu, 
                     containers,
                     logger, 
-                    DEPLOYMENT_TIMEOUT_FAILURE_SECONDS , TimeUnit.SECONDS);
+                    STATELESS_DEPLOYMENT_TIMEOUT_SECONDS , TimeUnit.SECONDS);
         
         state.addFutureStatelessDeployments(futureInstances);
         
@@ -557,7 +559,7 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
                             + "from " + RebalancingUtils.gscToString(source) + " " + "to "
                             + RebalancingUtils.gscToString(target));
                     return RebalancingUtils.relocateProcessingUnitInstanceAsync(target, candidateInstance,
-                            logger, DEPLOYMENT_TIMEOUT_FAILURE_SECONDS, TimeUnit.SECONDS);
+                            logger, STATEFUL_DEPLOYMENT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
 
                 }// for pu instance
             }// for source container
@@ -647,7 +649,7 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
                             + "from " + RebalancingUtils.gscToString(source)
                             + " " + "to " + RebalancingUtils.gscToString(target));
                     return RebalancingUtils.relocateProcessingUnitInstanceAsync(target, candidateInstance,
-                            logger, DEPLOYMENT_TIMEOUT_FAILURE_SECONDS, TimeUnit.SECONDS);
+                            logger, STATEFUL_DEPLOYMENT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
 
                 }
             }
@@ -811,7 +813,7 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
                     }
                     
                     return RebalancingUtils.restartProcessingUnitInstanceAsync(candidateInstance,
-                            logger, DEPLOYMENT_TIMEOUT_FAILURE_SECONDS, TimeUnit.SECONDS);
+                            logger, STATEFUL_DEPLOYMENT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
                 }
             }
         }
@@ -872,7 +874,7 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
                         }
                         
                         return RebalancingUtils.restartProcessingUnitInstanceAsync(candidateInstance,
-                                logger, DEPLOYMENT_TIMEOUT_FAILURE_SECONDS, TimeUnit.SECONDS);
+                                logger, STATEFUL_DEPLOYMENT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
                     }
                 }
                 // we haven't found any partition to restart, probably the instance that requires restart
@@ -970,13 +972,13 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
             if (future.getException() != null
                     && future.getException().getCause() instanceof WrongContainerProcessingUnitRelocationException
                     && future.getTargetContainer().isDiscovered()
-                    && passedSeconds < DEPLOYMENT_TIMEOUT_FAILURE_FORGET_SECONDS) {
+                    && passedSeconds < STATEFUL_DEPLOYMENT_FAILURE_FORGET_SECONDS) {
 
                 // do not remove future from list since the target container did not have enough
                 // memory
                 // meaning something is very wrong with our assumptions on the target container.
                 // We leave this future in the list so it will cause conflicting exceptions.
-                // Once RELOCATION_TIMEOUT_FAILURE_FORGET_SECONDS passes it is removed from the
+                // Once STATEFUL_DEPLOYMENT_FAILURE_FORGET_SECONDS passes it is removed from the
                 // list.
             } else {
                 logger.info("Forgetting relocation error " + future.getFailureMessage());
@@ -1016,24 +1018,59 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
      * Unless the target container has been removed.
      */
     private void cleanFailedFutureStatelessDeployments() {
-        for (FutureStatelessProcessingUnitInstance future : state.getFailedStatelessDeployments(pu)) {
+        for (final FutureStatelessProcessingUnitInstance future : state.getFailedStatelessDeployments(pu)) {
 
             int passedSeconds = (int) ((System.currentTimeMillis() - future.getTimestamp().getTime()) / 1000);
 
             if (future.getException() != null
                 && future.getTargetContainer().isDiscovered()
-                && passedSeconds < DEPLOYMENT_TIMEOUT_FAILURE_FORGET_SECONDS) {
+                && passedSeconds < STATELESS_DEPLOYMENT_FAILURE_FORGET_SECONDS) {
 
                 // do not remove future from list until timeout failure forget
                 // since something is very wrong with target container.
                 
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Ignoring failure to relocate stateless pu instance " + future.getProcessingUnit() + " Will try again in " + (DEPLOYMENT_TIMEOUT_FAILURE_FORGET_SECONDS- passedSeconds) + " seconds.",future.getException());
+                    logger.debug("Ignoring failure to relocate stateless pu instance " + future.getProcessingUnit() + " Will try again in " + (STATELESS_DEPLOYMENT_FAILURE_FORGET_SECONDS- passedSeconds) + " seconds.",future.getException());
                 }
                 
             } else {
-                logger.info("Forgetting relocation error " + future.getFailureMessage());
-                state.removeFailedFutureStatelessDeployment(future);
+            	final InternalAdmin admin = ((InternalAdmin)pu.getAdmin()); 
+                // 1. kick the GSM a little by removing planned instances that are not deployed
+            	// 2. forget the relocation error
+                admin.scheduleAdminOperation(new Runnable() {
+                	
+                    public void run() {
+                        try {
+
+                            final boolean decremented = ((InternalProcessingUnit)pu).decrementPlannedInstances();
+                            if (logger.isInfoEnabled()) {
+	                            if (decremented) {
+	                                logger.info("Decreased number of planned instances in the GSM. It will be incremented shortly (instance deployment retry)");
+	                            } else {
+	                                logger.info("Failed to decrement planned number of instances for " + pu.getName() + " meaning that instance is ok.");
+	                            }
+                            }
+                        }
+                        catch (final AdminException e) {
+                            logger.warn(
+                                    "Unexpected failure to decrement planned number of instances for " + pu.getName(),e);
+                        }
+                        catch (final Throwable t) {
+                            logger.warn("Unexpected exception when decrementing planned number of instances for "+ pu.getName(),t);
+                        }
+                        finally {
+	                        admin.scheduleNonBlockingStateChange(new Runnable() {
+								
+								@Override
+								public void run() {
+									logger.info("Forgetting deployment error " + future.getFailureMessage() + " will retry soon.");
+			                        state.removeFailedFutureStatelessDeployment(future);		
+								}
+							});
+                        }
+                    }}
+                );
+
             }
         }
     }
