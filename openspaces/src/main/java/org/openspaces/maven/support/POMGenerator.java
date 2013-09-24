@@ -39,6 +39,9 @@ public class POMGenerator {
     public static final String SPRING_VERSION = "3.2.4.RELEASE";
     public static final String SPRING_SECURITY_VERSION = "3.0.7.RELEASE";
 	private static final String SPRING_SECURITY_GROUP = "org.springframework.security";
+	private static final String COMMONS_COLLECTIONS_VERSION = "3.2.1";
+	private static final String COMMONS_LANG_VERSION = "2.6";
+	private static final String COMMONS_POOL_VERSION = "1.6";
     
     public static void main(String[] args) throws Exception {
         String templDir = System.getProperty("java.io.tmpdir");
@@ -106,6 +109,12 @@ public class POMGenerator {
         
         // ignore deprecated spring-asm that is needed by older spring-security
         printProvidedDependency(writer, SPRING_GROUP, "spring-asm", "3.0.6");
+        
+        // commons in lib/platform/commons
+        printDependency(writer, SPRING_GROUP, "commons-collections", "commons-collections", COMMONS_COLLECTIONS_VERSION);
+        printDependency(writer, SPRING_GROUP, "commons-lang", "commons-lang", COMMONS_LANG_VERSION);
+        printDependency(writer, SPRING_GROUP, "commons-pool", "commons-pool", COMMONS_POOL_VERSION);
+	
         // spring jars in lib/optional/spring
         printDependency(writer, SPRING_GROUP, "spring-web", SPRING_VERSION);
         printDependency(writer, SPRING_GROUP, "spring-jdbc", SPRING_VERSION);
