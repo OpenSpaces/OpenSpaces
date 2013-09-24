@@ -91,7 +91,7 @@ public @interface Notify {
      * @deprecated This configuration is redundant and has no affect.
      */
     @Deprecated
-    NotifyComType commType() default NotifyComType.MULTIPLEX;
+    NotifyComType commType() default org.openspaces.events.notify.NotifyComType.MULTIPLEX;
 
     /**
      * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setFifo(boolean)
