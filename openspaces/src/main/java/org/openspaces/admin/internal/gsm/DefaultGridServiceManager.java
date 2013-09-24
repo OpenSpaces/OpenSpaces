@@ -823,6 +823,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
                 verifyNotDiscovered(containersPendingRemoval);
                 verifyInstancesNotUndeploying(puInstancesPendingRemoval);
                 verifyOrphanInstancesNotDeploying(processingUnits);
+                verifyOrphanInstancesNotDeployed(processingUnits);
                 break;
             }
             catch (TimeoutException e) {
@@ -836,7 +837,24 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         }
     }
 
-    private void verifyOrphanInstancesNotDeploying(ProcessingUnit[] processingUnits) throws TimeoutException {
+    private void verifyOrphanInstancesNotDeployed(ProcessingUnit[] processingUnits) throws TimeoutException {
+		
+    	ProcessingUnitInstance[] orphanProcessingUnitInstances = ((InternalAdmin)admin).getOrphanProcessingUnitInstances();
+    	
+    	final Set<String> puNames = new HashSet<String>();
+		for (ProcessingUnit pu : processingUnits) {
+			puNames.add(pu.getName());
+		}
+		
+		for (ProcessingUnitInstance orphanInstance : orphanProcessingUnitInstances) {
+			final String puName = orphanInstance.getName();
+			if (puNames.contains(puName)) {
+				throw new TimeoutException("Orphan instance still being deployed. " + orphanInstance.getProcessingUnitInstanceName()); 
+			}
+		}
+	}
+
+	private void verifyOrphanInstancesNotDeploying(ProcessingUnit[] processingUnits) throws TimeoutException {
     	try {
 	    	for (ProcessingUnit pu : processingUnits) {
 	    		if (gsm.isOrphanInstancesBeingProvisioned(pu.getName())) {
