@@ -69,8 +69,8 @@ import com.j_spaces.core.client.INotifyDelegatorFilter;
  * <p/>
  * <p>The communication protocol between the space "server" and the even listener client can be
  * configured using either {@link #setComType(int)} or {@link #setComTypeName(String)}. The
- * available options are {@link #COM_TYPE_UNICAST}, {@link #COM_TYPE_MULTIPLEX} and
- * {@link #COM_TYPE_MULTICAST}. If using {@link #setComType(int)} the integer constant value should
+ * available options are {@link #COM_TYPE_UNICAST} or {@link #COM_TYPE_MULTIPLEX}. If using {@link #setComType(int)}
+ * the integer constant value should
  * be used. If using {@link #setComTypeName(String)} the actual name of the com type can be used (<code>unicast</code>,
  * <code>multiplex</code> or <code>multicast</code>). The default communication type is
  * {@link #COM_TYPE_UNICAST}.
