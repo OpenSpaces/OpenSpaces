@@ -33,6 +33,7 @@ import org.openspaces.admin.internal.lus.InternalLookupService;
 import org.openspaces.admin.internal.pu.InternalProcessingUnitInstance;
 import org.openspaces.admin.internal.pu.events.InternalOrphanProcessingUnitInstanceLifecycleEventListener;
 import org.openspaces.admin.internal.space.InternalSpaceInstance;
+import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.security.AdminFilter;
 
 import com.gigaspaces.internal.jvm.JVMDetails;
@@ -155,4 +156,6 @@ public interface InternalAdmin extends Admin {
 
 	void removeOrphanProcessingUnitInstanceEventListener(
 			InternalOrphanProcessingUnitInstanceLifecycleEventListener eventListener);
+
+	ProcessingUnitInstance[] getOrphanProcessingUnitInstances();
 }

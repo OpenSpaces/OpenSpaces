@@ -2216,4 +2216,9 @@ public class DefaultAdmin implements InternalAdmin {
 	public void removeOrphanProcessingUnitInstanceEventListener(InternalOrphanProcessingUnitInstanceLifecycleEventListener eventListener) {
 		processingUnitInstances.removeOrphanProcessingUnitInstanceLifecycleEventListener(eventListener);
 	}
+	
+	@Override
+	public ProcessingUnitInstance[] getOrphanProcessingUnitInstances() {
+		return processingUnitInstances.getOrphanProcessingUnitInstances();
+	}
 }
