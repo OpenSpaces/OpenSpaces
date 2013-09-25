@@ -71,7 +71,9 @@ public class ScriptingRemotingTests extends AbstractDependencyInjectionSpringCon
 
     public void testAsyncSyncExecutionWithReferenceToSpace() {
         gigaSpace.clear(null);
-        asyncScriptingExecutor.execute(new StaticScript("testAsyncSyncExecutionWithReferenceToSpace", "groovy", "gigaSpace.write(new Object())"));
+        asyncScriptingExecutor.execute(new StaticScript("testAsyncSyncExecutionWithReferenceToSpace", "groovy", 
+                                                        "import org.openspaces.itest.utils.EmptySpaceDataObject;" +
+        		                                        "gigaSpace.write(new EmptySpaceDataObject())"));
         assertEquals(1, gigaSpace.count(new Object()));
     }
 

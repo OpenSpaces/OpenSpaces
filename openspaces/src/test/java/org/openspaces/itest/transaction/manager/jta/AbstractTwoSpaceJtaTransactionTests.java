@@ -17,6 +17,7 @@
 package org.openspaces.itest.transaction.manager.jta;
 
 import org.openspaces.core.GigaSpace;
+import org.openspaces.itest.utils.EmptySpaceDataObject;
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -51,108 +52,108 @@ public abstract class AbstractTwoSpaceJtaTransactionTests extends AbstractDepend
 
     public void testSimpleCommit() {
         TransactionTemplate txTemplate = new TransactionTemplate(transactionManager);
-        assertNull(gigaSpace1.read(new Object()));
+        assertNull(gigaSpace1.read(new EmptySpaceDataObject()));
         txTemplate.execute(new TransactionCallbackWithoutResult() {
             protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
-                assertNull(gigaSpace1.read(new Object()));
-                gigaSpace1.write(new Object());
-                assertNotNull(gigaSpace1.read(new Object()));
+                assertNull(gigaSpace1.read(new EmptySpaceDataObject()));
+                gigaSpace1.write(new EmptySpaceDataObject());
+                assertNotNull(gigaSpace1.read(new EmptySpaceDataObject()));
             }
         });
-        assertNotNull(gigaSpace1.read(new Object()));
+        assertNotNull(gigaSpace1.read(new EmptySpaceDataObject()));
     }
 
     public void testSimpleCommitTwoSpaces() {
         TransactionTemplate txTemplate = new TransactionTemplate(transactionManager);
-        assertNull(gigaSpace1.read(new Object()));
-        assertNull(gigaSpace2.read(new Object()));
+        assertNull(gigaSpace1.read(new EmptySpaceDataObject()));
+        assertNull(gigaSpace2.read(new EmptySpaceDataObject()));
         txTemplate.execute(new TransactionCallbackWithoutResult() {
             protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
-                assertNull(gigaSpace1.read(new Object()));
-                assertNull(gigaSpace2.read(new Object()));
-                gigaSpace1.write(new Object());
-                gigaSpace2.write(new Object());
-                assertNotNull(gigaSpace1.read(new Object()));
-                assertNotNull(gigaSpace2.read(new Object()));
+                assertNull(gigaSpace1.read(new EmptySpaceDataObject()));
+                assertNull(gigaSpace2.read(new EmptySpaceDataObject()));
+                gigaSpace1.write(new EmptySpaceDataObject());
+                gigaSpace2.write(new EmptySpaceDataObject());
+                assertNotNull(gigaSpace1.read(new EmptySpaceDataObject()));
+                assertNotNull(gigaSpace2.read(new EmptySpaceDataObject()));
             }
         });
-        assertNotNull(gigaSpace1.read(new Object()));
-        assertNotNull(gigaSpace2.read(new Object()));
+        assertNotNull(gigaSpace1.read(new EmptySpaceDataObject()));
+        assertNotNull(gigaSpace2.read(new EmptySpaceDataObject()));
     }
 
     public void testSimpleRollback() {
         TransactionTemplate txTemplate = new TransactionTemplate(transactionManager);
-        assertNull(gigaSpace1.read(new Object()));
+        assertNull(gigaSpace1.read(new EmptySpaceDataObject()));
         txTemplate.execute(new TransactionCallbackWithoutResult() {
             protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
-                assertNull(gigaSpace1.read(new Object()));
-                gigaSpace1.write(new Object());
-                assertNotNull(gigaSpace1.read(new Object()));
+                assertNull(gigaSpace1.read(new EmptySpaceDataObject()));
+                gigaSpace1.write(new EmptySpaceDataObject());
+                assertNotNull(gigaSpace1.read(new EmptySpaceDataObject()));
                 transactionStatus.setRollbackOnly();
             }
         });
-        assertNull(gigaSpace1.read(new Object()));
+        assertNull(gigaSpace1.read(new EmptySpaceDataObject()));
     }
 
     public void testSimpleRollbackTwoSpaces() {
         TransactionTemplate txTemplate = new TransactionTemplate(transactionManager);
-        assertNull(gigaSpace1.read(new Object()));
+        assertNull(gigaSpace1.read(new EmptySpaceDataObject()));
         txTemplate.execute(new TransactionCallbackWithoutResult() {
             protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
-                assertNull(gigaSpace1.read(new Object()));
-                gigaSpace1.write(new Object());
-                assertNotNull(gigaSpace1.read(new Object()));
+                assertNull(gigaSpace1.read(new EmptySpaceDataObject()));
+                gigaSpace1.write(new EmptySpaceDataObject());
+                assertNotNull(gigaSpace1.read(new EmptySpaceDataObject()));
                 transactionStatus.setRollbackOnly();
             }
         });
-        assertNull(gigaSpace1.read(new Object()));
+        assertNull(gigaSpace1.read(new EmptySpaceDataObject()));
     }
 
     public void testTakeRollback() {
         TransactionTemplate txTemplate = new TransactionTemplate(transactionManager);
-        assertNull(gigaSpace1.read(new Object()));
-        gigaSpace1.write(new Object());
-        assertNotNull(gigaSpace1.read(new Object()));
+        assertNull(gigaSpace1.read(new EmptySpaceDataObject()));
+        gigaSpace1.write(new EmptySpaceDataObject());
+        assertNotNull(gigaSpace1.read(new EmptySpaceDataObject()));
         txTemplate.execute(new TransactionCallbackWithoutResult() {
             protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
-                assertNotNull(gigaSpace1.take(new Object()));
+                assertNotNull(gigaSpace1.take(new EmptySpaceDataObject()));
                 transactionStatus.setRollbackOnly();
             }
         });
-        assertNotNull(gigaSpace1.take(new Object()));
+        assertNotNull(gigaSpace1.take(new EmptySpaceDataObject()));
     }
 
     public void testTakeRollbackTwoSpaces() {
         TransactionTemplate txTemplate = new TransactionTemplate(transactionManager);
-        assertNull(gigaSpace1.read(new Object()));
-        assertNull(gigaSpace2.read(new Object()));
-        gigaSpace1.write(new Object());
-        gigaSpace2.write(new Object());
-        assertNotNull(gigaSpace1.read(new Object()));
-        assertNotNull(gigaSpace2.read(new Object()));
+        assertNull(gigaSpace1.read(new EmptySpaceDataObject()));
+        assertNull(gigaSpace2.read(new EmptySpaceDataObject()));
+        gigaSpace1.write(new EmptySpaceDataObject());
+        gigaSpace2.write(new EmptySpaceDataObject());
+        assertNotNull(gigaSpace1.read(new EmptySpaceDataObject()));
+        assertNotNull(gigaSpace2.read(new EmptySpaceDataObject()));
         txTemplate.execute(new TransactionCallbackWithoutResult() {
             protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
-                assertNotNull(gigaSpace1.take(new Object()));
-                assertNotNull(gigaSpace2.take(new Object()));
+                assertNotNull(gigaSpace1.take(new EmptySpaceDataObject()));
+                assertNotNull(gigaSpace2.take(new EmptySpaceDataObject()));
                 transactionStatus.setRollbackOnly();
             }
         });
-        assertNotNull(gigaSpace1.take(new Object()));
-        assertNotNull(gigaSpace2.take(new Object()));
+        assertNotNull(gigaSpace1.take(new EmptySpaceDataObject()));
+        assertNotNull(gigaSpace2.take(new EmptySpaceDataObject()));
     }
 
     public void testPropogationRequiredWithCommit() {
         TransactionTemplate txTemplate = new TransactionTemplate(transactionManager);
-        assertNull(gigaSpace1.read(new Object()));
+        assertNull(gigaSpace1.read(new EmptySpaceDataObject()));
         assertNull(gigaSpace1.read(new TestData1()));
         txTemplate.execute(new TransactionCallbackWithoutResult() {
             protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
-                assertNull(gigaSpace1.read(new Object()));
+                assertNull(gigaSpace1.read(new EmptySpaceDataObject()));
                 assertNull(gigaSpace1.read(new TestData1()));
 
-                gigaSpace1.write(new Object());
+                gigaSpace1.write(new EmptySpaceDataObject());
 
-                assertNotNull(gigaSpace1.read(new Object()));
+                assertNotNull(gigaSpace1.read(new EmptySpaceDataObject()));
                 assertNull(gigaSpace1.read(new TestData1()));
 
                 TransactionTemplate innerTxTemplate = new TransactionTemplate(transactionManager);
@@ -167,28 +168,28 @@ public abstract class AbstractTwoSpaceJtaTransactionTests extends AbstractDepend
                 assertNotNull(gigaSpace1.read(new TestData1()));
             }
         });
-        assertNotNull(gigaSpace1.read(new Object()));
+        assertNotNull(gigaSpace1.read(new EmptySpaceDataObject()));
         assertNotNull(gigaSpace1.read(new TestData1()));
     }
 
     public void testPropogationRequiredWithCommitTwoSpaces() {
         TransactionTemplate txTemplate = new TransactionTemplate(transactionManager);
-        assertNull(gigaSpace1.read(new Object()));
-        assertNull(gigaSpace2.read(new Object()));
+        assertNull(gigaSpace1.read(new EmptySpaceDataObject()));
+        assertNull(gigaSpace2.read(new EmptySpaceDataObject()));
         assertNull(gigaSpace1.read(new TestData1()));
         assertNull(gigaSpace2.read(new TestData1()));
         txTemplate.execute(new TransactionCallbackWithoutResult() {
             protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
-                assertNull(gigaSpace1.read(new Object()));
-                assertNull(gigaSpace2.read(new Object()));
+                assertNull(gigaSpace1.read(new EmptySpaceDataObject()));
+                assertNull(gigaSpace2.read(new EmptySpaceDataObject()));
                 assertNull(gigaSpace1.read(new TestData1()));
                 assertNull(gigaSpace2.read(new TestData1()));
 
-                gigaSpace1.write(new Object());
-                gigaSpace2.write(new Object());
+                gigaSpace1.write(new EmptySpaceDataObject());
+                gigaSpace2.write(new EmptySpaceDataObject());
 
-                assertNotNull(gigaSpace1.read(new Object()));
-                assertNotNull(gigaSpace2.read(new Object()));
+                assertNotNull(gigaSpace1.read(new EmptySpaceDataObject()));
+                assertNotNull(gigaSpace2.read(new EmptySpaceDataObject()));
                 assertNull(gigaSpace1.read(new TestData1()));
                 assertNull(gigaSpace2.read(new TestData1()));
 
@@ -206,31 +207,31 @@ public abstract class AbstractTwoSpaceJtaTransactionTests extends AbstractDepend
                 assertNotNull(gigaSpace2.read(new TestData1()));
             }
         });
-        assertNotNull(gigaSpace1.read(new Object()));
-        assertNotNull(gigaSpace2.read(new Object()));
+        assertNotNull(gigaSpace1.read(new EmptySpaceDataObject()));
+        assertNotNull(gigaSpace2.read(new EmptySpaceDataObject()));
         assertNotNull(gigaSpace1.read(new TestData1()));
         assertNotNull(gigaSpace2.read(new TestData1()));
     }
 
     public void testPropogationRequiredWithRollback() {
         TransactionTemplate txTemplate = new TransactionTemplate(transactionManager);
-        assertNull(gigaSpace1.read(new Object()));
-        assertNull(gigaSpace2.read(new Object()));
+        assertNull(gigaSpace1.read(new EmptySpaceDataObject()));
+        assertNull(gigaSpace2.read(new EmptySpaceDataObject()));
         assertNull(gigaSpace1.read(new TestData1()));
         assertNull(gigaSpace2.read(new TestData1()));
         try {
             txTemplate.execute(new TransactionCallbackWithoutResult() {
                 protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
-                    assertNull(gigaSpace1.read(new Object()));
-                    assertNull(gigaSpace2.read(new Object()));
+                    assertNull(gigaSpace1.read(new EmptySpaceDataObject()));
+                    assertNull(gigaSpace2.read(new EmptySpaceDataObject()));
                     assertNull(gigaSpace1.read(new TestData1()));
                     assertNull(gigaSpace2.read(new TestData1()));
 
-                    gigaSpace1.write(new Object());
-                    gigaSpace2.write(new Object());
+                    gigaSpace1.write(new EmptySpaceDataObject());
+                    gigaSpace2.write(new EmptySpaceDataObject());
 
-                    assertNotNull(gigaSpace1.read(new Object()));
-                    assertNotNull(gigaSpace2.read(new Object()));
+                    assertNotNull(gigaSpace1.read(new EmptySpaceDataObject()));
+                    assertNotNull(gigaSpace2.read(new EmptySpaceDataObject()));
                     assertNull(gigaSpace1.read(new TestData1()));
                     assertNull(gigaSpace2.read(new TestData1()));
 
@@ -254,22 +255,22 @@ public abstract class AbstractTwoSpaceJtaTransactionTests extends AbstractDepend
         }
         assertNull(gigaSpace1.read(new TestData1()));
         assertNull(gigaSpace2.read(new TestData1()));
-        assertNull(gigaSpace1.read(new Object()));
-        assertNull(gigaSpace2.read(new Object()));
+        assertNull(gigaSpace1.read(new EmptySpaceDataObject()));
+        assertNull(gigaSpace2.read(new EmptySpaceDataObject()));
     }
 
     public void testPropogationRequiresNewWithCommit() {
         TransactionTemplate txTemplate = new TransactionTemplate(transactionManager);
-        assertNull(gigaSpace1.read(new Object()));
+        assertNull(gigaSpace1.read(new EmptySpaceDataObject()));
         assertNull(gigaSpace1.read(new TestData1()));
         txTemplate.execute(new TransactionCallbackWithoutResult() {
             protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
-                assertNull(gigaSpace1.read(new Object()));
+                assertNull(gigaSpace1.read(new EmptySpaceDataObject()));
                 assertNull(gigaSpace1.read(new TestData1()));
 
-                gigaSpace1.write(new Object());
+                gigaSpace1.write(new EmptySpaceDataObject());
 
-                assertNotNull(gigaSpace1.read(new Object()));
+                assertNotNull(gigaSpace1.read(new EmptySpaceDataObject()));
                 assertNull(gigaSpace1.read(new TestData1()));
 
                 TransactionTemplate innerTxTemplate = new TransactionTemplate(transactionManager);
@@ -284,28 +285,28 @@ public abstract class AbstractTwoSpaceJtaTransactionTests extends AbstractDepend
                 assertNotNull(gigaSpace1.read(new TestData1()));
             }
         });
-        assertNotNull(gigaSpace1.read(new Object()));
+        assertNotNull(gigaSpace1.read(new EmptySpaceDataObject()));
         assertNotNull(gigaSpace1.read(new TestData1()));
     }
 
     public void testPropogationRequiresNewWithCommitWithTwoSpaces() {
         TransactionTemplate txTemplate = new TransactionTemplate(transactionManager);
-        assertNull(gigaSpace1.read(new Object()));
-        assertNull(gigaSpace2.read(new Object()));
+        assertNull(gigaSpace1.read(new EmptySpaceDataObject()));
+        assertNull(gigaSpace2.read(new EmptySpaceDataObject()));
         assertNull(gigaSpace1.read(new TestData1()));
         assertNull(gigaSpace2.read(new TestData1()));
         txTemplate.execute(new TransactionCallbackWithoutResult() {
             protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
-                assertNull(gigaSpace1.read(new Object()));
-                assertNull(gigaSpace2.read(new Object()));
+                assertNull(gigaSpace1.read(new EmptySpaceDataObject()));
+                assertNull(gigaSpace2.read(new EmptySpaceDataObject()));
                 assertNull(gigaSpace1.read(new TestData1()));
                 assertNull(gigaSpace2.read(new TestData1()));
 
-                gigaSpace1.write(new Object());
-                gigaSpace2.write(new Object());
+                gigaSpace1.write(new EmptySpaceDataObject());
+                gigaSpace2.write(new EmptySpaceDataObject());
 
-                assertNotNull(gigaSpace1.read(new Object()));
-                assertNotNull(gigaSpace2.read(new Object()));
+                assertNotNull(gigaSpace1.read(new EmptySpaceDataObject()));
+                assertNotNull(gigaSpace2.read(new EmptySpaceDataObject()));
                 assertNull(gigaSpace1.read(new TestData1()));
                 assertNull(gigaSpace2.read(new TestData1()));
 
@@ -323,24 +324,24 @@ public abstract class AbstractTwoSpaceJtaTransactionTests extends AbstractDepend
                 assertNotNull(gigaSpace2.read(new TestData1()));
             }
         });
-        assertNotNull(gigaSpace1.read(new Object()));
-        assertNotNull(gigaSpace2.read(new Object()));
+        assertNotNull(gigaSpace1.read(new EmptySpaceDataObject()));
+        assertNotNull(gigaSpace2.read(new EmptySpaceDataObject()));
         assertNotNull(gigaSpace1.read(new TestData1()));
         assertNotNull(gigaSpace2.read(new TestData1()));
     }
 
     public void testPropogationRequiresNewWithRollback() {
         TransactionTemplate txTemplate = new TransactionTemplate(transactionManager);
-        assertNull(gigaSpace1.read(new Object()));
+        assertNull(gigaSpace1.read(new EmptySpaceDataObject()));
         assertNull(gigaSpace1.read(new TestData1()));
         txTemplate.execute(new TransactionCallbackWithoutResult() {
             protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
-                assertNull(gigaSpace1.read(new Object()));
+                assertNull(gigaSpace1.read(new EmptySpaceDataObject()));
                 assertNull(gigaSpace1.read(new TestData1()));
 
-                gigaSpace1.write(new Object());
+                gigaSpace1.write(new EmptySpaceDataObject());
 
-                assertNotNull(gigaSpace1.read(new Object()));
+                assertNotNull(gigaSpace1.read(new EmptySpaceDataObject()));
                 assertNull(gigaSpace1.read(new TestData1()));
 
                 TransactionTemplate innerTxTemplate = new TransactionTemplate(transactionManager);
@@ -356,28 +357,28 @@ public abstract class AbstractTwoSpaceJtaTransactionTests extends AbstractDepend
                 assertNull(gigaSpace1.read(new TestData1()));
             }
         });
-        assertNotNull(gigaSpace1.read(new Object()));
+        assertNotNull(gigaSpace1.read(new EmptySpaceDataObject()));
         assertNull(gigaSpace1.read(new TestData1()));
     }
 
     public void testPropogationRequiresNewWithRollbackWithTwoSpaces() {
         TransactionTemplate txTemplate = new TransactionTemplate(transactionManager);
-        assertNull(gigaSpace1.read(new Object()));
-        assertNull(gigaSpace2.read(new Object()));
+        assertNull(gigaSpace1.read(new EmptySpaceDataObject()));
+        assertNull(gigaSpace2.read(new EmptySpaceDataObject()));
         assertNull(gigaSpace1.read(new TestData1()));
         assertNull(gigaSpace2.read(new TestData1()));
         txTemplate.execute(new TransactionCallbackWithoutResult() {
             protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
-                assertNull(gigaSpace1.read(new Object()));
-                assertNull(gigaSpace2.read(new Object()));
+                assertNull(gigaSpace1.read(new EmptySpaceDataObject()));
+                assertNull(gigaSpace2.read(new EmptySpaceDataObject()));
                 assertNull(gigaSpace1.read(new TestData1()));
                 assertNull(gigaSpace2.read(new TestData1()));
 
-                gigaSpace1.write(new Object());
-                gigaSpace2.write(new Object());
+                gigaSpace1.write(new EmptySpaceDataObject());
+                gigaSpace2.write(new EmptySpaceDataObject());
 
-                assertNotNull(gigaSpace1.read(new Object()));
-                assertNotNull(gigaSpace2.read(new Object()));
+                assertNotNull(gigaSpace1.read(new EmptySpaceDataObject()));
+                assertNotNull(gigaSpace2.read(new EmptySpaceDataObject()));
                 assertNull(gigaSpace1.read(new TestData1()));
                 assertNull(gigaSpace2.read(new TestData1()));
 
@@ -396,8 +397,8 @@ public abstract class AbstractTwoSpaceJtaTransactionTests extends AbstractDepend
                 assertNull(gigaSpace2.read(new TestData1()));
             }
         });
-        assertNotNull(gigaSpace1.read(new Object()));
-        assertNotNull(gigaSpace2.read(new Object()));
+        assertNotNull(gigaSpace1.read(new EmptySpaceDataObject()));
+        assertNotNull(gigaSpace2.read(new EmptySpaceDataObject()));
         assertNull(gigaSpace1.read(new TestData1()));
         assertNull(gigaSpace2.read(new TestData1()));
     }

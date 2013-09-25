@@ -22,6 +22,7 @@ import org.openspaces.core.executor.AutowireTask;
 import org.openspaces.core.executor.Task;
 import org.openspaces.core.executor.TaskGigaSpace;
 import org.openspaces.itest.transaction.manager.local.TestData1;
+import org.openspaces.itest.utils.EmptySpaceDataObject;
 import org.openspaces.itest.utils.TestUtils;
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -59,57 +60,57 @@ public class SimpleDistributedTransactionTests extends AbstractDependencyInjecti
 
     public void testSimpleCommit() {
         TransactionTemplate txTemplate = new TransactionTemplate(mahaloTxManager);
-        assertNull(gigaSpace.read(new Object()));
+        assertNull(gigaSpace.read(new EmptySpaceDataObject()));
         txTemplate.execute(new TransactionCallbackWithoutResult() {
             protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
-                assertNull(gigaSpace.read(new Object()));
-                gigaSpace.write(new Object());
-                assertNotNull(gigaSpace.read(new Object()));
+                assertNull(gigaSpace.read(new EmptySpaceDataObject()));
+                gigaSpace.write(new EmptySpaceDataObject());
+                assertNotNull(gigaSpace.read(new EmptySpaceDataObject()));
             }
         });
-        assertNotNull(gigaSpace.read(new Object()));
+        assertNotNull(gigaSpace.read(new EmptySpaceDataObject()));
     }
 
     public void testSimpleRollback() {
         TransactionTemplate txTemplate = new TransactionTemplate(mahaloTxManager);
-        assertNull(gigaSpace.read(new Object()));
+        assertNull(gigaSpace.read(new EmptySpaceDataObject()));
         txTemplate.execute(new TransactionCallbackWithoutResult() {
             protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
-                assertNull(gigaSpace.read(new Object()));
-                gigaSpace.write(new Object());
-                assertNotNull(gigaSpace.read(new Object()));
+                assertNull(gigaSpace.read(new EmptySpaceDataObject()));
+                gigaSpace.write(new EmptySpaceDataObject());
+                assertNotNull(gigaSpace.read(new EmptySpaceDataObject()));
                 transactionStatus.setRollbackOnly();
             }
         });
-        assertNull(gigaSpace.read(new Object()));
+        assertNull(gigaSpace.read(new EmptySpaceDataObject()));
     }
 
     public void testTakeRollback() {
         TransactionTemplate txTemplate = new TransactionTemplate(mahaloTxManager);
-        assertNull(gigaSpace.read(new Object()));
-        gigaSpace.write(new Object());
-        assertNotNull(gigaSpace.read(new Object()));
+        assertNull(gigaSpace.read(new EmptySpaceDataObject()));
+        gigaSpace.write(new EmptySpaceDataObject());
+        assertNotNull(gigaSpace.read(new EmptySpaceDataObject()));
         txTemplate.execute(new TransactionCallbackWithoutResult() {
             protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
-                assertNotNull(gigaSpace.take(new Object()));
+                assertNotNull(gigaSpace.take(new EmptySpaceDataObject()));
                 transactionStatus.setRollbackOnly();
             }
         });
-        assertNotNull(gigaSpace.take(new Object()));
+        assertNotNull(gigaSpace.take(new EmptySpaceDataObject()));
     }
 
     public void testPropogationRequiredWithCommit() {
         TransactionTemplate txTemplate = new TransactionTemplate(mahaloTxManager);
-        assertNull(gigaSpace.read(new Object()));
+        assertNull(gigaSpace.read(new EmptySpaceDataObject()));
         assertNull(gigaSpace.read(new TestData1()));
         txTemplate.execute(new TransactionCallbackWithoutResult() {
             protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
-                assertNull(gigaSpace.read(new Object()));
+                assertNull(gigaSpace.read(new EmptySpaceDataObject()));
                 assertNull(gigaSpace.read(new TestData1()));
 
-                gigaSpace.write(new Object());
+                gigaSpace.write(new EmptySpaceDataObject());
 
-                assertNotNull(gigaSpace.read(new Object()));
+                assertNotNull(gigaSpace.read(new EmptySpaceDataObject()));
                 assertNull(gigaSpace.read(new TestData1()));
 
                 TransactionTemplate innerTxTemplate = new TransactionTemplate(mahaloTxManager);
@@ -124,23 +125,23 @@ public class SimpleDistributedTransactionTests extends AbstractDependencyInjecti
                 assertNotNull(gigaSpace.read(new TestData1()));
             }
         });
-        assertNotNull(gigaSpace.read(new Object()));
+        assertNotNull(gigaSpace.read(new EmptySpaceDataObject()));
         assertNotNull(gigaSpace.read(new TestData1()));
     }
 
     public void testPropogationRequiredWithRollback() {
         TransactionTemplate txTemplate = new TransactionTemplate(mahaloTxManager);
-        assertNull(gigaSpace.read(new Object()));
+        assertNull(gigaSpace.read(new EmptySpaceDataObject()));
         assertNull(gigaSpace.read(new TestData1()));
         try {
             txTemplate.execute(new TransactionCallbackWithoutResult() {
                 protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
-                    assertNull(gigaSpace.read(new Object()));
+                    assertNull(gigaSpace.read(new EmptySpaceDataObject()));
                     assertNull(gigaSpace.read(new TestData1()));
 
-                    gigaSpace.write(new Object());
+                    gigaSpace.write(new EmptySpaceDataObject());
 
-                    assertNotNull(gigaSpace.read(new Object()));
+                    assertNotNull(gigaSpace.read(new EmptySpaceDataObject()));
                     assertNull(gigaSpace.read(new TestData1()));
 
                     TransactionTemplate innerTxTemplate = new TransactionTemplate(mahaloTxManager);
@@ -160,21 +161,21 @@ public class SimpleDistributedTransactionTests extends AbstractDependencyInjecti
             // do nothing
         }
         assertNull(gigaSpace.read(new TestData1()));
-        assertNull(gigaSpace.read(new Object()));
+        assertNull(gigaSpace.read(new EmptySpaceDataObject()));
     }
 
     public void testPropogationRequiresNewWithCommit() {
         TransactionTemplate txTemplate = new TransactionTemplate(mahaloTxManager);
-        assertNull(gigaSpace.read(new Object()));
+        assertNull(gigaSpace.read(new EmptySpaceDataObject()));
         assertNull(gigaSpace.read(new TestData1()));
         txTemplate.execute(new TransactionCallbackWithoutResult() {
             protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
-                assertNull(gigaSpace.read(new Object()));
+                assertNull(gigaSpace.read(new EmptySpaceDataObject()));
                 assertNull(gigaSpace.read(new TestData1()));
 
-                gigaSpace.write(new Object());
+                gigaSpace.write(new EmptySpaceDataObject());
 
-                assertNotNull(gigaSpace.read(new Object()));
+                assertNotNull(gigaSpace.read(new EmptySpaceDataObject()));
                 assertNull(gigaSpace.read(new TestData1()));
 
                 TransactionTemplate innerTxTemplate = new TransactionTemplate(mahaloTxManager);
@@ -189,22 +190,22 @@ public class SimpleDistributedTransactionTests extends AbstractDependencyInjecti
                 assertNotNull(gigaSpace.read(new TestData1()));
             }
         });
-        assertNotNull(gigaSpace.read(new Object()));
+        assertNotNull(gigaSpace.read(new EmptySpaceDataObject()));
         assertNotNull(gigaSpace.read(new TestData1()));
     }
 
     public void testPropogationRequiresNewWithRollback() {
         TransactionTemplate txTemplate = new TransactionTemplate(mahaloTxManager);
-        assertNull(gigaSpace.read(new Object()));
+        assertNull(gigaSpace.read(new EmptySpaceDataObject()));
         assertNull(gigaSpace.read(new TestData1()));
         txTemplate.execute(new TransactionCallbackWithoutResult() {
             protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
-                assertNull(gigaSpace.read(new Object()));
+                assertNull(gigaSpace.read(new EmptySpaceDataObject()));
                 assertNull(gigaSpace.read(new TestData1()));
 
-                gigaSpace.write(new Object());
+                gigaSpace.write(new EmptySpaceDataObject());
 
-                assertNotNull(gigaSpace.read(new Object()));
+                assertNotNull(gigaSpace.read(new EmptySpaceDataObject()));
                 assertNull(gigaSpace.read(new TestData1()));
 
                 TransactionTemplate innerTxTemplate = new TransactionTemplate(mahaloTxManager);
@@ -220,7 +221,7 @@ public class SimpleDistributedTransactionTests extends AbstractDependencyInjecti
                 assertNull(gigaSpace.read(new TestData1()));
             }
         });
-        assertNotNull(gigaSpace.read(new Object()));
+        assertNotNull(gigaSpace.read(new EmptySpaceDataObject()));
         assertNull(gigaSpace.read(new TestData1()));
     }
 
