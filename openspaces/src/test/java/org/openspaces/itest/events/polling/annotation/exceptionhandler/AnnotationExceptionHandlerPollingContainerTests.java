@@ -17,6 +17,7 @@
 package org.openspaces.itest.events.polling.annotation.exceptionhandler;
 
 import org.openspaces.core.GigaSpace;
+import org.openspaces.itest.utils.EmptySpaceDataObject;
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 
 /**
@@ -45,7 +46,7 @@ public class AnnotationExceptionHandlerPollingContainerTests extends AbstractDep
     public void testReceiveMessage() throws Exception{
         testListener.reset();
         assertFalse(testListener.isReceivedMessage());
-        gigaSpace.write(new Object());
+        gigaSpace.write(new EmptySpaceDataObject());
         Thread.sleep(500);
         assertTrue(testListener.isReceivedMessage());
         assertTrue(testListener.isExceptionHandlerSuccess());
@@ -55,7 +56,7 @@ public class AnnotationExceptionHandlerPollingContainerTests extends AbstractDep
         testListener.reset();
         testListener.setThrowException(true);
         assertFalse(testListener.isReceivedMessage());
-        gigaSpace.write(new Object());
+        gigaSpace.write(new EmptySpaceDataObject());
         Thread.sleep(500);
         assertTrue(testListener.isReceivedMessage());
         assertFalse(testListener.isExceptionHandlerSuccess());

@@ -17,6 +17,7 @@
 package org.openspaces.itest.events.polling.aspectlistener4;
 
 import org.openspaces.core.GigaSpace;
+import org.openspaces.itest.utils.EmptySpaceDataObject;
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 
 /**
@@ -43,7 +44,7 @@ public class Aspect4ListenerPollingContainerTests extends AbstractDependencyInje
 
     public void testReceiveMessage() throws Exception {
         assertFalse(testListener.isReceivedMessage());
-        gigaSpace.write(new Object());
+        gigaSpace.write(new EmptySpaceDataObject());
         Thread.sleep(500);
         assertTrue(testListener.isReceivedMessage());
     }

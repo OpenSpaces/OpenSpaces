@@ -17,6 +17,7 @@
 package org.openspaces.itest.events.polling.exceptionhandler;
 
 import org.openspaces.core.GigaSpace;
+import org.openspaces.itest.utils.EmptySpaceDataObject;
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 
 /**
@@ -42,7 +43,7 @@ public class ExceptionHandlerPollingContainerTests extends AbstractDependencyInj
         exceptionHandler.reset();
         eventListener.reset();
         assertEquals(0, eventListener.getMessageCounter());
-        gigaSpace.write(new Object());
+        gigaSpace.write(new EmptySpaceDataObject());
         Thread.sleep(500);
         assertEquals(1, eventListener.getMessageCounter());
         assertTrue(exceptionHandler.isSuccess());
@@ -53,7 +54,7 @@ public class ExceptionHandlerPollingContainerTests extends AbstractDependencyInj
         eventListener.setThrowExceptionTillCounter(2);
         assertEquals(0, eventListener.getMessageCounter());
 
-        gigaSpace.write(new Object());
+        gigaSpace.write(new EmptySpaceDataObject());
         Thread.sleep(500);
         assertEquals(2, eventListener.getMessageCounter());
         assertTrue(exceptionHandler.isSuccess());

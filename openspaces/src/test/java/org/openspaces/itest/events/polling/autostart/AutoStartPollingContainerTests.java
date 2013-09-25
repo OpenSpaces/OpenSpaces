@@ -17,6 +17,7 @@
 package org.openspaces.itest.events.polling.autostart;
 
 import org.openspaces.core.GigaSpace;
+import org.openspaces.itest.utils.EmptySpaceDataObject;
 import org.springframework.context.Lifecycle;
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 
@@ -41,7 +42,7 @@ public class AutoStartPollingContainerTests extends AbstractDependencyInjectionS
 
     public void testAutoStartFalse() throws Exception{
         assertEquals(0, autoStartEventListener.getMessageCounter());
-        gigaSpace.write(new Object());
+        gigaSpace.write(new EmptySpaceDataObject());
         Thread.sleep(500);
         assertEquals(0, autoStartEventListener.getMessageCounter());
         pollingContainer.start() ;
