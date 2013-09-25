@@ -16,8 +16,22 @@
 
 package org.openspaces.itest.transaction.manager.local;
 
+import com.gigaspaces.annotation.pojo.SpaceId;
+
 /**
  * @author kimchy
  */
 public class TestData1 {
+    private String uid;
+
+    @SpaceId(autoGenerate=true)
+    public String getUid()
+    {
+        return uid;
+    }
+
+    public void setUid(String uid)
+    {
+        this.uid = uid;
+    }
 }
