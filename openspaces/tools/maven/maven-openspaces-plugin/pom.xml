@@ -92,6 +92,7 @@
             <plugin>
                 <!-- Enable the prefix 'os' for the plugin -->
                 <artifactId>maven-plugin-plugin</artifactId>
+                <version>2.4.2</version>
                 <configuration>
                     <goalPrefix>os</goalPrefix>
                 </configuration>
