@@ -9,6 +9,7 @@
     <url>http://www.gigaspaces.com</url>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <pluginVersion>${project.version}</pluginVersion>
         <springVersion>3.2.4.RELEASE</springVersion>
     </properties>
    	<repositories>
