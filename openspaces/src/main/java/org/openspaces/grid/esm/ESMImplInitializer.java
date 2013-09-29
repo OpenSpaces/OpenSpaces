@@ -134,7 +134,8 @@ public class ESMImplInitializer {
                 @Override
                 public void run() {
                     try { 
-                        if (isLookupDiscoverySyncedWithGsm(lookupServices, gridServiceManagers, numberOfInstancesPerProcessingUnit)) {
+                        if (isManagementAgentsDiscovered(lookupServices, gridServiceManagers) &&
+                            isLookupDiscoverySyncedWithGsm(lookupServices, gridServiceManagers, numberOfInstancesPerProcessingUnit)) {
                             esmInitializer.adminCreated(admin);
                             return;
                         }
@@ -271,11 +272,7 @@ public class ESMImplInitializer {
     }
 
     /**
-     * We want to discover one ESM and at least one GSM We want to discover as much agents as we
-     * can, to avoid false alerts such as "need more machines failures"
-     * 
-     * @param admin
-     * @return
+     * We want to discover one LUS and at least one GSM 
      */
     private static boolean isManagementDiscovered(InternalAdmin admin) {
            
@@ -285,6 +282,20 @@ public class ESMImplInitializer {
             return false;
         }
 
+        GridServiceManager[] gsms = admin.getGridServiceManagers().getManagers();
+        if (gsms.length == 0) {
+            logger.log(Level.INFO, "Waiting to discover at least one GSM");
+            return false;
+        }
+        return true;
+    }
+    
+    /**
+     * We want to discover as much agents as we can,
+     * to avoid false alerts such as "need more machines failures"
+     */
+    private static boolean isManagementAgentsDiscovered(LookupService[] lookupServices, GridServiceManager[] gridServiceManagers) {
+           
         for (final LookupService lus : lookupServices) {
             if (lus.isDiscovered() && lus.getAgentId() != -1 && lus.getGridServiceAgent() == null) {
                 logger.log(Level.INFO, "Waiting to discover GSA that started lookup service " + lus.getUid());
@@ -292,13 +303,7 @@ public class ESMImplInitializer {
             }
         }
 
-        GridServiceManager[] gsms = admin.getGridServiceManagers().getManagers();
-        if (gsms.length == 0) {
-            logger.log(Level.INFO, "Waiting to discover at least one GSM");
-            return false;
-        }
-
-        for (GridServiceManager gsm : gsms) {
+        for (GridServiceManager gsm : gridServiceManagers) {
             if (gsm.isDiscovered() && gsm.getAgentId() != -1 && gsm.getGridServiceAgent() == null) {
                 logger.log(Level.INFO, "Waiting to discover GSA that started GSM " + gsm.getUid());
                 return false;
