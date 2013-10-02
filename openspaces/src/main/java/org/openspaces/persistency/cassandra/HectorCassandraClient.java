@@ -64,7 +64,6 @@ import org.openspaces.persistency.cassandra.meta.TypedColumnMetadata;
 import org.openspaces.persistency.cassandra.meta.data.ColumnData;
 import org.openspaces.persistency.cassandra.meta.data.ColumnFamilyRow;
 import org.openspaces.persistency.cassandra.meta.mapping.SpaceDocumentColumnFamilyMapper;
-import org.openspaces.persistency.cassandra.meta.types.CustomTypeInferringSerializer;
 import org.openspaces.persistency.cassandra.meta.types.SerializerProvider;
 import org.openspaces.persistency.cassandra.meta.types.ValidatorClassInferer;
 
@@ -203,9 +202,18 @@ public class HectorCassandraClient {
     /**
      * Writes the given {@link ColumnFamilyRow}'s in a mutate operation to the configured keyspace.
      * @param rows The {@link ColumnFamilyRow}'s to perform the mutate operation on.
+     * 
+     * Contract: It is assumed that all the rows in the passed list argument belong to the same column family.
+     * Failure to comply with contract will most likely lead to some data corruption.
      */
     public void performBatchOperation(List<ColumnFamilyRow> rows) {
-        Mutator<Object> mutator = createMutator(rows.size());
+        if (rows.isEmpty()) {
+            return;
+        }
+        
+        // rows is not empty and the contract says that `rows` should all belong to the same column family.
+        Serializer<?> keySerializer = rows.iterator().next().getColumnFamilyMetadata().getKeySerializer();
+        Mutator<Object> mutator = createMutator(rows.size(), keySerializer);
         
         for (ColumnFamilyRow row : rows) {
             switch (row.getRowType()) {
@@ -250,9 +258,10 @@ public class HectorCassandraClient {
         mutator.execute();
     }
     
-    private Mutator<Object> createMutator(int numberOfRowsHint) {
+    @SuppressWarnings("unchecked")
+    private Mutator<Object> createMutator(int numberOfRowsHint, Serializer<?> keySerializer) {
         return HFactory.createMutator(keyspace,
-                                      CustomTypeInferringSerializer.get(), 
+                                      (Serializer<Object>)keySerializer, 
                                       new BatchSizeHint(numberOfRowsHint, 15));
     }
     

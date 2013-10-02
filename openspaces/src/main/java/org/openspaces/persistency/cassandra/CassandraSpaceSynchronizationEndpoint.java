@@ -15,8 +15,10 @@
  *******************************************************************************/
 package org.openspaces.persistency.cassandra;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -92,7 +94,7 @@ public class CassandraSpaceSynchronizationEndpoint
             logger.trace("Starting batch operation");
         }
         
-        List<ColumnFamilyRow> rows = new LinkedList<ColumnFamilyRow>();
+        Map<String, List<ColumnFamilyRow>> cfToRows = new HashMap<String, List<ColumnFamilyRow>>();
         
         for (DataSyncOperation dataSyncOperation : dataSyncOperations) {
             if (!dataSyncOperation.supportsDataAsDocument()) {
@@ -153,6 +155,11 @@ public class CassandraSpaceSynchronizationEndpoint
                 logger.trace("Adding row: " + columnFamilyRow + " to current batch");
             }
             
+            List<ColumnFamilyRow> rows = cfToRows.get(metadata.getColumnFamilyName());
+            if (rows == null) {
+                rows = new LinkedList<ColumnFamilyRow>();
+                cfToRows.put(metadata.getColumnFamilyName(), rows);
+            }
             rows.add(columnFamilyRow);
         }
 
@@ -160,7 +167,9 @@ public class CassandraSpaceSynchronizationEndpoint
             logger.trace("Peforming batch operation");
         }
         
-        hectorClient.performBatchOperation(rows);
+        for (List<ColumnFamilyRow> rows : cfToRows.values()) {
+            hectorClient.performBatchOperation(rows);
+        }
     }
 
     @Override
