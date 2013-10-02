@@ -7,7 +7,7 @@
 
 	<properties>
 		<springVersion>3.2.4.RELEASE</springVersion> 
-		<springSecurityVersion>3.0.7.RELEASE</springSecurityVersion>
+		<springSecurityVersion>3.1.4.RELEASE</springSecurityVersion>
 		<jettyVersion>8.1.8.v20121106</jettyVersion>
 		<mavenVersion>3.0.2</mavenVersion>
 		<jotmVersion>2.2.3</jotmVersion>
@@ -931,7 +931,6 @@
 	
 	 
   <!-- Align spring versions for all projects using openspaces -->
-  <!-- Fix conflict of spring security 3.0.7 with spring 3.2.4 -->
   <dependencyManagement>
     <dependencies>
 		
@@ -990,16 +989,7 @@
 			<version>1.1.3</version>
 			<scope>provided</scope>
 		</dependency>		
-		<!-- This jar is required by spring-security 3.0.7
-             but since spring 3.2 it is no longer required
-			 so we mark it as "provided" -->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-asm</artifactId>
-            <version>3.0.6</version>
-            <scope>provided</scope>
-        </dependency>
-		
+
 		<!-- dependency management for jars in lib/optional/spring -->
    	<dependency>
             <groupId>org.springframework</groupId>

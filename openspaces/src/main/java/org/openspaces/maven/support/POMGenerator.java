@@ -37,7 +37,7 @@ public class POMGenerator {
     public static final String CLOUDIFY_GROUP = "org.cloudifysource";
     private static final String SPRING_GROUP = "org.springframework";
     public static final String SPRING_VERSION = "3.2.4.RELEASE";
-    public static final String SPRING_SECURITY_VERSION = "3.0.7.RELEASE";
+    public static final String SPRING_SECURITY_VERSION = "3.1.4.RELEASE";
 	private static final String SPRING_SECURITY_GROUP = "org.springframework.security";
 	private static final String COMMONS_COLLECTIONS_VERSION = "3.2.1";
 	private static final String COMMONS_LANG_VERSION = "2.6";
