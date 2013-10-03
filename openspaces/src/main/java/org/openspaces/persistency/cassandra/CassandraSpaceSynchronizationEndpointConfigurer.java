@@ -31,11 +31,11 @@ import org.openspaces.persistency.cassandra.meta.types.dynamic.PropertyValueSeri
  */
 public class CassandraSpaceSynchronizationEndpointConfigurer {
 
-    private PropertyValueSerializer               fixedPropertyValueSerializer;
-    private PropertyValueSerializer               dynamicPropertyValueSerializer;
-    private FlattenedPropertiesFilter             flattenedPropertiesFilter;
-    private ColumnFamilyNameConverter             columnFamilyNameConverter;
-    private HectorCassandraClient                 hectorClient;
+    protected PropertyValueSerializer               fixedPropertyValueSerializer;
+    protected PropertyValueSerializer               dynamicPropertyValueSerializer;
+    protected FlattenedPropertiesFilter             flattenedPropertiesFilter;
+    protected ColumnFamilyNameConverter             columnFamilyNameConverter;
+    protected HectorCassandraClient                 hectorClient;
     
     /**
      * Optional. If set, all fixed properties with a type that is not primitive nor a common 

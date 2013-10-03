@@ -28,13 +28,13 @@ import org.springframework.util.StringUtils;
  */
 public class HectorCassandraClientConfigurer {
 
-    private String  hosts;
-    private Integer port;
-    private String  clusterName;
-    private String  keyspaceName;
-    private Integer columnFamilyGcGraceSeconds;
-    private CassandraConsistencyLevel readConsistencyLevel;
-    private CassandraConsistencyLevel writeConsistencyLevel;
+    protected String  hosts;
+    protected Integer port;
+    protected String  clusterName;
+    protected String  keyspaceName;
+    protected Integer columnFamilyGcGraceSeconds;
+    protected CassandraConsistencyLevel readConsistencyLevel;
+    protected CassandraConsistencyLevel writeConsistencyLevel;
     
     /**
      * Cassandra hosts

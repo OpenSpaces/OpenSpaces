@@ -29,13 +29,13 @@ import org.openspaces.persistency.cassandra.meta.types.dynamic.PropertyValueSeri
  */
 public class CassandraSpaceDataSourceConfigurer {
 
-    private PropertyValueSerializer fixedPropertyValueSerializer;
-    private PropertyValueSerializer dynamicPropertyValueSerializer;
-    private CassandraDataSource     cassandraDataSource;
-    private HectorCassandraClient   hectorClient;
-    private int                     minimumNumberOfConnections = 5;
-    private int                     maximumNumberOfConnections = 30;
-    private int                     batchLimit                 = 10000;
+    protected PropertyValueSerializer fixedPropertyValueSerializer;
+    protected PropertyValueSerializer dynamicPropertyValueSerializer;
+    protected CassandraDataSource     cassandraDataSource;
+    protected HectorCassandraClient   hectorClient;
+    protected int                     minimumNumberOfConnections = 5;
+    protected int                     maximumNumberOfConnections = 30;
+    protected int                     batchLimit                 = 10000;
     
     /**
      * Optional. If set, all fixed properties with a type that is not primitive nor a common 
