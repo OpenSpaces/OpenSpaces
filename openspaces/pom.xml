@@ -791,10 +791,10 @@
 				<version>2.12.4</version>
 				<configuration>
 					<testFailureIgnore>true</testFailureIgnore>
-					<parallel>classesAndMethods</parallel>
-					<forkCount>1C</forkCount>
+					<parallel>classes</parallel>
+					<forkCount>4</forkCount>
 					<argLine>-Xms1024m -Xmx1024m</argLine>
-					<threadCount>5</threadCount>
+					<threadCount>4</threadCount>
 					<includes>
 						<include>**/*Test.java</include>
 						<include>**/*Tests.java</include>
