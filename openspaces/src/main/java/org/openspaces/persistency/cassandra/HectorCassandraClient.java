@@ -77,6 +77,8 @@ import com.gigaspaces.document.SpaceDocument;
  */
 public class HectorCassandraClient {
     
+    private static final int                                                 SLEEP_BEFORE_RETRY = 1000 * 11;
+
     private static final Log                                                  logger          = LogFactory.getLog(HectorCassandraClient.class);
     
     private final NamedLockProvider                                           namedLock       = new NamedLockProvider();
@@ -329,7 +331,21 @@ public class HectorCassandraClient {
             
             try {
                 // first create the actual column family
-                cluster.addColumnFamily(cfDef, true);
+                try {
+                    cluster.addColumnFamily(cfDef, true);
+                } catch (Exception e) {
+                    // This could be due to current type introduction
+                    // If column family already exists, we can ignore this exception, otherwise we propage
+                    if (logger.isInfoEnabled()) {
+                        logger.info("Column family creation failed, " +
+                    		"waiting " + (SLEEP_BEFORE_RETRY / 1000) + " seconds and then testing to see whether " +
+            				"the column family was already created.", e);
+                    }
+                    Thread.sleep(SLEEP_BEFORE_RETRY);
+                    if (!isColumnFamilyExists(metadata)) {
+                        throw e;
+                    }
+                }
                 
                 if (metadata != ColumnFamilyMetadataMetadata.INSTANCE) {
                     metadataCache.addColumnFamilyMetadata(metadata.getTypeName(), metadata);

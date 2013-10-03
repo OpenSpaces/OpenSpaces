@@ -15,6 +15,7 @@ import com.gigaspaces.logger.GSLogConfigLoader;
 @RunWith(Suite.class)
 @SuiteClasses(value= 
 {
+    ConcurrentColumnFamilyCreationCassandraTest.class,
     DataIteratorWithPropertyAddedLaterCassandraTest.class,
     ReadByIdWithPropertyAddedLaterCassandraTest.class,
     ReadByIdsCassandraTest.class,
@@ -35,7 +36,7 @@ import com.gigaspaces.logger.GSLogConfigLoader;
 public class CassandraTestSuite 
 { 
     private static final AtomicInteger runningNumber = new AtomicInteger(0);
-    private static boolean isSuiteMode = false;
+    private static volatile boolean isSuiteMode = false;
 
     private static final EmbeddedCassandraController cassandraController = new EmbeddedCassandraController();
     
@@ -50,6 +51,7 @@ public class CassandraTestSuite
     @AfterClass
     public static void afterSuite()
     {
+        isSuiteMode = false;
         cassandraController.stopCassandra();
     }
 
