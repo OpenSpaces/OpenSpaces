@@ -202,6 +202,10 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-config</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-web</artifactId>
 		</dependency>
 		<dependency>
@@ -1037,6 +1041,11 @@
 			<version>${springSecurityVersion}</version>
 		</dependency>		
 
+    <dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-config</artifactId>
+			<version>${springSecurityVersion}</version>
+		</dependency>		
 		<!-- dependency management for other security jars for version alignment -->
 		<dependency>
 			<groupId>org.springframework.security</groupId>

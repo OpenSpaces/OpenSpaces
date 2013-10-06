@@ -1,29 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
-<beans>
-	<bean id="authenticationManager"
-		class="org.springframework.security.authentication.ProviderManager">
-		<property name="providers">
-			<list>
-				<ref bean="daoAuthenticationProvider" />
-			</list>
-		</property>
-	</bean>
 
-	<bean id="daoAuthenticationProvider" 
-		class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
-		<property name="userDetailsService" ref="daoUserDetailsService" />
-	</bean>
+<!--
+     Spring Security sample configuration file.
+     For detailed information, refer to the GigaSpaces documentation section on Spring-based Security.
+ -->
 
-	<bean id="daoUserDetailsService" class="org.springframework.security.core.userdetails.memory.InMemoryDaoImpl">
-		<property name="userMap">
-			<value>
-				Edward = koala, SpacePrivilege READ ClassFilter eg.cinema.Movie, SpacePrivilege READ ClassFilter eg.cinema.Seat, SpacePrivilege WRITE ClassFilter eg.cinema.Seat
-				Davis = dingo, SpacePrivilege READ ClassFilter eg.cinema.Movie, SpacePrivilege READ ClassFilter eg.cinema.Seat, SpacePrivilege WRITE ClassFilter eg.cinema.Seat
-				Thomas = wombat, SpacePrivilege READ ClassFilter eg.cinema.Movie, SpacePrivilege READ ClassFilter eg.cinema.Seat, SpacePrivilege WRITE ClassFilter eg.cinema.Seat, SpacePrivilege WRITE ClassFilter eg.cinema.Movie, SpacePrivilege TAKE ClassFilter eg.cinema.Movie
-				Allen = kangaroo, GridPrivilege MANAGE_GRID, GridPrivilege MANAGE_PU, GridPrivilege PROVISION_PU, SpacePrivilege READ PackageFilter eg.cinema
-			</value>
-		</property>
-	</bean>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:sec="http://www.springframework.org/schema/security"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+       http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.1.xsd">
+   
+   <sec:authentication-manager>
+      <sec:authentication-provider>
+	   	<sec:user-service>
+	        <sec:user name="Edward" password="koala" authorities="SpacePrivilege READ ClassFilter eg.cinema.Movie, SpacePrivilege READ ClassFilter eg.cinema.Seat, SpacePrivilege WRITE ClassFilter eg.cinema.Seat" />
+	        <sec:user name="Davis" password="dingo" authorities="SpacePrivilege READ ClassFilter eg.cinema.Movie, SpacePrivilege READ ClassFilter eg.cinema.Seat, SpacePrivilege WRITE ClassFilter eg.cinema.Seat" />
+	        <sec:user name="Thomas" password="wombat" authorities="SpacePrivilege READ ClassFilter eg.cinema.Movie, SpacePrivilege READ ClassFilter eg.cinema.Seat, SpacePrivilege WRITE ClassFilter eg.cinema.Seat, SpacePrivilege WRITE ClassFilter eg.cinema.Movie, SpacePrivilege TAKE ClassFilter eg.cinema.Movie" />
+	        <sec:user name="Allen" password="kangaroo" authorities="GridPrivilege MANAGE_GRID, GridPrivilege MANAGE_PU, GridPrivilege PROVISION_PU, SpacePrivilege READ PackageFilter eg.cinema" />
+	    </sec:user-service>	
+   	  </sec:authentication-provider>
+   </sec:authentication-manager>
 
 </beans>
+
+				
+				
+				
+				
