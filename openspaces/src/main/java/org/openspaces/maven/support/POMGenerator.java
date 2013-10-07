@@ -125,8 +125,6 @@ public class POMGenerator {
 		// spring jars in lib/optional/security
 		printDependency(writer, SPRING_SECURITY_GROUP, "spring-security-core", SPRING_SECURITY_VERSION);
 		printDependency(writer, SPRING_SECURITY_GROUP, "spring-security-config", SPRING_SECURITY_VERSION);
-		
-		// spring security version alignment
 		printDependency(writer, SPRING_SECURITY_GROUP, "spring-security-web", SPRING_SECURITY_VERSION);
 		
 		printDependenciesFooter(writer);
