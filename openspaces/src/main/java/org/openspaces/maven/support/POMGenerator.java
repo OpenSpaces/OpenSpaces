@@ -77,6 +77,9 @@ public class POMGenerator {
 
         writer = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(dir, "gs-openspaces-pom.xml")))));
         printHeader(writer, xapVersion, POMGenerator.GS_GROUP, "gs-openspaces");
+        printDependenciesHeader(writer);
+        printDependency(writer, POMGenerator.GS_GROUP, "gs-runtime", xapVersion);
+
         //<scope>compile</scope> overrides <scope>provided</scope> defined in <dependencyManagement>
         //without this override dependant PUs may not compile.
         //this list was derived from looking at mvn dependency:analyze which finds JARs not referenced from the bytecode directly.
