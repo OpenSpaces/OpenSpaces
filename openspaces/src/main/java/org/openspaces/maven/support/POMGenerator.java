@@ -96,7 +96,7 @@ public class POMGenerator {
         
         printDependencyManagementHeader(writer);
         printDependenciesHeader(writer);
-        // spring jars in lib/required
+        // spring jars in lib/required (in GSC classpath)
         printProvidedDependency(writer, SPRING_GROUP, "spring-aop", SPRING_VERSION);
         printProvidedDependency(writer, SPRING_GROUP, "spring-aspects", SPRING_VERSION);
         printProvidedDependency(writer, SPRING_GROUP, "spring-beans", SPRING_VERSION);
@@ -107,25 +107,25 @@ public class POMGenerator {
         printProvidedDependency(writer, SPRING_GROUP, "spring-tx", SPRING_VERSION);
         printProvidedDependency(writer, "commons-logging", "commons-logging", "1.1.3");
         
-        // commons in lib/platform/commons
+        // commons in lib/platform/commons (not in GSC classpath)
         printDependency(writer, "commons-collections", "commons-collections", COMMONS_COLLECTIONS_VERSION);
         printDependency(writer, "commons-lang", "commons-lang", COMMONS_LANG_VERSION);
         printDependency(writer, "commons-pool", "commons-pool", COMMONS_POOL_VERSION);
 	
-        // spring jars in lib/optional/spring
-        printDependency(writer, SPRING_GROUP, "spring-web", SPRING_VERSION);
-        printDependency(writer, SPRING_GROUP, "spring-jdbc", SPRING_VERSION);
-        printDependency(writer, SPRING_GROUP, "spring-jms", SPRING_VERSION);
-        printDependency(writer, SPRING_GROUP, "spring-orm", SPRING_VERSION);
-        printDependency(writer, SPRING_GROUP, "spring-oxm", SPRING_VERSION);
-        printDependency(writer, SPRING_GROUP, "spring-web", SPRING_VERSION);
-        printDependency(writer, SPRING_GROUP, "spring-webmvc", SPRING_VERSION);
+        // spring jars in lib/optional/spring (in GSC classpath)
+        printProvidedDependency(writer, SPRING_GROUP, "spring-web", SPRING_VERSION);
+        printProvidedDependency(writer, SPRING_GROUP, "spring-jdbc", SPRING_VERSION);
+        printProvidedDependency(writer, SPRING_GROUP, "spring-jms", SPRING_VERSION);
+        printProvidedDependency(writer, SPRING_GROUP, "spring-orm", SPRING_VERSION);
+        printProvidedDependency(writer, SPRING_GROUP, "spring-oxm", SPRING_VERSION);
+        printProvidedDependency(writer, SPRING_GROUP, "spring-web", SPRING_VERSION);
+        printProvidedDependency(writer, SPRING_GROUP, "spring-webmvc", SPRING_VERSION);
 		printTestDependency(writer, SPRING_GROUP, "spring-test", SPRING_VERSION);
 		
-		// spring jars in lib/optional/security
-		printDependency(writer, SPRING_SECURITY_GROUP, "spring-security-core", SPRING_SECURITY_VERSION);
-		printDependency(writer, SPRING_SECURITY_GROUP, "spring-security-config", SPRING_SECURITY_VERSION);
-		printDependency(writer, SPRING_SECURITY_GROUP, "spring-security-web", SPRING_SECURITY_VERSION);
+		// spring jars in lib/optional/security (in GSC classpath)
+		printProvidedDependency(writer, SPRING_SECURITY_GROUP, "spring-security-core", SPRING_SECURITY_VERSION);
+		printProvidedDependency(writer, SPRING_SECURITY_GROUP, "spring-security-config", SPRING_SECURITY_VERSION);
+		printProvidedDependency(writer, SPRING_SECURITY_GROUP, "spring-security-web", SPRING_SECURITY_VERSION);
 		
 		printDependenciesFooter(writer);
         printDependencyManagementFooter(writer);
