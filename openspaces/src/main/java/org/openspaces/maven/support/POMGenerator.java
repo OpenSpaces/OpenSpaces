@@ -77,16 +77,18 @@ public class POMGenerator {
 
         writer = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(dir, "gs-openspaces-pom.xml")))));
         printHeader(writer, xapVersion, POMGenerator.GS_GROUP, "gs-openspaces");
-        printDependenciesHeader(writer);
-        printDependency(writer, POMGenerator.GS_GROUP, "gs-runtime", xapVersion);
-        printDependency(writer, SPRING_GROUP, "spring-aop");
-        printDependency(writer, SPRING_GROUP, "spring-aspects");
-        printDependency(writer, SPRING_GROUP, "spring-beans");
-        printDependency(writer, SPRING_GROUP, "spring-context");
-        printDependency(writer, SPRING_GROUP, "spring-context-support");
-        printDependency(writer, SPRING_GROUP, "spring-core");
-        printDependency(writer, SPRING_GROUP, "spring-expression");
-        printDependency(writer, SPRING_GROUP, "spring-tx");
+        //<scope>compile</scope> overrides <scope>provided</scope> defined in <dependencyManagement>
+        //without this override dependant PUs may not compile.
+        //this list was derived from looking at mvn dependency:analyze which finds JARs not referenced from the bytecode directly.
+        printCompileDependency(writer, SPRING_GROUP, "spring-aop");
+        printCompileDependency(writer, SPRING_GROUP, "spring-beans");
+        printCompileDependency(writer, SPRING_GROUP, "spring-context");
+        printCompileDependency(writer, SPRING_GROUP, "spring-core");
+        printCompileDependency(writer, SPRING_GROUP, "spring-web");
+        printCompileDependency(writer, SPRING_GROUP, "spring-tx");
+        printCompileDependency(writer, SPRING_GROUP, "spring-jdbc");
+        printCompileDependency(writer, SPRING_GROUP, "spring-orm");
+        printCompileDependency(writer, SPRING_SECURITY_GROUP, "spring-security-core");
         printDependency(writer, "commons-logging", "commons-logging");
         // add javax.annotations (@PostConstruct) for JDK 1.5 (no need for 1.6 since it is there)
         if (!JdkVersion.isAtLeastJava16() && JdkVersion.isAtLeastJava15()) {
@@ -215,6 +217,12 @@ public class POMGenerator {
 
     public static void printProvidedDependency(PrintWriter writer, String groupId, String artifactId, String version) {
     	final String scope = "provided";
+    	printDependency(writer, groupId, artifactId, version, scope);
+    }
+    
+    public static void printCompileDependency(PrintWriter writer, String groupId, String artifactId) {
+    	final String scope = "compile";
+    	final String version = null;
     	printDependency(writer, groupId, artifactId, version, scope);
     }
     
