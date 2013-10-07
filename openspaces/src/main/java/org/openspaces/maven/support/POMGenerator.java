@@ -107,13 +107,10 @@ public class POMGenerator {
         printProvidedDependency(writer, SPRING_GROUP, "spring-tx", SPRING_VERSION);
         printProvidedDependency(writer, "commons-logging", "commons-logging", "1.1.3");
         
-        // ignore deprecated spring-asm that is needed by older spring-security
-        printProvidedDependency(writer, SPRING_GROUP, "spring-asm", "3.0.6");
-        
         // commons in lib/platform/commons
-        printDependency(writer, SPRING_GROUP, "commons-collections", "commons-collections", COMMONS_COLLECTIONS_VERSION);
-        printDependency(writer, SPRING_GROUP, "commons-lang", "commons-lang", COMMONS_LANG_VERSION);
-        printDependency(writer, SPRING_GROUP, "commons-pool", "commons-pool", COMMONS_POOL_VERSION);
+        printDependency(writer, "commons-collections", "commons-collections", COMMONS_COLLECTIONS_VERSION);
+        printDependency(writer, "commons-lang", "commons-lang", COMMONS_LANG_VERSION);
+        printDependency(writer, "commons-pool", "commons-pool", COMMONS_POOL_VERSION);
 	
         // spring jars in lib/optional/spring
         printDependency(writer, SPRING_GROUP, "spring-web", SPRING_VERSION);
@@ -124,9 +121,13 @@ public class POMGenerator {
         printDependency(writer, SPRING_GROUP, "spring-web", SPRING_VERSION);
         printDependency(writer, SPRING_GROUP, "spring-webmvc", SPRING_VERSION);
 		printTestDependency(writer, SPRING_GROUP, "spring-test", SPRING_VERSION);
+		
+		// spring jars in lib/optional/security
 		printDependency(writer, SPRING_SECURITY_GROUP, "spring-security-core", SPRING_SECURITY_VERSION);
-		printDependency(writer, SPRING_SECURITY_GROUP, "spring-security-web", SPRING_SECURITY_VERSION);
 		printDependency(writer, SPRING_SECURITY_GROUP, "spring-security-config", SPRING_SECURITY_VERSION);
+		
+		// spring security version alignment
+		printDependency(writer, SPRING_SECURITY_GROUP, "spring-security-web", SPRING_SECURITY_VERSION);
 		
 		printDependenciesFooter(writer);
         printDependencyManagementFooter(writer);
