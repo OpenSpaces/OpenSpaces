@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import junit.framework.Assert;
+import me.prettyprint.cassandra.serializers.LongSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.service.template.ColumnFamilyResult;
 import me.prettyprint.cassandra.service.template.ColumnFamilyRowMapper;
@@ -67,8 +68,10 @@ public class TestCassandaraArchiveOperationHandler {
 	private static final String SPACEDOCUMENT_NAME = "Anvil";
 
 	private static final String SPACEDOCUMENT_TYPENAME = "Product";
-
+	private static final String SPACEDOCUMENT2_TYPENAME = "Product2";
+	
 	private static final String SPACEDOCUMENT_ID = "hw-1234";
+	private static final Long SPACEDOCUMENT2_ID = 1234l;
 
 	private final Log logger = LogFactory.getLog(this.getClass());
     
@@ -176,15 +179,17 @@ public class TestCassandaraArchiveOperationHandler {
     private void test(CassandraArchiveOperationHandler archiveHandler, GigaSpace gigaSpace) {
 
     	if (!skipRegisterTypeDescriptor) {
-			registerTypeDescriptor(gigaSpace);
+			registerTypeDescriptor1(gigaSpace);
+			registerTypeDescriptor2(gigaSpace);
 		}
 		
-		archiveHandler.archive(createSpaceDocument());
+		archiveHandler.archive(createSpaceDocument1(), createSpaceDocument2());
 		
-		verifyDocumentInCassandra();
+		verifyDocument1InCassandra();
+		verifyDocument2InCassandra();
     }
 
-	private SpaceDocument createSpaceDocument() {
+	private SpaceDocument createSpaceDocument1() {
 		final Map<String, Object> properties = new HashMap<String, Object>();
 		properties.put("CatalogNumber", SPACEDOCUMENT_ID);
 		properties.put("Category", "Hardware");
@@ -194,9 +199,20 @@ public class TestCassandaraArchiveOperationHandler {
 		return document;
 	}
 
-	private void registerTypeDescriptor(GigaSpace gigaSpace) {
+    private SpaceDocument createSpaceDocument2() {
+        final Map<String, Object> properties = new HashMap<String, Object>();
+        properties.put("CatalogNumber", SPACEDOCUMENT2_ID);
+        properties.put("Category", "Hardware");
+        properties.put(SPACE_DOCUMENT_NAME_KEY, SPACEDOCUMENT_NAME);
+        properties.put("Price", 9.99f);
+        final SpaceDocument document = new SpaceDocument(SPACEDOCUMENT2_TYPENAME, properties);
+        return document;
+    }
+	
+	private void registerTypeDescriptor1(GigaSpace gigaSpace) {
 		final SpaceTypeDescriptor typeDescriptor = 
 				new SpaceTypeDescriptorBuilder(SPACEDOCUMENT_TYPENAME)
+		        .addFixedProperty("CatalogNumber", String.class)
 				.idProperty("CatalogNumber")
 				.routingProperty("Category")
 				.addPropertyIndex(SPACE_DOCUMENT_NAME_KEY, SpaceIndexType.BASIC)
@@ -205,7 +221,19 @@ public class TestCassandaraArchiveOperationHandler {
 		gigaSpace.getTypeManager().registerTypeDescriptor(typeDescriptor);
 	}
 
-	private void verifyDocumentInCassandra() {
+    private void registerTypeDescriptor2(GigaSpace gigaSpace) {
+        final SpaceTypeDescriptor typeDescriptor = 
+                new SpaceTypeDescriptorBuilder(SPACEDOCUMENT2_TYPENAME)
+                .addFixedProperty("CatalogNumber", Long.class)
+                .idProperty("CatalogNumber")
+                .routingProperty("Category")
+                .addPropertyIndex(SPACE_DOCUMENT_NAME_KEY, SpaceIndexType.BASIC)
+                .addPropertyIndex("Price", SpaceIndexType.EXTENDED)
+                .create();
+        gigaSpace.getTypeManager().registerTypeDescriptor(typeDescriptor);
+    }
+	
+	private void verifyDocument1InCassandra() {
 		
 		Cluster cluster = HFactory.getOrCreateCluster("test-localhost_"+server.getPort(), server.getHost()+ ":" + server.getPort());
 		Keyspace keyspace = HFactory.createKeyspace(server.getKeySpaceName(), cluster);
@@ -236,5 +264,37 @@ public class TestCassandaraArchiveOperationHandler {
 		Object name = template.queryColumns(SPACEDOCUMENT_ID, mapper);
 		Assert.assertEquals(SPACEDOCUMENT_NAME,name); 
 	}
+	
+	   private void verifyDocument2InCassandra() {
+	        
+	        Cluster cluster = HFactory.getOrCreateCluster("test-localhost_"+server.getPort(), server.getHost()+ ":" + server.getPort());
+	        Keyspace keyspace = HFactory.createKeyspace(server.getKeySpaceName(), cluster);
+	        
+	        String columnFamilyName = SPACEDOCUMENT2_TYPENAME; // as long as shorter than 40 bytes
+	        ThriftColumnFamilyTemplate<Long, String> template = new ThriftColumnFamilyTemplate<Long, String>(
+	                keyspace,
+	                columnFamilyName,
+	                LongSerializer.get(),
+	                StringSerializer.get());
+	        
+	        Assert.assertTrue(SPACEDOCUMENT_TYPENAME + " does not exist",template.isColumnsExist(SPACEDOCUMENT2_ID));
+
+	        ColumnFamilyRowMapper<Long, String, Object> mapper = new ColumnFamilyRowMapper<Long, String, Object>() {
+	            @Override
+	            public String mapRow(ColumnFamilyResult<Long, String> rs) {
+	                
+	                for (String columnName : rs.getColumnNames()) {
+	                    ByteBuffer bytes = rs.getColumn(columnName).getValueBytes();
+	                    if (columnName.equals(SPACE_DOCUMENT_NAME_KEY)) {
+	                        return StringSerializer.get().fromByteBuffer(bytes);
+	                    }
+	                }
+	                
+	                return "Could not find column " + SPACE_DOCUMENT_NAME_KEY;
+	            }
+	        };
+	        Object name = template.queryColumns(SPACEDOCUMENT2_ID, mapper);
+	        Assert.assertEquals(SPACEDOCUMENT_NAME,name); 
+	    }
 }
 

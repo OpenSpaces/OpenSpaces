@@ -15,8 +15,10 @@
  *******************************************************************************/
 package org.openspaces.persistency.cassandra.archive;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -221,7 +223,7 @@ public class CassandraArchiveOperationHandler implements ArchiveOperationHandler
      */
     @Override
     public void archive(Object... objects) {
-        List<ColumnFamilyRow> rows = new LinkedList<ColumnFamilyRow>();
+        Map<String, List<ColumnFamilyRow>> cfToRows = new HashMap<String, List<ColumnFamilyRow>>();
         
         for (Object object : objects) {
 
@@ -252,12 +254,19 @@ public class CassandraArchiveOperationHandler implements ArchiveOperationHandler
                                              spaceDoc, 
                                              ColumnFamilyRowType.Write,
                                              useDynamicPropertySerializerForDynamicColumns);
+            List<ColumnFamilyRow> rows = cfToRows.get(metadata.getColumnFamilyName());
+            if (rows == null) {
+                rows = new LinkedList<ColumnFamilyRow>();
+                cfToRows.put(metadata.getColumnFamilyName(), rows);
+            }
             rows.add(columnFamilyRow);
         }
-        if (logger.isTraceEnabled()) {
-            logger.trace("Writing to cassandra " + rows.size() + " objects");
+        for (List<ColumnFamilyRow> rows : cfToRows.values()) {
+            if (logger.isTraceEnabled()) {
+                logger.trace("Writing to cassandra " + rows.size() + " objects");
+            }
+            hectorClient.performBatchOperation(rows);
         }
-        hectorClient.performBatchOperation(rows);
     }
 
     private ColumnFamilyMetadata createColumnFamilyMetadata(String typeName)
