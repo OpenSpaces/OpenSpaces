@@ -796,7 +796,7 @@
 				<configuration>
 					<testFailureIgnore>true</testFailureIgnore>
 					<parallel>classes</parallel>
-					<forkCount>4</forkCount>
+					<forkMode>pertest</forkMode>
 					<argLine>-Xms1024m -Xmx1024m</argLine>
 					<threadCount>4</threadCount>
 					<includes>
