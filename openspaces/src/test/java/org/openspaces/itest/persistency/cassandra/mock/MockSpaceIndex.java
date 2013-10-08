@@ -3,8 +3,7 @@ package org.openspaces.itest.persistency.cassandra.mock;
 import com.gigaspaces.metadata.index.SpaceIndex;
 import com.gigaspaces.metadata.index.SpaceIndexType;
 
-public class MockSpaceIndex
-        implements SpaceIndex
+public class MockSpaceIndex implements SpaceIndex
 {
     private final String         _name;
     private final SpaceIndexType _type;
@@ -27,4 +26,9 @@ public class MockSpaceIndex
         return _type;
     }
 
+    @Override
+    public boolean isUnique()
+    {
+        return false;
+    }
 }
