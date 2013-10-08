@@ -189,17 +189,17 @@
      <dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
-			<scope>test</scope>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-web</artifactId>
-			<scope>test</scope>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-config</artifactId>
-			<scope>test</scope>
+			<scope>provided</scope>
 		</dependency>
 						
 		<!-- other spring dependencies are with <scope>provided</scope> as managed by <dependencyManagement> below -->
