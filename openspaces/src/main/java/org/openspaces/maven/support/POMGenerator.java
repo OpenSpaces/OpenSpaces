@@ -38,7 +38,9 @@ public class POMGenerator {
     private static final String SPRING_GROUP = "org.springframework";
     public static final String SPRING_VERSION = "3.2.4.RELEASE";
     public static final String SPRING_SECURITY_VERSION = "3.1.4.RELEASE";
+    public static final String SPRING_LDAP_VERSION = "1.3.2.RELEASE";
 	private static final String SPRING_SECURITY_GROUP = "org.springframework.security";
+	private static final String SPRING_LDAP_GROUP = "org.springframework.ldap";
 	private static final String COMMONS_COLLECTIONS_VERSION = "3.2.1";
 	private static final String COMMONS_LANG_VERSION = "2.6";
 	private static final String COMMONS_POOL_VERSION = "1.6";
@@ -78,7 +80,7 @@ public class POMGenerator {
         writer = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(dir, "gs-openspaces-pom.xml")))));
         printHeader(writer, xapVersion, POMGenerator.GS_GROUP, "gs-openspaces");
         printDependenciesHeader(writer);
-        printDependency(writer, POMGenerator.GS_GROUP, "gs-runtime", xapVersion);
+        printCompileDependency(writer, POMGenerator.GS_GROUP, "gs-runtime");
 
         //<scope>compile</scope> overrides <scope>provided</scope> defined in <dependencyManagement>
         //without this override dependant PUs may not compile.
@@ -131,6 +133,14 @@ public class POMGenerator {
 		printProvidedDependency(writer, SPRING_SECURITY_GROUP, "spring-security-core", SPRING_SECURITY_VERSION);
 		printProvidedDependency(writer, SPRING_SECURITY_GROUP, "spring-security-config", SPRING_SECURITY_VERSION);
 		printProvidedDependency(writer, SPRING_SECURITY_GROUP, "spring-security-web", SPRING_SECURITY_VERSION);
+		
+		//align spring security ldap version for pus importing this dep management pom section
+		printDependency(writer, SPRING_SECURITY_GROUP, "spring-security-ldap", SPRING_SECURITY_VERSION);
+		printDependency(writer, SPRING_LDAP_GROUP, "spring-ldap-core", SPRING_LDAP_VERSION);
+		printDependency(writer, SPRING_LDAP_GROUP, "spring-ldap-core-tiger", SPRING_LDAP_VERSION);
+		printDependency(writer, SPRING_LDAP_GROUP, "spring-ldap-odm", SPRING_LDAP_VERSION);
+		printDependency(writer, SPRING_LDAP_GROUP, "spring-ldap-ldif-core", SPRING_LDAP_VERSION);
+		printDependency(writer, SPRING_LDAP_GROUP, "spring-ldap-ldif-batch", SPRING_LDAP_VERSION);
 		
 		printDependenciesFooter(writer);
         printDependencyManagementFooter(writer);
@@ -224,8 +234,12 @@ public class POMGenerator {
     }
     
     public static void printCompileDependency(PrintWriter writer, String groupId, String artifactId) {
-    	final String scope = "compile";
     	final String version = null;
+    	printCompileDependency(writer, groupId, artifactId, version);
+    }
+    
+    public static void printCompileDependency(PrintWriter writer, String groupId, String artifactId, String version) {
+    	final String scope = "compile";
     	printDependency(writer, groupId, artifactId, version, scope);
     }
     
