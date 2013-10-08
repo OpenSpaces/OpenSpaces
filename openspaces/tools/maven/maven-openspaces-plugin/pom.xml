@@ -10,6 +10,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <pluginVersion>${project.version}</pluginVersion>
+        <gsVersion>${project.version}</gsVersion>
     </properties>
    	<repositories>
 		<repository>
@@ -127,22 +128,18 @@
         </plugins>
     </build>
     
-    	<!-- Align spring versions for all projects using openspaces -->
+  	<!-- Align spring versions for all projects using openspaces -->
   <dependencyManagement>
     <dependencies>
       <dependency>
         <groupId>com.gigaspaces</groupId>
-        <artifactId>gs-runtime</artifactId>
-        <version>${project.version}</version>
-        <scope>provided</scope>
-      </dependency>
-      <dependency>
-        <groupId>com.gigaspaces</groupId>
         <artifactId>gs-openspaces</artifactId>
-        <version>${project.version}</version>
-        <scope>provided</scope>
+        <version>${gsVersion}</version>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>
+
 
 </project>
