@@ -103,6 +103,11 @@ public class POMGenerator {
         
         printDependencyManagementHeader(writer);
         printDependenciesHeader(writer);
+        
+        // lib/required/gs-* files
+        printProvidedDependency(writer, GS_GROUP, "gs-runtime", xapVersion);
+        printProvidedDependency(writer, GS_GROUP, "gs-openspaces", xapVersion);
+        
         // spring jars in lib/required (in GSC classpath)
         printProvidedDependency(writer, SPRING_GROUP, "spring-aop", SPRING_VERSION);
         printProvidedDependency(writer, SPRING_GROUP, "spring-aspects", SPRING_VERSION);
