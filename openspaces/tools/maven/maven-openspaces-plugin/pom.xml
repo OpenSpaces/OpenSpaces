@@ -32,7 +32,7 @@
     <dependencies>
         <dependency>
             <groupId>com.gigaspaces</groupId>
-            <dependency>gs-runtime</dependency>
+            <artifactId>gs-runtime</artifactId>
             <scope>compile</scope>
         </dependency>
         <dependency>
