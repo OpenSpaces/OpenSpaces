@@ -31,6 +31,11 @@
 	</repositories>
     <dependencies>
         <dependency>
+            <groupId>com.gigaspaces</groupId>
+            <dependency>gs-runtime</dependency>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-plugin-api</artifactId>
             <version>2.0</version>
@@ -119,6 +124,8 @@
                     <configuration>
                         <failOnWarning>false</failOnWarning>
                         <usedDependencies>
+                             <!-- used with reflection -->
+                             <usedDependency>com.gigaspaces:gs-runtime</usedDependency>
                         </usedDependencies>
                     </configuration>
                 </execution>
