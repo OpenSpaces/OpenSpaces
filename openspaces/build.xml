@@ -147,6 +147,8 @@
 	      		<include name="com/sun/**/*.java"/>
         		<include name="net/**/*.java"/>
 		    </fileset>
+        	<fileset dir="${basedir}/../openspaces-jetty/src/main/java" defaultexcludes="yes">
+		    </fileset>
             <link href="http://download.oracle.com/javase/1,5.0/docs/api/"/>
         	<link href="http://www.gigaspaces.com/docs/JiniApi"/>
             <link href="http://static.springsource.org/spring/docs/3.2.4.RELEASE/javadoc-api/"/>
@@ -205,9 +207,6 @@
 		</exec>
 		<exec executable="${env.M2_HOME}\bin\${mvn.executable}"> 
 			<arg line="install:install-file -DgroupId=com.gigaspaces -DartifactId=gs-openspaces -DcreateChecksum=true -Dversion=${productversion} -Dpackaging=jar -DpomFile=${basedir}/pom.xml -Dfile=${target.dir}/gs-openspaces-${productversion}-tests.jar -Dclassifier=tests -Djavadoc=${target.dir}/xap-javadoc.zip -Dsources=${target.dir}/gs-openspaces-sources.jar -Dmaven.repo.local=${maven.repo.local}"/>
-		</exec>
-		<exec executable="${env.M2_HOME}\bin\${mvn.executable}"> 
-			<arg line="install:install-file -DgroupId=com.gigaspaces -DartifactId=jetty-os -DcreateChecksum=true -Dversion=${productversion} -Dpackaging=jar -DpomFile=${maven.tmp.dir}/jetty-os-pom.xml -Dfile=${target.dir}/gs-openspaces-jetty.jar -Dmaven.repo.local=${maven.repo.local}"/>
 		</exec>
 		
 		<replaceregexp file="${basedir}/tools/alert-integration/pom.xml"

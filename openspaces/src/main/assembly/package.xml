@@ -92,15 +92,6 @@
 				<include>spring-security-web-*</include>
 			</includes>
 		</fileSet>
-		
-		<!--  lib platform directory -->
-		<fileSet>
-			<directory>${project.build.directory}</directory>
-			<outputDirectory>/lib/platform/openspaces</outputDirectory>
-			<includes>
-				<include>gs-openspaces-jetty*.jar</include>
-			</includes>
-		</fileSet>
 		<fileSet>
 			<directory>${project.build.directory}/dependency</directory>
 			<outputDirectory>/lib/platform/jee</outputDirectory>
@@ -118,24 +109,6 @@
 				<include>transactions-jta-*</include>
 				<include>geronimo-connector-*</include>
 			</includes>
-		</fileSet>
-		<fileSet>
-			<directory>${project.build.directory}/dependency</directory>
-			<outputDirectory>/lib/platform/jetty</outputDirectory>
-			<includes>
-				<include>jetty-*</include>
-				<include>javax.servlet.jsp.jstl-*</include>
-				<include>javax.servlet.jsp-*</include>
-				<include>javax.el-*</include>
-				<include>com.sun.el-*</include>
-				<include>org.apache.jasper.glassfish-*</include>
-				<include>org.apache.taglibs.standard.glassfish-*</include>
-				<include>ecj-*</include>
-				<include>javax.servlet-api-*</include>
-			</includes>
-			<excludes>
-				<exclude>jetty-all-*</exclude>
-			</excludes>
 		</fileSet>
 		<fileSet>
 			<directory>${project.build.directory}/dependency</directory>
