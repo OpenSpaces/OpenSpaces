@@ -100,13 +100,20 @@ implements AutoScalingSlaEnforcementEndpointAware {
         super.setPlannedCapacity(initialCapacity);
         super.setScaleStrategyConfig(config);
 
-        getProcessingUnit().setStatisticsInterval(config.getStatisticsPollingIntervalSeconds(), TimeUnit.SECONDS);
-        getProcessingUnit().startStatisticsMonitor();
-        if (getLogger().isDebugEnabled()) {
-            getLogger().debug("isGridServiceAgentZonesAware="+isGridServiceAgentZonesAware());
-        }
+        // statistics admin API commands might block since they are synchronized with the network polling threads
+        // so we need to initialize them on another thread.
+        getAdmin().scheduleAdminOperation(new Runnable() {
         
-        enablePuStatistics();
+			@Override
+			public void run() {
+				getProcessingUnit().setStatisticsInterval(config.getStatisticsPollingIntervalSeconds(), TimeUnit.SECONDS);
+		        getProcessingUnit().startStatisticsMonitor();
+		        if (getLogger().isDebugEnabled()) {
+		            getLogger().debug("isGridServiceAgentZonesAware="+isGridServiceAgentZonesAware());
+		        }
+		        
+		        enablePuStatistics();
+		    }});
     }
 
     private void validateConfig() {
