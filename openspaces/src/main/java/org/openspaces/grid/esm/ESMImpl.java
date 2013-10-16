@@ -936,7 +936,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, RemoteSecuredSer
 									e);
 						}
 					}
-				}, 0, CHECK_SINGLE_THREAD_EVENT_PUMP_EVERY_SECONDS / 4,
+				}, 0, CHECK_SINGLE_THREAD_EVENT_PUMP_EVERY_SECONDS / 10,
 				TimeUnit.SECONDS);
 	}
 
