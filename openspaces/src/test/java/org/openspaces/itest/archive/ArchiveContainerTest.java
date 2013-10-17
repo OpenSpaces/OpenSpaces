@@ -97,7 +97,7 @@ public class ArchiveContainerTest {
     /**
      * Tests archiver with wrong template (processed = true)
      */
-    //@Test GS-11380  
+    @Test() //GS-11380
     public void testWrongTemplateXmlAnnotation() throws InterruptedException {
     	// see @Archive(batchSize=2) annotation and atomic=true in MockArchiveContainer
         final int expectedBatchSize = 2; 

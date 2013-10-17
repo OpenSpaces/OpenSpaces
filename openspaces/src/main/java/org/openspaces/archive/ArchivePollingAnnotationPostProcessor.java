@@ -83,9 +83,14 @@ public class ArchivePollingAnnotationPostProcessor implements BeanPostProcessor,
                 .batchSize(archive.batchSize())
                 .useFifoGrouping(archive.useFifoGrouping());
 
-        DynamicEventTemplateProvider templateProvider = AnnotationProcessorUtils.findDynamicEventTemplateProvider(bean);
-        if (templateProvider != null) {
-            archiveContainerConfigurer.dynamicTemplate(templateProvider);
+        Object staticTemplateProvider = AnnotationProcessorUtils.findTemplateFromProvider(bean);
+        if (staticTemplateProvider != null)
+            archiveContainerConfigurer.template(staticTemplateProvider);
+        else {
+            DynamicEventTemplateProvider templateProvider = AnnotationProcessorUtils.findDynamicEventTemplateProvider(bean);
+            if (templateProvider != null) {
+                archiveContainerConfigurer.dynamicTemplate(templateProvider);
+            }            
         }
         
         // handle transactions (we support using either @Transactional or @TransactionalEvent or both)
