@@ -615,7 +615,11 @@
 						</goals>
 						<phase>package</phase>
 						<configuration>
-							<finalName>${project.artifactId}</finalName>							
+							<finalName>${project.artifactId}</finalName>	
+							<excludes>
+								<exclude>org/openspaces/pu/container/jee/jetty/holder/**</exclude>
+								<exclude>org/openspaces/pu/container/jee/jetty/support/**</exclude>
+							</excludes>						
 							<archive>
 								<manifestEntries>
 									<Implementation-Title>${openspacesTitle}</Implementation-Title>
