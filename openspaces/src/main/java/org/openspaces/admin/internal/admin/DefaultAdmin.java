@@ -194,6 +194,7 @@ import com.gigaspaces.security.service.SecuredService;
  */
 public class DefaultAdmin implements InternalAdmin {
 
+    private static final Log lifecycleLogger = LogFactory.getLog("org.openspaces.admin.lifecycle");
     private static final Log logger = LogFactory.getLog(DefaultAdmin.class);
     
     private static final int DEFAULT_EVENT_LISTENER_THREADS = 10;
@@ -310,8 +311,11 @@ public class DefaultAdmin implements InternalAdmin {
             eventsQueue[i] = new LinkedList<Runnable>();
         }
         
-        if (logger.isDebugEnabled()) {
-            logger.debug("Admin created " + this.hashCode());
+        if (lifecycleLogger.isTraceEnabled()) {
+        	lifecycleLogger.trace("Admin created. hashCode=" + this.hashCode() + ". Calling method stack trace:" +  StringUtils.NEW_LINE + StringUtils.getCurrentStackTrace());
+        }
+        else if (lifecycleLogger.isDebugEnabled()) {
+        	lifecycleLogger.debug("Admin created. hashCode=" + this.hashCode());
         }
     }
     
@@ -530,13 +534,13 @@ public class DefaultAdmin implements InternalAdmin {
     @Override
     public void close() {
         if (!closeStarted.compareAndSet(false, true)) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Not closing admin, since close() has already been called " + this.hashCode());
+            if (lifecycleLogger.isDebugEnabled()) {
+            	lifecycleLogger.debug("Not closing admin, since close() has already been called. hashCode()=" + this.hashCode());
             }
             return;
         }
-        if (logger.isDebugEnabled()) {
-            logger.debug("Closing admin " + this.hashCode());
+        if (lifecycleLogger.isDebugEnabled()) {
+        	lifecycleLogger.debug("Closing admin. hashCode=" + this.hashCode());
         }
         discoveryService.stop();
         if (scheduledProcessingUnitMonitorFuture != null) { 
@@ -557,8 +561,8 @@ public class DefaultAdmin implements InternalAdmin {
         
         closeEnded.set(true);
         
-        if (logger.isDebugEnabled()) {
-            logger.debug("Admin closed " + this.hashCode());
+        if (lifecycleLogger.isDebugEnabled()) {
+        	lifecycleLogger.debug("Admin closed. hashCode=" + this.hashCode());
         }
     }
 
