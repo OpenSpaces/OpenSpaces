@@ -929,7 +929,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                     exception = e;
                 }
                 else {
-                    throw new IllegalStateException("Unexpected Exception from machine provisioning.",e);
+                    throw new IllegalStateException("Unexpected Exception from machine provisioning.",cause);
                 }
             } catch (TimeoutException e) {
                 // expected exception
