@@ -270,6 +270,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, RemoteSecuredSer
             if (logger.isLoggable(Level.FINE)) {
                 logger.fine("Waiting for ESM initializer to complete");
             }
+            SystemBoot.exitIfHasAgentAndAgentIsNotRunning();
             Thread.sleep(1000);
         }
         logger.info("Starting ESM ...");
