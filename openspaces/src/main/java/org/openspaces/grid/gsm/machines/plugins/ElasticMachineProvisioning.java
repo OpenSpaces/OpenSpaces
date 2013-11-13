@@ -95,24 +95,6 @@ public interface ElasticMachineProvisioning extends
 	StartedGridServiceAgent startMachine(ExactZonesConfig zones, GSAReservationId reservationId, FailedGridServiceAgent failedAgent, long duration,  TimeUnit unit)
 	throws ElasticMachineProvisioningException, ElasticGridServiceAgentProvisioningException, InterruptedException , TimeoutException ;
 
-	 /**
-     * Starts a new machine with a new grid service agent without specifying zones. the GSA will be assigned only the default zones.
-     * 
-     * This method is blocking on the current thread, or raises a TimeOutException if the timeout expired.
-     * 
-     * @param duration - the maximum duration after which a TimeoutException is raised.
-     * @param unit - the time unit for the duration
-     * @return the grid service agent
-     * 
-     * @throws ElasticMachineProvisioningException
-     * @throws InterruptedException
-     * @throws TimeoutException
-     * 
-     * @since 8.0
-     */
-	@Deprecated
-	GridServiceAgent startMachine(long duration,  TimeUnit unit)
-	throws ElasticMachineProvisioningException, ElasticGridServiceAgentProvisioningException, InterruptedException , TimeoutException ;
 	
 	/**
 	 * @return the capacity requirements that represent a single machine 
