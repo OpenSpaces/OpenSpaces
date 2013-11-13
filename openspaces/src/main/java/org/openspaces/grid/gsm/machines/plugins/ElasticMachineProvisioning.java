@@ -25,6 +25,8 @@ import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig;
 import org.openspaces.admin.zone.config.ExactZonesConfig;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
+import org.openspaces.grid.gsm.machines.FailedGridServiceAgent;
+import org.openspaces.grid.gsm.machines.StartedGridServiceAgent;
 import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIsolationAware;
 import org.openspaces.grid.gsm.machines.plugins.events.ElasticGridServiceAgentProvisioningProgressEventListenerAware;
 import org.openspaces.grid.gsm.machines.plugins.events.ElasticMachineProvisioningProgressChangedEventListenerAware;
@@ -77,9 +79,11 @@ public interface ElasticMachineProvisioning extends
 	 * 
 	 * This method is blocking on the current thread, or raises a TimeOutException if the timeout expired.
 	 * 
+	 * @param zones - the zones to start the machine on. these zones will be injected into the GSA that is started on this machine.
+	 * @param failedAgent - the failed agent for which this new machine is required in order to perform recovery. null if this machine is not related to a failed machine
+	 * @param failedAgentRecoveryAttempt - 0 if this is not related to failed machine, 1 if first attempt to recover from machine failure, 2 if second attempt to recover, etc...
 	 * @param duration - the maximum duration after which a TimeoutException is raised.
 	 * @param unit - the time unit for the duration
-	 * @param zones - the zones to start the machine on. these zones will be injected into the GSA that is started on this machine.
 	 * @return the grid service agent
 	 * 
 	 * @throws ElasticMachineProvisioningException
@@ -88,7 +92,7 @@ public interface ElasticMachineProvisioning extends
 	 * 
 	 * @since 8.0
 	 */
-	GridServiceAgent startMachine(ExactZonesConfig zones, GSAReservationId reservationId, long duration,  TimeUnit unit)
+	StartedGridServiceAgent startMachine(ExactZonesConfig zones, GSAReservationId reservationId, FailedGridServiceAgent failedAgent, long duration,  TimeUnit unit)
 	throws ElasticMachineProvisioningException, ElasticGridServiceAgentProvisioningException, InterruptedException , TimeoutException ;
 
 	 /**
@@ -136,7 +140,7 @@ public interface ElasticMachineProvisioning extends
 	 * 
 	 * @since 8.0
 	 */
-	void stopMachine(GridServiceAgent agent, long duration, TimeUnit unit) throws ElasticMachineProvisioningException, ElasticGridServiceAgentProvisioningException, InterruptedException, TimeoutException;
+	void stopMachine(StartedGridServiceAgent agent, long duration, TimeUnit unit) throws ElasticMachineProvisioningException, ElasticGridServiceAgentProvisioningException, InterruptedException, TimeoutException;
 	
 	/**
      * Cleanup all cloud resources.

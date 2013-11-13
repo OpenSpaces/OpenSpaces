@@ -37,10 +37,12 @@ import org.openspaces.admin.zone.config.ExactZonesConfig;
 import org.openspaces.grid.gsm.capacity.CapacityRequirement;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.NumberOfMachinesCapacityRequirement;
+import org.openspaces.grid.gsm.machines.FailedGridServiceAgent;
 import org.openspaces.grid.gsm.machines.FutureCleanupCloudResources;
 import org.openspaces.grid.gsm.machines.FutureGridServiceAgent;
 import org.openspaces.grid.gsm.machines.FutureGridServiceAgents;
 import org.openspaces.grid.gsm.machines.FutureStoppedMachine;
+import org.openspaces.grid.gsm.machines.StartedGridServiceAgent;
 import org.openspaces.grid.gsm.machines.exceptions.NoClassDefFoundElasticMachineProvisioningException;
 import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIsolation;
 import org.openspaces.grid.gsm.machines.plugins.exceptions.ElasticGridServiceAgentProvisioningException;
@@ -99,8 +101,8 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
                 public void run() {
                     try {
                         logger.info("Starting a new machine");
-                        
-                        GridServiceAgent agent = machineProvisioning.startMachine(zones, reservationId, duration, unit);
+                        final FailedGridServiceAgent stub = null;
+                        GridServiceAgent agent = machineProvisioning.startMachine(zones, reservationId, stub, duration, unit).getAgent();
                         ref.set(agent);
                         logger.info("New machine started");
                     } catch (ElasticMachineProvisioningException e) {
@@ -210,7 +212,7 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
                 
                 logger.info("Stopping machine " + hostAddress);
                 try {
-                    NonBlockingElasticMachineProvisioningAdapter.this.machineProvisioning.stopMachine(agent, duration, unit);
+                    NonBlockingElasticMachineProvisioningAdapter.this.machineProvisioning.stopMachine(new StartedGridServiceAgent(agent,null), duration, unit);
                     logger.info("machine " + hostAddress + " succesfully stopped.");
                     atomicDone.set(true);
                 } catch (ElasticMachineProvisioningException e) {
