@@ -252,7 +252,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                         numberOfContainersForPuOnAgent * sla.getContainerMemoryCapacityInMB() - allocatedMemoryOnAgentInMB;
 
                 if (memoryToAllocateOnAgentInMB > 0) {
-                    logger.info("Recovering " + memoryToAllocateOnAgentInMB + "MB allocated for PU" + pu.getName() + " on machine " + MachinesSlaUtils.machineToString(agent.getMachine()));
+                    logger.info("Recovering " + memoryToAllocateOnAgentInMB + "MB allocated for PU" + pu.getName() + " on agent " + agentToString(agent));
                     CapacityRequirements capacityToAllocateOnAgent = 
                             new CapacityRequirements(new MemoryCapacityRequirement(memoryToAllocateOnAgentInMB));
                     
@@ -496,13 +496,10 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                     // cancel scale in
                     unmarkCapacityForDeallocation(sla, agentUid, agentCapacity);
                     if (logger.isInfoEnabled()) {
-                        GridServiceAgent agent = pu.getAdmin().getGridServiceAgents().getAgentByUID(agentUid);
-                        if (agent != null) {
                         logger.info(
-                                "machine agent " + getAgentIpAddress(agent) + " " +
+                                "Agent " + agentToString(agentUid) + " " +
                                 "is no longer marked for deallocation in order to maintain capacity. "+
                                 "Allocated machine agents are: " + getAllocatedCapacity(sla));
-                        }
                     }
                 }
             }
@@ -531,10 +528,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             	CapacityRequirements agentCapacity =  capacityMarkedForDeallocation.getAgentCapacity(agentUid);
                 CapacityRequirements requiredCapacity = agentCapacity.min(shortageCapacity);
                 if (logger.isInfoEnabled()) {
-                    GridServiceAgent agent = pu.getAdmin().getGridServiceAgents().getAgentByUID(agentUid);
-                    if (agent != null) {
-                        logger.info("machine agent " + getAgentIpAddress(agent) + " is no longer marked for deallocation in order to maintain capacity.");
-                    }
+                    logger.info("Agent " + agentToString(agentUid) + " is no longer marked for deallocation in order to maintain capacity.");
                 }
                 unmarkCapacityForDeallocation(sla, agentUid, requiredCapacity);
                 shortageCapacity = shortageCapacity.subtract(requiredCapacity);
@@ -701,13 +695,10 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                     machineShortage--;
                 
                     if (logger.isInfoEnabled()) {
-                        GridServiceAgent agent = pu.getAdmin().getGridServiceAgents().getAgentByUID(agentUid);
-                        if (agent != null) {
-                            logger.info(
-                                    "machine " + MachinesSlaUtils.machineToString(agent.getMachine()) + " "+
-                                    "is no longer marked for deallocation in order to reach the minimum of " + 
-                                    sla.getMinimumNumberOfMachines() + " machines.");
-                        }
+                        logger.info(
+                                "Agent " + agentToString(agentUid) + " "+
+                                "is no longer marked for deallocation in order to reach the minimum of " + 
+                                sla.getMinimumNumberOfMachines() + " machines.");
                     }
                 }
             }
@@ -809,7 +800,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                 Set<Long> childProcessesIds = MachinesSlaUtils.getChildProcessesIds(agent);
                 if (!childProcessesIds.isEmpty()) {
                     // this is unexpected. We already checked for management processes and other PU processes.
-                    logger.warn("Agent " + agent.getUid() + " on machine " + MachinesSlaUtils.machineToString(agent.getMachine())+ " cannot be shutdown due to the following child processes: " + childProcessesIds);
+                    logger.warn("Agent " + agentToString(agentUid) + " cannot be shutdown due to the following child processes: " + childProcessesIds);
                     continue;
                 }
                 
@@ -824,7 +815,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
 
         if (!isAgentExistsInStoppedMachinesFutures(agent)) {
             
-            logger.info("Agent " + agent.getUid() + " on machine " + MachinesSlaUtils.machineToString(agent.getMachine()) 
+            logger.info("Agent " + agentToString(agent) 
                     + " is no longer in use by any processing unit. "+
                     "It is going down!");
             
@@ -878,7 +869,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         for(GridServiceAgent agent : MachinesSlaUtils.convertAgentUidsToAgents(getAllocatedCapacity(sla).getAgentUids(),pu.getAdmin())) {
             String agentUid = agent.getUid();
             if (restrictedMachines.containsKey(agentUid)) {
-                logger.info("Machine " + MachinesSlaUtils.machineToString(agent.getMachine())+ " is restricted for pu " + pu.getName() + " reason:" + restrictedMachines.get(agentUid));
+                logger.info("Agent " + agentToString(agentUid) + " is restricted for pu " + pu.getName() + " reason:" + restrictedMachines.get(agentUid));
                 markAgentCapacityForDeallocation(sla, agentUid);
             }
         }
@@ -894,10 +885,12 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         for(final String agentUid: getAllocatedCapacityUnfiltered(sla).getAgentUids()) {
             if (agents.getAgentByUID(agentUid) == null) {
             	if (state.isAgentFailoverDisabled(agentUid)) {
-            		logger.debug("Ignored agent " + agentUid + " that was killed since failure detection is disabled.");
+            		logger.debug("Ignored agent " + agentToString(agentUid) + " that was killed since failure detection is disabled.");
             	}
             	else {
-            		logger.warn("Agent " + agentUid + " was killed unexpectedly.");
+            		if (logger.isWarnEnabled()) {
+            			logger.warn("Agent " + agentToString(agentUid) + " was killed unexpectedly.");
+            		}
             		markAgentCapacityForDeallocation(sla, agentUid);
             	}
             }
@@ -1119,7 +1112,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             
             CapacityRequirements newAgentCapacity = MachinesSlaUtils.getMachineTotalCapacity(newAgent,sla);
             if (logger.isInfoEnabled()) {
-                logger.info("Agent started and provisioned succesfully on a new machine " + MachinesSlaUtils.machineToString(newAgent.getMachine())+ " has "+ newAgentCapacity);
+                logger.info("Agent started and provisioned succesfully on a new machine " + agentToString(newAgent)+ " has "+ newAgentCapacity);
             }
             
             unallocatedCapacity = 
@@ -1210,7 +1203,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             //some nasty bug in machine provisioning implementation 
             throw new IllegalStateException(
                 "Machine provisioning for " + pu.getName() + " "+
-                "has provided the machine " + MachinesSlaUtils.machineToString(newAgent.getMachine()) +
+                "has provided the agent " + agentToString(newAgent) +
                 " which is already in use by this PU."+
                 "The machine is ignored");
         }
@@ -1219,7 +1212,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
           //some nasty bug in machine provisioning implementation        
             throw new IllegalStateException(
                         "Machine provisioning for " + pu.getName() + " "+
-                        "has provided the machine " + MachinesSlaUtils.machineToString(newAgent.getMachine()) +
+                        "has provided the agent " + agentToString(newAgent) +
                         " which is already in use by another PU."+
                         "This machine is ignored");
         }
@@ -1239,7 +1232,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                oldMachineProvisioning == machineProvisioning) {
                
                throw new IllegalStateException(
-                       MachinesSlaUtils.machineToString(newAgent.getMachine()) + " has been started but with the wrong zone or management settings. "+
+                       agentToString(newAgent) + " has been started but with the wrong zone or management settings. "+
                        "newagent.zones="+newAgent.getExactZones() + " "+
                        "oldMachineProvisioning.config.zones="+oldMachineProvisioning.getConfig().getGridServiceAgentZones()); 
            }
@@ -1541,7 +1534,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             state.allocateCapacity(getKey(sla), agentUid, capacityToAllocate.getAgentCapacity(agentUid));
             if (logger.isInfoEnabled()) {
                 logger.info("allocating capacity "+capacityToAllocate.getAgentCapacity(agentUid) + " "+
-                            "on " + MachinesSlaUtils.agentToString(pu.getAdmin(), agentUid) + " "+
+                            "on " + agentToString(agentUid) + " "+
                             "for " + pu.getName() + " "+sla.getGridServiceAgentZones());
             }
         }
@@ -1551,7 +1544,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         for (String agentUid : capacityToMarkForDeallocation.getAgentUids()) {
             state.markCapacityForDeallocation(getKey(sla), agentUid, capacityToMarkForDeallocation.getAgentCapacity(agentUid));
             if (logger.isInfoEnabled()) {
-                logger.info("marking capacity for deallocation "+capacityToMarkForDeallocation.getAgentCapacity(agentUid) + " on " + MachinesSlaUtils.agentToString(pu.getAdmin(), agentUid));
+                logger.info("marking capacity for deallocation "+capacityToMarkForDeallocation.getAgentCapacity(agentUid) + " on " + agentToString(agentUid));
             }
         }
     }
@@ -1637,5 +1630,13 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             throw new CloudCleanupFailedException(pu, exception);
         }
 	}
-
+	
+    private String agentToString(String agentUid) {
+		return MachinesSlaUtils.agentToString(pu.getAdmin(), agentUid);
+	}
+    
+    private String agentToString(GridServiceAgent agent) {
+		return MachinesSlaUtils.agentToString(agent);
+	}
+	
 }

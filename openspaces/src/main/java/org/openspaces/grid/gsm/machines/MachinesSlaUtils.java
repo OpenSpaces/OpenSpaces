@@ -88,11 +88,11 @@ public class MachinesSlaUtils {
         if (agent != null) {
             return agentToString(agent);
         }
-        return "agent uid " + agentUid;
+        return "uid " + agentUid;
     }
 
 
-	private static String agentToString(GridServiceAgent agent) {
+	public static String agentToString(GridServiceAgent agent) {
 		return agent.getUid() + " " + machineToString(agent.getMachine()) +" "+agent.getExactZones();
 	}
     
