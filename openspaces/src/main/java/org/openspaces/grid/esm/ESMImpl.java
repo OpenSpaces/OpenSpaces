@@ -118,8 +118,8 @@ import com.sun.jini.start.LifeCycle;
 public class ESMImpl extends ServiceBeanAdapter implements ESM, RemoteSecuredService, ProcessingUnitRemovedEventListener,
         ProcessingUnitAddedEventListener,MachineLifecycleEventListener
 /*, RemoteSecuredService*//*, ServiceDiscoveryListener*/ {
-
-
+	
+    private static final long DISCOVERY_TIMEOUT_SECONDS = Long.getLong("org.openspaces.grid.initialization-timeout-seconds", 3*60L);
     private static final long CHECK_SINGLE_THREAD_EVENT_PUMP_EVERY_SECONDS= Long.getLong("org.openspaces.grid.internal-eventloop-keepalive-error-seconds", 1*60L);
     private static final String CONFIG_COMPONENT = "org.openspaces.grid.esm";
     private static final Logger logger = Logger.getLogger(CONFIG_COMPONENT);
@@ -139,6 +139,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, RemoteSecuredSer
     private final AtomicBoolean destroyStarted = new AtomicBoolean(false);
     private SecurityInterceptor securityInterceptor;
     private AtomicLong keepAlive = new AtomicLong(0);
+    private final long adminInitializationTimeout;
     
     /**
      * Create an ESM
@@ -182,7 +183,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, RemoteSecuredSer
                 logger.info("ESM is now listening for Processing Unit events");
             }
 
-			
+
             
             private boolean isEsmDiscovered(Admin admin) {
                 ElasticServiceManager[] esms = admin.getElasticServiceManagers().getManagers();
@@ -206,6 +207,10 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, RemoteSecuredSer
             }
             
         });
+        
+        adminInitializationTimeout = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(DISCOVERY_TIMEOUT_SECONDS);
+        logger.fine("Starting ESM initialization, timeout in " + DISCOVERY_TIMEOUT_SECONDS + " seconds.");
+        
     }
 
         
@@ -261,6 +266,10 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, RemoteSecuredSer
         }
     }
 
+	private boolean isAdminInitializationTimedOut() {
+		return System.currentTimeMillis() > adminInitializationTimeout;
+	}
+	
     @Override
     public synchronized void initialize(ServiceBeanContext context) throws Exception {
         if (SecurityResolver.isSecurityEnabled())
@@ -271,6 +280,10 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, RemoteSecuredSer
                 logger.fine("Waiting for ESM initializer to complete");
             }
             SystemBoot.exitIfHasAgentAndAgentIsNotRunning();
+            if (isAdminInitializationTimedOut()) {
+                //see GS-11463, could be fatal issue with LRMI listener port that requires process restart.
+                throw new ESMInitializationTimeoutException(DISCOVERY_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            }
             Thread.sleep(1000);
         }
         logger.info("Starting ESM ...");
