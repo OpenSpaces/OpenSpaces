@@ -870,7 +870,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             String agentUid = agent.getUid();
             if (restrictedMachines.containsKey(agentUid)) {
                 logger.info("Agent " + agentToString(agentUid) + " is restricted for pu " + pu.getName() + " reason:" + restrictedMachines.get(agentUid));
-                markAgentCapacityForDeallocation(sla, agentUid);
+                markAgentRestrictedForPu(sla, agentUid);
             }
         }
     }
@@ -891,7 +891,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             		if (logger.isWarnEnabled()) {
             			logger.warn("Agent " + agentToString(agentUid) + " was killed unexpectedly.");
             		}
-            		markAgentCapacityForDeallocation(sla, agentUid);
+            		markAgentAsFailed(sla, agentUid);
             	}
             }
         }
@@ -1056,7 +1056,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             }
             
             //update state 2: remove futures from list
-            removeFutureAgents(sla, doneFutureAgents);
+            removeSuccesfullyStartedFutureAgents(sla, doneFutureAgents);
             
             // update state 3:
             // mark for shutdown new machines that are not marked by any processing unit
@@ -1488,10 +1488,6 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         return state.getNumberOfFutureAgents(getKey(sla));
     }
 
-    private void unmarkCapacityForDeallocation(CapacityMachinesSlaPolicy sla, String agentUid, CapacityRequirements agentCapacity) {
-        state.unmarkCapacityForDeallocation(getKey(sla), agentUid, agentCapacity);
-    }
-
     private void addFutureAgents(CapacityMachinesSlaPolicy sla, 
             FutureGridServiceAgent[] futureAgents, CapacityRequirements shortageCapacity) {
         state.addFutureAgents(getKey(sla), futureAgents, shortageCapacity);
@@ -1513,16 +1509,20 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         state.deallocateAgentCapacity(getKey(sla), agentUid);
     }
     
-    private void markAgentCapacityForDeallocation(AbstractMachinesSlaPolicy sla, String agentUid) {
-        state.markAgentCapacityForDeallocation(getKey(sla), agentUid);
+    private void markAgentAsFailed(AbstractMachinesSlaPolicy sla, String agentUid) {
+        state.markAgentAsFailed(getKey(sla), agentUid);
+    }
+    
+    private void markAgentRestrictedForPu(AbstractMachinesSlaPolicy sla, String agentUid) {
+    	state.markAgentRestrictedForPu(getKey(sla), agentUid);
     }
     
     private Collection<GridServiceAgentFutures> getAllDoneFutureAgents(AbstractMachinesSlaPolicy sla) {
         return state.getAllDoneFutureAgents(getKey(sla));
     }
     
-    private void removeFutureAgents(AbstractMachinesSlaPolicy sla, GridServiceAgentFutures doneFutureAgents) {
-        state.removeFutureAgents(getKey(sla), doneFutureAgents);
+    private void removeSuccesfullyStartedFutureAgents(AbstractMachinesSlaPolicy sla, GridServiceAgentFutures doneFutureAgents) {
+        state.removeSuccesfullyStartedFutureAgents(getKey(sla), doneFutureAgents);
     }
 
     private void allocateCapacity(AbstractMachinesSlaPolicy sla, CapacityRequirementsPerAgent capacityToAllocate) {

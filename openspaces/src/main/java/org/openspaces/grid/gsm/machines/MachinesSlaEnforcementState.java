@@ -353,7 +353,14 @@ public class MachinesSlaEnforcementState {
         return getState(key).getMachineGoingDown();
     }
 
-    public void markAgentCapacityForDeallocation(StateKey key, String uid) {
+	public void markAgentAsFailed(StateKey key, String agentUid) {
+		markAgentCapacityForDeallocation(key, agentUid);
+	}
+	
+	public void markAgentRestrictedForPu(StateKey key, String agentUid) {
+		markAgentCapacityForDeallocation(key, agentUid);
+	}
+    private void markAgentCapacityForDeallocation(StateKey key, String uid) {
         CapacityRequirements agentCapacity = getAllocatedCapacity(key).getAgentCapacity(uid);
         markCapacityForDeallocation(key, uid,agentCapacity);
     }
@@ -518,7 +525,7 @@ public class MachinesSlaEnforcementState {
         }
     }
     
-    public void removeFutureAgents(StateKey key, GridServiceAgentFutures futureAgents) {
+    public void removeSuccesfullyStartedFutureAgents(StateKey key, GridServiceAgentFutures futureAgents) {
         getState(key).removeFutureAgents(futureAgents);
     }
     
