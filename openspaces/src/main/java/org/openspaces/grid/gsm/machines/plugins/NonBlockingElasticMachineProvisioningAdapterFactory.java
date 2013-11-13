@@ -25,14 +25,15 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
+import org.openspaces.grid.esm.EsmSystemProperties;
+
 import com.gigaspaces.internal.utils.concurrent.GSThreadFactory;
-import com.j_spaces.kernel.SystemProperties;
 import com.j_spaces.kernel.threadpool.DynamicExecutors;
 
 public class NonBlockingElasticMachineProvisioningAdapterFactory {
 
 	private static final int MIN_THREADS = 1;
-	private static final int MAX_THREADS = Integer.getInteger(SystemProperties.ESM_MACHINE_PROVISIONING_MAX_THREADS, 64);
+	private static final int MAX_THREADS = Integer.getInteger(EsmSystemProperties.ESM_MACHINE_PROVISIONING_MAX_THREADS, EsmSystemProperties.ESM_MACHINE_PROVISIONING_MAX_THREADS_DEFAULT);
 	private static final long KEEP_ALIVE_TIME = TimeUnit.SECONDS.toMillis(60);
 
 	private final ThreadFactory threadFactory = new GSThreadFactory(this.getClass().getName(), /*daemonThreads=*/ true);

@@ -17,11 +17,6 @@
  ******************************************************************************/
 package org.openspaces.grid.esm;
 
-import com.gigaspaces.grid.gsm.PUDetails;
-import com.gigaspaces.grid.gsm.PUsDetails;
-import com.gigaspaces.internal.utils.concurrent.GSThreadFactory;
-import com.gigaspaces.security.service.SecurityResolver;
-import com.j_spaces.kernel.SystemProperties;
 import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -32,6 +27,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminFactory;
 import org.openspaces.admin.GridComponent;
@@ -43,6 +39,11 @@ import org.openspaces.admin.internal.gsm.InternalGridServiceManager;
 import org.openspaces.admin.internal.vm.InternalVirtualMachineInfoProvider;
 import org.openspaces.admin.lus.LookupService;
 import org.openspaces.admin.pu.ProcessingUnit;
+
+import com.gigaspaces.grid.gsm.PUDetails;
+import com.gigaspaces.grid.gsm.PUsDetails;
+import com.gigaspaces.internal.utils.concurrent.GSThreadFactory;
+import com.gigaspaces.security.service.SecurityResolver;
 /**
  * The purpose of this class is to make sure that admin API
  * view of the PUs and instances is based on the GSM and not the LUS.
@@ -58,13 +59,13 @@ public class ESMImplInitializer {
         void adminCreated(Admin admin);
     }
     
-    private static final long DISCOVERY_POLLING_PERIOD_SECONDS = Integer.getInteger(SystemProperties.ESM_DISCOVERY_POLLING_INTERVAL, 20);
+    private static final long DISCOVERY_POLLING_PERIOD_SECONDS = Long.getLong(EsmSystemProperties.ESM_INIT_POLLING_INTERVAL_SECONDS, EsmSystemProperties.ESM_INIT_POLLING_INTERVAL_SECONDS_DEFAULT);
     
     private static final Logger logger = Logger.getLogger(ESMImplInitializer.class.getName());
 
     // If any PU is discovered wait until all GSM(s) and LUS(s) are running for at least 1 minute.
-    private static final long WAITFOR_GSM_UPTIME_SECONDS = Integer.getInteger(SystemProperties.ESM_WAITFOR_GSM_UPTIME, 60); 
-    private static final long WAITFOR_LUS_UPTIME_SECONDS = Integer.getInteger(SystemProperties.ESM_WAITFOR_LUS_UPTIME, 60);
+    private static final long WAITFOR_GSM_UPTIME_SECONDS = Long.getLong(EsmSystemProperties.ESM_INIT_WAITFOR_GSM_UPTIME_SECONDS, EsmSystemProperties.ESM_INIT_WAITFOR_GSM_UPTIME_SECONDS_DEFAULT); 
+    private static final long WAITFOR_LUS_UPTIME_SECONDS = Long.getLong(EsmSystemProperties.ESM_INIT_WAITFOR_LUS_UPTIME_SECONDS, EsmSystemProperties.ESM_INIT_WAITFOR_LUS_UPTIME_SECONDS_DEFAULT);
 	
     private InternalAdmin admin;
 
@@ -167,8 +168,8 @@ public class ESMImplInitializer {
                     .singleThreadedEventListeners()
                     .useDaemonThreads(true);
             if (SecurityResolver.isSecurityEnabled()) {
-                String username = System.getProperty(SystemProperties.ESM_USERNAME);
-                String password = System.getProperty(SystemProperties.ESM_PASSWORD);
+                String username = System.getProperty(EsmSystemProperties.ESM_USERNAME);
+                String password = System.getProperty(EsmSystemProperties.ESM_PASSWORD);
                 factory.credentials(username, password);
             }
             admin = (InternalAdmin)factory.createAdmin();

@@ -44,6 +44,7 @@ import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.zone.config.ExactZonesConfig;
 import org.openspaces.admin.zone.config.ExactZonesConfigurer;
 import org.openspaces.admin.zone.config.ZonesConfig;
+import org.openspaces.grid.esm.EsmSystemProperties;
 import org.openspaces.grid.gsm.LogPerProcessingUnit;
 import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.capacity.CapacityRequirement;
@@ -91,10 +92,10 @@ import org.openspaces.grid.gsm.machines.plugins.exceptions.ElasticMachineProvisi
  */
 class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEndpoint {
 
-    private static final long START_AGENT_TIMEOUT_SECONDS = Long.getLong("org.openspaces.grid.start-agent-timeout-seconds", 30*60L);
-    private static final long STOP_AGENT_TIMEOUT_SECONDS = Long.getLong("org.openspaces.grid.stop-agent-timeout-seconds", 10*60L);
-    private static final long CLEANUP_CLOUD_TIMEOUT_SECONDS = Long.getLong("org.openspaces.grid.cleanup-cloud-timeout-seconds", 10*60L);
-
+    private static final long START_AGENT_TIMEOUT_SECONDS = Long.getLong(EsmSystemProperties.ESM_START_AGENT_TIMEOUT_SECONDS, EsmSystemProperties.ESM_START_AGENT_TIMEOUT_SECONDS_DEFAULT);
+    private static final long STOP_AGENT_TIMEOUT_SECONDS = Long.getLong(EsmSystemProperties.ESM_STOP_AGENT_TIMEOUT_SECONDS, EsmSystemProperties.ESM_STOP_AGENT_TIMEOUT_SECONDS_DEFAULT);
+    private static final long CLEANUP_CLOUD_TIMEOUT_SECONDS = Long.getLong(EsmSystemProperties.ESM_CLEANUP_CLOUD_TIMEOUT_SECONDS, EsmSystemProperties.ESM_CLEANUP_CLOUD_TIMEOUT_SECONDS_DEFAULT);
+    
     private final ProcessingUnit pu;
     private final Log logger;
     private final MachinesSlaEnforcementState state;

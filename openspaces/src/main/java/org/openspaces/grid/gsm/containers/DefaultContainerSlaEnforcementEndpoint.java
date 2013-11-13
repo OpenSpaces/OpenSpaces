@@ -38,6 +38,7 @@ import org.openspaces.admin.internal.gsa.InternalGridServiceAgent;
 import org.openspaces.admin.internal.gsc.InternalGridServiceContainer;
 import org.openspaces.admin.internal.support.InternalAgentGridComponent;
 import org.openspaces.admin.pu.ProcessingUnit;
+import org.openspaces.grid.esm.EsmSystemProperties;
 import org.openspaces.grid.gsm.LogPerProcessingUnit;
 import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
@@ -53,9 +54,9 @@ import com.gigaspaces.grid.gsa.AgentProcessDetails;
 class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcementEndpoint {
 
 	// enough time for the GSC also to register with the Lookup Service.
-    private static final long START_CONTAINER_TIMEOUT_FAILURE_SECONDS = Long.getLong("org.openspaces.grid.start-container-timeout-seconds", 2*60L);
-    private static final long START_CONTAINER_TIMEOUT_FAILURE_FORGET_SECONDS = START_CONTAINER_TIMEOUT_FAILURE_SECONDS + Long.getLong("org.openspaces.grid.wait-before-start-container-again-seconds", 1*60L);
-
+	private static final long START_CONTAINER_TIMEOUT_FAILURE_SECONDS = Long.getLong(EsmSystemProperties.ESM_START_CONTAINER_TIMEOUT_FAILURE_SECONDS, EsmSystemProperties.ESM_START_CONTAINER_TIMEOUT_FAILURE_SECONDS_DEFAULT);
+    private static final long START_CONTAINER_TIMEOUT_FAILURE_FORGET_SECONDS = START_CONTAINER_TIMEOUT_FAILURE_SECONDS + Long.getLong(EsmSystemProperties.ESM_WAIT_BEFORE_START_CONTAINER_AGAIN_SECONDS, EsmSystemProperties.ESM_WAIT_BEFORE_START_CONTAINER_AGAIN_SECONDS_DEFAULT);
+    
     private final ProcessingUnit pu;
     private final Log logger;
     private ContainersSlaEnforcementState state;

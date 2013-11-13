@@ -119,8 +119,8 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, RemoteSecuredSer
         ProcessingUnitAddedEventListener,MachineLifecycleEventListener
 /*, RemoteSecuredService*//*, ServiceDiscoveryListener*/ {
 	
-    private static final long DISCOVERY_TIMEOUT_SECONDS = Long.getLong("org.openspaces.grid.initialization-timeout-seconds", 3*60L);
-    private static final long CHECK_SINGLE_THREAD_EVENT_PUMP_EVERY_SECONDS= Long.getLong("org.openspaces.grid.internal-eventloop-keepalive-error-seconds", 1*60L);
+    private static final long DISCOVERY_TIMEOUT_SECONDS = Long.getLong(EsmSystemProperties.ESM_INIT_TIMEOUT_SECONDS, EsmSystemProperties.ESM_INIT_TIMEOUT_SECONDS_DEFAULT);
+    private static final long CHECK_SINGLE_THREAD_EVENT_PUMP_EVERY_SECONDS= Long.getLong(EsmSystemProperties.ESM_INIT_EVENTLOOP_KEEPALIVE_ERROR_SECONDS, EsmSystemProperties.ESM_INIT_EVENTLOOP_KEEPALIVE_ERROR_SECONDS_DEFAULT);
     private static final String CONFIG_COMPONENT = "org.openspaces.grid.esm";
     private static final Logger logger = Logger.getLogger(CONFIG_COMPONENT);
     private Admin admin;

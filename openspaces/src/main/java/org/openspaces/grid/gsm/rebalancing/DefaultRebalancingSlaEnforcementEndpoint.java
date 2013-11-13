@@ -37,6 +37,7 @@ import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.core.internal.commons.math.fraction.Fraction;
+import org.openspaces.grid.esm.EsmSystemProperties;
 import org.openspaces.grid.gsm.LogPerProcessingUnit;
 import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
@@ -56,11 +57,11 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
 
     //0.01 minimum cpu cores per machine
     private static final Fraction MIN_CPU_CORES_PER_MACHINE_FOR_REBALANCING = new Fraction(1,100); 
-    private static final long STATEFUL_DEPLOYMENT_TIMEOUT_SECONDS = Long.getLong("org.openspaces.grid.stateful_deployment_timeout_seconds", 60*60L); // one hour
-    private static final long STATELESS_DEPLOYMENT_TIMEOUT_SECONDS = Long.getLong("org.openspaces.grid.stateless_deployment_timeout_seconds", 60*60L); // one hour
-    private static final long STATEFUL_DEPLOYMENT_FAILURE_FORGET_SECONDS = Long.getLong("org.openspaces.grid.stateful_deployment_failure_forget_seconds", 60*60L); // one hour
-    private static final long STATELESS_DEPLOYMENT_FAILURE_FORGET_SECONDS = Long.getLong("org.openspaces.grid.stateless_deployment_failure_forget_seconds", 5*60L); // five minutes
-    
+    private static final long STATEFUL_DEPLOYMENT_TIMEOUT_SECONDS = Long.getLong(EsmSystemProperties.ESM_STATEFUL_DEPLOYMENT_TIMEOUT_SECONDS, EsmSystemProperties.ESM_STATEFUL_DEPLOYMENT_TIMEOUT_SECONDS_DEFAULT);
+    private static final long STATELESS_DEPLOYMENT_TIMEOUT_SECONDS = Long.getLong(EsmSystemProperties.ESM_STATELESS_DEPLOYMENT_TIMEOUT_SECONDS, EsmSystemProperties.ESM_STATELESS_DEPLOYMENT_TIMEOUT_SECONDS_DEFAULT);
+    private static final long STATEFUL_DEPLOYMENT_FAILURE_FORGET_SECONDS = Long.getLong(EsmSystemProperties.ESM_STATEFUL_DEPLOYMENT_FAILURE_FORGET_SECONDS, EsmSystemProperties.ESM_STATEFUL_DEPLOYMENT_FAILURE_FORGET_SECONDS_DEFAULT);
+    private static final long STATELESS_DEPLOYMENT_FAILURE_FORGET_SECONDS = Long.getLong(EsmSystemProperties.ESM_STATELESS_DEPLOYMENT_FAILURE_FORGET_SECONDS, EsmSystemProperties.ESM_STATELESS_DEPLOYMENT_FAILURE_FORGET_SECONDS_DEFAULT);
+
     private final ProcessingUnit pu;
     private final RebalancingSlaEnforcementState state;
     
