@@ -180,7 +180,8 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
         
         
         if (deleteById) {
-            Serializable id = getIdentifier(entry);
+                        
+            Serializable id = (Serializable) (bulkItem.supportsGetSpaceId()? bulkItem.getSpaceId() : getIdentifier(entry));
             if (id == null)
                 throw new DataSourceException(
                         "Object id is null. Make sure object space id and hibernate id are the same property.");

@@ -194,7 +194,7 @@ public class DefaultHibernateSpaceSynchronizationEndpoint extends AbstractHibern
         
         
         if (deleteById) {
-            Serializable id = getIdentifier(entry);
+            Serializable id = (Serializable) (dataSyncOperation.supportsGetSpaceId()? dataSyncOperation.getSpaceId() : getIdentifier(entry));
             if (id == null)
                 throw new DataSourceException(
                         "Object id is null. Make sure object space id and hibernate id are the same property.");
