@@ -93,19 +93,23 @@ import com.j_spaces.core.client.INotifyDelegatorFilter;
  */
 public abstract class AbstractNotifyEventListenerContainer extends AbstractTransactionalEventListenerContainer {
 
+    /**
+     * Custom Communication type is deprecated since 9.7 - the default is multiplex and there are no benefits for using unicast.
+     * @deprecated Since 9.7
+     */
+    @Deprecated
     public static final String COM_TYPE_PREFIX = "COM_TYPE_";
 
     /**
-     * Controls how notification are propagated from the space to the listener. Unicast propagation
-     * uses TCP unicast communication which is usually best for small amount of registered clients.
-     * This is the default communication type.
+     * Custom Communication type is deprecated since 9.7 - the default is multiplex and there are no benefits for using unicast.
+     * @deprecated Since 9.7
      */
+    @Deprecated
     public static final int COM_TYPE_UNICAST = 0;
 
     /**
-     * Controls how notification are propagated from the space to the listener. Same as unicast ({@link #COM_TYPE_UNICAST})
-     * in terms of communication protocol but uses a single client side multiplexer which handles
-     * all the dispatching to the different notification listeners.
+     * Custom Communication type is deprecated since 9.7 - the default is multiplex and there are no benefits for using unicast.
+     * @deprecated Since 9.7
      */
     public static final int COM_TYPE_MULTIPLEX = 1;
 
@@ -118,7 +122,7 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
 
     private static final Constants constants = new Constants(AbstractNotifyEventListenerContainer.class);
 
-    private int comType = COM_TYPE_UNICAST;
+    private int comType = COM_TYPE_MULTIPLEX;
 
     private boolean fifo = false;
 
@@ -176,13 +180,20 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
         this.comType = comType;
     }
 
+    /**
+     * Custom Communication type is deprecated since 9.7 - the default is multiplex and there are no benefits for using unicast.
+     * @deprecated Since 9.7
+     */
+    @Deprecated
     protected int getCommType() {
         return this.comType;
     }
 
     /**
-     * @deprecated This configuration is redundant and has no affect. 
+     * Custom Communication type is deprecated since 9.7 - the default is multiplex and there are no benefits for using unicast.
+     * @deprecated Since 9.7
      */
+    @Deprecated
     public void setComTypeName(String comTypeName) {
         Assert.notNull(comTypeName, "comTypeName cannot be null");
         setComType(constants.asNumber(COM_TYPE_PREFIX + comTypeName).intValue());

@@ -17,10 +17,10 @@
 package org.openspaces.events.notify;
 
 /**
- * The communication type used to send notifications.
- *
- * @author kimchy
+ * Custom Communication type is deprecated since 9.7 - the default is multiplex and there are no benefits for using unicast.
+ * @deprecated Since 9.7
  */
+@Deprecated
 public enum NotifyComType {
 
     /**
