@@ -331,7 +331,9 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
      * {@link net.jini.core.lease.Lease#FOREVER}.
      *
      * @see #setAutoRenew(boolean)
+     * @deprecated Since 9.7 - event listener with custom lease is deprecated.
      */
+    @Deprecated
     public void setListenerLease(long listenerLease) {
         this.listenerLease = listenerLease;
     }

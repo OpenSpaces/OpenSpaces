@@ -31,9 +31,11 @@ import com.gigaspaces.events.EventSessionConfig;
  * (automatically sets <code>true</code> to {@link org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setAutoRenew(boolean)}.
  *
  * @author kimchy
+ * @deprecated Since 9.7 - event listener with custom lease or custom auto-renew is deprecated.
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
+@Deprecated
 public @interface NotifyLease {
 
     /**

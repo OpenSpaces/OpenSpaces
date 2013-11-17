@@ -190,7 +190,9 @@ public class SimpleNotifyContainerConfigurer {
 
     /**
      * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setListenerLease(long)
+     * @deprecated Since 9.7 - event listener with custom lease is deprecated.
      */
+    @Deprecated
     public SimpleNotifyContainerConfigurer listenerLease(long listenerLease) {
         notifyEventListenerContainer.setListenerLease(listenerLease);
         return this;
