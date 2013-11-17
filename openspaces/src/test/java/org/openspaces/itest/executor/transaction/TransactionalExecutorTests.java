@@ -27,6 +27,7 @@ import org.openspaces.core.executor.AutowireTask;
 import org.openspaces.core.executor.DistributedTask;
 import org.openspaces.core.executor.Task;
 import org.openspaces.core.executor.TaskGigaSpace;
+import org.openspaces.itest.utils.EmptySpaceDataObject;
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
@@ -316,8 +317,8 @@ public class TransactionalExecutorTests extends AbstractDependencyInjectionSprin
         transient GigaSpace gigaSpace2;
 
         public Integer execute() throws Exception {
-            gigaSpace1.write(new Object());
-            gigaSpace2.write(new Object());
+            gigaSpace1.write(new EmptySpaceDataObject());
+            gigaSpace2.write(new EmptySpaceDataObject());
             return 1;
         }
 
@@ -344,7 +345,7 @@ public class TransactionalExecutorTests extends AbstractDependencyInjectionSprin
         transient GigaSpace gigaSpace;
 
         public Integer execute() throws Exception {
-            gigaSpace.write(new Object());
+            gigaSpace.write(new EmptySpaceDataObject());
             return 1;
         }
     }
@@ -359,7 +360,7 @@ public class TransactionalExecutorTests extends AbstractDependencyInjectionSprin
         transient GigaSpace gigaSpace;
 
         public Integer execute() throws Exception {
-            gigaSpace.write(new Object());
+            gigaSpace.write(new EmptySpaceDataObject());
             return 1;
         }
     }
@@ -373,7 +374,7 @@ public class TransactionalExecutorTests extends AbstractDependencyInjectionSprin
         transient GigaSpace gigaSpace;
 
         public Integer execute() throws Exception {
-            gigaSpace.write(new Object());
+            gigaSpace.write(new EmptySpaceDataObject());
             Thread.sleep(1000);
             return 1;
         }

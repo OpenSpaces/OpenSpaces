@@ -17,6 +17,7 @@
 package org.openspaces.itest.remoting.methodannotations;
 
 import com.gigaspaces.annotation.pojo.SpaceClass;
+import com.gigaspaces.annotation.pojo.SpaceId;
 import com.gigaspaces.annotation.pojo.SpaceRouting;
 import org.openspaces.core.GigaSpace;
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
@@ -126,6 +127,17 @@ public class EventDrivenRemotingMethodAnnotationsTests extends AbstractDependenc
 
         public void setRouting(Integer routing) {
             this.routing = routing;
+        }
+        
+        private String uid;
+
+        @SpaceId(autoGenerate=true)
+        public String getUid() {
+            return uid;
+        }
+
+        public void setUid(String uid) {
+            this.uid = uid;
         }
     }
 }
