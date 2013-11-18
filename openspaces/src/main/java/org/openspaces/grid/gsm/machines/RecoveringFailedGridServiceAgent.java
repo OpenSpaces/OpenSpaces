@@ -2,7 +2,6 @@ package org.openspaces.grid.gsm.machines;
 
 public class RecoveringFailedGridServiceAgent {
 
-	private final Object agentContext;
 	private final String agentUid;
 	private int recoveryAttempts;
 	
@@ -11,9 +10,8 @@ public class RecoveringFailedGridServiceAgent {
 	 * @param agentContext - the agent context as provided by the machine provisioning (cloud driver).
 	 * recoveryAttempts is zero.
 	 */
-	public RecoveringFailedGridServiceAgent(String agentUid, Object agentContext) {
+	public RecoveringFailedGridServiceAgent(String agentUid) {
 		this.agentUid = agentUid;
-		this.agentContext = agentContext;
 		this.recoveryAttempts = 0;
 	}
 
@@ -34,13 +32,5 @@ public class RecoveringFailedGridServiceAgent {
 	
 	public String getAgentUid() {
 		return agentUid;
-	}
-
-	public Object getAgentContext() {
-		return agentContext;
-	}
-	
-	public FailedGridServiceAgent toFailedGridServiceAgent() {
-		return new FailedGridServiceAgent(agentUid, agentContext, recoveryAttempts);
 	}
 }

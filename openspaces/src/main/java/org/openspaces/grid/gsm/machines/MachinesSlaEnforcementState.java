@@ -222,7 +222,7 @@ public class MachinesSlaEnforcementState {
         }
 
 		public Collection<RecoveringFailedGridServiceAgent> getFailedAgents() {
-			return failedAgents;
+			return Collections.unmodifiableCollection(failedAgents);
 		}
 
 		public void addFailedAgent(RecoveringFailedGridServiceAgent failedAgent) {
@@ -246,8 +246,8 @@ public class MachinesSlaEnforcementState {
     private final Set<ProcessingUnit> validatedUndeployNotInProgressPerProcessingUnit;
     private final Map<ProcessingUnit, FutureCleanupCloudResources> cloudCleanupPerProcessingUnit;
     private final Map<String, String> agentWithFailoverDisabledPerIpAddress;
-	private final Map<String, Object> discoveredAgentsContext;
-   
+    private final Map<String, Object> agentsContext;
+    
     public MachinesSlaEnforcementState() {
         this.logger = 
                 new SingleThreadedPollingLog( 
@@ -258,7 +258,7 @@ public class MachinesSlaEnforcementState {
         validatedUndeployNotInProgressPerProcessingUnit = new HashSet<ProcessingUnit>();
         cloudCleanupPerProcessingUnit = new HashMap<ProcessingUnit, FutureCleanupCloudResources>();
         agentWithFailoverDisabledPerIpAddress = new HashMap<String, String>();
-        discoveredAgentsContext = new LinkedHashMap<String,Object>();
+        agentsContext = new LinkedHashMap<String,Object>();
     }
 
     public boolean isHoldingStateForProcessingUnit(ProcessingUnit pu) {
@@ -557,13 +557,14 @@ public class MachinesSlaEnforcementState {
 			
 				// remove failed agent, since the new machine replaces it
 				unmarkAgentAsFailed(failedAgent);
+				removeAgentContext(failedAgent.getAgentUid());
 			}
 
 			//store agent context, so it could be resurrected if fails
 			try {
 				final String agentUid = doneFutureAgent.get().getAgent().getUid();
 				final Object agentContext = doneFutureAgent.get().getAgentContext();
-				discoveredAgentsContext.put(agentUid, agentContext);
+				addAgentContext(agentUid, agentContext);
 			} catch (ExecutionException e) { 
 				throw new IllegalStateException(e); 
 			} catch (TimeoutException e) { 
@@ -572,19 +573,30 @@ public class MachinesSlaEnforcementState {
 
 		}
     }
-
+    
 	public void unmarkAgentAsFailed(FailedGridServiceAgent failedAgent) {
 		for (final StateValue value : state.values()) {
-    		value.removeFailedAgent(failedAgent);
-    	}
-		discoveredAgentsContext.put(failedAgent.getAgentUid(), failedAgent.getAgentContext());
+			value.removeFailedAgent(failedAgent);
+		}
 	}
+    
+    private void addAgentContext(String agentUid, Object agentContext) {
+        agentsContext.put(agentUid, agentContext);
+    }
+    
+    public Object getAgentContext(String agentUid) {
+        return agentsContext.get(agentUid);
+    }
     
     public void removeFutureStoppedMachine(StateKey key, FutureStoppedMachine futureStoppedMachine) {
         getState(key).removeFutureStoppedMachine(futureStoppedMachine);
 
         final String agentUid = futureStoppedMachine.getGridServiceAgent().getUid();
-        discoveredAgentsContext.remove(agentUid);
+        removeAgentContext(agentUid);
+    }
+
+    private void removeAgentContext(final String agentUid) {
+        agentsContext.remove(agentUid);
     }
     
     public Collection<FutureStoppedMachine> getMachinesGoingDown() {
@@ -778,8 +790,7 @@ public class MachinesSlaEnforcementState {
 		}
 		if (failedAgent == null) {
 			//this is the first time we detected this agent failed
-			final Object context = discoveredAgentsContext.remove(agentUid);
-			failedAgent = new RecoveringFailedGridServiceAgent(agentUid, context);
+			failedAgent = new RecoveringFailedGridServiceAgent(agentUid);
 		}
 		getState(key).addFailedAgent(failedAgent);
 	}

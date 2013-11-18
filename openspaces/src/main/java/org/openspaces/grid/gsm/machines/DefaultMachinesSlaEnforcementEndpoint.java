@@ -679,9 +679,18 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
 		final int size = recoveringFailedAgents.length;
 		final FailedGridServiceAgent[] failedAgents = new FailedGridServiceAgent[size];
 		for (int i = 0 ; i < size ; i++) {
-			failedAgents[i] = recoveringFailedAgents[i].toFailedGridServiceAgent();
+			failedAgents[i] = toFailedGridServiceAgent(recoveringFailedAgents[i]);
 		}
 		return failedAgents;
+	}
+
+	private FailedGridServiceAgent toFailedGridServiceAgent(
+			RecoveringFailedGridServiceAgent recoveringFailedAgent) {
+		final String agentUid = recoveringFailedAgent.getAgentUid();
+		final int recoveryAttempts = recoveringFailedAgent.getRecoveryAttempts();
+		final Object agentContext = state.getAgentContext(agentUid);
+		final FailedGridServiceAgent failedGridServiceAgent = new FailedGridServiceAgent(agentUid, agentContext, recoveryAttempts);
+		return failedGridServiceAgent;
 	}
 
 	private RecoveringFailedGridServiceAgent[] getFailedAgentsNotBeingRestarted(CapacityMachinesSlaPolicy sla) {
