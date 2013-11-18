@@ -68,7 +68,7 @@ class GridServiceAgentFutures {
             if (futureAgent.isDone() && futureAgent.getException() == null) {
                 
                 try {
-                    agents.add(futureAgent.get());
+                    agents.add(futureAgent.get().getAgent());
                 } catch (ExecutionException e) { } 
                 catch (TimeoutException e) { }
             }

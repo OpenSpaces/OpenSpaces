@@ -20,6 +20,7 @@ package org.openspaces.grid.gsm.machines;
 import static org.openspaces.grid.gsm.machines.MachinesSlaUtils.getAgentIpAddress;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -60,6 +61,7 @@ import org.openspaces.grid.gsm.machines.exceptions.CloudCleanupFailedException;
 import org.openspaces.grid.gsm.machines.exceptions.DelayingScaleInUntilAllMachinesHaveStartedException;
 import org.openspaces.grid.gsm.machines.exceptions.DiscoveredTwoAgentsWithTheSameIpAddress;
 import org.openspaces.grid.gsm.machines.exceptions.ExpectedMachineWithMoreMemoryException;
+import org.openspaces.grid.gsm.machines.exceptions.FailedGridServiceAgentReconnectedException;
 import org.openspaces.grid.gsm.machines.exceptions.FailedToDiscoverMachinesException;
 import org.openspaces.grid.gsm.machines.exceptions.FailedToStartNewGridServiceAgentException;
 import org.openspaces.grid.gsm.machines.exceptions.FailedToStartNewMachineException;
@@ -441,7 +443,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         updateFutureAgentsState(sla);
         updateRestrictedMachinesState(sla);
         updateAgentsMarkedForDeallocationState(sla);
-        
+       
         CapacityRequirementsPerAgent capacityMarkedForDeallocation = getCapacityMarkedForDeallocation(sla);
         CapacityRequirementsPerAgent capacityAllocated = getAllocatedCapacity(sla);
         
@@ -461,7 +463,41 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         
         int machineShortage = getMachineShortageInOrderToReachMinimumNumberOfMachines(sla);
         
-        if (!capacityAllocatedAndMarked.getTotalAllocatedCapacity().equals(target) &&
+        final RecoveringFailedGridServiceAgent[] failedAgents = getFailedAgentsNotBeingRestarted(sla);
+        if ( failedAgents.length > 0 ) {
+
+            final CapacityRequirements capacityRequirements = new CapacityRequirements(
+                    new NumberOfMachinesCapacityRequirement(failedAgents.length));
+
+        	if (!sla.getMachineProvisioning().isStartMachineSupported()) {
+                throw new NeedToStartMoreGridServiceAgentsException(sla, state, capacityRequirements, pu);
+            }
+
+            if (isFutureAgentsOfOtherSharedServices(sla)) {
+                throw new MachinesSlaEnforcementInProgressException(getProcessingUnit(),
+                        "Cannot determine if need to recover from machine failover, waiting for other machines from same tenant to start first.");
+            }
+
+            for (RecoveringFailedGridServiceAgent failedAgent : failedAgents) {
+                failedAgent.incrementRecoveryAttempt();
+            }
+
+            final ExactZonesConfig exactZones = new ExactZonesConfigurer().addZones(sla.getGridServiceAgentZones().getZones()).create();
+            final FutureGridServiceAgent[] futureAgents = sla.getMachineProvisioning().startMachinesAsync(
+                    capacityRequirements,
+                    exactZones,
+                    toFailedGridServiceAgents(failedAgents),
+                    START_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+
+            addFutureAgents(sla, futureAgents, capacityRequirements);
+
+            logger.info(
+                    failedAgents.length + " machine(s) is started in order to "+
+                    "recover from failure of " + Arrays.toString(failedAgents) + " " + 
+                    "in zones " + exactZones);
+        }
+
+        else if (!capacityAllocatedAndMarked.getTotalAllocatedCapacity().equals(target) &&
             capacityAllocatedAndMarked.getTotalAllocatedCapacity().greaterOrEquals(target) &&
             machineShortage == 0) {
             
@@ -548,6 +584,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                 FutureGridServiceAgent[] futureAgents = sla.getMachineProvisioning().startMachinesAsync(
                     shortageCapacity, 
                     exactZones,
+                    new FailedGridServiceAgent[0],
                     START_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
                 addFutureAgents(sla, futureAgents, shortageCapacity);
                 
@@ -595,6 +632,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                 FutureGridServiceAgent[] futureAgents = sla.getMachineProvisioning().startMachinesAsync(
                         capacityRequirements,
                         exactZones,
+                        new FailedGridServiceAgent[0],
                         START_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
                 
                 addFutureAgents(sla, futureAgents, capacityRequirements);
@@ -636,7 +674,21 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         }
     }
 
-    /**
+	private FailedGridServiceAgent[] toFailedGridServiceAgents(
+			RecoveringFailedGridServiceAgent[] recoveringFailedAgents) {
+		final int size = recoveringFailedAgents.length;
+		final FailedGridServiceAgent[] failedAgents = new FailedGridServiceAgent[size];
+		for (int i = 0 ; i < size ; i++) {
+			failedAgents[i] = recoveringFailedAgents[i].toFailedGridServiceAgent();
+		}
+		return failedAgents;
+	}
+
+	private RecoveringFailedGridServiceAgent[] getFailedAgentsNotBeingRestarted(CapacityMachinesSlaPolicy sla) {
+		return state.getAgentsMarkedAsFailedNotBeingRestarted(getKey(sla));
+	}
+
+	/**
      * @param sla
      * @return
      */
@@ -877,8 +929,9 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
 
     /**
      * mark for deallocation machines that were undiscovered by the lookup service
+     * @throws MachinesSlaEnforcementInProgressException 
      */
-    private void updateFailedMachinesState(AbstractMachinesSlaPolicy sla) {
+    private void updateFailedMachinesState(AbstractMachinesSlaPolicy sla) throws MachinesSlaEnforcementInProgressException {
         final GridServiceAgents agents = pu.getAdmin().getGridServiceAgents();
         
         // mark for deallocation all failed machines
@@ -894,6 +947,13 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             		markAgentAsFailed(sla, agentUid);
             	}
             }
+        }
+
+        //Remove failed agents from list if they have recovered from a temporary network disconnect.
+        for (FailedGridServiceAgent failedAgent :  getAgentsMarkedAsFailed(sla)) {
+        	if (agents.getAgentByUID(failedAgent.getAgentUid()) != null) {
+        		unmarkAgentAsFailed(failedAgent);
+        	}
         }
     }
 
@@ -1017,6 +1077,15 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                     else {
                         throw e;
                     }
+                } catch (FailedGridServiceAgentReconnectedException e) {
+                	doneFutureAgents.removeFutureAgent(doneFutureAgent);
+                	if (sla.isUndeploying()) {
+                        logger.info("Ignoring problem with new grid service agent, since undeploy is in progress",e);
+                    }
+                	else {
+                		stopMachine(sla, e.getNewAgent());
+                		throw e;
+                	}
                 }
             }
         }
@@ -1134,23 +1203,25 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
      * @throws FailedToStartNewGridServiceAgentException 
      * @throws FailedToStartNewMachineException 
      * @throws ExpectedMachineWithMoreMemoryException 
-     * @throws FailedMachineProvisioningException 
+     * @throws FailedMachineProvisioningException
+     * @throws FailedGridServiceAgentReconnectedException 
      */
     private void validateHealthyAgent(
             AbstractMachinesSlaPolicy sla, 
             Collection<GridServiceAgent> discoveredAgents, 
             FutureGridServiceAgent futureAgent) 
-                    throws UnexpectedShutdownOfNewGridServiceAgentException, InconsistentMachineProvisioningException, FailedToStartNewGridServiceAgentException, FailedToStartNewMachineException, ExpectedMachineWithMoreMemoryException  {
+                    throws	UnexpectedShutdownOfNewGridServiceAgentException, InconsistentMachineProvisioningException, FailedToStartNewGridServiceAgentException, 
+                    		FailedToStartNewMachineException, ExpectedMachineWithMoreMemoryException, FailedGridServiceAgentReconnectedException  {
 
         final NonBlockingElasticMachineProvisioning machineProvisioning = sla.getMachineProvisioning();
         final Collection<String> usedAgentUids = state.getAllUsedAgentUids();
         final Collection<String> usedAgentUidsForPu = state.getUsedAgentUids(getKey(sla));
         
-        GridServiceAgent newAgent = null;
+        StartedGridServiceAgent newStartedAgent = null;
         {
             Exception exception = null;
             try {
-                newAgent = futureAgent.get(); 
+                newStartedAgent = futureAgent.get(); 
             } catch (ExecutionException e) {
                 // if runtime or error propagate exception "as-is"
                 Throwable cause = e.getCause();
@@ -1175,8 +1246,13 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                 throw new FailedToStartNewMachineException(pu, exception);
             }
         }
+        if (newStartedAgent == null) {
+            throw new IllegalStateException("Machine provisioning future is done without exception, but returned null.");
+        }
+        
+        final GridServiceAgent newAgent = newStartedAgent.getAgent();
         if (newAgent == null) {
-            throw new IllegalStateException("Machine provisioning future is done without exception, but returned a null agent");
+            throw new IllegalStateException("Machine provisioning future is done without exception, but returned a null agent.");
         }
         
         GSAReservationId actualReservationId = ((InternalGridServiceAgent)newAgent).getReservationId();
@@ -1185,9 +1261,8 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         }
         GSAReservationId expectedReservationId = futureAgent.getReservationId();
         if (!actualReservationId.equals(expectedReservationId)) {
-        	final String ipAddress = getAgentIpAddress(newAgent);
         	throw new IllegalStateException(
-            		"Machine provisioning future is done without exception, but returned an agent(ip="+ipAddress+") "+
+            		"Machine provisioning future is done without exception, but returned an agent " + agentToString(newAgent) +
             		"with the wrong reservationId: expected="+expectedReservationId+ " actual="+actualReservationId);
         }
         
@@ -1248,6 +1323,28 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
 		if (availableMB < containerMB) {
 			throw new ExpectedMachineWithMoreMemoryException(pu, newAgent.getMachine(), totalMB , reservedMB, containerMB); 
         }
+		
+        // agent started successfully. check if failed machine reconnected to the network, 
+        // if so - we do not need the new machine that was meant to replace it.
+        final FailedGridServiceAgent failedAgent = futureAgent.getFailedGridServiceAgent();
+        if (failedAgent != null) {
+            final GridServiceAgent reconnectedFailedAgent = isFailedAgentDiscovered(discoveredAgents, failedAgent);
+            if (reconnectedFailedAgent != null) {
+                throw new FailedGridServiceAgentReconnectedException(pu, newAgent, failedAgent, reconnectedFailedAgent);
+            }
+        }
+    }
+
+    private GridServiceAgent isFailedAgentDiscovered(
+            final Collection<GridServiceAgent> discoveredAgents,
+            final FailedGridServiceAgent failedAgent) {
+
+        for (final GridServiceAgent discoveredAgent : discoveredAgents) {
+            if (discoveredAgent.getUid().equals(failedAgent.getAgentUid())) {
+                return discoveredAgent;
+            }
+        }
+        return null;
     }
 
     /**
@@ -1516,7 +1613,15 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
     private void markAgentRestrictedForPu(AbstractMachinesSlaPolicy sla, String agentUid) {
     	state.markAgentRestrictedForPu(getKey(sla), agentUid);
     }
+
+	private void unmarkAgentAsFailed(FailedGridServiceAgent failedAgent) {
+		state.unmarkAgentAsFailed(failedAgent);
+	}
     
+	private FailedGridServiceAgent[] getAgentsMarkedAsFailed(AbstractMachinesSlaPolicy sla) {
+		return state.getAgentsMarkedAsFailed(getKey(sla));
+	}
+	
     private Collection<GridServiceAgentFutures> getAllDoneFutureAgents(AbstractMachinesSlaPolicy sla) {
         return state.getAllDoneFutureAgents(getKey(sla));
     }
@@ -1556,7 +1661,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
     private boolean isCompletedStateRecovery(AbstractMachinesSlaPolicy sla) {
         return state.isCompletedStateRecovery(getKey(sla));
     }
-    
+     
     @Override
     public void recoveredStateOnEsmStart(ProcessingUnit otherPu) {
         state.recoveredStateOnEsmStart(otherPu);
@@ -1638,5 +1743,5 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
     private String agentToString(GridServiceAgent agent) {
 		return MachinesSlaUtils.agentToString(agent);
 	}
-	
+
 }

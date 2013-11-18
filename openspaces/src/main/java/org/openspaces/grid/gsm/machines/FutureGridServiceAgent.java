@@ -18,17 +18,17 @@
 package org.openspaces.grid.gsm.machines;
 
 import org.openspaces.admin.gsa.GSAReservationId;
-import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.core.PollingFuture;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
 
-public interface FutureGridServiceAgent extends PollingFuture<GridServiceAgent> {
+public interface FutureGridServiceAgent extends PollingFuture<StartedGridServiceAgent> {
     
     NonBlockingElasticMachineProvisioning getMachineProvisioning();
     
     CapacityRequirements getFutureCapacity();
     
     GSAReservationId getReservationId();
-   
+
+    FailedGridServiceAgent getFailedGridServiceAgent();
 }

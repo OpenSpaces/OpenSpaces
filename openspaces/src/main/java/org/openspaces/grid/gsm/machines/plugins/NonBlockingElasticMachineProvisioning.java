@@ -24,6 +24,7 @@ import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig;
 import org.openspaces.admin.zone.config.ExactZonesConfig;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
+import org.openspaces.grid.gsm.machines.FailedGridServiceAgent;
 import org.openspaces.grid.gsm.machines.FutureCleanupCloudResources;
 import org.openspaces.grid.gsm.machines.FutureGridServiceAgent;
 import org.openspaces.grid.gsm.machines.FutureGridServiceAgents;
@@ -86,8 +87,12 @@ public interface NonBlockingElasticMachineProvisioning
      * 
      * This method is non blocking and returns a future object with the new grid service agent.
      * 
+     * @param capacityRequirements - total capacity of new machines
+     * @param zones - the agent zones.
      * @param duration - the maximum duration after which a TimeoutException is raised.
-     * @param unit - the time unit for the duration
+     * @param unit - the time unit for the duration.
+	 * @param failedAgents - list of agents that require recovery
+     * 
      * @return the grid service agent futures
      * 
      * @throws ElasticMachineProvisioningException
@@ -97,10 +102,11 @@ public interface NonBlockingElasticMachineProvisioning
      * @since 9.1.0
      */
     public FutureGridServiceAgent[] startMachinesAsync(
-            final CapacityRequirements capacityRequirements,
-            final ExactZonesConfig zones, 
+    		final CapacityRequirements capacityRequirements,
+            final ExactZonesConfig zones,
+            final FailedGridServiceAgent[] failedAgents,
             final long duration, final TimeUnit unit);
-    
+
 	/**
 	 * Shuts down the grid service agent and the machine.
 	 * The implementation should be able to close machines that it has not started, but rather an older instance of this object started perhaps with different configuration.

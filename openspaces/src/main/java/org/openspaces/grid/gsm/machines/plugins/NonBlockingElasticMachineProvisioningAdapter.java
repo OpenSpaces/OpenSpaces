@@ -58,7 +58,6 @@ import org.openspaces.grid.gsm.machines.plugins.exceptions.ElasticMachineProvisi
  */
 public class NonBlockingElasticMachineProvisioningAdapter implements NonBlockingElasticMachineProvisioning {
 
-
     private ElasticMachineProvisioning machineProvisioning;
 
     private final ExecutorService executorService;
@@ -75,11 +74,12 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
 		this.executorService = executorService;
 		this.scheduledExecutorService = scheduledExecutorService;
 	}
-	
+		
 	@Override
     public FutureGridServiceAgent[] startMachinesAsync(
             final CapacityRequirements capacityRequirements,
             final ExactZonesConfig zones, 
+            final FailedGridServiceAgent[] failedAgents,
             final long duration, final TimeUnit unit) {
 
         if (!isStartMachineSupported()) {
@@ -89,6 +89,11 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
         final GSAReservationId reservationId = GSAReservationId.randomGSAReservationId();
         final CapacityRequirements singleMachineCapacity = machineProvisioning.getCapacityOfSingleMachine();
         int numberOfMachines = calcNumberOfMachines(capacityRequirements, machineProvisioning);
+        if (numberOfMachines < failedAgents.length) {
+        	throw new IllegalArgumentException(
+        			"capacity requirements should be at least " + failedAgents.length + " machines for failure recovery. " +
+        			"Instead found "+ numberOfMachines + " machines, capacity = " + capacityRequirements);
+        }
         FutureGridServiceAgent[] futureAgents = new FutureGridServiceAgent[numberOfMachines];
         
         for (int i = 0 ; i < futureAgents.length ; i++) {
@@ -97,12 +102,12 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
             final int throttlingDelay = i*THROTTLING_DELAY_SECONDS;
             final long start = System.currentTimeMillis();
             final long end = start+ throttlingDelay*1000+unit.toMillis(duration);
+            final FailedGridServiceAgent failedAgent = failedAgents.length > i ? failedAgents[i] : null;
             submit(new Runnable() {
                 public void run() {
                     try {
                         logger.info("Starting a new machine");
-                        final FailedGridServiceAgent stub = null;
-                        GridServiceAgent agent = machineProvisioning.startMachine(zones, reservationId, stub, duration, unit).getAgent();
+                        StartedGridServiceAgent agent = machineProvisioning.startMachine(zones, reservationId, failedAgent, duration, unit);
                         ref.set(agent);
                         logger.info("New machine started");
                     } catch (ElasticMachineProvisioningException e) {
@@ -149,7 +154,7 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
                     return new Date(start);
                 }
     
-                public GridServiceAgent get()
+                public StartedGridServiceAgent get()
                         throws ExecutionException, IllegalStateException,TimeoutException {
     
                     Object result = ref.get();
@@ -170,7 +175,7 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
                         throw getException();
                     }
     
-                    return (GridServiceAgent) result;
+                    return (StartedGridServiceAgent)result;
                 }
                 
                 public NonBlockingElasticMachineProvisioning getMachineProvisioning() {
@@ -184,12 +189,14 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
                 public GSAReservationId getReservationId() {
                     return reservationId;
                 }
+
+				public FailedGridServiceAgent getFailedGridServiceAgent() {
+					return failedAgent;
+				}
             };
         }
         return futureAgents;
-
-
-    }	
+    }
 
     @Override
     public FutureStoppedMachine stopMachineAsync(final GridServiceAgent agent, final long duration,
@@ -536,5 +543,4 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
     public ElasticMachineProvisioning getElasticMachineProvisioning() {
         return machineProvisioning;
     }
-    
 }

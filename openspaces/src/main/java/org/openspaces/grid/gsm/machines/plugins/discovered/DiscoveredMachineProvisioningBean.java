@@ -35,6 +35,7 @@ import org.openspaces.admin.zone.config.ExactZonesConfig;
 import org.openspaces.core.bean.Bean;
 import org.openspaces.grid.gsm.ProcessingUnitAware;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
+import org.openspaces.grid.gsm.machines.FailedGridServiceAgent;
 import org.openspaces.grid.gsm.machines.FutureCleanupCloudResources;
 import org.openspaces.grid.gsm.machines.FutureGridServiceAgent;
 import org.openspaces.grid.gsm.machines.FutureGridServiceAgents;
@@ -149,9 +150,11 @@ public class DiscoveredMachineProvisioningBean implements NonBlockingElasticMach
         // not required
     }
 
-    @Override
-    public FutureGridServiceAgent[] startMachinesAsync(CapacityRequirements capacityRequirements, ExactZonesConfig zones,
-            long duration, TimeUnit unit) {
+    public FutureGridServiceAgent[] startMachinesAsync(
+    		final CapacityRequirements capacityRequirements,
+            final ExactZonesConfig zones,
+            final FailedGridServiceAgent[] failedAgents,
+            final long duration, final TimeUnit unit) {
         throw new UnsupportedOperationException();
     }
 

@@ -23,12 +23,15 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -114,6 +117,7 @@ public class MachinesSlaEnforcementState {
         private ElasticProcessingUnitMachineIsolation machineIsolation;
         private List<FutureStoppedMachine> machinesBeingStopped = new ArrayList<FutureStoppedMachine>();
         private boolean completedStateRecoveryAfterRestart;
+        private List<RecoveringFailedGridServiceAgent> failedAgents = new ArrayList<RecoveringFailedGridServiceAgent>();
         
         public void addFutureStoppedMachine(FutureStoppedMachine futureStoppedMachine) {
             machinesBeingStopped.add(futureStoppedMachine);
@@ -151,7 +155,7 @@ public class MachinesSlaEnforcementState {
                 throw new IllegalStateException(this + " should have set machine isolation before unmarking capacity for deallocation");
             }
             markedForDeallocationCapacity = markedForDeallocationCapacity.subtract(agentUid, capacity);
-            allocatedCapacity = allocatedCapacity.add(agentUid,capacity);
+            allocateCapacity(agentUid, capacity);
         }
 
         public void deallocateCapacity(String agentUid, CapacityRequirements capacity) {
@@ -169,7 +173,8 @@ public class MachinesSlaEnforcementState {
 
 			final CapacityRequirements agentAllocatedCapacity = allocatedCapacity.getAgentCapacity(oldAgentUid);
 			if (!agentAllocatedCapacity.equalsZero()) {
-				allocatedCapacity = allocatedCapacity.subtractAgent(oldAgentUid).add(newAgentUid, agentAllocatedCapacity);
+				allocatedCapacity = allocatedCapacity.subtractAgent(oldAgentUid);
+				allocateCapacity(newAgentUid, agentAllocatedCapacity);
 			}
 		}
 		
@@ -206,7 +211,8 @@ public class MachinesSlaEnforcementState {
                             + markedForDeallocationCapacity + ", " : "")
                     + (machineIsolation != null ? "machineIsolation=" + machineIsolation + ", " : "")
                     + "completedStateRecoveryAfterRestart="
-                    + completedStateRecoveryAfterRestart + "]";
+                    + completedStateRecoveryAfterRestart + ", " 
+                    + "failedAgents=" + failedAgents + "]";
         }
 
         public boolean equalsZero() {
@@ -214,6 +220,18 @@ public class MachinesSlaEnforcementState {
                    && markedForDeallocationCapacity.equalsZero() 
                    && futureAgents.isEmpty();
         }
+
+		public Collection<RecoveringFailedGridServiceAgent> getFailedAgents() {
+			return failedAgents;
+		}
+
+		public void addFailedAgent(RecoveringFailedGridServiceAgent failedAgent) {
+			failedAgents.add(failedAgent);
+		}
+
+		public void removeFailedAgent(FailedGridServiceAgent recoveredAgent) {
+			failedAgents.remove(recoveredAgent);
+		}
     }
     
     private final Log logger;
@@ -228,7 +246,8 @@ public class MachinesSlaEnforcementState {
     private final Set<ProcessingUnit> validatedUndeployNotInProgressPerProcessingUnit;
     private final Map<ProcessingUnit, FutureCleanupCloudResources> cloudCleanupPerProcessingUnit;
     private final Map<String, String> agentWithFailoverDisabledPerIpAddress;
-    
+	private final Map<String, Object> discoveredAgentsContext;
+   
     public MachinesSlaEnforcementState() {
         this.logger = 
                 new SingleThreadedPollingLog( 
@@ -239,6 +258,7 @@ public class MachinesSlaEnforcementState {
         validatedUndeployNotInProgressPerProcessingUnit = new HashSet<ProcessingUnit>();
         cloudCleanupPerProcessingUnit = new HashMap<ProcessingUnit, FutureCleanupCloudResources>();
         agentWithFailoverDisabledPerIpAddress = new HashMap<String, String>();
+        discoveredAgentsContext = new LinkedHashMap<String,Object>();
     }
 
     public boolean isHoldingStateForProcessingUnit(ProcessingUnit pu) {
@@ -258,7 +278,7 @@ public class MachinesSlaEnforcementState {
     
 
     public void allocateCapacity(StateKey key, String agentUid, CapacityRequirements capacity) {
-        getState(key).allocateCapacity(agentUid, capacity);        
+        getState(key).allocateCapacity(agentUid, capacity);
     }
 
     public void markCapacityForDeallocation(StateKey key, String agentUid, CapacityRequirements capacity) {
@@ -355,12 +375,14 @@ public class MachinesSlaEnforcementState {
 
 	public void markAgentAsFailed(StateKey key, String agentUid) {
 		markAgentCapacityForDeallocation(key, agentUid);
+		addFailedAgent(key, agentUid);
 	}
 	
 	public void markAgentRestrictedForPu(StateKey key, String agentUid) {
 		markAgentCapacityForDeallocation(key, agentUid);
 	}
-    private void markAgentCapacityForDeallocation(StateKey key, String uid) {
+
+	private void markAgentCapacityForDeallocation(StateKey key, String uid) {
         CapacityRequirements agentCapacity = getAllocatedCapacity(key).getAgentCapacity(uid);
         markCapacityForDeallocation(key, uid,agentCapacity);
     }
@@ -524,13 +546,45 @@ public class MachinesSlaEnforcementState {
             mapOfLists.put(key, new LinkedList<String>());
         }
     }
-    
-    public void removeSuccesfullyStartedFutureAgents(StateKey key, GridServiceAgentFutures futureAgents) {
-        getState(key).removeFutureAgents(futureAgents);
+
+    public void removeSuccesfullyStartedFutureAgents(StateKey key, GridServiceAgentFutures doneFutureAgents) {
+        getState(key).removeFutureAgents(doneFutureAgents);
+
+    	for (final FutureGridServiceAgent doneFutureAgent : doneFutureAgents.getFutureGridServiceAgents()) {
+
+    		final FailedGridServiceAgent failedAgent = doneFutureAgent.getFailedGridServiceAgent();
+			if (failedAgent != null) {
+			
+				// remove failed agent, since the new machine replaces it
+				unmarkAgentAsFailed(failedAgent);
+			}
+
+			//store agent context, so it could be resurrected if fails
+			try {
+				final String agentUid = doneFutureAgent.get().getAgent().getUid();
+				final Object agentContext = doneFutureAgent.get().getAgentContext();
+				discoveredAgentsContext.put(agentUid, agentContext);
+			} catch (ExecutionException e) { 
+				throw new IllegalStateException(e); 
+			} catch (TimeoutException e) { 
+				throw new IllegalStateException(e); 
+			}
+
+		}
     }
+
+	public void unmarkAgentAsFailed(FailedGridServiceAgent failedAgent) {
+		for (final StateValue value : state.values()) {
+    		value.removeFailedAgent(failedAgent);
+    	}
+		discoveredAgentsContext.put(failedAgent.getAgentUid(), failedAgent.getAgentContext());
+	}
     
     public void removeFutureStoppedMachine(StateKey key, FutureStoppedMachine futureStoppedMachine) {
         getState(key).removeFutureStoppedMachine(futureStoppedMachine);
+
+        final String agentUid = futureStoppedMachine.getGridServiceAgent().getUid();
+        discoveredAgentsContext.remove(agentUid);
     }
     
     public Collection<FutureStoppedMachine> getMachinesGoingDown() {
@@ -664,7 +718,8 @@ public class MachinesSlaEnforcementState {
         final CapacityRequirementsPerAgent allocatedCapacityPerAgent  = getState(key).allocatedCapacity;
         Collection<String> agentUids = new ArrayList<String>(allocatedCapacityPerAgent.getAgentUids()); //copy before iteration
         for (String agentUid : agentUids) {
-            final ExactZonesConfig agentZones = admin.getGridServiceAgents().getAgentByUID(agentUid).getExactZones();
+            final GridServiceAgent agent = admin.getGridServiceAgents().getAgentByUID(agentUid);
+			final ExactZonesConfig agentZones = agent.getExactZones();
             if (!key.gridServiceAgentZones.equals(agentZones)) {
                 // the key.agentZones is different than agentZones
                 // move allocation from key.agentZones to agentZones
@@ -690,6 +745,45 @@ public class MachinesSlaEnforcementState {
         state.remove(key);
     }
 
+	public RecoveringFailedGridServiceAgent[] getAgentsMarkedAsFailedNotBeingRestarted(StateKey key) {
+		List<RecoveringFailedGridServiceAgent> failedAgentsForKey = new ArrayList<RecoveringFailedGridServiceAgent>(getState(key).getFailedAgents());
+        //Remove failed agents that are already being recovered
+    	for (GridServiceAgentFutures futureAgents : getFutureAgents(key)) {
+    		for (FutureGridServiceAgent futureAgent: futureAgents.getFutureGridServiceAgents() ) {
+    			final FailedGridServiceAgent failedAgent = futureAgent.getFailedGridServiceAgent();
+    			if (failedAgent != null) {
+    				failedAgentsForKey.remove(failedAgent);
+    			}
+    		}
+    	}
+		return failedAgentsForKey.toArray(new RecoveringFailedGridServiceAgent[failedAgentsForKey.size()]);
+	}
+	
+	public FailedGridServiceAgent[] getAgentsMarkedAsFailed(StateKey key) {
+		Collection<RecoveringFailedGridServiceAgent> failedAgentsForKey = getState(key).getFailedAgents();
+		return failedAgentsForKey.toArray(new FailedGridServiceAgent[failedAgentsForKey.size()]);
+	}
+
+	private void addFailedAgent(StateKey key, String agentUid) {
+		RecoveringFailedGridServiceAgent failedAgent = null;
+		for (final StateValue value : state.values()) {
+			for (final RecoveringFailedGridServiceAgent otherFailedAgent : value.getFailedAgents()) {
+				if (otherFailedAgent.getAgentUid().equals(agentUid)) {
+					// this is not the first time we detected this agent failed
+					// another PU/key detected it first.
+					failedAgent = otherFailedAgent;
+					break;
+				}
+			}
+		}
+		if (failedAgent == null) {
+			//this is the first time we detected this agent failed
+			final Object context = discoveredAgentsContext.remove(agentUid);
+			failedAgent = new RecoveringFailedGridServiceAgent(agentUid, context);
+		}
+		getState(key).addFailedAgent(failedAgent);
+	}
+	
     public void beforeUndeployProcessingUnit(ProcessingUnit pu) {
         validatedUndeployNotInProgressPerProcessingUnit.remove(pu);
     }
@@ -786,9 +880,9 @@ public class MachinesSlaEnforcementState {
 		return agentWithFailoverDisabledPerIpAddress.get(ipAddress);
 	}
 
-	public void replaceAllocation(String otherAgentUid, String agentUid) {
+	public void replaceAllocation(String otherAgentUid, String newAgentUid) {
 		for (StateValue puState : state.values()) {
-			puState.replaceAllocation(otherAgentUid, agentUid);
+			puState.replaceAllocation(otherAgentUid, newAgentUid);
 		}
 	}
 }
