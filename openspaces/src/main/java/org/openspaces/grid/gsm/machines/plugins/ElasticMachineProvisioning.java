@@ -147,5 +147,13 @@ public interface ElasticMachineProvisioning extends
      * @throws InterruptedException 
      */
     Object getExternalApi(String apiName) 
-    		throws InterruptedException, ElasticMachineProvisioningException; 
+    		throws InterruptedException, ElasticMachineProvisioningException;
+
+    /**
+     * performs blocking initialization of the external api components.
+     * @throws Exception .
+     * * @since 9.7.0
+     */
+	void blockingAfterPropertiesSet()
+			throws Exception; 
 }
