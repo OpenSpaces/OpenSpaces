@@ -137,4 +137,15 @@ public interface ElasticMachineProvisioning extends
      */
     ElasticMachineProvisioningConfig getConfig();
 
+    /**
+     * Returns external API according to name.
+     * @param apiName
+     * 			The name of the external API.
+     * @return
+     * 		The external API according to name ("Storage"/"Network")
+     * @throws ElasticMachineProvisioningException 
+     * @throws InterruptedException 
+     */
+    Object getExternalApi(String apiName) 
+    		throws InterruptedException, ElasticMachineProvisioningException; 
 }

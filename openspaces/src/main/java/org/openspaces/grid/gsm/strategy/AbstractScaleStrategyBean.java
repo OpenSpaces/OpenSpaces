@@ -17,7 +17,6 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.strategy;
 
-import java.lang.reflect.Method;
 import java.rmi.Remote;
 import java.util.ArrayList;
 import java.util.List;
@@ -583,13 +582,12 @@ public abstract class AbstractScaleStrategyBean implements
         capacityPlanningEventState.enqueuProvisioningInProgressEvent(event);
     }
     
-    public Remote getStorageApi() throws Exception {
+    public Remote getRemoteApi(final String apiName) throws Exception {
         NonBlockingElasticMachineProvisioning nonBlockingElasticMachineProvisioning = getMachineProvisioning();
         if (nonBlockingElasticMachineProvisioning instanceof NonBlockingElasticMachineProvisioningAdapter) {
             ElasticMachineProvisioning emp = ((NonBlockingElasticMachineProvisioningAdapter)nonBlockingElasticMachineProvisioning).getElasticMachineProvisioning();
             if (emp.getClass().getName().equals(CLOUDIFY_ADAPTER_CLASS)) {    
-            	Method method = emp.getClass().getDeclaredMethod(GET_STORAGE_IMPL);
-            	return (Remote)method.invoke(emp);
+            	return (Remote) emp.getExternalApi(apiName);
             } else {
             	throw new IllegalStateException("ElasticMachineProvisioning instance (" + emp + ") is not an instance of " + CLOUDIFY_ADAPTER_CLASS);
             }

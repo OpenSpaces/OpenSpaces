@@ -39,7 +39,7 @@ public interface ESM extends com.gigaspaces.grid.esm.ESM {
     
     Events getScaleStrategyEvents(final long cursor, final int maxNumberOfEvents) throws RemoteException;
     
-    Remote getStorageApi(final String processingUnitName) throws RemoteException;
+    Remote getRemoteApi(final String processingUnitName, final String apiName) throws RemoteException;
 	
     /**
      * Disables failure detection for the agent on the machine that called this method.

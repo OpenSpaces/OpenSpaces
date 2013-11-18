@@ -113,9 +113,9 @@ public class ESMProxy extends AbstractProxy implements ESM, Serializable {
     }
 
 	@Override
-	public Remote getStorageApi(String processingUnitName) throws RemoteException {
+	public Remote getRemoteApi(final String processingUnitName, final String apiName) throws RemoteException {
         intercept(GridAuthority.GridPrivilege.MANAGE_GRID);
-		return esmServer.getStorageApi(processingUnitName);
+		return esmServer.getRemoteApi(processingUnitName, apiName);
 	}
 
 	@Override

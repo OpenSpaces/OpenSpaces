@@ -25,6 +25,7 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -40,7 +41,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.gigaspaces.security.service.RemoteSecuredService;
 import net.jini.export.Exporter;
 
 import org.jini.rio.boot.BootUtil;
@@ -78,7 +78,6 @@ import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioningAdapterFactory;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcement;
 import org.openspaces.grid.gsm.strategy.AbstractCapacityScaleStrategyBean;
-import org.openspaces.grid.gsm.strategy.AbstractScaleStrategyBean;
 import org.openspaces.grid.gsm.strategy.ScaleStrategyBean;
 import org.openspaces.grid.gsm.strategy.UndeployScaleStrategyBean;
 
@@ -108,6 +107,7 @@ import com.gigaspaces.lrmi.nio.info.NIOStatistics;
 import com.gigaspaces.management.entry.JMXConnection;
 import com.gigaspaces.security.SecurityException;
 import com.gigaspaces.security.directory.CredentialsProvider;
+import com.gigaspaces.security.service.RemoteSecuredService;
 import com.gigaspaces.security.service.SecurityContext;
 import com.gigaspaces.security.service.SecurityInterceptor;
 import com.gigaspaces.security.service.SecurityResolver;
@@ -140,6 +140,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, RemoteSecuredSer
     private SecurityInterceptor securityInterceptor;
     private AtomicLong keepAlive = new AtomicLong(0);
     private final long adminInitializationTimeout;
+    private final Map<String, Set<Remote>> exportedApis = new HashMap<String, Set<Remote>>();
     
     /**
      * Create an ESM
@@ -624,28 +625,12 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, RemoteSecuredSer
         ScaleBeanServer undeployedBeanServer = scaleBeanServerPerProcessingUnit.remove(pu);
         if (undeployedBeanServer != null) {
         	ScaleStrategyBean scaleStrategyBean = getScaleStrategyBean(pu.getName());
-        	Remote cloudStorage = null;
             if (scaleStrategyBean != null && scaleStrategyBean instanceof AbstractCapacityScaleStrategyBean) {
-            	try {
-            		cloudStorage = ((AbstractScaleStrategyBean)scaleStrategyBean).getStorageApi();
-            		if (cloudStorage != null) {
-            			if (logger.isLoggable(Level.FINE)) {
-            				logger.fine("Unexporting storage api of processing unit " + pu.getName() + ". hasCode=" + cloudStorage.hashCode());
+    			// unexport external apis that might have existed in services
+    			// with the same name and were uninstalled.
+    			unexportExistingApis(pu.getName());
+    			
             			}
-            			Exporter exporter = getExporter();
-            			if (exporter instanceof GenericExporter) {
-            				((GenericExporter)exporter).unexport(cloudStorage);
-            			} else {
-            				throw new IllegalStateException("exporter must be an instance of GenericExporter");
-            			}
-            		}
-            	}
-            	catch (Exception e) {
-            		if (cloudStorage != null) {
-            			logger.log(Level.WARNING, "Failed unexporting storage api instance with hashCode=" + cloudStorage.hashCode() + " : " + e.getMessage(), e);
-            		}
-            	}
-            }
             //TODO: Check isSlaMet() and handle this case ?!@
             undeployedBeanServer.destroy();
         }
@@ -678,6 +663,26 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, RemoteSecuredSer
             refreshProcessingUnitElasticConfig(pu, elasticProperties);
         }
     }
+
+
+	private void unexportExistingApis(final String processingUnitName) {
+		final Exporter exporter = getExporter();
+		final Set<Remote> apis = this.exportedApis.get(processingUnitName);
+		if (apis != null) {
+			for (Remote api : apis) {
+				try {
+					if (exporter instanceof GenericExporter) {
+						((GenericExporter)exporter).unexport(api);
+					} else {
+						throw new IllegalStateException("exporter must be an instance of GenericExporter");
+					}
+				} catch (Exception e) {
+					logger.log(Level.WARNING, "Failed unexporting api " + api.getClass().getName() + " instance with hashCode=" 
+								+ api.hashCode() + " : " + e.getMessage(), e);
+				}
+			}
+		}
+	}
 
     private void refreshProcessingUnitElasticConfig(ProcessingUnit pu, Map<String,String> elasticProperties) {
 
@@ -826,24 +831,37 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, RemoteSecuredSer
     }
 
     @Override
-    public Remote getStorageApi(final String processingUnitName) throws RemoteException {
+    public Remote getRemoteApi(final String processingUnitName, final String apiName) throws RemoteException {
+    	//TODO: yom bet cloudDriver.init() + security;
     	return submitAndWait(new Callable<Remote>() {
             @Override
             public Remote call() throws Exception {
                 ScaleStrategyBean scaleStrategyBean = getScaleStrategyBean(processingUnitName);
-                Remote cloudStorage = null;
+                Remote api = null;
                 if (scaleStrategyBean != null && scaleStrategyBean instanceof AbstractCapacityScaleStrategyBean) {
                 	try {
-                		cloudStorage = ((AbstractCapacityScaleStrategyBean)scaleStrategyBean).getStorageApi();
-                		if (cloudStorage != null) {
+                		api = ((AbstractCapacityScaleStrategyBean)scaleStrategyBean).getRemoteApi(apiName);
+                		if (api != null) {
                 			if (logger.isLoggable(Level.FINE)) {
-                				logger.fine("Exporting storage api of processing unit " + processingUnitName + ". hasCode=" + cloudStorage.hashCode());
+                				logger.fine("Exporting "+ apiName +" api of processing unit " + processingUnitName 
+                						+ ". hasCode=" + api.hashCode());
                 			}
-                			return getExporter().export(cloudStorage);  
+                			// save a reference to the exported apis.
+                			Set<Remote> existingSet = exportedApis.get(processingUnitName);
+                			if (existingSet != null) {
+                				existingSet.add(api);
+                			} else {
+                				existingSet = new LinkedHashSet<Remote>();
+                				existingSet.add(api);
+                				exportedApis.put(processingUnitName, existingSet);
+                		}
+                			
+                			return getExporter().export(api);  
                 		}
                 	} catch (Exception e) {
-                		if (cloudStorage != null) {
-                			logger.log(Level.WARNING, "Failed exporting cloud storage api instance with hashCode=" + cloudStorage.hashCode() + " : " + e.getMessage() , e);
+                		if (api != null) {
+                			logger.log(Level.WARNING, "Failed exporting cloud "+ apiName +" api instance with hashCode=" 
+                					+ api.hashCode() + " : " + e.getMessage() , e);
                 		}
                 	}
                 }

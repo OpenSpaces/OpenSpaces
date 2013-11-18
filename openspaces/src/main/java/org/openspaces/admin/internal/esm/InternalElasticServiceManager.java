@@ -78,13 +78,15 @@ public interface InternalElasticServiceManager extends ElasticServiceManager, In
     void processElasticScaleStrategyEvent(ElasticProcessingUnitEvent event);   
 
     /**
-     * expose cloud storage API
-     * @return an instance of a class implementing specific cloud storage API's.
+     * expose access to remote provisioning APIs given by the ElasticMachineProvisioningCloudifyAdapter.
+     * (Network/Storage etc)
+     * @return an instance of a class implementing a specific provisioning api.
      * @param processingUnitName - the processing unit name the cloud driver belongs to. 
-     * @since 9.5.0
-     * @author elip
+     * @param apiName - the name of the remote API to access. 
+     * @since 9.7.0
+     * @author elip, adaml
      */
-    Remote getStorageApi(final String processingUnitName);
+    Remote getRemoteApi(final String processingUnitName, final String apiName);
     
     /**
      * Disables the GSA failure detection of the calling PU instance.

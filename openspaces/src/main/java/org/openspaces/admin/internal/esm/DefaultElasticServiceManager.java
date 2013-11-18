@@ -269,9 +269,9 @@ public class DefaultElasticServiceManager extends AbstractAgentGridComponent imp
     }
 
 	@Override
-	public Remote getStorageApi(String processingUnitName) {
+	public Remote getRemoteApi(final String processingUnitName, final String apiName) {
 	       try {
-	            return esm.getStorageApi(processingUnitName);
+	            return esm.getRemoteApi(processingUnitName, apiName);
 	        }
 	        catch (RemoteException e) {
 	            throw new AdminException("Failed to get storage Api for processing unit " + processingUnitName,e);
