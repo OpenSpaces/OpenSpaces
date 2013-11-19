@@ -309,4 +309,23 @@ public class MachinesSlaUtils {
         }
         return Arrays.toString(agentsToString);
 	}
+
+    public static String reservationIdsToString(FutureGridServiceAgent[] futureAgents) {
+        final List<String> reservationIds = new ArrayList<String>(futureAgents.length);
+        for (FutureGridServiceAgent futureAgent : futureAgents) {
+            reservationIds.add(futureAgent.getReservationId().toString());
+        }
+        return reservationIds.toString();
+    }
+	
+    public static String failedAgentUidsToString(FutureGridServiceAgent[] futureAgents) {
+        final List<String> agentUids = new ArrayList<String>(futureAgents.length);
+        for (FutureGridServiceAgent futureAgent : futureAgents) {
+            final FailedGridServiceAgent failedAgent = futureAgent.getFailedGridServiceAgent();
+            if (failedAgent != null) {
+                agentUids.add(failedAgent.getAgentUid());
+            }
+        }
+        return agentUids.toString();
+    }
 }

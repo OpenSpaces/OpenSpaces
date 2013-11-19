@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -231,11 +232,11 @@ public class MachinesSlaEnforcementState {
 
 		public void removeFailedAgent(String agentUid) {
 		    final Iterator<RecoveringFailedGridServiceAgent> it = failedAgents.iterator();
-		    while (it.hasNext()) {
-		        if (it.next().getAgentUid().equals(agentUid)) {
-		            it.remove();
-		        }
-		    }
+            while (it.hasNext()) {
+                if (it.next().getAgentUid().equals(agentUid)) {
+                    it.remove();
+                }
+            }
 		}
     }
     
@@ -763,20 +764,26 @@ public class MachinesSlaEnforcementState {
         state.remove(key);
     }
 
-	public RecoveringFailedGridServiceAgent[] getAgentsMarkedAsFailedNotBeingRestarted(StateKey key) {
-		List<RecoveringFailedGridServiceAgent> failedAgentsForKey = new ArrayList<RecoveringFailedGridServiceAgent>(getState(key).getFailedAgents());
-        //Remove failed agents that are already being recovered
-    	for (GridServiceAgentFutures futureAgents : getFutureAgents(key)) {
-    		for (FutureGridServiceAgent futureAgent: futureAgents.getFutureGridServiceAgents() ) {
-    			final FailedGridServiceAgent failedAgent = futureAgent.getFailedGridServiceAgent();
-    			if (failedAgent != null) {
-    				failedAgentsForKey.remove(failedAgent);
-    			}
-    		}
-    	}
-		return failedAgentsForKey.toArray(new RecoveringFailedGridServiceAgent[failedAgentsForKey.size()]);
-	}
-	
+    public RecoveringFailedGridServiceAgent[] getAgentsMarkedAsFailedNotBeingRecovered(StateKey key) {
+        final Set<String> restartingAgentUids = new LinkedHashSet<String>();
+        for (GridServiceAgentFutures futureAgents : getFutureAgents(key)) {
+            for (FutureGridServiceAgent futureAgent: futureAgents.getFutureGridServiceAgents() ) {
+                final FailedGridServiceAgent failedAgent = futureAgent.getFailedGridServiceAgent();
+                if (failedAgent != null) {
+                    restartingAgentUids.add(failedAgent.getAgentUid());
+                }
+            }
+        }
+        
+        final List<RecoveringFailedGridServiceAgent> failedAgentsForKey = new ArrayList<RecoveringFailedGridServiceAgent>();
+        for (RecoveringFailedGridServiceAgent failedAgent : getState(key).getFailedAgents()) {
+            if (!restartingAgentUids.contains(failedAgent.getAgentUid())) {
+                failedAgentsForKey.add(failedAgent);
+            }
+        }
+        return failedAgentsForKey.toArray(new RecoveringFailedGridServiceAgent[failedAgentsForKey.size()]);
+    }
+
 	public RecoveringFailedGridServiceAgent[] getAgentsMarkedAsFailed(StateKey key) {
 		Collection<RecoveringFailedGridServiceAgent> failedAgentsForKey = getState(key).getFailedAgents();
 		return failedAgentsForKey.toArray(new RecoveringFailedGridServiceAgent[failedAgentsForKey.size()]);

@@ -17,10 +17,11 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.machines;
 
+import static org.openspaces.grid.gsm.machines.MachinesSlaUtils.failedAgentUidsToString;
 import static org.openspaces.grid.gsm.machines.MachinesSlaUtils.getAgentIpAddress;
+import static org.openspaces.grid.gsm.machines.MachinesSlaUtils.reservationIdsToString;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -463,7 +464,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         
         int machineShortage = getMachineShortageInOrderToReachMinimumNumberOfMachines(sla);
         
-        final RecoveringFailedGridServiceAgent[] failedAgents = getFailedAgentsNotBeingRestarted(sla);
+        final RecoveringFailedGridServiceAgent[] failedAgents = getFailedAgentsNotBeingRecovered(sla);
         if ( failedAgents.length > 0 ) {
 
             final CapacityRequirements capacityRequirements = new CapacityRequirements(
@@ -492,9 +493,9 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             addFutureAgents(sla, futureAgents, capacityRequirements);
 
             logger.info(
-                    failedAgents.length + " machine(s) is started in order to "+
-                    "recover from failure of " + Arrays.toString(failedAgents) + " " + 
-                    "in zones " + exactZones);
+                    futureAgents.length + " machine(s) is started in order to "+
+                    "recover from failure of " + failedAgentUidsToString(futureAgents) + " " + 
+                    "in zones " + exactZones + " reservationIds=" + reservationIdsToString(futureAgents));
         }
 
         else if (!capacityAllocatedAndMarked.getTotalAllocatedCapacity().equals(target) &&
@@ -592,6 +593,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                         "One or more new machine(s) is started in order to "+
                         "fill capacity shortage " + shortageCapacity + " " + 
                         "for zones " + exactZones +" "+
+                        "reservationIds=" + reservationIdsToString(futureAgents) + " "+
                         "Allocated machine agents are: " + getAllocatedCapacity(sla) +" "+
                         "Pending future machine(s) requests " + getNumberOfFutureAgents(sla));
                 
@@ -639,7 +641,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                 
                 logger.info(
                         machineShortage+ " new machine(s) is scheduled to be started in order to reach the minimum of " + 
-                        sla.getMinimumNumberOfMachines() + " machines, for zones " + exactZones + ". " +
+                        sla.getMinimumNumberOfMachines() + " machines, for zones " + exactZones + " reservationIds=" + reservationIdsToString(futureAgents) + ". " +
                         "Allocated machine agents are: " + getAllocatedCapacity(sla));
                 
             }
@@ -674,7 +676,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         }
     }
 
-	private FailedGridServiceAgent[] toFailedGridServiceAgents(
+    private FailedGridServiceAgent[] toFailedGridServiceAgents(
 			RecoveringFailedGridServiceAgent[] recoveringFailedAgents) {
 		final int size = recoveringFailedAgents.length;
 		final FailedGridServiceAgent[] failedAgents = new FailedGridServiceAgent[size];
@@ -693,8 +695,8 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
 		return failedGridServiceAgent;
 	}
 
-	private RecoveringFailedGridServiceAgent[] getFailedAgentsNotBeingRestarted(CapacityMachinesSlaPolicy sla) {
-		return state.getAgentsMarkedAsFailedNotBeingRestarted(getKey(sla));
+	private RecoveringFailedGridServiceAgent[] getFailedAgentsNotBeingRecovered(CapacityMachinesSlaPolicy sla) {
+		return state.getAgentsMarkedAsFailedNotBeingRecovered(getKey(sla));
 	}
 
 	/**
