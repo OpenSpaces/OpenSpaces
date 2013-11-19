@@ -229,8 +229,13 @@ public class MachinesSlaEnforcementState {
 			failedAgents.add(failedAgent);
 		}
 
-		public void removeFailedAgent(FailedGridServiceAgent recoveredAgent) {
-			failedAgents.remove(recoveredAgent);
+		public void removeFailedAgent(String agentUid) {
+		    final Iterator<RecoveringFailedGridServiceAgent> it = failedAgents.iterator();
+		    while (it.hasNext()) {
+		        if (it.next().getAgentUid().equals(agentUid)) {
+		            it.remove();
+		        }
+		    }
 		}
     }
     
@@ -556,8 +561,9 @@ public class MachinesSlaEnforcementState {
 			if (failedAgent != null) {
 			
 				// remove failed agent, since the new machine replaces it
-				unmarkAgentAsFailed(failedAgent);
-				removeAgentContext(failedAgent.getAgentUid());
+				final String failedAgentUid = failedAgent.getAgentUid();
+                unmarkAgentAsFailed(failedAgentUid);
+				removeAgentContext(failedAgentUid);
 			}
 
 			//store agent context, so it could be resurrected if fails
@@ -574,9 +580,9 @@ public class MachinesSlaEnforcementState {
 		}
     }
     
-	public void unmarkAgentAsFailed(FailedGridServiceAgent failedAgent) {
+	public void unmarkAgentAsFailed(String agentUid) {
 		for (final StateValue value : state.values()) {
-			value.removeFailedAgent(failedAgent);
+			value.removeFailedAgent(agentUid);
 		}
 	}
     
@@ -771,9 +777,9 @@ public class MachinesSlaEnforcementState {
 		return failedAgentsForKey.toArray(new RecoveringFailedGridServiceAgent[failedAgentsForKey.size()]);
 	}
 	
-	public FailedGridServiceAgent[] getAgentsMarkedAsFailed(StateKey key) {
+	public RecoveringFailedGridServiceAgent[] getAgentsMarkedAsFailed(StateKey key) {
 		Collection<RecoveringFailedGridServiceAgent> failedAgentsForKey = getState(key).getFailedAgents();
-		return failedAgentsForKey.toArray(new FailedGridServiceAgent[failedAgentsForKey.size()]);
+		return failedAgentsForKey.toArray(new RecoveringFailedGridServiceAgent[failedAgentsForKey.size()]);
 	}
 
 	private void addFailedAgent(StateKey key, String agentUid) {

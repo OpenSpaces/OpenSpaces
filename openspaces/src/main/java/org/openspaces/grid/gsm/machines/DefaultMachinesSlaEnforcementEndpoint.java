@@ -959,7 +959,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         }
 
         //Remove failed agents from list if they have recovered from a temporary network disconnect.
-        for (FailedGridServiceAgent failedAgent :  getAgentsMarkedAsFailed(sla)) {
+        for (RecoveringFailedGridServiceAgent failedAgent :  getAgentsMarkedAsFailed(sla)) {
         	if (agents.getAgentByUID(failedAgent.getAgentUid()) != null) {
         		unmarkAgentAsFailed(failedAgent);
         	}
@@ -1623,11 +1623,11 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
     	state.markAgentRestrictedForPu(getKey(sla), agentUid);
     }
 
-	private void unmarkAgentAsFailed(FailedGridServiceAgent failedAgent) {
-		state.unmarkAgentAsFailed(failedAgent);
+	private void unmarkAgentAsFailed(RecoveringFailedGridServiceAgent failedAgent) {
+		state.unmarkAgentAsFailed(failedAgent.getAgentUid());
 	}
     
-	private FailedGridServiceAgent[] getAgentsMarkedAsFailed(AbstractMachinesSlaPolicy sla) {
+	private RecoveringFailedGridServiceAgent[] getAgentsMarkedAsFailed(AbstractMachinesSlaPolicy sla) {
 		return state.getAgentsMarkedAsFailed(getKey(sla));
 	}
 	
