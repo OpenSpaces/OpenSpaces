@@ -70,11 +70,15 @@ import org.openspaces.grid.gsm.machines.plugins.ElasticMachineProvisioning;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioningAdapter;
 import org.openspaces.grid.gsm.rebalancing.exceptions.RebalancingSlaEnforcementInProgressException;
+import org.openspaces.grid.gsm.sla.exceptions.BlockingAfterPropertiesSetFailedException;
+import org.openspaces.grid.gsm.sla.exceptions.BlockingAfterPropertiesSetInProgressException;
 import org.openspaces.grid.gsm.sla.exceptions.CannotDiscoverEsmException;
 import org.openspaces.grid.gsm.sla.exceptions.DisconnectedFromLookupServiceException;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.sla.exceptions.TooManyEsmComponentsException;
 import org.openspaces.grid.gsm.sla.exceptions.WrongNumberOfESMComponentsException;
+
+import com.gigaspaces.internal.utils.concurrent.ExchangeCountDownLatch;
 
 public abstract class AbstractScaleStrategyBean implements 
     ElasticMachineProvisioningAware ,
@@ -85,10 +89,6 @@ public abstract class AbstractScaleStrategyBean implements
     Bean,
     Runnable{
     
-    private static final String CLOUDIFY_ADAPTER_CLASS = "org.cloudifysource.esc.driver.provisioning.ElasticMachineProvisioningCloudifyAdapter";
-
-	private static final String GET_STORAGE_IMPL = "getStorageImpl";
-
 	private static final int MAX_NUMBER_OF_MACHINES = 1000; // a very large number representing max number of machines per pu, but that would not overflow when multiplied by container capacity in MB
     
     // injected 
@@ -120,6 +120,8 @@ public abstract class AbstractScaleStrategyBean implements
     private EventsStore eventsStore;
 
     private boolean discoveryQuiteMode;
+
+    private final ExchangeCountDownLatch<Throwable> blockingAfterPropertiesSetComplete = new ExchangeCountDownLatch<Throwable>(1);
 
     protected InternalAdmin getAdmin() {
         return this.admin;
@@ -283,6 +285,27 @@ public abstract class AbstractScaleStrategyBean implements
         };
         machineProvisioning.setElasticMachineProvisioningProgressChangedEventListener(machineEventListener);
         
+        final ElasticMachineProvisioning emp = getElasticMachineProvisioningOrNull();
+        if (emp == null) {
+            blockingAfterPropertiesSetComplete.countDown(null);
+        }
+        else {
+            //perform blocking operation on another thread
+            admin.scheduleAdminOperation(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        // blocking operation
+                        emp.blockingAfterPropertiesSet();
+                        blockingAfterPropertiesSetComplete.countDown(null);
+                    }
+                    catch (Throwable t) {
+                        blockingAfterPropertiesSetComplete.countDown(t);
+                    }
+                }});
+        }
+        
+        //start the sla scale strategy
         scheduledTask = 
             admin.scheduleWithFixedDelayNonBlockingStateChange(
                     this, 
@@ -379,6 +402,8 @@ public abstract class AbstractScaleStrategyBean implements
         }
         
         try {
+
+            validateBlockingAfterPropertiesSetCompleted();
             recoverOnStartBeforeEnforceSLA();
 
             if (getLogger().isDebugEnabled()) {
@@ -407,6 +432,21 @@ public abstract class AbstractScaleStrategyBean implements
             ZonesConfig zones = null; // gsa zones not relevant for this context
             scaleEventState.enqueuDefaultProvisioningInProgressEvent(t, zones);
             isScaleInProgress = true;
+        }
+    }
+
+    private void validateBlockingAfterPropertiesSetCompleted()
+            throws BlockingAfterPropertiesSetInProgressException,
+            InterruptedException, BlockingAfterPropertiesSetFailedException {
+        
+        if (this.blockingAfterPropertiesSetComplete.getCount() > 0) {
+            throw new BlockingAfterPropertiesSetInProgressException(pu);
+        }
+        else {
+            final Throwable t = this.blockingAfterPropertiesSetComplete.get();
+            if (t != null) {
+                throw new BlockingAfterPropertiesSetFailedException(pu, t);
+            }
         }
     }
 
@@ -582,16 +622,20 @@ public abstract class AbstractScaleStrategyBean implements
         capacityPlanningEventState.enqueuProvisioningInProgressEvent(event);
     }
     
-    public Remote getRemoteApi(final String apiName) throws Exception {
+    public ElasticMachineProvisioning getElasticMachineProvisioningOrNull() {
         NonBlockingElasticMachineProvisioning nonBlockingElasticMachineProvisioning = getMachineProvisioning();
         if (nonBlockingElasticMachineProvisioning instanceof NonBlockingElasticMachineProvisioningAdapter) {
             ElasticMachineProvisioning emp = ((NonBlockingElasticMachineProvisioningAdapter)nonBlockingElasticMachineProvisioning).getElasticMachineProvisioning();
-            if (emp.getClass().getName().equals(CLOUDIFY_ADAPTER_CLASS)) {    
-            	return (Remote) emp.getExternalApi(apiName);
-            } else {
-            	throw new IllegalStateException("ElasticMachineProvisioning instance (" + emp + ") is not an instance of " + CLOUDIFY_ADAPTER_CLASS);
-            }
+            return emp;
         }
-        throw new IllegalStateException("NonBlockingElasticMachineProvisioning instance (" + nonBlockingElasticMachineProvisioning + ") is not an instance of NonBlockingElasticMachineProvisioningAdapter");
+        return null;
+    }
+    
+    public Remote getRemoteApi(final String apiName) throws Exception {
+        ElasticMachineProvisioning emp = getElasticMachineProvisioningOrNull();
+        if (emp == null) {
+            throw new IllegalStateException("NonBlockingElasticMachineProvisioning instance (" + getMachineProvisioning() + ") is not an instance of NonBlockingElasticMachineProvisioningAdapter");
+        }
+        return (Remote) emp.getExternalApi(apiName);
     }
 }
