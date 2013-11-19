@@ -563,7 +563,9 @@ public class MachinesSlaEnforcementState {
 			
 				// remove failed agent, since the new machine replaces it
 				final String failedAgentUid = failedAgent.getAgentUid();
-                unmarkAgentAsFailed(failedAgentUid);
+                for (StateKey okey : state.keySet()) {
+                    unmarkAgentAsFailed(okey, failedAgentUid);
+                }
 				removeAgentContext(failedAgentUid);
 			}
 
@@ -581,10 +583,8 @@ public class MachinesSlaEnforcementState {
 		}
     }
     
-	public void unmarkAgentAsFailed(String agentUid) {
-		for (final StateValue value : state.values()) {
-			value.removeFailedAgent(agentUid);
-		}
+	public void unmarkAgentAsFailed(StateKey key, String agentUid) {
+		getState(key).removeFailedAgent(agentUid);
 	}
     
     private void addAgentContext(String agentUid, Object agentContext) {
