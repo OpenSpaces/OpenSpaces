@@ -41,7 +41,7 @@ public class ExpectedMachineWithMoreMemoryException extends MachinesSlaEnforceme
 	private static String message(Machine machine, long totalMB, long reservedMB, long containerMB) {
 		return "Expected machine with more memory. Machine " +MachinesSlaUtils.machineToString(machine) + " has been started with not enough memory. Actual total memory is " +
                 + totalMB + "MB. Which is less than (reserved + container) = (" + reservedMB +"MB+" + 
-				containerMB + "MB) = " + reservedMB + containerMB + "MB";
+				containerMB + "MB) = " + (reservedMB + containerMB) + "MB";
 	}
 
 	@Override
