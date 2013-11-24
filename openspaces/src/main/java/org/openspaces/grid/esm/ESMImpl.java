@@ -70,6 +70,7 @@ import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
 import org.openspaces.admin.pu.events.ProcessingUnitAddedEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitRemovedEventListener;
+import org.openspaces.core.GigaSpace;
 import org.openspaces.grid.gsm.ScaleBeanServer;
 import org.openspaces.grid.gsm.autoscaling.AutoScalingSlaEnforcement;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcement;
@@ -156,7 +157,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, RemoteSecuredSer
         new ESMImplInitializer(new ESMImplInitializer.AdminCreatedEventListener() {
 
             @Override
-            public void adminCreated(Admin admin) {
+            public void adminCreated(Admin admin, GigaSpace managementSpace) {
 
                 ESMImpl.this.admin = admin;
                 startKeepAlive(admin);
