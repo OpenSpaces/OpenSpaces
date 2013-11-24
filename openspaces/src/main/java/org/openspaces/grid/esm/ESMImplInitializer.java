@@ -91,10 +91,10 @@ public class ESMImplInitializer {
                         return thread;
                      }});
         boolean restartAdmin = false;
-        schedule(restartAdmin, 0, TimeUnit.SECONDS);
+        scheduleAdminInitialization(restartAdmin, 0, TimeUnit.SECONDS);
     }
     
-    private void schedule(boolean restartAdmin, long delay, TimeUnit timeunit) {
+    private void scheduleAdminInitialization(boolean restartAdmin, long delay, TimeUnit timeunit) {
         
         if (restartAdmin) {
             closeAdminIfNotNull();
@@ -115,13 +115,13 @@ public class ESMImplInitializer {
                 if (!isManagementDiscovered(admin)) {
                     // retry, give admin more time to discover management machines
                     boolean restartAdmin = false;
-                    schedule(restartAdmin, DISCOVERY_POLLING_PERIOD_SECONDS, TimeUnit.SECONDS);
+                    scheduleAdminInitialization(restartAdmin, DISCOVERY_POLLING_PERIOD_SECONDS, TimeUnit.SECONDS);
                     return;
                 }
 
                 if (isOtherESMRunning(admin)) {
                     boolean restartAdmin = true;
-                    schedule(restartAdmin, DISCOVERY_POLLING_PERIOD_SECONDS, TimeUnit.SECONDS);
+                    scheduleAdminInitialization(restartAdmin, DISCOVERY_POLLING_PERIOD_SECONDS, TimeUnit.SECONDS);
                     return;
                 }
 
@@ -139,7 +139,7 @@ public class ESMImplInitializer {
                 	logger.log(Level.INFO,"Waiting to discover " + CLOUDIFY_MANAGEMENT_SPACE_NAME);
                     // retry, give admin more time to discover management space
                     boolean restartAdmin = false;
-                    schedule(restartAdmin, DISCOVERY_POLLING_PERIOD_SECONDS, TimeUnit.SECONDS);
+                    scheduleAdminInitialization(restartAdmin, DISCOVERY_POLLING_PERIOD_SECONDS, TimeUnit.SECONDS);
                     return;
                 }
                 
@@ -162,7 +162,7 @@ public class ESMImplInitializer {
                     
                     //retry, restart admin since something is wrong
                     boolean restartAdmin = true;
-                    schedule(restartAdmin, DISCOVERY_POLLING_PERIOD_SECONDS, TimeUnit.SECONDS);   
+                    scheduleAdminInitialization(restartAdmin, DISCOVERY_POLLING_PERIOD_SECONDS, TimeUnit.SECONDS);   
                 }
             });
             }
