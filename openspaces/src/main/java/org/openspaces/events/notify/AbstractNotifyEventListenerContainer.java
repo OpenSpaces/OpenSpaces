@@ -274,7 +274,9 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
      * <code>true</code>.
      *
      * <p>Defaults to {@link com.gigaspaces.events.EventSessionConfig#DEFAULT_RENEW_EXPIRATION}.
+     * @deprecated  Since 9.7
      */
+    @Deprecated
     protected long getRenewExpiration() {
         return renewExpiration;
     }
@@ -284,7 +286,9 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
      * <code>true</code>.
      *
      * <p>Defaults to {@link com.gigaspaces.events.EventSessionConfig#DEFAULT_RENEW_EXPIRATION}.
+     * @deprecated  Since 9.7
      */
+    @Deprecated
     public void setRenewExpiration(long renewExpiration) {
         this.renewExpiration = renewExpiration;
     }
@@ -294,7 +298,9 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
      * use more than renewRTT. Only applies when {@link #setAutoRenew(boolean)} is <code>true</code>.
      *
      * <p>Defaults to {@link com.gigaspaces.events.EventSessionConfig#DEFAULT_RENEW_DURATION}.
+     * @deprecated  Since 9.7
      */
+    @Deprecated
     protected long getRenewDuration() {
         return renewDuration;
     }
@@ -304,7 +310,9 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
      * use more than renewRTT. Only applies when {@link #setAutoRenew(boolean)} is <code>true</code>.
      *
      * <p>Defaults to {@link com.gigaspaces.events.EventSessionConfig#DEFAULT_RENEW_DURATION}.
+     * @deprecated  Since 9.7
      */
+    @Deprecated
     public void setRenewDuration(long renewDuration) {
         this.renewDuration = renewDuration;
     }
@@ -314,7 +322,9 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
      * <code>true</code>.
      *
      * <p>Defaults to {@link com.gigaspaces.events.EventSessionConfig#DEFAULT_RENEW_RTT}.
+     * @deprecated  Since 9.7
      */
+    @Deprecated
     protected long getRenewRTT() {
         return renewRTT;
     }
@@ -324,7 +334,9 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
      * <code>true</code>.
      *
      * <p>Defaults to {@link com.gigaspaces.events.EventSessionConfig#DEFAULT_RENEW_RTT}.
+     * @deprecated  Since 9.7
      */
+    @Deprecated
     public void setRenewRTT(long renewRTT) {
         this.renewRTT = renewRTT;
     }

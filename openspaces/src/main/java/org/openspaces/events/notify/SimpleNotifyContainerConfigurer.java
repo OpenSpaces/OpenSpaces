@@ -143,6 +143,7 @@ public class SimpleNotifyContainerConfigurer {
     /**
      * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setRenewExpiration(long)
      */
+    @Deprecated
     public SimpleNotifyContainerConfigurer renewExpiration(long renewExpiration) {
         notifyEventListenerContainer.setRenewExpiration(renewExpiration);
         return this;
@@ -151,6 +152,7 @@ public class SimpleNotifyContainerConfigurer {
     /**
      * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setRenewDuration(long)
      */
+    @Deprecated
     public SimpleNotifyContainerConfigurer renewDuration(long renewDuration) {
         notifyEventListenerContainer.setRenewDuration(renewDuration);
         return this;
@@ -159,6 +161,7 @@ public class SimpleNotifyContainerConfigurer {
     /**
      * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setRenewRTT(long)
      */
+    @Deprecated
     public SimpleNotifyContainerConfigurer renewRTT(long renewRTT) {
         notifyEventListenerContainer.setRenewRTT(renewRTT);
         return this;
