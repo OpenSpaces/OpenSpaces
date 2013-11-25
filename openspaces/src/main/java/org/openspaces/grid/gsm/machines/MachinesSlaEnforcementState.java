@@ -738,7 +738,11 @@ public class MachinesSlaEnforcementState {
         Collection<String> agentUids = new ArrayList<String>(allocatedCapacityPerAgent.getAgentUids()); //copy before iteration
         for (String agentUid : agentUids) {
             final GridServiceAgent agent = admin.getGridServiceAgents().getAgentByUID(agentUid);
-			final ExactZonesConfig agentZones = agent.getExactZones();
+            //Agent could be null if it failed but it's failover is temporarily disabled.
+            if (agent == null) {
+                continue;
+            }
+            final ExactZonesConfig agentZones = agent.getExactZones();
             if (!key.gridServiceAgentZones.equals(agentZones)) {
                 // the key.agentZones is different than agentZones
                 // move allocation from key.agentZones to agentZones

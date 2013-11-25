@@ -359,10 +359,11 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
         }
         
         for (String agentUid : capacityToAdd.getAgentUids()) {
-            
             GridServiceAgent agent = getAdmin().getGridServiceAgents().getAgentByUID(agentUid);
-            CapacityRequirements agentCapacity = capacityToAdd.getAgentCapacity(agentUid);
-            ExactZonesConfig zones = agent.getExactZones();
+            //Agent could be null if it failed but it's failover is temporarily disabled.
+            //fallback to previous zone
+            final ZonesConfig zones = agent != null ? agent.getExactZones() : zonesToRemove;
+            final CapacityRequirements agentCapacity = capacityToAdd.getAgentCapacity(agentUid);
             newCapacityPerZones = newCapacityPerZones.add(zones, agentCapacity);
         }
         return setPlannedCapacity(new CapacityRequirementsPerZonesConfig(newCapacityPerZones));

@@ -117,29 +117,14 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                 pu);
     }
 
-    @Override
     public CapacityRequirementsPerAgent getAllocatedCapacity(AbstractMachinesSlaPolicy sla) {
-        CapacityRequirementsPerAgent allocatedCapacity = getAllocatedCapacityUnfiltered(sla);
-        // validate all agents have been discovered
-        for (String agentUid : allocatedCapacity.getAgentUids()) {
-            GridServiceAgent agent = pu.getAdmin().getGridServiceAgents().getAgentByUID(agentUid);
-            if (agent == null) {
-                throw new IllegalStateException(
-                        "agent " + agentUid +" is not discovered. "+
-                        "sla.agentZones="+sla.getGridServiceAgentZones());
-            }
-        }
-        return allocatedCapacity;
-     }
-
-    public CapacityRequirementsPerAgent getAllocatedCapacityUnfiltered(AbstractMachinesSlaPolicy sla) {
        return state.getAllocatedCapacity(getKey(sla));
     }
 
     @Override
     public CapacityRequirementsPerAgent getAllocatedCapacityFilterUndiscoveredAgents(AbstractMachinesSlaPolicy sla) {
         CapacityRequirementsPerAgent checkedAllocatedCapacity = new CapacityRequirementsPerAgent(); 
-        CapacityRequirementsPerAgent allocatedCapacity = getAllocatedCapacityUnfiltered(sla);
+        CapacityRequirementsPerAgent allocatedCapacity = getAllocatedCapacity(sla);
         // validate all agents have been discovered
         for (String agentUid : allocatedCapacity.getAgentUids()) {
             GridServiceAgent agent = pu.getAdmin().getGridServiceAgents().getAgentByUID(agentUid);
@@ -295,7 +280,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
 
         Collection<GridServiceAgent> discoveredAgents =sla.getDiscoveredMachinesCache().getDiscoveredAgents();
         Collection<GridServiceAgent> undiscoveredAgents = new HashSet<GridServiceAgent>();
-        for(GridServiceAgent agent : MachinesSlaUtils.convertAgentUidsToAgentsIfDiscovered(getAllocatedCapacityUnfiltered(sla).getAgentUids(),pu.getAdmin())) {
+        for(GridServiceAgent agent : MachinesSlaUtils.convertAgentUidsToAgentsIfDiscovered(getAllocatedCapacity(sla).getAgentUids(),pu.getAdmin())) {
            
             if (!discoveredAgents.contains(agent)) {
                 undiscoveredAgents.add(agent);
@@ -929,8 +914,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         
         // mark for deallocation machines that are restricted for this PU
         Map<String,List<String>> restrictedMachines = getRestrictedAgentUidsForPuWithReason(sla);
-        for(GridServiceAgent agent : MachinesSlaUtils.convertAgentUidsToAgents(getAllocatedCapacity(sla).getAgentUids(),pu.getAdmin())) {
-            String agentUid = agent.getUid();
+        for(String agentUid : getAllocatedCapacity(sla).getAgentUids()) {
             if (restrictedMachines.containsKey(agentUid)) {
                 logger.info("Agent " + agentToString(agentUid) + " is restricted for pu " + pu.getName() + " reason:" + restrictedMachines.get(agentUid));
                 markAgentRestrictedForPu(sla, agentUid);
@@ -946,7 +930,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         final GridServiceAgents agents = pu.getAdmin().getGridServiceAgents();
         
         // mark for deallocation all failed machines
-        for(final String agentUid: getAllocatedCapacityUnfiltered(sla).getAgentUids()) {
+        for(final String agentUid: getAllocatedCapacity(sla).getAgentUids()) {
             if (agents.getAgentByUID(agentUid) == null) {
             	if (state.isAgentFailoverDisabled(agentUid)) {
             		logger.debug("Ignored agent " + agentToString(agentUid) + " that was killed since failure detection is disabled.");
@@ -1644,11 +1628,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
     }
 
     private void allocateCapacity(AbstractMachinesSlaPolicy sla, CapacityRequirementsPerAgent capacityToAllocate) {
-        GridServiceAgents gridServiceAgents = pu.getAdmin().getGridServiceAgents();
         for (String agentUid : capacityToAllocate.getAgentUids()) {
-            if (gridServiceAgents.getAgentByUID(agentUid) == null) {
-                throw new IllegalArgumentException("Cannot allocate capacity on a removed agent " + agentUid);
-            }
             state.allocateCapacity(getKey(sla), agentUid, capacityToAllocate.getAgentCapacity(agentUid));
             if (logger.isInfoEnabled()) {
                 logger.info("allocating capacity "+capacityToAllocate.getAgentCapacity(agentUid) + " "+
