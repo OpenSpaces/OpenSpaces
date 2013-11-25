@@ -41,6 +41,7 @@ import org.openspaces.admin.gsa.GSAReservationId;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.gsa.InternalGridServiceAgents;
+import org.openspaces.admin.internal.zone.config.ZonesConfigUtils;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.zone.config.ExactZonesConfig;
 import org.openspaces.admin.zone.config.ZonesConfig;
@@ -48,9 +49,12 @@ import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerAgent;
 import org.openspaces.grid.gsm.containers.ContainersSlaUtils;
+import org.openspaces.grid.gsm.machines.backup.MachinesState;
 import org.openspaces.grid.gsm.machines.exceptions.UndeployInProgressException;
 import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIsolation;
 import org.openspaces.grid.gsm.machines.isolation.PublicMachineIsolation;
+
+import com.gigaspaces.document.DocumentProperties;
 
 public class MachinesSlaEnforcementState {
     
@@ -228,6 +232,7 @@ public class MachinesSlaEnforcementState {
 
 		public void addFailedAgent(RecoveringFailedGridServiceAgent failedAgent) {
 			failedAgents.add(failedAgent);
+			machinesStateVersion++;
 		}
 
 		public void removeFailedAgent(String agentUid) {
@@ -237,6 +242,7 @@ public class MachinesSlaEnforcementState {
                     it.remove();
                 }
             }
+			machinesStateVersion++;
 		}
     }
     
@@ -253,6 +259,7 @@ public class MachinesSlaEnforcementState {
     private final Map<ProcessingUnit, FutureCleanupCloudResources> cloudCleanupPerProcessingUnit;
     private final Map<String, String> agentWithFailoverDisabledPerIpAddress;
     private final Map<String, Object> agentsContext;
+    private long machinesStateVersion;
     
     public MachinesSlaEnforcementState() {
         this.logger = 
@@ -265,6 +272,7 @@ public class MachinesSlaEnforcementState {
         cloudCleanupPerProcessingUnit = new HashMap<ProcessingUnit, FutureCleanupCloudResources>();
         agentWithFailoverDisabledPerIpAddress = new HashMap<String, String>();
         agentsContext = new LinkedHashMap<String,Object>();
+        machinesStateVersion = 0;
     }
 
     public boolean isHoldingStateForProcessingUnit(ProcessingUnit pu) {
@@ -586,9 +594,10 @@ public class MachinesSlaEnforcementState {
 	public void unmarkAgentAsFailed(StateKey key, String agentUid) {
 		getState(key).removeFailedAgent(agentUid);
 	}
-    
+
     private void addAgentContext(String agentUid, Object agentContext) {
         agentsContext.put(agentUid, agentContext);
+        machinesStateVersion++;
     }
     
     public Object getAgentContext(String agentUid) {
@@ -604,6 +613,7 @@ public class MachinesSlaEnforcementState {
 
     private void removeAgentContext(final String agentUid) {
         agentsContext.remove(agentUid);
+        machinesStateVersion++;
     }
     
     public Collection<FutureStoppedMachine> getMachinesGoingDown() {
@@ -912,5 +922,62 @@ public class MachinesSlaEnforcementState {
 		for (StateValue puState : state.values()) {
 			puState.replaceAllocation(otherAgentUid, newAgentUid);
 		}
+		final Object context = agentsContext.remove(otherAgentUid);
+		if (context != null) {
+		    addAgentContext(newAgentUid, context);
+		}
 	}
+	
+    /**
+     * @return A map that can be saved into the space.
+     * Note: If you change this method, change also #fromDocumentProperties and update #version properly.
+     */
+    public MachinesState toMachinesState() {
+        
+        final List<DocumentProperties> failedAgentsProperties = new ArrayList<DocumentProperties>();
+        for (Entry<StateKey, StateValue> entry : state.entrySet()) {
+            final String agentZone = ZonesConfigUtils.zonesToString(entry.getKey().gridServiceAgentZones);
+            final String puName = entry.getKey().pu.getName();
+            for (RecoveringFailedGridServiceAgent failedAgent : entry.getValue().getFailedAgents()) {
+                failedAgentsProperties.add(new DocumentProperties()
+                    .setProperty("puName", puName)
+                    .setProperty("agentZones", agentZone)
+                    .setProperty("agentUid", failedAgent.getAgentUid()));
+            }
+        }
+        final DocumentProperties properties = new DocumentProperties()
+            .setProperty("agentsContext", agentsContext)
+            .setProperty("failedAgentsProperties", failedAgentsProperties);
+        
+        final MachinesState machinesState = new MachinesState();
+        machinesState.setProperties(properties);
+        machinesState.setId(MachinesState.SINGLETON_ID);
+        machinesState.setVersion(machinesStateVersion);
+        return machinesState;
+    }
+	
+	public void fromMachinesState(MachinesState state, Admin admin) {
+		machinesStateVersion = state.getVersion();
+		DocumentProperties properties = state.getProperties();
+		agentsContext.clear();
+		agentsContext.putAll((DocumentProperties)properties.getProperty("agentsContext"));
+		List<DocumentProperties> failedAgentsProperties = properties.getProperty("failedAgentsProperties");
+		
+		for (DocumentProperties failedAgentProperties : failedAgentsProperties) {
+			final String puName = failedAgentProperties.getProperty("puName");
+			final ProcessingUnit pu = admin.getProcessingUnits().getProcessingUnit(puName);
+			if (pu == null) {
+			    logger.warn("Failed to recover list of failed machines for processing unit " + puName + " since it has been uninstalled");
+			    continue;
+			}
+			final ZonesConfig agentZones = ZonesConfigUtils.zonesFromString((String)failedAgentProperties.getProperty("agentZones"));
+			final String agentUid =  failedAgentProperties.getProperty("agentUid");
+			final StateKey key = new StateKey(pu, agentZones);
+			addFailedAgent(key, agentUid);
+		}
+	}
+
+    public long getVersion() {
+        return machinesStateVersion;
+    }
 }

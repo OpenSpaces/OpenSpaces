@@ -59,6 +59,8 @@ import org.openspaces.grid.gsm.autoscaling.exceptions.AutoScalingSlaEnforcementI
 import org.openspaces.grid.gsm.containers.exceptions.ContainersSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementState.RecoveryState;
 import org.openspaces.grid.gsm.machines.MachinesSlaUtils;
+import org.openspaces.grid.gsm.machines.backup.MachinesStateBackup;
+import org.openspaces.grid.gsm.machines.backup.MachinesStateBackupAware;
 import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.machines.exceptions.MachinesSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.machines.exceptions.NeedToWaitUntilAllGridServiceAgentsDiscoveredException;
@@ -86,6 +88,7 @@ public abstract class AbstractScaleStrategyBean implements
     ElasticScaleStrategyEventStorageAware,
     ScaleStrategyBean,
     ElasticProcessingUnitMachineIsolationAware,
+    MachinesStateBackupAware,
     Bean,
     Runnable{
     
@@ -122,6 +125,8 @@ public abstract class AbstractScaleStrategyBean implements
     private boolean discoveryQuiteMode;
 
     private final ExchangeCountDownLatch<Throwable> blockingAfterPropertiesSetComplete = new ExchangeCountDownLatch<Throwable>(1);
+
+    private MachinesStateBackup stateBackup;
 
     protected InternalAdmin getAdmin() {
         return this.admin;
@@ -180,6 +185,11 @@ public abstract class AbstractScaleStrategyBean implements
     @Override
     public void setElasticMachineProvisioning(NonBlockingElasticMachineProvisioning machineProvisioning) {
         this.machineProvisioning = machineProvisioning;
+    }
+    
+    @Override
+    public void setMachinesStateBackup(MachinesStateBackup stateBackup) {
+        this.stateBackup = stateBackup;
     }
     
     protected NonBlockingElasticMachineProvisioning getMachineProvisioning() {
@@ -405,6 +415,7 @@ public abstract class AbstractScaleStrategyBean implements
 
             validateBlockingAfterPropertiesSetCompleted();
             recoverOnStartBeforeEnforceSLA();
+            stateBackup.validateBackupCompleted(pu);
 
             if (getLogger().isDebugEnabled()) {
                 getLogger().debug("enforcing SLA.");

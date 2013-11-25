@@ -36,9 +36,9 @@ public class MachinesSlaEnforcement implements
     private final MachinesSlaEnforcementState state;
     private final Map<ProcessingUnit, MachinesSlaEnforcementEndpoint> endpoints;
 
-    public MachinesSlaEnforcement() {
+    public MachinesSlaEnforcement(MachinesSlaEnforcementState state) {
         this.endpoints = new HashMap<ProcessingUnit, MachinesSlaEnforcementEndpoint>();
-        this.state = new MachinesSlaEnforcementState();
+        this.state = state;
     }
 
     public MachinesSlaEnforcementEndpoint createEndpoint(ProcessingUnit pu)

@@ -40,6 +40,7 @@ import org.openspaces.grid.gsm.containers.ContainersSlaEnforcement;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcement;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpoint;
+import org.openspaces.grid.gsm.machines.backup.MachinesStateBackup;
 import org.openspaces.grid.gsm.machines.plugins.ElasticMachineProvisioning;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioningAdapterFactory;
@@ -72,7 +73,8 @@ public class ScaleBeanServer {
             AutoScalingSlaEnforcement autoScalingSlaEnforcement,
             NonBlockingElasticMachineProvisioningAdapterFactory nonBlockingAdapterFactory,
             ElasticMachineIsolationConfig isolationConfig,
-            EventsStore eventStore) {
+            EventsStore eventStore,
+            MachinesStateBackup machinesStateBackup) {
 
         if (pu == null) {
             throw new IllegalArgumentException("pu cannot be null");
@@ -124,7 +126,6 @@ public class ScaleBeanServer {
                 destroyAllEndpointsForPu(pu);
             }
         }
-        
         this.beanServer = new DefaultBeanServer<Bean>(
                 
                 new ScaleBeanFactory(
@@ -136,7 +137,8 @@ public class ScaleBeanServer {
                         autoScalingSlaEnforcementEndpoint,
                         nonBlockingAdapterFactory,
                         isolationConfig,
-                        eventStore));
+                        eventStore,
+                        machinesStateBackup));
         
     }
 

@@ -76,6 +76,9 @@ import org.openspaces.grid.gsm.autoscaling.AutoScalingSlaEnforcement;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcement;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcement;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpoint;
+import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementState;
+import org.openspaces.grid.gsm.machines.backup.MachinesState;
+import org.openspaces.grid.gsm.machines.backup.MachinesStateBackup;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioningAdapterFactory;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcement;
 import org.openspaces.grid.gsm.strategy.AbstractCapacityScaleStrategyBean;
@@ -142,6 +145,8 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, RemoteSecuredSer
     private AtomicLong keepAlive = new AtomicLong(0);
     private final long adminInitializationTimeout;
     private final Map<String, Set<Remote>> exportedApis = new HashMap<String, Set<Remote>>();
+    protected GigaSpace managementSpace;
+    private MachinesStateBackup machinesStateBackup;
     
     /**
      * Create an ESM
@@ -163,11 +168,21 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, RemoteSecuredSer
                 startKeepAlive(admin);
                 startKeepAliveMonitor();
                 
-                ESMImpl.this.machinesSlaEnforcement = new MachinesSlaEnforcement();
+                ESMImpl.this.managementSpace = managementSpace;                
+                final MachinesSlaEnforcementState machinesSlaEnforcementState = new MachinesSlaEnforcementState();
+                if (managementSpace != null) {
+                    final MachinesState machinesState = managementSpace.readById(MachinesState.class, MachinesState.SINGLETON_ID);
+                    if (machinesState != null) {
+                    	logger.info("Recovering machines state from " + managementSpace.getName());
+                    	machinesSlaEnforcementState.fromMachinesState(machinesState, admin);
+                    }
+                }
+                ESMImpl.this.machinesSlaEnforcement = new MachinesSlaEnforcement(machinesSlaEnforcementState);
                 ESMImpl.this.containersSlaEnforcement = new ContainersSlaEnforcement(admin);
                 ESMImpl.this.rebalancingSlaEnforcement = new RebalancingSlaEnforcement();
                 ESMImpl.this.autoScalingSlaEnforcement = new AutoScalingSlaEnforcement(admin);
-                
+                ESMImpl.this.machinesStateBackup = new MachinesStateBackup(admin, managementSpace, machinesSlaEnforcementState);
+
                 adminInitialized.set(true);
                 
                 while (!isEsmDiscovered(admin)) {
@@ -315,7 +330,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, RemoteSecuredSer
     public synchronized void destroy(boolean force) {
         logger.info("Stopping ESM ...");
         destroyStarted.set(true);
-
+        machinesStateBackup.close();
         admin.getProcessingUnits().getProcessingUnitRemoved().remove(this);
         admin.getProcessingUnits().getProcessingUnitAdded().remove(this);
         synchronized (scaleBeanServerPerProcessingUnit) {
@@ -702,7 +717,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, RemoteSecuredSer
             if (beanServer == null) {
                 ProcessingUnitSchemaConfig schemaConfig = new ProcessingUnitSchemaConfig(elasticProperties);
                 ElasticMachineIsolationConfig isolationConfig = new ElasticMachineIsolationConfig(elasticProperties);
-                beanServer = new ScaleBeanServer(pu,schemaConfig, rebalancingSlaEnforcement,containersSlaEnforcement,machinesSlaEnforcement, autoScalingSlaEnforcement, nonBlockingAdapterFactory, isolationConfig, eventsStore);
+                beanServer = new ScaleBeanServer(pu,schemaConfig, rebalancingSlaEnforcement,containersSlaEnforcement,machinesSlaEnforcement, autoScalingSlaEnforcement, nonBlockingAdapterFactory, isolationConfig, eventsStore, machinesStateBackup);
                 scaleBeanServerPerProcessingUnit.put(pu, beanServer);
             }
             //TODO: Move this to a separate thread since bean#afterPropertiesSet() might block. This is very tricky since the PU can deploy/undeploy while we are in that thread, which changes the bean server.

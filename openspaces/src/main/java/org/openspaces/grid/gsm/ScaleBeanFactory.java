@@ -37,6 +37,8 @@ import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpointAware;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpointAware;
+import org.openspaces.grid.gsm.machines.backup.MachinesStateBackup;
+import org.openspaces.grid.gsm.machines.backup.MachinesStateBackupAware;
 import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIsolation;
 import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIsolationAware;
 import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIsolationFactory;
@@ -60,7 +62,7 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
     private final NonBlockingElasticMachineProvisioningAdapterFactory nonBlockingAdapterFactory;
     private final ElasticMachineIsolationConfig isolationConfig;
     private final EventsStore eventStore;
-
+    private final MachinesStateBackup machinesStateBackup;
     
     ScaleBeanFactory(
             ProcessingUnit pu,
@@ -71,7 +73,8 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
             AutoScalingSlaEnforcementEndpoint autoScalingSlaEnforcementEndpoint,
             NonBlockingElasticMachineProvisioningAdapterFactory nonBlockingAdapterFactory,
             ElasticMachineIsolationConfig isolationConfig,
-            EventsStore eventStore) {
+            EventsStore eventStore,
+            MachinesStateBackup machinesStateBackup) {
         
         super(pu.getAdmin());
         this.schemaConfig = schemaConfig;
@@ -83,7 +86,7 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
         this.pu = pu;
         this.isolationConfig = isolationConfig;
         this.eventStore = eventStore;
-        
+        this.machinesStateBackup = machinesStateBackup;
     }
     
     @Override
@@ -130,6 +133,10 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
         if (instance instanceof ElasticProcessingUnitMachineIsolationAware) {
             ElasticProcessingUnitMachineIsolation isolation = new ElasticProcessingUnitMachineIsolationFactory().create(pu.getName(), isolationConfig);
             ((ElasticProcessingUnitMachineIsolationAware)instance).setElasticProcessingUnitMachineIsolation(isolation); 
+        }
+        
+        if (instance instanceof MachinesStateBackupAware) {
+            ((MachinesStateBackupAware)instance).setMachinesStateBackup(machinesStateBackup); 
         }
         
         ElasticConfigBean elasticConfigBean = findElasticConfigBean(beanServer);

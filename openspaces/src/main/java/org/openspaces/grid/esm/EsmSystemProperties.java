@@ -49,4 +49,7 @@ public class EsmSystemProperties {
     
     public static final String ESM_CLEANUP_CLOUD_TIMEOUT_SECONDS = "org.openspaces.grid.cleanup-cloud-timeout-seconds";
     public static final long ESM_CLEANUP_CLOUD_TIMEOUT_SECONDS_DEFAULT = 10*60L;
+    
+    public static final String ESM_BACKUP_INTERVAL_MILLISECONDS = "org.openspaces.grid.state-backup-to-space-interval-milliseconds";
+    public static final Long ESM_BACKUP_INTERVAL_MILLISECONDS_DEFAULT = 1000L;
 }
