@@ -21,13 +21,14 @@ import org.openspaces.admin.internal.pu.elastic.events.InternalElasticProcessing
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementInProgressException;
+import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementLoggerBehavior;
 
 
 /**
  * @author itaif
  * @since 9.7
  */
-public class MachinesStateBackupFailureException extends SlaEnforcementInProgressException implements SlaEnforcementFailure {
+public class MachinesStateBackupFailureException extends SlaEnforcementInProgressException implements SlaEnforcementFailure , SlaEnforcementLoggerBehavior {
 
     private static final long serialVersionUID = 1L;
     
@@ -41,5 +42,16 @@ public class MachinesStateBackupFailureException extends SlaEnforcementInProgres
         event.setFailureDescription(getMessage());
         event.setProcessingUnitName(getProcessingUnitName());
         return event;
+    }
+
+    @Override
+    public boolean isAlwaysLogStackTrace() {
+        //space write stack trace is important
+        return true;
+    }
+
+    @Override
+    public boolean isAlwaysLogDuplicateException() {
+        return false;
     }
 }
