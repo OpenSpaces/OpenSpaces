@@ -79,6 +79,8 @@ import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementState;
 import org.openspaces.grid.gsm.machines.backup.MachinesState;
 import org.openspaces.grid.gsm.machines.backup.MachinesStateBackup;
+import org.openspaces.grid.gsm.machines.backup.MachinesStateBackupStub;
+import org.openspaces.grid.gsm.machines.backup.MachinesStateBackupToSpace;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioningAdapterFactory;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcement;
 import org.openspaces.grid.gsm.strategy.AbstractCapacityScaleStrategyBean;
@@ -181,7 +183,12 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, RemoteSecuredSer
                 ESMImpl.this.containersSlaEnforcement = new ContainersSlaEnforcement(admin);
                 ESMImpl.this.rebalancingSlaEnforcement = new RebalancingSlaEnforcement();
                 ESMImpl.this.autoScalingSlaEnforcement = new AutoScalingSlaEnforcement(admin);
-                ESMImpl.this.machinesStateBackup = new MachinesStateBackup(admin, managementSpace, machinesSlaEnforcementState);
+                if (managementSpace == null) {
+                    ESMImpl.this.machinesStateBackup = new MachinesStateBackupStub();
+                }
+                else {
+                    ESMImpl.this.machinesStateBackup = new MachinesStateBackupToSpace(admin, managementSpace, machinesSlaEnforcementState);
+                }
 
                 adminInitialized.set(true);
                 
