@@ -1011,13 +1011,13 @@ public class MachinesSlaEnforcementState {
 		//detect failed agents
 		final List<DocumentProperties> agentsProperties = properties.getProperty("agentsProperties");
 		for (DocumentProperties agentProperties : agentsProperties) {
-		    final boolean isStopping =  agentProperties.getProperty("isStopping");
+		    final boolean isStopping =  (Boolean)agentProperties.getProperty("isStopping");
 		    final String agentUid =  agentProperties.getProperty("agentUid");
 		    final String puName = agentProperties.getProperty("puName");
 		    final ProcessingUnit pu = admin.getProcessingUnits().getProcessingUnit(puName);
 		    final GridServiceAgent agent = admin.getGridServiceAgents().getAgentByUID(agentUid);
 		    
-		    boolean isFailed =  agentProperties.getProperty("isFailed");
+		    boolean isFailed =  (Boolean)agentProperties.getProperty("isFailed");
 		    if (agent == null) {
 		        if (pu == null) {
 		            logger.info("Ignoring missing " + puName + " agent " + agentUid + " since " + puName + " was uninstalled");
