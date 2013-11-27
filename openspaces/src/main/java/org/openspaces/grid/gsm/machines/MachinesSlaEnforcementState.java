@@ -55,6 +55,7 @@ import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIs
 import org.openspaces.grid.gsm.machines.isolation.PublicMachineIsolation;
 
 import com.gigaspaces.document.DocumentProperties;
+import com.gigaspaces.internal.version.PlatformLogicalVersion;
 
 public class MachinesSlaEnforcementState {
     
@@ -126,10 +127,12 @@ public class MachinesSlaEnforcementState {
         
         public void addFutureStoppedMachine(FutureStoppedMachine futureStoppedMachine) {
             machinesBeingStopped.add(futureStoppedMachine);
+            machinesStateVersion++;
         }
         
         public void removeFutureStoppedMachine(FutureStoppedMachine futureStoppedMachine) {
             machinesBeingStopped.remove(futureStoppedMachine);
+            machinesStateVersion++;
         }
         
         public Collection<FutureStoppedMachine> getMachineGoingDown() {
@@ -138,6 +141,7 @@ public class MachinesSlaEnforcementState {
         
         public void addFutureAgents(FutureGridServiceAgent[] newFutureAgents, CapacityRequirements capacityRequirements) {
             futureAgents.add(new GridServiceAgentFutures(newFutureAgents,capacityRequirements));
+            machinesStateVersion++;
         }
 
         public void allocateCapacity(String agentUid, CapacityRequirements capacity) {
@@ -145,6 +149,7 @@ public class MachinesSlaEnforcementState {
                 throw new IllegalStateException(this + " should have set machine isolation before allocating capacity");
             }
             allocatedCapacity = allocatedCapacity.add(agentUid,capacity);
+            machinesStateVersion++;
         }
 
         public void markCapacityForDeallocation(String agentUid, CapacityRequirements capacity) {
@@ -153,6 +158,7 @@ public class MachinesSlaEnforcementState {
             }
             allocatedCapacity = allocatedCapacity.subtract(agentUid,capacity);
             markedForDeallocationCapacity = markedForDeallocationCapacity.add(agentUid, capacity);
+            machinesStateVersion++;
         }
 
         public void unmarkCapacityForDeallocation(String agentUid, CapacityRequirements capacity) {
@@ -161,6 +167,7 @@ public class MachinesSlaEnforcementState {
             }
             markedForDeallocationCapacity = markedForDeallocationCapacity.subtract(agentUid, capacity);
             allocateCapacity(agentUid, capacity);
+            machinesStateVersion++;
         }
 
         public void deallocateCapacity(String agentUid, CapacityRequirements capacity) {
@@ -168,6 +175,7 @@ public class MachinesSlaEnforcementState {
                 throw new IllegalStateException(this + " should have set machine isolation before deallocating capacity");
             }
             markedForDeallocationCapacity = markedForDeallocationCapacity.subtract(agentUid, capacity);
+            machinesStateVersion++;
         }
 
 		public void replaceAllocation(String oldAgentUid, String newAgentUid) {
@@ -181,6 +189,7 @@ public class MachinesSlaEnforcementState {
 				allocatedCapacity = allocatedCapacity.subtractAgent(oldAgentUid);
 				allocateCapacity(newAgentUid, agentAllocatedCapacity);
 			}
+            machinesStateVersion++;
 		}
 		
         public Collection<GridServiceAgentFutures> getAllDoneFutureAgents() {
@@ -201,6 +210,7 @@ public class MachinesSlaEnforcementState {
                 throw new IllegalStateException(this + " should have set machine isolation before removing future agent");
             }
             futureAgents.remove(futureAgentsToRemove);
+            machinesStateVersion++;
         }
 
         public void completedStateRecoveryAfterRestart() {
@@ -357,11 +367,19 @@ public class MachinesSlaEnforcementState {
         
         CapacityRequirementsPerAgent allUsedCapacity = new CapacityRequirementsPerAgent();
         
-        for (StateValue value : state.values()) {
-            allUsedCapacity = allUsedCapacity.add(value.allocatedCapacity).add(value.markedForDeallocationCapacity);
+        for (StateKey key: state.keySet()) {
+            allUsedCapacity = allUsedCapacity.add(getAllUsedCapacity(key));
         }
         
         return allUsedCapacity;
+    }
+
+    /**
+     * Lists all capacity from all processing units including those that are marked for deallocation for specified key.
+     */
+    private CapacityRequirementsPerAgent getAllUsedCapacity(StateKey key) {
+        final StateValue value = getState(key);
+        return (value.allocatedCapacity).add(value.markedForDeallocationCapacity);
     }
 
     /**
@@ -934,20 +952,33 @@ public class MachinesSlaEnforcementState {
      */
     public MachinesState toMachinesState() {
         
-        final List<DocumentProperties> failedAgentsProperties = new ArrayList<DocumentProperties>();
-        for (Entry<StateKey, StateValue> entry : state.entrySet()) {
-            final String agentZone = ZonesConfigUtils.zonesToString(entry.getKey().gridServiceAgentZones);
-            final String puName = entry.getKey().pu.getName();
-            for (RecoveringFailedGridServiceAgent failedAgent : entry.getValue().getFailedAgents()) {
-                failedAgentsProperties.add(new DocumentProperties()
-                    .setProperty("puName", puName)
-                    .setProperty("agentZones", agentZone)
-                    .setProperty("agentUid", failedAgent.getAgentUid()));
+        final List<DocumentProperties> agentsProperties = new ArrayList<DocumentProperties>();
+        for (StateKey key: state.keySet()) {
+
+            for (String agentUid : getAllUsedCapacity(key).getAgentUids()) {
+                final boolean isStopping = false;
+                final boolean isFailed = false;
+                agentsProperties.add(toAgentProperties(key, agentUid, isStopping, isFailed));
+            }
+
+            for (RecoveringFailedGridServiceAgent failedAgent : getAgentsMarkedAsFailed(key)) {
+                final String agentUid = failedAgent.getAgentUid();
+                final boolean isStopping = false;
+                final boolean isFailed = true;
+                agentsProperties.add(toAgentProperties(key, agentUid, isStopping, isFailed));
+            }
+
+            for (FutureStoppedMachine stoppingAgent : getMachinesGoingDown(key)) {
+                final String agentUid = stoppingAgent.getGridServiceAgent().getUid();
+                final boolean isStopping = true;
+                final boolean isFailed = false;
+                agentsProperties.add(toAgentProperties(key, agentUid, isStopping, isFailed));
             }
         }
         final DocumentProperties properties = new DocumentProperties()
+            .setProperty("platformLogicalVersion", PlatformLogicalVersion.getLogicalVersion())
             .setProperty("agentsContext", agentsContext)
-            .setProperty("failedAgentsProperties", failedAgentsProperties);
+            .setProperty("agentsProperties", agentsProperties);
         
         final MachinesState machinesState = new MachinesState();
         machinesState.setProperties(properties);
@@ -955,25 +986,60 @@ public class MachinesSlaEnforcementState {
         machinesState.setVersion(machinesStateVersion);
         return machinesState;
     }
+
+    private DocumentProperties toAgentProperties(
+            final StateKey key,
+            final String agentUid,
+            final boolean isStopping,
+            final boolean isFailed) {
+        final String agentZone = ZonesConfigUtils.zonesToString(key.gridServiceAgentZones);
+        final String puName = key.pu.getName();
+        return new DocumentProperties()
+        .setProperty("puName", puName)
+        .setProperty("agentZones", agentZone)
+        .setProperty("agentUid", agentUid)
+        .setProperty("isStopping", isStopping)
+        .setProperty("isFailed", isFailed);
+    }
 	
 	public void fromMachinesState(MachinesState state, Admin admin) {
 		machinesStateVersion = state.getVersion();
 		DocumentProperties properties = state.getProperties();
 		agentsContext.clear();
 		agentsContext.putAll((DocumentProperties)properties.getProperty("agentsContext"));
-		List<DocumentProperties> failedAgentsProperties = properties.getProperty("failedAgentsProperties");
 		
-		for (DocumentProperties failedAgentProperties : failedAgentsProperties) {
-			final String puName = failedAgentProperties.getProperty("puName");
-			final ProcessingUnit pu = admin.getProcessingUnits().getProcessingUnit(puName);
-			if (pu == null) {
-			    logger.warn("Failed to recover list of failed machines for processing unit " + puName + " since it has been uninstalled");
-			    continue;
-			}
-			final ZonesConfig agentZones = ZonesConfigUtils.zonesFromString((String)failedAgentProperties.getProperty("agentZones"));
-			final String agentUid =  failedAgentProperties.getProperty("agentUid");
-			final StateKey key = new StateKey(pu, agentZones);
-			addFailedAgent(key, agentUid);
+		//detect failed agents
+		final List<DocumentProperties> agentsProperties = properties.getProperty("agentsProperties");
+		for (DocumentProperties agentProperties : agentsProperties) {
+		    final boolean isStopping =  agentProperties.getProperty("isStopping");
+		    final String agentUid =  agentProperties.getProperty("agentUid");
+		    final String puName = agentProperties.getProperty("puName");
+		    final ProcessingUnit pu = admin.getProcessingUnits().getProcessingUnit(puName);
+		    final GridServiceAgent agent = admin.getGridServiceAgents().getAgentByUID(agentUid);
+		    
+		    boolean isFailed =  agentProperties.getProperty("isFailed");
+		    if (agent == null) {
+		        if (pu == null) {
+		            logger.info("Ignoring missing " + puName + " agent " + agentUid + " since " + puName + " was uninstalled");
+		        }
+		        else if (isStopping) {
+                    logger.info("Ignoring missing " + puName + " agent " + agentUid + " since it was being stopped");
+                }
+		        else if (isFailed) {
+                    logger.info("Marking " + puName + " agent " + agentUid + " as failed since it was previously marked as failed.");
+		        }
+		        else {
+		            // Agent probably failed while ESM was restarting 
+		            logger.info("Marking " + puName + " agent " + agentUid + " as failed since it cannot be discovered.");
+		            isFailed = true;
+		        }
+		    }
+
+		    if (isFailed) {
+		        final ZonesConfig agentZones = ZonesConfigUtils.zonesFromString((String)agentProperties.getProperty("agentZones"));
+		        final StateKey key = new StateKey(pu, agentZones);
+		        addFailedAgent(key, agentUid);
+		    }
 		}
 	}
 
