@@ -52,4 +52,6 @@ public class EsmSystemProperties {
     
     public static final String ESM_BACKUP_INTERVAL_MILLISECONDS = "org.openspaces.grid.state-backup-to-space-interval-milliseconds";
     public static final Long ESM_BACKUP_INTERVAL_MILLISECONDS_DEFAULT = 1000L;
+    
+    public static final String ESM_BACKUP_MACHINES_STATE_TO_SPACE_FLAG = "org.openspaces.grid.backup-machines-state-to-cloudify-management-space"; //default is false
 }

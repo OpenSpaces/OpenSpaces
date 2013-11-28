@@ -46,7 +46,6 @@ import com.gigaspaces.grid.gsm.PUDetails;
 import com.gigaspaces.grid.gsm.PUsDetails;
 import com.gigaspaces.internal.utils.concurrent.GSThreadFactory;
 import com.gigaspaces.security.service.SecurityResolver;
-import com.j_spaces.kernel.PlatformVersion;
 /**
  * The purpose of this class is to make sure that admin API
  * view of the PUs and instances is based on the GSM and not the LUS.
@@ -69,7 +68,7 @@ public class ESMImplInitializer {
     // If any PU is discovered wait until all GSM(s) and LUS(s) are running for at least 1 minute.
     private static final long WAITFOR_GSM_UPTIME_SECONDS = Long.getLong(EsmSystemProperties.ESM_INIT_WAITFOR_GSM_UPTIME_SECONDS, EsmSystemProperties.ESM_INIT_WAITFOR_GSM_UPTIME_SECONDS_DEFAULT); 
     private static final long WAITFOR_LUS_UPTIME_SECONDS = Long.getLong(EsmSystemProperties.ESM_INIT_WAITFOR_LUS_UPTIME_SECONDS, EsmSystemProperties.ESM_INIT_WAITFOR_LUS_UPTIME_SECONDS_DEFAULT);
-
+    private static final boolean USE_CLOUDIFY_MANAGEMENT_SPACE = Boolean.getBoolean(EsmSystemProperties.ESM_BACKUP_MACHINES_STATE_TO_SPACE_FLAG);
 	protected static final String CLOUDIFY_MANAGEMENT_SPACE_NAME = "cloudifyManagementSpace";
 	
     private InternalAdmin admin;
@@ -135,7 +134,7 @@ public class ESMImplInitializer {
                 final GridServiceManager[] gridServiceManagers = admin.getGridServiceManagers().getManagers();
                 
                 final Space space = admin.getSpaces().getSpaceByName(CLOUDIFY_MANAGEMENT_SPACE_NAME);
-                if (isCloudifyVersion() && space == null) {
+                if (USE_CLOUDIFY_MANAGEMENT_SPACE && space == null) {
                 	logger.log(Level.INFO,"Waiting to discover " + CLOUDIFY_MANAGEMENT_SPACE_NAME);
                     // retry, give admin more time to discover management space
                     boolean restartAdmin = false;
@@ -328,8 +327,4 @@ public class ESMImplInitializer {
         return true;
     }
     
-    public static boolean isCloudifyVersion(){
-        String forceCloudify =  System.getProperty( "force.cloudify", System.getenv( "force.cloudify" ) );   // -Dforce.cloudify=true will emulate cloudify environment.
-        return "true".equals( forceCloudify ) || PlatformVersion.getShortOfficialVersion().indexOf( PlatformVersion.EDITION_CLOUDIFY ) >= 0;
-    }    
 }
