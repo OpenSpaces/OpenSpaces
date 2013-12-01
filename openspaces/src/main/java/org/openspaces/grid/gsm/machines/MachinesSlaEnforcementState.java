@@ -1006,7 +1006,7 @@ public class MachinesSlaEnforcementState {
 		machinesStateVersion = state.getVersion();
 		DocumentProperties properties = state.getProperties();
 		agentsContext.clear();
-		agentsContext.putAll((DocumentProperties)properties.getProperty("agentsContext"));
+		agentsContext.putAll((Map<String, Object>)properties.getProperty("agentsContext"));
 		
 		//detect failed agents
 		final List<DocumentProperties> agentsProperties = properties.getProperty("agentsProperties");
