@@ -179,12 +179,12 @@ public class MachinesSlaEnforcementState {
         }
 
 		public void replaceAllocation(String oldAgentUid, String newAgentUid) {
-			final CapacityRequirements agentDeallocationCapacity = markedForDeallocationCapacity.getAgentCapacity(oldAgentUid);
+			final CapacityRequirements agentDeallocationCapacity = markedForDeallocationCapacity.getAgentCapacityOrZero(oldAgentUid);
 			if (!agentDeallocationCapacity.equalsZero()) {
 				markedForDeallocationCapacity = markedForDeallocationCapacity.subtractAgent(oldAgentUid).add(newAgentUid, agentDeallocationCapacity);
 			}
 
-			final CapacityRequirements agentAllocatedCapacity = allocatedCapacity.getAgentCapacity(oldAgentUid);
+			final CapacityRequirements agentAllocatedCapacity = allocatedCapacity.getAgentCapacityOrZero(oldAgentUid);
 			if (!agentAllocatedCapacity.equalsZero()) {
 				allocatedCapacity = allocatedCapacity.subtractAgent(oldAgentUid);
 				allocateCapacity(newAgentUid, agentAllocatedCapacity);
