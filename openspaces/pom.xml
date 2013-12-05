@@ -631,10 +631,7 @@
 					<execution>
 						<goals>
 							<goal>test-jar</goal>
-						</goals>
-						<configuration>
-							<finalName>${project.artifactId}</finalName>	
-						</configuration>
+						</goals>						
 					</execution>
 				</executions>
 			</plugin>
