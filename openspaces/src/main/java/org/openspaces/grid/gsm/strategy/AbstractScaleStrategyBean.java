@@ -125,6 +125,7 @@ public abstract class AbstractScaleStrategyBean implements
     private boolean discoveryQuiteMode;
 
     private final ExchangeCountDownLatch<Throwable> blockingAfterPropertiesSetComplete = new ExchangeCountDownLatch<Throwable>(1);
+    private boolean loggedBlockingAfterPropertiesSetException = false;
 
     private MachinesStateBackup stateBackup;
 
@@ -449,15 +450,23 @@ public abstract class AbstractScaleStrategyBean implements
     private void validateBlockingAfterPropertiesSetCompleted()
             throws BlockingAfterPropertiesSetInProgressException,
             InterruptedException, BlockingAfterPropertiesSetFailedException {
-        
-        if (this.blockingAfterPropertiesSetComplete.getCount() > 0) {
-            throw new BlockingAfterPropertiesSetInProgressException(pu);
-        }
-        else {
-            final Throwable t = this.blockingAfterPropertiesSetComplete.get();
-            if (t != null) {
-                throw new BlockingAfterPropertiesSetFailedException(pu, t);
+        try {
+            if (this.blockingAfterPropertiesSetComplete.getCount() > 0) {
+                throw new BlockingAfterPropertiesSetInProgressException(pu);
             }
+            else {
+                final Throwable t = this.blockingAfterPropertiesSetComplete.get();
+                if (t != null) {
+                    throw new BlockingAfterPropertiesSetFailedException(pu, t);
+                }
+            }
+        } catch (final BlockingAfterPropertiesSetInProgressException e) {
+            //TODO: Fire event
+            if (!loggedBlockingAfterPropertiesSetException) {
+                getLogger().warn("SLA is not enforced",e);
+                loggedBlockingAfterPropertiesSetException = true;
+            }
+            throw e;
         }
     }
 
