@@ -450,14 +450,10 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         int machineShortage = getMachineShortageInOrderToReachMinimumNumberOfMachines(sla);
         
         final RecoveringFailedGridServiceAgent[] failedAgents = getFailedAgentsNotBeingRecovered(sla);
-        if ( failedAgents.length > 0 ) {
+        if ( failedAgents.length > 0 && sla.getMachineProvisioning().isStartMachineSupported()) {
 
             final CapacityRequirements capacityRequirements = new CapacityRequirements(
                     new NumberOfMachinesCapacityRequirement(failedAgents.length));
-
-        	if (!sla.getMachineProvisioning().isStartMachineSupported()) {
-                throw new NeedToStartMoreGridServiceAgentsException(sla, state, capacityRequirements, pu);
-            }
 
             if (isFutureAgentsOfOtherSharedServices(sla)) {
                 throw new MachinesSlaEnforcementInProgressException(getProcessingUnit(),
