@@ -12,4 +12,8 @@ public class MachinesStateBackupStub implements MachinesStateBackup {
     public void validateBackupCompleted(ProcessingUnit pu) {
     }
 
+    @Override
+    public void recoverAndStartBackup(ProcessingUnit pu) {
+    }
+
 }

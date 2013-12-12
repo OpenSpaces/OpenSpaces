@@ -23,4 +23,6 @@ public interface MachinesStateBackup {
     void close();
 
     void validateBackupCompleted(ProcessingUnit pu) throws MachinesStateBackupFailureException, MachinesStateBackupInProgressException;
+    
+    void recoverAndStartBackup(ProcessingUnit pu) throws MachinesStateRecoveryFailureException, MachinesStateRecoveryInProgressException;
 }

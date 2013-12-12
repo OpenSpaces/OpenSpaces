@@ -982,7 +982,6 @@ public class MachinesSlaEnforcementState {
         
         final MachinesState machinesState = new MachinesState();
         machinesState.setProperties(properties);
-        machinesState.setId(MachinesState.SINGLETON_ID);
         machinesState.setVersion(machinesStateVersion);
         return machinesState;
     }
@@ -1002,27 +1001,29 @@ public class MachinesSlaEnforcementState {
         .setProperty("isFailed", isFailed);
     }
 	
-	public void fromMachinesState(MachinesState state, Admin admin) {
+	public void fromMachinesState(MachinesState state) {
 		machinesStateVersion = state.getVersion();
 		DocumentProperties properties = state.getProperties();
 		agentsContext.clear();
 		agentsContext.putAll((Map<String, Object>)properties.getProperty("agentsContext"));
 		
 		//detect failed agents
+		final Collection<String> allUsedAgentUids = getAllUsedAgentUids();
+		final Map<String, ProcessingUnit> allProcessingUnits = getAllProcessingUnits();
 		final List<DocumentProperties> agentsProperties = properties.getProperty("agentsProperties");
 		for (DocumentProperties agentProperties : agentsProperties) {
 		    final boolean isStopping =  (Boolean)agentProperties.getProperty("isStopping");
 		    final String agentUid =  agentProperties.getProperty("agentUid");
 		    final String puName = agentProperties.getProperty("puName");
-		    final ProcessingUnit pu = admin.getProcessingUnits().getProcessingUnit(puName);
-		    final GridServiceAgent agent = admin.getGridServiceAgents().getAgentByUID(agentUid);
-		    
+		    final ProcessingUnit pu = allProcessingUnits.get(puName);
 		    boolean isFailed =  (Boolean)agentProperties.getProperty("isFailed");
-		    if (agent == null) {
-		        if (pu == null) {
-		            logger.info("Ignoring missing " + puName + " agent " + agentUid + " since " + puName + " was uninstalled");
-		        }
-		        else if (isStopping) {
+		    if (pu == null) {
+                logger.info("Ignoring missing " + puName + " agent " + agentUid + " since " + puName + " was uninstalled");
+                isFailed = false;
+            }
+		    else if (!allUsedAgentUids.contains(agentUid)) {
+		        
+		        if (isStopping) {
                     logger.info("Ignoring missing " + puName + " agent " + agentUid + " since it was being stopped");
                 }
 		        else if (isFailed) {
@@ -1042,6 +1043,15 @@ public class MachinesSlaEnforcementState {
 		    }
 		}
 	}
+
+    private Map<String, ProcessingUnit> getAllProcessingUnits() {
+        final Map<String, ProcessingUnit> puNames = new LinkedHashMap<String, ProcessingUnit>();
+        for (StateKey key : this.state.keySet()) {
+           final ProcessingUnit pu = key.pu;
+           puNames.put(pu.getName(), pu);
+        }
+        return puNames;
+    }
 
     public long getVersion() {
         return machinesStateVersion;

@@ -28,8 +28,8 @@ public class GridServiceAgentSlaEnforcementInProgressException extends SlaEnforc
         super(pu, message);
     }
     
-    public GridServiceAgentSlaEnforcementInProgressException(ProcessingUnit pu, String message, Exception cause) {
-        super(pu, message,cause);
+    public GridServiceAgentSlaEnforcementInProgressException(ProcessingUnit pu, String message, Throwable cause) {
+        super(pu, message, cause);
     }
 
 }

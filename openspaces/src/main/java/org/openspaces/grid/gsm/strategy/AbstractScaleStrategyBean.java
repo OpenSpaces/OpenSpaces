@@ -499,6 +499,7 @@ public abstract class AbstractScaleStrategyBean implements
                 }
             }
             validateAllProcessingUnitsRecoveredStateOnEsmStart();
+            stateBackup.recoverAndStartBackup(pu);
         } catch (final SlaEnforcementInProgressException e) {
             //TODO: Fire event
             getLogger().info("SLA is not enforced",e);

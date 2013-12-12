@@ -8,8 +8,6 @@ import com.gigaspaces.document.DocumentProperties;
 @SpaceClass
 public class MachinesState {
 
-    public static final Integer SINGLETON_ID = 0;
-    
     private Integer id;
     private DocumentProperties properties;
     private Long version;

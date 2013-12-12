@@ -77,7 +77,6 @@ import org.openspaces.grid.gsm.containers.ContainersSlaEnforcement;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcement;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementState;
-import org.openspaces.grid.gsm.machines.backup.MachinesState;
 import org.openspaces.grid.gsm.machines.backup.MachinesStateBackup;
 import org.openspaces.grid.gsm.machines.backup.MachinesStateBackupStub;
 import org.openspaces.grid.gsm.machines.backup.MachinesStateBackupToSpace;
@@ -172,13 +171,6 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, RemoteSecuredSer
                 
                 ESMImpl.this.managementSpace = managementSpace;                
                 final MachinesSlaEnforcementState machinesSlaEnforcementState = new MachinesSlaEnforcementState();
-                if (managementSpace != null) {
-                    final MachinesState machinesState = managementSpace.readById(MachinesState.class, MachinesState.SINGLETON_ID);
-                    if (machinesState != null) {
-                    	logger.info("Recovering machines state from " + managementSpace.getName());
-                    	machinesSlaEnforcementState.fromMachinesState(machinesState, admin);
-                    }
-                }
                 ESMImpl.this.machinesSlaEnforcement = new MachinesSlaEnforcement(machinesSlaEnforcementState);
                 ESMImpl.this.containersSlaEnforcement = new ContainersSlaEnforcement(admin);
                 ESMImpl.this.rebalancingSlaEnforcement = new RebalancingSlaEnforcement();

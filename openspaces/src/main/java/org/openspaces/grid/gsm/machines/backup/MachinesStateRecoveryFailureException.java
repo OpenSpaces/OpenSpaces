@@ -1,19 +1,20 @@
 /*******************************************************************************
- * Copyright (c) 2013 GigaSpaces Technologies Ltd. All rights reserved
- *
+ * 
+ * Copyright (c) 2012 GigaSpaces Technologies Ltd. All rights reserved
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *       http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *******************************************************************************/
-
+ *  
+ ******************************************************************************/
 package org.openspaces.grid.gsm.machines.backup;
 
 import org.openspaces.admin.internal.gsa.events.DefaultElasticGridServiceAgentProvisioningFailureEvent;
@@ -23,19 +24,13 @@ import org.openspaces.grid.gsm.machines.exceptions.GridServiceAgentSlaEnforcemen
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementFailure;
 import org.openspaces.grid.gsm.sla.exceptions.SlaEnforcementLoggerBehavior;
 
-
-/**
- * @author itaif
- * @since 9.7
- */
-public class MachinesStateBackupFailureException extends GridServiceAgentSlaEnforcementInProgressException implements SlaEnforcementFailure , SlaEnforcementLoggerBehavior {
+public class MachinesStateRecoveryFailureException extends GridServiceAgentSlaEnforcementInProgressException implements SlaEnforcementFailure , SlaEnforcementLoggerBehavior {
 
     private static final long serialVersionUID = 1L;
     
-    public MachinesStateBackupFailureException(ProcessingUnit pu, Throwable cause) {
-        super(pu, "Failed to write machines state to space", cause);
+    public MachinesStateRecoveryFailureException(ProcessingUnit pu, Exception t) {
+        super(pu, "Cannot read state from space", t);
     }
-    
     @Override
     public InternalElasticProcessingUnitFailureEvent toEvent() {
         DefaultElasticGridServiceAgentProvisioningFailureEvent event = new DefaultElasticGridServiceAgentProvisioningFailureEvent(); 
@@ -46,7 +41,7 @@ public class MachinesStateBackupFailureException extends GridServiceAgentSlaEnfo
 
     @Override
     public boolean isAlwaysLogStackTrace() {
-        //space write stack trace is important
+        //space read stack trace is important
         return true;
     }
 
@@ -54,4 +49,5 @@ public class MachinesStateBackupFailureException extends GridServiceAgentSlaEnfo
     public boolean isAlwaysLogDuplicateException() {
         return false;
     }
+
 }

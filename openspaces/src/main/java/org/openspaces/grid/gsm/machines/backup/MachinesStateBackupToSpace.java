@@ -16,9 +16,11 @@
 
 package org.openspaces.grid.gsm.machines.backup;
 
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -36,12 +38,16 @@ import org.openspaces.grid.esm.EsmSystemProperties;
 import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementState;
 
+import com.gigaspaces.async.AsyncFuture;
 import com.gigaspaces.internal.utils.concurrent.GSThreadFactory;
+import com.gigaspaces.query.IdQuery;
 
 public class MachinesStateBackupToSpace implements MachinesStateBackup {
 
     private final Log logger = new SingleThreadedPollingLog(LogFactory.getLog(this.getClass()));
-
+    
+    public static final Integer SINGLETON_ID = 0;
+    
     private final MachinesSlaEnforcementState machinesSlaEnforcementState;
     private final GigaSpace space;
     private final AtomicLong writeCompletedVersion;
@@ -53,6 +59,13 @@ public class MachinesStateBackupToSpace implements MachinesStateBackup {
     private final InternalAdmin admin;
     
     private static final long BACKUP_INTERVAL_MILLISECONDS = Long.getLong(EsmSystemProperties.ESM_BACKUP_INTERVAL_MILLISECONDS, EsmSystemProperties.ESM_BACKUP_INTERVAL_MILLISECONDS_DEFAULT);
+
+    private ScheduledFuture<?> scheduledFuture;
+
+    private boolean started = false;
+    private boolean recovered = false;
+
+    private AsyncFuture<MachinesState> asyncRead;
     
     public MachinesStateBackupToSpace(Admin admin, GigaSpace space, MachinesSlaEnforcementState machinesSlaEnforcementState) {
         this.admin = (InternalAdmin) admin;
@@ -60,11 +73,13 @@ public class MachinesStateBackupToSpace implements MachinesStateBackup {
         this.machinesSlaEnforcementState = machinesSlaEnforcementState;
         writeCompletedVersion = new AtomicLong(machinesSlaEnforcementState.getVersion() - 1);
         lastError = new AtomicReference<Throwable>();
-        startBackup();
     }
 
     private void startBackup() {
-        this.admin.scheduleWithFixedDelayNonBlockingStateChange(new Runnable() {
+        if (started) {
+            return;
+        }
+        scheduledFuture = this.admin.scheduleWithFixedDelayNonBlockingStateChange(new Runnable() {
 
             private Future<?> future = null;
 
@@ -86,6 +101,7 @@ public class MachinesStateBackupToSpace implements MachinesStateBackup {
             private void write(final long currentVersion) {
                 try {
                     final MachinesState machinesState = machinesSlaEnforcementState.toMachinesState();
+                    machinesState.setId(SINGLETON_ID);
                     if (machinesState.getVersion() != currentVersion) {
                         throw new IllegalStateException("Expected version " + currentVersion + ", instead got " + machinesState.getVersion());
                     }
@@ -114,11 +130,13 @@ public class MachinesStateBackupToSpace implements MachinesStateBackup {
         },0L, 
         BACKUP_INTERVAL_MILLISECONDS, 
         TimeUnit.MILLISECONDS);
+        started = true;
     }
     
     @Override
     public void close() {
-        service.shutdownNow();  
+        scheduledFuture.cancel(false);
+        service.shutdownNow();
     }
 
     @Override
@@ -130,5 +148,45 @@ public class MachinesStateBackupToSpace implements MachinesStateBackup {
         else if (writeCompletedVersion.get() != machinesSlaEnforcementState.getVersion()) {
             throw new MachinesStateBackupInProgressException(pu);    
         }
+    }
+
+    @Override
+    public void recoverAndStartBackup(ProcessingUnit pu) throws MachinesStateRecoveryFailureException, MachinesStateRecoveryInProgressException {
+        recover(pu);
+        startBackup();
+    }
+
+    private void recover(ProcessingUnit pu)
+            throws MachinesStateRecoveryFailureException, MachinesStateRecoveryInProgressException {
+        if (!recovered) {
+            final MachinesState machinesState = readMachineStateFromSpace(pu);
+            if (machinesState != null) {
+               logger.info("Recovering machines state from " + space.getName());
+               machinesSlaEnforcementState.fromMachinesState(machinesState);
+            }
+            else {
+                logger.debug("Not recovering machines state from " + space.getName() + " since it's empty.");
+            }
+            recovered = true;
+        }
+    }
+
+    private MachinesState readMachineStateFromSpace(ProcessingUnit pu) throws MachinesStateRecoveryFailureException, MachinesStateRecoveryInProgressException {
+        if (this.asyncRead == null) {
+            this.asyncRead = space.asyncRead(new IdQuery<MachinesState>(MachinesState.class, SINGLETON_ID));
+            
+        }
+        if (this.asyncRead != null && this.asyncRead.isDone()){
+            try {
+                return asyncRead.get();
+            }
+            catch (ExecutionException e) {
+                throw new MachinesStateRecoveryFailureException(pu, e);
+            }
+            catch (InterruptedException e) {
+                throw new MachinesStateRecoveryFailureException(pu, e);
+            }
+        }
+        throw new MachinesStateRecoveryInProgressException(pu);
     }
 }
