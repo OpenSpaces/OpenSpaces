@@ -245,7 +245,7 @@ public class RunPUMojo extends AbstractOpenSpacesMojo {
         
         // set locators
         if (locators != null && !locators.trim().equals("")) {
-            System.setProperty("com.gs.jini_lus.locators", locators);
+            System.setProperty(SystemProperties.JINI_LUS_LOCATORS, locators);
         }
         
         // execute the processing unit in the new class loader 
