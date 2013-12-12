@@ -578,7 +578,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
     public String[] getGroups() {
         String[] groups;
         if (this.groups == null) {
-            String groupsProperty = System.getProperty("com.gs.jini_lus.groups");
+            String groupsProperty = System.getProperty(SystemProperties.JINI_LUS_GROUPS);
             if (groupsProperty == null) {
                 groupsProperty = System.getenv("LOOKUPGROUPS");
             }

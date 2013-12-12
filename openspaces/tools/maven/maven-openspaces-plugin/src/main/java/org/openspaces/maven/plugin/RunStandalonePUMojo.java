@@ -234,7 +234,7 @@ public class RunStandalonePUMojo extends AbstractOpenSpacesMojo {
         }
         
         if (groups != null && !groups.trim().equals("")) {
-            System.setProperty("com.gs.jini_lus.groups", groups);
+            System.setProperty(SystemProperties.JINI_LUS_GROUPS, groups);
         }
         if (locators != null && !locators.trim().equals("")) {
             System.setProperty("com.gs.jini_lus.locators", locators);

@@ -170,7 +170,7 @@ public class Deploy {
 
     public String[] getGroups() {
         if (groups == null) {
-            String groupsProperty = java.lang.System.getProperty("com.gs.jini_lus.groups");
+            String groupsProperty = System.getProperty(SystemProperties.JINI_LUS_GROUPS);
             if (groupsProperty != null) {
                 StringTokenizer tokenizer = new StringTokenizer(groupsProperty);
                 int count = tokenizer.countTokens();

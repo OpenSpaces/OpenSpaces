@@ -240,7 +240,7 @@ public class RunPUMojo extends AbstractOpenSpacesMojo {
         
         // set groups
         if (groups != null && !groups.trim().equals("")) {
-            System.setProperty("com.gs.jini_lus.groups", groups);
+            System.setProperty(SystemProperties.JINI_LUS_GROUPS, groups);
         }
         
         // set locators
