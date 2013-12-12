@@ -16,6 +16,7 @@
 
 package org.openspaces.maven.plugin;
 
+import com.gigaspaces.internal.lookup.LookupUtils;
 import com.j_spaces.kernel.SystemProperties;
 import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
@@ -235,7 +236,7 @@ public class RunStandalonePUMojo extends AbstractOpenSpacesMojo {
         }
         
         if (groups != null && !groups.trim().equals("")) {
-            System.setProperty(SystemProperties.JINI_LUS_GROUPS, groups);
+            LookupUtils.setGroups(groups);
         }
         if (locators != null && !locators.trim().equals("")) {
             System.setProperty(SystemProperties.JINI_LUS_LOCATORS, locators);

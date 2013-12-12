@@ -21,6 +21,7 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.gigaspaces.internal.lookup.LookupUtils;
 import net.jini.core.discovery.LookupLocator;
 import net.jini.core.entry.Entry;
 import net.jini.core.lookup.ServiceID;
@@ -578,7 +579,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
     public String[] getGroups() {
         String[] groups;
         if (this.groups == null) {
-            String groupsProperty = System.getProperty(SystemProperties.JINI_LUS_GROUPS);
+            String groupsProperty = LookupUtils.getGroups();
             if (groupsProperty == null) {
                 groupsProperty = System.getenv("LOOKUPGROUPS");
             }

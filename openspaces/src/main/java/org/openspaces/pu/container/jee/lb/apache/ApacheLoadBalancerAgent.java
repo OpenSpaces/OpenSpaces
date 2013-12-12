@@ -16,6 +16,7 @@
 
 package org.openspaces.pu.container.jee.lb.apache;
 
+import com.gigaspaces.internal.lookup.LookupUtils;
 import com.gigaspaces.logger.GSLogConfigLoader;
 import com.j_spaces.core.service.ServiceConfigLoader;
 import com.j_spaces.kernel.PlatformVersion;
@@ -91,7 +92,7 @@ public class ApacheLoadBalancerAgent implements DiscoveryListener, ServiceDiscov
 
     public String[] getGroups() {
         if (groups == null) {
-            String groupsProperty = System.getProperty(SystemProperties.JINI_LUS_GROUPS);
+            String groupsProperty = LookupUtils.getGroups();
             if (groupsProperty != null) {
                 StringTokenizer tokenizer = new StringTokenizer(groupsProperty);
                 int count = tokenizer.countTokens();

@@ -42,6 +42,7 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.gigaspaces.internal.lookup.LookupUtils;
 import net.jini.config.Configuration;
 import net.jini.core.discovery.LookupLocator;
 import net.jini.core.lookup.ServiceItem;
@@ -170,7 +171,7 @@ public class Deploy {
 
     public String[] getGroups() {
         if (groups == null) {
-            String groupsProperty = System.getProperty(SystemProperties.JINI_LUS_GROUPS);
+            String groupsProperty = LookupUtils.getGroups();
             if (groupsProperty != null) {
                 StringTokenizer tokenizer = new StringTokenizer(groupsProperty);
                 int count = tokenizer.countTokens();

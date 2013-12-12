@@ -17,6 +17,7 @@
 package org.openspaces.pu.container.servicegrid.deploy;
 
 import com.gigaspaces.grid.gsm.GSM;
+import com.gigaspaces.internal.lookup.LookupUtils;
 import com.j_spaces.kernel.PlatformVersion;
 import com.j_spaces.kernel.SystemProperties;
 
@@ -63,7 +64,7 @@ public class Undeploy {
 
     public String[] getGroups() {
         if (groups == null) {
-            String groupsProperty = System.getProperty(SystemProperties.JINI_LUS_GROUPS);
+            String groupsProperty = LookupUtils.getGroups();
             if (groupsProperty != null) {
                 StringTokenizer tokenizer = new StringTokenizer(groupsProperty);
                 int count = tokenizer.countTokens();
