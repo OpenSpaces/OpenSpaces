@@ -82,7 +82,23 @@ public class DiscoveredMachineProvisioningConfigurer {
         config.setReservedMemoryCapacityPerMachineInMB(MemoryUnit.MEGABYTES.convert(memory));
         return this;
     }
-    
+
+    /**
+     * @see DiscoveredMachineProvisioningConfig#setReservedMemoryCapacityPerManagementMachineInMB(long)
+     */
+    public DiscoveredMachineProvisioningConfigurer reservedMemoryCapacityPerManagementMachine(long memory, MemoryUnit unit) {
+        config.setReservedMemoryCapacityPerManagementMachineInMB(MemoryUnit.MEGABYTES.convert(memory, unit));
+        return this;
+    }
+
+    /**
+     * @see DiscoveredMachineProvisioningConfig#setReservedMemoryCapacityPerManagementMachineInMB(long)
+     */
+    public DiscoveredMachineProvisioningConfigurer reservedMemoryCapacityPerManagementMachine(String memory) {
+        config.setReservedMemoryCapacityPerManagementMachineInMB(MemoryUnit.MEGABYTES.convert(memory));
+        return this;
+    }
+
     /**
      * @see  DiscoveredMachineProvisioningConfig#setDedicatedManagementMachines(boolean)
      */
