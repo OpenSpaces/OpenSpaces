@@ -103,7 +103,6 @@ import com.j_spaces.core.Constants;
 import com.j_spaces.core.client.SpaceURL;
 import com.j_spaces.core.service.ServiceConfigLoader;
 import com.j_spaces.kernel.PlatformVersion;
-import com.j_spaces.kernel.SystemProperties;
 import com.j_spaces.kernel.time.SystemTime;
 
 /**
@@ -188,7 +187,7 @@ public class Deploy {
 
     public LookupLocator[] getLocators() {
         if (locators == null) {
-            String locatorsProperty = System.getProperty(SystemProperties.JINI_LUS_LOCATORS);
+            String locatorsProperty = LookupUtils.getLocators();
             if (locatorsProperty != null) {
                 locators = BootUtil.toLookupLocators(locatorsProperty);
             }

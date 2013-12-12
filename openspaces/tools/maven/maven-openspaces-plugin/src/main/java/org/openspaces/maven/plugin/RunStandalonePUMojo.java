@@ -239,7 +239,7 @@ public class RunStandalonePUMojo extends AbstractOpenSpacesMojo {
             LookupUtils.setGroups(groups);
         }
         if (locators != null && !locators.trim().equals("")) {
-            System.setProperty(SystemProperties.JINI_LUS_LOCATORS, locators);
+            LookupUtils.setLocators(locators);
         }
 
         // run the PU

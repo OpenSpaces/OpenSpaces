@@ -85,7 +85,7 @@ public class Undeploy {
 
     public LookupLocator[] getLocators() {
         if (locators == null) {
-            String locatorsProperty = System.getProperty(SystemProperties.JINI_LUS_LOCATORS);
+            String locatorsProperty = LookupUtils.getLocators();
             if (locatorsProperty != null) {
                 locators = BootUtil.toLookupLocators(locatorsProperty);
             }

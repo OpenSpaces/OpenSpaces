@@ -86,7 +86,6 @@ import com.j_spaces.core.admin.IJSpaceContainerAdmin;
 import com.j_spaces.core.jini.SharedDiscoveryManagement;
 import com.j_spaces.jmx.util.JMXUtilities;
 import com.j_spaces.kernel.PlatformVersion;
-import com.j_spaces.kernel.SystemProperties;
 
 /**
  * @author kimchy
@@ -633,7 +632,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
     
     private LookupLocator[] getInitialLocators() {
         if (locators == null) {
-            String locatorsProperty = System.getProperty(SystemProperties.JINI_LUS_LOCATORS);
+            String locatorsProperty = LookupUtils.getLocators();
             if (locatorsProperty == null) {
                 locatorsProperty = System.getenv("LOOKUPLOCATORS");
             }

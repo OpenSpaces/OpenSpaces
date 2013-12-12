@@ -20,7 +20,6 @@ import com.gigaspaces.internal.lookup.LookupUtils;
 import com.gigaspaces.logger.GSLogConfigLoader;
 import com.j_spaces.core.service.ServiceConfigLoader;
 import com.j_spaces.kernel.PlatformVersion;
-import com.j_spaces.kernel.SystemProperties;
 
 import net.jini.core.lookup.ServiceTemplate;
 import net.jini.core.lookup.ServiceID;
@@ -113,7 +112,7 @@ public class ApacheLoadBalancerAgent implements DiscoveryListener, ServiceDiscov
 
     public String getLocators() {
         if (locators == null) {
-            String locatorsProperty = System.getProperty(SystemProperties.JINI_LUS_LOCATORS);
+            String locatorsProperty = LookupUtils.getLocators();
             if (locatorsProperty != null) {
                 locators = locatorsProperty;
             }
