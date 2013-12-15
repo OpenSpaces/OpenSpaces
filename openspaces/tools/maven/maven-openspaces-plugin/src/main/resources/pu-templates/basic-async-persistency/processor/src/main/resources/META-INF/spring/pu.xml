@@ -49,8 +49,9 @@
         </property>
     </bean>
 
-    <bean id="hibernateDataSource" class="org.openspaces.persistency.hibernate.DefaultHibernateExternalDataSource">
+    <bean id="hibernateSpaceDataSource" class="org.openspaces.persistency.hibernate.DefaultHibernateSpaceDataSourceFactoryBean">
         <property name="sessionFactory" ref="sessionFactory"/>
+        <property name="initialLoadChunkSize" value="2000"/>
     </bean>
 
     <!--
@@ -62,8 +63,8 @@
         The space is configured to connect to a mirror, and uses the configured external data source
         to perform the initial load operation from the database when the Space starts up.
     -->
-    <os-core:space id="space" url="/./space" schema="persistent" mirror="true"
-                   external-data-source="hibernateDataSource">
+    <os-core:space id="space" url="/./space" schema="persistent"
+                   mirror="true" space-data-source="hibernateSpaceDataSource">
         <os-core:properties>
             <props>
                 <!-- Use ALL IN CACHE -->

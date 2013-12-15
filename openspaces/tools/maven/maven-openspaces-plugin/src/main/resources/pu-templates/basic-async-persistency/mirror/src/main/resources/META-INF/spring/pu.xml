@@ -2,14 +2,8 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:os-core="http://www.openspaces.org/schema/core"
-       xmlns:os-events="http://www.openspaces.org/schema/events"
-       xmlns:os-remoting="http://www.openspaces.org/schema/remoting"
-       xmlns:os-sla="http://www.openspaces.org/schema/sla"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
-       http://www.openspaces.org/schema/core http://www.openspaces.org/schema/9.7/core/openspaces-core.xsd
-       http://www.openspaces.org/schema/events http://www.openspaces.org/schema/9.7/events/openspaces-events.xsd
-       http://www.openspaces.org/schema/remoting http://www.openspaces.org/schema/9.7/remoting/openspaces-remoting.xsd
-       http://www.openspaces.org/schema/sla http://www.openspaces.org/schema/sla/9.6/openspaces-sla.xsd">
+       http://www.openspaces.org/schema/core http://www.openspaces.org/schema/9.7/core/openspaces-core.xsd">
 
     <bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
     </bean>
@@ -63,16 +57,16 @@
         An external data source that will be responsible for persisting changes done on the cluster that
         connects to this mirror using Hibernate.
     -->
-    <bean id="hibernateDataSource" class="org.openspaces.persistency.hibernate.DefaultHibernateExternalDataSource">
+    <bean id="hibernateSpaceSynchronizationEndpoint" class="org.openspaces.persistency.hibernate.DefaultHibernateSpaceSynchronizationEndpointFactoryBean">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
 
     <!--
         The mirror space. Uses the Hibernate external data source. Persists changes done on the Space that
         connects to this mirror space into the database using Hibernate.
-    -->    
-    <os-core:mirror id="mirror" url="/./mirror-service" external-data-source="hibernateDataSource">
-		<os-core:source-space name="space" partitions="2" backups="1"/>      
-	</os-core:mirror>
+    -->
+    <os-core:mirror id="mirror" url="/./mirror-service" space-sync-endpoint="hibernateSpaceSynchronizationEndpoint" operation-grouping="group-by-space-transaction">
+        <os-core:source-space name="space" partitions="2" backups="1"/>
+    </os-core:mirror>
 
 </beans>

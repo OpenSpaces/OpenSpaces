@@ -62,7 +62,7 @@
         An external data source that will be responsible for persisting changes done on the cluster that
         connects to this mirror using Hibernate.
     -->
-    <bean id="hibernateDataSource" class="org.openspaces.persistency.hibernate.DefaultHibernateExternalDataSource">
+    <bean id="hibernateSpaceSynchronizationEndpoint" class="org.openspaces.persistency.hibernate.DefaultHibernateSpaceSynchronizationEndpointFactoryBean">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
 
@@ -70,8 +70,8 @@
         The mirror space. Uses the Hibernate external data source. Persists changes done on the Space that
         connects to this mirror space into the database using Hibernate.
     -->
-    <os-core:mirror id="mirror" url="/./mirror-service" external-data-source="hibernateDataSource">
-		<os-core:source-space name="space" partitions="2" backups="1"/>      
-	</os-core:mirror>
+    <os-core:mirror id="mirror" url="/./mirror-service" space-sync-endpoint="hibernateSpaceSynchronizationEndpoint" operation-grouping="group-by-space-transaction">
+        <os-core:source-space name="space" partitions="2" backups="1"/>
+    </os-core:mirror>
 
 </beans>
