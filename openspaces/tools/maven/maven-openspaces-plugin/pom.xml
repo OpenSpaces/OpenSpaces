@@ -134,8 +134,9 @@
                     <configuration>
                         <failOnWarning>false</failOnWarning>
                         <usedDependencies>
-                             <!-- used with reflection -->
+                             <!-- used with reflection
                              <usedDependency>com.gigaspaces:gs-runtime</usedDependency>
+                             -->
                         </usedDependencies>
                     </configuration>
                 </execution>
