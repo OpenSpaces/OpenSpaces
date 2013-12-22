@@ -19,6 +19,7 @@ package org.openspaces.admin.internal.discovery;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.gigaspaces.internal.lookup.LookupUtils;
@@ -639,7 +640,16 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
 
     @Override
     public String toString() {
+        return toString(false);
+    }
+
+    public String toString(boolean verbose) {
         DiscoveryManagement ldm = sdm.getDiscoveryManager();
-        return super.toString() + " sdm=" + Integer.toHexString(sdm.hashCode()) +" ldm=" + Integer.toHexString(ldm.hashCode());
+        String message = super.toString() +
+                " sdm=" + Integer.toHexString(sdm.hashCode()) +
+                " ldm=" + Integer.toHexString(ldm.hashCode());
+        if (verbose)
+            message += " groups=" + Arrays.toString(getGroups()) + " locators=" + Arrays.toString(getLocators());
+        return message;
     }
 }

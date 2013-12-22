@@ -412,8 +412,9 @@ public class DefaultAdmin implements InternalAdmin {
         scheduledAgentProcessessMonitorFuture = scheduleWithFixedDelay(new ScheduledAgentProcessessMonitor(),
                 scheduledAgentProcessessMonitorInterval, scheduledAgentProcessessMonitorInterval, TimeUnit.MILLISECONDS);
         
-        if (logger.isDebugEnabled()) {
-            logger.debug("Admin started " + this.hashCode() + "discoveryService=" + this.discoveryService.toString());
+        if (logger.isInfoEnabled()) {
+            logger.info("Admin started " + this.hashCode() +
+                    " discoveryService=" + this.discoveryService.toString(true));
         }
 
         
