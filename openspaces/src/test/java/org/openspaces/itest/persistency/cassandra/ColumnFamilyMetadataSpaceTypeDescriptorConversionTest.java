@@ -10,7 +10,7 @@ import org.openspaces.itest.persistency.common.data.TestPojo2;
 import org.openspaces.itest.persistency.common.data.TestPojo3;
 import org.openspaces.itest.persistency.common.data.TestPojo4;
 import org.openspaces.itest.persistency.common.mock.MockIntroduceTypeData;
-import org.openspaces.utest.persistency.cassandra.meta.mapping.TestSpaceTypeDescriptorUtils;
+import org.openspaces.utest.persistency.common.TestSpaceTypeDescriptorUtils;
 
 import com.gigaspaces.annotation.pojo.FifoSupport;
 import com.gigaspaces.datasource.DataIterator;

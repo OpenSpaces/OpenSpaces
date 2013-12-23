@@ -1,4 +1,4 @@
-package org.openspaces.utest.persistency.cassandra.meta.mapping;
+package org.openspaces.utest.persistency.common;
 
 import junit.framework.Assert;
 

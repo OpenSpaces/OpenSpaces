@@ -11,6 +11,7 @@ import com.gigaspaces.metadata.SpaceTypeDescriptorBuilder;
 import com.gigaspaces.metadata.StorageType;
 import com.gigaspaces.metadata.index.SpaceIndexType;
 import org.openspaces.persistency.support.SpaceTypeDescriptorContainer;
+import org.openspaces.utest.persistency.common.TestSpaceTypeDescriptorUtils;
 
 public class SpaceTypeDescriptorDataHolderTest
 {
