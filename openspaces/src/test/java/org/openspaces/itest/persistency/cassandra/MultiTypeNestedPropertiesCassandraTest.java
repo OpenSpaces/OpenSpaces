@@ -4,9 +4,9 @@ import java.util.Date;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.openspaces.itest.persistency.cassandra.data.MyCassandraPojo1;
-import org.openspaces.itest.persistency.cassandra.data.MyCassandraPojo3;
-import org.openspaces.itest.persistency.cassandra.data.MyCassandraPojo4;
+import org.openspaces.itest.persistency.common.data.TestPojo1;
+import org.openspaces.itest.persistency.common.data.TestPojo3;
+import org.openspaces.itest.persistency.common.data.TestPojo4;
 import org.openspaces.itest.persistency.cassandra.data.MyCassandraSpaceDocumentFactory;
 import org.openspaces.itest.persistency.common.mock.MockAddIndexData;
 import org.openspaces.itest.persistency.common.mock.MockDataSourceQuery;
@@ -26,11 +26,11 @@ public class MultiTypeNestedPropertiesCassandraTest extends AbstractCassandraTes
 
     private SpaceDocument _topLevelSpaceDocument; 
     
-    private final MyCassandraPojo3 _pojoInsidePojo = createPojoInsidePojo();
+    private final TestPojo3 _pojoInsidePojo = createPojoInsidePojo();
     
     private final SpaceDocument _pojoInsideDocument = createPojoInsideDocument();
     
-    private final MyCassandraPojo1 _documentInsidePojo = createDocumentInsidePojo();
+    private final TestPojo1 _documentInsidePojo = createDocumentInsidePojo();
     
     private final SpaceDocument _documentInsideDocument = createDocumentInsideDocument();
 
@@ -97,13 +97,13 @@ public class MultiTypeNestedPropertiesCassandraTest extends AbstractCassandraTes
         // Test queries
         assertValidQuery("pojoInsidePojo.name = ?", _pojoInsidePojo.getName());
         assertValidQuery("pojoInsidePojo.age = ?", _pojoInsidePojo.getAge());
-        assertValidQuery("pojoInsidePojo.cassandraPojo4_1.dateProperty = ?", _pojoInsidePojo.getCassandraPojo4_1().getDateProperty());
+        assertValidQuery("pojoInsidePojo.cassandraPojo4_1.dateProperty = ?", _pojoInsidePojo.getPojo4_1().getDateProperty());
         
         assertValidQuery("pojoInsideDocument.intProperty = ?", _pojoInsideDocument.getProperty("intProperty"));
         assertValidQuery("pojoInsideDocument.myCassandraPojo4.longProperty = ?", 
-             ((MyCassandraPojo4)_pojoInsideDocument.getProperty("myCassandraPojo4")).getLongProperty());
+             ((TestPojo4)_pojoInsideDocument.getProperty("myCassandraPojo4")).getLongProperty());
         assertValidQuery("pojoInsideDocument.myCassandraPojo4.dateProperty = ?", 
-                         ((MyCassandraPojo4)_pojoInsideDocument.getProperty("myCassandraPojo4")).getDateProperty());
+                         ((TestPojo4)_pojoInsideDocument.getProperty("myCassandraPojo4")).getDateProperty());
         
         assertValidQuery("documentInsidePojo.str = ?", _documentInsidePojo.getStr());
         assertValidQuery("documentInsidePojo.spaceDocument.firstName = ?", _documentInsidePojo.getSpaceDocument().getProperty("firstName"));
@@ -119,7 +119,7 @@ public class MultiTypeNestedPropertiesCassandraTest extends AbstractCassandraTes
 
         assertValidQuery("pojoInsidePojoInsideDocument.myCassandraPojo3.name = ?", _pojoInsidePojo.getName());
         assertValidQuery("pojoInsidePojoInsideDocument.myCassandraPojo3.age = ?", _pojoInsidePojo.getAge());
-        assertValidQuery("pojoInsidePojoInsideDocument.myCassandraPojo3.cassandraPojo4_1.dateProperty = ?", _pojoInsidePojo.getCassandraPojo4_1().getDateProperty());
+        assertValidQuery("pojoInsidePojoInsideDocument.myCassandraPojo3.cassandraPojo4_1.dateProperty = ?", _pojoInsidePojo.getPojo4_1().getDateProperty());
         
     }
     
@@ -151,7 +151,7 @@ public class MultiTypeNestedPropertiesCassandraTest extends AbstractCassandraTes
 //        SpaceDocument cassandraPojo4_1AsDocument = myCassandraPojo3AsDocument.getProperty("cassandraPojo4_1");
 //        Assert.assertEquals(_pojoInsidePojo.getName(), myCassandraPojo3AsDocument.getProperty("name"));
 //        Assert.assertEquals(_pojoInsidePojo.getAge(), myCassandraPojo3AsDocument.getProperty("age"));
-//        Assert.assertEquals(_pojoInsidePojo.getCassandraPojo4_1().getDateProperty(), 
+//        Assert.assertEquals(_pojoInsidePojo.getPojo4_1().getDateProperty(),
 //                            cassandraPojo4_1AsDocument.getProperty("dateProperty"));
         
     }
@@ -173,16 +173,16 @@ public class MultiTypeNestedPropertiesCassandraTest extends AbstractCassandraTes
             .setProperty("documentInsideDocument", _documentInsideDocument);
     }
     
-    private MyCassandraPojo3 createPojoInsidePojo()
+    private TestPojo3 createPojoInsidePojo()
     {
-        MyCassandraPojo3 pojo3 = new MyCassandraPojo3();
+        TestPojo3 pojo3 = new TestPojo3();
         pojo3.setAge(15);
         pojo3.setName("dank");
-        MyCassandraPojo4 cassandraPojo4_1 = new MyCassandraPojo4();
+        TestPojo4 cassandraPojo4_1 = new TestPojo4();
         cassandraPojo4_1.setDateProperty(new Date(123));
         cassandraPojo4_1.setLongProperty(null);
-        pojo3.setCassandraPojo4_1(cassandraPojo4_1);
-        pojo3.setCassandraPojo4_2(null);
+        pojo3.setPojo4_1(cassandraPojo4_1);
+        pojo3.setPojo4_2(null);
         return pojo3;
     }
 
@@ -195,9 +195,9 @@ public class MultiTypeNestedPropertiesCassandraTest extends AbstractCassandraTes
                                                                    false));
     }
 
-    private MyCassandraPojo1 createDocumentInsidePojo()
+    private TestPojo1 createDocumentInsidePojo()
     {
-        MyCassandraPojo1 pojo1 = new MyCassandraPojo1();
+        TestPojo1 pojo1 = new TestPojo1();
         pojo1.setStr("this is a string");
         pojo1.setSpaceDocument(
             MyCassandraSpaceDocumentFactory.getMyCassandraDocument1("dan dan", "kilman kilman"));
@@ -206,7 +206,7 @@ public class MultiTypeNestedPropertiesCassandraTest extends AbstractCassandraTes
 
     private SpaceDocument createPojoInsideDocument()
     {
-        MyCassandraPojo4 pojo4 = new MyCassandraPojo4();
+        TestPojo4 pojo4 = new TestPojo4();
         pojo4.setDateProperty(new Date(123123));
         pojo4.setLongProperty(1555l);
         return MyCassandraSpaceDocumentFactory.getMyCassandraDocument4(89, pojo4);
@@ -214,7 +214,7 @@ public class MultiTypeNestedPropertiesCassandraTest extends AbstractCassandraTes
     }
     
     private SpaceDocument createPojoInsidePojoInsideDocument(
-            MyCassandraPojo3 pojoInsidePojo)
+            TestPojo3 pojoInsidePojo)
     {
         return MyCassandraSpaceDocumentFactory.getMyCassandraDocument6(pojoInsidePojo);
     }

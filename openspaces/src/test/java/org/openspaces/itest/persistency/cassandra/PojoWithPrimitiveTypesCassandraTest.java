@@ -3,7 +3,7 @@ package org.openspaces.itest.persistency.cassandra;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openspaces.itest.persistency.cassandra.data.MyCassandraPojoWithPrimitives;
+import org.openspaces.itest.persistency.common.data.TestPojoWithPrimitives;
 import org.openspaces.itest.persistency.common.mock.MockOperationsBatchDataBuilder;
 
 import com.gigaspaces.datasource.DataIterator;
@@ -47,9 +47,9 @@ public class PojoWithPrimitiveTypesCassandraTest extends AbstractCassandraTest
             .setProperty(fixedPropertyName , createPojo());
     }
     
-    private MyCassandraPojoWithPrimitives createPojo()
+    private TestPojoWithPrimitives createPojo()
     {
-        MyCassandraPojoWithPrimitives result = new MyCassandraPojoWithPrimitives();
+        TestPojoWithPrimitives result = new TestPojoWithPrimitives();
         
         result.setBooleanProperty(true);
         result.setByteProperty((byte)1);

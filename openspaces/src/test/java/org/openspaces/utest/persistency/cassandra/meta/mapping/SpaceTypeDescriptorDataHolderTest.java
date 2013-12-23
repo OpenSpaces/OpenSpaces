@@ -1,8 +1,8 @@
 package org.openspaces.utest.persistency.cassandra.meta.mapping;
 
 import org.junit.Test;
-import org.openspaces.itest.persistency.cassandra.data.MyCassandraDocumentWrapper;
-import org.openspaces.itest.persistency.cassandra.data.MyCassandraDocumentWrapper2;
+import org.openspaces.itest.persistency.common.data.TestDocumentWrapper;
+import org.openspaces.itest.persistency.common.data.TestDocumentWrapper2;
 import org.openspaces.persistency.cassandra.meta.mapping.SpaceTypeDescriptorHolder;
 
 import com.gigaspaces.annotation.pojo.FifoSupport;
@@ -176,11 +176,11 @@ public class SpaceTypeDescriptorDataHolderTest
         {
             public void doWithSuper(SpaceTypeDescriptorBuilder builder)
             {
-                builder.documentWrapperClass(MyCassandraDocumentWrapper.class);
+                builder.documentWrapperClass(TestDocumentWrapper.class);
             }
             public void doWithSub(SpaceTypeDescriptorBuilder builder)
             {
-                builder.documentWrapperClass(MyCassandraDocumentWrapper2.class);
+                builder.documentWrapperClass(TestDocumentWrapper2.class);
             }
         });
     }

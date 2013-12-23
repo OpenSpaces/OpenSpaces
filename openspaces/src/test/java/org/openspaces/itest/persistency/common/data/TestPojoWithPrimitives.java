@@ -1,9 +1,26 @@
-package org.openspaces.itest.persistency.cassandra.data;
+/*******************************************************************************
+ *
+ * Copyright (c) 2013 GigaSpaces Technologies Ltd. All rights reserved
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ ******************************************************************************/
+package org.openspaces.itest.persistency.common.data;
 
 import java.util.Arrays;
 
-public class MyCassandraPojoWithPrimitives
-{
+public class TestPojoWithPrimitives {
+
     private boolean booleanProperty;
     private byte byteProperty;
     private char charProperty;
@@ -184,7 +201,7 @@ public class MyCassandraPojoWithPrimitives
             return false;
         if (getClass() != obj.getClass())
             return false;
-        MyCassandraPojoWithPrimitives other = (MyCassandraPojoWithPrimitives) obj;
+        TestPojoWithPrimitives other = (TestPojoWithPrimitives) obj;
         if (!Arrays.equals(booleanArrayProperty, other.booleanArrayProperty))
             return false;
         if (booleanProperty != other.booleanProperty)
@@ -246,7 +263,7 @@ public class MyCassandraPojoWithPrimitives
 //            return false;
 //        if (getClass() != obj.getClass())
 //            return false;
-//        MyCassandraPojoWithPrimitives other = (MyCassandraPojoWithPrimitives) obj;
+//        TestPojoWithPrimitives other = (TestPojoWithPrimitives) obj;
 //        if (booleanProperty != other.booleanProperty)
 //            return false;
 //        if (byteProperty != other.byteProperty)
@@ -265,7 +282,4 @@ public class MyCassandraPojoWithPrimitives
 //            return false;
 //        return true;
 //    }
-    
-    
-    
 }

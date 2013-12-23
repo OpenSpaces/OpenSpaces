@@ -4,7 +4,7 @@ import junit.framework.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.openspaces.itest.persistency.cassandra.data.MyCassandraPojo2;
+import org.openspaces.itest.persistency.common.data.TestPojo2;
 import org.openspaces.itest.persistency.common.mock.MockDataSourceIdQuery;
 import org.openspaces.itest.persistency.common.mock.MockOperationsBatchDataBuilder;
 
@@ -14,7 +14,7 @@ import com.gigaspaces.sync.IntroduceTypeData;
 public class ReadByIdWithPropertyAddedLaterCassandraTest extends AbstractCassandraTest
 {
     private final String           keyName       = "key";
-    private final MyCassandraPojo2 keyValue      = new MyCassandraPojo2("dank",
+    private final TestPojo2 keyValue      = new TestPojo2("dank",
                                                                         13);
     private final String           someProp      = "some_prop";
     private final boolean          somePropValue = true;

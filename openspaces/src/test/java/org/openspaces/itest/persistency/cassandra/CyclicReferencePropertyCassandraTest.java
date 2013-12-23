@@ -6,8 +6,8 @@ import java.util.Set;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openspaces.itest.persistency.cassandra.data.MyCassandraCyclicPojoButtom;
-import org.openspaces.itest.persistency.cassandra.data.MyCassandraCyclicPojoTop;
+import org.openspaces.itest.persistency.common.data.TestPojoCyclicBottom;
+import org.openspaces.itest.persistency.common.data.TestPojoCyclicTop;
 import org.openspaces.itest.persistency.common.mock.MockDataSourceQuery;
 import org.openspaces.itest.persistency.common.mock.MockDataSourceSqlQuery;
 import org.openspaces.itest.persistency.common.mock.MockIntroduceTypeData;
@@ -30,16 +30,16 @@ public class CyclicReferencePropertyCassandraTest extends AbstractCassandraTest
         
         SpaceDocument indexes = new SpaceDocument("indexes")
             .setProperty("top.number", null)
-            .setProperty("top.buttom.number", null)
-            .setProperty("top.buttom.top.number", null)
-            .setProperty("top.buttom.top.buttom.number", null)
-            .setProperty("top.buttom.top.buttom.top.number", null)
-            .setProperty("top.buttom.top.buttom.top.buttom.number", null)
-            .setProperty("top.buttom.top.buttom.top.buttom.top.number", null)
-            .setProperty("top.buttom.top.buttom.top.buttom.top.buttom.number", null)
-            .setProperty("top.buttom.top.buttom.top.buttom.top.buttom.top.number", null)
-            .setProperty("top.buttom.top.buttom.top.buttom.top.buttom.top.buttom.number", null)
-            .setProperty("top.buttom.top.buttom.top.buttom.top.buttom.top.buttom.top.number", null);
+            .setProperty("top.bottom.number", null)
+            .setProperty("top.bottom.top.number", null)
+            .setProperty("top.bottom.top.bottom.number", null)
+            .setProperty("top.bottom.top.bottom.top.number", null)
+            .setProperty("top.bottom.top.bottom.top.bottom.number", null)
+            .setProperty("top.bottom.top.bottom.top.bottom.top.number", null)
+            .setProperty("top.bottom.top.bottom.top.bottom.top.bottom.number", null)
+            .setProperty("top.bottom.top.bottom.top.bottom.top.bottom.top.number", null)
+            .setProperty("top.bottom.top.bottom.top.bottom.top.bottom.top.bottom.number", null)
+            .setProperty("top.bottom.top.bottom.top.bottom.top.bottom.top.bottom.top.number", null);
         
         MockIntroduceTypeData typeData = createIntroduceTypeDataFromSpaceDocument(_topLevelSpaceDocument, "key", indexes.getProperties().keySet());
         _typeDescriptor = typeData.getTypeDescriptor();
@@ -58,16 +58,16 @@ public class CyclicReferencePropertyCassandraTest extends AbstractCassandraTest
     {
         assertNestingLevel ("");
         assertNestingLevel ("top.number = ?");
-        assertNestingLevel ("top.buttom.number = ?");
-        assertNestingLevel ("top.buttom.top.number = ?");
-        assertNestingLevel ("top.buttom.top.buttom.number = ?");
-        assertNestingLevel ("top.buttom.top.buttom.top.number = ?");
-        assertNestingLevel ("top.buttom.top.buttom.top.buttom.number = ?");
-        assertNestingLevel ("top.buttom.top.buttom.top.buttom.top.number = ?");
-        assertNestingLevel ("top.buttom.top.buttom.top.buttom.top.buttom.number = ?");
-        assertNestingLevel ("top.buttom.top.buttom.top.buttom.top.buttom.top.number = ?");
-        assertNestingLevel ("top.buttom.top.buttom.top.buttom.top.buttom.top.buttom.number = ?");
-        assertEntryNotFound("top.buttom.top.buttom.top.buttom.top.buttom.top.buttom.top.number = ?");
+        assertNestingLevel ("top.bottom.number = ?");
+        assertNestingLevel ("top.bottom.top.number = ?");
+        assertNestingLevel ("top.bottom.top.bottom.number = ?");
+        assertNestingLevel ("top.bottom.top.bottom.top.number = ?");
+        assertNestingLevel ("top.bottom.top.bottom.top.bottom.number = ?");
+        assertNestingLevel ("top.bottom.top.bottom.top.bottom.top.number = ?");
+        assertNestingLevel ("top.bottom.top.bottom.top.bottom.top.bottom.number = ?");
+        assertNestingLevel ("top.bottom.top.bottom.top.bottom.top.bottom.top.number = ?");
+        assertNestingLevel ("top.bottom.top.bottom.top.bottom.top.bottom.top.bottom.number = ?");
+        assertEntryNotFound("top.bottom.top.bottom.top.bottom.top.bottom.top.bottom.top.number = ?");
     }
     
     private void assertEntryNotFound(String query)
@@ -82,12 +82,12 @@ public class CyclicReferencePropertyCassandraTest extends AbstractCassandraTest
         DataIterator<Object> iterator = getDataIterator(query);
         Assert.assertTrue("Missing result", iterator.hasNext());
         SpaceDocument result = (SpaceDocument) iterator.next();
-        MyCassandraCyclicPojoTop top = result.getProperty("top");
-        MyCassandraCyclicPojoButtom buttom = null;
+        TestPojoCyclicTop top = result.getProperty("top");
+        TestPojoCyclicBottom buttom = null;
         
         // top is no longer cyclic
-        Set<MyCassandraCyclicPojoTop> tops = new HashSet<MyCassandraCyclicPojoTop>();
-        Set<MyCassandraCyclicPojoButtom> buttoms = new HashSet<MyCassandraCyclicPojoButtom>();
+        Set<TestPojoCyclicTop> tops = new HashSet<TestPojoCyclicTop>();
+        Set<TestPojoCyclicBottom> buttoms = new HashSet<TestPojoCyclicBottom>();
         
         boolean currentlyTop = true;
         while (true)
@@ -97,7 +97,7 @@ public class CyclicReferencePropertyCassandraTest extends AbstractCassandraTest
                 if (!tops.add(top))
                     break;
                 currentlyTop = false;
-                buttom = top.getButtom();
+                buttom = top.getBottom();
             }
             else
             {
@@ -124,9 +124,9 @@ public class CyclicReferencePropertyCassandraTest extends AbstractCassandraTest
     
     private SpaceDocument createTopLevelDocument()
     {
-        MyCassandraCyclicPojoTop top = new MyCassandraCyclicPojoTop();
-        MyCassandraCyclicPojoButtom buttom = new MyCassandraCyclicPojoButtom();
-        top.setButtom(buttom);
+        TestPojoCyclicTop top = new TestPojoCyclicTop();
+        TestPojoCyclicBottom buttom = new TestPojoCyclicBottom();
+        top.setBottom(buttom);
         buttom.setTop(top);
         return new SpaceDocument("CyclicRefernceType")
             .setProperty("key", random.nextLong())

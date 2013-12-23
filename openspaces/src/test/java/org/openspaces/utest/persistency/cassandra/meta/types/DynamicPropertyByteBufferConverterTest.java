@@ -7,7 +7,7 @@ import java.util.UUID;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.openspaces.itest.persistency.cassandra.data.MyCassandraPojo1;
+import org.openspaces.itest.persistency.common.data.TestPojo1;
 import org.openspaces.persistency.cassandra.meta.types.dynamic.DynamicPropertyValueSerializer;
 
 
@@ -33,7 +33,7 @@ public class DynamicPropertyByteBufferConverterTest
         test((short)12323);
         test(UUID.randomUUID());
         test(new Date(123456789));
-        test(new MyCassandraPojo1("some string"));
+        test(new TestPojo1("some string"));
         test(new BigInteger("123123"));
         test(new BigDecimal(new BigInteger("123213213")));
         test(new byte[] { 1, 2, 3, 4 });

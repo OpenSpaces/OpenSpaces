@@ -8,7 +8,7 @@ import junit.framework.Assert;
 import org.apache.cassandra.cql.jdbc.CassandraDataSource;
 import org.junit.Before;
 import org.junit.Test;
-import org.openspaces.itest.persistency.cassandra.data.MyCassandraPojo1;
+import org.openspaces.itest.persistency.common.data.TestPojo1;
 import org.openspaces.itest.persistency.common.mock.MockDataSourceQuery;
 import org.openspaces.itest.persistency.common.mock.MockOperationsBatchDataBuilder;
 import org.openspaces.persistency.cassandra.CassandraSpaceDataSource;
@@ -37,11 +37,11 @@ public class CustomSerializersCassandraTest extends AbstractCassandraTest
     private final String primitiveFixedPropName = "primitiveFixedProp";
     private final Integer primitiveFixedPropValue = 123123;
     private final String objectFixedPropName = "objectFixedProp";
-    private final MyCassandraPojo1 objectFixedPropValue = new MyCassandraPojo1("123123");
+    private final TestPojo1 objectFixedPropValue = new TestPojo1("123123");
     private final String primitiveDynamicPropName = "primitiveDynamicProp";
     private final Integer primitiveDynamicPropValue = 333333;
     private final String objectDynamicPropName = "dynProp";
-    private final MyCassandraPojo1 objectDynamicPropValue = new MyCassandraPojo1("123");
+    private final TestPojo1 objectDynamicPropValue = new TestPojo1("123");
     
     private IntroduceTypeData introduceDataType;
     

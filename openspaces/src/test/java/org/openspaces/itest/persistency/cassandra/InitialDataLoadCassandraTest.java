@@ -13,7 +13,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
-import org.openspaces.itest.persistency.cassandra.data.MyCassandraPojo2;
+import org.openspaces.itest.persistency.common.data.TestPojo2;
 import org.openspaces.itest.persistency.common.mock.MockOperationsBatchDataBuilder;
 import org.openspaces.persistency.cassandra.CassandraSpaceDataSource;
 import org.openspaces.persistency.cassandra.HectorCassandraClient;
@@ -174,7 +174,7 @@ public class InitialDataLoadCassandraTest extends AbstractCassandraTest
     {
         public Object getKey()
         {
-            return new MyCassandraPojo2("name", random.nextInt());
+            return new TestPojo2("name", random.nextInt());
         }
         
     }

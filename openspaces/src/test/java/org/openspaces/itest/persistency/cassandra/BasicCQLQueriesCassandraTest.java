@@ -10,7 +10,7 @@ import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.openspaces.itest.persistency.cassandra.data.MyCassandraPojo2;
+import org.openspaces.itest.persistency.common.data.TestPojo2;
 import org.openspaces.itest.persistency.common.mock.MockDataSourceQuery;
 import org.openspaces.itest.persistency.common.mock.MockDataSourceSqlQuery;
 import org.openspaces.itest.persistency.common.mock.MockIntroduceTypeData;
@@ -63,7 +63,7 @@ public class BasicCQLQueriesCassandraTest extends AbstractCassandraTest
     private static final String           DYNAMIC_COL_9_AGE      = DYNAMIC_COL_9
                                                                          + ".age";
     private static final Integer              DYNAMIC_COL_9_AGE_VAL  = 77;
-    private static final MyCassandraPojo2 DYNAMIC_COL_9_VAL      = new MyCassandraPojo2(DYNAMIC_COL_9_NAME_VAL,
+    private static final TestPojo2 DYNAMIC_COL_9_VAL      = new TestPojo2(DYNAMIC_COL_9_NAME_VAL,
                                                                                         DYNAMIC_COL_9_AGE_VAL);
     
     @Before
