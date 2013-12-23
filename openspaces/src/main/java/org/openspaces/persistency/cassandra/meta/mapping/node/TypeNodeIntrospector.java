@@ -34,6 +34,7 @@ import com.gigaspaces.document.SpaceDocument;
 import com.gigaspaces.metadata.SpaceDocumentSupport;
 import com.gigaspaces.metadata.SpacePropertyDescriptor;
 import com.gigaspaces.metadata.SpaceTypeDescriptor;
+import org.openspaces.persistency.support.ProcedureCache;
 
 /**
  * @since 9.1.1
