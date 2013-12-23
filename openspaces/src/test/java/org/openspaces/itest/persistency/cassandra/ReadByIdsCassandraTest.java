@@ -8,7 +8,7 @@ import junit.framework.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.openspaces.itest.persistency.cassandra.mock.MockOperationsBatchDataBuilder;
+import org.openspaces.itest.persistency.common.mock.MockOperationsBatchDataBuilder;
 
 import com.gigaspaces.datasource.DataIterator;
 import com.gigaspaces.datasource.DataSourceIdsQuery;

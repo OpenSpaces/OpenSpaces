@@ -9,7 +9,7 @@ import junit.framework.Assert;
 import org.apache.cassandra.cql.jdbc.CassandraDataSource;
 import org.junit.Before;
 import org.junit.Test;
-import org.openspaces.itest.persistency.cassandra.mock.MockOperationsBatchDataBuilder;
+import org.openspaces.itest.persistency.common.mock.MockOperationsBatchDataBuilder;
 import org.openspaces.persistency.cassandra.CassandraSpaceDataSource;
 import org.openspaces.persistency.cassandra.HectorCassandraClient;
 

@@ -6,7 +6,7 @@ import java.util.concurrent.BlockingQueue;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.openspaces.itest.persistency.cassandra.mock.MockIntroduceTypeData;
+import org.openspaces.itest.persistency.common.mock.MockIntroduceTypeData;
 import org.openspaces.persistency.cassandra.CassandraSpaceSynchronizationEndpoint;
 import org.openspaces.persistency.cassandra.HectorCassandraClient;
 

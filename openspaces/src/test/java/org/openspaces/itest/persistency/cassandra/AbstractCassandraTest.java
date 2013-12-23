@@ -8,7 +8,7 @@ import java.util.Set;
 import org.apache.cassandra.cql.jdbc.CassandraDataSource;
 import org.junit.After;
 import org.junit.Before;
-import org.openspaces.itest.persistency.cassandra.mock.MockIntroduceTypeData;
+import org.openspaces.itest.persistency.common.mock.MockIntroduceTypeData;
 import org.openspaces.persistency.cassandra.CassandraSpaceDataSource;
 import org.openspaces.persistency.cassandra.CassandraSpaceSynchronizationEndpoint;
 import org.openspaces.persistency.cassandra.CassandraSpaceSynchronizationEndpointConfigurer;

@@ -11,12 +11,12 @@ import java.util.UUID;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.openspaces.itest.persistency.cassandra.mock.MockAddIndexData;
-import org.openspaces.itest.persistency.cassandra.mock.MockDataSourceIdQuery;
-import org.openspaces.itest.persistency.cassandra.mock.MockDataSourceQuery;
-import org.openspaces.itest.persistency.cassandra.mock.MockIntroduceTypeData;
-import org.openspaces.itest.persistency.cassandra.mock.MockOperationsBatchDataBuilder;
-import org.openspaces.itest.persistency.cassandra.mock.MockSpaceIndex;
+import org.openspaces.itest.persistency.common.mock.MockAddIndexData;
+import org.openspaces.itest.persistency.common.mock.MockDataSourceIdQuery;
+import org.openspaces.itest.persistency.common.mock.MockDataSourceQuery;
+import org.openspaces.itest.persistency.common.mock.MockIntroduceTypeData;
+import org.openspaces.itest.persistency.common.mock.MockOperationsBatchDataBuilder;
+import org.openspaces.itest.persistency.common.mock.MockSpaceIndex;
 
 import com.gigaspaces.datasource.DataIterator;
 import com.gigaspaces.datasource.DataSourceQuery;

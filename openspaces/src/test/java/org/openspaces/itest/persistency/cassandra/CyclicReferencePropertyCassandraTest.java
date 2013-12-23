@@ -8,10 +8,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openspaces.itest.persistency.cassandra.data.MyCassandraCyclicPojoButtom;
 import org.openspaces.itest.persistency.cassandra.data.MyCassandraCyclicPojoTop;
-import org.openspaces.itest.persistency.cassandra.mock.MockDataSourceQuery;
-import org.openspaces.itest.persistency.cassandra.mock.MockDataSourceSqlQuery;
-import org.openspaces.itest.persistency.cassandra.mock.MockIntroduceTypeData;
-import org.openspaces.itest.persistency.cassandra.mock.MockOperationsBatchDataBuilder;
+import org.openspaces.itest.persistency.common.mock.MockDataSourceQuery;
+import org.openspaces.itest.persistency.common.mock.MockDataSourceSqlQuery;
+import org.openspaces.itest.persistency.common.mock.MockIntroduceTypeData;
+import org.openspaces.itest.persistency.common.mock.MockOperationsBatchDataBuilder;
 
 import com.gigaspaces.datasource.DataIterator;
 import com.gigaspaces.document.SpaceDocument;
