@@ -33,7 +33,6 @@ import org.openspaces.persistency.cassandra.error.SpaceCassandraDataSourceExcept
 import org.openspaces.persistency.cassandra.meta.ColumnFamilyMetadata;
 import org.openspaces.persistency.cassandra.meta.mapping.DefaultSpaceDocumentColumnFamilyMapper;
 import org.openspaces.persistency.cassandra.meta.mapping.SpaceDocumentColumnFamilyMapper;
-import org.openspaces.persistency.cassandra.meta.mapping.SpaceTypeDescriptorHolder;
 import org.openspaces.persistency.cassandra.meta.mapping.TypeHierarcyTopologySorter;
 import org.openspaces.persistency.cassandra.meta.types.dynamic.PropertyValueSerializer;
 import org.openspaces.persistency.cassandra.pool.ConnectionResource;
@@ -53,6 +52,7 @@ import com.j_spaces.kernel.pool.IResourceFactory;
 import com.j_spaces.kernel.pool.IResourcePool;
 import com.j_spaces.kernel.pool.IResourceProcedure;
 import com.j_spaces.kernel.pool.ResourcePool;
+import org.openspaces.persistency.support.SpaceTypeDescriptorContainer;
 
 /**
  * 
@@ -261,7 +261,7 @@ public class CassandraSpaceDataSource
             logger.debug(sb.toString());
         }
         
-        Map<String, SpaceTypeDescriptorHolder> typeDescriptors = new HashMap<String, SpaceTypeDescriptorHolder>();
+        Map<String, SpaceTypeDescriptorContainer> typeDescriptors = new HashMap<String, SpaceTypeDescriptorContainer>();
         
         for (ColumnFamilyMetadata metadata : columnFamilies.values()) {
             typeDescriptors.put(metadata.getTypeName(), metadata.getTypeDescriptorData());

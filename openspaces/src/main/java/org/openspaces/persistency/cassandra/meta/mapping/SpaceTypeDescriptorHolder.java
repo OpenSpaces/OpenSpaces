@@ -15,15 +15,8 @@
  *******************************************************************************/
 package org.openspaces.persistency.cassandra.meta.mapping;
 
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-import java.io.Serializable;
-
-import com.gigaspaces.internal.io.IOUtils;
 import com.gigaspaces.metadata.SpaceTypeDescriptor;
-import com.gigaspaces.metadata.SpaceTypeDescriptorVersionedSerializationUtils;
+import org.openspaces.persistency.support.SpaceTypeDescriptorContainer;
 
 /**
  * A {@link SpaceTypeDescriptor} holder which serializes/deserializes its underlying {@link SpaceTypeDescriptor}
@@ -32,46 +25,16 @@ import com.gigaspaces.metadata.SpaceTypeDescriptorVersionedSerializationUtils;
  * @since 9.1.1
  * @author Dan Kilman
  */
-public class SpaceTypeDescriptorHolder implements Externalizable {
+public class SpaceTypeDescriptorHolder extends SpaceTypeDescriptorContainer {
     
     private static final long serialVersionUID = 1L;
 
-    private SpaceTypeDescriptor spaceTypeDescriptor;
-    
-    /* Externalizable */
+    /** Required for Externalizable */
     public SpaceTypeDescriptorHolder() {
-        
+        super();
     }
     
     public SpaceTypeDescriptorHolder(SpaceTypeDescriptor typeDescriptor) {
-        spaceTypeDescriptor = typeDescriptor;
+        super(typeDescriptor);
     }
-    
-    public String getTypeName() {
-        return spaceTypeDescriptor.getTypeName();
-    }
-
-    public String getSuperTypeName() {
-        return spaceTypeDescriptor.getSuperTypeName();
-    }
-
-    public SpaceTypeDescriptor getTypeDescriptor() {
-        return spaceTypeDescriptor;
-    }
-    
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        IOUtils.writeObject(out, SpaceTypeDescriptorVersionedSerializationUtils
-                                         .toSerializableForm(spaceTypeDescriptor));
-    }
-
-    @Override
-    public void readExternal(ObjectInput in) throws IOException,
-            ClassNotFoundException {
-        Serializable typeDescriptorVersionedSerializableWrapper = IOUtils.readObject(in);
-        spaceTypeDescriptor = SpaceTypeDescriptorVersionedSerializationUtils
-                                      .fromSerializableForm(typeDescriptorVersionedSerializableWrapper);
-        
-    }
-    
 }

@@ -29,11 +29,11 @@ import me.prettyprint.hector.api.Serializer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.persistency.cassandra.meta.conversion.ColumnFamilyNameConverter;
-import org.openspaces.persistency.cassandra.meta.mapping.SpaceTypeDescriptorHolder;
 import org.openspaces.persistency.cassandra.meta.mapping.node.TopLevelTypeNode;
 import org.openspaces.persistency.cassandra.meta.types.SerializerProvider;
 
 import com.gigaspaces.internal.io.IOUtils;
+import org.openspaces.persistency.support.SpaceTypeDescriptorContainer;
 
 /**
  * @since 9.1.1
@@ -54,7 +54,7 @@ public class ColumnFamilyMetadata implements Externalizable {
     private transient String                                 keyName;
     private transient Class<?>                               keyType;
 
-    private SpaceTypeDescriptorHolder                        typeDescriptorData;
+    private SpaceTypeDescriptorContainer                     typeDescriptorData;
     private TopLevelTypeNode                                 topLevelTypeNode;
     private String                                           columnFamilyName;
     
@@ -66,8 +66,8 @@ public class ColumnFamilyMetadata implements Externalizable {
     public ColumnFamilyMetadata(
             TopLevelTypeNode topLevelTypeNode, 
             Set<String> initialIndexes, 
-            ColumnFamilyNameConverter columnFamilyNameConverter, 
-            SpaceTypeDescriptorHolder typeDescriptorData) { 
+            ColumnFamilyNameConverter columnFamilyNameConverter,
+            SpaceTypeDescriptorContainer typeDescriptorData) {
         this.topLevelTypeNode = topLevelTypeNode;
         this.typeDescriptorData = typeDescriptorData;
         if (initialIndexes != null) {
@@ -88,7 +88,7 @@ public class ColumnFamilyMetadata implements Externalizable {
         columns.putAll(topLevelTypeNode.getAllTypedColumnMetadataChildren());
     }
     
-    public SpaceTypeDescriptorHolder getTypeDescriptorData() {
+    public SpaceTypeDescriptorContainer getTypeDescriptorData() {
         return typeDescriptorData;
     }
     

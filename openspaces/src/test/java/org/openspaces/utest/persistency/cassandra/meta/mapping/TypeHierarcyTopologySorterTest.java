@@ -6,12 +6,12 @@ import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.openspaces.persistency.cassandra.meta.mapping.SpaceTypeDescriptorHolder;
 import org.openspaces.persistency.cassandra.meta.mapping.TypeHierarcyTopologySorter;
 
 import com.gigaspaces.annotation.pojo.SpaceId;
 import com.gigaspaces.metadata.SpaceTypeDescriptor;
 import com.gigaspaces.metadata.SpaceTypeDescriptorBuilder;
+import org.openspaces.persistency.support.SpaceTypeDescriptorContainer;
 
 public class TypeHierarcyTopologySorterTest
 {
@@ -37,28 +37,28 @@ public class TypeHierarcyTopologySorterTest
         SpaceTypeDescriptor desc9 = new SpaceTypeDescriptorBuilder("d9", desc8).create();
         SpaceTypeDescriptor desc10 = new SpaceTypeDescriptorBuilder("d10", desc8).create();
 
-        SpaceTypeDescriptorHolder holder_desc1 = new SpaceTypeDescriptorHolder(desc1);
-        SpaceTypeDescriptorHolder holder_desc2 = new SpaceTypeDescriptorHolder(desc2);
-        SpaceTypeDescriptorHolder holder_desc3 = new SpaceTypeDescriptorHolder(desc3);
-        SpaceTypeDescriptorHolder holder_desc4 = new SpaceTypeDescriptorHolder(desc4);
-        SpaceTypeDescriptorHolder holder_desc5 = new SpaceTypeDescriptorHolder(desc5);
-        SpaceTypeDescriptorHolder holder_desc6 = new SpaceTypeDescriptorHolder(desc6);
-        SpaceTypeDescriptorHolder holder_desc7 = new SpaceTypeDescriptorHolder(desc7);
-        SpaceTypeDescriptorHolder holder_desc8 = new SpaceTypeDescriptorHolder(desc8);
-        SpaceTypeDescriptorHolder holder_desc9 = new SpaceTypeDescriptorHolder(desc9);
-        SpaceTypeDescriptorHolder holder_desc10 = new SpaceTypeDescriptorHolder(desc10);
+        SpaceTypeDescriptorContainer container_desc1 = new SpaceTypeDescriptorContainer(desc1);
+        SpaceTypeDescriptorContainer container_desc2 = new SpaceTypeDescriptorContainer(desc2);
+        SpaceTypeDescriptorContainer container_desc3 = new SpaceTypeDescriptorContainer(desc3);
+        SpaceTypeDescriptorContainer container_desc4 = new SpaceTypeDescriptorContainer(desc4);
+        SpaceTypeDescriptorContainer container_desc5 = new SpaceTypeDescriptorContainer(desc5);
+        SpaceTypeDescriptorContainer container_desc6 = new SpaceTypeDescriptorContainer(desc6);
+        SpaceTypeDescriptorContainer container_desc7 = new SpaceTypeDescriptorContainer(desc7);
+        SpaceTypeDescriptorContainer container_desc8 = new SpaceTypeDescriptorContainer(desc8);
+        SpaceTypeDescriptorContainer container_desc9 = new SpaceTypeDescriptorContainer(desc9);
+        SpaceTypeDescriptorContainer container_desc10 = new SpaceTypeDescriptorContainer(desc10);
         
-        Map<String, SpaceTypeDescriptorHolder> typeDescriptorsData = new HashMap<String, SpaceTypeDescriptorHolder>();
-        typeDescriptorsData.put(holder_desc1.getTypeName(), holder_desc1);
-        typeDescriptorsData.put(holder_desc2.getTypeName(), holder_desc2);
-        typeDescriptorsData.put(holder_desc3.getTypeName(), holder_desc3);
-        typeDescriptorsData.put(holder_desc4.getTypeName(), holder_desc4);
-        typeDescriptorsData.put(holder_desc5.getTypeName(), holder_desc5);
-        typeDescriptorsData.put(holder_desc6.getTypeName(), holder_desc6);
-        typeDescriptorsData.put(holder_desc7.getTypeName(), holder_desc7);
-        typeDescriptorsData.put(holder_desc8.getTypeName(), holder_desc8);
-        typeDescriptorsData.put(holder_desc9.getTypeName(), holder_desc9);
-        typeDescriptorsData.put(holder_desc10.getTypeName(), holder_desc10);
+        Map<String, SpaceTypeDescriptorContainer> typeDescriptorsData = new HashMap<String, SpaceTypeDescriptorContainer>();
+        typeDescriptorsData.put(container_desc1.getTypeDescriptor().getTypeName(), container_desc1);
+        typeDescriptorsData.put(container_desc2.getTypeDescriptor().getTypeName(), container_desc2);
+        typeDescriptorsData.put(container_desc3.getTypeDescriptor().getTypeName(), container_desc3);
+        typeDescriptorsData.put(container_desc4.getTypeDescriptor().getTypeName(), container_desc4);
+        typeDescriptorsData.put(container_desc5.getTypeDescriptor().getTypeName(), container_desc5);
+        typeDescriptorsData.put(container_desc6.getTypeDescriptor().getTypeName(), container_desc6);
+        typeDescriptorsData.put(container_desc7.getTypeDescriptor().getTypeName(), container_desc7);
+        typeDescriptorsData.put(container_desc8.getTypeDescriptor().getTypeName(), container_desc8);
+        typeDescriptorsData.put(container_desc9.getTypeDescriptor().getTypeName(), container_desc9);
+        typeDescriptorsData.put(container_desc10.getTypeDescriptor().getTypeName(), container_desc10);
         
         List<SpaceTypeDescriptor> sortedList = TypeHierarcyTopologySorter.getSortedList(typeDescriptorsData);
         
@@ -77,14 +77,14 @@ public class TypeHierarcyTopologySorterTest
         SpaceTypeDescriptor bDesc = new SpaceTypeDescriptorBuilder(MyCassandraB.class, aDesc).create();
         SpaceTypeDescriptor cDesc = new SpaceTypeDescriptorBuilder(MyCassandraC.class, null).create();
         
-        SpaceTypeDescriptorHolder aDescHolder = new SpaceTypeDescriptorHolder(aDesc);
-        SpaceTypeDescriptorHolder bDescHolder = new SpaceTypeDescriptorHolder(bDesc);
-        SpaceTypeDescriptorHolder cDescHolder = new SpaceTypeDescriptorHolder(cDesc);
-        
-        Map<String, SpaceTypeDescriptorHolder> typeDescriptorsData = new HashMap<String, SpaceTypeDescriptorHolder>();
-        typeDescriptorsData.put(aDescHolder.getTypeName(), aDescHolder);
-        typeDescriptorsData.put(bDescHolder.getTypeName(), bDescHolder);
-        typeDescriptorsData.put(cDescHolder.getTypeName(), cDescHolder);
+        SpaceTypeDescriptorContainer aDescContainer = new SpaceTypeDescriptorContainer(aDesc);
+        SpaceTypeDescriptorContainer bDescContainer = new SpaceTypeDescriptorContainer(bDesc);
+        SpaceTypeDescriptorContainer cDescContainer = new SpaceTypeDescriptorContainer(cDesc);
+
+        Map<String, SpaceTypeDescriptorContainer> typeDescriptorsData = new HashMap<String, SpaceTypeDescriptorContainer>();
+        typeDescriptorsData.put(aDescContainer.getTypeDescriptor().getTypeName(), aDescContainer);
+        typeDescriptorsData.put(bDescContainer.getTypeDescriptor().getTypeName(), bDescContainer);
+        typeDescriptorsData.put(cDescContainer.getTypeDescriptor().getTypeName(), cDescContainer);
         
         List<SpaceTypeDescriptor> sortedList = TypeHierarcyTopologySorter.getSortedList(typeDescriptorsData);
 

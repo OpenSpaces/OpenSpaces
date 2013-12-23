@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.gigaspaces.metadata.SpaceTypeDescriptor;
+import org.openspaces.persistency.support.SpaceTypeDescriptorContainer;
 
 /**
  * A utility class used for sorting {@link SpaceTypeDescriptor} instances.
@@ -80,16 +81,16 @@ public class TypeHierarcyTopologySorter {
     }
 
     /**
-     * @param typeDescriptorHolders A map from type name to its matching {@link SpaceTypeDescriptorHolder}
+     * @param typeDescriptorContainers A map from type name to its matching {@link SpaceTypeDescriptorContainer}
      * @return A list of {@link SpaceTypeDescriptor} instances sorted in such way that super types will 
      * precede their sub types. 
      */
     public static List<SpaceTypeDescriptor> getSortedList(
-            Map<String, SpaceTypeDescriptorHolder> typeDescriptorHolders) {
+            Map<String, SpaceTypeDescriptorContainer> typeDescriptorContainers) {
         TypeHierarcyTopologySorter sorter = new TypeHierarcyTopologySorter();
-        for (SpaceTypeDescriptorHolder typeDescriptorHolder : typeDescriptorHolders.values())
-            sorter.addTypeName(typeDescriptorHolder.getTypeName(),
-                               typeDescriptorHolder.getSuperTypeName());
+        for (SpaceTypeDescriptorContainer typeDescriptorContainer : typeDescriptorContainers.values())
+            sorter.addTypeName(typeDescriptorContainer.getTypeDescriptor().getTypeName(),
+                    typeDescriptorContainer.getTypeDescriptor().getSuperTypeName());
 
         Map<String, TypeNameNode> allTypeNameNodes = sorter.nodes;
         TypeNameNode root = sorter.fixAndGetRoot();
@@ -97,32 +98,20 @@ public class TypeHierarcyTopologySorter {
         List<SpaceTypeDescriptor> result = new LinkedList<SpaceTypeDescriptor>();
 
         // root is java.lang.Object so we skip him
-        for (String typeName : root.children) {
-            addSelfThenChildren(typeName,
-                                typeDescriptorHolders,
-                                allTypeNameNodes,
-                                result);
-        }
-        
+        for (String typeName : root.children)
+            addSelfThenChildren(typeName, typeDescriptorContainers, allTypeNameNodes, result);
+
         return result;
     }
 
-    private static void addSelfThenChildren(
-            String typeName,
-            Map<String, SpaceTypeDescriptorHolder> 
-            typeDescriptorHolders,
-            Map<String, TypeNameNode> nodes, 
-            List<SpaceTypeDescriptor> result) {
-        SpaceTypeDescriptorHolder typeDescriptorData = typeDescriptorHolders.get(typeName);
-        SpaceTypeDescriptor typeDescriptor = typeDescriptorData.getTypeDescriptor();
+    private static void addSelfThenChildren(String typeName,
+                                            Map<String, SpaceTypeDescriptorContainer> typeDescriptorContainers,
+                                            Map<String, TypeNameNode> nodes,
+                                            List<SpaceTypeDescriptor> result) {
+        SpaceTypeDescriptor typeDescriptor = typeDescriptorContainers.get(typeName).getTypeDescriptor();
         result.add(typeDescriptor);
         TypeNameNode typeNameNode = nodes.get(typeName);
-        for (String childTypeName : typeNameNode.children) {
-            addSelfThenChildren(childTypeName, 
-                                typeDescriptorHolders, 
-                                nodes, 
-                                result);
-        }
+        for (String childTypeName : typeNameNode.children)
+            addSelfThenChildren(childTypeName, typeDescriptorContainers, nodes, result);
     }
-    
 }

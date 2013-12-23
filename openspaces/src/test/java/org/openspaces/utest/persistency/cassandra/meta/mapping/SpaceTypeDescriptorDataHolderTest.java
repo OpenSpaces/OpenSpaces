@@ -3,7 +3,6 @@ package org.openspaces.utest.persistency.cassandra.meta.mapping;
 import org.junit.Test;
 import org.openspaces.itest.persistency.common.data.TestDocumentWrapper;
 import org.openspaces.itest.persistency.common.data.TestDocumentWrapper2;
-import org.openspaces.persistency.cassandra.meta.mapping.SpaceTypeDescriptorHolder;
 
 import com.gigaspaces.annotation.pojo.FifoSupport;
 import com.gigaspaces.metadata.SpaceDocumentSupport;
@@ -11,6 +10,7 @@ import com.gigaspaces.metadata.SpaceTypeDescriptor;
 import com.gigaspaces.metadata.SpaceTypeDescriptorBuilder;
 import com.gigaspaces.metadata.StorageType;
 import com.gigaspaces.metadata.index.SpaceIndexType;
+import org.openspaces.persistency.support.SpaceTypeDescriptorContainer;
 
 public class SpaceTypeDescriptorDataHolderTest
 {
@@ -207,13 +207,13 @@ public class SpaceTypeDescriptorDataHolderTest
         SpaceTypeDescriptorBuilder superBuilder = new SpaceTypeDescriptorBuilder("super");
         handler.doWithSuper(superBuilder);
         SpaceTypeDescriptor superDesc = superBuilder.create();
-        SpaceTypeDescriptorHolder superHolder = new SpaceTypeDescriptorHolder(superDesc);
+        SpaceTypeDescriptorContainer superHolder = new SpaceTypeDescriptorContainer(superDesc);
         TestSpaceTypeDescriptorUtils.assertTypeDescriptorsEquals(superDesc, superHolder.getTypeDescriptor());
         
         SpaceTypeDescriptorBuilder subBuilder = new SpaceTypeDescriptorBuilder("sub", superDesc);
         handler.doWithSub(subBuilder);
         SpaceTypeDescriptor subDesc = subBuilder.create();
-        SpaceTypeDescriptorHolder supHolder = new SpaceTypeDescriptorHolder(subDesc);
+        SpaceTypeDescriptorContainer supHolder = new SpaceTypeDescriptorContainer(subDesc);
         TestSpaceTypeDescriptorUtils.assertTypeDescriptorsEquals(subDesc, supHolder.getTypeDescriptor());
     }
     

@@ -35,6 +35,7 @@ import com.gigaspaces.document.SpaceDocument;
 import com.gigaspaces.metadata.SpaceTypeDescriptor;
 import com.gigaspaces.metadata.index.SpaceIndex;
 import com.gigaspaces.metadata.index.SpaceIndexType;
+import org.openspaces.persistency.support.SpaceTypeDescriptorContainer;
 
 /**
  * The default {@link SpaceDocumentColumnFamilyMapper} implementation.
@@ -78,7 +79,7 @@ public class DefaultSpaceDocumentColumnFamilyMapper
     @Override
     public ColumnFamilyMetadata toColumnFamilyMetadata(
             SpaceTypeDescriptor typeDescriptor) {
-        SpaceTypeDescriptorHolder typeDescriptorData = new SpaceTypeDescriptorHolder(typeDescriptor);
+        SpaceTypeDescriptorContainer typeDescriptorData = new SpaceTypeDescriptorHolder(typeDescriptor);
         
         Map<String, SpaceIndex> indexes = typeDescriptor.getIndexes();
         Set<String> initialIndexes = new HashSet<String>();
