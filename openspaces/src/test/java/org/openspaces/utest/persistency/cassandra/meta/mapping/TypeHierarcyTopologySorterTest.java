@@ -6,12 +6,12 @@ import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.openspaces.persistency.cassandra.meta.mapping.TypeHierarcyTopologySorter;
 
 import com.gigaspaces.annotation.pojo.SpaceId;
 import com.gigaspaces.metadata.SpaceTypeDescriptor;
 import com.gigaspaces.metadata.SpaceTypeDescriptorBuilder;
 import org.openspaces.persistency.support.SpaceTypeDescriptorContainer;
+import org.openspaces.persistency.support.TypeDescriptorUtils;
 
 public class TypeHierarcyTopologySorterTest
 {
@@ -60,7 +60,7 @@ public class TypeHierarcyTopologySorterTest
         typeDescriptorsData.put(container_desc9.getTypeDescriptor().getTypeName(), container_desc9);
         typeDescriptorsData.put(container_desc10.getTypeDescriptor().getTypeName(), container_desc10);
         
-        List<SpaceTypeDescriptor> sortedList = TypeHierarcyTopologySorter.getSortedList(typeDescriptorsData);
+        List<SpaceTypeDescriptor> sortedList = TypeDescriptorUtils.sort(typeDescriptorsData);
         
         assertOrder("d7", "d4", sortedList);
         assertOrder("d4", "d1", sortedList);
@@ -86,7 +86,7 @@ public class TypeHierarcyTopologySorterTest
         typeDescriptorsData.put(bDescContainer.getTypeDescriptor().getTypeName(), bDescContainer);
         typeDescriptorsData.put(cDescContainer.getTypeDescriptor().getTypeName(), cDescContainer);
         
-        List<SpaceTypeDescriptor> sortedList = TypeHierarcyTopologySorter.getSortedList(typeDescriptorsData);
+        List<SpaceTypeDescriptor> sortedList = TypeDescriptorUtils.sort(typeDescriptorsData);
 
         assertOrder(MyCassandraB.class.getName(), MyCassandraA.class.getName(), sortedList);
         

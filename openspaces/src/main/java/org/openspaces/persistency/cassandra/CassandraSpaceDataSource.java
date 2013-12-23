@@ -33,7 +33,6 @@ import org.openspaces.persistency.cassandra.error.SpaceCassandraDataSourceExcept
 import org.openspaces.persistency.cassandra.meta.ColumnFamilyMetadata;
 import org.openspaces.persistency.cassandra.meta.mapping.DefaultSpaceDocumentColumnFamilyMapper;
 import org.openspaces.persistency.cassandra.meta.mapping.SpaceDocumentColumnFamilyMapper;
-import org.openspaces.persistency.cassandra.meta.mapping.TypeHierarcyTopologySorter;
 import org.openspaces.persistency.cassandra.meta.types.dynamic.PropertyValueSerializer;
 import org.openspaces.persistency.cassandra.pool.ConnectionResource;
 import org.openspaces.persistency.cassandra.pool.ConnectionResourceFactory;
@@ -53,6 +52,7 @@ import com.j_spaces.kernel.pool.IResourcePool;
 import com.j_spaces.kernel.pool.IResourceProcedure;
 import com.j_spaces.kernel.pool.ResourcePool;
 import org.openspaces.persistency.support.SpaceTypeDescriptorContainer;
+import org.openspaces.persistency.support.TypeDescriptorUtils;
 
 /**
  * 
@@ -267,7 +267,7 @@ public class CassandraSpaceDataSource
             typeDescriptors.put(metadata.getTypeName(), metadata.getTypeDescriptorData());
         }
         
-        List<SpaceTypeDescriptor> result = TypeHierarcyTopologySorter.getSortedList(typeDescriptors);
+        List<SpaceTypeDescriptor> result = TypeDescriptorUtils.sort(typeDescriptors);
         
         return new DataIteratorAdapter<SpaceTypeDescriptor>(result.iterator());
     }
