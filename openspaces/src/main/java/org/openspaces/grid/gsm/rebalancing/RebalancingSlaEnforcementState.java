@@ -79,7 +79,7 @@ class RebalancingSlaEnforcementState {
     public List<FutureStatelessProcessingUnitInstance> getAllFutureStatelessProcessingUnitInstances() {
         final List<FutureStatelessProcessingUnitInstance> futures = new ArrayList<FutureStatelessProcessingUnitInstance>();
 
-        for (final ProcessingUnit pu : this.futureStatefulDeploymentPerProcessingUnit.keySet()) {
+        for (final ProcessingUnit pu : this.futureStatelessDeploymentPerProcessingUnit.keySet()) {
             futures.addAll(this.futureStatelessDeploymentPerProcessingUnit.get(pu));
         }
         futures.addAll(this.failedStatelessDeployments);
