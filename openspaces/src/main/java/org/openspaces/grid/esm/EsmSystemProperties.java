@@ -27,7 +27,7 @@ public class EsmSystemProperties {
     public static final long ESM_STATEFUL_DEPLOYMENT_TIMEOUT_SECONDS_DEFAULT = 60*60L;
 
     public static final String ESM_STATELESS_DEPLOYMENT_TIMEOUT_SECONDS = "org.openspaces.grid.stateless_deployment_timeout_seconds";
-    public static final long ESM_STATELESS_DEPLOYMENT_TIMEOUT_SECONDS_DEFAULT = 60*60L;
+    public static final long ESM_STATELESS_DEPLOYMENT_TIMEOUT_SECONDS_DEFAULT = 5*60L;
 
     public static final String ESM_STATEFUL_DEPLOYMENT_FAILURE_FORGET_SECONDS = "org.openspaces.grid.stateful_deployment_failure_forget_seconds";
     public static final long ESM_STATEFUL_DEPLOYMENT_FAILURE_FORGET_SECONDS_DEFAULT = 60*60L;
