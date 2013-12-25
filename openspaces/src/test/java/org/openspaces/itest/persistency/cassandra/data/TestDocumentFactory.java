@@ -21,52 +21,35 @@ import com.gigaspaces.document.SpaceDocument;
 import org.openspaces.itest.persistency.common.data.TestPojo3;
 import org.openspaces.itest.persistency.common.data.TestPojo4;
 
-public class MyCassandraSpaceDocumentFactory
-{
-    
-    public static SpaceDocument getMyCassandraDocument1(String firstName, String lastName)   
-    {
-        return new SpaceDocument("MyCassandraDocument1")
+public class TestDocumentFactory {
+
+    public static SpaceDocument getTestDocument1(String firstName, String lastName) {
+        return new SpaceDocument("TestDocument1")
             .setProperty("firstName", firstName)
             .setProperty("lastName", lastName);
     }
 
-    public static SpaceDocument getMyCassandraDocument3(
-            Integer intProperty, 
-            Long longProperty, 
-            Boolean booleanProperty)   
-    {
-        return new SpaceDocument("MyCassandraDocument3")
+    public static SpaceDocument getTestDocument3(Integer intProperty, Long longProperty, Boolean booleanProperty) {
+        return new SpaceDocument("TestDocument3")
             .setProperty("intProperty", intProperty)
             .setProperty("longProperty", longProperty)
             .setProperty("booleanProperty", booleanProperty);
     }
 
-    public static SpaceDocument getMyCassandraDocument4(
-            Integer intProperty, 
-            TestPojo4 myCassandraPojo4)
-    {
-        return new SpaceDocument("MyCassandraDocument4")
+    public static SpaceDocument getTestDocument4(Integer intProperty, TestPojo4 pojo4) {
+        return new SpaceDocument("TestDocument4")
             .setProperty("intProperty", intProperty)
-            .setProperty("myCassandraPojo4", myCassandraPojo4);
+            .setProperty("testPojo4", pojo4);
     }
 
-    public static SpaceDocument getMyCassandraDocument5(
-            Integer intProperty, 
-            SpaceDocument spaceDocument)   
-    {
-        return new SpaceDocument("MyCassandraDocument5")
-            .setProperty("intProperty", intProperty)
-            .setProperty("spaceDocument", spaceDocument);
+    public static SpaceDocument getTestDocument5(Integer intProperty, SpaceDocument spaceDocument) {
+        return new SpaceDocument("TestDocument5")
+                .setProperty("intProperty", intProperty)
+                .setProperty("spaceDocument", spaceDocument);
     }
 
-    public static SpaceDocument getMyCassandraDocument6(
-            TestPojo3 myCassandraPojo3)
-    {
-        return new SpaceDocument("MyCassandraDocument6")
-            .setProperty("myCassandraPojo3", myCassandraPojo3);
+    public static SpaceDocument getTestDocument6(TestPojo3 pojo) {
+        return new SpaceDocument("TestDocument6")
+                .setProperty("testPojo3", pojo);
     }
-    
-    
-    
 }
