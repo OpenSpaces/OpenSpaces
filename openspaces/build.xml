@@ -87,8 +87,10 @@
     <!--
     ########### COMPILE TARGETS ###########
     -->
-
+	
     <target name="buildmain" description="Compile main source tree java files into class files">
+    	<echo message="productversion=${productversion}"/>  
+    	<echo message="maven.repo.local=${maven.repo.local}"/>  
     	<exec executable="${env.M2_HOME}\bin\${mvn.executable}" failonerror="true"> 
 			<arg line="package -DskipTests -Dmaven.repo.local=${maven.repo.local}" />
 		</exec>
