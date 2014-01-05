@@ -278,7 +278,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
             final NIODetails nioDetails = spaceInstance.getNIODetails();
             final OSDetails osDetails = spaceInstance.getOSDetails();
             
-            IJSpaceContainer container = direcyIjspace.getContainer();
+            IJSpaceContainer container = direcyIjspace.getDirectProxy().getContainer();
             IJSpaceContainerAdmin containerAdmin = ( IJSpaceContainerAdmin )container;
             String jmxServiceURL = null;
             try{
