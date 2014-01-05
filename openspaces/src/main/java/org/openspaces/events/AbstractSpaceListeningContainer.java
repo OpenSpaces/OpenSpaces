@@ -193,7 +193,7 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
                 primaryBackupListener = new PrimaryBackupListener();
                 try {
                     IJSpace clusterMemberSpace = SpaceUtils.getClusterMemberSpace(gigaSpace.getSpace());
-                    ISpaceModeListener remoteListener = (ISpaceModeListener) clusterMemberSpace.getStubHandler()
+                    ISpaceModeListener remoteListener = (ISpaceModeListener) clusterMemberSpace.getDirectProxy().getStubHandler()
                             .exportObject(primaryBackupListener);
                     currentMode = ((IInternalRemoteJSpaceAdmin) clusterMemberSpace.getAdmin()).addSpaceModeListener(remoteListener);
                 } catch (RemoteException e) {
@@ -237,7 +237,7 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
             if (!SpaceUtils.isRemoteProtocol(gigaSpace.getSpace())) {
                 IJSpace clusterMemberSpace = SpaceUtils.getClusterMemberSpace(gigaSpace.getSpace());
                 try {
-                    ISpaceModeListener remoteListener = (ISpaceModeListener) clusterMemberSpace.getStubHandler()
+                    ISpaceModeListener remoteListener = (ISpaceModeListener) clusterMemberSpace.getDirectProxy().getStubHandler()
                             .exportObject(primaryBackupListener);
                     ((IInternalRemoteJSpaceAdmin) clusterMemberSpace.getAdmin()).removeSpaceModeListener(remoteListener);
                 } catch (RemoteException e) {
