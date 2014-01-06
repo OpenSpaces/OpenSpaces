@@ -63,6 +63,8 @@ public class StandaloneContainerRunnable implements Runnable {
 
     private volatile Throwable exception;
 
+    private volatile Thread runningThread;
+
     /**
      * Constructs a new standalone container runnable based on the provided configuration set
      * parameters.
@@ -90,6 +92,7 @@ public class StandaloneContainerRunnable implements Runnable {
      */
     public void run() {
         try {
+            runningThread = Thread.currentThread();
             Resource[] resources;
             PathMatchingResourcePatternResolver pathMatchingResourcePatternResolver = new PathMatchingResourcePatternResolver();
             if (configLocations.size() == 0) {
@@ -164,7 +167,8 @@ public class StandaloneContainerRunnable implements Runnable {
      */
     public synchronized void stop() {
         this.running = false;
-        Thread.currentThread().interrupt();
+        if (runningThread != null)
+            runningThread.interrupt();
     }
 
     /**
