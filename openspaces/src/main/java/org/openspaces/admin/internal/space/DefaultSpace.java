@@ -492,7 +492,7 @@ public class DefaultSpace implements InternalSpace {
             }
             
             try {
-                space = ((ISpaceProxy) ((InternalSpaceInstance) firstInstance).getIJSpace()).getClusteredSpace();
+                space = ((InternalSpaceInstance) firstInstance).getIJSpace().getDirectProxy().getClusteredProxy();
                 admin.login((SecuredService)space);
             } catch (AdminException e) {
                 throw e;

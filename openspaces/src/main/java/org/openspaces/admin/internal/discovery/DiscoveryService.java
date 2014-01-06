@@ -81,9 +81,7 @@ import com.gigaspaces.internal.utils.StringUtils;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.management.entry.JMXConnection;
 import com.j_spaces.core.IJSpace;
-import com.j_spaces.core.IJSpaceContainer;
 import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
-import com.j_spaces.core.admin.IJSpaceContainerAdmin;
 import com.j_spaces.core.jini.SharedDiscoveryManagement;
 import com.j_spaces.jmx.util.JMXUtilities;
 import com.j_spaces.kernel.PlatformVersion;
@@ -262,7 +260,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
         try {
             admin.login(clusteredIjspace);
 
-            ISpaceProxy direcyIjspace = (ISpaceProxy)clusteredIjspace.getClusterMember();
+            ISpaceProxy direcyIjspace = (ISpaceProxy)clusteredIjspace.getDirectProxy().getNonClusteredProxy();
             admin.login(direcyIjspace);
 
             final IInternalRemoteJSpaceAdmin spaceAdmin = (IInternalRemoteJSpaceAdmin) direcyIjspace.getAdmin();
@@ -278,12 +276,9 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
             final NIODetails nioDetails = spaceInstance.getNIODetails();
             final OSDetails osDetails = spaceInstance.getOSDetails();
             
-            IJSpaceContainer container = direcyIjspace.getDirectProxy().getContainer();
-            IJSpaceContainerAdmin containerAdmin = ( IJSpaceContainerAdmin )container;
             String jmxServiceURL = null;
             try{
-                String jndiUrl = containerAdmin.getConfig().jndiUrl;
-                jmxServiceURL = JMXUtilities.createJMXUrl( jndiUrl );
+                jmxServiceURL = JMXUtilities.createJMXUrl(direcyIjspace.getDirectProxy().getContainerConfig().jndiUrl);
             }
             catch( RemoteException re ){
                 logger.warn( "Failed to fetch jndi url from space container", re);   

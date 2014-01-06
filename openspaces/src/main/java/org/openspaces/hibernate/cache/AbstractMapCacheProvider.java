@@ -116,7 +116,7 @@ public abstract class AbstractMapCacheProvider implements CacheProvider {
         // if it is an embedde Space, stop it
         if (!SpaceUtils.isRemoteProtocol(map.getMasterSpace())) {
             try {
-                map.getMasterSpace().getDirectProxy().getContainer().shutdown();
+                map.getMasterSpace().getDirectProxy().shutdown();
             } catch (RemoteException e) {
                 log.warn("Failed to shutdown master space", e);
             }
