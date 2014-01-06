@@ -14,23 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *  
- ******************************************************************************/
+ ******************************************************re************************/
 package org.openspaces.grid.gsm.machines;
-
-import static org.openspaces.grid.gsm.machines.MachinesSlaUtils.failedAgentUidsToString;
-import static org.openspaces.grid.gsm.machines.MachinesSlaUtils.getAgentIpAddress;
-import static org.openspaces.grid.gsm.machines.MachinesSlaUtils.reservationIdsToString;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -82,6 +67,21 @@ import org.openspaces.grid.gsm.machines.exceptions.WaitingForDiscoveredMachinesE
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
 import org.openspaces.grid.gsm.machines.plugins.exceptions.ElasticGridServiceAgentProvisioningException;
 import org.openspaces.grid.gsm.machines.plugins.exceptions.ElasticMachineProvisioningException;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import static org.openspaces.grid.gsm.machines.MachinesSlaUtils.failedAgentUidsToString;
+import static org.openspaces.grid.gsm.machines.MachinesSlaUtils.getAgentIpAddress;
+import static org.openspaces.grid.gsm.machines.MachinesSlaUtils.reservationIdsToString;
 
 /**
  * This class tracks started and shutdown machines while the operating is in progress. 
@@ -1308,15 +1308,14 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
            // providing a grace period for provisionedAgents to update.
            throw new InconsistentMachineProvisioningException(getProcessingUnit(), newAgent);
         }
-        
-        final long reservedMB = MachinesSlaUtils.getMemoryInMB(MachinesSlaUtils.getReservedCapacity(sla, newAgent));
-        final long totalMB = MachinesSlaUtils.getMemoryInMB(MachinesSlaUtils.getMachineCapacity(newAgent));
-        long availableMB = totalMB - reservedMB;
-		long containerMB = sla.getContainerMemoryCapacityInMB();
-		if (availableMB < containerMB) {
-			throw new ExpectedMachineWithMoreMemoryException(pu, newAgent.getMachine(), totalMB , reservedMB, containerMB); 
+
+        if (sla.isUndeploying()) {
+            logger.info("Not performing memory validation on agent " + newAgent.getUid()
+                    + " since undeploy is in progress");
+        } else { // no need to throw the exception since we don't need this machine now anyway.
+            validateMemory(sla, newAgent);
         }
-		
+
         // agent started successfully. check if failed machine reconnected to the network, 
         // if so - we do not need the new machine that was meant to replace it.
         final FailedGridServiceAgent failedAgent = futureAgent.getFailedGridServiceAgent();
@@ -1325,6 +1324,17 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             if (reconnectedFailedAgent != null) {
                 throw new FailedGridServiceAgentReconnectedException(pu, newAgent, failedAgent, reconnectedFailedAgent);
             }
+        }
+    }
+
+    private void validateMemory(AbstractMachinesSlaPolicy sla, GridServiceAgent newAgent)
+            throws ExpectedMachineWithMoreMemoryException {
+        final long reservedMB = MachinesSlaUtils.getMemoryInMB(MachinesSlaUtils.getReservedCapacity(sla, newAgent));
+        final long totalMB = MachinesSlaUtils.getMemoryInMB(MachinesSlaUtils.getMachineCapacity(newAgent));
+        long availableMB = totalMB - reservedMB;
+        long containerMB = sla.getContainerMemoryCapacityInMB();
+        if (availableMB < containerMB) {
+            throw new ExpectedMachineWithMoreMemoryException(pu, newAgent.getMachine(), totalMB , reservedMB, containerMB);
         }
     }
 
