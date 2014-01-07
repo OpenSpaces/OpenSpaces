@@ -1011,6 +1011,9 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     
     @Override
     public boolean decrementPlannedInstances() {
+    	if (getManagingGridServiceManager() == null) {
+    		throw new AdminException("Processing Unit " + getName() + " does not have an associated managing GSM");
+    	}
         return ((InternalGridServiceManager) managingGridServiceManager).decrementPlannedInstances(this);
     }
 
