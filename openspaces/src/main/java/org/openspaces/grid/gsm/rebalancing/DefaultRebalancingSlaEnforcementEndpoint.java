@@ -1064,7 +1064,7 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
 								
 								@Override
 								public void run() {
-									logger.info("Forgetting deployment error " + future.getFailureMessage() + " will retry soon.");
+									logger.info("Cleaning deployment error before retry. Error was:" + future.getFailureMessage());
 			                        state.removeFailedFutureStatelessDeployment(future);		
 								}
 							});
