@@ -162,6 +162,11 @@ public class POMGenerator {
         printHeader(writer, xapVersion, POMGenerator.GS_GROUP, "jetty-os");
         printProjectFooter(writer);
         writer.close();
+
+        writer = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(dir, "mongo-datasource-pom.xml")))));
+        printHeader(writer, xapVersion, POMGenerator.GS_GROUP, "mongo-datasource");
+        printProjectFooter(writer);
+        writer.close();
         
         if ( isCloudify ) {
             writer = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(dir, "dsl-pom.xml")))));

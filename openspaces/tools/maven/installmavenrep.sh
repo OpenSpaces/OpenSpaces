@@ -26,6 +26,7 @@ mvn install:install-file -DgroupId=com.gigaspaces -DcreateChecksum=true -Dartifa
 mvn install:install-file -DgroupId=com.gigaspaces -DcreateChecksum=true -DartifactId=gs-openspaces -Dversion=$XAP_VERSION -DpomFile=$TMPDIR/gs-openspaces-pom.xml -Dpackaging=jar -Dfile=${JSHOMEDIR}/lib/required/gs-openspaces.jar -Djavadoc="${JSHOMEDIR}/docs/xap-javadoc.zip" -Dsources="${JSHOMEDIR}/lib/optional/openspaces/gs-openspaces-sources.jar"
 mvn install:install-file -DgroupId=com.gigaspaces -DcreateChecksum=true -DartifactId=mule-os -Dversion=$XAP_VERSION -Dpackaging=jar -DpomFile=$TMPDIR/mule-os-pom.xml -Dfile=${JSHOMEDIR}/lib/optional/openspaces/mule-os.jar
 mvn install:install-file -DgroupId=com.gigaspaces -DcreateChecksum=true -DartifactId=jetty-os -Dversion=$XAP_VERSION -Dpackaging=jar -DpomFile=$TMPDIR/jetty-os-pom.xml -Dfile=${JSHOMEDIR}/lib/platform/openspaces/gs-openspaces-jetty.jar
+mvn install:install-file -DgroupId=com.gigaspaces -DcreateChecksum=true -DartifactId=mongo-datasource -Dversion=$XAP_VERSION -Dpackaging=jar -DpomFile=$TMPDIR/mongo-datasource-pom.xml -Dfile=${JSHOMEDIR}/lib/optional/datasource/mongo/mongo-datasource.jar
 
 # Build and install OpenSpaces Maven Plugin
 mvn -f maven-openspaces-plugin/pom.xml install -DcreateChecksum=true
