@@ -65,6 +65,7 @@ del %TEMP%\gs-runtime-pom.xml
 del %TEMP%\gs-openspaces-pom.xml
 del %TEMP%\mule-os-pom.xml
 del %TEMP%\jetty-os-pom.xml
+del $TMPDIR\mongo-datasource-pom.xml
 
 if "%EDITION%" == "Cloudify" (
 del %TEMP%\usm-pom.xml

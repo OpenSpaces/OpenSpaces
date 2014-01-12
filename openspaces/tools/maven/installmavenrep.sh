@@ -52,6 +52,7 @@ rm $TMPDIR/gs-runtime-pom.xml
 rm $TMPDIR/gs-openspaces-pom.xml
 rm $TMPDIR/mule-os-pom.xml
 rm $TMPDIR/jetty-os-pom.xml
+rm $TMPDIR/mongo-datasource-pom.xml
 
 if [ "${EDITION}" = "Cloudify" ] ; then
 	rm $TMPDIR/dsl-pom.xml
