@@ -100,4 +100,23 @@ public class ChangeExtension
         
         return changeResult.getResults().iterator().next();
     }
+
+    /**
+     * Gets the result of a single change operation which that was applied on a single entry, otherwise an exception will be thrown.
+     * @param changeResult the result of the change operation
+     * @return the result of a single change operation which that was applied on a single entry, otherwise an exception will be thrown. Or null if no
+     * entry was changed.
+     */
+    public static <T> T getSingleChangeOperationResult(
+            ChangeResult<?> changeResult) {
+        ChangedEntryDetails<?> changedEntryDetails = getSingleChangedEntryDetails(changeResult);
+        if (changedEntryDetails == null)
+            return null;
+        if (changedEntryDetails.getChangeOperationsResults().size() != 1) {
+            String message = "ambigious result - more than one changes were applied on the entry and as a result it contains more than one change operation result";
+            Collection<?> changeEntries = changeResult.getResults();
+            throw exceptionTranslator.translate(new ChangeException(message, (Collection<ChangedEntryDetails<?>>) changeEntries, Collections.EMPTY_LIST, Collections.EMPTY_LIST));
+        }
+        return (T) changedEntryDetails.getChangeOperationsResults().get(0).getResult();
+    }
 }
