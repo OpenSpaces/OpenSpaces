@@ -76,7 +76,6 @@ import org.openspaces.core.GigaSpaceConfigurer;
 
 import com.gigaspaces.cluster.activeelection.InactiveSpaceException;
 import com.gigaspaces.cluster.activeelection.SpaceMode;
-import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
 import com.gigaspaces.internal.cluster.node.impl.gateway.GatewayPolicy;
 import com.gigaspaces.internal.version.PlatformLogicalVersion;
 import com.gigaspaces.security.service.SecuredService;
