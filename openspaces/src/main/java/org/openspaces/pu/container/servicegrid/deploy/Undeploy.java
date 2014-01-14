@@ -16,23 +16,23 @@
 
 package org.openspaces.pu.container.servicegrid.deploy;
 
+import java.nio.channels.ClosedChannelException;
+import java.rmi.ConnectException;
+import java.util.Arrays;
+import java.util.StringTokenizer;
+
+import net.jini.core.discovery.LookupLocator;
+import net.jini.core.lookup.ServiceItem;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.jini.rio.boot.BootUtil;
+import org.jini.rio.core.OperationalStringManager;
+import org.openspaces.pu.container.support.CommandLineParser;
+
 import com.gigaspaces.grid.gsm.GSM;
 import com.gigaspaces.internal.lookup.LookupUtils;
 import com.j_spaces.kernel.PlatformVersion;
-import com.j_spaces.kernel.SystemProperties;
-
-import net.jini.core.lookup.ServiceItem;
-import net.jini.core.discovery.LookupLocator;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.jini.rio.core.OperationalStringManager;
-import org.jini.rio.boot.BootUtil;
-import org.openspaces.pu.container.support.CommandLineParser;
-
-import java.util.Arrays;
-import java.util.StringTokenizer;
-import java.rmi.ConnectException;
-import java.nio.channels.ClosedChannelException;
 
 /**
  * @author kimchy
