@@ -4,7 +4,7 @@
     <groupId>org.apache.maven.plugins</groupId>
     <artifactId>maven-openspaces-plugin</artifactId>
     <packaging>maven-plugin</packaging>
-    <version>10.0.0-11500-103-SNAPSHOT</version>
+    <version>9.7.0-SNAPSHOT</version>
     <name>maven-openspaces-plugin</name>
     <url>http://www.gigaspaces.com</url>
     <properties>
