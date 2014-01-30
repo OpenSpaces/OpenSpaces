@@ -22,12 +22,7 @@
 		<jettyVersion>8.1.8.v20121106</jettyVersion>
 	</properties>
 
-	<repositories>
-		<repository>
-         	<id>local-nexus</id>
-	       	<name>local-nexus</name>
-       		<url>http://nexus.gsdev.info:8088/nexus</url>
-        </repository>
+	<repositories>		
 		<repository>
 			<id>JBoss-Thirdparty</id>
 			<url>https://repository.jboss.org/nexus/content/repositories/thirdparty-releases</url>
