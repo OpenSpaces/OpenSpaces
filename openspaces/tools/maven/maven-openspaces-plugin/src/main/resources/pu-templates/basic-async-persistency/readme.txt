@@ -145,4 +145,4 @@ MAVEN PLUGIN WIKI PAGE
 ---------------------------------
 
   For more information about the Maven Plugin please refer to:
-http://www.gigaspaces.com/wiki/display/XAP97/Maven+Plugin
+http://www.gigaspaces.com/wiki/display/XAP100/Maven+Plugin
