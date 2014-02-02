@@ -16,40 +16,36 @@
 
 package org.openspaces.pu.container.servicegrid;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.rmi.MarshalledObject;
-import java.rmi.RemoteException;
-import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.StringTokenizer;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.jar.JarFile;
-import java.util.jar.Manifest;
-
+import com.gigaspaces.cluster.activeelection.SpaceMode;
+import com.gigaspaces.grid.zone.ZoneHelper;
+import com.gigaspaces.internal.dump.InternalDump;
+import com.gigaspaces.internal.dump.InternalDumpProcessor;
+import com.gigaspaces.internal.dump.InternalDumpProcessorFailedException;
+import com.gigaspaces.internal.io.BootIOUtils;
+import com.gigaspaces.internal.jvm.JVMDetails;
+import com.gigaspaces.internal.jvm.JVMHelper;
+import com.gigaspaces.internal.jvm.JVMStatistics;
+import com.gigaspaces.internal.os.OSDetails;
+import com.gigaspaces.internal.os.OSHelper;
+import com.gigaspaces.internal.os.OSStatistics;
+import com.gigaspaces.lrmi.LRMIMonitoringDetails;
+import com.gigaspaces.lrmi.nio.info.NIODetails;
+import com.gigaspaces.lrmi.nio.info.NIOInfoHelper;
+import com.gigaspaces.lrmi.nio.info.NIOStatistics;
+import com.gigaspaces.management.entry.JMXConnection;
+import com.gigaspaces.security.service.SecurityResolver;
+import com.gigaspaces.start.Locator;
+import com.gigaspaces.start.SystemBoot;
+import com.j_spaces.core.IJSpace;
+import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
+import com.j_spaces.core.admin.RuntimeHolder;
+import com.j_spaces.core.admin.StatisticsAdmin;
+import com.j_spaces.core.client.SpaceURL;
+import com.j_spaces.core.filters.StatisticsHolder;
+import com.j_spaces.jmx.util.JMXUtilities;
+import com.j_spaces.kernel.ClassLoaderHelper;
+import com.j_spaces.kernel.Environment;
 import net.jini.core.lookup.ServiceID;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jini.rio.boot.BootUtil;
@@ -109,35 +105,39 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.util.StringUtils;
 
-import com.gigaspaces.cluster.activeelection.SpaceMode;
-import com.gigaspaces.grid.zone.ZoneHelper;
-import com.gigaspaces.internal.dump.InternalDump;
-import com.gigaspaces.internal.dump.InternalDumpProcessor;
-import com.gigaspaces.internal.dump.InternalDumpProcessorFailedException;
-import com.gigaspaces.internal.io.BootIOUtils;
-import com.gigaspaces.internal.jvm.JVMDetails;
-import com.gigaspaces.internal.jvm.JVMHelper;
-import com.gigaspaces.internal.jvm.JVMStatistics;
-import com.gigaspaces.internal.os.OSDetails;
-import com.gigaspaces.internal.os.OSHelper;
-import com.gigaspaces.internal.os.OSStatistics;
-import com.gigaspaces.lrmi.LRMIMonitoringDetails;
-import com.gigaspaces.lrmi.nio.info.NIODetails;
-import com.gigaspaces.lrmi.nio.info.NIOInfoHelper;
-import com.gigaspaces.lrmi.nio.info.NIOStatistics;
-import com.gigaspaces.management.entry.JMXConnection;
-import com.gigaspaces.security.service.SecurityResolver;
-import com.gigaspaces.start.Locator;
-import com.gigaspaces.start.SystemBoot;
-import com.j_spaces.core.IJSpace;
-import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
-import com.j_spaces.core.admin.RuntimeHolder;
-import com.j_spaces.core.admin.StatisticsAdmin;
-import com.j_spaces.core.client.SpaceURL;
-import com.j_spaces.core.filters.StatisticsHolder;
-import com.j_spaces.jmx.util.JMXUtilities;
-import com.j_spaces.kernel.ClassLoaderHelper;
-import com.j_spaces.kernel.Environment;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.net.UnknownHostException;
+import java.rmi.MarshalledObject;
+import java.rmi.RemoteException;
+import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.StringTokenizer;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 
 /**
  * @author kimchy
@@ -263,6 +263,17 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         } finally {
             Thread.currentThread().setContextClassLoader(origClassLoader);
         }
+    }
+
+    private boolean isOnGsmHost() throws MalformedURLException, RemoteException, UnknownHostException {
+        logger.debug("Determining if managing GSM is on the same host as this GSC");
+
+        String deployHost = context.getServiceBeanManager().getOperationalStringManager().getDeployHost();
+        logger.debug("Deploy host is " + deployHost);
+
+        InetAddress localHost = InetAddress.getLocalHost();
+        logger.debug("Local host is " + localHost);
+        return deployHost.equals(localHost.getHostAddress());
     }
 
     
@@ -468,18 +479,32 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
             beanLevelProperties.getContextProperties().setProperty(DeployableProcessingUnitContainerProvider.CONTEXT_PROPERTY_DEPLOY_PATH, deployPath.getAbsolutePath());
 
-            long size = downloadAndExtractPU(puName, puPath, codeserver, deployPath, new File(deployedProcessingUnitsLocation));
-
-            if (logger.isInfoEnabled()) {
-                NumberFormat nf = NumberFormat.getInstance();
-                nf.setMaximumFractionDigits(2);
-                String suffix = "kb";
-                float factor = 1024;
-                if (size > 1024 * 1024) {
-                    suffix = "mb";
-                    factor = 1024 * 1024;
+            try {
+                if (isOnGsmHost()) {
+                    copyPu(puPath, deployPath);
+                } else {
+                    long size = downloadAndExtractPU(puName, puPath, codeserver, deployPath,
+                            new File(deployedProcessingUnitsLocation));
+                    logDownloadSize(size);
                 }
-                logger.info("Downloaded [" + nf.format(size / factor) + suffix + "] to [" + deployPath + "]");
+            } catch (MalformedURLException mle) {
+                logger.warn("Could not determine if GSC and GSM are on the same host", mle);
+                // fallbacל to download
+                long size = downloadAndExtractPU(puName, puPath, codeserver, deployPath,
+                        new File(deployedProcessingUnitsLocation));
+                logDownloadSize(size);
+            } catch (UnknownHostException unhe) {
+                logger.warn("Could not determine if GSC and GSM are on the same host", unhe);
+                // fallbacל to download
+                long size = downloadAndExtractPU(puName, puPath, codeserver, deployPath,
+                        new File(deployedProcessingUnitsLocation));
+                logDownloadSize(size);
+            } catch (RemoteException re) {
+                logger.warn("Could not determine if GSC and GSM are on the same host", re);
+                // fallbacל to download
+                long size = downloadAndExtractPU(puName, puPath, codeserver, deployPath,
+                        new File(deployedProcessingUnitsLocation));
+                logDownloadSize(size);
             }
 
             // go over listed files that needs to be resolved with properties
@@ -748,6 +773,28 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                 }
                 executorService.scheduleAtFixedRate(watchTask, watchTask.getMonitor().getPeriod(), watchTask.getMonitor().getPeriod(), TimeUnit.MILLISECONDS);
             }
+        }
+    }
+
+    private long copyPu(String puPath, File puWorkFolder) throws IOException {
+        String puDeployPath = context.getServiceBeanManager().getOperationalStringManager().getDeployPath() + "/" + puPath;
+        File src = new File(puDeployPath);
+        logger.info("Copying from GSM [" + puDeployPath + "] to " + "[" + deployPath + "] ...");
+        FileSystemUtils.copyRecursively(src, puWorkFolder);
+        return src.getTotalSpace();
+    }
+
+    private void logDownloadSize(long size) {
+        if (logger.isInfoEnabled()) {
+            NumberFormat nf = NumberFormat.getInstance();
+            nf.setMaximumFractionDigits(2);
+            String suffix = "kb";
+            float factor = 1024;
+            if (size > 1024 * 1024) {
+                suffix = "mb";
+                factor = 1024 * 1024;
+            }
+            logger.info("Downloaded [" + nf.format(size / factor) + suffix + "] to [" + deployPath + "]");
         }
     }
 

@@ -16,33 +16,20 @@
 
 package org.openspaces.pu.container.servicegrid.deploy;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.rmi.MarshalledObject;
-import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
-import java.util.concurrent.atomic.AtomicInteger;
-
+import com.gigaspaces.grid.gsm.GSM;
+import com.gigaspaces.grid.zone.ZoneHelper;
 import com.gigaspaces.internal.lookup.LookupUtils;
+import com.gigaspaces.logger.GSLogConfigLoader;
+import com.gigaspaces.security.directory.CredentialsProvider;
+import com.gigaspaces.security.directory.CredentialsProviderHelper;
+import com.gigaspaces.security.directory.DefaultCredentialsProvider;
+import com.gigaspaces.security.directory.User;
+import com.gigaspaces.security.directory.UserDetails;
+import com.j_spaces.core.Constants;
+import com.j_spaces.core.client.SpaceURL;
+import com.j_spaces.core.service.ServiceConfigLoader;
+import com.j_spaces.kernel.PlatformVersion;
+import com.j_spaces.kernel.time.SystemTime;
 import net.jini.config.Configuration;
 import net.jini.core.discovery.LookupLocator;
 import net.jini.core.lookup.ServiceItem;
@@ -91,19 +78,33 @@ import org.springframework.core.io.Resource;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
 
-import com.gigaspaces.grid.gsm.GSM;
-import com.gigaspaces.grid.zone.ZoneHelper;
-import com.gigaspaces.logger.GSLogConfigLoader;
-import com.gigaspaces.security.directory.CredentialsProvider;
-import com.gigaspaces.security.directory.CredentialsProviderHelper;
-import com.gigaspaces.security.directory.DefaultCredentialsProvider;
-import com.gigaspaces.security.directory.User;
-import com.gigaspaces.security.directory.UserDetails;
-import com.j_spaces.core.Constants;
-import com.j_spaces.core.client.SpaceURL;
-import com.j_spaces.core.service.ServiceConfigLoader;
-import com.j_spaces.kernel.PlatformVersion;
-import com.j_spaces.kernel.time.SystemTime;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.UnknownHostException;
+import java.rmi.MarshalledObject;
+import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  */
@@ -354,10 +355,32 @@ public class Deploy {
         initGSM();
         initDeployAdmin();
 
-        // check if the pu to deploy is an actual file on the file system and ends with jar
+        // check if the pu to deploy is an actual file on the file system and ends with jar, zip or war.
         if (puFile.exists() && (puFile.getName().endsWith(".zip") || puFile.getName().endsWith(".jar") || puFile.getName().endsWith(".war"))) {
-            // we deploy a jar/zip/war file, upload it to the GSM
-            uploadPU(puPath, puFile);
+
+            try {
+                if (isOnGsmHost()) {
+                    // the client is on the same host as the gsm.
+                    // we can simply copy the pu instead of uploading it.
+                    copyPu(puPath, puFile);
+
+                } else {
+                    // we deploy a jar/zip/war file, upload it to the GSM
+                    uploadPU(puPath, puFile);
+                }
+            } catch (UnknownHostException uhe) {
+                // fall back to upload anyway
+                logger.warn("Could not determine if client and GSM[" + gsm.getGSAServiceID() + "] are on the same " +
+                        "host", uhe);
+                uploadPU(puPath, puFile);
+
+            } catch (RemoteException re) {
+                // fall back to upload anyway
+                logger.warn("Could not determine if client and GSM[" + gsm.getGSAServiceID() + "] are on the same " +
+                        "host", re);
+                uploadPU(puPath, puFile);
+            }
+
             if (deletePUFile) {
                 puFile.delete();
             }
@@ -563,6 +586,16 @@ public class Deploy {
 
         //deploy to sg
         return loadDeployment(puString, codeserver, sla, puPath, overridePuName, beanLevelProperties, elasticProperties, instanceDeploymentDependencies, instanceStartDependencies, applicationName);
+    }
+
+    private void copyPu(String puPath, File puFile) throws Exception {
+        PUZipUtils.unzip(new File(puFile.getAbsolutePath()), new File(gsm.getDeployPath(), puPath));
+    }
+
+    private boolean isOnGsmHost() throws UnknownHostException, RemoteException {
+        InetAddress localHost = InetAddress.getLocalHost();
+        InetAddress gsmHost = InetAddress.getByName(gsm.getOSDetails().getHostName());
+        return localHost.equals(gsmHost);
     }
         
     private void processSecurityParameters(BeanLevelProperties beanLevelProperties, Parameter[] params) 
@@ -980,7 +1013,7 @@ public class Deploy {
         }
         byte[] buffer = new byte[4098];
         String codebase = getCodebase(deployAdmin);
-        info("Uploading [" + puPath + "] to [" + codebase + "]");
+        info("Uploading [" + puPath + "] " + "[" + puFile.getPath() + "] to [" + codebase + "]");
         HttpURLConnection conn = (HttpURLConnection) new URL(codebase + puFile.getName()).openConnection();
         conn.setDoOutput(true);
         conn.setDoInput(true);
