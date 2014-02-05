@@ -11,7 +11,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.openspaces.admin.Admin;
-import org.openspaces.admin.AdminFactory;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.pu.DeploymentStatus;
 import org.openspaces.admin.pu.ProcessingUnit;
@@ -19,8 +18,11 @@ import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.ProcessingUnitPartition;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.cluster.ClusterInfoAware;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 
 import com.gigaspaces.grid.zone.ZoneHelper;
 
@@ -32,14 +34,12 @@ import com.gigaspaces.grid.zone.ZoneHelper;
  * 2. primaries in backup zone if it happens instances are restarted and balance is restored.
  */
 public class PrimaryZoneController
-        implements InitializingBean, DisposableBean, ClusterInfoAware
+        implements InitializingBean, DisposableBean, ClusterInfoAware,ApplicationContextAware
 {
     private static Logger            logger             = Logger.getLogger(PrimaryZoneController.class.getName());
 
     private String                   primaryZone;
     private String                   puName;
-    private String                   locators;
-    private String                   groups;
 
     private Admin                    admin              = null;
     private ScheduledExecutorService scheduler;
@@ -48,32 +48,34 @@ public class PrimaryZoneController
 
     private ClusterInfo              clusterInfo;
 
+    private ApplicationContext ctx;
+
     public PrimaryZoneController()
     {
     }
 
     public void afterPropertiesSet() throws Exception
     {
+        
         if (clusterInfo == null)
         {
             throw new IllegalStateException(PrimaryZoneController.class.getSimpleName()
                     + " doesn't run on non-clustered pu.");
         }
+        
         puName = clusterInfo.getName();
         init();
     }
 
     public void init() throws Exception
     {
-        AdminFactory af = new AdminFactory();
-        if ((locators != null) && (locators.trim().length() > 0))
-            af.addLocator(locators);
+        Object bean = ctx.getBean(puName);
 
-        if ((groups != null) && (groups.trim().length() > 0))
-            af.addLocator(groups);
-
-        admin = af.create();
-
+		logger.info("PrimaryZoneController on " + bean);
+        if(bean != null && bean instanceof ProcessingUnit)
+            admin = ((ProcessingUnit)bean).getAdmin();
+        else throw new IllegalArgumentException("[" + puName+ "] is not a processing unit.");
+            
         GridServiceManager gsm = admin.getGridServiceManagers()
                 .waitForAtLeastOne(30, TimeUnit.SECONDS);
         if (gsm == null)
@@ -192,16 +194,6 @@ public class PrimaryZoneController
         }
     }
 
-    public String getPuName()
-    {
-        return puName;
-    }
-
-    public void setPuName(String puName)
-    {
-        this.puName = puName;
-    }
-
     public String getPrimaryZone()
     {
         return primaryZone;
@@ -212,26 +204,7 @@ public class PrimaryZoneController
         this.primaryZone = primaryZone;
     }
 
-    public String getLocators()
-    {
-        return locators;
-    }
-
-    public void setLocators(String locators)
-    {
-        this.locators = locators;
-    }
-
-    public String getGroups()
-    {
-        return groups;
-    }
-
-    public void setGroups(String groups)
-    {
-        this.groups = groups;
-    }
-
+   
     @Override
     public void destroy()
     {
@@ -289,6 +262,14 @@ public class PrimaryZoneController
     {
         this.clusterInfo = clusterInfo;
 
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext ctx)
+            throws BeansException
+    {
+        this.ctx = ctx;
+        
     }
 
 }
