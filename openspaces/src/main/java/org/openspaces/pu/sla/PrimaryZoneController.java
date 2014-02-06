@@ -11,6 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.openspaces.admin.Admin;
+import org.openspaces.admin.AdminFactory;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.pu.DeploymentStatus;
 import org.openspaces.admin.pu.ProcessingUnit;
@@ -18,11 +19,9 @@ import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.ProcessingUnitPartition;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.cluster.ClusterInfoAware;
-import org.springframework.beans.BeansException;
+import org.openspaces.core.space.SecurityConfig;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 
 import com.gigaspaces.grid.zone.ZoneHelper;
 
@@ -34,7 +33,7 @@ import com.gigaspaces.grid.zone.ZoneHelper;
  * 2. primaries in backup zone if it happens instances are restarted and balance is restored.
  */
 public class PrimaryZoneController
-        implements InitializingBean, DisposableBean, ClusterInfoAware,ApplicationContextAware
+        implements InitializingBean, DisposableBean, ClusterInfoAware
 {
     private static Logger            logger             = Logger.getLogger(PrimaryZoneController.class.getName());
 
@@ -47,8 +46,8 @@ public class PrimaryZoneController
     private int                      delayBetweenChecks = 60;
 
     private ClusterInfo              clusterInfo;
+    private SecurityConfig           securityConfig;
 
-    private ApplicationContext ctx;
 
     public PrimaryZoneController()
     {
@@ -62,19 +61,14 @@ public class PrimaryZoneController
             throw new IllegalStateException(PrimaryZoneController.class.getSimpleName()
                     + " doesn't run on non-clustered pu.");
         }
-        
+
         puName = clusterInfo.getName();
-        init();
-    }
-
-    public void init() throws Exception
-    {
-        Object bean = ctx.getBean(puName);
-
-		logger.info("PrimaryZoneController on " + bean);
-        if(bean != null && bean instanceof ProcessingUnit)
-            admin = ((ProcessingUnit)bean).getAdmin();
-        else throw new IllegalArgumentException("[" + puName+ "] is not a processing unit.");
+       
+        AdminFactory a = new AdminFactory();
+        if(securityConfig != null)
+        {
+            a.credentialsProvider(securityConfig.getCredentialsProvider() );
+        }
             
         GridServiceManager gsm = admin.getGridServiceManagers()
                 .waitForAtLeastOne(30, TimeUnit.SECONDS);
@@ -144,7 +138,8 @@ public class PrimaryZoneController
             // then the current primary just needs to be restarted
             // the current backup will become primary and balance will be
             // restored.
-            if (!containsAny(currentPrimaryZones, primaryZones) && containsAny(currentBackupZones, primaryZones))
+            if (!containsAny(currentPrimaryZones, primaryZones)
+                    && containsAny(currentBackupZones, primaryZones))
             {
                 logger.warning("Primary instance of PU "
                         + primary.getProcessingUnitInstanceName()
@@ -154,8 +149,7 @@ public class PrimaryZoneController
                         + "] is not running on primary zone [" + primaryZone
                         + "]. It will be restarted.");
 
-
-                    primary.restartAndWait(60, TimeUnit.SECONDS);
+                primary.restartAndWait(60, TimeUnit.SECONDS);
             }
         }
     }
@@ -264,12 +258,14 @@ public class PrimaryZoneController
 
     }
 
-    @Override
-    public void setApplicationContext(ApplicationContext ctx)
-            throws BeansException
+    public SecurityConfig getSecurityConfig()
     {
-        this.ctx = ctx;
-        
+        return securityConfig;
+    }
+
+    public void setSecurityConfig(SecurityConfig securityConfig)
+    {
+        this.securityConfig = securityConfig;
     }
 
 }
