@@ -81,8 +81,8 @@ import org.openspaces.pu.container.ProcessingUnitContainer;
 import org.openspaces.pu.container.ProcessingUnitContainerProvider;
 import org.openspaces.pu.container.UndeployingEventProcessingUnitContainer;
 import org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainerProvider;
+import org.openspaces.pu.container.jee.JeeProcessingUnitContainerProvider;
 import org.openspaces.pu.container.jee.context.BootstrapWebApplicationContextListener;
-import org.openspaces.pu.container.jee.jetty.JettyJeeProcessingUnitContainerProvider;
 import org.openspaces.pu.container.servicegrid.jmxs.SecuredPUExtension;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainer;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainerProvider;
@@ -706,8 +706,8 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         if (factory instanceof ClassLoaderAwareProcessingUnitContainerProvider) {
             ((ClassLoaderAwareProcessingUnitContainerProvider) factory).setClassLoader(contextClassLoader);
         }
-        if (factory instanceof JettyJeeProcessingUnitContainerProvider) {
-            ((JettyJeeProcessingUnitContainerProvider) factory).setManifestUrls(manifestClassPathJars);
+        if (factory instanceof JeeProcessingUnitContainerProvider) {
+            ((JeeProcessingUnitContainerProvider) factory).setManifestUrls(manifestClassPathJars);
         }
         
         // only load the spring xml file if it is not a web application (if it is a web application, we will load it with the Bootstrap servlet context loader)
