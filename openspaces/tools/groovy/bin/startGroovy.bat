@@ -78,7 +78,7 @@ goto end
 
 :default_JAVA_EXE
 set JAVA_EXE=java.exe
-goto check_GROOVY_HOME
+goto check_GS_GROOVY_HOME
 
 :valid_JAVA_HOME_DIR
 set JAVA_EXE=%JAVA_HOME%\bin\java.exe
@@ -91,12 +91,12 @@ goto common_error
 :valid_JAVA_HOME
 if exist "%JAVA_HOME%\lib\tools.jar" set TOOLS_JAR=%JAVA_HOME%\lib\tools.jar
 
-:check_GROOVY_HOME
-@rem Define GROOVY_HOME if not set
-if "%GROOVY_HOME%" == "" set GROOVY_HOME=%DIRNAME%..
+:check_GS_GROOVY_HOME
+@rem Define GS_GROOVY_HOME if not set
+if "%GS_GROOVY_HOME%" == "" set GS_GROOVY_HOME=%DIRNAME%..
 
-@rem Remove trailing slash from GROOVY_HOME if found
-if "%GROOVY_HOME:~-1%"=="\" SET GROOVY_HOME=%GROOVY_HOME:~0,-1%
+@rem Remove trailing slash from GS_GROOVY_HOME if found
+if "%GS_GROOVY_HOME:~-1%"=="\" SET GS_GROOVY_HOME=%GS_GROOVY_HOME:~0,-1%
 
 @rem classpath handling
 set _SKIP=2
@@ -219,7 +219,7 @@ set CMD_LINE_ARGS=%$
 
 :execute
 @rem Setup the command line
-set STARTER_CLASSPATH=%GROOVY_HOME%\lib\groovy-2.2.1.jar
+set STARTER_CLASSPATH=%GS_GROOVY_HOME%\lib\groovy-2.2.1.jar
 
 if exist "%USERPROFILE%/.groovy/init.bat" call "%USERPROFILE%/.groovy/init.bat"
 
@@ -237,19 +237,25 @@ set CP=%CLASSPATH%;%CP%
 :after_cp
 
 set STARTER_MAIN_CLASS=org.codehaus.groovy.tools.GroovyStarter
-set STARTER_CONF=%GROOVY_HOME%\conf\groovy-starter.conf
+set STARTER_CONF=%GS_GROOVY_HOME%\conf\groovy-starter.conf
 
-set GROOVY_OPTS="-Xmx128m"
-set GROOVY_OPTS=%GROOVY_OPTS% -Dprogram.name="%PROGNAME%"
-set GROOVY_OPTS=%GROOVY_OPTS% -Dgroovy.home="%GROOVY_HOME%"
-if not "%TOOLS_JAR%" == "" set GROOVY_OPTS=%GROOVY_OPTS% -Dtools.jar="%TOOLS_JAR%"
-set GROOVY_OPTS=%GROOVY_OPTS% -Dgroovy.starter.conf="%STARTER_CONF%"
-set GROOVY_OPTS=%GROOVY_OPTS% -Dscript.name="%GROOVY_SCRIPT_NAME%"
+@rem GigaSpaces: Change the -Xmx to higher value
+if "%JAVA_OPTS%" == "" set JAVA_OPTS="-Xmx512m"
+set JAVA_OPTS=%JAVA_OPTS% -Dprogram.name="%PROGNAME%"
+set JAVA_OPTS=%JAVA_OPTS% -Dgroovy.home="%GS_GROOVY_HOME%"
+if not "%TOOLS_JAR%" == "" set JAVA_OPTS=%JAVA_OPTS% -Dtools.jar="%TOOLS_JAR%"
+set JAVA_OPTS=%JAVA_OPTS% -Dgroovy.starter.conf="%STARTER_CONF%"
+set JAVA_OPTS=%JAVA_OPTS% -Dscript.name="%GROOVY_SCRIPT_NAME%"
 
 if exist "%USERPROFILE%/.groovy/postinit.bat" call "%USERPROFILE%/.groovy/postinit.bat"
 
+@rem GigaSpaces - Call setenv
+SET JSHOMEDIR=%GS_GROOVY_HOME%\..\..\
+call "%JSHOMEDIR%\bin\setenv.bat"
+set JAVA_OPTS=%JAVA_OPTS% %LOOKUP_GROUPS_PROP% %LOOKUP_LOCATORS_PROP%
+
 @rem Execute Groovy
-"%JAVA_EXE%" %GROOVY_OPTS% %JAVA_OPTS% -classpath "%STARTER_CLASSPATH%" %STARTER_MAIN_CLASS% --main %CLASS% --conf "%STARTER_CONF%" --classpath "%CP%" %CMD_LINE_ARGS%
+"%JAVA_EXE%" %JAVA_OPTS% -classpath "%STARTER_CLASSPATH%" %STARTER_MAIN_CLASS% --main %CLASS% --conf "%STARTER_CONF%" --classpath "%CP%" %CMD_LINE_ARGS%
 
 :end
 @rem End local scope for the variables with windows NT shell
