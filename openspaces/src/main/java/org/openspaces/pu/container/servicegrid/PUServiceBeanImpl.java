@@ -489,19 +489,19 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                 }
             } catch (MalformedURLException mle) {
                 logger.warn("Could not determine if GSC and GSM are on the same host", mle);
-                // fallbacל to download
+                // fallback to download
                 long size = downloadAndExtractPU(puName, puPath, codeserver, deployPath,
                         new File(deployedProcessingUnitsLocation));
                 logDownloadSize(size);
             } catch (UnknownHostException unhe) {
                 logger.warn("Could not determine if GSC and GSM are on the same host", unhe);
-                // fallbacל to download
+                // fallback to download
                 long size = downloadAndExtractPU(puName, puPath, codeserver, deployPath,
                         new File(deployedProcessingUnitsLocation));
                 logDownloadSize(size);
             } catch (RemoteException re) {
                 logger.warn("Could not determine if GSC and GSM are on the same host", re);
-                // fallbacל to download
+                // fallback to download
                 long size = downloadAndExtractPU(puName, puPath, codeserver, deployPath,
                         new File(deployedProcessingUnitsLocation));
                 logDownloadSize(size);
