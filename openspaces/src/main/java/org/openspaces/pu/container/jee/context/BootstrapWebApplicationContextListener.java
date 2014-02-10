@@ -213,7 +213,7 @@ public class BootstrapWebApplicationContextListener implements ServletContextLis
 
         // load jee specific context listener
         if (beanLevelProperties != null) {
-            String jeeContainer = beanLevelProperties.getContextProperties().getProperty("jee.container", "jetty");
+            String jeeContainer = beanLevelProperties.getContextProperties().getProperty("jee.container", JeeProcessingUnitContainerProvider.DEFAULT_CONTAINER);
             String className = "org.openspaces.pu.container.jee." + jeeContainer + "." + StringUtils.capitalize(jeeContainer) + "WebApplicationContextListener";
             Class clazz = null;
             try {

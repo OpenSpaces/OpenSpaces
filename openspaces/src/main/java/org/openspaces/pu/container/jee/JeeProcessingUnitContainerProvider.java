@@ -48,4 +48,6 @@ public interface JeeProcessingUnitContainerProvider extends
      * (loaded from the <code>pu.xml</code>) is stored.
      */
     public static final String APPLICATION_CONTEXT_CONTEXT = "applicationContext";
+
+    public static final String DEFAULT_CONTAINER = "jetty";
 }

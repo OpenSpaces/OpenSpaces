@@ -53,6 +53,7 @@ import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.core.properties.BeanLevelPropertyBeanPostProcessor;
 import org.openspaces.core.properties.BeanLevelPropertyPlaceholderConfigurer;
+import org.openspaces.pu.container.jee.JeeProcessingUnitContainerProvider;
 import org.openspaces.pu.container.support.BeanLevelPropertiesParser;
 import org.openspaces.pu.container.support.ClusterInfoParser;
 import org.openspaces.pu.container.support.CommandLineParser;
@@ -828,7 +829,7 @@ public class Deploy {
         if (beanLevelProperties != null) {
             element.getServiceBeanConfig().addInitParameter("pu.type", beanLevelProperties.getContextProperties().remove("pu.type"));
             element.getServiceBeanConfig().addInitParameter("beanLevelProperties", new MarshalledObject<BeanLevelProperties>(beanLevelProperties));
-            element.getServiceBeanConfig().addInitParameter("jee.container", beanLevelProperties.getContextProperties().getProperty("jee.container", "jetty"));
+            element.getServiceBeanConfig().addInitParameter("jee.container", beanLevelProperties.getContextProperties().getProperty("jee.container", JeeProcessingUnitContainerProvider.DEFAULT_CONTAINER));
         }
 
         //sla

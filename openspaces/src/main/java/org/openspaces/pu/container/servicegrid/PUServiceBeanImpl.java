@@ -425,7 +425,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         if (webXml != null) {
             webXml.close();
             downloadPU = true;
-            String jeeContainer = beanLevelProperties.getContextProperties().getProperty("jee.container", "jetty");
+            String jeeContainer = beanLevelProperties.getContextProperties().getProperty("jee.container", JeeProcessingUnitContainerProvider.DEFAULT_CONTAINER);
             String[] classesToLoad = null;
             if ("jetty".equals(jeeContainer)) {
                 // pre load the jetty server class so the static shutdown thread will be loaded under it
