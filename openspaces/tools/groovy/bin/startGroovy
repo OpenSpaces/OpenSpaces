@@ -268,7 +268,7 @@ startGroovy ( ) {
         runProfiler
     else
         exec "$JAVACMD" $JAVA_OPTS \
-            -classpath "$STARTER_CLASSPATH" \
+            -classpath "$STARTER_CLASSPATH:$GS_JARS" \
             -Dscript.name="$SCRIPT_PATH" \
             -Dprogram.name="$PROGNAME" \
             -Dgroovy.starter.conf="$GROOVY_CONF" \
