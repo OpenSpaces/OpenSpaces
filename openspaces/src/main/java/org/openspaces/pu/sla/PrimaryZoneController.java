@@ -70,6 +70,8 @@ public class PrimaryZoneController
             a.credentialsProvider(securityConfig.getCredentialsProvider() );
         }
             
+        admin = a.create();
+        
         GridServiceManager gsm = admin.getGridServiceManagers()
                 .waitForAtLeastOne(30, TimeUnit.SECONDS);
         if (gsm == null)
