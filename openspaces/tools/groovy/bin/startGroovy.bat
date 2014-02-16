@@ -254,8 +254,11 @@ SET JSHOMEDIR=%GS_GROOVY_HOME%\..\..\
 call "%JSHOMEDIR%\bin\setenv.bat"
 set JAVA_OPTS=%JAVA_OPTS% %LOOKUP_GROUPS_PROP% %LOOKUP_LOCATORS_PROP%
 
+@rem Remove redundant apostrophes from the classpath
+set tmpPath=%STARTER_CLASSPATH%;%GS_JARS:"=%
+
 @rem Execute Groovy
-"%JAVA_EXE%" %JAVA_OPTS% -classpath "%STARTER_CLASSPATH%;%GS_JARS%" %STARTER_MAIN_CLASS% --main %CLASS% --conf "%STARTER_CONF%" --classpath "%CP%" %CMD_LINE_ARGS%
+"%JAVA_EXE%" %JAVA_OPTS% -classpath "%tmpPath%" %STARTER_MAIN_CLASS% --main %CLASS% --conf "%STARTER_CONF%" --classpath "%CP%" %CMD_LINE_ARGS%
 
 :end
 @rem End local scope for the variables with windows NT shell
