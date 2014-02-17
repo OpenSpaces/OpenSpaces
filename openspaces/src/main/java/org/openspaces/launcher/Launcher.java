@@ -22,8 +22,8 @@ import java.util.logging.Logger;
 
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SessionManager;
-import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.openspaces.pu.container.support.CommandLineParser;
 
@@ -74,9 +74,9 @@ public class Launcher {
         	return;
         
         Server server = new Server();
-        SelectChannelConnector connector = new SelectChannelConnector();
+        ServerConnector connector = new ServerConnector(server);
+        connector.setPort(port);
         connector.setReuseAddress( false );
-        connector.setPort( port );
         server.setConnectors( new Connector[]{ connector } );
         
         WebAppContext webAppContext = new WebAppContext();

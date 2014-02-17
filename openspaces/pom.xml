@@ -19,7 +19,7 @@
 		<hectorVersion>1.1-2</hectorVersion>
 		<cassandraVersion>1.1.6</cassandraVersion>
 		<slf4jVersion>1.6.6</slf4jVersion>
-		<jettyVersion>8.1.8.v20121106</jettyVersion>
+		<jettyVersion>9.1.2.v20140210</jettyVersion>
 	</properties>
 
 	<repositories>		
