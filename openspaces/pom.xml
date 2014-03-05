@@ -19,7 +19,6 @@
 		<hectorVersion>1.1-2</hectorVersion>
 		<cassandraVersion>1.1.6</cassandraVersion>
 		<slf4jVersion>1.6.6</slf4jVersion>
-		<jettyVersion>9.1.2.v20140210</jettyVersion>
 	</properties>
 
 	<repositories>		
@@ -61,51 +60,6 @@
 		</repository>
 	</repositories>
 	<dependencies>
-		<dependency>
-			<groupId>org.eclipse.jetty.orbit</groupId>
-			<artifactId>com.sun.el</artifactId>
-			<version>2.2.0.v201108011116</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty.orbit</groupId>
-			<artifactId>javax.el</artifactId>
-			<version>2.2.0.v201108011116</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty.orbit</groupId>
-			<artifactId>javax.servlet.jsp</artifactId>
-			<version>2.2.0.v201112011158</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty.orbit</groupId>
-			<artifactId>javax.servlet.jsp.jstl</artifactId>
-			<version>1.2.0.v201105211821</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty.orbit</groupId>
-			<artifactId>org.apache.taglibs.standard.glassfish</artifactId>
-			<version>1.2.0.v201112081803</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty.aggregate</groupId>
-			<artifactId>jetty-all</artifactId>
-			<version>${jettyVersion}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty.orbit</groupId>
-			<artifactId>org.apache.jasper.glassfish</artifactId>
-			<version>2.2.2.v201112011158</version>
-		</dependency>
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-			<version>3.0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jdt.core.compiler</groupId>
-			<artifactId>ecj</artifactId>
-			<version>3.7.1</version>
-		</dependency>
 		<dependency>
 			<groupId>org.ow2.jotm</groupId>
 			<artifactId>jotm-core</artifactId>
@@ -616,10 +570,6 @@
 						<phase>package</phase>
 						<configuration>
 							<finalName>${project.artifactId}</finalName>	
-							<excludes>
-								<exclude>org/openspaces/pu/container/jee/jetty/holder/**</exclude>
-								<exclude>org/openspaces/pu/container/jee/jetty/support/**</exclude>
-							</excludes>						
 							<archive>
 								<manifestEntries>
 									<Implementation-Title>${openspacesTitle}</Implementation-Title>

@@ -20,16 +20,12 @@ package org.openspaces.launcher;
 import java.io.File;
 import java.util.logging.Logger;
 
-import org.eclipse.jetty.server.Connector;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.SessionManager;
-import org.eclipse.jetty.webapp.WebAppContext;
+import com.gigaspaces.internal.io.FileUtils;
+import com.gigaspaces.internal.utils.StringUtils;
+import com.j_spaces.kernel.*;
 import org.openspaces.pu.container.support.CommandLineParser;
 
 import com.gigaspaces.admin.cli.RuntimeInfo;
-import com.gigaspaces.internal.io.FileUtils;
-import com.gigaspaces.internal.utils.StringUtils;
 import com.gigaspaces.logger.GSLogConfigLoader;
 
 /**
@@ -39,25 +35,23 @@ import com.gigaspaces.logger.GSLogConfigLoader;
 public class Launcher {
 
     public static void main(String[] args) throws Exception {
-        
-        int port = Integer.getInteger("org.openspaces.launcher.port", 8099);
+
+        WebLauncherConfig config = new WebLauncherConfig();
         String name = System.getProperty("org.openspaces.launcher.name", "launcher");
-        String path = System.getProperty("org.openspaces.launcher.path", null);
-        String work = System.getProperty("org.openspaces.launcher.work", "./work");
         String loggerName = System.getProperty("org.openspaces.launcher.logger", "org.openspaces.launcher");
-        String sessionManagerStr = System.getProperty( "org.openspaces.launcher.jetty.session.manager" );
-        
+        String webLauncherClass = System.getProperty("org.openspaces.launcher.class", "org.openspaces.launcher.JettyLauncher");
+
         CommandLineParser.Parameter[] params = CommandLineParser.parse(args);
         for (CommandLineParser.Parameter param : params) {
             String paramName = param.getName();
             if ("port".equals(paramName))
-                port = Integer.parseInt(param.getArguments()[0]);
+                config.setPort(Integer.parseInt(param.getArguments()[0]));
+            else if ("path".equals(paramName))
+                config.setWarFilePath(param.getArguments()[0]);
+            else if ("work".equals(paramName))
+                config.setTempDirPath(param.getArguments()[0]);
             else if ("name".equals(paramName))
                 name = param.getArguments()[0];
-            else if ("path".equals(paramName))
-                path = param.getArguments()[0];
-            else if ("work".equals(paramName))
-                work = param.getArguments()[0];
             else if ("logger".equals(paramName))
             	loggerName = param.getArguments()[0];
             else if("help".equals(paramName) || "h".equals(paramName)) {
@@ -68,84 +62,51 @@ public class Launcher {
 
         GSLogConfigLoader.getLoader(name);
         GSLogConfigLoader.getLoader();
-        final Logger logger = Logger.getLogger(loggerName);
-        final String warFilePath = getWarFilePath(path, logger);
-        if (warFilePath == null)
+        if (!validate(config)) {
+            printHelpMessage();
         	return;
-        
-        Server server = new Server();
-        ServerConnector connector = new ServerConnector(server);
-        connector.setPort(port);
-        connector.setReuseAddress( false );
-        server.setConnectors( new Connector[]{ connector } );
-        
-        WebAppContext webAppContext = new WebAppContext();
-        webAppContext.setContextPath("/");
-        webAppContext.setWar(warFilePath);
-        File tempDir = new File(work);
-        tempDir.mkdirs();
-        webAppContext.setTempDirectory(tempDir);
-        webAppContext.setCopyWebDir(false);
-        webAppContext.setParentLoaderPriority(true);
-        
-        if( sessionManagerStr != null ){
-            //change default session manager implementation ( in order to change "JSESSIONID" )
-        	//GS-10830, CLOUDIFY-1797
-        	try{
-        		Class sessionManagerClass = Class.forName( sessionManagerStr );
-        		SessionManager sessionManagerImpl = ( SessionManager )sessionManagerClass.newInstance();
-        		webAppContext.getSessionHandler().setSessionManager( sessionManagerImpl );
-        	}
-        	catch( Throwable t ){
-        		System.out.println( "Session Manager [" + sessionManagerStr + "] was not set cause following exception:" + t.toString() );
-        		t.printStackTrace();
-        	}
-        }
-        else{
-        	System.out.println( "Session Manager was not provided" );
         }
 
-        server.setHandler(webAppContext);
-        
-		logger.info(RuntimeInfo.getShortEnvironmentInfo());
-        server.start();
-        webAppContext.start();        
-        logger.info(name + " server started on port [" + port + "]");
+        final Logger logger = Logger.getLogger(loggerName);
+        logger.info(RuntimeInfo.getShortEnvironmentInfo());
+        WebLauncher webLauncher = ClassLoaderHelper.newInstance(webLauncherClass);
+        webLauncher.launch(config);
+        logger.info(name + " server started on port [" + config.getPort() + "]");
     }
 
     private static void printHelpMessage() {
         System.out.println("Launcher -path <path> [-work <work>] [-port <port>] [-name <name>] [-logger <logger>]");
     }
-    private static String getWarFilePath(String path, Logger logger) {
-    	// Verify path is not empty:
-    	if (!StringUtils.hasLength(path)) {
-    		printHelpMessage();
-    		return null;
-    	}
-    	// Verify path exists:
-    	final File file = new File(path);
-    	if (!file.exists()) {
-    		System.out.println("Path does not exist: " + path);
-    		printHelpMessage();
-    		return null;
-    	}
-    	// If File is an actual file, return it:
-		if (file.isFile())
-			return path;
-		// If file is a directory, Get the 1st war file (if any):
-		if (file.isDirectory()) {
-			File[] warFiles = FileUtils.findFiles(file, null, ".war");
-			if (warFiles.length == 0) {
-	    		System.out.println("Path does not contain any war files: " + path);
-	    		printHelpMessage();
-	    		return null;
-			}
-			final String warFile = warFiles[0].getPath(); 
-			if (warFiles.length > 1)
-				logger.warning("Found " + warFiles.length + " war files in " + path + ", using " + warFile);
-			return warFile;
-		}
-		System.out.println("Path is neither file nor folder: " + path);
-		return null;
+
+    private static boolean validate(WebLauncherConfig config) {
+        // Verify path is not empty:
+        if (!StringUtils.hasLength(config.getWarFilePath()))
+            return false;
+
+        // Verify path exists:
+        final File file = new File(config.getWarFilePath());
+        if (!file.exists()) {
+            System.out.println("Path does not exist: " + config.getWarFilePath());
+            return false;
+        }
+        // If File is an actual file, return it:
+        if (file.isFile())
+            return true;
+
+        // If file is a directory, Get the 1st war file (if any):
+        if (file.isDirectory()) {
+            File[] warFiles = FileUtils.findFiles(file, null, ".war");
+            if (warFiles.length == 0) {
+                System.out.println("Path does not contain any war files: " + config.getWarFilePath());
+                return false;
+            }
+            if (warFiles.length > 1)
+                System.out.println("Found " + warFiles.length + " war files in " + config.getWarFilePath() + ", using " + warFiles[0].getPath());
+            config.setWarFilePath(warFiles[0].getPath());
+            return true;
+        }
+
+        System.out.println("Path is neither file nor folder: " + config.getWarFilePath());
+        return false;
     }
 }
