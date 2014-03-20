@@ -434,8 +434,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             // setup class loaders correcly
             try {
                 Thread.currentThread().setContextClassLoader(CommonClassLoader.getInstance());
-                String gsLibPlatform = System.getProperty(Locator.GS_LIB_PLATFORM);
-                ((ServiceClassLoader) contextClassLoader).addURLs(BootUtil.toURLs(new String[] {gsLibPlatform + "openspaces/gs-openspaces-" + jeeContainer + ".jar"}));
+                ((ServiceClassLoader) contextClassLoader).addURLs(BootUtil.toURLs(new String[] {Locator.getJeeContainerJarPath(jeeContainer)}));
                 ((ServiceClassLoader) contextClassLoader).setParentClassLoader(SharedServiceData.getJeeClassLoader(jeeContainer, classesToLoad));
             } catch (Exception e) {
                 throw new CannotCreateContainerException("Failed to configure JEE class loader", e);
