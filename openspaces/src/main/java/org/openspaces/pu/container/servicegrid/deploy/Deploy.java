@@ -829,7 +829,7 @@ public class Deploy {
         if (beanLevelProperties != null) {
             element.getServiceBeanConfig().addInitParameter("pu.type", beanLevelProperties.getContextProperties().remove("pu.type"));
             element.getServiceBeanConfig().addInitParameter("beanLevelProperties", new MarshalledObject<BeanLevelProperties>(beanLevelProperties));
-            element.getServiceBeanConfig().addInitParameter("jee.container", beanLevelProperties.getContextProperties().getProperty("jee.container", JeeProcessingUnitContainerProvider.DEFAULT_CONTAINER));
+            element.getServiceBeanConfig().addInitParameter(JeeProcessingUnitContainerProvider.JEE_CONTAINER_PROPERTY_NAME, JeeProcessingUnitContainerProvider.getJeeContainer(beanLevelProperties));
         }
 
         //sla
