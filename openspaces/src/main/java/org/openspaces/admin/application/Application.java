@@ -77,4 +77,9 @@ public interface Application {
      */
     boolean undeployAndWait(long timeout, TimeUnit timeUnit);
 
+    /**
+     * Sets the history size of number for the processing units
+     */
+    void setStatisticsHistorySize(int historySize);
+
 }

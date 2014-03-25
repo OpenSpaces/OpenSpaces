@@ -76,6 +76,15 @@ public class DefaultApplication implements InternalApplication {
         return name.hashCode();
     }
 
+    
+    @Override
+    public void setStatisticsHistorySize(int historySize) {
+        for (ProcessingUnit processingUnit : processingUnits) {
+        	processingUnit.setStatisticsHistorySize(historySize);
+        }
+    }
+    
+
     @Override
     public void undeployAndWait() {
         undeployAndWait(admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());

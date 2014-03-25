@@ -55,6 +55,7 @@ import org.jini.rio.monitor.event.Events;
 import org.openspaces.admin.AdminEventListener;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.GridComponent;
+import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.alert.AlertManager;
 import org.openspaces.admin.application.Application;
 import org.openspaces.admin.application.Applications;
@@ -271,6 +272,8 @@ public class DefaultAdmin implements InternalAdmin {
 
     private long executorSingleThreadId;
 
+    private volatile int statisticsHistorySize = StatisticsMonitor.DEFAULT_HISTORY_SIZE;
+
     private final AlertManager alertManager;
 
     private final boolean useDaemonThreads;
@@ -366,6 +369,7 @@ public class DefaultAdmin implements InternalAdmin {
 
     @Override
     public void setStatisticsHistorySize(int historySize) {
+    	this.statisticsHistorySize = historySize;
         this.spaces.setStatisticsHistorySize(historySize);
         this.virtualMachines.setStatisticsHistorySize(historySize);
         this.transports.setStatisticsHistorySize(historySize);
@@ -1414,6 +1418,7 @@ public class DefaultAdmin implements InternalAdmin {
         InternalApplication application = (InternalApplication) applications.getApplication(applicationName);
         if (application == null) {
             application = new DefaultApplication(this, applicationName);
+            application.setStatisticsHistorySize(statisticsHistorySize);
         }
         applications.addApplication(application, processingUnit);
     }
