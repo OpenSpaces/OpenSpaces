@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.gigaspaces.internal.lookup.LookupUtils;
+
 import net.jini.core.discovery.LookupLocator;
 import net.jini.core.entry.Entry;
 import net.jini.core.lookup.ServiceID;
@@ -45,6 +46,10 @@ import org.apache.commons.logging.LogFactory;
 import org.jini.rio.boot.BootUtil;
 import org.jini.rio.resources.servicecore.Service;
 import org.openspaces.admin.AdminException;
+import org.openspaces.admin.esm.ElasticServiceManager;
+import org.openspaces.admin.gsa.GridServiceAgent;
+import org.openspaces.admin.gsc.GridServiceContainer;
+import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.internal.admin.AdminClosedException;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.esm.DefaultElasticServiceManager;
@@ -61,6 +66,9 @@ import org.openspaces.admin.internal.pu.DefaultProcessingUnitInstance;
 import org.openspaces.admin.internal.pu.InternalProcessingUnitInstance;
 import org.openspaces.admin.internal.space.DefaultSpaceInstance;
 import org.openspaces.admin.internal.space.InternalSpaceInstance;
+import org.openspaces.admin.pu.ProcessingUnit;
+import org.openspaces.admin.pu.ProcessingUnitInstance;
+import org.openspaces.admin.space.Space;
 import org.openspaces.core.space.SpaceServiceDetails;
 import org.openspaces.grid.esm.ESM;
 import org.openspaces.pu.container.servicegrid.PUDetails;
@@ -107,10 +115,38 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
     private LookupCache serviceCache;
     private LookupCache spaceCache;
 
+    //types of services to discover
+    private Class[] services = new Class[]{Service.class};
+    
+   
     public DiscoveryService(InternalAdmin admin) {
-        this.admin = admin;
+    	this.admin = admin;
     }
 
+    public void setDiscoveryServices(Class...services)
+    {
+    	if(services == null || services.length == 0)
+    		return ;
+
+    	this.services = new Class[services.length];
+    	for (int i = 0; i < services.length; i++) {
+    		if(GridServiceAgent.class.isAssignableFrom(services[i]))
+    			this.services[i] = GSA.class;
+    		else if(GridServiceManager.class.isAssignableFrom(services[i]))
+    			this.services[i] = GSM.class;
+    		else if(GridServiceContainer.class.isAssignableFrom(services[i]))
+    			this.services[i] = GSC.class;
+    		else if(ElasticServiceManager.class.isAssignableFrom(services[i]))
+    			this.services[i] = ESM.class;
+    		else if(ProcessingUnit.class.isAssignableFrom(services[i]))
+    			this.services[i] = PUServiceBean.class;
+    		else if(Space.class.isAssignableFrom(services[i]))
+    			this.services[i] = IJSpace.class;
+    		else
+    			throw new IllegalArgumentException("Illegal discovery type - " + services[i] );
+    	}
+    }
+    
     public void addGroup(String group) {
         if (groups == null) {
             groups = new ArrayList<String>();
@@ -142,7 +178,8 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
         }
 
         try {
-            ServiceTemplate template = new ServiceTemplate(null, new Class[] { Service.class }, null);
+        	
+            ServiceTemplate template = new ServiceTemplate(null, services , null);
             serviceCache = sdm.createLookupCache(template, null, this);
         } catch (Exception e) {
             sdm.terminate();
@@ -161,7 +198,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
         }
     }
 
-    public void stop() {
+	public void stop() {
         if (!started) {
             return;
         }

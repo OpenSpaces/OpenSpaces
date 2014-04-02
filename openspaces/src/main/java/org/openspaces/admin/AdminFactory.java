@@ -21,7 +21,13 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.jini.rio.boot.BootUtil;
+import org.openspaces.admin.esm.ElasticServiceManager;
+import org.openspaces.admin.gsa.GridServiceAgent;
+import org.openspaces.admin.gsc.GridServiceContainer;
+import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.internal.admin.DefaultAdmin;
+import org.openspaces.admin.pu.ProcessingUnit;
+import org.openspaces.admin.space.Space;
 import org.openspaces.security.AdminFilter;
 
 import com.gigaspaces.logger.GSLogConfigLoader;
@@ -54,8 +60,12 @@ public class AdminFactory {
     private CredentialsProvider credentialsProvider = null;
     private boolean discoverUnmanagedSpaces = false;
     private AdminFilter adminFilter;
+
+	private Class[] discoveryServices;
     
-    /**
+   
+
+	/**
      * By default the Admin finds in classpath the GS logging config file. This file is used for the setting
      * GS logging configuration. This file is searched under /config/gs_logging.properties
      * User can set system property: -Djava.util.logging.config.file to use his own java logging configuration.
@@ -163,7 +173,24 @@ public class AdminFactory {
         this.adminFilter = adminFilter;
         return this;
     }
-    
+  
+    /**
+	 * Set the service types that will be monitored
+	 *  @param discoveryServices 
+	 * {@link GridServiceAgent},
+	 * {@link GridServiceManager}, 
+	 * {@link GridServiceContainer} , 
+	 * {@link ElasticServiceManager}, 
+	 * {@link ProcessingUnit}, 
+	 * {@link Space}
+	 * 
+	 * @throws IllegalArgumentException if other type is provided
+	 * @since 9.7.1
+     *
+	 */
+	public void setDiscoveryServices(Class... discoveryServices) {
+		this.discoveryServices = discoveryServices;
+	}
     /**
      * Enables discovery of unmanaged spaces (spaces that are not started by being deployed
      * within the Service Grid). Defaults to <code>false</code> (unmanaged spaces are not discovered).
@@ -193,6 +220,8 @@ public class AdminFactory {
         DefaultAdmin admin = new DefaultAdmin(useDaemonThreads, singleThreadedEventListeners);
         admin.setCredentialsProvider(credentialsProvider);
         admin.setAdminFilter(adminFilter);
+        admin.setDiscoveryServices(discoveryServices);
+        
         for (String group : groups) {
             admin.addGroup(group);
         }

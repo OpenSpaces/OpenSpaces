@@ -2231,4 +2231,20 @@ public class DefaultAdmin implements InternalAdmin {
 	public ProcessingUnitInstance[] getOrphanProcessingUnitInstances() {
 		return processingUnitInstances.getOrphanProcessingUnitInstances();
 	}
+
+	/**
+	 * Set the service types that will be monitored
+	 * Supported types: 
+	 * {@link GridServiceAgent},
+	 * {@link GridServiceManager}, 
+	 * {@link GridServiceContainer} , 
+	 * {@link ElasticServiceManager}, 
+	 * {@link ProcessingUnit}, 
+	 * {@link Space}
+	 * @throws IllegalArgumentException if other type is provided
+	 */
+	public void setDiscoveryServices(Class... discoveryServices) {
+		this.discoveryService.setDiscoveryServices(discoveryServices);
+		
+	}
 }
