@@ -33,6 +33,8 @@ public class MemcachedDeploy {
 
     private final Deploy deploy;
 
+    public final static String[] validOptionsArray = Deploy.validOptionsArray;
+
     public static String extractName(String url) {
         int index = url.lastIndexOf("/");
         if (index == -1) {
@@ -120,9 +122,9 @@ public class MemcachedDeploy {
         for (int i = 0; i < args.length - 1; i++) {
             tempList.add(args[i]);
         }
-        tempList.add("-properties");
+        tempList.add("-" + Deploy.KEY_PROPERTIES);
         tempList.add("embed://url=" + spaceUrl);
-        tempList.add("-override-name");
+        tempList.add("-"  + Deploy.KEY_OVERRIDE_NAME);
         tempList.add(extractName(spaceUrl) + "-memcached");
         tempList.add("/templates/memcached");
         return tempList.toArray(new String[tempList.size()]);
@@ -148,37 +150,37 @@ public class MemcachedDeploy {
     public static String getUsage(boolean managed) {
         StringBuilder sb = new StringBuilder();
         if (!managed) {
-            sb.append("Usage: memcached Deploy [-sla ...] [-cluster ...] [-groups groups] [-locators host1 host2] [-timeout timeoutValue] [-properties ...] [-user xxx -password yyy] [-secured true/false] space_url");
+            sb.append("Usage: memcached Deploy [-" + Deploy.KEY_SLA + " ...] [-" + Deploy.KEY_CLUSTER + " ...] [-groups groups] [-locators host1 host2] [-timeout timeoutValue] [-properties ...] [-user xxx -password yyy] [-secured true/false] space_url");
         } else {
-            sb.append("Usage: deploy-memcached [-sla ...] [-cluster ...] [-properties ...] [-user xxx -password yyy] [-secured true/false] space_url");
+            sb.append("Usage: deploy-memcached [-" + Deploy.KEY_SLA + " ...] [-" + Deploy.KEY_CLUSTER + " ...] [-properties ...] [-user xxx -password yyy] [-secured true/false] space_url");
         }
         sb.append("\n    space_url: The url of the space, can be embedded, eg: /./myMemcached, or remote eg: jini://*/*/myMemcached");
-        sb.append("\n    -sla [sla-location]                      : Location of an optional xml file holding the SLA element");
-        sb.append("\n    -cluster [cluster properties]            : Allows to override the cluster parameters of the SLA elements");
-        sb.append("\n             schema=partitioned-sync2backup  : The cluster schema to override");
-        sb.append("\n             total_members=1,1               : The number of instances and number of backups to override");
+        sb.append("\n    -" + Deploy.KEY_SLA + " [sla-location]                      : Location of an optional xml file holding the SLA element");
+        sb.append("\n    -" + Deploy.KEY_CLUSTER + " [cluster properties]            : Allows to override the cluster parameters of the SLA elements");
+        sb.append("\n             " + Deploy.KEY_SCHEMA + "=partitioned-sync2backup  : The cluster schema to override");
+        sb.append("\n             " + Deploy.KEY_TOTAL_MEMBERS + "=1,1               : The number of instances and number of backups to override");
         if (!managed) {
-            sb.append("\n    -groups [groupName] [groupName] ...      : The lookup groups used to look up the GSM");
-            sb.append("\n    -locators [host1] [host2] ...            : The lookup locators used to look up the GSM");
-            sb.append("\n    -timeout [timeout value]                 : The timeout value of GSM lookup (defaults to 5000) in milliseconds");
+            sb.append("\n    -" + Deploy.KEY_GROUPS + " [groupName] [groupName] ...      : The lookup groups used to look up the GSM");
+            sb.append("\n    -" + Deploy.KEY_LOCATORS + " [host1] [host2] ...            : The lookup locators used to look up the GSM");
+            sb.append("\n    -" + Deploy.KEY_TIMEOUT + " [timeout value]                 : The timeout value of GSM lookup (defaults to 5000) in milliseconds");
         }
-        sb.append("\n    -user xxx -password yyyy                 : Deploys a secured space propagated with the supplied user and password");
-        sb.append("\n    -secured true                            : Deploys a secured space (implicit when using -user/-password)");
-        sb.append("\n    -properties [properties-loc]             : Location of context level properties");
-        sb.append("\n    -properties [bean-name] [properties-loc] : Location of properties used applied only for a specified bean");
-        sb.append("\n    -max-instances-per-vm [number]           : Allows to set the SLA number of instances per VM");
-        sb.append("\n    -max-instances-per-machine [number]      : Allows to set the SLA number of instances per machine");
-        sb.append("\n    -max-instances-per-zone [zone/number,...]: Allows to set the SLA number of instances per zone");
-        sb.append("\n    -zones [zoneName] [zoneName] ...         : Allows to set the SLA zone requirements");
-        sb.append("\n    -deploy-timeout [timeout value in ms]    : Timeout for deploy operation, otherwise blocks until all successful/failed deployment events arrive (default)");
+        sb.append("\n    -" + Deploy.KEY_USER + " xxx -" + Deploy.KEY_PASSWORD + " yyyy                 : Deploys a secured space propagated with the supplied user and password");
+        sb.append("\n    -" + Deploy.KEY_SECURED + " true                            : Deploys a secured space (implicit when using -" + Deploy.KEY_USER + "/-" + Deploy.KEY_PASSWORD + ")");
+        sb.append("\n    -" + Deploy.KEY_PROPERTIES + " [properties-loc]             : Location of context level properties");
+        sb.append("\n    -" + Deploy.KEY_PROPERTIES + " [bean-name] [properties-loc] : Location of properties used applied only for a specified bean");
+        sb.append("\n    -" + Deploy.KEY_MAX_INSTANCES_PER_VM + " [number]           : Allows to set the SLA number of instances per VM");
+        sb.append("\n    -" + Deploy.KEY_MAX_INSTANCES_PER_MACHINE + " [number]      : Allows to set the SLA number of instances per machine");
+        sb.append("\n    -" + Deploy.KEY_MAX_INSTANCES_PER_ZONE + " [zone/number,...]: Allows to set the SLA number of instances per zone");
+        sb.append("\n    -" + Deploy.KEY_ZONES + " [zoneName] [zoneName] ...         : Allows to set the SLA zone requirements");
+        sb.append("\n    -" + Deploy.KEY_DEPLOY_TIMEOUT + " [timeout value in ms]    : Timeout for deploy operation, otherwise blocks until all successful/failed deployment events arrive (default)");
         sb.append("\n");
         sb.append("\n");
         sb.append("\nSome Examples:");
         sb.append("\n1. deploy-memcached /./test");
         sb.append("\n    - Deploys a single instance embedded memcached called test");
-        sb.append("\n2. deploy-memcached -cluster total_members=2,1 /./test");
+        sb.append("\n2. deploy-memcached -" + Deploy.KEY_CLUSTER + " " + Deploy.KEY_TOTAL_MEMBERS + "=2,1 /./test");
         sb.append("\n    - Deploys a memcached called test with partitioned sync2backup cluster schema of 2 partitions, each with one backup");
-        sb.append("\n3. deploy-memcached -sla file://config/sla.xml /./test");
+        sb.append("\n3. deploy-memcached -" + Deploy.KEY_SLA + " file://config/sla.xml /./test");
         sb.append("\n    - Deploys a memcached called test using an SLA element read from sla.xml");
         return sb.toString();
     }

@@ -37,6 +37,17 @@ import com.gigaspaces.security.directory.UserDetails;
  */
 public abstract class AbstractApplicationCommand {
 
+    public final static String KEY_HELP1 = "h";
+    public final static String KEY_HELP2 = "help";
+    public final static String KEY_GROUPS = "groups";
+    public final static String KEY_LOCATORS = "locators";
+    public final static String KEY_TIMEOUT = "timeout";
+    public final static String KEY_DEPLOY_TIMEOUT = "deploy-timeout";
+    public final static String KEY_UNDEPLOY_TIMEOUT = "undeploy-timeout";
+    public final static String KEY_USER = "user";
+    public final static String KEY_PASSWORD = "password";
+    public final static String KEY_SECURED = "secured";
+
         private final Log logger = LogFactory.getLog(this.getClass());
 
         private String[] groups;
@@ -178,11 +189,11 @@ public abstract class AbstractApplicationCommand {
             String password = null;
             for (CommandLineParser.Parameter param : params) {
                 debug("parsing param name=" + param.getName() + " args=" + Arrays.toString(param.getArguments()));
-                if (param.getName().equalsIgnoreCase("groups")) {
+                if (param.getName().equalsIgnoreCase(KEY_GROUPS)) {
                     setGroups(param.getArguments());
                 }
                 
-                if (param.getName().equalsIgnoreCase("locators")) {
+                if (param.getName().equalsIgnoreCase(KEY_LOCATORS)) {
                     StringBuilder sb = new StringBuilder();
                     for (String arg : param.getArguments()) {
                         sb.append(arg).append(',');
@@ -190,24 +201,24 @@ public abstract class AbstractApplicationCommand {
                     setLocators(sb.toString());
                 }
                 
-                if (param.getName().equalsIgnoreCase("timeout")) {
+                if (param.getName().equalsIgnoreCase(KEY_TIMEOUT)) {
                     setLookupTimeout(Integer.valueOf(param.getArguments()[0]));
                 }
                 
-                if (param.getName().equalsIgnoreCase("deploy-timeout") || 
-                    param.getName().equalsIgnoreCase("undeploy-timeout")) {
+                if (param.getName().equalsIgnoreCase(KEY_DEPLOY_TIMEOUT) ||
+                    param.getName().equalsIgnoreCase(KEY_UNDEPLOY_TIMEOUT)) {
                     setTimeout(Long.valueOf(param.getArguments()[0]));
                 }
                 
-                if (param.getName().equals("user")) {
+                if (param.getName().equals(KEY_USER)) {
                     username = param.getArguments()[0];
                 } 
                 
-                if (param.getName().equals("password")) {
+                if (param.getName().equals(KEY_PASSWORD)) {
                     password = param.getArguments()[0];
                 }
                 
-                if (param.getName().equals("secured")) {
+                if (param.getName().equals(KEY_SECURED)) {
                     if (param.getArguments().length == 0) {
                         setSecured(true);
                     } else {

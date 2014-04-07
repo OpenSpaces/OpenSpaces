@@ -34,6 +34,8 @@ public class SpaceDeploy {
 
     private final Deploy deploy;
 
+    public final static String[] validOptionsArray = Deploy.validOptionsArray;
+
     public SpaceDeploy() {
         this.deploy = new Deploy();
     }
@@ -109,9 +111,9 @@ public class SpaceDeploy {
         for (int i = 0; i < args.length - 1; i++) {
             tempList.add(args[i]);
         }
-        tempList.add("-properties");
+        tempList.add("-" + Deploy.KEY_PROPERTIES);
         tempList.add("embed://dataGridName=" + spaceName);
-        tempList.add("-override-name");
+        tempList.add("-" + Deploy.KEY_OVERRIDE_NAME);
         tempList.add(spaceName);
         tempList.add("/templates/datagrid");
         return tempList.toArray(new String[tempList.size()]);
@@ -137,46 +139,46 @@ public class SpaceDeploy {
     public static String getUsage(boolean managed) {
         StringBuilder sb = new StringBuilder();
         if (!managed) {
-            sb.append("Usage: Space Deploy [-sla ...] [-cluster ...] [-groups groups] [-locators host1 host2] [-timeout timeoutValue] [-properties ...] [-user xxx -password yyy] [-secured true/false] Space_Name");
+            sb.append("Usage: Space Deploy [-" + Deploy.KEY_SLA + " ...] [-" + Deploy.KEY_CLUSTER + " ...] [-" + Deploy.KEY_GROUPS + " groups] [-" + Deploy.KEY_LOCATORS + " host1 host2] [-" + Deploy.KEY_TIMEOUT + " timeoutValue] [-" + Deploy.KEY_PROPERTIES + " ...] [-" + Deploy.KEY_USER + " xxx -" + Deploy.KEY_PASSWORD + " yyy] [-" + Deploy.KEY_SECURED + " true/false] Space_Name");
         } else {
-            sb.append("Usage: deploy-space [-sla ...] [-cluster ...] [-properties ...] [-user xxx -password yyy] [-secured true/false] Space_Name");
+            sb.append("Usage: deploy-space [-" + Deploy.KEY_SLA + " ...] [-" + Deploy.KEY_CLUSTER + "...] [-" + Deploy.KEY_PROPERTIES + " ...] [-" + Deploy.KEY_USER + " xxx -" + Deploy.KEY_PASSWORD + " yyy] [-" + Deploy.KEY_SECURED + " true/false] Space_Name");
         }
         sb.append("\n    Space_Name: The name of the space to deploy");
-        sb.append("\n    -sla [sla-location]                      : Location of an optional xml file holding the SLA element");
-        sb.append("\n    -cluster [cluster properties]            : Allows to override the cluster parameters of the SLA elements");
-        sb.append("\n             schema=partitioned-sync2backup  : The cluster schema to override");
-        sb.append("\n             total_members=1,1               : The number of instances and number of backups to override");
+        sb.append("\n    -" + Deploy.KEY_SLA + " [sla-location]                      : Location of an optional xml file holding the SLA element");
+        sb.append("\n    -" + Deploy.KEY_CLUSTER + " [cluster properties]            : Allows to override the cluster parameters of the SLA elements");
+        sb.append("\n             " + Deploy.KEY_SCHEMA + "=partitioned-sync2backup  : The cluster schema to override");
+        sb.append("\n             " + Deploy.KEY_TOTAL_MEMBERS + "=1,1               : The number of instances and number of backups to override");
         if (!managed) {
-            sb.append("\n    -groups [groupName] [groupName] ...      : The lookup groups used to look up the GSM");
-            sb.append("\n    -locators [host1] [host2] ...            : The lookup locators used to look up the GSM");
-            sb.append("\n    -timeout [timeout value]                 : The timeout value of GSM lookup (defaults to 5000) in milliseconds");
+            sb.append("\n    -" + Deploy.KEY_GROUPS + " [groupName] [groupName] ...      : The lookup groups used to look up the GSM");
+            sb.append("\n    -" + Deploy.KEY_LOCATORS + " [host1] [host2] ...            : The lookup locators used to look up the GSM");
+            sb.append("\n    -" + Deploy.KEY_TIMEOUT + " [timeout value]                 : The timeout value of GSM lookup (defaults to 5000) in milliseconds");
         }
-        sb.append("\n    -user xxx -password yyyy                 : Deploys a secured space propagated with the supplied user and password");
-        sb.append("\n    -secured true                            : Deploys a secured space (implicit when using -user/-password)");
-        sb.append("\n    -properties [properties-loc]             : Location of context level properties");
-        sb.append("\n    -properties [bean-name] [properties-loc] : Location of properties used applied only for a specified bean");
-        sb.append("\n    -max-instances-per-vm [number]           : Allows to set the SLA number of instances per VM");
-        sb.append("\n    -max-instances-per-machine [number]      : Allows to set the SLA number of instances per machine");
-        sb.append("\n    -max-instances-per-zone [zone/number,...]: Allows to set the SLA number of instances per zone");
-        sb.append("\n    -zones [zoneName] [zoneName] ...         : Allows to set the SLA zone requirements");
-        sb.append("\n    -deploy-timeout [timeout value in ms]    : Timeout for deploy operation, otherwise blocks until all successful/failed deployment events arrive (default)");
+        sb.append("\n    -" + Deploy.KEY_USER + " xxx -" + Deploy.KEY_PASSWORD + " yyyy                 : Deploys a secured space propagated with the supplied user and password");
+        sb.append("\n    -" + Deploy.KEY_SECURED + " true                            : Deploys a secured space (implicit when using -user/-password)");
+        sb.append("\n    -" + Deploy.KEY_PROPERTIES + " [properties-loc]             : Location of context level properties");
+        sb.append("\n    -" + Deploy.KEY_PROPERTIES + " [bean-name] [properties-loc] : Location of properties used applied only for a specified bean");
+        sb.append("\n    -" + Deploy.KEY_MAX_INSTANCES_PER_VM + " [number]           : Allows to set the SLA number of instances per VM");
+        sb.append("\n    -" + Deploy.KEY_MAX_INSTANCES_PER_MACHINE + " [number]      : Allows to set the SLA number of instances per machine");
+        sb.append("\n    -" + Deploy.KEY_MAX_INSTANCES_PER_ZONE + " [zone/number,...]: Allows to set the SLA number of instances per zone");
+        sb.append("\n    -" + Deploy.KEY_ZONES + " [zoneName] [zoneName] ...         : Allows to set the SLA zone requirements");
+        sb.append("\n    -" + Deploy.KEY_DEPLOY_TIMEOUT + " [timeout value in ms]    : Timeout for deploy operation, otherwise blocks until all successful/failed deployment events arrive (default)");
         sb.append("\n");
         sb.append("\n");
         if (!managed) {
             sb.append("\nSome Examples:");
             sb.append("\n1. Space Deploy test");
             sb.append("\n    - Deploys a single instance space called test");
-            sb.append("\n2. Deploy -cluster total_members=2,1 test");
+            sb.append("\n2. Deploy -" + Deploy.KEY_CLUSTER + " " + Deploy.KEY_TOTAL_MEMBERS + "=2,1 test");
             sb.append("\n    - Deploys a space called test with partitioned sync2backup cluster schema of 2 partitions, each with one backup");
-            sb.append("\n3. Deploy -sla file://config/sla.xml test");
+            sb.append("\n3. Deploy -" + Deploy.KEY_SLA + " file://config/sla.xml test");
             sb.append("\n    - Deploys a space called test using an SLA element read from sla.xml");
         } else {
             sb.append("\nSome Examples:");
             sb.append("\n1. deploy-space test");
             sb.append("\n    - Deploys a single instance space called test");
-            sb.append("\n2. deploy-space -cluster total_members=2,1 test");
+            sb.append("\n2. deploy-space -" + Deploy.KEY_CLUSTER + " " + Deploy.KEY_TOTAL_MEMBERS + "=2,1 test");
             sb.append("\n    - Deploys a space called test with partitioned sync2backup cluster schema of 2 partitions, each with one backup");
-            sb.append("\n3. deploy-space -sla file://config/sla.xml test");
+            sb.append("\n3. deploy-space -" + Deploy.KEY_SLA + " file://config/sla.xml test");
             sb.append("\n    - Deploys a space called test using an SLA element read from sla.xml");
         }
         return sb.toString();

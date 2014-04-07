@@ -16,6 +16,8 @@
 
 package org.openspaces.pu.container.servicegrid.deploy;
 
+import com.gigaspaces.admin.cli.Formatter;
+import com.gigaspaces.admin.cli.OptionHandler;
 import com.gigaspaces.grid.gsm.GSM;
 import com.gigaspaces.grid.zone.ZoneHelper;
 import com.gigaspaces.internal.lookup.LookupUtils;
@@ -128,6 +130,34 @@ public class Deploy {
     private static boolean sout = false;
 
     private static boolean disableInfoLogging = false;
+
+    public static final String KEY_HELP1     			= "h";  // help
+    public static final String KEY_HELP2    			= "help";
+    public static final String KEY_USER     			= "user";
+    public static final String KEY_PASSWORD    			= "password";
+    public static final String KEY_SECURED     			= "secured";
+    public static final String KEY_SLA     			    = "sla";
+    public static final String KEY_CLUSTER    			= "cluster";
+    public static final String KEY_SCHEMA     			= "schema";
+    public static final String KEY_TOTAL_MEMBERS     	= "total_members";
+    public static final String KEY_GROUPS     			= "groups";
+    public static final String KEY_LOCATORS     		= "locators";
+    public static final String KEY_TIMEOUT     			= "timeout";
+    public static final String KEY_PROPERTIES           = "properties";
+    public static final String KEY_OVERRIDE_NAME		= "override-name";
+    public static final String KEY_ZONES     			= "zones";
+    public static final String KEY_PRIMARY_ZONE 		= "primary-zone";
+    public static final String KEY_APPLICATION_NAME 	= "application-name";
+    public static final String KEY_ELASTIC_PROPERTIES 	= "elastic-properties";
+    public static final String KEY_DEPLOY_TIMEOUT     			= "deploy-timeout";
+    public static final String KEY_MAX_INSTANCES_PER_VM     	= "max-instances-per-vm";
+    public static final String KEY_MAX_INSTANCES_PER_MACHINE    = "max-instances-per-machine";
+    public static final String KEY_MAX_INSTANCES_PER_ZONE     	= "max-instances-per-zone";
+
+    public final static String[] validOptionsArray = { KEY_HELP1, KEY_HELP2, KEY_USER, KEY_PASSWORD, KEY_SECURED, KEY_SLA,
+            KEY_CLUSTER, /*KEY_SCHEMA, KEY_TOTAL_MEMBERS,*/ KEY_GROUPS, KEY_LOCATORS, KEY_TIMEOUT, KEY_PROPERTIES,
+            KEY_OVERRIDE_NAME, KEY_ZONES, KEY_DEPLOY_TIMEOUT, KEY_APPLICATION_NAME, KEY_MAX_INSTANCES_PER_VM,
+            KEY_MAX_INSTANCES_PER_MACHINE, KEY_MAX_INSTANCES_PER_ZONE };
 
     public static void setDisableInfoLogging(boolean disableInfoLogging) {
         Deploy.disableInfoLogging = disableInfoLogging;
@@ -320,23 +350,23 @@ public class Deploy {
         
         // check if we have a groups parameter and timeout parameter
         for (CommandLineParser.Parameter param : params) {
-            if (param.getName().equalsIgnoreCase("groups")) {
+            if (param.getName().equalsIgnoreCase( KEY_GROUPS )) {
                 setGroups(param.getArguments());
             }
-            if (param.getName().equalsIgnoreCase("locators")) {
+            if (param.getName().equalsIgnoreCase( KEY_LOCATORS )) {
                 StringBuilder sb = new StringBuilder();
                 for (String arg : param.getArguments()) {
                     sb.append(arg).append(',');
                 }
                 setLocators(sb.toString());
             }
-            if (param.getName().equalsIgnoreCase("timeout")) {
+            if (param.getName().equalsIgnoreCase( KEY_TIMEOUT )) {
                 setLookupTimeout(Integer.valueOf(param.getArguments()[0]));
             }
-            if (param.getName().equalsIgnoreCase("override-name")) {
+            if (param.getName().equalsIgnoreCase( KEY_OVERRIDE_NAME )) {
                 overridePuName = param.getArguments()[0];
             }
-            if (param.getName().equalsIgnoreCase("deploy-timeout")) {
+            if (param.getName().equalsIgnoreCase( KEY_DEPLOY_TIMEOUT )) {
                 setDeployTimeout(Long.valueOf(param.getArguments()[0]));
             }
             if (RequiredDependenciesCommandLineParser.isInstanceDeploymentDependencies(param)) {
@@ -345,7 +375,7 @@ public class Deploy {
             if (RequiredDependenciesCommandLineParser.isInstanceStartDependencies(param)) {
                 instanceStartDependencies  = RequiredDependenciesCommandLineParser.convertCommandlineParameterToInstanceStartDependencies(param);
             }
-            if (param.getName().equalsIgnoreCase("application-name")) {
+            if (param.getName().equalsIgnoreCase( KEY_APPLICATION_NAME )) {
                 setApplicationName(param.getArguments()[0]);
             }
         }
@@ -441,7 +471,7 @@ public class Deploy {
         // check to see if sla was passed as a parameter
         String slaString = puString;
         for (CommandLineParser.Parameter param : params) {
-            if (param.getName().equalsIgnoreCase("sla")) {
+            if (param.getName().equalsIgnoreCase( KEY_SLA )) {
                 String slaLocation = param.getArguments()[0];
                 info("Loading SLA from [" + slaLocation + "]");
                 resource = new DefaultResourceLoader() {
@@ -531,17 +561,17 @@ public class Deploy {
         }
         
         for (CommandLineParser.Parameter param : params) {
-            if (param.getName().equalsIgnoreCase("max-instances-per-vm")) {
+            if (param.getName().equalsIgnoreCase( KEY_MAX_INSTANCES_PER_VM )) {
                 String maxInstancePerVm = param.getArguments()[0];
                 sla.setMaxInstancesPerVM(Integer.valueOf(maxInstancePerVm));
                 info("Overrding SLA maxInstancesPerVM with [" + maxInstancePerVm + "]");
             }
-            if (param.getName().equalsIgnoreCase("max-instances-per-machine")) {
+            if (param.getName().equalsIgnoreCase( KEY_MAX_INSTANCES_PER_MACHINE )) {
                 String maxInstancePerMachine = param.getArguments()[0];
                 sla.setMaxInstancesPerMachine(Integer.valueOf(maxInstancePerMachine));
                 info("Overrding SLA maxInstancesPerMachine with [" + maxInstancePerMachine + "]");
             }
-            if (param.getName().equalsIgnoreCase("max-instances-per-zone")) {
+            if (param.getName().equalsIgnoreCase( KEY_MAX_INSTANCES_PER_ZONE )) {
                 Map<String, Integer> map = new HashMap<String, Integer>();
                 for (String arg : param.getArguments()) {
                     map.putAll(ZoneHelper.parse(arg));
@@ -549,13 +579,13 @@ public class Deploy {
                 sla.setMaxInstancesPerZone(map);
                 info("Overrding SLA maxInstancesPerZone with [" + ZoneHelper.unparse(map) + "]");
             }
-            if (param.getName().equalsIgnoreCase("zones")) {
+            if (param.getName().equalsIgnoreCase( KEY_ZONES )) {
                 for (String arg : param.getArguments()) {
                     sla.getRequirements().add(new ZoneRequirement(arg));
                     info("Adding SLA required zone with [" + arg + "]");
                 }
             }
-            if (param.getName().equalsIgnoreCase("primary-zone")) {
+            if (param.getName().equalsIgnoreCase( KEY_PRIMARY_ZONE )) {
                 String primaryZone = param.getArguments()[0];
                 sla.setPrimaryZone(primaryZone);
                 info("Overriding SLA primaryZone with [" + primaryZone + "]");
@@ -571,7 +601,7 @@ public class Deploy {
         //Get elastic properties
         Map<String, String> elasticProperties = new HashMap<String, String>();
         for (CommandLineParser.Parameter param : params) {
-            if (param.getName().equalsIgnoreCase("elastic-properties")) {
+            if (param.getName().equalsIgnoreCase(KEY_ELASTIC_PROPERTIES)) {
                 for (String argument : param.getArguments()) {
                     int indexOfEqual = argument.indexOf("=");                    
                     String name = argument.substring(0, indexOfEqual);
@@ -606,11 +636,11 @@ public class Deploy {
         String userName = null;
         String password = null;
         for (CommandLineParser.Parameter param : params) {
-            if (param.getName().equals("user")) {
+            if (param.getName().equals(KEY_USER)) {
                 userName = param.getArguments()[0];
-            } else if (param.getName().equals("password")) {
+            } else if (param.getName().equals(KEY_PASSWORD)) {
                 password = param.getArguments()[0];
-            } else if (param.getName().equals("secured")) {
+            } else if (param.getName().equals(KEY_SECURED)) {
                 if (param.getArguments().length == 0) {
                     setSecured(true);
                 } else {
@@ -1088,40 +1118,40 @@ public class Deploy {
     public static String getUsage(boolean managed) {
         StringBuilder sb = new StringBuilder();
         if (!managed) {
-            sb.append("Usage: Deploy [-sla ...] [-cluster ...] [-groups groups] [-locators hots1 hots2] [-timeout timeoutValue] [-properties ...] [-user xxx -password yyy] [-secured true/false] PU_Name");
+            sb.append("Usage: Deploy [-" + KEY_SLA + " ...] [-" + KEY_CLUSTER + " ...] [-" + KEY_GROUPS + " groups] [-" + KEY_LOCATORS + " hots1 hots2] [-" + KEY_TIMEOUT + " timeoutValue] [-" + KEY_PROPERTIES + " ...] [-" + KEY_USER + " xxx -" + KEY_PASSWORD + " yyy] [-" + KEY_SECURED + " true/false] PU_Name");
         } else {
-            sb.append("Usage: deploy [-sla ...] [-cluster ...] [-properties ...] [-user xxx -password yyy] [-secured true/false] PU_Name");
+            sb.append("Usage: deploy [-" + KEY_SLA + " ...] [-" + KEY_CLUSTER + " ...] [-" + KEY_PROPERTIES + " ...] [-" + KEY_USER + " xxx -" + KEY_PASSWORD + " yyy] [-" + KEY_SECURED + " true/false] PU_Name");
         }
         sb.append("\n    PU_Name: The name of the processing unit under the deploy directory, or packaged jar file");
-        sb.append("\n    -sla [sla-location]                      : Location of an optional xml file holding the SLA element");
-        sb.append("\n    -cluster [cluster properties]            : Allows to override the cluster parameters of the SLA elements");
-        sb.append("\n             schema=partitioned-sync2backup  : The cluster schema to override");
-        sb.append("\n             total_members=1,1               : The number of instances and number of backups to override");
+        sb.append("\n    -" + KEY_SLA + " [sla-location]                      : Location of an optional xml file holding the SLA element");
+        sb.append("\n    -" + KEY_CLUSTER + " [cluster properties]            : Allows to override the cluster parameters of the SLA elements");
+        sb.append("\n             " + KEY_SCHEMA + "=partitioned-sync2backup  : The cluster schema to override");
+        sb.append("\n             " + KEY_TOTAL_MEMBERS + "=1,1               : The number of instances and number of backups to override");
         if (!managed) {
-            sb.append("\n    -groups [groupName] [groupName] ...      : The lookup groups used to look up the GSM");
-            sb.append("\n    -locators [host1] [host2] ...            : The lookup locators used to look up the GSM");
-            sb.append("\n    -timeout [timeout value]                 : The timeout value of GSM lookup (defaults to 5000) in milliseconds");
+            sb.append("\n    -" + KEY_GROUPS + " [groupName] [groupName] ...      : The lookup groups used to look up the GSM");
+            sb.append("\n    -" + KEY_LOCATORS + " [host1] [host2] ...            : The lookup locators used to look up the GSM");
+            sb.append("\n    -" + KEY_TIMEOUT + " [timeout value]                 : The timeout value of GSM lookup (defaults to 5000) in milliseconds");
         }
-        sb.append("\n    -user xxx -password yyyy                 : Deploys a secured processing unit propagated with the supplied user and password");
-        sb.append("\n    -secured true                            : Deploys a secured processing unit (implicit when using -user/-password)");
-        sb.append("\n    -properties [properties-loc]             : Location of context level properties");
-        sb.append("\n    -properties [bean-name] [properties-loc] : Location of properties used applied only for a specified bean");
-        sb.append("\n    -override-name [override pu name]        : An override pu name, useful when using pu as a template");
-        sb.append("\n    -max-instances-per-vm [number]           : Allows to set the SLA number of instances per VM");
-        sb.append("\n    -max-instances-per-machine [number]      : Allows to set the SLA number of instances per machine");
-        sb.append("\n    -max-instances-per-zone [zone/number,...]: Allows to set the SLA number of instances per zone");
-        sb.append("\n    -zones [zoneName] [zoneName] ...         : Allows to set the SLA zone requirements");
-        sb.append("\n    -deploy-timeout [timeout value in ms]    : Timeout for deploy operation, otherwise blocks until all successful/failed deployment events arrive (default)");
+        sb.append("\n    -" + KEY_USER + " xxx -" + KEY_PASSWORD + " yyyy                 : Deploys a secured processing unit propagated with the supplied user and password");
+        sb.append("\n    -" + KEY_SECURED + " true                            : Deploys a secured processing unit (implicit when using -" + KEY_USER + "/-" + KEY_PASSWORD + ")");
+        sb.append("\n    -" + KEY_PROPERTIES + " [properties-loc]             : Location of context level properties");
+        sb.append("\n    -" + KEY_PROPERTIES + " [bean-name] [properties-loc] : Location of properties used applied only for a specified bean");
+        sb.append("\n    -" + KEY_OVERRIDE_NAME + " [override pu name]        : An override pu name, useful when using pu as a template");
+        sb.append("\n    -" + KEY_MAX_INSTANCES_PER_VM + " [number]           : Allows to set the SLA number of instances per VM");
+        sb.append("\n    -" + KEY_MAX_INSTANCES_PER_MACHINE + " [number]      : Allows to set the SLA number of instances per machine");
+        sb.append("\n    -" + KEY_MAX_INSTANCES_PER_ZONE + " [zone/number,...]: Allows to set the SLA number of instances per zone");
+        sb.append("\n    -" + KEY_ZONES + " [zoneName] [zoneName] ...         : Allows to set the SLA zone requirements");
+        sb.append("\n    -" + KEY_DEPLOY_TIMEOUT + " [timeout value in ms]    : Timeout for deploy operation, otherwise blocks until all successful/failed deployment events arrive (default)");
         sb.append("\n");
         sb.append("\n");
         sb.append("\nSome Examples:");
         sb.append("\n1. Deploy data-processor");
         sb.append("\n    - Deploys a processing unit called data-processor");
-        sb.append("\n2. Deploy -sla file://config/sla.xml data-processor");
+        sb.append("\n2. Deploy -" + KEY_SLA + " file://config/sla.xml data-processor");
         sb.append("\n    - Deploys a processing unit called data-processor using an SLA element read from sla.xml");
-        sb.append("\n3. Deploy -properties file://config/context.properties -properties space1 file://config/space1.properties data-processor");
+        sb.append("\n3. Deploy -" + KEY_PROPERTIES + " file://config/context.properties -" + KEY_PROPERTIES + " space1 file://config/space1.properties data-processor");
         sb.append("\n    - Deploys a processing unit called data-processor using context level properties called context.proeprties and bean level properties called space1.properties applied to bean named space1");
-        sb.append("\n4. Deploy -properties embed://prop1=value1 -properties space1 embed://prop2=value2;prop3=value3 data-processor");
+        sb.append("\n4. Deploy -" + KEY_PROPERTIES + " embed://prop1=value1 -" + KEY_PROPERTIES + " space1 embed://prop2=value2;prop3=value3 data-processor");
         sb.append("\n    - Deploys a processing unit called data-processor using context level properties with a single property called prop1 with value1 and bean level properties with two properties");
         return sb.toString();
     }

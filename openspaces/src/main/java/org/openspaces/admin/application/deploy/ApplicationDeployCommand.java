@@ -38,6 +38,9 @@ import com.j_spaces.kernel.time.SystemTime;
  */
 public class ApplicationDeployCommand extends AbstractApplicationCommand {
 
+    public final static String[] validOptionsArray = { KEY_HELP1, KEY_HELP2, KEY_USER, KEY_PASSWORD, KEY_SECURED,
+            KEY_GROUPS, KEY_LOCATORS, KEY_TIMEOUT, KEY_DEPLOY_TIMEOUT  };
+
         public static void main(String[] args) throws Exception {
             ApplicationDeployCommand deployer = new ApplicationDeployCommand();
             if (args.length < 1) {
@@ -53,7 +56,6 @@ public class ApplicationDeployCommand extends AbstractApplicationCommand {
             }
         }
 
-        
         public void deployAndWait(String[] args) throws TimeoutException,AdminException {
             
             try {
@@ -104,19 +106,19 @@ public class ApplicationDeployCommand extends AbstractApplicationCommand {
        public String getUsage() {
             StringBuilder sb = new StringBuilder();
             if (!getManaged()) {
-                sb.append("Usage: ApplicationDeployCommand [-groups groups] [-locators hots1 hots2] [-timeout timeoutValue] [-user xxx -password yyy] [-secured true/false] Application_DirOrZip");
+                sb.append("Usage: ApplicationDeployCommand [-" + KEY_GROUPS + " groups] [-" + KEY_LOCATORS + " hots1 hots2] [-" + KEY_TIMEOUT + " timeoutValue] [-" + KEY_USER + " xxx -" + KEY_PASSWORD + " yyy] [-" + KEY_SECURED + " true/false] Application_DirOrZip");
             } else {
-                sb.append("Usage: deploy-application [-user xxx -password yyy] [-secured true/false] Application_DirOrZip");
+                sb.append("Usage: deploy-application [-" + KEY_USER + " xxx -" + KEY_PASSWORD + " yyy] [-" + KEY_SECURED + " true/false] Application_DirOrZip");
             }
-            sb.append("\n    Application_DirOrZip: The path to the application direcoty or zip file containing application.xml and the PU jars.");
+            sb.append("\n    Application_DirOrZip: The path to the application directory or zip file containing application.xml and the PU jars.");
             if (!getManaged()) {
-                sb.append("\n    -groups [groupName] [groupName] ...      : The lookup groups used to look up the GSM");
-                sb.append("\n    -locators [host1] [host2] ...            : The lookup locators used to look up the GSM");
-                sb.append("\n    -timeout [timeout value]                 : The timeout value of GSM lookup (defaults to 5000) in milliseconds");
+                sb.append("\n    -" + KEY_GROUPS + " [groupName] [groupName] ...      : The lookup groups used to look up the GSM");
+                sb.append("\n    -" + KEY_LOCATORS + " [host1] [host2] ...            : The lookup locators used to look up the GSM");
+                sb.append("\n    -" + KEY_TIMEOUT + " [timeout value]                 : The timeout value of GSM lookup (defaults to 5000) in milliseconds");
             }
-            sb.append("\n    -user xxx -password yyyy                 : Deploys a secured processing unit propagated with the supplied user and password");
-            sb.append("\n    -secured true                            : Deploys a secured processing unit (implicit when using -user/-password)");
-            sb.append("\n    -deploy-timeout [timeout value in ms]    : Timeout for deploy operation, otherwise blocks until all successful/failed deployment events arrive (default)");
+            sb.append("\n    -" + KEY_USER + " xxx -" + KEY_PASSWORD + " yyyy                 : Deploys a secured processing unit propagated with the supplied user and password");
+            sb.append("\n    -" + KEY_SECURED + " true                            : Deploys a secured processing unit (implicit when using -user/-password)");
+            sb.append("\n    -" + KEY_DEPLOY_TIMEOUT + " [timeout value in ms]    : Timeout for deploy operation, otherwise blocks until all successful/failed deployment events arrive (default)");
             sb.append("\n");
             sb.append("\n");
             sb.append("\nSome Examples:");
