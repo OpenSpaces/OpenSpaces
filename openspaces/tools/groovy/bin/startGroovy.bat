@@ -246,6 +246,8 @@ set JAVA_OPTS=%JAVA_OPTS% -Dgroovy.home="%GS_GROOVY_HOME%"
 if not "%TOOLS_JAR%" == "" set JAVA_OPTS=%JAVA_OPTS% -Dtools.jar="%TOOLS_JAR%"
 set JAVA_OPTS=%JAVA_OPTS% -Dgroovy.starter.conf="%STARTER_CONF%"
 set JAVA_OPTS=%JAVA_OPTS% -Dscript.name="%GROOVY_SCRIPT_NAME%"
+@rem Make groovy use the provided .groovy folder located in %GS_GROOVY_HOME%
+set JAVA_OPTS=%JAVA_OPTS% -Duser.home="%GS_GROOVY_HOME%"
 
 if exist "%USERPROFILE%/.groovy/postinit.bat" call "%USERPROFILE%/.groovy/postinit.bat"
 
