@@ -42,15 +42,11 @@ public class SerialMultiDataIterator implements MultiDataIterator {
     }
 
     public boolean hasNext() {
-        while (true) {
-            boolean hasNext = iterators[currentIterator].hasNext();
-            if (hasNext) {
+        for ( ; currentIterator < iterators.length ; currentIterator++) {
+            if (iterators[currentIterator].hasNext())
                 return true;
-            }
-            if (++currentIterator == iterators.length) {
-                break;
-            }
         }
+
         return false;
     }
 

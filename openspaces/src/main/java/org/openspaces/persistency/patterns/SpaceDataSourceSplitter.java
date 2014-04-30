@@ -46,7 +46,6 @@ public class SpaceDataSourceSplitter extends SpaceDataSource {
     public SpaceDataSourceSplitter(ManagedEntriesSpaceDataSource[] dataSources) {
         this.dataSources = dataSources;
         for (ManagedEntriesSpaceDataSource dataSource : dataSources) {
-            
             for (String entry : dataSource.getManagedEntries()) {
                 entriesToDataSource.put(entry, dataSource);
             }
@@ -72,7 +71,9 @@ public class SpaceDataSourceSplitter extends SpaceDataSource {
     public DataIterator<Object> initialDataLoad() {
         ArrayList<DataIterator> iterators = new ArrayList<DataIterator>(dataSources.length);
         for (SpaceDataSource dataSource : dataSources) {
-            iterators.add(dataSource.initialDataLoad());
+            DataIterator<Object> iterator = dataSource.initialDataLoad();
+            if (iterator != null)
+                iterators.add(iterator);
         }
         return new ConcurrentMultiDataIterator(iterators.toArray(new DataIterator[iterators.size()]), initalLoadThreadPoolSize);
     }
@@ -87,7 +88,9 @@ public class SpaceDataSourceSplitter extends SpaceDataSource {
     public DataIterator<SpaceTypeDescriptor> initialMetadataLoad() {
         ArrayList<DataIterator<SpaceTypeDescriptor>> iterators = new ArrayList<DataIterator<SpaceTypeDescriptor>>(dataSources.length);
         for (SpaceDataSource dataSource : dataSources) {
-            iterators.add(dataSource.initialMetadataLoad());
+            DataIterator<SpaceTypeDescriptor> iterator = dataSource.initialMetadataLoad();
+            if (iterator != null)
+                iterators.add(iterator);
         }
         return new SerialMultiDataIterator(iterators.toArray(new DataIterator[iterators.size()]));
     }
@@ -98,9 +101,7 @@ public class SpaceDataSourceSplitter extends SpaceDataSource {
     @Override
     public DataIterator<Object> getDataIterator(DataSourceQuery query) {
         SpaceDataSource dataSource = getDataSource(query.getTypeDescriptor().getTypeName());
-        if (dataSource == null)
-            return null;
-        return dataSource.getDataIterator(query);
+        return dataSource == null ? null : dataSource.getDataIterator(query);
     }
     
     /**
@@ -109,9 +110,7 @@ public class SpaceDataSourceSplitter extends SpaceDataSource {
     @Override
     public Object getById(DataSourceIdQuery idQuery) {
         SpaceDataSource dataSource = getDataSource(idQuery.getTypeDescriptor().getTypeName());
-        if (dataSource == null)
-            return null;
-        return dataSource.getById(idQuery);
+        return dataSource == null ? null : dataSource.getById(idQuery);
     }
     
     /**
@@ -120,9 +119,6 @@ public class SpaceDataSourceSplitter extends SpaceDataSource {
     @Override
     public DataIterator<Object> getDataIteratorByIds(DataSourceIdsQuery idsQuery) {
         SpaceDataSource dataSource = getDataSource(idsQuery.getTypeDescriptor().getTypeName());
-        if (dataSource == null)
-            return null;
-        return dataSource.getDataIteratorByIds(idsQuery);
+        return dataSource == null ? null : dataSource.getDataIteratorByIds(idsQuery);
     }
-    
 }
