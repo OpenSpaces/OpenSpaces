@@ -45,6 +45,7 @@ import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.space.SpaceInstanceRuntimeDetails;
 import org.openspaces.admin.space.SpaceInstanceStatistics;
 import org.openspaces.admin.space.SpacePartition;
+import org.openspaces.admin.space.config.SpaceConfig;
 import org.openspaces.admin.space.events.ReplicationStatusChangedEvent;
 import org.openspaces.admin.space.events.ReplicationStatusChangedEventManager;
 import org.openspaces.admin.space.events.SpaceInstanceStatisticsChangedEvent;
@@ -97,6 +98,8 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
     private volatile GigaSpace gigaSpace;
 
     private volatile IInternalRemoteJSpaceAdmin spaceAdmin;
+
+    private volatile com.j_spaces.core.admin.SpaceConfig spaceConfig;
 
     private final SpaceURL spaceURL;
 
@@ -601,5 +604,19 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
     @Override
     public PlatformLogicalVersion getPlatformLogicalVersion() {
         return LRMIUtilities.getServicePlatformLogicalVersion(((ISpaceProxy)getIJSpace()).getDirectProxy().getRemoteJSpace());
+    }
+
+    @Override
+    public com.j_spaces.core.admin.SpaceConfig getSpaceConfig() {
+        IInternalRemoteJSpaceAdmin spaceAdmin = getSpaceAdmin();
+        if( spaceConfig == null && spaceAdmin != null ){
+            try {
+                spaceConfig = spaceAdmin.getConfig();
+            } catch (RemoteException e) {
+                throw new AdminException("Failed to fetch SpaceConfig", e);
+            }
+        }
+
+        return spaceConfig;
     }
 }

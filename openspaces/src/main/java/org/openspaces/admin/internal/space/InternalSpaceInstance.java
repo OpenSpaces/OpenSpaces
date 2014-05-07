@@ -33,6 +33,7 @@ import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
 import com.j_spaces.core.admin.RuntimeHolder;
 import com.j_spaces.core.filters.StatisticsHolder;
+import com.j_spaces.core.admin.SpaceConfig;
 
 /**
  * @author kimchy
@@ -66,4 +67,6 @@ public interface InternalSpaceInstance extends SpaceInstance, InternalGridCompon
     StatisticsHolder getStatisticsHolder() throws RemoteException;
 
     PlatformLogicalVersion getPlatformLogicalVersion();
+
+    SpaceConfig getSpaceConfig();
 }
