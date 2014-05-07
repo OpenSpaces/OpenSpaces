@@ -608,12 +608,15 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
 
     @Override
     public com.j_spaces.core.admin.SpaceConfig getSpaceConfig() {
-        IInternalRemoteJSpaceAdmin spaceAdmin = getSpaceAdmin();
-        if( spaceConfig == null && spaceAdmin != null ){
-            try {
-                spaceConfig = spaceAdmin.getConfig();
-            } catch (RemoteException e) {
-                throw new AdminException("Failed to fetch SpaceConfig", e);
+
+        if( spaceConfig == null ) {
+            IInternalRemoteJSpaceAdmin spaceAdmin = getSpaceAdmin();
+            if( spaceAdmin != null ) {
+                try {
+                    spaceConfig = spaceAdmin.getConfig();
+                } catch (RemoteException e) {
+                    throw new AdminException("Failed to fetch SpaceConfig", e);
+                }
             }
         }
 
