@@ -15,16 +15,18 @@
  *******************************************************************************/
 package org.openspaces.persistency.cassandra;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
+import com.gigaspaces.datasource.*;
+import com.gigaspaces.document.SpaceDocument;
+import com.gigaspaces.internal.utils.StringUtils;
+import com.gigaspaces.metadata.SpaceTypeDescriptor;
+import com.j_spaces.kernel.pool.IResourceFactory;
+import com.j_spaces.kernel.pool.IResourcePool;
+import com.j_spaces.kernel.pool.IResourceProcedure;
+import com.j_spaces.kernel.pool.ResourcePool;
 import org.apache.cassandra.cql.jdbc.CassandraDataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openspaces.persistency.ClusterInfoAwareSpaceDataSource;
 import org.openspaces.persistency.cassandra.datasource.CQLQueryContext;
 import org.openspaces.persistency.cassandra.datasource.CassandraTokenRangeAwareDataIterator;
 import org.openspaces.persistency.cassandra.datasource.CassandraTokenRangeAwareInitialLoadDataIterator;
@@ -36,23 +38,11 @@ import org.openspaces.persistency.cassandra.meta.mapping.SpaceDocumentColumnFami
 import org.openspaces.persistency.cassandra.meta.types.dynamic.PropertyValueSerializer;
 import org.openspaces.persistency.cassandra.pool.ConnectionResource;
 import org.openspaces.persistency.cassandra.pool.ConnectionResourceFactory;
-
-import com.gigaspaces.datasource.DataIterator;
-import com.gigaspaces.datasource.DataIteratorAdapter;
-import com.gigaspaces.datasource.DataSourceIdQuery;
-import com.gigaspaces.datasource.DataSourceIdsQuery;
-import com.gigaspaces.datasource.DataSourceQuery;
-import com.gigaspaces.datasource.DataSourceSQLQuery;
-import com.gigaspaces.datasource.SpaceDataSource;
-import com.gigaspaces.document.SpaceDocument;
-import com.gigaspaces.internal.utils.StringUtils;
-import com.gigaspaces.metadata.SpaceTypeDescriptor;
-import com.j_spaces.kernel.pool.IResourceFactory;
-import com.j_spaces.kernel.pool.IResourcePool;
-import com.j_spaces.kernel.pool.IResourceProcedure;
-import com.j_spaces.kernel.pool.ResourcePool;
 import org.openspaces.persistency.support.SpaceTypeDescriptorContainer;
 import org.openspaces.persistency.support.TypeDescriptorUtils;
+
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * 
@@ -61,10 +51,9 @@ import org.openspaces.persistency.support.TypeDescriptorUtils;
  * @since 9.1.1
  * @author Dan Kilman
  */
-public class CassandraSpaceDataSource
-        extends SpaceDataSource {
+public class CassandraSpaceDataSource extends ClusterInfoAwareSpaceDataSource {
     
-    private static final String                     CQL_VERSION  = "2.0.0";
+    public static final String                     CQL_VERSION  = "2.0.0";
     
     private static final Log                        logger       = LogFactory.getLog(CassandraSpaceDataSource.class);
 
@@ -274,11 +263,14 @@ public class CassandraSpaceDataSource
 
     @Override
     public DataIterator<Object> initialDataLoad() {
-        
-        Collection<ColumnFamilyMetadata> columnFamilies = hectorClient.getColumnFamiliesMetadata().values();
+        obtainInitialLoadQueries();
+
+        Map<String, ColumnFamilyMetadata> columnFamilies = hectorClient.getColumnFamiliesMetadata();
+
         return new CassandraTokenRangeAwareInitialLoadDataIterator(mapper,
                                                                    columnFamilies,
                                                                    connectionPool.getResource(),
+                                                                   initialLoadQueries,
                                                                    batchLimit,
                                                                    readConsistencyLevel);
     }

@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.openspaces.persistency.patterns;
 
-import com.gigaspaces.datasource.SpaceDataSource;
+import org.openspaces.persistency.ClusterInfoAwareSpaceDataSource;
 
 /**
  * An implementation of {@link com.gigaspaces.datasource.SpaceDataSource} that can provide a list
@@ -25,7 +25,7 @@ import com.gigaspaces.datasource.SpaceDataSource;
  * @since 9.5
  *
  */
-public abstract class ManagedEntriesSpaceDataSource extends SpaceDataSource {
+public abstract class ManagedEntriesSpaceDataSource extends ClusterInfoAwareSpaceDataSource {
     
     public abstract Iterable<String> getManagedEntries();
     

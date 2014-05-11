@@ -15,19 +15,15 @@
  *******************************************************************************/
 package org.openspaces.persistency.hibernate;
 
-import java.util.Set;
-
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.openspaces.persistency.hibernate.iterator.DefaultChunkListDataIterator;
-import org.openspaces.persistency.hibernate.iterator.DefaultChunkScrollableDataIterator;
-import org.openspaces.persistency.hibernate.iterator.DefaultListQueryDataIterator;
-import org.openspaces.persistency.hibernate.iterator.DefaultScrollableDataIterator;
-import org.openspaces.persistency.hibernate.iterator.HibernateProxyRemoverIterator;
-
 import com.gigaspaces.datasource.DataIterator;
 import com.gigaspaces.datasource.DataSourceQuery;
 import com.gigaspaces.datasource.DataSourceSQLQuery;
+import com.j_spaces.core.client.SQLQuery;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.openspaces.persistency.hibernate.iterator.*;
+
+import java.util.*;
 
 /**
  * The default Hibernate space data source implementation. Based on Hibernate {@link Session}.
@@ -52,36 +48,75 @@ public class DefaultHibernateSpaceDataSource extends AbstractHibernateSpaceDataS
      */
     @Override
     public DataIterator<Object> initialDataLoad() {
-        DataIterator[] iterators = new DataIterator[getInitialLoadEntries().length];
-        int iteratorCounter = 0;
-        for (String entityName : getInitialLoadEntries()) {
+        List<DataIterator> iterators = new LinkedList<DataIterator>();
+        obtainInitialLoadQueries();
+        Set<String> initialLoadEntriesSet = new HashSet<String>();
+        for (String entry : getInitialLoadEntries()) {
+            initialLoadEntriesSet.add(entry);
+        }
+        for (Map.Entry<String, String> entry : initialLoadQueries.entrySet()) {
+            // check type in initialLoadEntries
+            String type = entry.getKey();
+            if (initialLoadEntriesSet.contains(type)) {
+                throw new IllegalStateException("Type "+type+" has an initial load query but also appears in the initial load entries list.");
+            }
+            String query = entry.getValue();
+            SQLQuery sqlQuery = new SQLQuery(type, query);
+            if (getInitialLoadChunkSize() == -1) {
+                if (isUseScrollableResultSet()) {
+                    if (logger.isTraceEnabled()) {
+                        logger.trace("Creating initial load scrollable iterator for entry [" + type + "], query: "+query);
+                    }
+                    iterators.add(new DefaultScrollableDataIterator(sqlQuery, getSessionFactory(), getFetchSize(), isPerformOrderById()));
+                } else {
+                    if (logger.isTraceEnabled()) {
+                        logger.trace("Creating initial load list iterator for entry [" + type + "], query: "+query);
+                    }
+                    iterators.add(new DefaultListQueryDataIterator(sqlQuery, getSessionFactory()));
+                }
+            } else {
+                if (isUseScrollableResultSet()) {
+                    if (logger.isTraceEnabled()) {
+                        logger.trace("Creating initial load chunk scrollable iterator for entry [" + type + "], query: "+query);
+                    }
+                    iterators.add(new DefaultChunkScrollableDataIterator(sqlQuery, getSessionFactory(), getFetchSize(), isPerformOrderById(), getInitialLoadChunkSize()));
+                } else {
+                    if (logger.isTraceEnabled()) {
+                        logger.trace("Creating initial load chunk list iterator for entry [" + type + "], query: "+query);
+                    }
+                    iterators.add(new DefaultChunkListDataIterator(sqlQuery, getSessionFactory(), getFetchSize(), isPerformOrderById(), getInitialLoadChunkSize()));
+                }
+            }
+        }
+        for (String entityName : initialLoadEntriesSet) {
             if (getInitialLoadChunkSize() == -1) {
                 if (isUseScrollableResultSet()) {
                     if (logger.isTraceEnabled()) {
                         logger.trace("Creating initial load scrollable iterator for entry [" + entityName + "]");
                     }
-                    iterators[iteratorCounter++] = new DefaultScrollableDataIterator(entityName, getSessionFactory(), getFetchSize(), isPerformOrderById());
+                    iterators.add(new DefaultScrollableDataIterator(entityName, getSessionFactory(), getFetchSize(), isPerformOrderById()));
                 } else {
                     if (logger.isTraceEnabled()) {
                         logger.trace("Creating initial load list iterator for entry [" + entityName + "]");
                     }
-                    iterators[iteratorCounter++] = new DefaultListQueryDataIterator(entityName, getSessionFactory());
+                    iterators.add(new DefaultListQueryDataIterator(entityName, getSessionFactory()));
                 }
             } else {
                 if (isUseScrollableResultSet()) {
                     if (logger.isTraceEnabled()) {
                         logger.trace("Creating initial load chunk scrollable iterator for entry [" + entityName + "]");
                     }
-                    iterators[iteratorCounter++] = new DefaultChunkScrollableDataIterator(entityName, getSessionFactory(), getFetchSize(), isPerformOrderById(), getInitialLoadChunkSize());
+                    iterators.add(new DefaultChunkScrollableDataIterator(entityName, getSessionFactory(), getFetchSize(), isPerformOrderById(), getInitialLoadChunkSize()));
                 } else {
                     if (logger.isTraceEnabled()) {
                         logger.trace("Creating initial load chunk list iterator for entry [" + entityName + "]");
                     }
-                    iterators[iteratorCounter++] = new DefaultChunkListDataIterator(entityName, getSessionFactory(), getFetchSize(), isPerformOrderById(), getInitialLoadChunkSize());
+                    iterators.add(new DefaultChunkListDataIterator(entityName, getSessionFactory(), getFetchSize(), isPerformOrderById(), getInitialLoadChunkSize()));
                 }
             }
         }
-        return createInitialLoadIterator(iterators);
+        DataIterator[] dataIterators = new DataIterator[iterators.size()];
+        return createInitialLoadIterator(iterators.toArray(dataIterators));
     }
     
     /**

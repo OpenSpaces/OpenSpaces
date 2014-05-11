@@ -15,16 +15,15 @@
  *******************************************************************************/
 package org.openspaces.persistency.cassandra.datasource;
 
-import java.util.Collection;
-import java.util.Iterator;
-
+import com.gigaspaces.datasource.DataIterator;
+import com.gigaspaces.document.SpaceDocument;
 import org.openspaces.persistency.cassandra.CassandraConsistencyLevel;
 import org.openspaces.persistency.cassandra.meta.ColumnFamilyMetadata;
 import org.openspaces.persistency.cassandra.meta.mapping.SpaceDocumentColumnFamilyMapper;
 import org.openspaces.persistency.cassandra.pool.ConnectionResource;
 
-import com.gigaspaces.datasource.DataIterator;
-import com.gigaspaces.document.SpaceDocument;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * @since 9.1.1
@@ -32,25 +31,30 @@ import com.gigaspaces.document.SpaceDocument;
  */
 public class CassandraTokenRangeAwareInitialLoadDataIterator implements DataIterator<Object> {
     
-    private final SpaceDocumentColumnFamilyMapper mapper;
-    private final Iterator<ColumnFamilyMetadata>  metadata;
-    private final ConnectionResource              connectionResource;
-    private final int                             batchLimit;
-    private final CassandraConsistencyLevel       readConsistencyLevel;
+    private final SpaceDocumentColumnFamilyMapper                   mapper;
+    private final Map<String, ColumnFamilyMetadata>                 metadataMap;
+    private final Iterator<Map.Entry<String, ColumnFamilyMetadata>> metadata;
+    private final ConnectionResource                                connectionResource;
+    private final Map<String, String>                               initialLoadQueries;
+    private final int                                               batchLimit;
 
+    private final CassandraConsistencyLevel       readConsistencyLevel;
     private CassandraTokenRangeAwareDataIterator  currentIterator;
-    
+
     public CassandraTokenRangeAwareInitialLoadDataIterator(
             SpaceDocumentColumnFamilyMapper mapper, 
-            Collection<ColumnFamilyMetadata> metadata,
+            Map<String, ColumnFamilyMetadata> metadataMap,
             ConnectionResource connectionResource,
+            Map<String, String> queries,
             int batchLimit, 
             CassandraConsistencyLevel readConsistencyLevel) {
         this.mapper = mapper;
         this.batchLimit = batchLimit;
         this.connectionResource = connectionResource;
+        this.initialLoadQueries = queries;
         this.readConsistencyLevel = readConsistencyLevel;
-        this.metadata = metadata.iterator();
+        this.metadataMap = metadataMap;
+        this.metadata = metadataMap.entrySet().iterator();
         this.currentIterator = nextDataIterator();
     }
     
@@ -83,12 +87,18 @@ public class CassandraTokenRangeAwareInitialLoadDataIterator implements DataIter
 
     private CassandraTokenRangeAwareDataIterator nextDataIterator() {
         if (metadata.hasNext()) {
-            ColumnFamilyMetadata metadata = this.metadata.next();
+            Map.Entry<String, ColumnFamilyMetadata> metadata = this.metadata.next();
+
+            CQLQueryContext queryContext = null; // this default value will result in a 'select all' query
+            if (initialLoadQueries != null && initialLoadQueries.containsKey(metadata.getKey())) {
+                // the initial load query is hard-coded by the user as-is, shouldn't need parameters
+                queryContext = new CQLQueryContext(null, initialLoadQueries.get(metadata.getKey()), new Object[]{});
+            }
+
             return new CassandraTokenRangeAwareDataIterator(mapper,
-                                                            metadata,
+                                                            metadata.getValue(),
                                                             connectionResource, 
-                                                            null /* the null value will be interperted as 
-                                                            select all */,
+                                                            queryContext,
                                                             Integer.MAX_VALUE,
                                                             batchLimit,
                                                             readConsistencyLevel);
