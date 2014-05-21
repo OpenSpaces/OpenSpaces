@@ -15,19 +15,14 @@
  *******************************************************************************/
 package org.openspaces.persistency.hibernate;
 
-import java.util.Set;
-
-import org.hibernate.SessionFactory;
-import org.openspaces.persistency.hibernate.iterator.HibernateProxyRemoverIterator;
-import org.openspaces.persistency.hibernate.iterator.StatelessChunkListDataIterator;
-import org.openspaces.persistency.hibernate.iterator.StatelessChunkScrollableDataIterator;
-import org.openspaces.persistency.hibernate.iterator.StatelessListQueryDataIterator;
-import org.openspaces.persistency.hibernate.iterator.StatelessScrollableDataIterator;
-
 import com.gigaspaces.datasource.DataIterator;
 import com.gigaspaces.datasource.DataSourceQuery;
 import com.gigaspaces.datasource.DataSourceSQLQuery;
 import com.gigaspaces.datasource.SpaceDataSource;
+import org.hibernate.SessionFactory;
+import org.openspaces.persistency.hibernate.iterator.*;
+
+import java.util.Set;
 
 /**
  * A {@link SpaceDataSource} implementation based on Hibernate {@link org.hibernate.StatelessSession}.
@@ -42,10 +37,10 @@ import com.gigaspaces.datasource.SpaceDataSource;
 public class StatelessHibernateSpaceDataSource extends AbstractHibernateSpaceDataSource {
 
     public StatelessHibernateSpaceDataSource(SessionFactory sessionFactory, Set<String> managedEntries, int fetchSize,
-            boolean performOrderById, String[] initialLoadEntries, int initialLoadThreadPoolSize,
-            int initialLoadChunkSize, boolean useScrollableResultSet) {
+                                             boolean performOrderById, String[] initialLoadEntries, int initialLoadThreadPoolSize,
+                                             int initialLoadChunkSize, boolean useScrollableResultSet, String[] initialLoadQueryScanningBasePackages, boolean augmentInitialLoadEntries) {
         super(sessionFactory, managedEntries, fetchSize, performOrderById, initialLoadEntries, initialLoadThreadPoolSize,
-                initialLoadChunkSize, useScrollableResultSet);
+                initialLoadChunkSize, useScrollableResultSet, initialLoadQueryScanningBasePackages, augmentInitialLoadEntries);
     }
     
     /**
@@ -57,7 +52,7 @@ public class StatelessHibernateSpaceDataSource extends AbstractHibernateSpaceDat
      */
     @Override
     public DataIterator initialDataLoad() {
-        DataIterator[] iterators = new DataIterator[getInitialLoadEntries().length];
+        DataIterator[] iterators = new DataIterator[getInitialLoadEntries().size()];
         int iteratorCounter = 0;
         for (String entityName : getInitialLoadEntries()) {
             if (getInitialLoadChunkSize() == -1) {

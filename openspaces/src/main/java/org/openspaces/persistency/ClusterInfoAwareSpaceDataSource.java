@@ -19,6 +19,8 @@ import com.gigaspaces.annotation.pojo.SpaceClass;
 import com.gigaspaces.annotation.pojo.SpaceInitialLoadQuery;
 import com.gigaspaces.datasource.SpaceDataSource;
 import com.gigaspaces.internal.utils.ReflectionUtils;
+import com.gigaspaces.metadata.SpacePropertyDescriptor;
+import com.gigaspaces.metadata.SpaceTypeDescriptor;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.cluster.ClusterInfoAware;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -42,12 +44,13 @@ import java.util.Set;
  */
 public abstract class ClusterInfoAwareSpaceDataSource extends SpaceDataSource implements ClusterInfoAware {
 
-    protected String[] basePackages = null;
+    protected String[] initialLoadQueryScanningBasePackages = null;
     protected ClusterInfo clusterInfo;
     protected Map<String, String> initialLoadQueries = new HashMap<String, String>();
+    protected boolean augmentInitialLoadEntries = true;
 
-    public void setBasePackages(String[] basePackages) {
-        this.basePackages = basePackages;
+    public void setInitialLoadQueryScanningBasePackages(String[] initialLoadQueryScanningBasePackages) {
+        this.initialLoadQueryScanningBasePackages = initialLoadQueryScanningBasePackages;
     }
 
     @Override
@@ -94,10 +97,10 @@ public abstract class ClusterInfoAwareSpaceDataSource extends SpaceDataSource im
                 return isClassMatch(metadataReader, classLoader);
             }
         });
-        if (basePackages == null) {
+        if (initialLoadQueryScanningBasePackages == null) {
             return;
         }
-        for (String basePackage : basePackages) {
+        for (String basePackage : initialLoadQueryScanningBasePackages) {
             Set<BeanDefinition> candidates = scanner.findCandidateComponents(basePackage);
             for (final BeanDefinition beanDefinition : candidates) {
                 final Class<?> clazz;
@@ -179,4 +182,20 @@ public abstract class ClusterInfoAwareSpaceDataSource extends SpaceDataSource im
         }
         return type;
     }
+
+    protected String createInitialLoadQuery(SpaceTypeDescriptor typeDescriptor, String templateQuery) {
+        SpacePropertyDescriptor routingPropertyType = typeDescriptor.getFixedProperty(typeDescriptor.getRoutingPropertyName());
+        if (routingPropertyType == null) {
+            // can't move on without a routing property
+            return null;
+        }
+        Class<?> routingPropertyClass = routingPropertyType.getType();
+        if (!ReflectionUtils.isNumeric(routingPropertyClass)) {
+            // routing property type is non-numeric... log?
+            return null;
+        }
+        // routing property is numeric => go ahead
+        return templateQuery.replace("?", routingPropertyType.getName());
+    }
+
 }

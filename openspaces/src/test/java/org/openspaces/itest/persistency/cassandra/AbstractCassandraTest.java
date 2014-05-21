@@ -1,25 +1,20 @@
 package org.openspaces.itest.persistency.cassandra;
 
-import java.util.HashSet;
-import java.util.Map.Entry;
-import java.util.Random;
-import java.util.Set;
-
+import com.gigaspaces.document.SpaceDocument;
+import com.gigaspaces.metadata.SpaceTypeDescriptorBuilder;
+import com.gigaspaces.metadata.index.SpaceIndexType;
 import org.apache.cassandra.cql.jdbc.CassandraDataSource;
 import org.junit.After;
 import org.junit.Before;
 import org.openspaces.itest.persistency.common.mock.MockIntroduceTypeData;
-import org.openspaces.persistency.cassandra.CassandraSpaceDataSource;
-import org.openspaces.persistency.cassandra.CassandraSpaceSynchronizationEndpoint;
-import org.openspaces.persistency.cassandra.CassandraSpaceSynchronizationEndpointConfigurer;
-import org.openspaces.persistency.cassandra.HectorCassandraClient;
-import org.openspaces.persistency.cassandra.HectorCassandraClientConfigurer;
+import org.openspaces.persistency.cassandra.*;
 import org.openspaces.persistency.cassandra.meta.mapping.filter.FlattenedPropertiesFilter;
 import org.openspaces.persistency.cassandra.meta.mapping.filter.PropertyContext;
 
-import com.gigaspaces.document.SpaceDocument;
-import com.gigaspaces.metadata.SpaceTypeDescriptorBuilder;
-import com.gigaspaces.metadata.index.SpaceIndexType;
+import java.util.HashSet;
+import java.util.Map.Entry;
+import java.util.Random;
+import java.util.Set;
 
 abstract public class AbstractCassandraTest
 {
@@ -106,7 +101,8 @@ abstract public class AbstractCassandraTest
                                                                            hectorClient,
                                                                            5,
                                                                            30,
-                                                                           10000);
+                                                                           10000,
+                                                                           null, true);
         return dataSource;
     }
 

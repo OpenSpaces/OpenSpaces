@@ -67,16 +67,18 @@ public class CassandraSpaceDataSource extends ClusterInfoAwareSpaceDataSource {
 
     private final Object                            lock         = new Object();
     private boolean                                 closed       = false;
-
+    private Map<String, SpaceTypeDescriptor>        initialLoadEntriesMap = new HashMap<String, SpaceTypeDescriptor>();
     
     public CassandraSpaceDataSource(
             PropertyValueSerializer fixedPropertyValueSerializer,
             PropertyValueSerializer dynamicPropertyValueSerializer,
             CassandraDataSource cassandraDataSource,
             HectorCassandraClient hectorClient,
-            int minimumNumberOfConnections, 
+            int minimumNumberOfConnections,
             int maximumNumberOfConnections,
-            int batchLimit) {
+            int batchLimit,
+            String[] initialLoadQueryScanningBasePackages,
+            boolean augmentInitialLoadEntries) {
         
         if (hectorClient == null) {
             throw new IllegalArgumentException("hectorClient must be set and initiated");
@@ -115,7 +117,8 @@ public class CassandraSpaceDataSource extends ClusterInfoAwareSpaceDataSource {
         
         mapper = new DefaultSpaceDocumentColumnFamilyMapper(fixedPropertyValueSerializer,
                                                              dynamicPropertyValueSerializer);
-        
+        this.initialLoadQueryScanningBasePackages = initialLoadQueryScanningBasePackages;
+        this.augmentInitialLoadEntries = augmentInitialLoadEntries;
     }
 
     /**
@@ -249,16 +252,43 @@ public class CassandraSpaceDataSource extends ClusterInfoAwareSpaceDataSource {
             
             logger.debug(sb.toString());
         }
-        
+
         Map<String, SpaceTypeDescriptorContainer> typeDescriptors = new HashMap<String, SpaceTypeDescriptorContainer>();
-        
+
         for (ColumnFamilyMetadata metadata : columnFamilies.values()) {
-            typeDescriptors.put(metadata.getTypeName(), metadata.getTypeDescriptorData());
+            String typeName = metadata.getTypeName();
+            SpaceTypeDescriptorContainer spaceTypeDescriptorContainer = metadata.getTypeDescriptorData();
+            typeDescriptors.put(typeName, spaceTypeDescriptorContainer);
+            if (augmentInitialLoadEntries) {
+                initialLoadEntriesMap.put(typeName, spaceTypeDescriptorContainer.getTypeDescriptor());
+            }
         }
-        
+
         List<SpaceTypeDescriptor> result = TypeDescriptorUtils.sort(typeDescriptors);
-        
+
         return new DataIteratorAdapter<SpaceTypeDescriptor>(result.iterator());
+    }
+
+    @Override
+    protected void obtainInitialLoadQueries() {
+        super.obtainInitialLoadQueries();
+        if (!augmentInitialLoadEntries) {
+            return;
+        }
+        if (initialLoadEntriesMap.isEmpty() || clusterInfo == null) {
+            return;
+        }
+        Integer num = clusterInfo.getNumberOfInstances(), instanceId = clusterInfo.getInstanceId();
+        if (num == null || instanceId == null) {
+            return;
+        }
+        String query = "? % " + num + " = " + instanceId;
+        for (Entry<String, SpaceTypeDescriptor> entry : initialLoadEntriesMap.entrySet()) {
+            String typeQuery = createInitialLoadQuery(entry.getValue(), query);
+            if (null != typeQuery) {
+                initialLoadQueries.put(entry.getKey(), typeQuery);
+            }
+        }
     }
 
     @Override
@@ -284,4 +314,7 @@ public class CassandraSpaceDataSource extends ClusterInfoAwareSpaceDataSource {
         return false;
     }
 
+    protected Map<String, SpaceTypeDescriptor> getInitialLoadEntriesMap() {
+        return initialLoadEntriesMap;
+    }
 }

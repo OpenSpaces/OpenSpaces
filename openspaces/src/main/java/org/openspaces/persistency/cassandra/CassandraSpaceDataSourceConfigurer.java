@@ -36,7 +36,9 @@ public class CassandraSpaceDataSourceConfigurer {
     protected int                     minimumNumberOfConnections = 5;
     protected int                     maximumNumberOfConnections = 30;
     protected int                     batchLimit                 = 10000;
-    
+    protected String[]                initialLoadQueryScanningBasePackages;
+    protected boolean                 augmentInitialLoadEntries  = true;
+
     /**
      * Optional. If set, all fixed properties with a type that is not primitive nor a common 
      * java type will be deserialized using {@link PropertyValueSerializer#fromByteBuffer(java.nio.ByteBuffer)}
@@ -126,7 +128,29 @@ public class CassandraSpaceDataSourceConfigurer {
         this.batchLimit = batchLimit;
         return this;
     }
-    
+
+    /**
+     * optional.
+     * @param initialLoadQueryScanningBasePackages array of base packages to scan for custom initial load query methods
+     *                                             marked with the {@link com.gigaspaces.annotation.pojo.SpaceInitialLoadQuery}
+     *                                             annotation (default: null, scans nothing).
+     * @return {@code this} instance.
+     */
+    public CassandraSpaceDataSourceConfigurer initialLoadQueryScanningBasePackages(String[] initialLoadQueryScanningBasePackages) {
+        this.initialLoadQueryScanningBasePackages = initialLoadQueryScanningBasePackages;
+        return this;
+    }
+
+    /**
+     * optional.
+     * @param augmentInitialLoadEntries feature switch for initial load entry augmentation with partition-specific query (default: true).
+     * @return {@code this} instance.
+     */
+    public CassandraSpaceDataSourceConfigurer augmentInitialLoadEntries(boolean augmentInitialLoadEntries) {
+        this.augmentInitialLoadEntries = augmentInitialLoadEntries;
+        return this;
+    }
+
     /**
      * @return An instance of {@link CassandraSpaceDataSource} matching this configurer
      * configuration.
@@ -138,7 +162,8 @@ public class CassandraSpaceDataSourceConfigurer {
                                             hectorClient,
                                             minimumNumberOfConnections,
                                             maximumNumberOfConnections,
-                                            batchLimit);
+                                            batchLimit,
+                                            initialLoadQueryScanningBasePackages,
+                                            augmentInitialLoadEntries);
     }
-    
 }

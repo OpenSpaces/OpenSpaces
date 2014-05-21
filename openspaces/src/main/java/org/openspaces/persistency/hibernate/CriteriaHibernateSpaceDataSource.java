@@ -15,9 +15,10 @@
  *******************************************************************************/
 package org.openspaces.persistency.hibernate;
 
-import java.io.Serializable;
-import java.util.Set;
-
+import com.gigaspaces.datasource.DataIterator;
+import com.gigaspaces.datasource.DataSourceIdQuery;
+import com.gigaspaces.datasource.DataSourceQuery;
+import com.gigaspaces.datasource.SpaceDataSourceException;
 import org.hibernate.FlushMode;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -26,10 +27,8 @@ import org.openspaces.persistency.hibernate.iterator.DefaultCriteriaByExampleDat
 import org.openspaces.persistency.hibernate.iterator.HibernateIteratorUtils;
 import org.openspaces.persistency.hibernate.iterator.HibernateProxyRemoverIterator;
 
-import com.gigaspaces.datasource.DataIterator;
-import com.gigaspaces.datasource.DataSourceIdQuery;
-import com.gigaspaces.datasource.DataSourceQuery;
-import com.gigaspaces.datasource.SpaceDataSourceException;
+import java.io.Serializable;
+import java.util.Set;
 
 /**
  * An extension over the default implementation that its main use is to override Hibernate bugs when executing queries with composite
@@ -41,9 +40,11 @@ public class CriteriaHibernateSpaceDataSource extends DefaultHibernateSpaceDataS
 
     public CriteriaHibernateSpaceDataSource(SessionFactory sessionFactory, Set<String> managedEntries, int fetchSize,
             boolean performOrderById, String[] initialLoadEntries, int initialLoadThreadPoolSize,
-            int initialLoadChunkSize, boolean useScrollableResultSet) {
+            int initialLoadChunkSize, boolean useScrollableResultSet, String[] initialLoadQueryScanningBasePackages,
+            boolean augmentInitialLoadEntries) {
         super(sessionFactory, managedEntries, fetchSize, performOrderById, initialLoadEntries,
-                initialLoadThreadPoolSize, initialLoadChunkSize, useScrollableResultSet);
+                initialLoadThreadPoolSize, initialLoadChunkSize, useScrollableResultSet, initialLoadQueryScanningBasePackages,
+                augmentInitialLoadEntries);
     }
     
     /* (non-Javadoc)

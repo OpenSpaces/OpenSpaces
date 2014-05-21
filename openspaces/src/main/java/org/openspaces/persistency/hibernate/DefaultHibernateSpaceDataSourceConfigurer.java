@@ -15,13 +15,13 @@
  *******************************************************************************/
 package org.openspaces.persistency.hibernate;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.SessionFactory;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A configurer class which is used to configure a {@link DefaultHibernateSpaceDataSource}
@@ -46,6 +46,10 @@ public class DefaultHibernateSpaceDataSourceConfigurer {
     private boolean performOrderById = true;
 
     private boolean useScrollableResultSet = true;
+
+    private boolean augmentInitialLoadEntries = true;
+
+    private String[] initialLoadQueryScanningBasePackages;
 
     /**
      * Injects the Hibernate SessionFactory to be used with this data source.
@@ -135,14 +139,34 @@ public class DefaultHibernateSpaceDataSourceConfigurer {
         this.useScrollableResultSet = useScrollableResultSet;
         return this;
     }
-    
+
+    /**
+     * optional.
+     * @param initialLoadQueryScanningBasePackages array of base packages to scan for custom initial load query methods
+     *                                             marked with the {@link com.gigaspaces.annotation.pojo.SpaceInitialLoadQuery}
+     *                                             annotation (default: null, scans nothing).
+     * @return {@code this} instance.
+     */
+    public DefaultHibernateSpaceDataSourceConfigurer initialLoadQueryScanningBasePackages(String[] initialLoadQueryScanningBasePackages) {
+        this.initialLoadQueryScanningBasePackages = initialLoadQueryScanningBasePackages;
+        return this;
+    }
+
+    /**
+     * Feature switch for initial load entries augmentation (creation of partition-specific query for entries) Defaults to <code>true</code>.
+     */
+    public DefaultHibernateSpaceDataSourceConfigurer augmentInitialLoadEntries(boolean augmentInitialLoadEntries) {
+        this.augmentInitialLoadEntries = augmentInitialLoadEntries;
+        return this;
+    }
+
     /**
      * Creates a {@link DefaultHibernateExternalDataSource} with the setup configuration.
      */
     public DefaultHibernateSpaceDataSource create(){
         return new DefaultHibernateSpaceDataSource(sessionFactory,
                 managedEntries, fetchSize, performOrderById, initialLoadEntries, initialLoadThreadPoolSize,
-                initialLoadChunkSize, useScrollableResultSet);
+                initialLoadChunkSize, useScrollableResultSet, initialLoadQueryScanningBasePackages, augmentInitialLoadEntries);
     }
 
 }

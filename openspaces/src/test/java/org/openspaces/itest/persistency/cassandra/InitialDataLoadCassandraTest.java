@@ -1,12 +1,9 @@
 package org.openspaces.itest.persistency.cassandra;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
-
+import com.gigaspaces.datasource.DataIterator;
+import com.gigaspaces.document.SpaceDocument;
+import edu.emory.mathcs.backport.java.util.Arrays;
 import junit.framework.Assert;
-
 import org.apache.cassandra.cql.jdbc.CassandraDataSource;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,10 +15,10 @@ import org.openspaces.itest.persistency.common.mock.MockOperationsBatchDataBuild
 import org.openspaces.persistency.cassandra.CassandraSpaceDataSource;
 import org.openspaces.persistency.cassandra.HectorCassandraClient;
 
-import com.gigaspaces.datasource.DataIterator;
-import com.gigaspaces.document.SpaceDocument;
-
-import edu.emory.mathcs.backport.java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 @RunWith(Parameterized.class)
 public class InitialDataLoadCassandraTest extends AbstractCassandraTest
@@ -77,7 +74,7 @@ public class InitialDataLoadCassandraTest extends AbstractCassandraTest
                                                                            hectorClient,
                                                                            5,
                                                                            30,
-                                                                           batchLimit);
+                                                                           batchLimit, null, true);
         return dataSource;
     }
     

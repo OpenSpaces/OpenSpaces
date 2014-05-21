@@ -15,13 +15,13 @@
  *******************************************************************************/
 package org.openspaces.persistency.hibernate;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.SessionFactory;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A configurer class which is used to configure a {@link StatelessHibernateSpaceDataSource}
@@ -46,6 +46,10 @@ public class StatelessHibernateSpaceDataSourceConfigurer {
     private boolean performOrderById = true;
 
     private boolean useScrollableResultSet = true;
+
+    private boolean augmentInitialLoadEntries = true;
+
+    private String[] initialLoadQueryScanningBasePackages;
 
     /**
      * Injects the Hibernate SessionFactory to be used with this data source.
@@ -129,10 +133,30 @@ public class StatelessHibernateSpaceDataSourceConfigurer {
     }
 
     /**
-     * Controls if scrollable result sets will be used with initial load operation. Defaults to <code>true</code>.
+     * Controls if scrollable result sets will be used with initial load operation. Defaults to <code>true</code>. Defaults to <code>true</code>.
      */
     public StatelessHibernateSpaceDataSourceConfigurer useScrollableResultSet(boolean useScrollableResultSet) {
         this.useScrollableResultSet = useScrollableResultSet;
+        return this;
+    }
+
+    /**
+     * optional.
+     * @param initialLoadQueryScanningBasePackages array of base packages to scan for custom initial load query methods
+     *                                             marked with the {@link com.gigaspaces.annotation.pojo.SpaceInitialLoadQuery}
+     *                                             annotation (default: null, scans nothing).
+     * @return {@code this} instance.
+     */
+    public StatelessHibernateSpaceDataSourceConfigurer initialLoadQueryScanningBasePackages(String[] initialLoadQueryScanningBasePackages) {
+        this.initialLoadQueryScanningBasePackages = initialLoadQueryScanningBasePackages;
+        return this;
+    }
+
+    /**
+     * Feature switch for initial load entries augmentation (creation of partition-specific query for entries)
+     */
+    public StatelessHibernateSpaceDataSourceConfigurer augmentInitialLoadEntries(boolean augmentInitialLoadEntries) {
+        this.augmentInitialLoadEntries = augmentInitialLoadEntries;
         return this;
     }
     
@@ -142,7 +166,8 @@ public class StatelessHibernateSpaceDataSourceConfigurer {
     public StatelessHibernateSpaceDataSource create(){
         return new StatelessHibernateSpaceDataSource(sessionFactory,
                 managedEntries, fetchSize, performOrderById, initialLoadEntries, initialLoadThreadPoolSize,
-                initialLoadChunkSize, useScrollableResultSet);
+                initialLoadChunkSize, useScrollableResultSet, initialLoadQueryScanningBasePackages,
+                augmentInitialLoadEntries);
     }
 
 }

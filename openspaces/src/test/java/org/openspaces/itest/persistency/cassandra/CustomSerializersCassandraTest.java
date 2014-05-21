@@ -1,10 +1,9 @@
 package org.openspaces.itest.persistency.cassandra;
 
-import java.nio.ByteBuffer;
-import java.util.concurrent.atomic.AtomicInteger;
-
+import com.gigaspaces.datasource.DataIterator;
+import com.gigaspaces.document.SpaceDocument;
+import com.gigaspaces.sync.IntroduceTypeData;
 import junit.framework.Assert;
-
 import org.apache.cassandra.cql.jdbc.CassandraDataSource;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,9 +18,8 @@ import org.openspaces.persistency.cassandra.meta.mapping.filter.PropertyContext;
 import org.openspaces.persistency.cassandra.meta.types.SerializerProvider;
 import org.openspaces.persistency.cassandra.meta.types.dynamic.PropertyValueSerializer;
 
-import com.gigaspaces.datasource.DataIterator;
-import com.gigaspaces.document.SpaceDocument;
-import com.gigaspaces.sync.IntroduceTypeData;
+import java.nio.ByteBuffer;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class CustomSerializersCassandraTest extends AbstractCassandraTest
 {
@@ -143,7 +141,7 @@ public class CustomSerializersCassandraTest extends AbstractCassandraTest
                                                                            hectorClient,
                                                                            5,
                                                                            30,
-                                                                           10000);
+                                                                           10000, null, true);
         return dataSource;
     }
     

@@ -92,6 +92,18 @@ public class CassandraSpaceDataSourceFactoryBean implements
         configurer.batchLimit(batchLimit);
     }
 
+    /**
+     * @see CassandraSpaceDataSourceConfigurer#initialLoadQueryScanningBasePackages(String[])
+     */
+    public void initialLoadQueryScanningBasePackages(String... initialLoadQueryScanningBasePackages) {
+        configurer.initialLoadQueryScanningBasePackages(initialLoadQueryScanningBasePackages);
+    }
+
+    /**
+     * @see CassandraSpaceDataSourceConfigurer#augmentInitialLoadEntries(boolean)
+     */
+    public void augmentInitialLoadEntries(boolean augmentInitialLoadEntries) { configurer.augmentInitialLoadEntries(augmentInitialLoadEntries); }
+
     @Override
     public void afterPropertiesSet() throws Exception {
         cassandraSpaceDataSource = configurer.create();
