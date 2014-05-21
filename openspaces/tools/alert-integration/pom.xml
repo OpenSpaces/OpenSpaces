@@ -8,7 +8,7 @@
 	<name>SNMP-Alert-Logging</name>
 	<properties>
 		<gsType>PU</gsType>
-		<gsVersion>10.0.0-11508-30-SNAPSHOT</gsVersion>
+		<gsVersion>10.0.0-11508-31-SNAPSHOT</gsVersion>
 	</properties>
 	<repositories>
 		<repository>
