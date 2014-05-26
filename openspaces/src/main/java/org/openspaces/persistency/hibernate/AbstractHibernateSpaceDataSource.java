@@ -16,6 +16,7 @@
 package org.openspaces.persistency.hibernate;
 
 import com.gigaspaces.datasource.DataIterator;
+import com.gigaspaces.datasource.DataIteratorAdapter;
 import com.gigaspaces.datasource.SpaceDataSource;
 import com.gigaspaces.internal.client.spaceproxy.metadata.TypeDescFactory;
 import com.gigaspaces.metadata.SpaceTypeDescriptor;
@@ -26,10 +27,10 @@ import org.hibernate.EntityMode;
 import org.hibernate.SessionFactory;
 import org.hibernate.metadata.ClassMetadata;
 import org.hibernate.persister.entity.AbstractEntityPersister;
-import org.openspaces.persistency.cassandra.datasource.SingleEntryDataIterator;
 import org.openspaces.persistency.hibernate.iterator.HibernateProxyRemoverIterator;
 import org.openspaces.persistency.patterns.ManagedEntriesSpaceDataSource;
 import org.openspaces.persistency.support.ConcurrentMultiDataIterator;
+import org.openspaces.persistency.support.TypeDescriptorUtils;
 
 import java.util.*;
 
@@ -52,6 +53,7 @@ public abstract class AbstractHibernateSpaceDataSource extends ManagedEntriesSpa
     private final ManagedEntitiesContainer sessionManager;
     private final SessionFactory sessionFactory;
     private final Map<String, SpaceTypeDescriptor> initialLoadEntriesTypeDescs = new HashMap<String, SpaceTypeDescriptor>();
+    private Map<String, ClassMetadata> allMappedClassMetaData;
 
     public AbstractHibernateSpaceDataSource(SessionFactory sessionFactory, Set<String> managedEntries, int fetchSize,
                                             boolean performOrderById, String[] initialLoadEntries,
@@ -71,7 +73,7 @@ public abstract class AbstractHibernateSpaceDataSource extends ManagedEntriesSpa
         this.augmentInitialLoadEntries = augmentInitialLoadEntries;
     }
 
-    private static Set<String> createInitialLoadEntries(String[] initialLoadEntries, SessionFactory sessionFactory) {
+    private Set<String> createInitialLoadEntries(String[] initialLoadEntries, SessionFactory sessionFactory) {
         Set<String> result = new HashSet<String>();
         if (initialLoadEntries != null) {
             for (String entry : initialLoadEntries) {
@@ -79,13 +81,13 @@ public abstract class AbstractHibernateSpaceDataSource extends ManagedEntriesSpa
             }
         } else {
             // try and derive the managedEntries
-            Map<String, ClassMetadata> allClassMetaData = sessionFactory.getAllClassMetadata();
-            for (Map.Entry<String, ClassMetadata> entry : allClassMetaData.entrySet()) {
+            allMappedClassMetaData = sessionFactory.getAllClassMetadata();
+            for (Map.Entry<String, ClassMetadata> entry : allMappedClassMetaData.entrySet()) {
                 String entityName = entry.getKey();
                 ClassMetadata classMetadata = entry.getValue();
                 if (classMetadata.isInherited()) {
                     String superClassEntityName = ((AbstractEntityPersister) classMetadata).getMappedSuperclass();
-                    ClassMetadata superClassMetadata = allClassMetaData.get(superClassEntityName);
+                    ClassMetadata superClassMetadata = allMappedClassMetaData.get(superClassEntityName);
                     Class superClass = superClassMetadata.getMappedClass(EntityMode.POJO);
                     // only filter out classes that their super class has mappings
                     if (superClass != null) {
@@ -170,13 +172,28 @@ public abstract class AbstractHibernateSpaceDataSource extends ManagedEntriesSpa
                 throw new IllegalArgumentException("Initial load entity " + initialLoadEntryTypeName + " cannot be resolved!", e);
             }
         }
-        DataIterator[] dataIterators = new DataIterator[initialLoadEntriesTypeDescs.size()];
-        int ix=0;
-        for (Map.Entry<String, SpaceTypeDescriptor> entry : initialLoadEntriesTypeDescs.entrySet()) {
-            dataIterators[ix++] = new SingleEntryDataIterator(entry.getValue());
+        putUnmappedAncestors(typeDescFactory);
+
+        List<SpaceTypeDescriptor> sortedTypeDescriptors = TypeDescriptorUtils.sort(initialLoadEntriesTypeDescs.values());
+
+        return new DataIteratorAdapter<SpaceTypeDescriptor>(sortedTypeDescriptors.iterator());
+    }
+
+    private void putUnmappedAncestors(TypeDescFactory typeDescFactory) {
+        Set<SpaceTypeDescriptor> mapped = new HashSet<SpaceTypeDescriptor>(initialLoadEntriesTypeDescs.values());
+        for (SpaceTypeDescriptor entry : mapped) {
+            String superTypeName = entry.getSuperTypeName();
+            while (!Object.class.getName().equals(superTypeName) && !initialLoadEntriesTypeDescs.containsKey(superTypeName)) {
+                try {
+                    SpaceTypeDescriptor typeDescriptor = typeDescFactory.createPojoTypeDesc(ClassLoaderHelper.loadClass(superTypeName), null, null);
+                    initialLoadEntriesTypeDescs.put(superTypeName, typeDescriptor);
+                    superTypeName = typeDescriptor.getSuperTypeName();
+                } catch (ClassNotFoundException e) {
+                    // shouldn't happen...
+                    throw new IllegalArgumentException("Initial load entity " + superTypeName + " cannot be resolved!", e);
+                }
+            }
         }
-        DataIterator<SpaceTypeDescriptor> result = createInitialLoadIterator(dataIterators);
-        return result;
     }
 
     @Override
@@ -198,7 +215,7 @@ public abstract class AbstractHibernateSpaceDataSource extends ManagedEntriesSpa
         // go through the initial load entries, check for matching queries, make queries for managed entries with a
         // numeric routing field (unless a query already exists)
         for (String type : initialLoadEntries) {
-            if (!initialLoadQueries.containsKey(type)) {
+            if ((allMappedClassMetaData == null || allMappedClassMetaData.containsKey(type)) && !initialLoadQueries.containsKey(type)) {
                 processInitialLoadEntry(type, query);
             }
         }

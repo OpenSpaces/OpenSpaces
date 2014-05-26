@@ -17,12 +17,7 @@ package org.openspaces.persistency.support;
 
 import com.gigaspaces.metadata.SpaceTypeDescriptor;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Niv Ingberg
@@ -30,16 +25,16 @@ import java.util.Set;
  */
 public class TypeDescriptorUtils {
 
-    /**
-     * @param typeDescriptorContainers A map from type name to its matching {@link SpaceTypeDescriptorContainer}
-     * @return A list of {@link SpaceTypeDescriptor} instances sorted in such way that super types will
-     * precede their sub types.
-     */
-    public static List<SpaceTypeDescriptor> sort(Map<String, SpaceTypeDescriptorContainer> typeDescriptorContainers) {
+    public static List<SpaceTypeDescriptor> sort(Collection<SpaceTypeDescriptor> typeDescriptors) {
         TypeHierarchySorter sorter = new TypeHierarchySorter();
-        for (SpaceTypeDescriptorContainer typeDescriptorContainer : typeDescriptorContainers.values())
-            sorter.addTypeName(typeDescriptorContainer.getTypeDescriptor().getTypeName(),
-                    typeDescriptorContainer.getTypeDescriptor().getSuperTypeName());
+        Map<String,SpaceTypeDescriptor> typeDescriptorsMap = new HashMap<String, SpaceTypeDescriptor>();
+
+        for (SpaceTypeDescriptor typeDescriptor : typeDescriptors) {
+            if (null != typeDescriptor) {
+                typeDescriptorsMap.put(typeDescriptor.getTypeName(), typeDescriptor);
+                sorter.addTypeName(typeDescriptor.getTypeName(), typeDescriptor.getSuperTypeName());
+            }
+        }
 
         Map<String, TypeNameNode> allTypeNameNodes = sorter.nodes;
         TypeNameNode root = sorter.fixAndGetRoot();
@@ -48,20 +43,34 @@ public class TypeDescriptorUtils {
 
         // root is java.lang.Object so we skip him
         for (String typeName : root.children)
-            addSelfThenChildren(typeName, typeDescriptorContainers, allTypeNameNodes, result);
+            addSelfThenChildren(typeName, typeDescriptorsMap, allTypeNameNodes, result);
 
         return result;
+
+    }
+
+    /**
+     * @param typeDescriptorContainers A map from type name to its matching {@link SpaceTypeDescriptorContainer}
+     * @return A list of {@link SpaceTypeDescriptor} instances sorted in such way that super types will
+     * precede their sub types.
+     */
+    public static List<SpaceTypeDescriptor> sort(Map<String, SpaceTypeDescriptorContainer> typeDescriptorContainers) {
+        Collection<SpaceTypeDescriptor> typeDescriptors = new HashSet<SpaceTypeDescriptor>();
+        for (SpaceTypeDescriptorContainer container : typeDescriptorContainers.values()) {
+            typeDescriptors.add(container.getTypeDescriptor());
+        }
+        return sort(typeDescriptors);
     }
 
     private static void addSelfThenChildren(String typeName,
-                                            Map<String, SpaceTypeDescriptorContainer> typeDescriptorContainers,
+                                            Map<String, SpaceTypeDescriptor> typeDescriptors,
                                             Map<String, TypeNameNode> nodes,
                                             List<SpaceTypeDescriptor> result) {
-        SpaceTypeDescriptor typeDescriptor = typeDescriptorContainers.get(typeName).getTypeDescriptor();
+        SpaceTypeDescriptor typeDescriptor = typeDescriptors.get(typeName);
         result.add(typeDescriptor);
         TypeNameNode typeNameNode = nodes.get(typeName);
         for (String childTypeName : typeNameNode.children)
-            addSelfThenChildren(childTypeName, typeDescriptorContainers, nodes, result);
+            addSelfThenChildren(childTypeName, typeDescriptors, nodes, result);
     }
 
     private static  class TypeNameNode {
