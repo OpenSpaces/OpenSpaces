@@ -95,7 +95,7 @@ public class CassandraSpaceDataSourceFactoryBean implements
     /**
      * @see CassandraSpaceDataSourceConfigurer#initialLoadQueryScanningBasePackages(String[])
      */
-    public void initialLoadQueryScanningBasePackages(String... initialLoadQueryScanningBasePackages) {
+    public void setInitialLoadQueryScanningBasePackages(String... initialLoadQueryScanningBasePackages) {
         configurer.initialLoadQueryScanningBasePackages(initialLoadQueryScanningBasePackages);
     }
 

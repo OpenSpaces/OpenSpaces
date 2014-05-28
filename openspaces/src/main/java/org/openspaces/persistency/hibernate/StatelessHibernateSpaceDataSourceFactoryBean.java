@@ -119,14 +119,14 @@ public class StatelessHibernateSpaceDataSourceFactoryBean implements FactoryBean
     /**
      * @see StatelessHibernateSpaceDataSourceConfigurer#initialLoadQueryScanningBasePackages(String[])
      */
-    public void initialLoadQueryScanningBasePackages(String... initialLoadQueryScanningBasePackages) {
+    public void setInitialLoadQueryScanningBasePackages(String... initialLoadQueryScanningBasePackages) {
         dataSourceConfigurer.initialLoadQueryScanningBasePackages(initialLoadQueryScanningBasePackages);
     }
 
     /**
      * Feature switch for initial load entries augmentation (creation of partition-specific query for entries). Defaults to <code>true</code>.
      */
-    public void augmentInitialLoadEntries(boolean augmentInitialLoadEntries) {
+    public void setAugmentInitialLoadEntries(boolean augmentInitialLoadEntries) {
         dataSourceConfigurer.augmentInitialLoadEntries(augmentInitialLoadEntries);
     }
 
