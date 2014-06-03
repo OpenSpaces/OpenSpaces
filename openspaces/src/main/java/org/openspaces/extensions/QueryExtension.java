@@ -21,7 +21,7 @@ import com.gigaspaces.async.AsyncFuture;
 import com.gigaspaces.internal.client.QueryResultTypeInternal;
 import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
 import com.gigaspaces.internal.transport.IEntryPacket;
-import com.gigaspaces.query.tasks.AggregateTask;
+import com.gigaspaces.internal.query.tasks.AggregateTask;
 import com.j_spaces.core.client.SQLQuery;
 import org.openspaces.core.GigaSpace;
 
