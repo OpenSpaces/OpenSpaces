@@ -18,7 +18,9 @@
 package org.openspaces.extensions;
 
 import com.gigaspaces.async.AsyncFuture;
+import com.gigaspaces.internal.client.QueryResultTypeInternal;
 import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
+import com.gigaspaces.internal.transport.IEntryPacket;
 import com.gigaspaces.query.tasks.AggregateTask;
 import com.j_spaces.core.client.SQLQuery;
 import org.openspaces.core.GigaSpace;
@@ -35,8 +37,18 @@ public class QueryExtension {
         return execute(gigaSpace, new AggregateTask.Max<N>(), query, path);
     }
 
+    public static <T> T maxBy(GigaSpace gigaSpace, SQLQuery<T> query, String path) {
+        IEntryPacket entry = execute(gigaSpace, new AggregateTask.MaxBy(), query, path);
+        return entry != null ? (T)entry.toObject(QueryResultTypeInternal.NOT_SET) : null;
+    }
+
     public static <T,N extends Number & Comparable> N min(GigaSpace gigaSpace, SQLQuery<T> query, String path) {
         return execute(gigaSpace, new AggregateTask.Min<N>(), query, path);
+    }
+
+    public static <T> T minBy(GigaSpace gigaSpace, SQLQuery<T> query, String path) {
+        IEntryPacket entry = execute(gigaSpace, new AggregateTask.MinBy(), query, path);
+        return entry != null ? (T)entry.toObject(QueryResultTypeInternal.NOT_SET) : null;
     }
 
     public static <T,N extends Number & Comparable> N sum(GigaSpace gigaSpace, SQLQuery<T> query, String path) {
