@@ -61,10 +61,10 @@ public class QueryExtension {
     }
 
     private static <T, N extends Serializable> N execute(GigaSpace gigaSpace, AggregateTask<N> task, SQLQuery<T> query, String path) {
-        task.setQuery(query);
+        ISpaceProxy spaceProxy = (ISpaceProxy) gigaSpace.getSpace();
+        task.setQuery(query, spaceProxy, QueryResultTypeInternal.NOT_SET);
         task.setPath(path);
         task.setModifiers(gigaSpace.getDefaultReadModifiers().getCode());
-        ISpaceProxy spaceProxy = (ISpaceProxy) gigaSpace.getSpace();
         try {
             AsyncFuture<N> future = spaceProxy.execute(task, null, gigaSpace.getCurrentTransaction(), null);
             return future.get();
