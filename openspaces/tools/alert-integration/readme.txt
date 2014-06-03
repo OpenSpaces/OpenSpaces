@@ -25,4 +25,4 @@ WIKI PAGE
 ---------------------------------
 
 For more information about the Alert Logging Gateway Example please refer to:
-http://docs.gigaspaces.com/xap97/snmp-connectivity-via-alert-logging-gateway.html
+http://docs.gigaspaces.com/xap100/snmp-connectivity-via-alert-logging-gateway.html
