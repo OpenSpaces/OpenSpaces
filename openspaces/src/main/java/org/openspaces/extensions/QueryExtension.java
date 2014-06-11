@@ -20,13 +20,13 @@ package org.openspaces.extensions;
 import com.gigaspaces.async.AsyncFuture;
 import com.gigaspaces.internal.client.QueryResultTypeInternal;
 import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
-import com.gigaspaces.internal.query.tasks.AggregateTaskResult;
-import com.gigaspaces.internal.transport.IEntryPacket;
-import com.gigaspaces.internal.query.tasks.AggregateTask;
-import com.gigaspaces.query.AggregationModifiers;
-import com.gigaspaces.query.AggregationResult;
+import com.gigaspaces.internal.query.scanner.EntryPacketScannerTask;
+import com.gigaspaces.internal.query.scanner.EntryPacketScannerTaskResult;
+import com.gigaspaces.query.*;
 import com.j_spaces.core.client.SQLQuery;
 import org.openspaces.core.GigaSpace;
+
+import java.util.List;
 
 /**
  * @author Niv Ingberg
@@ -34,68 +34,45 @@ import org.openspaces.core.GigaSpace;
  */
 public class QueryExtension {
 
-    public static <T> AggregationResult<T> aggregate(GigaSpace gigaSpace, SQLQuery<T> query, String path, AggregationModifiers modifiers) {
-        if (modifiers == null)
-            throw new IllegalArgumentException("modifiers cannot be null");
-        AggregateTaskResult result = execute(gigaSpace, query, path, modifiers);
-        if (result == null)
-            return null;
-        return new AggregationResult<T>()
-                .setMaxValue(result.getMaxValue())
-                .setMinValue(result.getMinValue())
-                .setSum(result.getSum())
-                .setAverage(result.getAverage())
-                .setMaxEntry(toObject(gigaSpace, result.getMaxEntry()))
-                .setMinEntry(toObject(gigaSpace, result.getMinEntry()));
-    }
-
-    public static <T> Number maxValue(GigaSpace gigaSpace, SQLQuery<T> query, String path) {
-        AggregateTaskResult result = execute(gigaSpace, query, path, AggregationModifiers.MAX_VALUE);
-        return result == null ? null : result.getMaxValue();
-    }
-
-    public static <T> T maxEntry(GigaSpace gigaSpace, SQLQuery<T> query, String path) {
-        AggregateTaskResult result = execute(gigaSpace, query, path, AggregationModifiers.MAX_ENTRY);
-        return toObject(gigaSpace, result != null ? result.getMaxEntry() : null);
-    }
-
-    public static <T> Number minValue(GigaSpace gigaSpace, SQLQuery<T> query, String path) {
-        AggregateTaskResult result = execute(gigaSpace, query, path, AggregationModifiers.MIN_VALUE);
-        return result == null ? null : result.getMinValue();
-    }
-
-    public static <T> T minEntry(GigaSpace gigaSpace, SQLQuery<T> query, String path) {
-        AggregateTaskResult result = execute(gigaSpace, query, path, AggregationModifiers.MIN_ENTRY);
-        return toObject(gigaSpace, result != null ? result.getMinEntry() : null);
-    }
-
-    public static <T> Number sum(GigaSpace gigaSpace, SQLQuery<T> query, String path) {
-        AggregateTaskResult result = execute(gigaSpace, query, path, AggregationModifiers.SUM);
-        return result == null ? null : result.getSum();
-    }
-
-    public static <T> Double average(GigaSpace gigaSpace, SQLQuery<T> query, String path) {
-        AggregateTaskResult result = execute(gigaSpace, query, path, AggregationModifiers.AVERAGE);
-        return result == null ? null : result.getAverage();
-    }
-
-    private static <T> AggregateTaskResult execute(GigaSpace gigaSpace, SQLQuery<T> query, String path, AggregationModifiers modifiers) {
+    public static <T> List<Object> aggregate(GigaSpace gigaSpace, SQLQuery<T> query, AggregationSet aggregations) {
         ISpaceProxy spaceProxy = (ISpaceProxy) gigaSpace.getSpace();
-        AggregateTask task = new AggregateTask();
+        List<SpaceEntriesScanner> scanners = AggregationSetInternalUtils.getScanners(aggregations);
+        EntryPacketScannerTask task = new EntryPacketScannerTask();
         task.setQuery(query, spaceProxy, QueryResultTypeInternal.NOT_SET);
-        task.setPath(path);
+        task.setScanners(scanners);
         task.setModifiers(gigaSpace.getDefaultReadModifiers().getCode());
-        task.setAggregateModifiers(modifiers);
+
         try {
-            AsyncFuture<AggregateTaskResult> future = spaceProxy.execute(task, null, gigaSpace.getCurrentTransaction(), null);
-            return future.get();
+            AsyncFuture<EntryPacketScannerTaskResult> future = spaceProxy.execute(task, null, null, null);
+            EntryPacketScannerTaskResult result = future.get();
+            result.transformResults(scanners, spaceProxy);
+            return result.getResults();
         } catch (Exception e) {
             throw gigaSpace.getExceptionTranslator().translate(e);
         }
     }
 
-    private static <T> T toObject(GigaSpace gigaSpace, IEntryPacket entry) {
-        ISpaceProxy spaceProxy = (ISpaceProxy) gigaSpace.getSpace();
-        return (T)spaceProxy.getDirectProxy().getTypeManager().getObjectFromEntryPacket(entry, QueryResultTypeInternal.NOT_SET, false);
+    public static <T> Number maxValue(GigaSpace gigaSpace, SQLQuery<T> query, String path) {
+        return (Number) aggregate(gigaSpace, query, new AggregationSet().maxValue(path)).get(0);
+    }
+
+    public static <T> T maxEntry(GigaSpace gigaSpace, SQLQuery<T> query, String path) {
+        return (T) aggregate(gigaSpace, query, new AggregationSet().maxEntry(path)).get(0);
+    }
+
+    public static <T> Number minValue(GigaSpace gigaSpace, SQLQuery<T> query, String path) {
+        return (Number) aggregate(gigaSpace, query, new AggregationSet().minValue(path)).get(0);
+    }
+
+    public static <T> T minEntry(GigaSpace gigaSpace, SQLQuery<T> query, String path) {
+        return (T) aggregate(gigaSpace, query, new AggregationSet().minEntry(path)).get(0);
+    }
+
+    public static <T> Number sum(GigaSpace gigaSpace, SQLQuery<T> query, String path) {
+        return (Number) aggregate(gigaSpace, query, new AggregationSet().sum(path)).get(0);
+    }
+
+    public static <T> Double average(GigaSpace gigaSpace, SQLQuery<T> query, String path) {
+        return (Double) aggregate(gigaSpace, query, new AggregationSet().average(path)).get(0);
     }
 }
