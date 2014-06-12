@@ -17,11 +17,7 @@
  ******************************************************************************/
 package org.openspaces.extensions;
 
-import com.gigaspaces.async.AsyncFuture;
-import com.gigaspaces.internal.client.QueryResultTypeInternal;
 import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
-import com.gigaspaces.internal.query.scanner.EntryPacketScannerTask;
-import com.gigaspaces.internal.query.scanner.EntryPacketScannerTaskResult;
 import com.gigaspaces.query.*;
 import com.j_spaces.core.client.SQLQuery;
 import org.openspaces.core.GigaSpace;
@@ -36,17 +32,9 @@ public class QueryExtension {
 
     public static <T> List<Object> aggregate(GigaSpace gigaSpace, SQLQuery<T> query, AggregationSet aggregations) {
         ISpaceProxy spaceProxy = (ISpaceProxy) gigaSpace.getSpace();
-        List<SpaceEntriesScanner> scanners = AggregationSetInternalUtils.getScanners(aggregations);
-        EntryPacketScannerTask task = new EntryPacketScannerTask();
-        task.setQuery(query, spaceProxy, QueryResultTypeInternal.NOT_SET);
-        task.setScanners(scanners);
-        task.setModifiers(gigaSpace.getDefaultReadModifiers().getCode());
 
         try {
-            AsyncFuture<EntryPacketScannerTaskResult> future = spaceProxy.execute(task, null, null, null);
-            EntryPacketScannerTaskResult result = future.get();
-            result.transformResults(scanners, spaceProxy);
-            return result.getResults();
+            return spaceProxy.aggregate(query, aggregations, gigaSpace.getCurrentTransaction(), gigaSpace.getDefaultReadModifiers().getCode()).getResults();
         } catch (Exception e) {
             throw gigaSpace.getExceptionTranslator().translate(e);
         }
