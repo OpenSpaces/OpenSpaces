@@ -154,7 +154,8 @@ public abstract class AbstractChunkDataIterator implements MultiDataIterator {
                 criteria.setProjection(Projections.rowCount());
                 int count;
                 try {
-                    count = ((Number) criteria.uniqueResult()).intValue();
+                    Number result = (Number) criteria.uniqueResult();
+                    count = (result == null) ? -1 : ((Number) criteria.uniqueResult()).intValue();
                 } catch (HibernateException e) {
                     count = -1;
                 }
