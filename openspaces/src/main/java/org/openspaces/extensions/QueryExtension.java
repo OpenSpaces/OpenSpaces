@@ -19,6 +19,8 @@ package org.openspaces.extensions;
 
 import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
 import com.gigaspaces.query.*;
+import com.gigaspaces.query.aggregators.GroupByAggregator;
+import com.gigaspaces.query.aggregators.GroupByResult;
 import com.j_spaces.core.client.SQLQuery;
 import org.openspaces.core.GigaSpace;
 
@@ -30,11 +32,11 @@ import java.util.List;
  */
 public class QueryExtension {
 
-    public static <T> List<Object> aggregate(GigaSpace gigaSpace, SQLQuery<T> query, AggregationSet aggregations) {
+    public static <T> AggregationResult aggregate(GigaSpace gigaSpace, SQLQuery<T> query, AggregationSet aggregations) {
         ISpaceProxy spaceProxy = (ISpaceProxy) gigaSpace.getSpace();
 
         try {
-            return spaceProxy.aggregate(query, aggregations, gigaSpace.getCurrentTransaction(), gigaSpace.getDefaultReadModifiers().getCode()).getResults();
+            return spaceProxy.aggregate(query, aggregations, gigaSpace.getCurrentTransaction(), gigaSpace.getDefaultReadModifiers().getCode());
         } catch (Exception e) {
             throw gigaSpace.getExceptionTranslator().translate(e);
         }
@@ -62,5 +64,9 @@ public class QueryExtension {
 
     public static <T> Double average(GigaSpace gigaSpace, SQLQuery<T> query, String path) {
         return (Double) aggregate(gigaSpace, query, new AggregationSet().average(path)).get(0);
+    }
+
+    public static <T> GroupByResult groupBy(GigaSpace gigaSpace, SQLQuery<T> query, GroupByAggregator aggregator) {
+        return (GroupByResult) aggregate(gigaSpace, query, new AggregationSet().groupBy(aggregator)).get(0);
     }
 }
