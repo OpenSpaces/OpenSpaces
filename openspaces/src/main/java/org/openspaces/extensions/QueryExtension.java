@@ -18,9 +18,7 @@
 package org.openspaces.extensions;
 
 import com.gigaspaces.query.ISpaceQuery;
-import com.gigaspaces.query.aggregators.AggregationSet;
-import com.gigaspaces.query.aggregators.GroupByAggregator;
-import com.gigaspaces.query.aggregators.GroupByResult;
+import com.gigaspaces.query.aggregators.*;
 import org.openspaces.core.GigaSpace;
 
 /**
@@ -59,5 +57,37 @@ public class QueryExtension {
 
     public static <T> GroupByResult groupBy(GigaSpace gigaSpace, ISpaceQuery<T> query, GroupByAggregator aggregator) {
         return (GroupByResult) gigaSpace.aggregate(query, new AggregationSet().groupBy(aggregator)).get(0);
+    }
+
+    public static SpaceEntriesAggregator count() {
+        return new CountEntryAggregator();
+    }
+
+    public static SpaceEntriesAggregator count(String path) {
+        return new CountAggregator().setPath(path);
+    }
+
+    public static SpaceEntriesAggregator sum(String path) {
+        return new SumAggregator().setPath(path);
+    }
+
+    public static SpaceEntriesAggregator average(String path) {
+        return new AverageAggregator().setPath(path);
+    }
+
+    public static SpaceEntriesAggregator maxValue(String path) {
+        return new MaxValueAggregator().setPath(path);
+    }
+
+    public static SpaceEntriesAggregator maxEntry(String path) {
+        return new MaxEntryAggregator().setPath(path);
+    }
+
+    public static SpaceEntriesAggregator minValue(String path) {
+        return new MinValueAggregator().setPath(path);
+    }
+
+    public static SpaceEntriesAggregator minEntry(String path) {
+        return new MinEntryAggregator().setPath(path);
     }
 }
