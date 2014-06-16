@@ -17,14 +17,11 @@
  ******************************************************************************/
 package org.openspaces.extensions;
 
-import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
-import com.gigaspaces.query.*;
+import com.gigaspaces.query.ISpaceQuery;
+import com.gigaspaces.query.aggregators.AggregationSet;
 import com.gigaspaces.query.aggregators.GroupByAggregator;
 import com.gigaspaces.query.aggregators.GroupByResult;
-import com.j_spaces.core.client.SQLQuery;
 import org.openspaces.core.GigaSpace;
-
-import java.util.List;
 
 /**
  * @author Niv Ingberg
@@ -32,41 +29,35 @@ import java.util.List;
  */
 public class QueryExtension {
 
-    public static <T> AggregationResult aggregate(GigaSpace gigaSpace, SQLQuery<T> query, AggregationSet aggregations) {
-        ISpaceProxy spaceProxy = (ISpaceProxy) gigaSpace.getSpace();
-
-        try {
-            return spaceProxy.aggregate(query, aggregations, gigaSpace.getCurrentTransaction(), gigaSpace.getDefaultReadModifiers().getCode());
-        } catch (Exception e) {
-            throw gigaSpace.getExceptionTranslator().translate(e);
-        }
+    public static <T> Number count(GigaSpace gigaSpace, ISpaceQuery<T> query, String path) {
+        return (Number) gigaSpace.aggregate(query, new AggregationSet().count(path)).get(0);
     }
 
-    public static <T> Number maxValue(GigaSpace gigaSpace, SQLQuery<T> query, String path) {
-        return (Number) aggregate(gigaSpace, query, new AggregationSet().maxValue(path)).get(0);
+    public static <T> Number sum(GigaSpace gigaSpace, ISpaceQuery<T> query, String path) {
+        return (Number) gigaSpace.aggregate(query, new AggregationSet().sum(path)).get(0);
     }
 
-    public static <T> T maxEntry(GigaSpace gigaSpace, SQLQuery<T> query, String path) {
-        return (T) aggregate(gigaSpace, query, new AggregationSet().maxEntry(path)).get(0);
+    public static <T> Double average(GigaSpace gigaSpace, ISpaceQuery<T> query, String path) {
+        return (Double) gigaSpace.aggregate(query, new AggregationSet().average(path)).get(0);
     }
 
-    public static <T> Number minValue(GigaSpace gigaSpace, SQLQuery<T> query, String path) {
-        return (Number) aggregate(gigaSpace, query, new AggregationSet().minValue(path)).get(0);
+    public static <T> Number maxValue(GigaSpace gigaSpace, ISpaceQuery<T> query, String path) {
+        return (Number) gigaSpace.aggregate(query, new AggregationSet().maxValue(path)).get(0);
     }
 
-    public static <T> T minEntry(GigaSpace gigaSpace, SQLQuery<T> query, String path) {
-        return (T) aggregate(gigaSpace, query, new AggregationSet().minEntry(path)).get(0);
+    public static <T> T maxEntry(GigaSpace gigaSpace, ISpaceQuery<T> query, String path) {
+        return (T) gigaSpace.aggregate(query, new AggregationSet().maxEntry(path)).get(0);
     }
 
-    public static <T> Number sum(GigaSpace gigaSpace, SQLQuery<T> query, String path) {
-        return (Number) aggregate(gigaSpace, query, new AggregationSet().sum(path)).get(0);
+    public static <T> Number minValue(GigaSpace gigaSpace, ISpaceQuery<T> query, String path) {
+        return (Number) gigaSpace.aggregate(query, new AggregationSet().minValue(path)).get(0);
     }
 
-    public static <T> Double average(GigaSpace gigaSpace, SQLQuery<T> query, String path) {
-        return (Double) aggregate(gigaSpace, query, new AggregationSet().average(path)).get(0);
+    public static <T> T minEntry(GigaSpace gigaSpace, ISpaceQuery<T> query, String path) {
+        return (T) gigaSpace.aggregate(query, new AggregationSet().minEntry(path)).get(0);
     }
 
-    public static <T> GroupByResult groupBy(GigaSpace gigaSpace, SQLQuery<T> query, GroupByAggregator aggregator) {
-        return (GroupByResult) aggregate(gigaSpace, query, new AggregationSet().groupBy(aggregator)).get(0);
+    public static <T> GroupByResult groupBy(GigaSpace gigaSpace, ISpaceQuery<T> query, GroupByAggregator aggregator) {
+        return (GroupByResult) gigaSpace.aggregate(query, new AggregationSet().groupBy(aggregator)).get(0);
     }
 }
