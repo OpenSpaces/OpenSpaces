@@ -27,20 +27,19 @@ import org.openspaces.core.GigaSpace;
  */
 public class QueryExtension {
 
-    public static Integer count(GigaSpace gigaSpace, ISpaceQuery query, String path) {
-        String s = null;
-        return gigaSpace.aggregate(query, new AggregationSet().count(path)).getInt(0);
+    public static long count(GigaSpace gigaSpace, ISpaceQuery query, String path) {
+        return gigaSpace.aggregate(query, new AggregationSet().count(path)).getLong(0);
     }
 
-    public static Number sum(GigaSpace gigaSpace, ISpaceQuery query, String path) {
-        return (Number) gigaSpace.aggregate(query, new AggregationSet().sum(path)).get(0);
+    public static <T extends Number> T sum(GigaSpace gigaSpace, ISpaceQuery query, String path) {
+        return (T) gigaSpace.aggregate(query, new AggregationSet().sum(path)).get(0);
     }
 
-    public static Double average(GigaSpace gigaSpace, ISpaceQuery query, String path) {
-        return gigaSpace.aggregate(query, new AggregationSet().average(path)).getDouble(0);
+    public static <T extends Number> T average(GigaSpace gigaSpace, ISpaceQuery query, String path) {
+        return (T) gigaSpace.aggregate(query, new AggregationSet().average(path)).get(0);
     }
 
-    public static <T extends Comparable> T maxValue(GigaSpace gigaSpace, ISpaceQuery query, String path) {
+    public static <T extends Comparable> T max(GigaSpace gigaSpace, ISpaceQuery query, String path) {
         return (T) gigaSpace.aggregate(query, new AggregationSet().maxValue(path)).get(0);
     }
 
@@ -48,7 +47,7 @@ public class QueryExtension {
         return (T) gigaSpace.aggregate(query, new AggregationSet().maxEntry(path)).get(0);
     }
 
-    public static <T extends Comparable> T minValue(GigaSpace gigaSpace, ISpaceQuery query, String path) {
+    public static <T extends Comparable> T min(GigaSpace gigaSpace, ISpaceQuery query, String path) {
         return (T) gigaSpace.aggregate(query, new AggregationSet().minValue(path)).get(0);
     }
 
