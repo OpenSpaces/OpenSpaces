@@ -17,6 +17,7 @@ package org.openspaces.persistency;
 
 import com.gigaspaces.annotation.pojo.SpaceClass;
 import com.gigaspaces.annotation.pojo.SpaceInitialLoadQuery;
+import com.gigaspaces.datasource.DataIterator;
 import com.gigaspaces.datasource.SpaceDataSource;
 import com.gigaspaces.internal.utils.ReflectionUtils;
 import com.gigaspaces.metadata.SpacePropertyDescriptor;
@@ -51,6 +52,12 @@ public abstract class ClusterInfoAwareSpaceDataSource extends SpaceDataSource im
 
     public void setInitialLoadQueryScanningBasePackages(String[] initialLoadQueryScanningBasePackages) {
         this.initialLoadQueryScanningBasePackages = initialLoadQueryScanningBasePackages;
+    }
+
+    @Override
+    public DataIterator<SpaceTypeDescriptor> initialMetadataLoad() {
+        initialLoadQueries.clear();
+        return super.initialMetadataLoad();
     }
 
     @Override

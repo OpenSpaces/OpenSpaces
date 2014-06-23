@@ -16,7 +16,6 @@
 package org.openspaces.persistency.hibernate;
 
 import com.gigaspaces.datasource.DataIterator;
-import com.gigaspaces.datasource.DataIteratorAdapter;
 import com.gigaspaces.datasource.SpaceDataSource;
 import com.gigaspaces.internal.client.spaceproxy.metadata.TypeDescFactory;
 import com.gigaspaces.metadata.SpaceTypeDescriptor;
@@ -30,7 +29,6 @@ import org.hibernate.persister.entity.AbstractEntityPersister;
 import org.openspaces.persistency.hibernate.iterator.HibernateProxyRemoverIterator;
 import org.openspaces.persistency.patterns.ManagedEntriesSpaceDataSource;
 import org.openspaces.persistency.support.ConcurrentMultiDataIterator;
-import org.openspaces.persistency.support.TypeDescriptorUtils;
 
 import java.util.*;
 
@@ -164,6 +162,7 @@ public abstract class AbstractHibernateSpaceDataSource extends ManagedEntriesSpa
 
     @Override
     public DataIterator<SpaceTypeDescriptor> initialMetadataLoad() {
+        super.initialMetadataLoad();
         TypeDescFactory typeDescFactory = new TypeDescFactory();
         for (String initialLoadEntryTypeName : initialLoadEntries) {
             try {

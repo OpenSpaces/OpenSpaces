@@ -150,14 +150,19 @@ public abstract class AbstractChunkDataIterator implements MultiDataIterator {
             Session session = sessionFactory.openSession();
             Transaction transaction = session.beginTransaction();
             try {
-                Criteria criteria = session.createCriteria(entityName);
-                criteria.setProjection(Projections.rowCount());
-                int count;
-                try {
-                    Number result = (Number) criteria.uniqueResult();
-                    count = (result == null) ? -1 : ((Number) criteria.uniqueResult()).intValue();
-                } catch (HibernateException e) {
-                    count = -1;
+                int count = -1;
+                if (entityName != null) {
+                    Criteria criteria = session.createCriteria(entityName);
+                    criteria.setProjection(Projections.rowCount());
+                    try {
+                        Number result = null;
+                        if (null != criteria) {
+                            result = (Number) criteria.uniqueResult();
+                        }
+                        count = (result == null) ? -1 : result.intValue();
+                    } catch (HibernateException e) {
+                        count = -1;
+                    }
                 }
                 if (count != -1) {
                     int from = 0;

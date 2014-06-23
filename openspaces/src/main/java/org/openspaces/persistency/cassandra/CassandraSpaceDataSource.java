@@ -238,7 +238,7 @@ public class CassandraSpaceDataSource extends ClusterInfoAwareSpaceDataSource {
     
     @Override
     public DataIterator<SpaceTypeDescriptor> initialMetadataLoad() {
-        
+        super.initialMetadataLoad();
         Map<String, ColumnFamilyMetadata> columnFamilies = hectorClient.populateColumnFamiliesMetadata(mapper);
         
         if (logger.isDebugEnabled()) {
