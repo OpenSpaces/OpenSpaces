@@ -60,7 +60,7 @@ public class QueryExtension {
     }
 
     public static SpaceEntriesAggregator count() {
-        return new CountEntryAggregator();
+        return new CountAggregator();
     }
 
     public static SpaceEntriesAggregator count(String path) {
