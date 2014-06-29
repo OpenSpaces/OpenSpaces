@@ -424,6 +424,10 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         	// we do not throw an exception since historically #getTotalNumberOfInstances() does not throw exception.
         	// we fall-back to an estimate of planned number of instances as reflected by the GSM
         }
+    	
+    	if(sla != null)
+    		return sla.getNumberOfInstances() * (sla.getNumberOfBackups() + 1);
+
         return getTotalNumberOfInstances();
     }
 
