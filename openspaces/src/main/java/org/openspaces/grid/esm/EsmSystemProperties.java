@@ -8,6 +8,9 @@ public class EsmSystemProperties {
     public static final String ESM_USERNAME = "com.gs.esm.username";
     public static final String ESM_PASSWORD = "com.gs.esm.password";
 
+    public static final String ESM_PROPERTIES_USERNAME = "esm-username";
+    public static final String ESM_PROPERTIES_PASSWORD = "esm-password";
+
     public static final String ESM_INIT_POLLING_INTERVAL_SECONDS = "com.gs.esm.discovery_polling_interval_seconds";
     public static final long ESM_INIT_POLLING_INTERVAL_SECONDS_DEFAULT = 20L;
 

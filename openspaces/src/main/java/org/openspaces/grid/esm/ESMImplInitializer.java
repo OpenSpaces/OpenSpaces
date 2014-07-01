@@ -17,17 +17,12 @@
  ******************************************************************************/
 package org.openspaces.grid.esm;
 
-import java.rmi.RemoteException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
+import com.gigaspaces.grid.gsm.PUDetails;
+import com.gigaspaces.grid.gsm.PUsDetails;
+import com.gigaspaces.internal.utils.concurrent.GSThreadFactory;
+import com.gigaspaces.security.SecurityFactory;
+import com.gigaspaces.security.service.SecurityResolver;
+import com.j_spaces.kernel.SystemProperties;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminFactory;
 import org.openspaces.admin.GridComponent;
@@ -42,10 +37,19 @@ import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.space.Space;
 import org.openspaces.core.GigaSpace;
 
-import com.gigaspaces.grid.gsm.PUDetails;
-import com.gigaspaces.grid.gsm.PUsDetails;
-import com.gigaspaces.internal.utils.concurrent.GSThreadFactory;
-import com.gigaspaces.security.service.SecurityResolver;
+import java.io.IOException;
+import java.io.InputStream;
+import java.rmi.RemoteException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 /**
  * The purpose of this class is to make sure that admin API
  * view of the PUs and instances is based on the GSM and not the LUS.
@@ -184,6 +188,39 @@ public class ESMImplInitializer {
             if (SecurityResolver.isSecurityEnabled()) {
                 String username = System.getProperty(EsmSystemProperties.ESM_USERNAME);
                 String password = System.getProperty(EsmSystemProperties.ESM_PASSWORD);
+                if( logger.isLoggable( Level.FINEST ) ) {
+                    logger.finest("esm-username:" + username + ", esm-password:" + password);
+                }
+                //if user name was not found then try to retrieve security properties file name
+                if( username == null || username.trim().length() == 0 ) {
+                    String securityPropertyFile = System.getProperty(SystemProperties.SECURITY_PROPERTIES_FILE,
+                            SecurityFactory.DEFAULT_SECURITY_RESOURCE);
+                    if( logger.isLoggable( Level.FINEST ) ) {
+                        logger.finest("securityPropertyFile:" + securityPropertyFile);
+                    }
+                    //if security properties file name was defined
+                    if( securityPropertyFile != null ) {
+                        InputStream resourceStream = SecurityFactory.findSecurityProperties( securityPropertyFile );
+                        if( logger.isLoggable( Level.FINEST ) ) {
+                            logger.finest("resourceStream:" + resourceStream);
+                        }
+                        Properties securityProperties = new Properties();
+                        if( resourceStream != null ) {
+                            try {
+                                securityProperties.load( resourceStream );
+                                username = securityProperties.getProperty(EsmSystemProperties.ESM_PROPERTIES_USERNAME);
+                                password = securityProperties.getProperty(EsmSystemProperties.ESM_PROPERTIES_PASSWORD);
+                                if( logger.isLoggable( Level.FINEST ) ) {
+                                    logger.finest("esm-username from properties:" + username +
+                                                ", esm-password from properties:" + password);
+                                }
+                            } catch (IOException e) {
+                                logger.log(Level.SEVERE, e.toString(), e);
+                            }
+                        }
+                    }
+                }
+
                 factory.credentials(username, password);
             }
             admin = (InternalAdmin)factory.createAdmin();
