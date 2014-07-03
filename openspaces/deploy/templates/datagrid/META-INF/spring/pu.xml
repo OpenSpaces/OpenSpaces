@@ -23,8 +23,8 @@
     </bean>
 
     <!--
-        A bean representing an embedded space (an IJSpace implementation).
+        A bean representing an embedded space.
     -->
-    <os-core:space id="space" url="/./${dataGridName}">
-    </os-core:space>
+    <os-core:embedded-space id="space" name="${dataGridName}">
+    </os-core:embedded-space>
 </beans>
