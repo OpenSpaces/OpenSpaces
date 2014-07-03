@@ -11,6 +11,13 @@
 	      <id>org.openspaces</id>
 	      <url>http://maven-repository.openspaces.org</url>
 	    </repository>
+	      <repository>
+            <id>mulesoft-releases</id>
+            <name>MuleSoft Repository</name>
+            <url>https://repository-master.mulesoft.org/releases/</url>
+            <layout>default</layout>
+        </repository>
+		
 	</repositories>
 	<pluginRepositories>
 		<pluginRepository>
@@ -20,7 +27,7 @@
 	</pluginRepositories>
     <properties>
         <gsVersion>${pluginVersion}</gsVersion>
-        <muleVersion>3.3.0</muleVersion>
+        <muleVersion>3.5.0</muleVersion>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <modules>
