@@ -16,8 +16,6 @@
 
 package org.openspaces.pu.container.servicegrid.deploy;
 
-import com.gigaspaces.admin.cli.Formatter;
-import com.gigaspaces.admin.cli.OptionHandler;
 import com.gigaspaces.grid.gsm.GSM;
 import com.gigaspaces.grid.zone.ZoneHelper;
 import com.gigaspaces.internal.lookup.LookupUtils;
@@ -702,7 +700,12 @@ public class Deploy {
                     }
                 }
             }
-        } if (puStringWithoutComments.contains("os-gateway:sink") || puStringWithoutComments.contains("os-gateway:delegator")) {
+        }
+        //new embedded space syntax, since version 10.0
+        if(puStringWithoutComments.contains("os-core:embedded-space")){
+            return ProcessingUnitType.STATEFUL.name(); //embedded space
+        }
+        if (puStringWithoutComments.contains("os-gateway:sink") || puStringWithoutComments.contains("os-gateway:delegator")) {
             return ProcessingUnitType.GATEWAY.name();            
         } if (puStringWithoutComments.length() == 0 && beanLevelProperties.getContextProperties().containsKey("dataGridName")) {
             return ProcessingUnitType.STATEFUL.name(); //.Net stateful
