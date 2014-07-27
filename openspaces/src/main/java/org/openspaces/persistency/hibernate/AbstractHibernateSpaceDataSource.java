@@ -26,6 +26,7 @@ import org.hibernate.EntityMode;
 import org.hibernate.SessionFactory;
 import org.hibernate.metadata.ClassMetadata;
 import org.hibernate.persister.entity.AbstractEntityPersister;
+import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.persistency.hibernate.iterator.HibernateProxyRemoverIterator;
 import org.openspaces.persistency.patterns.ManagedEntriesSpaceDataSource;
 import org.openspaces.persistency.support.ConcurrentMultiDataIterator;
@@ -58,7 +59,8 @@ public abstract class AbstractHibernateSpaceDataSource extends ManagedEntriesSpa
                                             int initialLoadThreadPoolSize, int initialLoadChunkSize,
                                             boolean useScrollableResultSet,
                                             String[] initialLoadQueryScanningBasePackages,
-                                            boolean augmentInitialLoadEntries) {
+                                            boolean augmentInitialLoadEntries,
+											ClusterInfo clusterInfo) {
         this.sessionFactory = sessionFactory;
         this.fetchSize = fetchSize;
         this.performOrderById = performOrderById;
@@ -69,6 +71,7 @@ public abstract class AbstractHibernateSpaceDataSource extends ManagedEntriesSpa
         this.sessionManager = new ManagedEntitiesContainer(sessionFactory, managedEntries);
         this.initialLoadQueryScanningBasePackages = initialLoadQueryScanningBasePackages;
         this.augmentInitialLoadEntries = augmentInitialLoadEntries;
+		this.clusterInfo = clusterInfo;
     }
 
     private Set<String> createInitialLoadEntries(String[] initialLoadEntries, SessionFactory sessionFactory) {
@@ -211,7 +214,7 @@ public abstract class AbstractHibernateSpaceDataSource extends ManagedEntriesSpa
         if (num == null || instanceId == null) {
             return;
         }
-        String query = "? % " + num + " = " + instanceId;
+        String query = "MOD(?," + num + ") = " + ( instanceId - 1 );
         // go through the initial load entries, check for matching queries, make queries for managed entries with a
         // numeric routing field (unless a query already exists)
         for (String type : initialLoadEntries) {

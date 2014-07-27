@@ -23,6 +23,7 @@ import org.hibernate.FlushMode;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.persistency.hibernate.iterator.DefaultCriteriaByExampleDataIterator;
 import org.openspaces.persistency.hibernate.iterator.HibernateIteratorUtils;
 import org.openspaces.persistency.hibernate.iterator.HibernateProxyRemoverIterator;
@@ -41,10 +42,10 @@ public class CriteriaHibernateSpaceDataSource extends DefaultHibernateSpaceDataS
     public CriteriaHibernateSpaceDataSource(SessionFactory sessionFactory, Set<String> managedEntries, int fetchSize,
             boolean performOrderById, String[] initialLoadEntries, int initialLoadThreadPoolSize,
             int initialLoadChunkSize, boolean useScrollableResultSet, String[] initialLoadQueryScanningBasePackages,
-            boolean augmentInitialLoadEntries) {
+            boolean augmentInitialLoadEntries, ClusterInfo clusterInfo) {
         super(sessionFactory, managedEntries, fetchSize, performOrderById, initialLoadEntries,
                 initialLoadThreadPoolSize, initialLoadChunkSize, useScrollableResultSet, initialLoadQueryScanningBasePackages,
-                augmentInitialLoadEntries);
+                augmentInitialLoadEntries,clusterInfo);
     }
     
     /* (non-Javadoc)

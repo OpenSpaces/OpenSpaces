@@ -16,6 +16,8 @@
 package org.openspaces.persistency.cassandra;
 
 import org.apache.cassandra.cql.jdbc.CassandraDataSource;
+import org.openspaces.core.cluster.ClusterInfo;
+import org.openspaces.core.cluster.ClusterInfoAware;
 import org.openspaces.persistency.cassandra.meta.types.dynamic.PropertyValueSerializer;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
@@ -31,7 +33,7 @@ import org.springframework.beans.factory.InitializingBean;
  * @author Dan Kilman
  */
 public class CassandraSpaceDataSourceFactoryBean implements 
-    FactoryBean<CassandraSpaceDataSource>, InitializingBean, DisposableBean {
+    FactoryBean<CassandraSpaceDataSource>, InitializingBean, DisposableBean, ClusterInfoAware {
 
     private final CassandraSpaceDataSourceConfigurer configurer = getConfigurer();
 
@@ -99,6 +101,14 @@ public class CassandraSpaceDataSourceFactoryBean implements
         configurer.initialLoadQueryScanningBasePackages(initialLoadQueryScanningBasePackages);
     }
 
+	/**
+	 * @see CassandraSpaceDataSourceConfigurer#clusterInfo(org.openspaces.core.cluster.ClusterInfo)
+	 */
+	@Override
+	public void setClusterInfo(ClusterInfo clusterInfo) {
+		configurer.clusterInfo(clusterInfo);
+	}
+
     /**
      * @see CassandraSpaceDataSourceConfigurer#augmentInitialLoadEntries(boolean)
      */
@@ -128,5 +138,4 @@ public class CassandraSpaceDataSourceFactoryBean implements
     public void destroy() throws Exception {
         cassandraSpaceDataSource.close();
     }
-
 }

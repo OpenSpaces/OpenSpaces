@@ -74,7 +74,7 @@ public class InitialDataLoadCassandraTest extends AbstractCassandraTest
                                                                            hectorClient,
                                                                            5,
                                                                            30,
-                                                                           batchLimit, null, true);
+                                                                           batchLimit, null, true,null);
         return dataSource;
     }
     

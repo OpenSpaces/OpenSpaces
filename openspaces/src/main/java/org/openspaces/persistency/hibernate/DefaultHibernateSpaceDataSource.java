@@ -21,6 +21,7 @@ import com.gigaspaces.datasource.DataSourceSQLQuery;
 import com.j_spaces.core.client.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.persistency.hibernate.iterator.*;
 
 import java.util.*;
@@ -34,8 +35,10 @@ public class DefaultHibernateSpaceDataSource extends AbstractHibernateSpaceDataS
 
     public DefaultHibernateSpaceDataSource(SessionFactory sessionFactory, Set<String> managedEntries, int fetchSize,
                                            boolean performOrderById, String[] initialLoadEntries, int initialLoadThreadPoolSize,
-                                           int initialLoadChunkSize, boolean useScrollableResultSet, String[] initialLoadQueryScanningBasePackages, boolean augmentInitialLoadEntries) {
-        super(sessionFactory, managedEntries, fetchSize, performOrderById, initialLoadEntries, initialLoadThreadPoolSize, initialLoadChunkSize, useScrollableResultSet, initialLoadQueryScanningBasePackages, augmentInitialLoadEntries);
+                                           int initialLoadChunkSize, boolean useScrollableResultSet, String[] initialLoadQueryScanningBasePackages,
+										   boolean augmentInitialLoadEntries, ClusterInfo clusterInfo) {
+        super(sessionFactory, managedEntries, fetchSize, performOrderById, initialLoadEntries, initialLoadThreadPoolSize,initialLoadChunkSize,
+				useScrollableResultSet, initialLoadQueryScanningBasePackages, augmentInitialLoadEntries, clusterInfo);
         
     }
     

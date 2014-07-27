@@ -141,7 +141,7 @@ public class CustomSerializersCassandraTest extends AbstractCassandraTest
                                                                            hectorClient,
                                                                            5,
                                                                            30,
-                                                                           10000, null, true);
+                                                                           10000, null, true,null);
         return dataSource;
     }
     

@@ -18,6 +18,7 @@ package org.openspaces.persistency.hibernate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.SessionFactory;
+import org.openspaces.core.cluster.ClusterInfo;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -51,7 +52,9 @@ public class CriteriaHibernateSpaceDataSourceConfigurer {
 
     private String[] initialLoadQueryScanningBasePackages;
 
-    /**
+	private ClusterInfo clusterInfo;
+
+	/**
      * Injects the Hibernate SessionFactory to be used with this data source.
      */
     public CriteriaHibernateSpaceDataSourceConfigurer sessionFactory(SessionFactory sessionFactory) {
@@ -88,7 +91,6 @@ public class CriteriaHibernateSpaceDataSourceConfigurer {
     /**
      * When performing initial load, this flag indicates if the generated query will order to results by
      * the id. By default set to <code>true</code> as it most times results in better initial load performance.
-     * @return 
      */
     public CriteriaHibernateSpaceDataSourceConfigurer performOrderById(boolean performOrderById) {
         this.performOrderById = performOrderById;
@@ -152,6 +154,14 @@ public class CriteriaHibernateSpaceDataSourceConfigurer {
         return this;
     }
 
+	/**
+	 * Injects the {@link org.openspaces.core.cluster.ClusterInfo} to be used with the SpaceDataSource
+	 */
+	public CriteriaHibernateSpaceDataSourceConfigurer clusterInfo(ClusterInfo clusterInfo) {
+		this.clusterInfo = clusterInfo;
+		return this;
+	}
+
     /**
      * Feature switch for initial load entries augmentation (creation of partition-specific query for entries). Defaults to <code>true</code>.
      */
@@ -167,7 +177,7 @@ public class CriteriaHibernateSpaceDataSourceConfigurer {
         return new CriteriaHibernateSpaceDataSource(sessionFactory,
                 managedEntries, fetchSize, performOrderById, initialLoadEntries, initialLoadThreadPoolSize,
                 initialLoadChunkSize, useScrollableResultSet, initialLoadQueryScanningBasePackages,
-                augmentInitialLoadEntries);
+                augmentInitialLoadEntries, clusterInfo);
     }
 
 }

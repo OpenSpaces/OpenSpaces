@@ -102,7 +102,9 @@ abstract public class AbstractCassandraTest
                                                                            5,
                                                                            30,
                                                                            10000,
-                                                                           null, true);
+                                                                           null,
+				                                                           true,
+                                                                           null);
         return dataSource;
     }
 

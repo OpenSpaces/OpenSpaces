@@ -18,6 +18,7 @@ package org.openspaces.persistency.hibernate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.SessionFactory;
+import org.openspaces.core.cluster.ClusterInfo;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -50,6 +51,8 @@ public class StatelessHibernateSpaceDataSourceConfigurer {
     private boolean augmentInitialLoadEntries = true;
 
     private String[] initialLoadQueryScanningBasePackages;
+
+	private ClusterInfo clusterInfo;
 
     /**
      * Injects the Hibernate SessionFactory to be used with this data source.
@@ -88,7 +91,6 @@ public class StatelessHibernateSpaceDataSourceConfigurer {
     /**
      * When performing initial load, this flag indicates if the generated query will order to results by
      * the id. By default set to <code>true</code> as it most times results in better initial load performance.
-     * @return 
      */
     public StatelessHibernateSpaceDataSourceConfigurer performOrderById(boolean performOrderById) {
         this.performOrderById = performOrderById;
@@ -152,6 +154,14 @@ public class StatelessHibernateSpaceDataSourceConfigurer {
         return this;
     }
 
+	/**
+	 * Injects the {@link ClusterInfo} to be used with the SpaceDataSource
+	 */
+	public StatelessHibernateSpaceDataSourceConfigurer clusterInfo(ClusterInfo clusterInfo){
+		this.clusterInfo = clusterInfo;
+		return this;
+	}
+
     /**
      * Feature switch for initial load entries augmentation (creation of partition-specific query for entries)
      */
@@ -167,7 +177,7 @@ public class StatelessHibernateSpaceDataSourceConfigurer {
         return new StatelessHibernateSpaceDataSource(sessionFactory,
                 managedEntries, fetchSize, performOrderById, initialLoadEntries, initialLoadThreadPoolSize,
                 initialLoadChunkSize, useScrollableResultSet, initialLoadQueryScanningBasePackages,
-                augmentInitialLoadEntries);
+                augmentInitialLoadEntries, clusterInfo);
     }
 
 }

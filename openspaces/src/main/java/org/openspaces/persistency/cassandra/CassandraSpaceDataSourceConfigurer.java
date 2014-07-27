@@ -16,6 +16,7 @@
 package org.openspaces.persistency.cassandra;
 
 import org.apache.cassandra.cql.jdbc.CassandraDataSource;
+import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.persistency.cassandra.meta.types.dynamic.DynamicPropertyValueSerializer;
 import org.openspaces.persistency.cassandra.meta.types.dynamic.PropertyValueSerializer;
 
@@ -38,6 +39,7 @@ public class CassandraSpaceDataSourceConfigurer {
     protected int                     batchLimit                 = 10000;
     protected String[]                initialLoadQueryScanningBasePackages;
     protected boolean                 augmentInitialLoadEntries  = true;
+	protected ClusterInfo             clusterInfo                = null;
 
     /**
      * Optional. If set, all fixed properties with a type that is not primitive nor a common 
@@ -141,6 +143,14 @@ public class CassandraSpaceDataSourceConfigurer {
         return this;
     }
 
+	/**
+	 * Injects the {@link ClusterInfo} to be used with the SpaceDataSource
+	 */
+	public CassandraSpaceDataSourceConfigurer clusterInfo(ClusterInfo clusterInfo){
+		this.clusterInfo = clusterInfo;
+		return this;
+	}
+
     /**
      * optional.
      * @param augmentInitialLoadEntries feature switch for initial load entry augmentation with partition-specific query (default: true).
@@ -164,6 +174,7 @@ public class CassandraSpaceDataSourceConfigurer {
                                             maximumNumberOfConnections,
                                             batchLimit,
                                             initialLoadQueryScanningBasePackages,
-                                            augmentInitialLoadEntries);
+                                            augmentInitialLoadEntries,
+				                            clusterInfo);
     }
 }

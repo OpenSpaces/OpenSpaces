@@ -18,6 +18,7 @@ package org.openspaces.persistency.hibernate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.SessionFactory;
+import org.openspaces.core.cluster.ClusterInfo;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -50,6 +51,8 @@ public class DefaultHibernateSpaceDataSourceConfigurer {
     private boolean augmentInitialLoadEntries = true;
 
     private String[] initialLoadQueryScanningBasePackages;
+
+	private ClusterInfo clusterInfo = null;
 
     /**
      * Injects the Hibernate SessionFactory to be used with this data source.
@@ -88,7 +91,6 @@ public class DefaultHibernateSpaceDataSourceConfigurer {
     /**
      * When performing initial load, this flag indicates if the generated query will order to results by
      * the id. By default set to <code>true</code> as it most times results in better initial load performance.
-     * @return 
      */
     public DefaultHibernateSpaceDataSourceConfigurer performOrderById(boolean performOrderById) {
         this.performOrderById = performOrderById;
@@ -140,17 +142,25 @@ public class DefaultHibernateSpaceDataSourceConfigurer {
         return this;
     }
 
-    /**
-     * optional.
-     * @param initialLoadQueryScanningBasePackages array of base packages to scan for custom initial load query methods
-     *                                             marked with the {@link com.gigaspaces.annotation.pojo.SpaceInitialLoadQuery}
-     *                                             annotation (default: null, scans nothing).
-     * @return {@code this} instance.
-     */
-    public DefaultHibernateSpaceDataSourceConfigurer initialLoadQueryScanningBasePackages(String[] initialLoadQueryScanningBasePackages) {
-        this.initialLoadQueryScanningBasePackages = initialLoadQueryScanningBasePackages;
-        return this;
-    }
+	/**
+	 * optional.
+	 * @param initialLoadQueryScanningBasePackages array of base packages to scan for custom initial load query methods
+	 *                                             marked with the {@link com.gigaspaces.annotation.pojo.SpaceInitialLoadQuery}
+	 *                                             annotation (default: null, scans nothing).
+	 * @return {@code this} instance.
+	 */
+	public DefaultHibernateSpaceDataSourceConfigurer initialLoadQueryScanningBasePackages(String[] initialLoadQueryScanningBasePackages) {
+		this.initialLoadQueryScanningBasePackages = initialLoadQueryScanningBasePackages;
+		return this;
+	}
+
+	/**
+	 * Injects the {@link ClusterInfo} to be used with the SpaceDataSource
+	 */
+	public DefaultHibernateSpaceDataSourceConfigurer clusterInfo(ClusterInfo clusterInfo) {
+		this.clusterInfo = clusterInfo;
+		return this;
+	}
 
     /**
      * Feature switch for initial load entries augmentation (creation of partition-specific query for entries) Defaults to <code>true</code>.
@@ -161,12 +171,13 @@ public class DefaultHibernateSpaceDataSourceConfigurer {
     }
 
     /**
-     * Creates a {@link DefaultHibernateExternalDataSource} with the setup configuration.
+     * Creates a {@link DefaultHibernateSpaceDataSource} with the setup configuration.
      */
     public DefaultHibernateSpaceDataSource create(){
         return new DefaultHibernateSpaceDataSource(sessionFactory,
                 managedEntries, fetchSize, performOrderById, initialLoadEntries, initialLoadThreadPoolSize,
-                initialLoadChunkSize, useScrollableResultSet, initialLoadQueryScanningBasePackages, augmentInitialLoadEntries);
+                initialLoadChunkSize, useScrollableResultSet, initialLoadQueryScanningBasePackages, augmentInitialLoadEntries,
+				clusterInfo);
     }
 
 }

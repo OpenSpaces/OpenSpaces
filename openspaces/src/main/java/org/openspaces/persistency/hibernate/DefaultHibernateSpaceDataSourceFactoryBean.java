@@ -16,6 +16,8 @@
 package org.openspaces.persistency.hibernate;
 
 import org.hibernate.SessionFactory;
+import org.openspaces.core.cluster.ClusterInfo;
+import org.openspaces.core.cluster.ClusterInfoAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
@@ -24,7 +26,7 @@ import org.springframework.beans.factory.InitializingBean;
  * @author eitany
  * @since 9.5
  */
-public class DefaultHibernateSpaceDataSourceFactoryBean implements FactoryBean<DefaultHibernateSpaceDataSource>, InitializingBean {
+public class DefaultHibernateSpaceDataSourceFactoryBean implements FactoryBean<DefaultHibernateSpaceDataSource>, InitializingBean, ClusterInfoAware {
 
     
     private final DefaultHibernateSpaceDataSourceConfigurer dataSourceConfigurer = getConfigurer();
@@ -69,7 +71,6 @@ public class DefaultHibernateSpaceDataSourceFactoryBean implements FactoryBean<D
     /**
      * When performing initial load, this flag indicates if the generated query will order to results by
      * the id. By default set to <code>true</code> as it most times results in better initial load performance.
-     * @return 
      */
     public void setPerformOrderById(boolean performOrderById) {
         dataSourceConfigurer.performOrderById(performOrderById);
@@ -116,12 +117,19 @@ public class DefaultHibernateSpaceDataSourceFactoryBean implements FactoryBean<D
         dataSourceConfigurer.useScrollableResultSet(useScrollableResultSet);
     }
 
-    /**
-     * @see DefaultHibernateSpaceDataSourceConfigurer#initialLoadQueryScanningBasePackages(String[])
-     */
-    public void setInitialLoadQueryScanningBasePackages(String... initialLoadQueryScanningBasePackages) {
-        dataSourceConfigurer.initialLoadQueryScanningBasePackages(initialLoadQueryScanningBasePackages);
-    }
+	/**
+	 * @see DefaultHibernateSpaceDataSourceConfigurer#initialLoadQueryScanningBasePackages(String[])
+	 */
+	public void setInitialLoadQueryScanningBasePackages(String... initialLoadQueryScanningBasePackages) {
+		dataSourceConfigurer.initialLoadQueryScanningBasePackages(initialLoadQueryScanningBasePackages);
+	}
+
+	/**
+	 * @see DefaultHibernateSpaceDataSourceConfigurer#clusterInfo(org.openspaces.core.cluster.ClusterInfo)
+	 */
+	public void setClusterInfo(ClusterInfo clusterInfo) {
+		dataSourceConfigurer.clusterInfo(clusterInfo);
+	}
 
     /**
      * Feature switch for initial load entries augmentation (creation of partition-specific query for entries). Defaults to <code>true</code>.

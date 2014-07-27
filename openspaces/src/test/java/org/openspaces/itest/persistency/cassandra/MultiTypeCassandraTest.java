@@ -38,7 +38,7 @@ public class MultiTypeCassandraTest extends AbstractCassandraTest
                                                                            5,
                                                                            30,
                                                                            10 /* batchLimit */,
-                                                                           null, true);
+                                                                           null, true,null);
         return dataSource;
     }
     

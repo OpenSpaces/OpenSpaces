@@ -26,6 +26,7 @@ import com.j_spaces.kernel.pool.ResourcePool;
 import org.apache.cassandra.cql.jdbc.CassandraDataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.persistency.ClusterInfoAwareSpaceDataSource;
 import org.openspaces.persistency.cassandra.datasource.CQLQueryContext;
 import org.openspaces.persistency.cassandra.datasource.CassandraTokenRangeAwareDataIterator;
@@ -78,7 +79,8 @@ public class CassandraSpaceDataSource extends ClusterInfoAwareSpaceDataSource {
             int maximumNumberOfConnections,
             int batchLimit,
             String[] initialLoadQueryScanningBasePackages,
-            boolean augmentInitialLoadEntries) {
+            boolean augmentInitialLoadEntries,
+			ClusterInfo clusterInfo	) {
         
         if (hectorClient == null) {
             throw new IllegalArgumentException("hectorClient must be set and initiated");
@@ -119,6 +121,7 @@ public class CassandraSpaceDataSource extends ClusterInfoAwareSpaceDataSource {
                                                              dynamicPropertyValueSerializer);
         this.initialLoadQueryScanningBasePackages = initialLoadQueryScanningBasePackages;
         this.augmentInitialLoadEntries = augmentInitialLoadEntries;
+		this.clusterInfo = clusterInfo;
     }
 
     /**
@@ -267,28 +270,6 @@ public class CassandraSpaceDataSource extends ClusterInfoAwareSpaceDataSource {
         List<SpaceTypeDescriptor> result = TypeDescriptorUtils.sort(typeDescriptors);
 
         return new DataIteratorAdapter<SpaceTypeDescriptor>(result.iterator());
-    }
-
-    @Override
-    protected void obtainInitialLoadQueries() {
-        super.obtainInitialLoadQueries();
-        if (!augmentInitialLoadEntries) {
-            return;
-        }
-        if (initialLoadEntriesMap.isEmpty() || clusterInfo == null) {
-            return;
-        }
-        Integer num = clusterInfo.getNumberOfInstances(), instanceId = clusterInfo.getInstanceId();
-        if (num == null || instanceId == null) {
-            return;
-        }
-        String query = "? % " + num + " = " + instanceId;
-        for (Entry<String, SpaceTypeDescriptor> entry : initialLoadEntriesMap.entrySet()) {
-            String typeQuery = createInitialLoadQuery(entry.getValue(), query);
-            if (null != typeQuery) {
-                initialLoadQueries.put(entry.getKey(), typeQuery);
-            }
-        }
     }
 
     @Override
