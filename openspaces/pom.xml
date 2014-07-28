@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.gigaspaces</groupId>
     <artifactId>gs-openspaces</artifactId>
-    <version>10.1.0-12500-14-SNAPSHOT</version>
+    <version>10.1.0-12500-16-SNAPSHOT</version>
 
     <properties>
         <springVersion>3.2.4.RELEASE</springVersion>
