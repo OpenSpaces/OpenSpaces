@@ -1,0 +1,102 @@
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+       xmlns:os-events="http://www.openspaces.org/schema/events"
+       xmlns:os-core="http://www.openspaces.org/schema/core"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:spring="http://www.springframework.org/schema/beans"
+       xmlns:os-queue="http://www.openspaces.org/schema/mule/os-queue"
+       xmlns:os-seda="http://www.openspaces.org/schema/mule/os-seda"
+       xmlns:os-eventcontainer="http://www.openspaces.org/schema/mule/os-eventcontainer"
+       xsi:schemaLocation="http://www.openspaces.org/schema/core http://www.openspaces.org/schema/10.0/core/openspaces-core.xsd
+           http://www.openspaces.org/schema/events http://www.openspaces.org/schema/10.0/events/openspaces-events.xsd
+           http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+           http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/3.5/mule.xsd
+           http://www.openspaces.org/schema/mule/os-eventcontainer http://www.openspaces.org/schema/10.0/mule/3.5/mule-os-eventcontainer.xsd
+           http://www.openspaces.org/schema/mule/os-queue http://www.openspaces.org/schema/10.0/mule/3.5/mule-os-queue.xsd
+           http://www.openspaces.org/schema/mule/os-seda http://www.openspaces.org/schema/10.0/mule/3.5/mule-os-seda.xsd">
+
+    <spring:beans>
+        <!--
+            A bean representing a space (an IJSpace implementation).
+
+            Note, we do not specify here the cluster topology of the space. It is declated outside of
+            the processing unit or within the SLA bean.
+        -->
+        <os-core:space id="space" url="/./space"/>
+
+        <!--
+            OpenSpaces simplified space API built on top of IJSpace/JavaSpace.
+        -->
+        <os-core:giga-space id="gigaSpace" space="space"/>
+
+        <!--
+            A polling event container that perfoms (by default) polling take operations against
+            the space using the provided template (in our case, and the non processed data objects).
+            Once a match is found, the data processor bean event listener is triggered using the
+            annotation adapter.
+        -->
+        <os-events:polling-container id="dataProcessorPollingEventContainer" giga-space="gigaSpace">
+            <os-core:template>
+                <spring:bean class="${puGroupId}.common.Data">
+                    <spring:property name="processed" value="false"/>
+                </spring:bean>
+            </os-core:template>
+        </os-events:polling-container>
+        
+        <spring:bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+			<spring:property name="properties">
+				<spring:props>
+					<spring:prop key="verifiedGroupId">${puGroupId}.processor.Verifier</spring:prop>
+					<spring:prop key="approverGroupId">${puGroupId}.processor.Approver</spring:prop>
+					<spring:prop key="processorGroupId">${puGroupId}.processor.Processor</spring:prop>
+				</spring:props>
+			</spring:property>
+		</spring:bean>
+
+    </spring:beans>
+    
+    <os-eventcontainer:connector name="gigaSpacesConnector"/>
+    
+     <!-- this connector must be declared ,in order to inject the  Spring appliction context -->
+    <os-queue:connector name="queueConnector" giga-space="gigaSpace"/>
+
+    <os-seda:model name="ProcessingModel">
+
+        <os-seda:service name="Verifier">
+            <inbound>
+                <os-eventcontainer:inbound-endpoint address="os-eventcontainer://dataProcessorPollingEventContainer"/>
+            </inbound>
+            <component class="${verifiedGroupId}"/>
+            <outbound>
+                <pass-through-router>
+                    <os-queue:outbound-endpoint path="queue1"/>
+                </pass-through-router>
+            </outbound>
+        </os-seda:service>
+
+        <os-seda:service name="Approver">
+            <inbound>
+                <os-queue:inbound-endpoint path="queue1"/>
+            </inbound>
+            <component class="${approverGroupId}"/>
+            <outbound>
+                <pass-through-router>
+                    <os-queue:outbound-endpoint path="queue2"/>
+                </pass-through-router>
+            </outbound>
+        </os-seda:service>
+
+        <os-seda:service name="Processor">
+            <inbound>
+                <os-queue:inbound-endpoint path="queue2"/>
+            </inbound>
+            <component class="${processorGroupId}"/>
+            <outbound>
+                <pass-through-router>
+                    <os-eventcontainer:outbound-endpoint giga-space="gigaSpace"/>
+                </pass-through-router>
+            </outbound>
+        </os-seda:service>
+
+    </os-seda:model>
+    
+</mule>

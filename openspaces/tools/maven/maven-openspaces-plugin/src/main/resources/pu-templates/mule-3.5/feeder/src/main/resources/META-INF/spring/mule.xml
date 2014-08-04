@@ -1,0 +1,60 @@
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+       xmlns:os-events="http://www.openspaces.org/schema/events"
+       xmlns:os-core="http://www.openspaces.org/schema/core"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:spring="http://www.springframework.org/schema/beans"
+       xmlns:quartz="http://www.mulesoft.org/schema/mule/quartz"
+       xmlns:os-eventcontainer="http://www.openspaces.org/schema/mule/os-eventcontainer"
+       xsi:schemaLocation="http://www.openspaces.org/schema/core http://www.openspaces.org/schema/10.0/core/openspaces-core.xsd
+           http://www.openspaces.org/schema/events http://www.openspaces.org/schema/10.0/events/openspaces-events.xsd
+           http://www.mulesoft.org/schema/mule/quartz http://www.mulesoft.org/schema/mule/quartz/3.5/mule-quartz.xsd
+           http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+           http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/3.5/mule.xsd
+           http://www.openspaces.org/schema/mule/os-eventcontainer http://www.openspaces.org/schema/10.0/mule/3.5/mule-os-eventcontainer.xsd">
+
+    <spring:beans>
+    
+        <!--
+            A bean representing a space (an IJSpace implementation).
+
+            Note, we do not specify here the cluster topology of the space. It is declated outside of
+            the processing unit or within the SLA bean.
+        -->
+        <os-core:space id="space" url="jini://*/*/space"/>
+
+        <!--
+            OpenSpaces simplified space API built on top of IJSpace/JavaSpace.
+        -->
+        <os-core:giga-space id="gigaSpace" space="space"/>
+        
+        <spring:bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+			<spring:property name="properties">
+				<spring:props>
+					<spring:prop key="mGroupId">${puGroupId}.feeder.Feeder</spring:prop>
+				</spring:props>
+			</spring:property>
+		</spring:bean>
+		
+    </spring:beans>
+    
+    <os-eventcontainer:connector name="gigaSpacesConnector" />
+    
+    <model name="feeder">
+        <service name="DataFeederUMO">
+            <inbound>
+                <quartz:inbound-endpoint jobName="feedJob" repeatInterval="1000">
+                    <quartz:event-generator-job/>
+                </quartz:inbound-endpoint>
+            </inbound>
+
+            <component class="${mGroupId}"/>
+            
+            <outbound>
+                <pass-through-router>
+                    <os-eventcontainer:outbound-endpoint giga-space="gigaSpace"/>
+                </pass-through-router>
+            </outbound>
+        </service>
+    </model>
+    
+</mule>
