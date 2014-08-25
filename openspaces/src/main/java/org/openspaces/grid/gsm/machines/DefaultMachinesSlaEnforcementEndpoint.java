@@ -1482,6 +1482,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         logger.debug("Creating BinPackingSolver");
         final BinPackingSolver solver = new BinPackingSolver();
         solver.setLogger(logger);
+        solver.setAllowMoreThanAverageMemoryPerMachine(sla.isAllowAboveAverageMemoryPerMachine());
         solver.setContainerMemoryCapacityInMB(sla.getContainerMemoryCapacityInMB());
         solver.setUnallocatedCapacity(unallocatedCapacity);
         solver.setAllocatedCapacityForPu(getAllocatedCapacity(sla));

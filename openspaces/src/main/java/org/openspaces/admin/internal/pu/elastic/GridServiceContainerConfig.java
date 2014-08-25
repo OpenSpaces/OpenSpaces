@@ -43,9 +43,9 @@ public class GridServiceContainerConfig {
     private static final String MAXIMUM_MEMORY_CAPACITY_MEGABYTES_KEY = "container.memory-capacity";
     private static final Long MAXIMUM_MEMORY_CAPACITY_MEGABYTES_DEFAULT = 0L;
     private static final String RESTART_ON_EXIT_KEY = "restart-on-exit";
-    
+
     StringProperties properties;
-        
+
     public GridServiceContainerConfig(Map<String,String> properties) {
         this.properties = new StringProperties(properties);
     }
@@ -149,7 +149,7 @@ public class GridServiceContainerConfig {
     public void setMaximumMemoryCapacityInMB(long memoryInMB) {
         properties.putLong(MAXIMUM_MEMORY_CAPACITY_MEGABYTES_KEY, memoryInMB);
     }
-    
+
     /**
      * @return the com.gs.zones value if available or null if not found.
      */

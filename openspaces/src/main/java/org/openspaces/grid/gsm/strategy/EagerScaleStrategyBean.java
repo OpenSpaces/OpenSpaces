@@ -157,7 +157,8 @@ public class EagerScaleStrategyBean extends AbstractScaleStrategyBean
     }
 
     private EagerMachinesSlaPolicy getMachinesSlaPolicy() {
-        final EagerMachinesSlaPolicy sla = new EagerMachinesSlaPolicy();      
+        final EagerMachinesSlaPolicy sla = new EagerMachinesSlaPolicy();
+        sla.setAllowAboveAverageMemoryPerMachine(getConfig().isAllowAboveAverageMemoryPerMachine());
         sla.setMaximumNumberOfMachines(getMaximumNumberOfInstances());
         sla.setMinimumNumberOfMachines(getMinimumNumberOfMachines());
         sla.setMaximumNumberOfContainersPerMachine(getMaximumNumberOfContainersPerMachine());

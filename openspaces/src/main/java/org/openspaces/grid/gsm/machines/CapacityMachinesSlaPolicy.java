@@ -64,4 +64,23 @@ public class CapacityMachinesSlaPolicy extends AbstractMachinesSlaPolicy {
         	throw new IllegalArgumentException("disabledAgentFailureDetectionIpAddresses cannot be null");
         }
     }
+
+    @Override
+    public String toString() {
+        return "AbstractMachinesSlaPolicy{" +
+                "maxNumberOfMachines=" + getMaximumNumberOfMachines() +
+                ", minimumNumberOfMachines=" + getMinimumNumberOfMachines() +
+                ", containerMemoryCapacityInMB=" + getContainerMemoryCapacityInMB() +
+                ", machineProvisioning=" + getMachineProvisioning() +
+                ", machineIsolation=" + getMachineIsolation() +
+                ", maxNumberOfContainersPerMachine=" + getMaximumNumberOfContainersPerMachine() +
+                ", machinesCache=" + getDiscoveredMachinesCache() +
+                ", zones=" + getGridServiceAgentZones() +
+                ", allowAboveAverageMemoryPerMachine=" + isAllowAboveAverageMemoryPerMachine() +
+                ", capacityRequirements=" + capacityRequirements +
+                ", agentFailureDetectionConfig=" + agentFailureDetectionConfig +
+                '}';
+    }
+
+
 }

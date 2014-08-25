@@ -55,7 +55,18 @@ public interface ScaleStrategyConfig extends BeanConfig , Externalizable {
      * @since 8.0.3
      */
     void setAtMostOneContainerPerMachine(boolean atMostOneContainerPerMachine);
-    
+
+    /**
+     * Allows a single machine to accommodate for more than the average maximum memory allocation of a Processing Unit.
+     * The average is calculated like so : (memoryCapacityPerContainer * totalNumberOfProcessingUnitInstances) / minimumNumberOfMachines
+     * <p/>
+     *
+     * @since 9.7.0
+     */
+    public void setAllowAboveAverageMemoryPerMachine(boolean allowAboveAverageMemoryPerMachine);
+
+    public boolean isAllowAboveAverageMemoryPerMachine();
+
     boolean isAtMostOneContainerPerMachine();
     
     boolean equals(Object other);

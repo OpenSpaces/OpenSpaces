@@ -37,7 +37,9 @@ public class ScaleStrategyConfigUtils {
     private static final String AT_MOST_ONE_CONTAINER_PER_MACHINE_KEY = "at-most-one-container-per-machine";
     private static final String ENABLE_AGENT_ZONES_AWARE_KEY = "enable-agent-zones-aware";
     private static final boolean ENABLE_AGENT_ZONES_AWARE_DEFAULT = false;
-    
+    private static final String ALLOW_ABOVE_AVERAGE_MEMORY_PER_MACHINE = "allow-above-average-memory-per-machine";
+    private static final boolean ALLOW_ABOVE_AVERAGE_MEMORY_PER_MACHINE_DEFAULT = false;
+
     public static void setMaxNumberOfContainersPerMachine(
             StringProperties properties,
             int maxNumberOfContainersPerMachine) {
@@ -112,7 +114,15 @@ public class ScaleStrategyConfigUtils {
     public static void setAtMostOneContainerPerMachine(StringProperties properties, boolean isSingleContainersPerMachine) {
         properties.putBoolean(AT_MOST_ONE_CONTAINER_PER_MACHINE_KEY,isSingleContainersPerMachine);
     }
-    
+
+    public static void setAllowAboveAverageMemoryPerMachine(StringProperties properties, boolean isAllowAboveAverageMemoryPerMachine) {
+        properties.putBoolean(ALLOW_ABOVE_AVERAGE_MEMORY_PER_MACHINE, isAllowAboveAverageMemoryPerMachine);
+    }
+
+    public static boolean isAllowAboveAverageMemoryPerMachine(StringProperties properties) {
+        return properties.getBoolean(ALLOW_ABOVE_AVERAGE_MEMORY_PER_MACHINE, ALLOW_ABOVE_AVERAGE_MEMORY_PER_MACHINE_DEFAULT);
+    }
+
     public static boolean isSingleContainerPerMachine(StringProperties properties) {
         return properties.getBoolean(AT_MOST_ONE_CONTAINER_PER_MACHINE_KEY,AT_MOST_ONE_CONTAINER_PER_MACHINE_DEFAULT);
     }

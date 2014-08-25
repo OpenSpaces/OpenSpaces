@@ -54,6 +54,12 @@ public class AutomaticCapacityScaleConfigurer implements ScaleStrategyConfigurer
     }
 
     @Override
+    public AutomaticCapacityScaleConfigurer allowAboveAverageMemoryPerMachine(boolean allowAboveAverageMemoryPerMachine) {
+        config.setAllowAboveAverageMemoryPerMachine(allowAboveAverageMemoryPerMachine);
+        return this;
+    }
+
+    @Override
     public AutomaticCapacityScaleConfigurer pollingInterval(long pollingInterval, TimeUnit timeUnit) {
         config.setPollingIntervalSeconds((int) timeUnit.toSeconds(pollingInterval));
         return this;

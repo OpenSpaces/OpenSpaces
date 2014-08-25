@@ -60,6 +60,12 @@ public class ManualCapacityPerZonesScaleConfigurer implements ScaleStrategyConfi
     }
 
     @Override
+    public ManualCapacityPerZonesScaleConfigurer allowAboveAverageMemoryPerMachine(boolean allowAboveAverageMemoryPerMachine) {
+        config.setAllowAboveAverageMemoryPerMachine(allowAboveAverageMemoryPerMachine);
+        return this;
+    }
+
+    @Override
     public ManualCapacityPerZonesScaleConfigurer pollingInterval(long pollingInterval, TimeUnit timeUnit) {
         config.setPollingIntervalSeconds((int)timeUnit.toSeconds(pollingInterval));
         return this;

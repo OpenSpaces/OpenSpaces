@@ -93,6 +93,12 @@ public class ManualCapacityScaleConfigurer implements ScaleStrategyConfigurer<Ma
     }
 
     @Override
+    public ManualCapacityScaleConfigurer allowAboveAverageMemoryPerMachine(boolean allowAboveAverageMemoryPerMachine) {
+        config.setAllowAboveAverageMemoryPerMachine(allowAboveAverageMemoryPerMachine);
+        return this;
+    }
+
+    @Override
     public ManualCapacityScaleConfigurer pollingInterval(long pollingInterval, TimeUnit timeUnit) {
         config.setPollingIntervalSeconds((int)timeUnit.toSeconds(pollingInterval));
         return this;

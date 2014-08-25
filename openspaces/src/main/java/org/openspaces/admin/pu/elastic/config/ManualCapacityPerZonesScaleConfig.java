@@ -78,7 +78,17 @@ public class ManualCapacityPerZonesScaleConfig implements ScaleStrategyConfig , 
     public void setMaxConcurrentRelocationsPerMachine(int maxNumberOfConcurrentRelocationsPerMachine) {
         ScaleStrategyConfigUtils.setMaxConcurrentRelocationsPerMachine(properties, maxNumberOfConcurrentRelocationsPerMachine);
     }
-    
+
+    @Override
+    public void setAllowAboveAverageMemoryPerMachine(boolean allowAboveAverageMemoryPerMachine) {
+        ScaleStrategyConfigUtils.setAllowAboveAverageMemoryPerMachine(properties, allowAboveAverageMemoryPerMachine);
+    }
+
+    @Override
+    public boolean isAllowAboveAverageMemoryPerMachine() {
+        return ScaleStrategyConfigUtils.isAllowAboveAverageMemoryPerMachine(properties);
+    }
+
     @Override
     public boolean isAtMostOneContainerPerMachine() {
         return ScaleStrategyConfigUtils.isSingleContainerPerMachine(properties);

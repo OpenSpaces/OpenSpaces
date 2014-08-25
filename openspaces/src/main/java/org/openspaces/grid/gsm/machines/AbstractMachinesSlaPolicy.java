@@ -34,6 +34,7 @@ public abstract class AbstractMachinesSlaPolicy extends ServiceLevelAgreementPol
     private int maxNumberOfContainersPerMachine;
     private DiscoveredMachinesCache machinesCache;
     private ZonesConfig zones;
+    private boolean allowAboveAverageMemoryPerMachine;
 
     public ZonesConfig getGridServiceAgentZones() {
         return zones;
@@ -157,4 +158,12 @@ public abstract class AbstractMachinesSlaPolicy extends ServiceLevelAgreementPol
     public abstract boolean isStopMachineSupported();
 
     public abstract String getScaleStrategyName();
+
+    public boolean isAllowAboveAverageMemoryPerMachine() {
+        return allowAboveAverageMemoryPerMachine;
+    }
+
+    public void setAllowAboveAverageMemoryPerMachine(boolean allowAboveAverageMemoryPerMachine) {
+        this.allowAboveAverageMemoryPerMachine = allowAboveAverageMemoryPerMachine;
+    }
 }

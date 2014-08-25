@@ -37,4 +37,10 @@ public interface ScaleStrategyConfigurer<T extends ScaleStrategyConfig> extends 
      * @see ScaleStrategyConfig#setAtMostOneContainerPerMachine(boolean)
      */
     ScaleStrategyConfigurer<T> atMostOneContainerPerMachine();
+
+    /**
+     * @see ScaleStrategyConfig#setAllowAboveAverageMemoryPerMachine(boolean)
+     */
+    ScaleStrategyConfigurer<T> allowAboveAverageMemoryPerMachine(boolean allowAboveAverageMemoryPerMachine);
+
 }

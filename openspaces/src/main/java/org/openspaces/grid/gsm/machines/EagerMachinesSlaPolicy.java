@@ -29,4 +29,21 @@ public class EagerMachinesSlaPolicy extends AbstractMachinesSlaPolicy {
     public String getScaleStrategyName() {
         return "Eager Scale Strategy";
     }
+
+
+    @Override
+    public String toString() {
+        return "AbstractMachinesSlaPolicy{" +
+                "maxNumberOfMachines=" + getMaximumNumberOfMachines() +
+                ", minimumNumberOfMachines=" + getMinimumNumberOfMachines() +
+                ", containerMemoryCapacityInMB=" + getContainerMemoryCapacityInMB() +
+                ", machineProvisioning=" + getMachineProvisioning() +
+                ", machineIsolation=" + getMachineIsolation() +
+                ", maxNumberOfContainersPerMachine=" + getMaximumNumberOfContainersPerMachine() +
+                ", machinesCache=" + getDiscoveredMachinesCache() +
+                ", zones=" + getGridServiceAgentZones() +
+                ", allowAboveAverageMemoryPerMachine=" + isAllowAboveAverageMemoryPerMachine() +
+                '}';
+    }
+
 }

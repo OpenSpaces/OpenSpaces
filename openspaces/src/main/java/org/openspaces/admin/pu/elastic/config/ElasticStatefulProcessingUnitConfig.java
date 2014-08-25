@@ -43,6 +43,7 @@ public class ElasticStatefulProcessingUnitConfig
     private double maxNumberOfCpuCores;
     private double minNumberOfCpuCoresPerMachine;
     private Admin admin;
+    private boolean allowAboveAverageMemoryPerMachine;
 
     public ElasticStatefulProcessingUnitConfig() {
         super();
@@ -184,6 +185,14 @@ public class ElasticStatefulProcessingUnitConfig
     @Deprecated
     public void setMinNumberOfCpuCoresPerMachine(double minNumberOfCpuCoresPerMachine) {
         this.minNumberOfCpuCoresPerMachine = minNumberOfCpuCoresPerMachine;
+    }
+
+    public boolean isAllowAboveAverageMemoryPerMachine() {
+        return allowAboveAverageMemoryPerMachine;
+    }
+
+    public void setAllowAboveAverageMemoryPerMachine(boolean allowAboveAverageMemoryPerMachine) {
+        this.allowAboveAverageMemoryPerMachine = allowAboveAverageMemoryPerMachine;
     }
 
     @Override

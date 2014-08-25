@@ -69,6 +69,16 @@ public class EagerScaleConfig
         ScaleStrategyConfigUtils.setMaxConcurrentRelocationsPerMachine(properties, maxNumberOfConcurrentRelocationsPerMachine);
     }
 
+    @Override
+    public void setAllowAboveAverageMemoryPerMachine(boolean allowAboveAverageMemoryPerMachine) {
+        ScaleStrategyConfigUtils.setAllowAboveAverageMemoryPerMachine(properties, allowAboveAverageMemoryPerMachine);
+    }
+
+    @Override
+    public boolean isAllowAboveAverageMemoryPerMachine() {
+        return ScaleStrategyConfigUtils.isAllowAboveAverageMemoryPerMachine(properties);
+    }
+
     /*
      * @see EagerScaleConfig#isAtMostOneContainerPerMachine()
      */

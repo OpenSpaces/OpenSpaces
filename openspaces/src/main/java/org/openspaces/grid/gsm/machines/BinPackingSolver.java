@@ -17,16 +17,11 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.machines;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import org.apache.commons.logging.Log;
+
+import java.util.*;
 import java.util.Map.Entry;
 
-import org.apache.commons.logging.Log;
 import org.openspaces.grid.gsm.capacity.CapacityRequirement;
 import org.openspaces.grid.gsm.capacity.CapacityRequirementType;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
@@ -52,6 +47,7 @@ public class BinPackingSolver {
     private int minimumNumberOfMachines;
     private HashMap<String, Long> agentPriority;
     private long maxMemoryCapacityPerMachineInMB;
+    private boolean allowMoreThanAverageMemoryPerMachine = false;
 
     public BinPackingSolver() {
         debugTrace ="";
@@ -59,7 +55,15 @@ public class BinPackingSolver {
         allocatedCapacityResult = new CapacityRequirementsPerAgent();
         deallocatedCapacityResult = new CapacityRequirementsPerAgent();
     }
-    
+
+    public boolean isAllowMoreThanAverageMemoryPerMachine() {
+        return allowMoreThanAverageMemoryPerMachine;
+    }
+
+    public void setAllowMoreThanAverageMemoryPerMachine(boolean allowMoreThanAverageMemoryPerMachine) {
+        this.allowMoreThanAverageMemoryPerMachine = allowMoreThanAverageMemoryPerMachine;
+    }
+
     /**
      * Used for high availability purposes to calculate maximum cpu and memory per machine.
      * For example if min number of machines is 2, then max memory per machine is half of the total memory
@@ -756,13 +760,15 @@ public class BinPackingSolver {
     }
 
     private long getMaxMemoryPerMachine(long additionalMemoryToAllocate) {
+
         long totalMemory = getMemoryInMB(allocatedCapacityForPu)+additionalMemoryToAllocate;
+
+        long memoryToConsider = (long) Math.ceil(totalMemory/(1.0*minimumNumberOfMachines)); // half of total memory
+        if (allowMoreThanAverageMemoryPerMachine) {
+            memoryToConsider = totalMemory;
+        }
         
-        long halfOfTotalMemory = (long) Math.ceil(totalMemory/(1.0*minimumNumberOfMachines));
-        
-        return Math.max(containerMemoryCapacityInMB, 
-                Math.min(halfOfTotalMemory,
-                         maxMemoryCapacityPerMachineInMB));
+        return Math.max(containerMemoryCapacityInMB, Math.min(memoryToConsider, maxMemoryCapacityPerMachineInMB));
     }
 
 
@@ -1357,5 +1363,21 @@ public class BinPackingSolver {
     private long getMemoryInMB(CapacityRequirements capacity) {
         return capacity.getRequirement(new MemoryCapacityRequirement().getType()).getMemoryInMB();
     }
-    
+
+    @Override
+    public String toString() {
+        return "BinPackingSolver{" +
+                "containerMemoryCapacityInMB=" + containerMemoryCapacityInMB +
+                ", unallocatedCapacity=" + unallocatedCapacity +
+                ", allocatedCapacityForPu=" + allocatedCapacityForPu +
+                ", allocatedCapacityResult=" + allocatedCapacityResult +
+                ", deallocatedCapacityResult=" + deallocatedCapacityResult +
+                ", debugTrace='" + debugTrace + '\'' +
+                ", maxMemoryCapacityInMB=" + maxMemoryCapacityInMB +
+                ", minimumNumberOfMachines=" + minimumNumberOfMachines +
+                ", agentPriority=" + agentPriority +
+                ", maxMemoryCapacityPerMachineInMB=" + maxMemoryCapacityPerMachineInMB +
+                ", allowMoreThanAverageMemoryPerMachine=" + allowMoreThanAverageMemoryPerMachine +
+                '}';
+    }
 }

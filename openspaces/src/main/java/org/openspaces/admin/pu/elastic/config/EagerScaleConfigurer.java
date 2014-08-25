@@ -59,6 +59,12 @@ public class EagerScaleConfigurer implements ScaleStrategyConfigurer<EagerScaleC
     }
 
     @Override
+    public EagerScaleConfigurer allowAboveAverageMemoryPerMachine(boolean allowAboveAverageMemoryPerMachine) {
+        config.setAllowAboveAverageMemoryPerMachine(allowAboveAverageMemoryPerMachine);
+        return this;
+    }
+
+    @Override
     public EagerScaleConfigurer pollingInterval(long pollingInterval, TimeUnit timeUnit) {
         config.setPollingIntervalSeconds((int) timeUnit.toSeconds(pollingInterval));
         return this;

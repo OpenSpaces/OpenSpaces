@@ -119,6 +119,16 @@ public class ManualCapacityScaleConfig
     }
 
     @Override
+    public void setAllowAboveAverageMemoryPerMachine(boolean allowAboveAverageMemoryPerMachine) {
+        ScaleStrategyConfigUtils.setAllowAboveAverageMemoryPerMachine(properties, allowAboveAverageMemoryPerMachine);
+    }
+
+    @Override
+    public boolean isAllowAboveAverageMemoryPerMachine() {
+        return ScaleStrategyConfigUtils.isAllowAboveAverageMemoryPerMachine(properties);
+    }
+
+    @Override
     public Map<String,String> getProperties() {
         return properties.getProperties();
     }
