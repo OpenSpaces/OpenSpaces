@@ -17,25 +17,7 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.rebalancing;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
+import com.gigaspaces.cluster.activeelection.SpaceMode;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -61,7 +43,14 @@ import org.openspaces.grid.gsm.rebalancing.exceptions.RemovedContainerProcessing
 import org.openspaces.grid.gsm.rebalancing.exceptions.SpaceRecoveryAfterRelocationException;
 import org.openspaces.grid.gsm.rebalancing.exceptions.WrongContainerProcessingUnitRelocationException;
 
-import com.gigaspaces.cluster.activeelection.SpaceMode;
+import java.io.File;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Logger;
 
 public class RebalancingUtils {
 
@@ -265,7 +254,6 @@ public class RebalancingUtils {
         final GridServiceContainer[] replicationSourceContainers = getReplicationSourceContainers(puInstance); 
         final int instanceId = puInstance.getInstanceId();
 
-        final CountDownLatch relocateInProgress = new CountDownLatch(1);
         final AtomicReference<Throwable> relocateThrowable = new AtomicReference<Throwable>();
 
         final Admin admin = puInstance.getAdmin();
@@ -305,181 +293,165 @@ public class RebalancingUtils {
                     logger.error("Unexpected exception " + e.getMessage(),e);
                     relocateThrowable.set(e);
                 }
-                finally {
-                    relocateInProgress.countDown();
-                }
             }
         });
 
-        FutureStatefulProcessingUnitInstance future = new FutureStatefulProcessingUnitInstance() {
+       return new FutureStatefulProcessingUnitInstance() {
 
-            Throwable throwable;
-            ProcessingUnitInstance newInstance;
-            
-            public boolean isTimedOut() {
-                return System.currentTimeMillis() > end;
-            }
+           Throwable throwable;
+           ProcessingUnitInstance newInstance;
 
-            public boolean isDone() {
-                
-                endRelocation();
-                
-                return isTimedOut() ||
-                       throwable != null || 
-                       newInstance != null;
-            }
-            
-            public ProcessingUnitInstance get() throws ExecutionException, IllegalStateException, TimeoutException {
+           public boolean isTimedOut() {
+               return System.currentTimeMillis() > end;
+           }
 
-                endRelocation();
-                
-                if (getException() != null) {
-                    throw getException();
-                }
-                if (newInstance == null) {
-                    if (isTimedOut()) {
-                        throw new TimeoutException("Relocation timeout");
-                    }
-                    throw new IllegalStateException("Async operation is not done yet.");
-                }
-                
-                return newInstance;
-            }
-            
-            public Date getTimestamp() {
-                return new Date(start);
-            }
+           public boolean isDone() {
 
-            public ExecutionException getException() {
+               endRelocation();
 
-                endRelocation();
-                if (throwable != null) {
-                    return new ExecutionException(throwable.getMessage(), throwable);
-                }
-                return null;
-            }
+               return isTimedOut() ||
+                      throwable != null ||
+                      newInstance != null;
+           }
 
-            /**
-             * populates this.exception or this.newInstance if relocation is complete
-             */
-            private void endRelocation() {
-                boolean inProgress = true;
-                try {
-                    inProgress = !relocateInProgress.await(0L,TimeUnit.SECONDS);
-                }
-                catch (InterruptedException e) {
-                    Thread.interrupted();
-                }
-                
-                if (inProgress) {
-                    // do nothing. relocate() method running on another thread has not returned yet.
-                }
-                else if (throwable != null || newInstance != null) {
-                    //do nothing. idempotent method
-                }
-                else if (relocateThrowable.get() != null) {
-                    throwable = relocateThrowable.get();
-                }
-                
-                else if (!targetContainer.isDiscovered()) {
-                    throwable = new RemovedContainerProcessingUnitDeploymentException(puInstance,targetContainer);
-                } 
-                else if (pu.getNumberOfBackups() > 0 && !isAtLeastOneInstanceValid(puInstancesFromSamePartition)) {
-                        throwable = new SpaceRecoveryAfterRelocationException(puInstance, puInstancesFromSamePartition);
-                } 
-                else {
-                    
-                    ProcessingUnitInstance relocatedInstance = getRelocatedProcessingUnitInstance();
-                    if (relocatedInstance != null) {
-                        
-                        if (relocatedInstance.getGridServiceContainer().equals(targetContainer)) {
-                            if (relocatedInstance.getSpaceInstance() != null &&
-                                relocatedInstance.getSpaceInstance().getMode() != SpaceMode.NONE) {
+           public ProcessingUnitInstance get() throws ExecutionException, IllegalStateException, TimeoutException {
+
+               endRelocation();
+
+               ExecutionException exception = getException();
+               if (exception != null) {
+                   throw exception;
+               }
+               if (newInstance == null) {
+                   if (isTimedOut()) {
+                       throw new TimeoutException("Relocation timeout");
+                   }
+                   throw new IllegalStateException("Async operation is not done yet.");
+               }
+
+               return newInstance;
+           }
+
+           public Date getTimestamp() {
+               return new Date(start);
+           }
+
+           public ExecutionException getException() {
+
+               endRelocation();
+               if (throwable != null) {
+                   return new ExecutionException(throwable.getMessage(), throwable);
+               }
+               return null;
+           }
+
+           /**
+            * populates this.exception or this.newInstance if relocation is complete
+            */
+           private void endRelocation() {
+               boolean inProgress = true;
+
+               tryStateChange(); // this makes relocation synchronous
+               if (newInstance != null || throwable != null) {
+                   inProgress = false;
+               }
+
+
+               if (inProgress) {
+                   if (logger.isDebugEnabled()) {
+                       logger.debug("Relocation from " + ContainersSlaUtils.gscToString(getSourceContainer())
+                           + " to " + ContainersSlaUtils.gscToString(getTargetContainer()) + " is in progress.");
+                   }
+                   // do nothing. relocate() method running on another thread has not returned yet.
+               }
+           }
+
+           private void tryStateChange() {
+               ProcessingUnitInstance relocatedInstance = getRelocatedProcessingUnitInstance();
+               if (relocatedInstance != null) {
+
+                   if (relocatedInstance.getGridServiceContainer().equals(targetContainer)) {
+                       if (relocatedInstance.getSpaceInstance() != null &&
+                           relocatedInstance.getSpaceInstance().getMode() != SpaceMode.NONE) {
                            if (logger.isDebugEnabled()) {
                                logger.debug("Relocation from " + ContainersSlaUtils.gscToString(getSourceContainer())
                                        + " to " + ContainersSlaUtils.gscToString(getTargetContainer()) + " had ended successfully.");
                            }
-                                newInstance = relocatedInstance;
-                            }
-                        }
-                        else  { 
+                           newInstance = relocatedInstance;
+                       }
+                   }
+                   else  {
                        if (logger.isDebugEnabled()) {
                            logger.debug("Relocation from " + ContainersSlaUtils.gscToString(getSourceContainer())
                                    + " to " + ContainersSlaUtils.gscToString(getTargetContainer()) + " has ended with an error.");
                        }
-                            throwable = new WrongContainerProcessingUnitRelocationException(puInstance,targetContainer);
-                                         
-                        }
-                    }
-                    else {
-                        // do nothing. No state change means operation is not done yet.
-                    }
-                }
-            }
+                       throwable = new WrongContainerProcessingUnitRelocationException(puInstance,targetContainer);
 
-            private ProcessingUnitInstance getRelocatedProcessingUnitInstance() {
-                for (GridServiceContainer container : admin.getGridServiceContainers()) {
-                    for (ProcessingUnitInstance instance : container.getProcessingUnitInstances(puName)) {
-                        if (!instance.equals(puInstance) &&
-                            instance.getClusterInfo().getRunningNumber() == runningNumber &&
-                            !puInstancesFromSamePartition.contains(instance)) {
-                            return instance;
-                        }
-                    }
-                }
-                return null;
-            }
-
-            private boolean isAtLeastOneInstanceValid(Set<ProcessingUnitInstance> instances) {
-                boolean isValidState = false;
-                for (ProcessingUnitInstance instance : instances) {
-                    if (instance.isDiscovered() && instance.getGridServiceContainer().isDiscovered()) {
-                        isValidState = true;
-                        break;
-                    }
-                }
-                return isValidState;
-            }
-
-           
-            public String getFailureMessage() {
-               if (isTimedOut()) {
-                return "relocation timeout of processing unit instance " + instanceId + " from " + 
-                        gscToString(sourceContainer) + " to " + 
-                        gscToString(targetContainer);
+                   }
                }
-               
-               if (getException() != null) {
-                   return getException().getMessage();
+           }
+
+           private ProcessingUnitInstance getRelocatedProcessingUnitInstance() {
+               for (GridServiceContainer container : admin.getGridServiceContainers()) {
+                   for (ProcessingUnitInstance instance : container.getProcessingUnitInstances(puName)) {
+                       if (!instance.equals(puInstance) &&
+                           instance.getClusterInfo().getRunningNumber() == runningNumber &&
+                           !puInstancesFromSamePartition.contains(instance)) {
+                           return instance;
+                       }
+                   }
                }
-               
-               throw new IllegalStateException("Relocation has not encountered any failure.");
-               
-            }
+               return null;
+           }
 
-            public GridServiceContainer getTargetContainer() {
-                return targetContainer;
-            }
+           private boolean isAtLeastOneInstanceValid(Set<ProcessingUnitInstance> instances) {
+               boolean isValidState = false;
+               for (ProcessingUnitInstance instance : instances) {
+                   if (instance.isDiscovered() && instance.getGridServiceContainer().isDiscovered()) {
+                       isValidState = true;
+                       break;
+                   }
+               }
+               return isValidState;
+           }
 
-            public ProcessingUnit getProcessingUnit() {
-                return pu;
-            }
 
-            public int getInstanceId() {
-                return instanceId;
-            }
+           public String getFailureMessage() {
+              if (isTimedOut()) {
+               return "relocation timeout of processing unit instance " + instanceId + " from " +
+                       gscToString(sourceContainer) + " to " +
+                       gscToString(targetContainer);
+              }
 
-            public GridServiceContainer getSourceContainer() {
-                return sourceContainer;
-            }
+              if (getException() != null) {
+                  return getException().getMessage();
+              }
 
-            public GridServiceContainer[] getReplicaitonSourceContainers() {
-                return replicationSourceContainers;
-            }
+              throw new IllegalStateException("Relocation has not encountered any failure.");
 
-        };
+           }
 
-        return future;
+           public GridServiceContainer getTargetContainer() {
+               return targetContainer;
+           }
+
+           public ProcessingUnit getProcessingUnit() {
+               return pu;
+           }
+
+           public int getInstanceId() {
+               return instanceId;
+           }
+
+           public GridServiceContainer getSourceContainer() {
+               return sourceContainer;
+           }
+
+           public GridServiceContainer[] getReplicaitonSourceContainers() {
+               return replicationSourceContainers;
+           }
+
+       };
     }
 
    /**
@@ -862,8 +834,7 @@ public class RebalancingUtils {
         
         int min = 0;
         if (Arrays.asList(approvedContainers).contains(container)) {
-            min = (int) Math.floor(
-                    getAverageNumberOfInstancesPerContainer(approvedContainers, pu));
+            min = (int) Math.floor(getAverageNumberOfInstancesPerContainer(approvedContainers, pu));
         }
         return min;
     }

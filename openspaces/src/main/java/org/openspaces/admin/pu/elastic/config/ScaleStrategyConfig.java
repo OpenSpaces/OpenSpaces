@@ -17,9 +17,9 @@
  ******************************************************************************/
 package org.openspaces.admin.pu.elastic.config;
 
-import java.io.Externalizable;
-
 import org.openspaces.admin.bean.BeanConfig;
+
+import java.io.Externalizable;
 
 public interface ScaleStrategyConfig extends BeanConfig , Externalizable {
 
@@ -66,6 +66,17 @@ public interface ScaleStrategyConfig extends BeanConfig , Externalizable {
     public void setAllowAboveAverageMemoryPerMachine(boolean allowAboveAverageMemoryPerMachine);
 
     public boolean isAllowAboveAverageMemoryPerMachine();
+
+    /**
+     * Limits the number of concurrent relocations for the entire cluster to 1.
+     * Notice this is an aggregated property across all machines.
+     *
+     * @see ScaleStrategyConfig#setMaxConcurrentRelocationsPerMachine(int)
+     * @since 9.7.0
+     */
+    void setAtMostOneConcurrentRelocation(boolean atMostOneConcurrentRelocation);
+
+    public boolean isAtMostOneConcurrentRelocation();
 
     boolean isAtMostOneContainerPerMachine();
     

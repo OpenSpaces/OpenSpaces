@@ -130,17 +130,18 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
         markForDeallocationContainersOnMachineWithAllocatedCapacityShortage(sla);
         startContainersOnMachineWithAllocatedCapacitySurplus(sla);
 
-        if (!state.getContainersMarkedForDeallocation(pu).isEmpty()) {
-            throw new ContainersSlaEnforcementPendingProcessingUnitDeallocationException(getProcessingUnit(), state.getContainersMarkedForDeallocation(pu)); 
-        }
-        
-        if (state.getNumberOfContainersMarkedForShutdown(pu) > 0) {
-            throw new ContainersSlaEnforcementInProgressException(pu, state.getNumberOfContainersMarkedForShutdown(pu) + " containers are pending shutdown.");
-        }
-        
         if (state.getNumberOfFutureContainers(pu) > 0) {
+            // this will cause the rebalancing enforcement to not be invoked
+            // this is good since we don't to relocate instances to existing containers if containers are still starting.
+            // because for the most part, new containers are always a better choice for re-allocation.
             throw new ContainersSlaEnforcementInProgressException(pu, "Containers still being started.");
         }
+
+        if (!state.getContainersMarkedForDeallocation(pu).isEmpty()) {
+            throw new ContainersSlaEnforcementPendingProcessingUnitDeallocationException(getProcessingUnit(), state.getContainersMarkedForDeallocation(pu));
+        }
+
+
     }
 
     private void markForDeallocationContainersOnUnallocatedMachines(final ContainersSlaPolicy sla) {
@@ -355,12 +356,16 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
             boolean isContainerDiscovered = container.isDiscovered();
             
             if (!isContainerDiscovered) {
+                logger.debug("Container " + ContainersSlaUtils.gscToString(container) + " has shutdown. Un-marking it from containers marked for shutdown list.");
                 // container kill completed
                 state.unmarkForShutdownContainer(pu, container);
             }
             else if (container.getProcessingUnitInstances().length > 0) {
                 // cannot kill container since it still has pu instances on it.
-                logger.debug("Processing unit instances in container " + ContainersSlaUtils.gscToString(container) + " are still running.");
+                logger.debug("Cannot kill container " + ContainersSlaUtils.gscToString(container)
+                        + " since there are still processing unit instances running."
+                        + " An instance of this container may be awaiting relocation until more gsc's are available. current running gsc's are : "
+                        + ContainersSlaUtils.gscsToString(getProcessingUnit().getAdmin().getGridServiceContainers().getContainers()) );
             }
             else {
                 // kill container

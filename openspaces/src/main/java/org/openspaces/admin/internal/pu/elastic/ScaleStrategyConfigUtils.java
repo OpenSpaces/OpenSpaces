@@ -39,6 +39,7 @@ public class ScaleStrategyConfigUtils {
     private static final boolean ENABLE_AGENT_ZONES_AWARE_DEFAULT = false;
     private static final String ALLOW_ABOVE_AVERAGE_MEMORY_PER_MACHINE = "allow-above-average-memory-per-machine";
     private static final boolean ALLOW_ABOVE_AVERAGE_MEMORY_PER_MACHINE_DEFAULT = false;
+    private static final String AT_MOST_CONCURRENT_RELOCATION = "at-most-one-concurrent-relocation";
 
     public static void setMaxNumberOfContainersPerMachine(
             StringProperties properties,
@@ -135,4 +136,11 @@ public class ScaleStrategyConfigUtils {
         properties.putBoolean(ENABLE_AGENT_ZONES_AWARE_KEY,enableAgentZonesAware);
     }
 
+    public static void setAtMostOneConcurrentRelocation(StringProperties properties, boolean atMostOneConcurrentRelocation) {
+        properties.putBoolean(AT_MOST_CONCURRENT_RELOCATION, atMostOneConcurrentRelocation);
+    }
+
+    public static boolean isAtMostOneConcurrentRelocation(StringProperties properties) {
+        return properties.getBoolean(AT_MOST_CONCURRENT_RELOCATION, false);
+    }
 }

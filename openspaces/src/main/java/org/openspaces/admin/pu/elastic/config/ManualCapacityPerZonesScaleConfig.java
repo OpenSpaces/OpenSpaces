@@ -58,6 +58,15 @@ public class ManualCapacityPerZonesScaleConfig implements ScaleStrategyConfig , 
         capacityPerZone.addCapacity(zones, capacity);
     }
 
+    @Override
+    public void setAtMostOneConcurrentRelocation(boolean atMostOneConcurrentRelocation) {
+        ScaleStrategyConfigUtils.setAtMostOneConcurrentRelocation(properties, atMostOneConcurrentRelocation);
+    }
+
+    @Override
+    public boolean isAtMostOneConcurrentRelocation() {
+        return ScaleStrategyConfigUtils.isAtMostOneConcurrentRelocation(properties);
+    }
 
     @Override
     public void setPollingIntervalSeconds(int seconds) {

@@ -48,6 +48,12 @@ public class ManualCapacityPerZonesScaleConfigurer implements ScaleStrategyConfi
     }
 
     @Override
+    public ManualCapacityPerZonesScaleConfigurer atMostOneConcurrentRelocation(boolean atMostOneConcurrentRelocation) {
+        config.setAtMostOneConcurrentRelocation(atMostOneConcurrentRelocation);
+        return this;
+    }
+
+    @Override
     public ManualCapacityPerZonesScaleConfigurer maxConcurrentRelocationsPerMachine(int maxNumberOfConcurrentRelocationsPerMachine) {
         config.setMaxConcurrentRelocationsPerMachine(maxNumberOfConcurrentRelocationsPerMachine);
         return this;

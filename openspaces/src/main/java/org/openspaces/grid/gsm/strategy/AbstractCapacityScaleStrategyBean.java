@@ -426,6 +426,7 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
         sla.setMaximumNumberOfMachines(getMaximumNumberOfInstances());
         sla.setMaximumNumberOfContainersPerMachine(getMaximumNumberOfContainersPerMachine());
         sla.setContainerMemoryCapacityInMB(containersConfig.getMaximumMemoryCapacityInMB());
+        sla.setAllowAboveAverageMemoryPerMachine(getConfig().isAllowAboveAverageMemoryPerMachine());
         sla.setMachineIsolation(getIsolation());
         sla.setDiscoveredMachinesCache(getDiscoveredMachinesCache());
         sla.setGridServiceAgentZones(zones);

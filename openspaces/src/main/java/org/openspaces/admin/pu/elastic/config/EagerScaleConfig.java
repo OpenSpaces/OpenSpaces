@@ -48,7 +48,17 @@ public class EagerScaleConfig
     public EagerScaleConfig() {
         this(new HashMap<String,String>());
     }
-    
+
+    @Override
+    public void setAtMostOneConcurrentRelocation(boolean atMostOneConcurrentRelocation) {
+        ScaleStrategyConfigUtils.setAtMostOneConcurrentRelocation(properties, atMostOneConcurrentRelocation);
+    }
+
+    @Override
+    public boolean isAtMostOneConcurrentRelocation() {
+        return ScaleStrategyConfigUtils.isAtMostOneConcurrentRelocation(properties);
+    }
+
     @Override
     public int getPollingIntervalSeconds() {
         return ScaleStrategyConfigUtils.getPollingIntervalSeconds(properties);

@@ -61,6 +61,16 @@ public class ManualCapacityScaleConfig
     }
 
     @Override
+    public void setAtMostOneConcurrentRelocation(boolean atMostOneConcurrentRelocation) {
+        ScaleStrategyConfigUtils.setAtMostOneConcurrentRelocation(properties, atMostOneConcurrentRelocation);
+    }
+
+    @Override
+    public boolean isAtMostOneConcurrentRelocation() {
+        return ScaleStrategyConfigUtils.isAtMostOneConcurrentRelocation(properties);
+    }
+
+    @Override
     public void setMemoryCapacityInMB(long memory) {
         capacityRequirementConfig.setMemoryCapacityInMB(memory);
     }

@@ -17,7 +17,7 @@
  ******************************************************************************/
 package org.openspaces.admin.pu.elastic;
 
-import java.io.File;
+import com.gigaspaces.security.directory.UserDetails;
 
 import org.openspaces.admin.internal.pu.dependency.ProcessingUnitDetailedDependencies;
 import org.openspaces.admin.internal.pu.elastic.AbstractElasticProcessingUnitDeployment;
@@ -30,7 +30,7 @@ import org.openspaces.admin.pu.elastic.topology.AdvancedStatefulDeploymentTopolo
 import org.openspaces.admin.pu.elastic.topology.ElasticStatefulDeploymentTopology;
 import org.openspaces.core.util.MemoryUnit;
 
-import com.gigaspaces.security.directory.UserDetails;
+import java.io.File;
 
 /**
  * Defines an elastic deployment of a processing unit that with an embedded space..
@@ -75,7 +75,7 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
         getConfig().setMaxMemoryCapacityInMB(MemoryUnit.toMegaBytes(maxMemoryCapacity));
         return this;
     }
-    
+
     @Override
     public ElasticStatefulProcessingUnitDeployment highlyAvailable(boolean highlyAvailable) {
         numberOfBackupsPerPartition(highlyAvailable ? 1 : 0);

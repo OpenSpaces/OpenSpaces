@@ -17,15 +17,7 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.rebalancing;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import com.gigaspaces.cluster.activeelection.SpaceMode;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -51,8 +43,12 @@ import org.openspaces.grid.gsm.rebalancing.exceptions.ProcessingUnitIsNotInTactE
 import org.openspaces.grid.gsm.rebalancing.exceptions.RebalancingSlaEnforcementInProgressException;
 import org.openspaces.grid.gsm.rebalancing.exceptions.WrongContainerProcessingUnitRelocationException;
 
-import com.gigaspaces.cluster.activeelection.SpaceMode;
 import org.openspaces.grid.gsm.containers.ContainersSlaUtils;
+
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcementEndpoint {
 
@@ -420,7 +416,8 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
         while (true) {
             final FutureStatefulProcessingUnitInstance futureInstance = 
                 rebalanceNumberOfInstancesPerContainerStep(
-                    containers, relocateOnlyBackups, sla.getMaximumNumberOfConcurrentRelocationsPerMachine());
+                    containers, relocateOnlyBackups, sla.getMaximumNumberOfConcurrentRelocationsPerMachine(),
+                        sla.isAtMostOneConcurrentRelocation());
 
             if (futureInstance == null) {
                 break;
@@ -445,7 +442,8 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
      *             progress.
      */
     private FutureStatefulProcessingUnitInstance rebalanceNumberOfInstancesPerContainerStep(
-            final GridServiceContainer[] containers, boolean onlyBackups, int maximumNumberOfRelocationsPerMachine)
+            final GridServiceContainer[] containers, boolean onlyBackups, int maximumNumberOfRelocationsPerMachine,
+            boolean atMostOneConcurrentRelocation)
             throws RebalancingSlaEnforcementInProgressException {
 
         // sort all containers (including those not in the specified containers
@@ -464,7 +462,7 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
 
             logger.trace("Considering target container for re-location as " + ContainersSlaUtils.gscToString(target));
 
-            if (isConflictingDeploymentInProgress(target, maximumNumberOfRelocationsPerMachine)) {
+            if (isConflictingDeploymentInProgress(target, maximumNumberOfRelocationsPerMachine, atMostOneConcurrentRelocation)) {
                 conflict = true;
                 logger.debug("Cannot relocate instances to " + RebalancingUtils.gscToString(target)
                         + " since a conflicting relocation is already in progress.");
@@ -487,7 +485,7 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
 
                 logger.trace("Considering source container for re-location as " + ContainersSlaUtils.gscToString(source));
 
-                if (isConflictingDeploymentInProgress(source, maximumNumberOfRelocationsPerMachine)) {
+                if (isConflictingDeploymentInProgress(source, maximumNumberOfRelocationsPerMachine, atMostOneConcurrentRelocation)) {
                     conflict = true;
                     logger.debug("Cannot relocate instances from " + RebalancingUtils.gscToString(source)
                             + " since a conflicting relocation is already in progress.");
@@ -550,13 +548,12 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
 
                     for (Machine sourceReplicationMachine : RebalancingUtils.getMachinesHostingContainers(RebalancingUtils.getReplicationSourceContainers(candidateInstance))) {
                         if (isConflictingOperationInProgress(sourceReplicationMachine,
-                                maximumNumberOfRelocationsPerMachine)) {
+                                maximumNumberOfRelocationsPerMachine, atMostOneConcurrentRelocation)) {
                             logger.debug("Cannot relocate " + RebalancingUtils.puInstanceToString(candidateInstance)
                                     + " " + "since replication source is on machine "
                                     + RebalancingUtils.machineToString(sourceReplicationMachine) + " "
                                     + "which is busy with another relocation");
                             conflict = true;
-                            continue;
                         }
                     }
 
@@ -633,7 +630,7 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
             // The workaround is to relocate any backup from another machine to the empty GSC, and so the "emptiness" would move to that other machine.
             // we look for backups by their partition number to avoid an endless loop.
 
-            for (; lastResortPartitionRelocate < pu.getNumberOfInstances() - 1; lastResortPartitionRelocate++) {
+            for (; lastResortPartitionRelocate <= pu.getNumberOfInstances() - 1; lastResortPartitionRelocate++) {
 
                 logger.trace("Trying to relocate a backup from partition " + lastResortPartitionRelocate);
 
@@ -644,10 +641,8 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
 
                 GridServiceContainer source = candidateInstance.getGridServiceContainer();
 
-                for (int targetIndex = 0; targetIndex < sortedContainers.size(); targetIndex++) {
+                for (GridServiceContainer target : sortedContainers) {
 
-                    GridServiceContainer target = sortedContainers.get(targetIndex);
-                    
                     if (target.getMachine().equals(source.getMachine())) {
                         logger.debug("Not re-locating " + RebalancingUtils.puInstanceToString(candidateInstance) + " to "
                                 + ContainersSlaUtils.gscToString(target) + " since containers are on the same host.");
@@ -696,7 +691,6 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
                             continue;
                         }
                     }
-
                     logger.info("Relocating " + RebalancingUtils.puInstanceToString(candidateInstance) + " "
                             + "from " + RebalancingUtils.gscToString(source) + " with " + source.getProcessingUnitInstances().length
                             + " instances to " + RebalancingUtils.gscToString(target) + " with " + target.getProcessingUnitInstances().length
@@ -713,7 +707,7 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
             // we haven't found any partition to relocate, probably the instance that requires
             // relocation has a partition lower than lastResortPartitionRelocate.
 
-            if (lastResortPartitionRelocate >= pu.getNumberOfInstances() - 1) {
+            if (lastResortPartitionRelocate > pu.getNumberOfInstances() - 1) {
                 lastResortPartitionRelocate = 0; // better luck next time. continuation programming
             }
         }
@@ -789,7 +783,7 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
                     break;
                 }
                 
-                if (isConflictingOperationInProgress(target, 1)) {
+                if (isConflictingOperationInProgress(target, 1, true)) {
                     // number of primaries on machine might be skewed.
                     conflict = true;
                     logger.debug("Cannot restart a primary instance who's backup is on machine "
@@ -798,7 +792,7 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
                     continue;
                 }
 
-                if (isConflictingOperationInProgress(source, 1)) {
+                if (isConflictingOperationInProgress(source, 1, true)) {
                     // number of primaries on machine might be skewed.
                     conflict = true;
                     logger.debug("Cannot restart a primary instance from machine "
@@ -1134,7 +1128,8 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
     
     private boolean isConflictingDeploymentInProgress(
             GridServiceContainer container,
-            int maximumNumberOfConcurrentRelocationsPerMachine) {
+            int maximumNumberOfConcurrentRelocationsPerMachine,
+            boolean atMostOneConcurrentRelocation) {
 
         if (maximumNumberOfConcurrentRelocationsPerMachine <= 0) {
             throw new IllegalStateException("maximumNumberOfConcurrentRelocationsPerMachine must be 1 or higher");
@@ -1170,9 +1165,35 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
 
         return concurrentRelocationsInContainer > 0 ||
 
-        isConflictingOperationInProgress(container.getMachine(), maximumNumberOfConcurrentRelocationsPerMachine);
+        isConflictingOperationInProgress(container.getMachine(), maximumNumberOfConcurrentRelocationsPerMachine,
+                atMostOneConcurrentRelocation);
     }
-    
+
+    private boolean isConflictingOperationInProgress(Machine machine, int maximumNumberOfConcurrentRelocationsPerMachine,
+                                                     boolean atMostOneConcurrentRelocation) {
+        if (atMostOneConcurrentRelocation) {
+            // check for any relocation.
+            return isRelocationInProgress();
+        } else {
+            // check for relocation on the machine
+            return isConflictingOperationInProgress(machine, maximumNumberOfConcurrentRelocationsPerMachine);
+        }
+    }
+
+    private boolean isRelocationInProgress() {
+        List<FutureStatefulProcessingUnitInstance> allFutureStatefulProcessingUnitInstances = state.getAllFutureStatefulProcessingUnitInstances();
+        for (FutureStatefulProcessingUnitInstance futureStatefulProcessingUnitInstance : allFutureStatefulProcessingUnitInstances) {
+            if (!futureStatefulProcessingUnitInstance.isDone()) {
+                logger.debug("Relocation of " + futureStatefulProcessingUnitInstance.getInstanceId() + " is in progress from "
+                        + ContainersSlaUtils.gscToString(futureStatefulProcessingUnitInstance.getSourceContainer())
+                        + " to " + ContainersSlaUtils.gscToString(futureStatefulProcessingUnitInstance.getTargetContainer()));
+                return true;
+            }
+        }
+        logger.debug("No active re-locations found.");
+        return false;
+    }
+
     private boolean isConflictingOperationInProgress(Machine machine, int maximumNumberOfConcurrentRelocationsPerMachine) {
 
         if (maximumNumberOfConcurrentRelocationsPerMachine <= 0) {
@@ -1207,7 +1228,7 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
             Machine targetMachine = targetContainer.getMachine();
             
             if (targetMachine.equals(machine)) { // target machine is busy with deployment
-
+                logger.debug("A Relocation to " + ContainersSlaUtils.gscToString(future.getTargetContainer()) + " is in progress.");
                 concurrentRelocationsInMachine++;
             }
         }

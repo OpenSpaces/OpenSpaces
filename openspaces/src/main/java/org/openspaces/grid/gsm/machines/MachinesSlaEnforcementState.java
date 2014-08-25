@@ -67,6 +67,7 @@ public class MachinesSlaEnforcementState {
         public StateKey (ProcessingUnit pu, ZonesConfig gridServiceAgentZones) {
             this.pu = pu;
             this.gridServiceAgentZones = gridServiceAgentZones;
+
         }
         
         @Override
@@ -277,7 +278,7 @@ public class MachinesSlaEnforcementState {
     private long machinesStateVersion;
     
     public MachinesSlaEnforcementState() {
-        this.logger = 
+        this.logger =
                 new SingleThreadedPollingLog( 
                         LogFactory.getLog(MachinesSlaEnforcementState.class));
         

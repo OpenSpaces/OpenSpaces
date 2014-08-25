@@ -41,6 +41,13 @@ public class AutomaticCapacityScaleConfigurer implements ScaleStrategyConfigurer
         this.config = new AutomaticCapacityScaleConfig();
     }
 
+
+    @Override
+    public AutomaticCapacityScaleConfigurer atMostOneConcurrentRelocation(boolean atMostOneConcurrentRelocation) {
+        config.setAtMostOneConcurrentRelocation(atMostOneConcurrentRelocation);
+        return this;
+    }
+
     @Override
     public AutomaticCapacityScaleConfigurer maxConcurrentRelocationsPerMachine(int maxNumberOfConcurrentRelocationsPerMachine) {
         config.setMaxConcurrentRelocationsPerMachine(maxNumberOfConcurrentRelocationsPerMachine);

@@ -27,11 +27,20 @@ public class RebalancingSlaPolicy extends ServiceLevelAgreementPolicy {
     
     private GridServiceContainer[] containers;
     private int maxNumberOfConcurrentRelocationsPerMachine;
+    private boolean atMostOneConcurrentRelocation = false;
     private ProcessingUnitSchemaConfig schema;
     private CapacityRequirementsPerAgent allocatedCapacity;
     private int minimumNumberOfInstancesPerPartition;
     private boolean ignoreCpuRebalancing;
     private boolean eager;
+
+    public boolean isAtMostOneConcurrentRelocation() {
+        return atMostOneConcurrentRelocation;
+    }
+
+    public void setAtMostOneConcurrentRelocation(boolean atMostOneConcurrentRelocation) {
+        this.atMostOneConcurrentRelocation = atMostOneConcurrentRelocation;
+    }
 
     public void setContainers(GridServiceContainer[] containers) {
         this.containers = containers;

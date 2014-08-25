@@ -17,9 +17,11 @@
  ******************************************************************************/
 package org.openspaces.admin.pu.elastic.config;
 
+import org.openspaces.admin.bean.BeanConfigurer;
+
 import java.util.concurrent.TimeUnit;
 
-import org.openspaces.admin.bean.BeanConfigurer;
+
 
 public interface ScaleStrategyConfigurer<T extends ScaleStrategyConfig> extends BeanConfigurer<T> {
 
@@ -42,5 +44,10 @@ public interface ScaleStrategyConfigurer<T extends ScaleStrategyConfig> extends 
      * @see ScaleStrategyConfig#setAllowAboveAverageMemoryPerMachine(boolean)
      */
     ScaleStrategyConfigurer<T> allowAboveAverageMemoryPerMachine(boolean allowAboveAverageMemoryPerMachine);
+
+    /**
+     * @see ScaleStrategyConfig#setAtMostOneConcurrentRelocation(boolean) (boolean)
+     */
+    ScaleStrategyConfigurer<T> atMostOneConcurrentRelocation(boolean atMostOneConcurrentRelocation);
 
 }

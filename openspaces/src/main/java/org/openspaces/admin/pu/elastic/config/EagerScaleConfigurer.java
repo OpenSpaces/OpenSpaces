@@ -45,7 +45,13 @@ public class EagerScaleConfigurer implements ScaleStrategyConfigurer<EagerScaleC
     public EagerScaleConfigurer() {
         this.config = new EagerScaleConfig();
     }
-    
+
+    @Override
+    public EagerScaleConfigurer atMostOneConcurrentRelocation(boolean atMostOneConcurrentRelocation) {
+        config.setAtMostOneConcurrentRelocation(atMostOneConcurrentRelocation);
+        return this;
+    }
+
     @Override
     public EagerScaleConfigurer maxConcurrentRelocationsPerMachine(int maxNumberOfConcurrentRelocationsPerMachine) {
         config.setMaxConcurrentRelocationsPerMachine(maxNumberOfConcurrentRelocationsPerMachine);

@@ -17,10 +17,10 @@
  ******************************************************************************/
 package org.openspaces.admin.pu.elastic.config;
 
+import org.openspaces.core.util.MemoryUnit;
+
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
-import org.openspaces.core.util.MemoryUnit;
 
 /**
  * Provides fluent API for creating a new {@link ManualCapacityScaleConfig} object.
@@ -80,6 +80,7 @@ public class ManualCapacityScaleConfigurer implements ScaleStrategyConfigurer<Ma
         config.setDrivesCapacityInMB(drivesCapacityInMB);
     }
 
+
     @Override
     public ManualCapacityScaleConfigurer maxConcurrentRelocationsPerMachine(int maxNumberOfConcurrentRelocationsPerMachine) {
         config.setMaxConcurrentRelocationsPerMachine(maxNumberOfConcurrentRelocationsPerMachine);
@@ -95,6 +96,12 @@ public class ManualCapacityScaleConfigurer implements ScaleStrategyConfigurer<Ma
     @Override
     public ManualCapacityScaleConfigurer allowAboveAverageMemoryPerMachine(boolean allowAboveAverageMemoryPerMachine) {
         config.setAllowAboveAverageMemoryPerMachine(allowAboveAverageMemoryPerMachine);
+        return this;
+    }
+
+    @Override
+    public ManualCapacityScaleConfigurer atMostOneConcurrentRelocation(boolean atMostOneConcurrentRelocation) {
+        config.setAtMostOneConcurrentRelocation(atMostOneConcurrentRelocation);
         return this;
     }
 

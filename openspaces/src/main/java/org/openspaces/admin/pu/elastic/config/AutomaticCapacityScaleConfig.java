@@ -15,6 +15,13 @@
  *******************************************************************************/
 package org.openspaces.admin.pu.elastic.config;
 
+import org.openspaces.admin.internal.pu.elastic.ScaleStrategyConfigUtils;
+import org.openspaces.admin.pu.DeploymentStatus;
+import org.openspaces.admin.pu.ProcessingUnit;
+import org.openspaces.admin.pu.ProcessingUnitInstance;
+import org.openspaces.core.util.StringProperties;
+import org.openspaces.grid.gsm.strategy.AutomaticCapacityScaleStrategyBean;
+
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -23,13 +30,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.openspaces.admin.internal.pu.elastic.ScaleStrategyConfigUtils;
-import org.openspaces.admin.pu.DeploymentStatus;
-import org.openspaces.admin.pu.ProcessingUnit;
-import org.openspaces.admin.pu.ProcessingUnitInstance;
-import org.openspaces.core.util.StringProperties;
-import org.openspaces.grid.gsm.strategy.AutomaticCapacityScaleStrategyBean;
 
 /**
  * Defines an automatic scaling strategy that increases and decreases capacity.
@@ -104,6 +104,16 @@ public class AutomaticCapacityScaleConfig
     }
 
     @Override
+    public void setAtMostOneConcurrentRelocation(boolean atMostOneConcurrentRelocation) {
+        ScaleStrategyConfigUtils.setAtMostOneConcurrentRelocation(properties, atMostOneConcurrentRelocation);
+    }
+
+    @Override
+    public boolean isAtMostOneConcurrentRelocation() {
+        return ScaleStrategyConfigUtils.isAtMostOneConcurrentRelocation(properties);
+    }
+
+    @Override
     public void setAllowAboveAverageMemoryPerMachine(boolean allowAboveAverageMemoryPerMachine) {
         ScaleStrategyConfigUtils.setAllowAboveAverageMemoryPerMachine(properties, allowAboveAverageMemoryPerMachine);
     }
@@ -133,8 +143,8 @@ public class AutomaticCapacityScaleConfig
     public void setAtMostOneContainerPerMachine(boolean atMostOneContainerPerMachine) {
         ScaleStrategyConfigUtils.setAtMostOneContainerPerMachine(properties, atMostOneContainerPerMachine);
     }
-    
-    
+
+
     /**
      * Sets the polling rate in which statistics are gathered.
      */
