@@ -17,6 +17,7 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.rebalancing;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -37,6 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.GridComponent;
@@ -62,6 +64,8 @@ import org.openspaces.grid.gsm.rebalancing.exceptions.WrongContainerProcessingUn
 import com.gigaspaces.cluster.activeelection.SpaceMode;
 
 public class RebalancingUtils {
+
+    private static final Log logger = LogFactory.getLog(RebalancingUtils.class);
 
    static Collection<FutureStatelessProcessingUnitInstance> incrementNumberOfStatelessInstancesAsync(
        final ProcessingUnit pu, 
@@ -241,7 +245,16 @@ public class RebalancingUtils {
        }
        return unusedContainers;
    }
-   
+
+   public static String puInstancesToString(Collection<ProcessingUnitInstance> instances) {
+       StringBuilder builder = new StringBuilder();
+       for (ProcessingUnitInstance instance : instances) {
+           builder.append(RebalancingUtils.puInstanceToString(instance));
+           builder.append(File.separator);
+       }
+       return builder.toString();
+   }
+
    static FutureStatefulProcessingUnitInstance relocateProcessingUnitInstanceAsync(
            final GridServiceContainer targetContainer,
            final ProcessingUnitInstance puInstance, 
@@ -251,7 +264,7 @@ public class RebalancingUtils {
         final ProcessingUnit pu = puInstance.getProcessingUnit();
         final GridServiceContainer[] replicationSourceContainers = getReplicationSourceContainers(puInstance); 
         final int instanceId = puInstance.getInstanceId();
-        
+
         final CountDownLatch relocateInProgress = new CountDownLatch(1);
         final AtomicReference<Throwable> relocateThrowable = new AtomicReference<Throwable>();
 
@@ -262,8 +275,14 @@ public class RebalancingUtils {
         final GridServiceContainer sourceContainer = puInstance.getGridServiceContainer();
         final Set<ProcessingUnitInstance> puInstancesFromSamePartition = 
             getOtherInstancesFromSamePartition(puInstance);
-        
+       if (logger.isDebugEnabled()) {
+           logger.debug("Found instances from the same partition as "
+                   + RebalancingUtils.puInstanceToString(puInstance)
+                   + " : " + RebalancingUtils.puInstancesToString(puInstancesFromSamePartition));
+       }
+
         if (puInstancesFromSamePartition.size() != pu.getNumberOfBackups()) {
+        // total number of instances per partition = numberOfBackups + 1
             throw new IllegalStateException(
                     "puInstancesFromSamePartition has " + puInstancesFromSamePartition.size() + 
                     " instances instead of " + pu.getNumberOfBackups());
@@ -275,9 +294,12 @@ public class RebalancingUtils {
         ((InternalAdmin) admin).scheduleAdminOperation(new Runnable() {
             public void run() {
                 try {
+                    logger.debug("Relocation of " + RebalancingUtils.puInstanceToString(puInstance)
+                            + " to " + ContainersSlaUtils.gscToString(targetContainer) + " has started.");
                     puInstance.relocate(targetContainer);
                 }
                 catch (AdminException e) {
+                    logger.error("Admin exception " + e.getMessage(),e);
                     relocateThrowable.set(e);
                 } catch (Throwable e) {
                     logger.error("Unexpected exception " + e.getMessage(),e);
@@ -373,10 +395,18 @@ public class RebalancingUtils {
                         if (relocatedInstance.getGridServiceContainer().equals(targetContainer)) {
                             if (relocatedInstance.getSpaceInstance() != null &&
                                 relocatedInstance.getSpaceInstance().getMode() != SpaceMode.NONE) {
+                           if (logger.isDebugEnabled()) {
+                               logger.debug("Relocation from " + ContainersSlaUtils.gscToString(getSourceContainer())
+                                       + " to " + ContainersSlaUtils.gscToString(getTargetContainer()) + " had ended successfully.");
+                           }
                                 newInstance = relocatedInstance;
                             }
                         }
                         else  { 
+                       if (logger.isDebugEnabled()) {
+                           logger.debug("Relocation from " + ContainersSlaUtils.gscToString(getSourceContainer())
+                                   + " to " + ContainersSlaUtils.gscToString(getTargetContainer()) + " has ended with an error.");
+                       }
                             throwable = new WrongContainerProcessingUnitRelocationException(puInstance,targetContainer);
                                          
                         }
@@ -849,18 +879,22 @@ public class RebalancingUtils {
             GridServiceContainer container,
             GridServiceContainer[] approvedContainers,
             ProcessingUnit pu) {
-        
+
         int max = 0;
         if (Arrays.asList(approvedContainers).contains(container)) {
-            double averageInstancesPerContainer = ((double) pu.getTotalNumberOfInstances()) / approvedContainers.length;
-            max = (int) Math.ceil(averageInstancesPerContainer);
+            max = (int) Math.ceil(getAverageNumberOfInstancesPerContainer(approvedContainers, pu));
         }
         return max;
     }
     
     private static double getAverageNumberOfInstancesPerContainer(GridServiceContainer[] approvedContainers, ProcessingUnit pu) {
-        final double averageInstancesPerContainer = ((double) pu.getTotalNumberOfInstances()) / approvedContainers.length;
-        return averageInstancesPerContainer;
+        double avg = ((double) pu.getTotalNumberOfInstances()) / approvedContainers.length;
+        if (logger.isTraceEnabled()) {
+            logger.trace("averageInstancesPerContainer = ((double) pu.getTotalNumberOfInstances()) / approvedContainers.length = "
+                    + ((double) pu.getTotalNumberOfInstances()) + "/" + approvedContainers.length + " = "
+                    + avg);
+        }
+        return avg;
     }
     
     /**
@@ -986,7 +1020,7 @@ public class RebalancingUtils {
         builder.append("]");
         return builder.toString();
     }
-    
+
     public static String machineToString(Machine machine) {
         return machine.getHostName() + "/" + machine.getHostAddress();
     }

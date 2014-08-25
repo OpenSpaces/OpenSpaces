@@ -207,6 +207,7 @@ public class EagerScaleStrategyBean extends AbstractScaleStrategyBean
         sla.setSchemaConfig(getSchemaConfig());
         sla.setAllocatedCapacity(allocatedCapacity);
         sla.setMinimumNumberOfInstancesPerPartition(1);
+        sla.eager(true);
         try {
             rebalancingEndpoint.enforceSla(sla);
             puInstanceProvisioningCompletedEvent();

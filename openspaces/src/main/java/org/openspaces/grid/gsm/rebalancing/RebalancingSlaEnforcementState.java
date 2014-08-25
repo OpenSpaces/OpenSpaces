@@ -138,7 +138,7 @@ class RebalancingSlaEnforcementState {
                 if (tracingEnabled) {
                     doneFutureStatefulDeployments.add(future);
                 }
-                
+
                 iterator.remove();
                 return future;
             }

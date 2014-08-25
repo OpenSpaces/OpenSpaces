@@ -17,21 +17,24 @@
  ******************************************************************************/
 package org.openspaces.grid.gsm.capacity;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.os.OperatingSystemDetails;
 import org.openspaces.admin.os.OperatingSystemDetails.DriveDetails;
 import org.openspaces.core.internal.commons.math.fraction.Fraction;
 import org.openspaces.core.util.MemoryUnit;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
 public class MachineCapacityRequirements extends CapacityRequirements {
 
     Machine machine;
-    
+    private static Log logger = LogFactory.getLog(MachineCapacityRequirements.class);
+
     public MachineCapacityRequirements(Machine machine) {
         super(getMachineRequirements(machine));
         this.machine = machine;
@@ -54,6 +57,8 @@ public class MachineCapacityRequirements extends CapacityRequirements {
         if (memoryInMB < 0 ) {
             memoryInMB = 0;
         }
+        logger.trace("Retrieving total physical memory for machine "
+                + machine.getHostAddress() + " : " + memoryInMB);
         return new MemoryCapacityRequirement(memoryInMB);
     }
     
@@ -71,6 +76,8 @@ public class MachineCapacityRequirements extends CapacityRequirements {
     
     private static CpuCapacityRequirement getCpu(Machine machine) {
         int availableProcessors = machine.getOperatingSystem().getDetails().getAvailableProcessors();
+        logger.trace("Retrieving number of available processors for machine "
+                + machine.getHostAddress() + " : " + availableProcessors);
         return new CpuCapacityRequirement(new Fraction(availableProcessors,1));
         
     }

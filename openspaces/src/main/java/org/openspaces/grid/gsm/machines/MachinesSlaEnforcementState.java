@@ -148,23 +148,27 @@ public class MachinesSlaEnforcementState {
             if (machineIsolation == null) {
                 throw new IllegalStateException(this + " should have set machine isolation before allocating capacity");
             }
+            MachinesSlaEnforcementState.this.logger.trace("Adding {" + agentUid + ", " + capacity + "} to allocatedCapacity = " + allocatedCapacity.toDetailedString());
             allocatedCapacity = allocatedCapacity.add(agentUid,capacity);
             machinesStateVersion++;
         }
 
         public void markCapacityForDeallocation(String agentUid, CapacityRequirements capacity) {
             if (machineIsolation == null) {
-                throw new IllegalStateException(this + " should have set machine isolation before marking capacity for deallocation");
+                throw new IllegalStateException(this + " should have set machine isolation before marking capacity for de-allocation");
             }
+            MachinesSlaEnforcementState.this.logger.trace("Subtracting {" + agentUid + ", " + capacity + "} from allocatedCapacity = " + allocatedCapacity);
             allocatedCapacity = allocatedCapacity.subtract(agentUid,capacity);
+            MachinesSlaEnforcementState.this.logger.trace("Adding {" + agentUid + ", " + capacity + "} to markedForDeallocationCapacity = " + markedForDeallocationCapacity);
             markedForDeallocationCapacity = markedForDeallocationCapacity.add(agentUid, capacity);
             machinesStateVersion++;
         }
 
         public void unmarkCapacityForDeallocation(String agentUid, CapacityRequirements capacity) {
             if (machineIsolation == null) {
-                throw new IllegalStateException(this + " should have set machine isolation before unmarking capacity for deallocation");
+                throw new IllegalStateException(this + " should have set machine isolation before un-marking capacity for de-allocation");
             }
+            MachinesSlaEnforcementState.this.logger.trace("Subtracting {" + agentUid + ", " + capacity + "} from markedForDeallocationCapacity = " + markedForDeallocationCapacity);
             markedForDeallocationCapacity = markedForDeallocationCapacity.subtract(agentUid, capacity);
             allocateCapacity(agentUid, capacity);
             machinesStateVersion++;
@@ -172,8 +176,9 @@ public class MachinesSlaEnforcementState {
 
         public void deallocateCapacity(String agentUid, CapacityRequirements capacity) {
             if (machineIsolation == null) {
-                throw new IllegalStateException(this + " should have set machine isolation before deallocating capacity");
+                throw new IllegalStateException(this + " should have set machine isolation before de-allocating capacity");
             }
+            MachinesSlaEnforcementState.this.logger.trace("Subtracting {" + agentUid + ", " + capacity + "} from markedForDeallocationCapacity = " + markedForDeallocationCapacity);
             markedForDeallocationCapacity = markedForDeallocationCapacity.subtract(agentUid, capacity);
             machinesStateVersion++;
         }
@@ -274,7 +279,7 @@ public class MachinesSlaEnforcementState {
     public MachinesSlaEnforcementState() {
         this.logger = 
                 new SingleThreadedPollingLog( 
-                        LogFactory.getLog(DefaultMachinesSlaEnforcementEndpoint.class));
+                        LogFactory.getLog(MachinesSlaEnforcementState.class));
         
         state = new HashMap<StateKey,StateValue>();
         recoveredStatePerProcessingUnit = new HashMap<ProcessingUnit, MachinesSlaEnforcementState.RecoveryState>();

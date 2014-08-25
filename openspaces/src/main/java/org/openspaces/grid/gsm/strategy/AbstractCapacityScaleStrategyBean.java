@@ -208,7 +208,7 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
     }
     
     private int getMaximumNumberOfContainersPerMachine() {
-        return scaleStrategy.isAtMostOneContainerPerMachine()?1:getMaximumNumberOfInstances();
+        return scaleStrategy.isAtMostOneContainerPerMachine() ? 1 : getMaximumNumberOfInstances();
     }
     
     @Override

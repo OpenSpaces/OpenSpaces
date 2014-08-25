@@ -20,6 +20,7 @@ package org.openspaces.grid.gsm.rebalancing;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.pu.elastic.ProcessingUnitSchemaConfig;
 import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerAgent;
+import org.openspaces.grid.gsm.containers.ContainersSlaUtils;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementPolicy;
 
 public class RebalancingSlaPolicy extends ServiceLevelAgreementPolicy {
@@ -29,7 +30,9 @@ public class RebalancingSlaPolicy extends ServiceLevelAgreementPolicy {
     private ProcessingUnitSchemaConfig schema;
     private CapacityRequirementsPerAgent allocatedCapacity;
     private int minimumNumberOfInstancesPerPartition;
-    
+    private boolean ignoreCpuRebalancing;
+    private boolean eager;
+
     public void setContainers(GridServiceContainer[] containers) {
         this.containers = containers;
     }
@@ -92,5 +95,35 @@ public class RebalancingSlaPolicy extends ServiceLevelAgreementPolicy {
 
     public void setMinimumNumberOfInstancesPerPartition(int minimumNumberOfInstancesPerPartition) {
         this.minimumNumberOfInstancesPerPartition = minimumNumberOfInstancesPerPartition;
+    }
+
+    public void eager(boolean eager) {
+        this.eager = eager;
+    }
+
+    public boolean isEager() {
+        return this.eager;
+    }
+
+
+    public void ignoreCpuRebalancing(boolean ignore) {
+        this.ignoreCpuRebalancing = ignore;
+    }
+
+    public boolean ignoreCpuRebalancing() {
+        return this.ignoreCpuRebalancing;
+    }
+
+    @Override
+    public String toString() {
+        return "RebalancingSlaPolicy{" +
+                "containers=" + ContainersSlaUtils.gscsToString(containers) +
+                ", maxNumberOfConcurrentRelocationsPerMachine=" + maxNumberOfConcurrentRelocationsPerMachine +
+                ", schema=" + schema +
+                ", allocatedCapacity=" + allocatedCapacity +
+                ", minimumNumberOfInstancesPerPartition=" + minimumNumberOfInstancesPerPartition +
+                ", ignoreCpuRebalancing=" + ignoreCpuRebalancing +
+                ", eager=" + eager +
+                '}';
     }
 }

@@ -266,13 +266,9 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
               
                 if (logger.isInfoEnabled()) {
                     logger.info(
-                        "Starting " + numberOfContainersToStart + " containers = ceil(allocatedMemory/containerMemory) - runningContainers - futureContainers =" + 
+                        "Starting " + numberOfContainersToStart + " containers on machine" + ContainersSlaUtils.machineToString(agent.getMachine()) + "= ceil(allocatedMemory/containerMemory) - runningContainers - futureContainers =" +
                         "ceil(" + allocatedMemory +"/" + containerMemoryInMB + ") - " + numberOfRunningContainers + " - " + numberOfFutureContainers + "= "+ 
                         numberOfContainersToStart);
-                    
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Containers on machine " + ContainersSlaUtils.machineToString(agent.getMachine()));
-                    }
                 }
                 
                 for (int i = 0 ; i < numberOfContainersToStart ; i++) {
