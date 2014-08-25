@@ -1554,7 +1554,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                 // machine matches isolation and zone SLA 
                 CapacityRequirements unallocatedCapacityOnAgent = 
                     physicalCapacity.getAgentCapacity(agentUid)
-                    .subtract(usedCapacity.getAgentCapacityOrZero(agentUid));
+                    .subtractOrZero(usedCapacity.getAgentCapacityOrZero(agentUid));
                     
                 unallocatedCapacity = 
                     unallocatedCapacity.add(agentUid, unallocatedCapacityOnAgent);
