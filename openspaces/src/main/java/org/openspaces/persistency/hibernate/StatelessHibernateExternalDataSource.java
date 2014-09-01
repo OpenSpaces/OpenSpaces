@@ -16,31 +16,21 @@
 
 package org.openspaces.persistency.hibernate;
 
-import java.util.List;
-import java.util.Map;
-
+import com.gigaspaces.datasource.*;
+import com.j_spaces.core.client.SQLQuery;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
-import org.hibernate.EntityMode;
 import org.hibernate.Query;
 import org.hibernate.StatelessSession;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.metadata.ClassMetadata;
-import org.openspaces.persistency.hibernate.iterator.HibernateProxyRemoverIterator;
-import org.openspaces.persistency.hibernate.iterator.StatelessChunkListDataIterator;
-import org.openspaces.persistency.hibernate.iterator.StatelessChunkScrollableDataIterator;
-import org.openspaces.persistency.hibernate.iterator.StatelessListQueryDataIterator;
-import org.openspaces.persistency.hibernate.iterator.StatelessScrollableDataIterator;
+import org.openspaces.persistency.hibernate.iterator.*;
 
-import com.gigaspaces.datasource.BulkDataPersister;
-import com.gigaspaces.datasource.BulkItem;
-import com.gigaspaces.datasource.DataIterator;
-import com.gigaspaces.datasource.DataSourceException;
-import com.gigaspaces.datasource.SQLDataProvider;
-import com.j_spaces.core.client.SQLQuery;
+import java.util.List;
+import java.util.Map;
 
 /**
  * An external data source implementation based on Hiberante {@link org.hibernate.StatelessSession}.
@@ -299,7 +289,7 @@ public class StatelessHibernateExternalDataSource extends AbstractHibernateExter
                 Object entry = bulkItem.getItem();
                 criteria = session.createCriteria(entry.getClass().getName());
                 ClassMetadata classMetaData = getSessionFactory().getClassMetadata(entry.getClass());
-                criteria.add(Restrictions.idEq(classMetaData.getIdentifier(entry, EntityMode.POJO)));
+                criteria.add(Restrictions.idEq(classMetaData.getIdentifier(entry)));
                 criteria.setProjection(Projections.rowCount());
                 return ((Number) criteria.uniqueResult()).intValue() > 0;
             case BulkItem.PARTIAL_UPDATE:

@@ -15,29 +15,19 @@
  *******************************************************************************/
 package org.openspaces.persistency.hibernate;
 
-import java.util.Map;
-import java.util.Set;
-
+import com.gigaspaces.datasource.DataSourceException;
+import com.gigaspaces.document.SpaceDocument;
+import com.gigaspaces.metadata.SpaceTypeDescriptor;
+import com.gigaspaces.sync.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.Criteria;
-import org.hibernate.EntityMode;
-import org.hibernate.Query;
-import org.hibernate.SessionFactory;
-import org.hibernate.StatelessSession;
-import org.hibernate.Transaction;
+import org.hibernate.*;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.metadata.ClassMetadata;
 
-import com.gigaspaces.datasource.DataSourceException;
-import com.gigaspaces.document.SpaceDocument;
-import com.gigaspaces.metadata.SpaceTypeDescriptor;
-import com.gigaspaces.sync.DataSyncOperation;
-import com.gigaspaces.sync.OperationsBatchData;
-import com.gigaspaces.sync.SynchronizationEndpointInterceptor;
-import com.gigaspaces.sync.SpaceSynchronizationEndpointException;
-import com.gigaspaces.sync.TransactionData;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * A {@link SynchronizationEndpointInterceptor} implementation based on Hibernate {@link org.hibernate.StatelessSession}.
@@ -293,7 +283,7 @@ public class StatelessHibernateSpaceSynchronizationEndpoint extends AbstractHibe
                 Object entry = dataSyncOperation.getDataAsObject();
                 criteria = session.createCriteria(entry.getClass().getName());
                 ClassMetadata classMetaData = getSessionFactory().getClassMetadata(entry.getClass());
-                criteria.add(Restrictions.idEq(classMetaData.getIdentifier(entry, EntityMode.POJO)));
+                criteria.add(Restrictions.idEq(classMetaData.getIdentifier(entry)));
                 criteria.setProjection(Projections.rowCount());
                 return ((Number) criteria.uniqueResult()).intValue() > 0;
             case PARTIAL_UPDATE:

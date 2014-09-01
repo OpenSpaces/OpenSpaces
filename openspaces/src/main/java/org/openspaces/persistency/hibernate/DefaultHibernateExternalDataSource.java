@@ -16,28 +16,14 @@
 
 package org.openspaces.persistency.hibernate;
 
+import com.gigaspaces.datasource.*;
+import com.j_spaces.core.client.SQLQuery;
+import org.hibernate.*;
+import org.openspaces.persistency.hibernate.iterator.*;
+
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
-
-import org.hibernate.EntityMode;
-import org.hibernate.HibernateException;
-import org.hibernate.ObjectNotFoundException;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
-import org.openspaces.persistency.hibernate.iterator.DefaultChunkListDataIterator;
-import org.openspaces.persistency.hibernate.iterator.DefaultChunkScrollableDataIterator;
-import org.openspaces.persistency.hibernate.iterator.DefaultListQueryDataIterator;
-import org.openspaces.persistency.hibernate.iterator.DefaultScrollableDataIterator;
-import org.openspaces.persistency.hibernate.iterator.HibernateProxyRemoverIterator;
-
-import com.gigaspaces.datasource.BulkDataPersister;
-import com.gigaspaces.datasource.BulkItem;
-import com.gigaspaces.datasource.DataIterator;
-import com.gigaspaces.datasource.DataSourceException;
-import com.gigaspaces.datasource.SQLDataProvider;
-import com.j_spaces.core.client.SQLQuery;
 
 /**
  * The default Hibernate external data source implementation. Based on Hibernate {@link Session}.
@@ -292,7 +278,7 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
      */
     protected Serializable getIdentifier(Object o) {
 
-        return getSessionFactory().getClassMetadata(o.getClass()).getIdentifier(o, EntityMode.POJO);
+        return getSessionFactory().getClassMetadata(o.getClass()).getIdentifier(o);
       
     }
 }

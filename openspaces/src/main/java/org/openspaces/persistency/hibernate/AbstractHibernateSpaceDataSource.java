@@ -22,7 +22,6 @@ import com.gigaspaces.metadata.SpaceTypeDescriptor;
 import com.j_spaces.kernel.ClassLoaderHelper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.EntityMode;
 import org.hibernate.SessionFactory;
 import org.hibernate.metadata.ClassMetadata;
 import org.hibernate.persister.entity.AbstractEntityPersister;
@@ -89,7 +88,7 @@ public abstract class AbstractHibernateSpaceDataSource extends ManagedEntriesSpa
                 if (classMetadata.isInherited()) {
                     String superClassEntityName = ((AbstractEntityPersister) classMetadata).getMappedSuperclass();
                     ClassMetadata superClassMetadata = allMappedClassMetaData.get(superClassEntityName);
-                    Class superClass = superClassMetadata.getMappedClass(EntityMode.POJO);
+                    Class superClass = superClassMetadata.getMappedClass();
                     // only filter out classes that their super class has mappings
                     if (superClass != null) {
                         if (logger.isDebugEnabled()) {

@@ -15,26 +15,15 @@
  *******************************************************************************/
 package org.openspaces.persistency.hibernate;
 
-import java.io.Serializable;
-import java.util.Map;
-import java.util.Set;
-
-import org.hibernate.EntityMode;
-import org.hibernate.HibernateException;
-import org.hibernate.ObjectNotFoundException;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
-
 import com.gigaspaces.datasource.DataSourceException;
 import com.gigaspaces.document.SpaceDocument;
 import com.gigaspaces.metadata.SpaceTypeDescriptor;
-import com.gigaspaces.sync.DataSyncOperation;
-import com.gigaspaces.sync.OperationsBatchData;
-import com.gigaspaces.sync.SpaceSynchronizationEndpoint;
-import com.gigaspaces.sync.SpaceSynchronizationEndpointException;
-import com.gigaspaces.sync.TransactionData;
+import com.gigaspaces.sync.*;
+import org.hibernate.*;
+
+import java.io.Serializable;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * The default Hibernate {@link SpaceSynchronizationEndpoint} implementation. Based on Hibernate {@link Session}.
@@ -240,7 +229,7 @@ public class DefaultHibernateSpaceSynchronizationEndpoint extends AbstractHibern
      */
     protected Serializable getIdentifier(Object o) {
 
-        return getSessionFactory().getClassMetadata(o.getClass()).getIdentifier(o, EntityMode.POJO);
+        return getSessionFactory().getClassMetadata(o.getClass()).getIdentifier(o);
       
     }
 }

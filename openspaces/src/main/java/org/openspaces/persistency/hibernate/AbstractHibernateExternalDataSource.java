@@ -16,17 +16,13 @@
 
 package org.openspaces.persistency.hibernate;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-
+import com.gigaspaces.datasource.BulkItem;
+import com.gigaspaces.datasource.DataIterator;
+import com.gigaspaces.datasource.DataSourceException;
+import com.gigaspaces.datasource.ManagedDataSource;
+import com.gigaspaces.datasource.hibernate.SessionFactoryBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.EntityMode;
 import org.hibernate.SessionFactory;
 import org.hibernate.metadata.ClassMetadata;
 import org.hibernate.persister.entity.AbstractEntityPersister;
@@ -34,11 +30,7 @@ import org.openspaces.persistency.hibernate.iterator.HibernateProxyRemoverIterat
 import org.openspaces.persistency.patterns.ManagedDataSourceEntriesProvider;
 import org.openspaces.persistency.support.ConcurrentMultiDataIterator;
 
-import com.gigaspaces.datasource.BulkItem;
-import com.gigaspaces.datasource.DataIterator;
-import com.gigaspaces.datasource.DataSourceException;
-import com.gigaspaces.datasource.ManagedDataSource;
-import com.gigaspaces.datasource.hibernate.SessionFactoryBuilder;
+import java.util.*;
 
 /**
  * A base class for Hibernate based external data source implementations.
@@ -295,7 +287,7 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
                 if (classMetadata.isInherited()) {
                     String superClassEntityName = ((AbstractEntityPersister) classMetadata).getMappedSuperclass();
                     ClassMetadata superClassMetadata = allClassMetaData.get(superClassEntityName);
-                    Class superClass = superClassMetadata.getMappedClass(EntityMode.POJO);
+                    Class superClass = superClassMetadata.getMappedClass();
                     // only filter out classes that their super class has mappings
                     if (superClass != null) {
                         if (logger.isDebugEnabled()) {

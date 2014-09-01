@@ -20,7 +20,6 @@ import com.gigaspaces.datasource.DataIterator;
 import com.gigaspaces.datasource.DataProvider;
 import com.gigaspaces.datasource.DataSourceException;
 import com.j_spaces.core.IGSEntry;
-import org.hibernate.EntityMode;
 import org.hibernate.FlushMode;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -100,8 +99,7 @@ public class CriteriaHibernateExternalDataSource extends DefaultHibernateExterna
         if (template instanceof IGSEntry) {
             id = ((IGSEntry) template).getFieldValue(classMetaData.getIdentifierPropertyName());
         } else {
-            id = classMetaData.getIdentifier(template,
-                    EntityMode.POJO);
+            id = classMetaData.getIdentifier(template);
         }
 
         return id;
