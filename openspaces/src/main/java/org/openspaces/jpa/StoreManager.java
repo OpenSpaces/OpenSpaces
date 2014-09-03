@@ -159,7 +159,9 @@ public class StoreManager extends AbstractStoreManager {
     @Override
     public void commit() {
         try {
-            _transaction.commit(5000);
+            long timeout = (getConfiguration().getLockTimeout() == 0)?
+                    Lease.FOREVER : getConfiguration().getLockTimeout();
+            _transaction.commit(timeout);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         } finally {
