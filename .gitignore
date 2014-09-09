@@ -28,6 +28,7 @@ target
 dist
 bin
 logs
+release
 
 .idea/
 *.iml
