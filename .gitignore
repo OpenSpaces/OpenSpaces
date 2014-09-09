@@ -27,6 +27,7 @@ hs_err_pid*
 target
 dist
 bin
+logs
 
 .idea/
 *.iml
