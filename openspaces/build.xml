@@ -6,6 +6,7 @@
     <property file="build.properties"/>
 	<property environment="env"/>
 	<property name="checkouts.dir" value="${basedir}/../.." />
+	<property name="core.dir" value="core" />
 	
 	<condition property="mvn.executable" value="mvn.bat">
             <os family="windows" />
@@ -33,14 +34,14 @@
             <exclude name="ant/**"/>
         </fileset>
         <path path="${basedir}/tools/groovy/embeddable/groovy-all-1.8.6.jar" />
-    	<path path="${basedir}/../gigaspaces/classes" />
-        <path path="${basedir}/../gigaspaces/src/java/resources" />
+    	<path path="${basedir}/../${core.dir}/classes" />
+        <path path="${basedir}/../${core.dir}/src/java/resources" />
 
     </path>
 	
     <path id="javadoc-libs">
         <path path="${target.classes.dir}" />
-    	<path path="${basedir}/../gigaspaces/classes" />
+    	<path path="${basedir}/../${core.dir}/classes" />
     </path>
 
     <path id="tests-libs">
@@ -57,9 +58,9 @@
             <include name="**/*.jar"/>
         </fileset>
     	<path path="${basedir}/tools/groovy/embeddable/groovy-all-1.8.6.jar" />
-        <path path="${basedir}/../gigaspaces" />
-    	<path path="${basedir}/../gigaspaces/classes" />
-        <path path="${basedir}/../gigaspaces/src/java/resources" />
+        <path path="${basedir}/../${core.dir}" />
+    	<path path="${basedir}/../${core.dir}/classes" />
+        <path path="${basedir}/../${core.dir}/src/java/resources" />
 
     </path>
 
@@ -141,12 +142,12 @@
             <doctitle><![CDATA[<h1>GigaSpaces XAP ${gs.product.version} API</h1>]]></doctitle>
             <bottom><![CDATA[<i>Copyright &copy; <a href="http://www.gigaspaces.com/" target="_top">GigaSpaces</a>.</i>]]></bottom>
             <classpath refid="all-libs"/>
-        	<fileset dir="${basedir}/../gigaspaces/src/java" defaultexcludes="yes">
+        	<fileset dir="${basedir}/../${core.dir}/src/java" defaultexcludes="yes">
 	      		<include name="com/**"/>
 				<exclude name="com/j_spaces/jms/**" />
 				<contains text="JAVA-DOC-STAMP"/>
 		    </fileset>
-        	<fileset dir="${basedir}/../gigaspaces/src/java" defaultexcludes="yes">
+        	<fileset dir="${basedir}/../${core.dir}/src/java" defaultexcludes="yes">
 	      		<include name="com/sun/**/*.java"/>
         		<include name="net/**/*.java"/>
 		    </fileset>
