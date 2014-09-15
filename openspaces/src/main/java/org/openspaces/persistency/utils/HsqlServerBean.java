@@ -18,8 +18,8 @@ package org.openspaces.persistency.utils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hsqldb.ServerConfiguration;
-import org.hsqldb.ServerConstants;
+import org.hsqldb.server.ServerConfiguration;
+import org.hsqldb.server.ServerConstants;
 import org.hsqldb.persist.HsqlProperties;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
