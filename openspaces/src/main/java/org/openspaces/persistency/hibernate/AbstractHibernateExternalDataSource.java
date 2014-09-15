@@ -252,7 +252,7 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
      */
     public void init(Properties properties) throws DataSourceException {
         if (logger.isDebugEnabled()) {
-            logger.debug("Using initialLoadChunkSize [" + initialLoadChunkSize + "], fetchSize [" + fetchSize + "], initalLoadThreadPoolSize [" + initialLoadThreadPoolSize + "], performOrderById [" + performOrderById + "]");
+            logger.debug("Using initialLoadChunkSize [" + initialLoadChunkSize + "], fetchSize [" + fetchSize + "], initialLoadThreadPoolSize [" + initialLoadThreadPoolSize + "], performOrderById [" + performOrderById + "]");
         }
         if (sessionFactory == null) {
             createdSessionFactory = true;
@@ -292,7 +292,7 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
                     if (superClass != null) {
                         if (logger.isDebugEnabled()) {
                             logger.debug("Entity [" + entityname + "] is inherited and has a super class ["
-                                    + superClass + "] filtering it out for intial load managedEntries");
+                                    + superClass + "] filtering it out for initial load managedEntries");
                         }
                         continue;
                     }
@@ -302,7 +302,7 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
             this.initialLoadEntries = initialLoadEntries.toArray(new String[initialLoadEntries.size()]);
         }
         if (logger.isDebugEnabled()) {
-            logger.debug("Using Hibernate inital load managedEntries [" + Arrays.toString(initialLoadEntries) + "]");
+            logger.debug("Using Hibernate initial load managedEntries [" + Arrays.toString(initialLoadEntries) + "]");
         }
     }
 

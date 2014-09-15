@@ -258,7 +258,7 @@ public class IntegratedProcessingUnitContainerProvider implements ApplicationCon
             try {
                 CredentialsProviderHelper.appendMarshalledCredentials(beanLevelProperties.getContextProperties(), null, credentialsProvider);
             } catch (IOException e) {
-                throw new CannotCreateContainerException("Failed to marhsall user details", e);
+                throw new CannotCreateContainerException("Failed to marshall user details", e);
             }
         } else if (secured != null) {
             beanLevelProperties.getContextProperties().setProperty(SpaceURL.SECURED, "true");

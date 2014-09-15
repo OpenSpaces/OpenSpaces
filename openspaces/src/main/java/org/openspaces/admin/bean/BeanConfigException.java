@@ -51,7 +51,7 @@ public class BeanConfigException extends AdminException {
     }
     
     private static String getMessage(RemoteException remoteException) {
-        String message = "remote exception occured";
+        String message = "remote exception occurred";
         if (remoteException.getCause() != null) {
             message = remoteException.getCause().getMessage();
         }

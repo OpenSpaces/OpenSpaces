@@ -114,7 +114,7 @@ public class MachinesStateBackupToSpace implements MachinesStateBackup {
                                 space.write(machinesState, Lease.FOREVER);
                                 writeCompletedVersion.set(currentVersion);
                                 lastError.set(null);                                
-                                logger.trace("Succesfully writen machines state to space. version=" + currentVersion);
+                                logger.trace("Successfully written machines state to space. version=" + currentVersion);
                             } catch (final Throwable t) {
                                 logger.debug("Failed writing machines state to space. version=" + currentVersion, t);
                                 lastError.set(t);

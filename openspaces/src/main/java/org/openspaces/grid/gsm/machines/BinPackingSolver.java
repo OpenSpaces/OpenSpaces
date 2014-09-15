@@ -1322,7 +1322,7 @@ public class BinPackingSolver {
             }
         }
         if (chosenAgentUid != null) {
-            logger.debug("Choosed agent " + chosenAgentUid + " to allocate " + capacityToAllocateOnAgent + " since it has the least ammount of unallocated memory " + minUnallocatedMemoryInMB);
+            logger.debug("Chosen agent " + chosenAgentUid + " to allocate " + capacityToAllocateOnAgent + " since it has the least amount of unallocated memory " + minUnallocatedMemoryInMB);
         }
         else {
             logger.debug("Cannot find agent that can allocate " + capacityToAllocateOnAgent);

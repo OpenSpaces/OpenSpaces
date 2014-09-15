@@ -470,7 +470,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             }
         }
         catch( IOException io ){
-            throw new AdminException( "Failed to retrive processing units available " +
+            throw new AdminException( "Failed to retrieve processing units available " +
             		                    "under [GS ROOT]/deploy directory", io );
         }
 

@@ -386,7 +386,7 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
                 addURL.invoke(classLoader, url);
             }
         } catch (Exception e) {
-            throw new CannotCreateContainerException("Failed to add shared lib to therad context class loader [" + classLoader + "]", e);
+            throw new CannotCreateContainerException("Failed to add shared lib to thread context class loader [" + classLoader + "]", e);
         }
         addedSharedLibToClassLoader = true;
     }

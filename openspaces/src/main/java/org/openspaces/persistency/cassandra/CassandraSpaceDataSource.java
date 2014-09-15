@@ -95,12 +95,12 @@ public class CassandraSpaceDataSource extends ClusterInfoAwareSpaceDataSource {
         }
         
         if (minimumNumberOfConnections <= 0) {
-            throw new IllegalArgumentException("mininumNumberOfConnections must be positive number");
+            throw new IllegalArgumentException("minimumNumberOfConnections must be positive number");
         }
         
         if (maximumNumberOfConnections < minimumNumberOfConnections) {
-            throw new IllegalArgumentException("maxmimumNumberOfConnections must not be smaller than" +
-                                               "mininummNumberOfConnections");
+            throw new IllegalArgumentException("maximumNumberOfConnections must not be smaller than" +
+                                               "minimumNumberOfConnections");
         }
         
         if (batchLimit <= 0) {

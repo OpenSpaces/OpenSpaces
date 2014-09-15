@@ -508,7 +508,7 @@ public class ApacheLoadBalancerAgent implements DiscoveryListener, ServiceDiscov
         } else if (apcaheLocation != null) {
             agent.setConfigLocation(apcaheLocation + "/conf/gigaspaces");
         } else {
-            throw new IllegalArgumentException("Either conig director location or apache location must be provied");
+            throw new IllegalArgumentException("Either config directory location or apache location must be provided");
         }
 
         try {

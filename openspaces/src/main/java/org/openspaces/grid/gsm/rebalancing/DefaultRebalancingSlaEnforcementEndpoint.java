@@ -1042,7 +1042,7 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
         for (ProcessingUnitInstance instance : state.getRemovedStatelessProcessingUnitInstances(pu)) {
              if (!instance.isDiscovered()) {
                 state.removeRemovedStatelessProcessingUnitInstance(instance);
-                logger.info("Processing Unit Instance " + RebalancingUtils.puInstanceToString(instance) + " removed succesfully.");
+                logger.info("Processing Unit Instance " + RebalancingUtils.puInstanceToString(instance) + " removed successfully.");
             }
         }
     }

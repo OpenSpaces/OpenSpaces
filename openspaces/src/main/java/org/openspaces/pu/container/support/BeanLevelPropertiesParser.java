@@ -65,7 +65,7 @@ public abstract class BeanLevelPropertiesParser {
             try {
                 beanLevelProperties.getContextProperties().load(is);
             } catch (IOException e) {
-                throw new IllegalArgumentException("Faled to load [" + DEFAULT_CONTEXT_PROPERTIES_LOCATION + "]", e);
+                throw new IllegalArgumentException("Failed to load [" + DEFAULT_CONTEXT_PROPERTIES_LOCATION + "]", e);
             } finally {
                 try {
                     is.close();

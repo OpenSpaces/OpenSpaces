@@ -93,7 +93,7 @@ public class ReplicationRedoLogOverflowToDiskAlertBean implements AlertBean, Spa
             AlertFactory factory = new AlertFactory();
             factory.name(ALERT_NAME);
             factory.groupUid(groupUid);
-            factory.description("Replication redo log is unvailable; " + getSpaceName(spaceInstance) + " has been removed.");
+            factory.description("Replication redo log is unavailable; " + getSpaceName(spaceInstance) + " has been removed.");
             factory.severity(AlertSeverity.WARNING);
             factory.status(AlertStatus.NA);
             factory.componentUid(spaceInstance.getUid());

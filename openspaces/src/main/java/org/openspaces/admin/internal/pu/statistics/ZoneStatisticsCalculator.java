@@ -41,7 +41,7 @@ public class ZoneStatisticsCalculator implements InternalProcessingUnitStatistic
             Collection<ProcessingUnitStatisticsId> requestedStatisticsIds) {
         
         if (logger.isTraceEnabled()) {
-            logger.trace("calculateNewStatistics(processingUnitStatistics="+processingUnitStatistics+" , statisticsIds="+ requestedStatisticsIds + " admin timestampe = " + processingUnitStatistics.getAdminTimestamp());
+            logger.trace("calculateNewStatistics(processingUnitStatistics="+processingUnitStatistics+" , statisticsIds="+ requestedStatisticsIds + " admin timestamp = " + processingUnitStatistics.getAdminTimestamp());
         }
         
         //copy to avoid conc. modification exception on statistics
@@ -52,7 +52,7 @@ public class ZoneStatisticsCalculator implements InternalProcessingUnitStatistic
             calculateNewStatistics(processingUnitStatistics, statistics, requestedStatisticsId);
         } 
         if (logger.isTraceEnabled()) {
-            logger.trace("calculateNewStatistics(processingUnitStatistics="+processingUnitStatistics+" , statisticsIds="+ requestedStatisticsIds + " admin timestampe = " + processingUnitStatistics.getAdminTimestamp());
+            logger.trace("calculateNewStatistics(processingUnitStatistics="+processingUnitStatistics+" , statisticsIds="+ requestedStatisticsIds + " admin timestamp = " + processingUnitStatistics.getAdminTimestamp());
         }
     } 
     
@@ -67,7 +67,7 @@ public class ZoneStatisticsCalculator implements InternalProcessingUnitStatistic
             }
         }
         if (!statisfied && logger.isTraceEnabled()) {
-            logger.trace("requestedZoneStatisticsConfig : " + requestedStatisticsId.getAgentZones() + " is not satisfied by any existing statisitcs");
+            logger.trace("requestedZoneStatisticsConfig : " + requestedStatisticsId.getAgentZones() + " is not satisfied by any existing statistics");
         }
         
     }
@@ -88,7 +88,7 @@ public class ZoneStatisticsCalculator implements InternalProcessingUnitStatistic
         if (existingProcessingUnitStatisticsId.getAgentZones() instanceof ExactZonesConfig) {
             existingZoneStatisticsConfig = (ExactZonesConfig) existingProcessingUnitStatisticsId.getAgentZones(); // there may be zones config that are not ExactZones
         } else {
-            throw new IllegalStateException("found a map entry with key = " + existingProcessingUnitStatisticsId + " and value = " + value + " in processing unti statistics = " + internalProcessingUnitStatistics + ". ZonesConfig for this entry is not an instance of ExactZonesConfig." + "requestedStatisticsId for calculation was = " + requestedStatisticsId);
+            throw new IllegalStateException("found a map entry with key = " + existingProcessingUnitStatisticsId + " and value = " + value + " in processing unit statistics = " + internalProcessingUnitStatistics + ". ZonesConfig for this entry is not an instance of ExactZonesConfig." + "requestedStatisticsId for calculation was = " + requestedStatisticsId);
         }
             
         if (requestedZoneStatisticsConfig.isSatisfiedBy(existingZoneStatisticsConfig)) {

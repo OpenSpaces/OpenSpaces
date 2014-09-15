@@ -512,7 +512,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Spac
         try {
             initializationLatch.await(60, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
-            throw new RemoteLookupFailureException("Space remoting service exporter interruped while waiting for initialization", e);
+            throw new RemoteLookupFailureException("Space remoting service exporter interrupted while waiting for initialization", e);
         }
         if (!initialized) {
             throw new RemoteLookupFailureException("Space remoting service exporter not initialized yet");

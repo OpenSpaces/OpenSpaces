@@ -555,7 +555,7 @@ public abstract class AbstractCapacityScaleStrategyBean extends AbstractScaleStr
                  getProcessingUnit().getNumberOfBackups()+1);
         getLogger().info(
                 "targetNumberOfContainers= "+
-                "max(minimumNumberOfMachines, numberOfBackupsPerParition+1)= "+
+                "max(minimumNumberOfMachines, numberOfBackupsPerPartition+1)= "+
                 "max("+ getMinimumNumberOfMachines() +","+1+ "+"+getProcessingUnit().getNumberOfBackups()+")= "+
                 targetNumberOfContainers);
         

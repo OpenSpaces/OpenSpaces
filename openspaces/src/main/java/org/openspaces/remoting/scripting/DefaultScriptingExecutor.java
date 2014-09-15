@@ -236,7 +236,7 @@ public class DefaultScriptingExecutor implements ScriptingExecutor, ApplicationC
             TypedScript typedScript = (TypedScript) script;
             Map<String, Class<?>> scriptParameterTypes = typedScript.getParameterTypes();
             if (scriptParameterTypes == null) {
-                throw new ScriptingException("paramterTypes cannot be null for typed script");
+                throw new ScriptingException("parameterTypes cannot be null for typed script");
             }
             if (parameterTypes != null) {
                 for (Map.Entry<String, Class<?>> entry : parameterTypes.entrySet()) {

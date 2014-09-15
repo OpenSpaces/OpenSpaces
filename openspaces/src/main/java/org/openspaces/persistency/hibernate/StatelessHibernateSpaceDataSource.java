@@ -60,24 +60,24 @@ public class StatelessHibernateSpaceDataSource extends AbstractHibernateSpaceDat
             if (getInitialLoadChunkSize() == -1) {
                 if (isUseScrollableResultSet()) {
                     if (logger.isTraceEnabled()) {
-                        logger.trace("Creating inital load scrollable iterator for entry [" + entityName + "]");
+                        logger.trace("Creating initial load scrollable iterator for entry [" + entityName + "]");
                     }
                     iterators[iteratorCounter++] = new StatelessScrollableDataIterator(entityName, getSessionFactory(), getFetchSize(), isPerformOrderById());
                 } else {
                     if (logger.isTraceEnabled()) {
-                        logger.trace("Creating inital load list iterator for entry [" + entityName + "]");
+                        logger.trace("Creating initial load list iterator for entry [" + entityName + "]");
                     }
                     iterators[iteratorCounter++] = new StatelessListQueryDataIterator(entityName, getSessionFactory());
                 }
             } else {
                 if (isUseScrollableResultSet()) {
                     if (logger.isTraceEnabled()) {
-                        logger.trace("Creating inital load chunk scrollable iterator for entry [" + entityName + "]");
+                        logger.trace("Creating initial load chunk scrollable iterator for entry [" + entityName + "]");
                     }
                     iterators[iteratorCounter++] = new StatelessChunkScrollableDataIterator(entityName, getSessionFactory(), getFetchSize(), isPerformOrderById(), getInitialLoadChunkSize());
                 } else {
                     if (logger.isTraceEnabled()) {
-                        logger.trace("Creating inital load chunk list iterator for entry [" + entityName + "]");
+                        logger.trace("Creating initial load chunk list iterator for entry [" + entityName + "]");
                     }
                     iterators[iteratorCounter++] = new StatelessChunkListDataIterator(entityName, getSessionFactory(), getFetchSize(), isPerformOrderById(), getInitialLoadChunkSize());
                 }

@@ -164,7 +164,7 @@ public class CassandraSpaceSynchronizationEndpoint
         }
 
         if (logger.isTraceEnabled()) {
-            logger.trace("Peforming batch operation");
+            logger.trace("Performing batch operation");
         }
         
         for (List<ColumnFamilyRow> rows : cfToRows.values()) {

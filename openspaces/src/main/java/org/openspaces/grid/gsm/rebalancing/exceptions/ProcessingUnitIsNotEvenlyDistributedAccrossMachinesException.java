@@ -25,7 +25,7 @@ public class ProcessingUnitIsNotEvenlyDistributedAccrossMachinesException extend
     private static final long serialVersionUID = 1L;
 
     public ProcessingUnitIsNotEvenlyDistributedAccrossMachinesException(ProcessingUnit pu) {
-        super(pu, "Instances are not evenly distributed accress machines.");
+        super(pu, "Instances are not evenly distributed across machines.");
     }
 
 

@@ -220,7 +220,7 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
                 logger.info("Stopping machine " + hostAddress);
                 try {
                     NonBlockingElasticMachineProvisioningAdapter.this.machineProvisioning.stopMachine(new StartedGridServiceAgent(agent,null), duration, unit);
-                    logger.info("machine " + hostAddress + " succesfully stopped.");
+                    logger.info("machine " + hostAddress + " successfully stopped.");
                     atomicDone.set(true);
                 } catch (ElasticMachineProvisioningException e) {
 					atomicExceptionRef.set(e);

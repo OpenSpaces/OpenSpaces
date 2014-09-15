@@ -1191,7 +1191,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             
             CapacityRequirements newAgentCapacity = MachinesSlaUtils.getMachineTotalCapacity(newAgent,sla);
             if (logger.isInfoEnabled()) {
-                logger.info("Agent started and provisioned succesfully on a new machine " + agentToString(newAgent)+ " has "+ newAgentCapacity);
+                logger.info("Agent started and provisioned successfully on a new machine " + agentToString(newAgent)+ " has "+ newAgentCapacity);
             }
             
             unallocatedCapacity = 

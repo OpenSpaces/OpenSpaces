@@ -177,7 +177,7 @@ public class StoreManagerSQLQuery extends AbstractStoreQuery {
             final StoreManagerSQLQuery query = (StoreManagerSQLQuery) storeQuery;
                         
             if (params == null)
-                throw new UserException("Execute task/script is not supported for non-parameterized query.");
+                throw new UserException("Execute task/script is not supported for non-parametrized query.");
             if (params.length != 1)
                 throw new UserException("Illegal number of arguments <" + params.length + "> should be <1>.");
 

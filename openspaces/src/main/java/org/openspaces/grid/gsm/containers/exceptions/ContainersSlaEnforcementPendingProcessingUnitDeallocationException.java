@@ -28,7 +28,7 @@ public class ContainersSlaEnforcementPendingProcessingUnitDeallocationException 
     private static final long serialVersionUID = 1L;
 
     public ContainersSlaEnforcementPendingProcessingUnitDeallocationException(ProcessingUnit pu, Collection<GridServiceContainer> containers) {
-        super(pu, "Cannot shutdown the following containers untill all processing units have been undeployed: " + ContainersSlaUtils.gscsToString(containers));
+        super(pu, "Cannot shutdown the following containers until all processing units have been undeployed: " + ContainersSlaUtils.gscsToString(containers));
     }
     
 

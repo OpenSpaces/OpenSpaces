@@ -270,7 +270,7 @@ implements AutoScalingSlaEnforcementEndpointAware {
                 final CapacityRequirements plannedForZones = planned.getZonesCapacityOrZero(zones);
                 
                 if (getLogger().isDebugEnabled()) {
-                    getLogger().debug("Copying exising zones " + zones +" capacity " + plannedForZones);
+                    getLogger().debug("Copying existing zones " + zones +" capacity " + plannedForZones);
                 }
                 newPlanned = newPlanned.set(zones, plannedForZones);
             }

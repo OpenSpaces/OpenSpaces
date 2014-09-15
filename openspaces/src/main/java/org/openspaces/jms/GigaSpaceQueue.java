@@ -42,7 +42,7 @@ public class GigaSpaceQueue implements FactoryBean, InitializingBean {
     }
 
     public void afterPropertiesSet() throws Exception {
-        Assert.notNull(queueName, "queueName proeprty is required");
+        Assert.notNull(queueName, "queueName property is required");
         queue = new GSQueueImpl(queueName);
     }
 

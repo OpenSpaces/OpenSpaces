@@ -670,7 +670,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, RemoteSecuredSer
                     //Pending operation is override command (setElasticProperties), override with pending state.
                     elasticProperties = pendingPropsUpdate.getElasticProperties();
                     if (logger.isLoggable(Level.INFO)) {
-                        logger.info("Added " + pu.getName() + " and overrided elastic properties (elasticProperties.size()=" + elasticProperties.size()+")");
+                        logger.info("Added " + pu.getName() + " and overridden elastic properties (elasticProperties.size()=" + elasticProperties.size()+")");
                     }
                 }
             }
@@ -921,7 +921,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, RemoteSecuredSer
                 
                 Map<String, String> elasticProperties = elasticPropertiesPerProcessingUnit.get(processingUnitName);
                 if (elasticProperties == null) {
-                	throw new IllegalArgumentException("Could not find conifugration for " + processingUnitName);
+                	throw new IllegalArgumentException("Could not find configuration for " + processingUnitName);
                 }
 
                 // Change pu properties, copy before modifying it.

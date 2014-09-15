@@ -109,7 +109,7 @@ public class ChangeExtension
             return null;
         
         if (changeResult.getNumberOfChangedEntries() != 1) {
-            String message = "ambigious result - change operation have modified more than one entry, " +
+            String message = "ambiguous result - change operation have modified more than one entry, " +
                     "this could point to having entry with the same id in multiple partitions and using an id query without a routing value";
             Collection<?> changeEntries = changeResult.getResults();
             throw exceptionTranslator.translate(new ChangeException(message, (Collection<ChangedEntryDetails<?>>) changeEntries, Collections.EMPTY_LIST, Collections.EMPTY_LIST));    
@@ -130,7 +130,7 @@ public class ChangeExtension
         if (changedEntryDetails == null)
             return null;
         if (changedEntryDetails.getChangeOperationsResults().size() != 1) {
-            String message = "ambigious result - more than one changes were applied on the entry and as a result it contains more than one change operation result";
+            String message = "ambiguous result - more than one changes were applied on the entry and as a result it contains more than one change operation result";
             Collection<?> changeEntries = changeResult.getResults();
             throw exceptionTranslator.translate(new ChangeException(message, (Collection<ChangedEntryDetails<?>>) changeEntries, Collections.EMPTY_LIST, Collections.EMPTY_LIST));
         }

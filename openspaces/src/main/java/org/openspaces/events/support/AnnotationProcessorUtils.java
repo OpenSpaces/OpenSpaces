@@ -82,7 +82,7 @@ public class AnnotationProcessorUtils {
             return (T) refs.values().iterator().next();
         } 
         throw new IllegalArgumentException("Failed to resolve " + refClass.getName() + " to use with event container, " +
-                "[" + beanName + "] does not specifiy one, has no fields of that type, and there are more than one " + refClass.getName() + " beans within the context");
+                "[" + beanName + "] does not specify one, has no fields of that type, and there are more than one " + refClass.getName() + " beans within the context");
     }
     
     public static PlatformTransactionManager findTxManager(String txManagerName, ApplicationContext applicationContext, String beanName) {

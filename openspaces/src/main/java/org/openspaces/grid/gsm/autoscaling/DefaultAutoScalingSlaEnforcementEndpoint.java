@@ -217,7 +217,7 @@ public class DefaultAutoScalingSlaEnforcementEndpoint implements AutoScalingSlaE
             }
         }
         if (minimunChange.equalsZero()) {
-            throw new IllegalStateException("minimunCapcityHighThresholdIncreaseRequirements cannot be zero");
+            throw new IllegalStateException("minimumCapacityHighThresholdIncreaseRequirements cannot be zero");
         }
         return minimunChange;
     }
