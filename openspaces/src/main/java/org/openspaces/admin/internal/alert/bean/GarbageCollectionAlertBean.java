@@ -86,11 +86,11 @@ public class GarbageCollectionAlertBean implements AlertBean, VirtualMachineStat
     private void validateProperties() {
         
         if (config.getLongGcPausePeriod() == null) {
-            throw new BeanConfigurationException("Long GC pause pertiod property is null");
+            throw new BeanConfigurationException("Long GC pause period property is null");
         }
         
         if (config.getShortGcPausePeriod() == null) {
-            throw new BeanConfigurationException("Short GC pause pertiod property is null");
+            throw new BeanConfigurationException("Short GC pause period property is null");
         }
         
         if (config.getLongGcPausePeriod() < config.getShortGcPausePeriod()) {
@@ -99,7 +99,7 @@ public class GarbageCollectionAlertBean implements AlertBean, VirtualMachineStat
         }
               
         if (config.getShortGcPausePeriod() < 0) {
-            throw new BeanConfigurationException("Measurment period [" + config.getShortGcPausePeriod()
+            throw new BeanConfigurationException("Measurement period [" + config.getShortGcPausePeriod()
                     + " ms] must be greater than zero");
         }
     }

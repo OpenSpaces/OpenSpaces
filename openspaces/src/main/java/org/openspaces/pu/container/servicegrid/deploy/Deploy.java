@@ -542,17 +542,17 @@ public class Deploy {
 
             // override specific cluster info parameters on the SLA
             if (clusterInfo.getSchema() != null && clusterInfo.getSchema().length() > 0) {
-                info("Overrding SLA cluster schema with [" + clusterInfo.getSchema() + "]");
+                info("Overriding SLA cluster schema with [" + clusterInfo.getSchema() + "]");
                 sla.setClusterSchema(clusterInfo.getSchema());
             }
             if (clusterInfo.getNumberOfInstances() != null) {
-                info("Overrding SLA numberOfInstances with [" + clusterInfo.getNumberOfInstances() + "]");
+                info("Overriding SLA numberOfInstances with [" + clusterInfo.getNumberOfInstances() + "]");
                 sla.setNumberOfInstances(clusterInfo.getNumberOfInstances());
                 if (clusterInfo.getNumberOfBackups() == null) {
-                    info("Overrding SLA numberOfBackups with [" + clusterInfo.getNumberOfBackups() + "]");
+                    info("Overriding SLA numberOfBackups with [" + clusterInfo.getNumberOfBackups() + "]");
                     sla.setNumberOfBackups(0);
                 } else {
-                    info("Overrding SLA numberOfBackups with [" + clusterInfo.getNumberOfBackups() + "]");
+                    info("Overriding SLA numberOfBackups with [" + clusterInfo.getNumberOfBackups() + "]");
                     sla.setNumberOfBackups(clusterInfo.getNumberOfBackups());
                 }
             }
@@ -1153,7 +1153,7 @@ public class Deploy {
         sb.append("\n2. Deploy -" + KEY_SLA + " file://config/sla.xml data-processor");
         sb.append("\n    - Deploys a processing unit called data-processor using an SLA element read from sla.xml");
         sb.append("\n3. Deploy -" + KEY_PROPERTIES + " file://config/context.properties -" + KEY_PROPERTIES + " space1 file://config/space1.properties data-processor");
-        sb.append("\n    - Deploys a processing unit called data-processor using context level properties called context.proeprties and bean level properties called space1.properties applied to bean named space1");
+        sb.append("\n    - Deploys a processing unit called data-processor using context level properties called context.properties and bean level properties called space1.properties applied to bean named space1");
         sb.append("\n4. Deploy -" + KEY_PROPERTIES + " embed://prop1=value1 -" + KEY_PROPERTIES + " space1 embed://prop2=value2;prop3=value3 data-processor");
         sb.append("\n    - Deploys a processing unit called data-processor using context level properties with a single property called prop1 with value1 and bean level properties with two properties");
         return sb.toString();

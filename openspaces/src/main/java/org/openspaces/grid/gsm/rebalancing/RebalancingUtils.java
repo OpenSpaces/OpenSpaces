@@ -916,7 +916,7 @@ public class RebalancingUtils {
                     
                     if (getNumberOfCpuCores(m1,allocatedCapacity).equals(Fraction.ZERO) ||
                         getNumberOfCpuCores(m2,allocatedCapacity).equals(Fraction.ZERO)) {
-                        throw new IllegalStateException("Rebalancing assumes positibe number of CPU cores per machine");
+                        throw new IllegalStateException("Rebalancing assumes positive number of CPU cores per machine");
                     }
                     
                     return 

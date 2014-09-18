@@ -117,7 +117,7 @@ public class CpuUtilizationAlertBean implements AlertBean,
         }
 
         if (config.getMeasurementPeriod() < StatisticsMonitor.DEFAULT_MONITOR_INTERVAL) {
-            throw new BeanConfigurationException("Measurment period [" + config.getMeasurementPeriod()
+            throw new BeanConfigurationException("Measurement period [" + config.getMeasurementPeriod()
                     + " ms] must be greater than ["+StatisticsMonitor.DEFAULT_MONITOR_INTERVAL+" ms]");
         }
     }
@@ -131,7 +131,7 @@ public class CpuUtilizationAlertBean implements AlertBean,
             AlertFactory factory = new AlertFactory();
             factory.name(ALERT_NAME);
             factory.groupUid(groupUid);
-            factory.description("CPU measurment is unavailable; machine has been removed");
+            factory.description("CPU measurement is unavailable; machine has been removed");
             factory.severity(AlertSeverity.WARNING);
             factory.status(AlertStatus.NA);
             factory.componentUid(machine.getOperatingSystem().getUid());

@@ -117,7 +117,7 @@ public class HeapMemoryUtilizationAlertBean implements AlertBean, VirtualMachine
         }
 
         if (config.getMeasurementPeriod() < StatisticsMonitor.DEFAULT_MONITOR_INTERVAL) {
-            throw new BeanConfigurationException("Measurment period [" + config.getMeasurementPeriod()
+            throw new BeanConfigurationException("Measurement period [" + config.getMeasurementPeriod()
                     + " ms] must be greater than ["+StatisticsMonitor.DEFAULT_MONITOR_INTERVAL+" ms]");
         }
     }

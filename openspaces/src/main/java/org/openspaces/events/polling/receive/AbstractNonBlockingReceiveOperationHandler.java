@@ -68,7 +68,7 @@ public abstract class AbstractNonBlockingReceiveOperationHandler implements Rece
             try {
                 Thread.sleep(sleepTime);
             } catch (InterruptedException e) {
-                throw new SpaceInterruptedException("Interrupted while perfoming non blocking receive operation");
+                throw new SpaceInterruptedException("Interrupted while performing non blocking receive operation");
             }
         }
         return null;

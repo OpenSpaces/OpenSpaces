@@ -633,7 +633,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             try {
                 prepareWebApplication(deployPath, clusterInfo, beanLevelProperties);
             } catch (Exception e) {
-                throw new CannotCreateContainerException("Failed to bootstrap web applciation", e);
+                throw new CannotCreateContainerException("Failed to bootstrap web application", e);
             }
         } else {
             // add to service class loader

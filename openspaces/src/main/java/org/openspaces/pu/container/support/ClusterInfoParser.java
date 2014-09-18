@@ -59,8 +59,8 @@ public abstract class ClusterInfoParser {
                 String clusterParameter = param.getArguments()[j];
                 int equalsIndex = clusterParameter.indexOf("=");
                 if (equalsIndex == -1) {
-                    throw new IllegalArgumentException("Cluster paramter [" + clusterParameter
-                            + "] is mailformed, must have a name=value syntax");
+                    throw new IllegalArgumentException("Cluster parameter [" + clusterParameter
+                            + "] is malformed, must have a name=value syntax");
                 }
                 String clusterParamName = clusterParameter.substring(0, equalsIndex);
                 String clusterParamValue = clusterParameter.substring(equalsIndex + 1);

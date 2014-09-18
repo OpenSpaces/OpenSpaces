@@ -43,7 +43,7 @@ abstract public class AbstractCompoundTypeNode implements CompoundTypeNode {
                 result.put(child.getFullName(), columnMetadata);
             } else if (child instanceof DynamicColumnMetadata) {
                 throw new IllegalStateException("Dynamic columns should not be part of the column " +
-                		"family metadta static columns");
+                		"family metadata static columns");
             } else {
                 result.putAll(((CompoundTypeNode)child).getAllTypedColumnMetadataChildren());
             }

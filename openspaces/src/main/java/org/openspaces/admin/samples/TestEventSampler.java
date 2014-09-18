@@ -137,7 +137,7 @@ public class TestEventSampler implements MachineLifecycleEventListener,
 
     public void processingUnitManagingGridServiceManagerChanged(ManagingGridServiceManagerChangedEvent event) {
         if (event.isUnknown()) {
-            System.out.println("Processing Unit [" + event.getProcessingUnit().getName() + "] managin GSM UNKNOWN");
+            System.out.println("Processing Unit [" + event.getProcessingUnit().getName() + "] managing GSM UNKNOWN");
         } else {
             System.out.println("Processing Unit [" + event.getProcessingUnit().getName() + "] new managing GSM [" + event.getNewGridServiceManager().getUid() + "]");
         }

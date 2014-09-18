@@ -391,7 +391,7 @@ public class HectorCassandraClient {
             
             ColumnFamilyDefinition columnFamilyDefinition = getColumnFamilyDefinition(metadata);
             if (columnFamilyDefinition == null) {
-                throw new SpaceCassandraSchemaUpdateException("column family definitaion: " + metadata.getColumnFamilyName() + 
+                throw new SpaceCassandraSchemaUpdateException("column family definition: " + metadata.getColumnFamilyName() +
                                                    " for type: " + typeName + " not found", null, false);
             }
             

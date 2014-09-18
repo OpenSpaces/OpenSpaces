@@ -78,7 +78,7 @@ public class BeanPropertyMonitor extends AbstractMonitor implements ApplicationC
         try {
             bean = applicationContext.getBean(ref);
         } catch (NoSuchBeanDefinitionException e) {
-            throw new IllegalArgumentException("Monitor did not find bean [" + ref + "] under Spring application context, availalbe beans are " + Arrays.toString(applicationContext.getBeanDefinitionNames()));
+            throw new IllegalArgumentException("Monitor did not find bean [" + ref + "] under Spring application context, available beans are " + Arrays.toString(applicationContext.getBeanDefinitionNames()));
         }
 
         methodInvoker = new MethodInvoker();

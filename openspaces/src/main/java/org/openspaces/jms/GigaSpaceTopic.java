@@ -42,7 +42,7 @@ public class GigaSpaceTopic implements FactoryBean, InitializingBean {
     }
 
     public void afterPropertiesSet() throws Exception {
-        Assert.notNull(topicName, "topicName proeprty is required");
+        Assert.notNull(topicName, "topicName property is required");
         topic = new GSTopicImpl(topicName);
     }
 

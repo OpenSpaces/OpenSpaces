@@ -50,7 +50,7 @@ public class AutoScalingConfigConflictException extends AutoScalingSlaEnforcemen
     private static String message(CapacityRequirements minimum, CapacityRequirements maximum,Set<String> zones,
             CapacityRequirementsPerZones lastEnforcedCapacityPerZones,
             CapacityRequirementsPerZones newCapacityRequirementsPerZones) {
-        return "Configuration Confilict. autoscaling will not continue. minimumCapacityRequirements= " + minimum + " is in conflict with maximumCapacityRequirements="
+        return "Configuration Conflict. autoscaling will not continue. minimumCapacityRequirements= " + minimum + " is in conflict with maximumCapacityRequirements="
                     + maximum + " for zones " + zones + " : lastEnforcedCapacityPerZones=" + lastEnforcedCapacityPerZones + " , newCapacityRequirementsPerZones=" + newCapacityRequirementsPerZones;
         
         

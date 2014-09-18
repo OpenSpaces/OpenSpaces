@@ -102,7 +102,7 @@ public abstract class AbstractHibernateSpaceDataSource extends ManagedEntriesSpa
             }
         }
         if (logger.isDebugEnabled()) {
-            logger.debug("Using Hibernate inital load managedEntries [" + Arrays.toString(initialLoadEntries) + "]");
+            logger.debug("Using Hibernate initial load managedEntries [" + Arrays.toString(initialLoadEntries) + "]");
         }
         return result;
     }

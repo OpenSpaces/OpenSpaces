@@ -36,7 +36,7 @@ public class ElasticAutoScalingAlertBean extends AbstractElasticProcessingUnitAl
     private static final String AUTO_SCALING_ALERT_BEAN_UID = "AF5874F0-78E1-11E1-8DA5-1FC84724019B";
     private static final String AUTO_SCALING_ALERT_NAME = "Automatic Scaling Alert";
     private static final AlertSeverity AUTO_SCALING_ALERT_SEVERITY = AlertSeverity.SEVERE;
-    private static final String AUTO_SCALING_ALERT_RESOLVED_DESCRIPTION_POSTFIX= "Automatic Scaling for %s completed succesfully";
+    private static final String AUTO_SCALING_ALERT_RESOLVED_DESCRIPTION_POSTFIX= "Automatic Scaling for %s completed successfully";
         
     @Override
     public void afterPropertiesSet() throws Exception {

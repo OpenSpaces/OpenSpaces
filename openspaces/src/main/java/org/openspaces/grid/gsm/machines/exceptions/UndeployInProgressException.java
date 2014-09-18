@@ -34,7 +34,7 @@ public class UndeployInProgressException extends GridServiceAgentSlaEnforcementI
     }
 
     private static String message(ProcessingUnit pu) {
-        return "Last undeployment of " + pu.getName() + " has not completed succesfully.";
+        return "Last undeployment of " + pu.getName() + " has not completed successfully.";
     }
     
     

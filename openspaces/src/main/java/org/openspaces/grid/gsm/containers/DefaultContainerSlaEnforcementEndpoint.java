@@ -308,7 +308,7 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
             try {
                 GridServiceContainer container = future.get();
                 if (container.isDiscovered()) {
-                    logger.info("Container started succesfully " + ContainersSlaUtils.gscToString(container));
+                    logger.info("Container started successfully " + ContainersSlaUtils.gscToString(container));
                 }
 
             } catch (ExecutionException e) {
@@ -375,7 +375,7 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
                         try {
                             hasProcessingUnitInstances = ((InternalGridServiceContainer)container).hasProcessingUnitInstances();
                         } catch (AdminException e) {
-                            logger.info("Cannot determine number of processing unit instances running on conatiner " + ContainersSlaUtils.gscToString(container),e);
+                            logger.info("Cannot determine number of processing unit instances running on container " + ContainersSlaUtils.gscToString(container),e);
                             return;
                         }
                         
@@ -422,14 +422,14 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
             GridServiceAgent agent = future.getGridServiceAgent();
             if (!agent.isDiscovered()) {
                 logger.info("Forgetting failure to start container on machine "
-                        + ContainersSlaUtils.machineToString(agent.getMachine()) + " that occured " + passedSeconds
+                        + ContainersSlaUtils.machineToString(agent.getMachine()) + " that occurred " + passedSeconds
                         + " seconds ago since grid service agent no longer exists.");
                 state.removeFailedFuture(future);
             } else {
                 terminateOrphanContainersOfAgent(agent, future);
                 if (passedSeconds > START_CONTAINER_TIMEOUT_FAILURE_FORGET_SECONDS) {
                     logger.info("Forgetting failure to start container on machine "
-                            + ContainersSlaUtils.machineToString(agent.getMachine()) + " that occured " + passedSeconds
+                            + ContainersSlaUtils.machineToString(agent.getMachine()) + " that occurred " + passedSeconds
                             + " seconds ago due to timeout.");
                     state.removeFailedFuture(future);
                 }
