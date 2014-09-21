@@ -20,7 +20,6 @@ import com.gigaspaces.datasource.BulkItem;
 import com.gigaspaces.datasource.DataIterator;
 import com.gigaspaces.datasource.DataSourceException;
 import com.gigaspaces.datasource.ManagedDataSource;
-import com.gigaspaces.datasource.hibernate.SessionFactoryBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.SessionFactory;
