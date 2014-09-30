@@ -247,23 +247,35 @@ public class DefaultOperatingSystemsStatistics implements OperatingSystemsStatis
 
     public String getMinMemoryUsedPercFormatted() {
  
-        return StatisticsUtils.formatPerc(getMaxMemoryUsedPerc());
+        return StatisticsUtils.formatPerc(getMinMemoryUsedPerc());
     }
 
     public String getMaxMemoryUsedPercFormatted() {
  
         return StatisticsUtils.formatPerc(getMaxMemoryUsedPerc());
     }
-    
-    
-    
+
+    @Override
+    public long getActualMemoryUsed() {
+        long total = 0;
+        for (OperatingSystemStatistics stat : stats) {
+            if (stat.getActualMemoryUsed() != -1) {
+                total += stat.getActualMemoryUsed();
+            }
+        }
+        return total;
+    }
+
     private double calculateOSUsedMemoryPerc( OperatingSystemStatistics stat ) {
         OperatingSystemDetails osDetails = stat.getDetails();
         //os details can be null if OperatingSystemStatistics is NA
         if( osDetails != null && !osDetails.isNA()){
+            if( stat.getPhysicalMemoryUsedPerc() > 0 ){
+                return stat.getPhysicalMemoryUsedPerc();
+            }
+
             long totalPhysicalMemorySize = osDetails.getTotalPhysicalMemorySizeInBytes();
-            double usedMemory = totalPhysicalMemorySize - 
-            stat.getFreePhysicalMemorySizeInBytes();
+            double usedMemory = totalPhysicalMemorySize - stat.getFreePhysicalMemorySizeInBytes();
             return usedMemory/totalPhysicalMemorySize;
         }
         

@@ -150,7 +150,8 @@ public class DefaultOperatingSystemStatistics implements OperatingSystemStatisti
         if (isNA()) {
             return -1;
         }
-        return StatisticsUtils.computePerc(getDetails().getTotalPhysicalMemorySizeInBytes() - getFreePhysicalMemorySizeInBytes(), getDetails().getTotalPhysicalMemorySizeInBytes());
+        return stats.getUsedMemoryPerc() < 0 ?
+                StatisticsUtils.computePerc(getDetails().getTotalPhysicalMemorySizeInBytes() - getFreePhysicalMemorySizeInBytes(), getDetails().getTotalPhysicalMemorySizeInBytes()) : stats.getUsedMemoryPerc();
     }
 
     public double getActualPhysicalMemoryUsedPerc() {
@@ -166,6 +167,11 @@ public class DefaultOperatingSystemStatistics implements OperatingSystemStatisti
 
     public String getCpuPercFormatted() {
         return StatisticsUtils.formatPerc(getCpuPerc());
+    }
+
+    @Override
+    public long getActualMemoryUsed() {
+        return stats.getActualMemoryUsed();
     }
 
     private Map<String, NetworkStatistics> netStats;

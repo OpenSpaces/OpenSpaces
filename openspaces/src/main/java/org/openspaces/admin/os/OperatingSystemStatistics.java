@@ -100,6 +100,13 @@ public interface OperatingSystemStatistics {
     String getCpuPercFormatted();
 
     /**
+     * @since 10.1
+     * @return Actual Memory Used, in bytes
+     */
+    long getActualMemoryUsed();
+
+
+    /**
      * Returns the network statistics per network device.
      */
     Map<String, NetworkStatistics> getNetworkStats();
