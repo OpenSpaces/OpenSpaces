@@ -98,4 +98,10 @@ public interface OperatingSystemsStatistics {
     
     double getMaxMemoryUsedPerc();
     String getMaxMemoryUsedPercFormatted();
+
+    /**
+     * @since 10.1
+     * @return Actual Memory Used, in bytes
+     */
+    long getActualMemoryUsed();
 }
