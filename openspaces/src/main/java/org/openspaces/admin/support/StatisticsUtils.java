@@ -46,6 +46,15 @@ public class StatisticsUtils {
         return ((double) value) / max * 100;
     }
 
+    /**
+     * @param percVal value between 0 and 100
+     * @return value between 0 and 1
+     */
+    public static double computePerc(double percVal) {
+        return percVal / 100;
+    }
+
+
     public static double computePercByTime(long currentTime, long previousTime, long currentTimestamp, long previousTimestamp) {
         return ((double) (currentTime - previousTime)) / (currentTimestamp - previousTimestamp);
     }
