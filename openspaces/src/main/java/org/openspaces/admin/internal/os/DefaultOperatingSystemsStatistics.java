@@ -271,7 +271,8 @@ public class DefaultOperatingSystemsStatistics implements OperatingSystemsStatis
         //os details can be null if OperatingSystemStatistics is NA
         if( osDetails != null && !osDetails.isNA()){
             if( stat.getPhysicalMemoryUsedPerc() > 0 ){
-                return stat.getPhysicalMemoryUsedPerc();
+                // divide to 100 for backwards compatibility as result of fixing GS-11887
+                return stat.getPhysicalMemoryUsedPerc()/100;
             }
 
             long totalPhysicalMemorySize = osDetails.getTotalPhysicalMemorySizeInBytes();
