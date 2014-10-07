@@ -16,14 +16,17 @@
 
 package org.openspaces.events.notify;
 
-import java.util.ArrayList;
-
+import com.gigaspaces.events.DataEventSession;
+import com.gigaspaces.events.EventSessionConfig;
+import com.gigaspaces.events.NotifyActionType;
+import com.gigaspaces.events.batching.BatchRemoteEvent;
+import com.j_spaces.core.client.EntryArrivedRemoteEvent;
+import com.j_spaces.core.client.INotifyDelegatorFilter;
 import net.jini.core.event.EventRegistration;
 import net.jini.core.event.RemoteEvent;
 import net.jini.core.event.RemoteEventListener;
 import net.jini.core.lease.Lease;
 import net.jini.lease.LeaseListener;
-
 import org.openspaces.core.UnusableEntryException;
 import org.openspaces.core.util.SpaceUtils;
 import org.openspaces.events.AbstractTransactionalEventListenerContainer;
@@ -33,12 +36,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.Assert;
 
-import com.gigaspaces.events.DataEventSession;
-import com.gigaspaces.events.EventSessionConfig;
-import com.gigaspaces.events.NotifyActionType;
-import com.gigaspaces.events.batching.BatchRemoteEvent;
-import com.j_spaces.core.client.EntryArrivedRemoteEvent;
-import com.j_spaces.core.client.INotifyDelegatorFilter;
+import java.util.ArrayList;
 
 /**
  * Base class for notifications based containers allowing to register listener that will be
@@ -124,6 +122,8 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
 
     private int comType = COM_TYPE_MULTIPLEX;
 
+    private boolean notifyPreviousValueOnUpdate = false;
+
     private boolean fifo = false;
 
     private Integer batchSize;
@@ -197,6 +197,18 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
     public void setComTypeName(String comTypeName) {
         Assert.notNull(comTypeName, "comTypeName cannot be null");
         setComType(constants.asNumber(COM_TYPE_PREFIX + comTypeName).intValue());
+    }
+
+    /**
+     * Determines whether the previous value should be sent with the new one upon update notification.
+     * @param notifyPreviousValueOnUpdate
+     */
+    public void setNotifyPreviousValueOnUpdate(boolean notifyPreviousValueOnUpdate) {
+        this.notifyPreviousValueOnUpdate = notifyPreviousValueOnUpdate;
+    }
+
+    public boolean isNotifyPreviousValueOnUpdate() {
+        return notifyPreviousValueOnUpdate;
     }
 
     /**
@@ -709,6 +721,7 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
             default:
                 throw new IllegalArgumentException("Unknown com type [" + comType + "]");
         }
+        eventSessionConfig.setNotifyPreviousValueOnUpdate(notifyPreviousValueOnUpdate);
         eventSessionConfig.setFifo(fifo);
         if (batchSize != null && batchTime != null) {
             if (batchPendingThreshold != null && batchPendingThreshold != -1) {
