@@ -99,6 +99,11 @@ public @interface Notify {
     boolean fifo() default false;
 
     /**
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setNotifyPreviousValueOnUpdate(boolean)
+     */
+    boolean notifyPreviousValueOnUpdate() default false;
+
+    /**
      * When batching is turned on, should the batch of events be passed as an <code>Object[]</code> to
      * the listener. Default to <code>false</code> which means it will be passed one event at a time.
      *
