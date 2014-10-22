@@ -36,7 +36,7 @@ public class RemotingAnnotationBeanDefinitionParser implements BeanDefinitionPar
     public BeanDefinition parse(Element element, ParserContext parserContext) {
         if (!this.registered) {
             BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(RemotingAnnotationBeanPostProcessor.class);
-            builder.setSource(parserContext.extractSource(element));
+            builder.getRawBeanDefinition().setSource(parserContext.extractSource(element));
             BeanDefinitionReaderUtils.registerWithGeneratedName(builder.getBeanDefinition(), parserContext.getRegistry());
             this.registered = true;
         }

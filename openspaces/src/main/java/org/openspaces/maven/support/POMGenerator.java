@@ -66,7 +66,7 @@ public class POMGenerator {
         
 
         // jmx
-        if (!JdkVersion.isAtLeastJava15()) {
+        if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
         	printDependenciesHeader(writer);
             printDependency(writer, "com.sun.jdmk", "jmxtools", "1.2.1");
             printDependency(writer, "javax.management", "jmxremote", "1.0.1_04");
@@ -96,7 +96,7 @@ public class POMGenerator {
         printCompileDependency(writer, SPRING_SECURITY_GROUP, "spring-security-core");
         printDependency(writer, "commons-logging", "commons-logging");
         // add javax.annotations (@PostConstruct) for JDK 1.5 (no need for 1.6 since it is there)
-        if (!JdkVersion.isAtLeastJava16() && JdkVersion.isAtLeastJava15()) {
+        if (JdkVersion.getMajorJavaVersion() == JdkVersion.JAVA_15) {
             printDependency(writer, "org.apache.geronimo.specs", "geronimo-annotation_1.0_spec", "1.1.1");
         }
         printDependenciesFooter(writer);
