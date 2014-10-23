@@ -27,7 +27,6 @@ import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
 import org.openspaces.persistency.hibernate.DefaultHibernateExternalDataSource;
-import org.springframework.orm.hibernate3.HibernateTemplate;
 
 import java.util.Iterator;
 import java.util.List;
@@ -44,13 +43,13 @@ public class CollectionRelationshipTests extends TestCase {
 
     protected SQLDataProvider sqlDataProvider;
 
-    protected HibernateTemplate hibernateTemplate;
+    protected Session session;
 
     protected void setUp() throws Exception {
         Configuration conf = new Configuration().configure("org/openspaces/itest/persistency/hibernate/col1/hibernate.cfg.xml")
                 .setProperty(Environment.HBM2DDL_AUTO, "create");
         sessionFactory = conf.buildSessionFactory();
-        hibernateTemplate = new HibernateTemplate(sessionFactory);
+        session = sessionFactory.openSession();
         deleteContent();
         DefaultHibernateExternalDataSource dataSource = new DefaultHibernateExternalDataSource();
 //        dataSource.setInitialLoadChunkSize(-1);
