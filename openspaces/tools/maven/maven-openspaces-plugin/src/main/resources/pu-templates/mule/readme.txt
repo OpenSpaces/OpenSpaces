@@ -146,7 +146,7 @@ MAVEN PLUGIN WIKI PAGE
 ---------------------------------
 
   For more information about the Maven Plugin please refer to:
-http://www.gigaspaces.com/wiki/display/XAP100/Maven+Plugin
+http://docs.gigaspaces.com/xap100/maven-plugin.html
 
   For more information about the Mule ESB please refer to:
-http://www.gigaspaces.com/wiki/display/XAP100/Mule+ESB
+http://docs.gigaspaces.com/xap100/mule-esb.html
