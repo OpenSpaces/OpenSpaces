@@ -550,7 +550,7 @@
                 <directory>deploy/templates</directory>
             </testResource>
             <testResource>
-                <directory>../gigaspaces</directory>
+                <directory>../core</directory>
                 <includes>
                     <include>gslicense.xml</include>
                 </includes>
