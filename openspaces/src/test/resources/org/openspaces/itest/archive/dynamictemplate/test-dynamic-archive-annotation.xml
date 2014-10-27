@@ -15,7 +15,6 @@
 	
 	<!-- Enable support for @Archive annotation -->
 	<os-archive:annotation-support />
-    <os-archive:cassandra-archive-handler giga-space="" keyspace="" hosts=""
 	
 	<os-core:space id="space" url="/./space" />
 	
