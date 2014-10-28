@@ -8,6 +8,7 @@ import com.gigaspaces.query.ISpaceQuery;
 import com.gigaspaces.query.IdQuery;
 import com.gigaspaces.sync.change.ChangeOperation;
 import com.gigaspaces.sync.change.IncrementOperation;
+import com.google.common.collect.Iterables;
 import com.j_spaces.core.client.Modifiers;
 import junit.framework.Assert;
 import org.junit.Test;
@@ -27,7 +28,7 @@ import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
-public class ChangeExtensionTests 
+public class ChangeExtensionTests
 {
     @SpaceClass
     public static class ChangeExtensionPojo
@@ -159,8 +160,7 @@ public class ChangeExtensionTests
     {
         Collection<SpaceEntryMutator> mutators = ChangeSetInternalUtils.getMutators(argument.getValue());
         Assert.assertEquals(1, mutators.size());
-        ArrayList<SpaceEntryMutator> copy = new ArrayList<SpaceEntryMutator>(mutators);
-        ChangeOperation changeOperation = copy.get(0);
+        ChangeOperation changeOperation = Iterables.get(mutators, 0);
         Assert.assertTrue(IncrementOperation.represents(changeOperation));
         Assert.assertEquals(property, IncrementOperation.getPath(changeOperation));
         Assert.assertEquals(delta, IncrementOperation.getDelta(changeOperation));

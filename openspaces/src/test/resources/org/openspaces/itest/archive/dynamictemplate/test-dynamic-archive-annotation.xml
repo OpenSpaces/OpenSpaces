@@ -21,8 +21,7 @@
 	<os-core:local-tx-manager id="transactionManager" space="space"/>
 	
 	<os-core:giga-space id="gigaSpace" space="space" tx-manager="transactionManager"/>
-    
-	
+
 	<!--  mocks -->
 	<bean class="org.openspaces.itest.archive.MockArchiveOperationsHandler">
 		<property name="atomicArchiveOfMultipleObjects" value="false" />
