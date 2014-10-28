@@ -7,9 +7,7 @@
 	<property environment="env"/>
 	<property name="checkouts.dir" value="${basedir}/../.." />
 	<property name="core.dir" value="core" />
-    <property name="maven.repo.local" value="/home/kobi/.m2/repository"/>
-    <property name="productversion" value="10.1.0-SNAPSHOT"/>
-	
+
 	<condition property="mvn.executable" value="mvn.bat">
             <os family="windows" />
     </condition>
