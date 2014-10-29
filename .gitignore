@@ -34,3 +34,6 @@ release
 space-logs/
 */#*#
 *.epoch
+
+# QuickBuild
+.qbcache/
