@@ -629,7 +629,10 @@
                         <include>**/Test*.java</include>
                     </includes>
                     <excludes>
+                        <!--Running org.openspaces.itest.events.polling.sqlqueryrouting.SQLQueryRoutingPollingContainerTest-->
+                        <exclude>**/itest/**</exclude>
                         <exclude>**/*Abstract*</exclude>
+                        <exclude>**/SpaceFactoryBeanWrappersTest*</exclude>
                         <exclude>**/PersistentQueueTests*</exclude>
                         <exclude>**/PersistentSedaTests*</exclude>
                     </excludes>
