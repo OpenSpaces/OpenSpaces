@@ -16,23 +16,32 @@
 
 package org.openspaces.itest.events.polling.autostart;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.itest.utils.EmptySpaceDataObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.Lifecycle;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import static org.junit.Assert.assertEquals;
+
 
 /**
  * @author kimchy
  */
-public class AutoStartPollingContainerTests extends AbstractDependencyInjectionSpringContextTests {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:/org/openspaces/itest/events/polling/autostart/polling-autostart.xml")
+public class AutoStartPollingContainerTests   { 
 
 
-    protected GigaSpace gigaSpace;
-    protected Lifecycle pollingContainer ;
-    protected AutoStartEventListener autoStartEventListener;
+     @Autowired protected GigaSpace gigaSpace;
+    @Autowired protected Lifecycle pollingContainer ;
+     @Autowired protected AutoStartEventListener autoStartEventListener;
 
     public AutoStartPollingContainerTests() {
-        setPopulateProtectedVariables(true);
+ 
     }
 
     protected String[] getConfigLocations() {
@@ -40,7 +49,7 @@ public class AutoStartPollingContainerTests extends AbstractDependencyInjectionS
     }
 
 
-    public void testAutoStartFalse() throws Exception{
+     @Test public void testAutoStartFalse() throws Exception{
         assertEquals(0, autoStartEventListener.getMessageCounter());
         gigaSpace.write(new EmptySpaceDataObject());
         Thread.sleep(500);
@@ -51,3 +60,4 @@ public class AutoStartPollingContainerTests extends AbstractDependencyInjectionS
     }
 
 }
+

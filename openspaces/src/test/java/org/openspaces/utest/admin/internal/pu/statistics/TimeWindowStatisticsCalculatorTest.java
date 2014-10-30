@@ -15,30 +15,21 @@
  *******************************************************************************/
 package org.openspaces.utest.admin.internal.pu.statistics;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
 import junit.framework.Assert;
 import junit.framework.TestCase;
-
 import org.junit.Test;
 import org.openspaces.admin.internal.pu.DefaultProcessingUnitStatistics;
 import org.openspaces.admin.internal.pu.ProcessingUnitStatistics;
 import org.openspaces.admin.internal.pu.statistics.InternalProcessingUnitStatistics;
 import org.openspaces.admin.internal.pu.statistics.TimeWindowStatisticsCalculator;
-import org.openspaces.admin.pu.statistics.AverageTimeWindowStatisticsConfig;
-import org.openspaces.admin.pu.statistics.AverageTimeWindowStatisticsConfigurer;
-import org.openspaces.admin.pu.statistics.LastSampleTimeWindowStatisticsConfig;
-import org.openspaces.admin.pu.statistics.MaximumTimeWindowStatisticsConfigurer;
-import org.openspaces.admin.pu.statistics.MinimumTimeWindowStatisticsConfigurer;
-import org.openspaces.admin.pu.statistics.PercentileTimeWindowStatisticsConfigurer;
-import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
-import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsIdConfigurer;
-import org.openspaces.admin.pu.statistics.SingleInstanceStatisticsConfigurer;
+import org.openspaces.admin.pu.statistics.*;
 import org.openspaces.admin.zone.config.ExactZonesConfig;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Unit Tests for {@link TimeWindowStatisticsCalculator}

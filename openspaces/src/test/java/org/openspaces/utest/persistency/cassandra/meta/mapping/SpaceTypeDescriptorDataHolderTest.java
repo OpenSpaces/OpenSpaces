@@ -1,15 +1,14 @@
 package org.openspaces.utest.persistency.cassandra.meta.mapping;
 
-import org.junit.Test;
-import org.openspaces.itest.persistency.common.data.TestDocumentWrapper;
-import org.openspaces.itest.persistency.common.data.TestDocumentWrapper2;
-
 import com.gigaspaces.annotation.pojo.FifoSupport;
 import com.gigaspaces.metadata.SpaceDocumentSupport;
 import com.gigaspaces.metadata.SpaceTypeDescriptor;
 import com.gigaspaces.metadata.SpaceTypeDescriptorBuilder;
 import com.gigaspaces.metadata.StorageType;
 import com.gigaspaces.metadata.index.SpaceIndexType;
+import org.junit.Test;
+import org.openspaces.itest.persistency.common.data.TestDocumentWrapper;
+import org.openspaces.itest.persistency.common.data.TestDocumentWrapper2;
 import org.openspaces.persistency.support.SpaceTypeDescriptorContainer;
 import org.openspaces.utest.persistency.common.TestSpaceTypeDescriptorUtils;
 

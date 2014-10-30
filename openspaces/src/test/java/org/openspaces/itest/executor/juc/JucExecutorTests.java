@@ -18,56 +18,66 @@
 package org.openspaces.itest.executor.juc;
 
 import com.gigaspaces.annotation.pojo.SpaceRouting;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.executor.TaskExecutors;
 import org.openspaces.core.executor.juc.TaskExecutorService;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.Serializable;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import static org.junit.Assert.assertEquals;
+
 /**
  * @author kimchy
  */
-public class JucExecutorTests extends AbstractDependencyInjectionSpringContextTests {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:/org/openspaces/itest/executor/juc/context.xml")
+public class JucExecutorTests   { 
 
-    protected GigaSpace gigaSpace1;
+     @Autowired protected GigaSpace gigaSpace1;
 
-    protected GigaSpace clusteredGigaSpace1;
+     @Autowired protected GigaSpace clusteredGigaSpace1;
 
-    protected GigaSpace gigaSpace2;
+     @Autowired protected GigaSpace gigaSpace2;
 
-    protected GigaSpace clusteredGigaSpace2;
+     @Autowired protected GigaSpace clusteredGigaSpace2;
 
     private TaskExecutorService executorService;
 
     public JucExecutorTests() {
-        setPopulateProtectedVariables(true);
+ 
     }
 
     protected String[] getConfigLocations() {
         return new String[]{"/org/openspaces/itest/executor/juc/context.xml"};
     }
 
-    protected void onSetUp() throws Exception {
+     @Before public  void onSetUp() throws Exception {
         gigaSpace1.clear(null);
         gigaSpace2.clear(null);
         this.executorService = TaskExecutors.newExecutorService(clusteredGigaSpace1);
     }
 
-    protected void onTearDown() throws Exception {
+     @After public  void onTearDown() throws Exception {
         gigaSpace1.clear(null);
         gigaSpace2.clear(null);
     }
 
-    public void testSimpleCallableExecution() throws Exception {
+     @Test public void testSimpleCallableExecution() throws Exception {
         Future<Integer> result = executorService.submit(new MyCallable1());
         assertEquals(1, (int) result.get(1000, TimeUnit.MILLISECONDS));
     }
 
-    public void testSimpleRunnableExecution() throws Exception {
+     @Test public void testSimpleRunnableExecution() throws Exception {
         Future<Integer> result = executorService.submit(new MyRunnable1(), 1);
         assertEquals(1, (int) result.get(1000, TimeUnit.MILLISECONDS));
     }
@@ -102,3 +112,4 @@ public class JucExecutorTests extends AbstractDependencyInjectionSpringContextTe
         }
     }
 }
+

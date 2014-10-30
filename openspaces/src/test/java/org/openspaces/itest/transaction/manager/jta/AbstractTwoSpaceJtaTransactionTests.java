@@ -16,41 +16,50 @@
 
 package org.openspaces.itest.transaction.manager.jta;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.itest.utils.EmptySpaceDataObject;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
 /**
  * @author kimchy
  */
-public abstract class AbstractTwoSpaceJtaTransactionTests extends AbstractDependencyInjectionSpringContextTests {
+@RunWith(SpringJUnit4ClassRunner.class)
+public abstract class AbstractTwoSpaceJtaTransactionTests   { 
 
-    protected GigaSpace gigaSpace1;
+     @Autowired protected GigaSpace gigaSpace1;
 
-    protected GigaSpace gigaSpace2;
+     @Autowired protected GigaSpace gigaSpace2;
 
-    protected PlatformTransactionManager transactionManager;
+     @Autowired protected PlatformTransactionManager transactionManager;
 
     public AbstractTwoSpaceJtaTransactionTests() {
-        setPopulateProtectedVariables(true);
+ 
     }
 
-    protected void onSetUp() throws Exception {
+     @Before public  void onSetUp() throws Exception {
         gigaSpace1.clear(null);
         gigaSpace2.clear(null);
     }
 
-    protected void onTearDown() throws Exception {
+     @After public  void onTearDown() throws Exception {
         gigaSpace1.clear(null);
         gigaSpace2.clear(null);
     }
 
-    public void testSimpleCommit() {
+     @Test public void testSimpleCommit() {
         TransactionTemplate txTemplate = new TransactionTemplate(transactionManager);
         assertNull(gigaSpace1.read(new EmptySpaceDataObject()));
         txTemplate.execute(new TransactionCallbackWithoutResult() {
@@ -63,7 +72,7 @@ public abstract class AbstractTwoSpaceJtaTransactionTests extends AbstractDepend
         assertNotNull(gigaSpace1.read(new EmptySpaceDataObject()));
     }
 
-    public void testSimpleCommitTwoSpaces() {
+     @Test public void testSimpleCommitTwoSpaces() {
         TransactionTemplate txTemplate = new TransactionTemplate(transactionManager);
         assertNull(gigaSpace1.read(new EmptySpaceDataObject()));
         assertNull(gigaSpace2.read(new EmptySpaceDataObject()));
@@ -81,7 +90,7 @@ public abstract class AbstractTwoSpaceJtaTransactionTests extends AbstractDepend
         assertNotNull(gigaSpace2.read(new EmptySpaceDataObject()));
     }
 
-    public void testSimpleRollback() {
+     @Test public void testSimpleRollback() {
         TransactionTemplate txTemplate = new TransactionTemplate(transactionManager);
         assertNull(gigaSpace1.read(new EmptySpaceDataObject()));
         txTemplate.execute(new TransactionCallbackWithoutResult() {
@@ -95,7 +104,7 @@ public abstract class AbstractTwoSpaceJtaTransactionTests extends AbstractDepend
         assertNull(gigaSpace1.read(new EmptySpaceDataObject()));
     }
 
-    public void testSimpleRollbackTwoSpaces() {
+     @Test public void testSimpleRollbackTwoSpaces() {
         TransactionTemplate txTemplate = new TransactionTemplate(transactionManager);
         assertNull(gigaSpace1.read(new EmptySpaceDataObject()));
         txTemplate.execute(new TransactionCallbackWithoutResult() {
@@ -109,7 +118,7 @@ public abstract class AbstractTwoSpaceJtaTransactionTests extends AbstractDepend
         assertNull(gigaSpace1.read(new EmptySpaceDataObject()));
     }
 
-    public void testTakeRollback() {
+     @Test public void testTakeRollback() {
         TransactionTemplate txTemplate = new TransactionTemplate(transactionManager);
         assertNull(gigaSpace1.read(new EmptySpaceDataObject()));
         gigaSpace1.write(new EmptySpaceDataObject());
@@ -123,7 +132,7 @@ public abstract class AbstractTwoSpaceJtaTransactionTests extends AbstractDepend
         assertNotNull(gigaSpace1.take(new EmptySpaceDataObject()));
     }
 
-    public void testTakeRollbackTwoSpaces() {
+     @Test public void testTakeRollbackTwoSpaces() {
         TransactionTemplate txTemplate = new TransactionTemplate(transactionManager);
         assertNull(gigaSpace1.read(new EmptySpaceDataObject()));
         assertNull(gigaSpace2.read(new EmptySpaceDataObject()));
@@ -142,7 +151,7 @@ public abstract class AbstractTwoSpaceJtaTransactionTests extends AbstractDepend
         assertNotNull(gigaSpace2.take(new EmptySpaceDataObject()));
     }
 
-    public void testPropogationRequiredWithCommit() {
+     @Test public void testPropogationRequiredWithCommit() {
         TransactionTemplate txTemplate = new TransactionTemplate(transactionManager);
         assertNull(gigaSpace1.read(new EmptySpaceDataObject()));
         assertNull(gigaSpace1.read(new TestData1()));
@@ -172,7 +181,7 @@ public abstract class AbstractTwoSpaceJtaTransactionTests extends AbstractDepend
         assertNotNull(gigaSpace1.read(new TestData1()));
     }
 
-    public void testPropogationRequiredWithCommitTwoSpaces() {
+     @Test public void testPropogationRequiredWithCommitTwoSpaces() {
         TransactionTemplate txTemplate = new TransactionTemplate(transactionManager);
         assertNull(gigaSpace1.read(new EmptySpaceDataObject()));
         assertNull(gigaSpace2.read(new EmptySpaceDataObject()));
@@ -213,7 +222,7 @@ public abstract class AbstractTwoSpaceJtaTransactionTests extends AbstractDepend
         assertNotNull(gigaSpace2.read(new TestData1()));
     }
 
-    public void testPropogationRequiredWithRollback() {
+     @Test public void testPropogationRequiredWithRollback() {
         TransactionTemplate txTemplate = new TransactionTemplate(transactionManager);
         assertNull(gigaSpace1.read(new EmptySpaceDataObject()));
         assertNull(gigaSpace2.read(new EmptySpaceDataObject()));
@@ -259,7 +268,7 @@ public abstract class AbstractTwoSpaceJtaTransactionTests extends AbstractDepend
         assertNull(gigaSpace2.read(new EmptySpaceDataObject()));
     }
 
-    public void testPropogationRequiresNewWithCommit() {
+     @Test public void testPropogationRequiresNewWithCommit() {
         TransactionTemplate txTemplate = new TransactionTemplate(transactionManager);
         assertNull(gigaSpace1.read(new EmptySpaceDataObject()));
         assertNull(gigaSpace1.read(new TestData1()));
@@ -289,7 +298,7 @@ public abstract class AbstractTwoSpaceJtaTransactionTests extends AbstractDepend
         assertNotNull(gigaSpace1.read(new TestData1()));
     }
 
-    public void testPropogationRequiresNewWithCommitWithTwoSpaces() {
+     @Test public void testPropogationRequiresNewWithCommitWithTwoSpaces() {
         TransactionTemplate txTemplate = new TransactionTemplate(transactionManager);
         assertNull(gigaSpace1.read(new EmptySpaceDataObject()));
         assertNull(gigaSpace2.read(new EmptySpaceDataObject()));
@@ -330,7 +339,7 @@ public abstract class AbstractTwoSpaceJtaTransactionTests extends AbstractDepend
         assertNotNull(gigaSpace2.read(new TestData1()));
     }
 
-    public void testPropogationRequiresNewWithRollback() {
+     @Test public void testPropogationRequiresNewWithRollback() {
         TransactionTemplate txTemplate = new TransactionTemplate(transactionManager);
         assertNull(gigaSpace1.read(new EmptySpaceDataObject()));
         assertNull(gigaSpace1.read(new TestData1()));
@@ -361,7 +370,7 @@ public abstract class AbstractTwoSpaceJtaTransactionTests extends AbstractDepend
         assertNull(gigaSpace1.read(new TestData1()));
     }
 
-    public void testPropogationRequiresNewWithRollbackWithTwoSpaces() {
+     @Test public void testPropogationRequiresNewWithRollbackWithTwoSpaces() {
         TransactionTemplate txTemplate = new TransactionTemplate(transactionManager);
         assertNull(gigaSpace1.read(new EmptySpaceDataObject()));
         assertNull(gigaSpace2.read(new EmptySpaceDataObject()));
@@ -403,7 +412,7 @@ public abstract class AbstractTwoSpaceJtaTransactionTests extends AbstractDepend
         assertNull(gigaSpace2.read(new TestData1()));
     }
 
-    public void testPropagationNotSupportedWithRollback() {
+     @Test public void testPropagationNotSupportedWithRollback() {
         TransactionTemplate txTemplate = new TransactionTemplate(transactionManager);
         txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
         assertNull(gigaSpace1.read(new TestData2()));
@@ -435,7 +444,7 @@ public abstract class AbstractTwoSpaceJtaTransactionTests extends AbstractDepend
         assertNotNull(gigaSpace1.read(new TestData1()));
     }
     
-//    public void testPropagationNotSupportedWithRollbackTask() {
+//     @Test public void testPropagationNotSupportedWithRollbackTask() {
 //        TransactionTemplate txTemplate = new TransactionTemplate(transactionManager);
 //        txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 //        assertNull(gigaSpace1.read(new TestData2()));
@@ -493,3 +502,4 @@ public abstract class AbstractTwoSpaceJtaTransactionTests extends AbstractDepend
 
 
 }
+

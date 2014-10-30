@@ -1,7 +1,6 @@
 package org.openspaces.itest.persistency.cassandra;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
+import com.gigaspaces.logger.GSLogConfigLoader;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
@@ -9,7 +8,7 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 import org.openspaces.itest.persistency.cassandra.helper.EmbeddedCassandraController;
 
-import com.gigaspaces.logger.GSLogConfigLoader;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 @RunWith(Suite.class)

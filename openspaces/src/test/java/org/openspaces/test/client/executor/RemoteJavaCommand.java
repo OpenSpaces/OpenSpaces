@@ -5,6 +5,9 @@
  */
 package org.openspaces.test.client.executor;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -13,8 +16,6 @@ import java.rmi.ConnectException;
 import java.rmi.Remote;
 import java.util.Arrays;
 import java.util.Map;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * The RemoteJavaCommand provides ability to control forkable process as remote service,

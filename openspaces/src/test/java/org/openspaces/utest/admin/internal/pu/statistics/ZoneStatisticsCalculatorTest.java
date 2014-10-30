@@ -15,29 +15,21 @@
  *******************************************************************************/
 package org.openspaces.utest.admin.internal.pu.statistics;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
 import junit.framework.Assert;
 import junit.framework.TestCase;
-
 import org.junit.Test;
 import org.openspaces.admin.internal.pu.DefaultProcessingUnitStatistics;
 import org.openspaces.admin.internal.pu.ProcessingUnitStatistics;
 import org.openspaces.admin.internal.pu.statistics.InternalProcessingUnitStatistics;
-import org.openspaces.admin.pu.statistics.AverageInstancesStatisticsConfig;
-import org.openspaces.admin.pu.statistics.AverageTimeWindowStatisticsConfigurer;
-import org.openspaces.admin.pu.statistics.LastSampleTimeWindowStatisticsConfig;
-import org.openspaces.admin.pu.statistics.MaximumInstancesStatisticsConfig;
-import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
-import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsIdConfigurer;
-import org.openspaces.admin.pu.statistics.SingleInstanceStatisticsConfigurer;
-import org.openspaces.admin.pu.statistics.ThroughputTimeWindowStatisticsConfigurer;
+import org.openspaces.admin.pu.statistics.*;
 import org.openspaces.admin.zone.config.AtLeastOneZoneConfigurer;
 import org.openspaces.admin.zone.config.ExactZonesConfigurer;
 import org.openspaces.core.util.ConcurrentHashSet;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author elip

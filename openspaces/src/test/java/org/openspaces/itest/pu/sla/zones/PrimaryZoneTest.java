@@ -16,25 +16,38 @@
 
 package org.openspaces.itest.pu.sla.zones;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.openspaces.pu.sla.SLA;
 import org.openspaces.pu.sla.requirement.ZoneRequirement;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 
 /**
  * @author anna
  */
-public class PrimaryZoneTest extends AbstractDependencyInjectionSpringContextTests {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:/org/openspaces/itest/pu/sla/zones/zones.xml")
+public class PrimaryZoneTest   { 
+@Autowired
+    protected ApplicationContext ac;
 
     public PrimaryZoneTest() {
-        setPopulateProtectedVariables(true);
+ 
     }
 
     protected String[] getConfigLocations() {
         return new String[]{"/org/openspaces/itest/pu/sla/zones/zones.xml"};
     }
 
-    public void testZones() {
-        SLA sla = (SLA) getApplicationContext().getBean("SLA");
+     @Test public void testZones() {
+        SLA sla = (SLA) ac.getBean("SLA");
         assertNotNull(sla);
         assertEquals("zone2", sla.getPrimaryZone());
         assertNotNull(sla.getRequirements());
@@ -45,3 +58,4 @@ public class PrimaryZoneTest extends AbstractDependencyInjectionSpringContextTes
         assertEquals("zone2", zone2.getZone());
     }
 }
+

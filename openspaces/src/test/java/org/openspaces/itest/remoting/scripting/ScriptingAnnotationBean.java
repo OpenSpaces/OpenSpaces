@@ -17,7 +17,10 @@
  ******************************************************************************/
 package org.openspaces.itest.remoting.scripting;
 
-import org.openspaces.remoting.scripting.*;
+import org.openspaces.remoting.scripting.EventDrivenScriptingExecutor;
+import org.openspaces.remoting.scripting.ExecutorScriptingExecutor;
+import org.openspaces.remoting.scripting.ScriptingExecutor;
+import org.openspaces.remoting.scripting.StaticScript;
 
 /**
  * @author kimchy

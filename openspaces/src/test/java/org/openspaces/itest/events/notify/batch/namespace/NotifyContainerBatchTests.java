@@ -16,35 +16,44 @@
 
 package org.openspaces.itest.events.notify.batch.namespace;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.itest.utils.EmptySpaceDataObject;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import static org.junit.Assert.*;
+
 
 /**
  * @see org.openspaces.itest.events.notify.batch.NotifyContainerBatchTests
  * @author Moran Avigdor
  */
-public class NotifyContainerBatchTests extends AbstractDependencyInjectionSpringContextTests {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:/org/openspaces/itest/events/notify/batch/namespace/notify-batch.xml")
+public class NotifyContainerBatchTests   { 
 
-    protected GigaSpace gigaSpace;
+     @Autowired protected GigaSpace gigaSpace;
 
-    protected TestListener testListener;
+     @Autowired protected TestListener testListener;
 
     public NotifyContainerBatchTests() {
-        setPopulateProtectedVariables(true);
+ 
     }
 
-    @Override
-    protected void onSetUp() throws Exception {
+     @Before public  void onSetUp() throws Exception {
         gigaSpace.clear(null);
     }
 
-    @Override
-    protected String[] getConfigLocations() {
+    //@Override
+    protected String[] getConfigLocations () {
         return new String[]{"/org/openspaces/itest/events/notify/batch/namespace/notify-batch.xml"};
     }
 
-    public void testReceiveMessage() throws Exception {
+     @Test public void testReceiveMessage() throws Exception {
         assertFalse(testListener.isReceivedMessage());
         gigaSpace.write(new EmptySpaceDataObject());
         gigaSpace.write(new EmptySpaceDataObject());
@@ -56,3 +65,4 @@ public class NotifyContainerBatchTests extends AbstractDependencyInjectionSpring
     }
 
 }
+

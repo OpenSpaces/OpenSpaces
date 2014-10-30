@@ -15,11 +15,11 @@
  *******************************************************************************/
 package org.openspaces.itest.events.polling.dynamictemplate;
 
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Logger;
-
 import org.openspaces.events.DynamicEventTemplateProvider;
 import org.openspaces.itest.events.pojos.MockPojo;
+
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
 
 /**
  * @author Itai Frenkel

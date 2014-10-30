@@ -17,11 +17,18 @@
  ******************************************************************************/
 package org.openspaces.itest.events.polling.sqlqueryrouting;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.events.polling.SimplePollingContainerConfigurer;
 import org.openspaces.events.polling.SimplePollingEventListenerContainer;
 import org.openspaces.itest.events.pojos.MockPojo;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import static org.junit.Assert.assertEquals;
+
 
 /**
  * Test SQLQuery.setRouting with two polling containers (1 for each partition).
@@ -30,19 +37,21 @@ import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
  * @since 8.0.1
  *
  */
-public class SQLQueryRoutingPollingContainerTest extends AbstractDependencyInjectionSpringContextTests {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:/org/openspaces/itest/events/polling/sqlqueryrouting/sqlquery-routing.xml")
+public class SQLQueryRoutingPollingContainerTest   { 
     
-    protected GigaSpace gigaSpace;
+     @Autowired protected GigaSpace gigaSpace;
     
     public SQLQueryRoutingPollingContainerTest() {
-        setPopulateProtectedVariables(true);
+ 
     }
 
     protected String[] getConfigLocations() {
         return new String[]{"/org/openspaces/itest/events/polling/sqlqueryrouting/sqlquery-routing.xml"};
     }
     
-    public void testSqlQueryRouting() throws Exception {
+     @Test public void testSqlQueryRouting() throws Exception {
         PollingContainerListener listener1 = new PollingContainerListener(Integer.valueOf(1));
         PollingContainerListener listener2 = new PollingContainerListener(Integer.valueOf(2));
         SimplePollingEventListenerContainer container1 = new SimplePollingContainerConfigurer(gigaSpace).eventListenerAnnotation(listener1).pollingContainer();
@@ -59,3 +68,4 @@ public class SQLQueryRoutingPollingContainerTest extends AbstractDependencyInjec
         assertEquals(1, listener2.getCount());
     }    
 }
+

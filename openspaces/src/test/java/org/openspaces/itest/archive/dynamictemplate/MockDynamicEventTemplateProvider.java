@@ -15,11 +15,11 @@
  *******************************************************************************/
 package org.openspaces.itest.archive.dynamictemplate;
 
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Logger;
-
 import org.openspaces.events.DynamicEventTemplateProvider;
 import org.openspaces.itest.events.pojos.MockPojoFifoGrouping;
+
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
 
 /**
  * Standalone bean implementing a dynamic template

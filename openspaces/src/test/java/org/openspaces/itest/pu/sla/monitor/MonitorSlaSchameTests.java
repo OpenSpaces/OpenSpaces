@@ -16,25 +16,38 @@
 
 package org.openspaces.itest.pu.sla.monitor;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.openspaces.pu.sla.SLA;
 import org.openspaces.pu.sla.monitor.BeanPropertyMonitor;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 
 /**
  * @author kimchy
  */
-public class MonitorSlaSchameTests extends AbstractDependencyInjectionSpringContextTests {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:/org/openspaces/itest/pu/sla/monitor/monitor.xml")
+public class MonitorSlaSchameTests   { 
+@Autowired
+    protected ApplicationContext ac;
 
     public MonitorSlaSchameTests() {
-        setPopulateProtectedVariables(true);
+ 
     }
 
     protected String[] getConfigLocations() {
         return new String[]{"/org/openspaces/itest/pu/sla/monitor/monitor.xml"};
     }
 
-    public void testMonitor() {
-        SLA sla = (SLA) getApplicationContext().getBean("SLA");
+     @Test public void testMonitor() {
+        SLA sla = (SLA) ac.getBean("SLA");
         assertNotNull(sla);
         assertNotNull(sla.getMonitors());
         assertEquals(1, sla.getMonitors().size());
@@ -44,3 +57,4 @@ public class MonitorSlaSchameTests extends AbstractDependencyInjectionSpringCont
         assertEquals("prop", monitor.getPropertyName());
     }
 }
+

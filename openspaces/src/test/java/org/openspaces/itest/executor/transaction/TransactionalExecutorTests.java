@@ -17,63 +17,72 @@
  ******************************************************************************/
 package org.openspaces.itest.executor.transaction;
 
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import javax.annotation.Resource;
-
+import com.gigaspaces.async.AsyncFuture;
+import com.gigaspaces.async.AsyncFutureListener;
+import com.gigaspaces.async.AsyncResult;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.executor.AutowireTask;
 import org.openspaces.core.executor.DistributedTask;
 import org.openspaces.core.executor.Task;
 import org.openspaces.core.executor.TaskGigaSpace;
 import org.openspaces.itest.utils.EmptySpaceDataObject;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import com.gigaspaces.async.AsyncFuture;
-import com.gigaspaces.async.AsyncFutureListener;
-import com.gigaspaces.async.AsyncResult;
+import javax.annotation.Resource;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * @author kimchy
  */
-public class TransactionalExecutorTests extends AbstractDependencyInjectionSpringContextTests {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:/org/openspaces/itest/executor/transaction/context.xml")
+public class TransactionalExecutorTests   { 
 
-    protected GigaSpace localGigaSpace1;
+     @Autowired protected GigaSpace localGigaSpace1;
 
-    protected GigaSpace localGigaSpace2;
+     @Autowired protected GigaSpace localGigaSpace2;
 
-    protected GigaSpace distGigaSpace;
+     @Autowired protected GigaSpace distGigaSpace;
 
-    protected PlatformTransactionManager localTxManager1;
+     @Autowired protected PlatformTransactionManager localTxManager1;
 
-    protected PlatformTransactionManager localTxManager2;
+     @Autowired protected PlatformTransactionManager localTxManager2;
 
-    protected PlatformTransactionManager distTxManager;
+     @Autowired protected PlatformTransactionManager distTxManager;
 
     public TransactionalExecutorTests() {
-        setPopulateProtectedVariables(true);
+ 
     }
 
     protected String[] getConfigLocations() {
         return new String[]{"/org/openspaces/itest/executor/transaction/context.xml"};
     }
     
-    protected void onSetUp() throws Exception {
+     @Before public  void onSetUp() throws Exception {
         localGigaSpace1.clear(null);
         localGigaSpace2.clear(null);
     }
 
-    protected void onTearDown() throws Exception {
+     @After public  void onTearDown() throws Exception {
         localGigaSpace1.clear(null);
         localGigaSpace2.clear(null);
     }
 
-    public void testSimpleTransactionCommit1() {
+     @Test public void testSimpleTransactionCommit1() {
         TransactionTemplate txTemplate = new TransactionTemplate(localTxManager1);
         txTemplate.execute(new TransactionCallbackWithoutResult() {
             protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -89,7 +98,7 @@ public class TransactionalExecutorTests extends AbstractDependencyInjectionSprin
         assertEquals(1, localGigaSpace1.count(null));
     }
 
-    public void testSimpleTransactionCommit2() {
+     @Test public void testSimpleTransactionCommit2() {
         TransactionTemplate txTemplate = new TransactionTemplate(localTxManager1);
         txTemplate.execute(new TransactionCallbackWithoutResult() {
             protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -105,7 +114,7 @@ public class TransactionalExecutorTests extends AbstractDependencyInjectionSprin
         assertEquals(1, localGigaSpace1.count(null));
     }
 
-    public void testSimpleTransactionRollback1() {
+     @Test public void testSimpleTransactionRollback1() {
         TransactionTemplate txTemplate = new TransactionTemplate(localTxManager1);
         txTemplate.execute(new TransactionCallbackWithoutResult() {
             protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -122,7 +131,7 @@ public class TransactionalExecutorTests extends AbstractDependencyInjectionSprin
         assertEquals(0, localGigaSpace1.count(null));
     }
 
-    public void testSimpleTransactionRollback2() {
+     @Test public void testSimpleTransactionRollback2() {
         TransactionTemplate txTemplate = new TransactionTemplate(localTxManager1);
         txTemplate.execute(new TransactionCallbackWithoutResult() {
             protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -139,7 +148,7 @@ public class TransactionalExecutorTests extends AbstractDependencyInjectionSprin
         assertEquals(0, localGigaSpace1.count(null));
     }
 
-    public void testListenerTransactionCommit() throws Exception {
+     @Test public void testListenerTransactionCommit() throws Exception {
         TransactionTemplate txTemplate = new TransactionTemplate(localTxManager1);
         final Listener listener = new Listener();
         txTemplate.execute(new TransactionCallbackWithoutResult() {
@@ -157,7 +166,7 @@ public class TransactionalExecutorTests extends AbstractDependencyInjectionSprin
         assertEquals(1, localGigaSpace1.count(null));
     }
 
-    public void testListenerAsParameterTransactionCommit() throws Exception {
+     @Test public void testListenerAsParameterTransactionCommit() throws Exception {
         TransactionTemplate txTemplate = new TransactionTemplate(localTxManager1);
         final Listener listener = new Listener();
         txTemplate.execute(new TransactionCallbackWithoutResult() {
@@ -174,7 +183,7 @@ public class TransactionalExecutorTests extends AbstractDependencyInjectionSprin
         assertEquals(1, localGigaSpace1.count(null));
     }
 
-    public void testListenerTransactionRollback() throws Exception {
+     @Test public void testListenerTransactionRollback() throws Exception {
         TransactionTemplate txTemplate = new TransactionTemplate(localTxManager1);
         final Listener listener = new Listener();
         txTemplate.execute(new TransactionCallbackWithoutResult() {
@@ -198,7 +207,7 @@ public class TransactionalExecutorTests extends AbstractDependencyInjectionSprin
         assertEquals(0, localGigaSpace1.count(null));
     }
 
-    public void testListenerAsParameterTransactionRollback() throws Exception {
+     @Test public void testListenerAsParameterTransactionRollback() throws Exception {
         TransactionTemplate txTemplate = new TransactionTemplate(localTxManager1);
         final Listener listener = new Listener();
         txTemplate.execute(new TransactionCallbackWithoutResult() {
@@ -221,7 +230,7 @@ public class TransactionalExecutorTests extends AbstractDependencyInjectionSprin
         assertEquals(0, localGigaSpace1.count(null));
     }
 
-    public void testListenerTransactionException() throws Exception {
+     @Test public void testListenerTransactionException() throws Exception {
         TransactionTemplate txTemplate = new TransactionTemplate(localTxManager1);
         final ExceptionListener listener = new ExceptionListener();
         txTemplate.execute(new TransactionCallbackWithoutResult() {
@@ -245,7 +254,7 @@ public class TransactionalExecutorTests extends AbstractDependencyInjectionSprin
         assertEquals(0, localGigaSpace1.count(null));
     }
 
-    public void testDistributedTransactionCommit() throws Exception {
+     @Test public void testDistributedTransactionCommit() throws Exception {
         TransactionTemplate txTemplate = new TransactionTemplate(distTxManager);
         txTemplate.execute(new TransactionCallbackWithoutResult() {
             protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -261,7 +270,7 @@ public class TransactionalExecutorTests extends AbstractDependencyInjectionSprin
         assertEquals(4, distGigaSpace.count(null));
     }
 
-    public void testDistributedTransactionRollback() throws Exception {
+     @Test public void testDistributedTransactionRollback() throws Exception {
         TransactionTemplate txTemplate = new TransactionTemplate(distTxManager);
         txTemplate.execute(new TransactionCallbackWithoutResult() {
             protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -380,3 +389,4 @@ public class TransactionalExecutorTests extends AbstractDependencyInjectionSprin
         }
     }
 }
+

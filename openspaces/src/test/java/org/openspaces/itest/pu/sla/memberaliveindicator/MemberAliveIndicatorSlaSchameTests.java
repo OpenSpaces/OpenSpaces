@@ -16,16 +16,29 @@
 
 package org.openspaces.itest.pu.sla.memberaliveindicator;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.openspaces.pu.sla.SLA;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 
 /**
  * @author kimchy
  */
-public class MemberAliveIndicatorSlaSchameTests extends AbstractDependencyInjectionSpringContextTests {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:/org/openspaces/itest/pu/sla/memberaliveindicator/memberaliveindicator.xml")
+public class MemberAliveIndicatorSlaSchameTests   { 
+@Autowired
+    protected ApplicationContext ac;
 
     public MemberAliveIndicatorSlaSchameTests() {
-        setPopulateProtectedVariables(true);
+ 
     }
 
     protected String[] getConfigLocations() {
@@ -33,8 +46,8 @@ public class MemberAliveIndicatorSlaSchameTests extends AbstractDependencyInject
     }
 
 
-    public void testMemberAliveIndicatorSchema() {
-        SLA sla = (SLA) getApplicationContext().getBean("SLA");
+     @Test public void testMemberAliveIndicatorSchema() {
+        SLA sla = (SLA) ac.getBean("SLA");
         assertNotNull(sla);
         assertNotNull(sla.getMemberAliveIndicator());
         assertEquals(1, sla.getMemberAliveIndicator().getInvocationDelay());
@@ -42,3 +55,4 @@ public class MemberAliveIndicatorSlaSchameTests extends AbstractDependencyInject
         assertEquals(3, sla.getMemberAliveIndicator().getRetryTimeout());
     }
 }
+

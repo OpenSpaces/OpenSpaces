@@ -16,25 +16,36 @@
 
 package org.openspaces.itest.events.asyncpolling.annotation;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.itest.core.simple.Message;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 
 /**
  * @author kimchy
  */
-public class AnnotationAsyncPollingContainerTests extends AbstractDependencyInjectionSpringContextTests {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:/org/openspaces/itest/events/asyncpolling/annotation/async-polling-annotation.xml")
+public class AnnotationAsyncPollingContainerTests   { 
 
 
-    protected GigaSpace gigaSpace;
+     @Autowired protected GigaSpace gigaSpace;
 
-    protected TestListener testListener;
+     @Autowired protected TestListener testListener;
 
     public AnnotationAsyncPollingContainerTests() {
-        setPopulateProtectedVariables(true);
+ 
     }
 
-    protected void onSetUp() throws Exception {
+     @Before public  void onSetUp() throws Exception {
         gigaSpace.clear(null);
     }
 
@@ -43,7 +54,7 @@ public class AnnotationAsyncPollingContainerTests extends AbstractDependencyInje
     }
 
 
-    public void testReceiveMessage() throws Exception {
+     @Test public void testReceiveMessage() throws Exception {
         assertFalse(testListener.isReceivedMessage());
         gigaSpace.write(new Message("test"));
         Thread.sleep(500);
@@ -56,3 +67,4 @@ public class AnnotationAsyncPollingContainerTests extends AbstractDependencyInje
     }
 
 }
+

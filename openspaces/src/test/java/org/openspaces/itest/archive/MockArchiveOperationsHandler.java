@@ -15,15 +15,14 @@
  *******************************************************************************/
 package org.openspaces.itest.archive;
 
+import edu.emory.mathcs.backport.java.util.Arrays;
+import org.openspaces.archive.ArchiveOperationHandler;
+import org.springframework.beans.factory.annotation.Required;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.ConcurrentLinkedQueue;
-
-import org.openspaces.archive.ArchiveOperationHandler;
-import org.springframework.beans.factory.annotation.Required;
-
-import edu.emory.mathcs.backport.java.util.Arrays;
 
 /**
  * @author Itai Frenkel

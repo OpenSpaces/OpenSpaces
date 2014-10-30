@@ -17,7 +17,6 @@ package org.openspaces.utest.admin.config;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
-
 import org.junit.Test;
 import org.openspaces.admin.application.ApplicationDeployment;
 import org.openspaces.admin.application.config.ApplicationConfig;

@@ -15,9 +15,10 @@
  *******************************************************************************/
 package org.openspaces.utest.grid.gsm;
 
-import static org.openspaces.grid.gsm.autoscaling.AutoScalingSlaUtils.formatMetricValue;
 import junit.framework.Assert;
 import junit.framework.TestCase;
+
+import static org.openspaces.grid.gsm.autoscaling.AutoScalingSlaUtils.formatMetricValue;
 
 /**
  * @author Itai Frenkel

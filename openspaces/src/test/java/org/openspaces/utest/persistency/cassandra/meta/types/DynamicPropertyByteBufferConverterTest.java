@@ -1,14 +1,14 @@
 package org.openspaces.utest.persistency.cassandra.meta.types;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.Date;
-import java.util.UUID;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.openspaces.itest.persistency.common.data.TestPojo1;
 import org.openspaces.persistency.cassandra.meta.types.dynamic.DynamicPropertyValueSerializer;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.Date;
+import java.util.UUID;
 
 
 public class DynamicPropertyByteBufferConverterTest

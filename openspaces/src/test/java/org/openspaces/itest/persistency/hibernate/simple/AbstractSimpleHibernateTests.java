@@ -53,6 +53,7 @@ public abstract class AbstractSimpleHibernateTests extends TestCase {
         sessionFactory = conf.buildSessionFactory();
         session = sessionFactory.openSession();
         deleteContent();
+
     }
 
     protected void tearDown() throws Exception {
@@ -77,6 +78,9 @@ public abstract class AbstractSimpleHibernateTests extends TestCase {
         tx.commit();
         session.close();
 
+        session.flush();
+        session.close();
+
         List<BulkItem> bulkItems = new ArrayList<BulkItem>();
         bulkItems.add(new MockBulkItem(new Simple(1, "test"), BulkItem.WRITE));
         bulkItems.add(new MockBulkItem(new Simple(2, "test"), BulkItem.REMOVE));
@@ -87,6 +91,8 @@ public abstract class AbstractSimpleHibernateTests extends TestCase {
         assertNotNull(session.get(Simple.class, 1));
         assertNull(session.get(Simple.class, 2));
         assertNotNull(session.get(Simple.class, 3));
+        session.close();
+
     }
 
     public void XtestDuplicateWriteExecuteBulk() throws Exception {
@@ -136,14 +142,18 @@ public abstract class AbstractSimpleHibernateTests extends TestCase {
         session.save(new Simple(2, "test2"));
         tx.commit();
 
+        session.flush();
+        session.close();
         SQLQuery<Simple> sql = new SQLQuery<Simple>(Simple.class, "id = ?");
         sql.setParameter(1, 1);
         DataIterator it = sqlDataProvider.iterator(sql);
         assertTrue(it.hasNext());
         assertEquals(1, ((Simple) it.next()).getId().intValue());
 
+        it.close();
         sql.setParameter(1, 0);
         it = sqlDataProvider.iterator(sql);
         assertFalse(it.hasNext());
+        it.close();
     }
 }

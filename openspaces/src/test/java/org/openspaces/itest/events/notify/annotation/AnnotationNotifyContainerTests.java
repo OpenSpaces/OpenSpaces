@@ -16,24 +16,35 @@
 
 package org.openspaces.itest.events.notify.annotation;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.itest.utils.EmptySpaceDataObject;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 
 /**
  * @author kimchy
  */
-public class AnnotationNotifyContainerTests extends AbstractDependencyInjectionSpringContextTests {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:/org/openspaces/itest/events/notify/annotation/notify-annotation.xml")
+public class AnnotationNotifyContainerTests   { 
 
-    protected GigaSpace gigaSpace;
+     @Autowired protected GigaSpace gigaSpace;
 
-    protected TestListener testListener;
+     @Autowired protected TestListener testListener;
 
     public AnnotationNotifyContainerTests() {
-        setPopulateProtectedVariables(true);
+ 
     }
 
-    protected void onSetUp() throws Exception {
+     @Before public  void onSetUp() throws Exception {
         gigaSpace.clear(null);
     }
 
@@ -42,7 +53,7 @@ public class AnnotationNotifyContainerTests extends AbstractDependencyInjectionS
     }
 
 
-    public void testReceiveMessage() throws Exception {
+     @Test public void testReceiveMessage() throws Exception {
         assertFalse(testListener.isReceivedMessage());
         gigaSpace.write(new EmptySpaceDataObject());
         Thread.sleep(500);
@@ -50,3 +61,4 @@ public class AnnotationNotifyContainerTests extends AbstractDependencyInjectionS
     }
 
 }
+

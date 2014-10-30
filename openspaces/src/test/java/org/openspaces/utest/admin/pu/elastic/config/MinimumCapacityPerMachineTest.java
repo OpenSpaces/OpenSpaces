@@ -17,7 +17,6 @@ package org.openspaces.utest.admin.pu.elastic.config;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
-
 import org.junit.Test;
 import org.openspaces.admin.pu.elastic.config.CapacityRequirementsConfigurer;
 import org.openspaces.admin.zone.config.ExactZonesConfig;

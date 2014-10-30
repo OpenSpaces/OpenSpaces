@@ -1,33 +1,7 @@
 package org.openspaces.utest.extensions;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import junit.framework.Assert;
-
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.openspaces.core.ChangeException;
-import org.openspaces.core.GigaSpace;
-import org.openspaces.extensions.ChangeExtension;
-
 import com.gigaspaces.annotation.pojo.SpaceClass;
-import com.gigaspaces.client.ChangeModifiers;
-import com.gigaspaces.client.ChangeOperationResult;
-import com.gigaspaces.client.ChangeResult;
-import com.gigaspaces.client.ChangeSet;
-import com.gigaspaces.client.ChangeSetInternalUtils;
-import com.gigaspaces.client.ChangedEntryDetails;
+import com.gigaspaces.client.*;
 import com.gigaspaces.client.mutators.SpaceEntryMutator;
 import com.gigaspaces.internal.client.mutators.IncrementSpaceEntryMutator;
 import com.gigaspaces.query.ISpaceQuery;
@@ -36,6 +10,23 @@ import com.gigaspaces.sync.change.ChangeOperation;
 import com.gigaspaces.sync.change.IncrementOperation;
 import com.google.common.collect.Iterables;
 import com.j_spaces.core.client.Modifiers;
+import junit.framework.Assert;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.openspaces.core.ChangeException;
+import org.openspaces.core.GigaSpace;
+import org.openspaces.extensions.ChangeExtension;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.*;
 
 public class ChangeExtensionTests 
 {

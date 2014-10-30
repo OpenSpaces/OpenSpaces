@@ -15,23 +15,17 @@
  *******************************************************************************/
 package org.openspaces.utest.grid.gsm;
 
-import java.util.concurrent.TimeUnit;
-
 import junit.framework.Assert;
 import junit.framework.TestCase;
-
-import org.openspaces.admin.pu.elastic.config.AutomaticCapacityScaleConfig;
-import org.openspaces.admin.pu.elastic.config.AutomaticCapacityScaleConfigurer;
-import org.openspaces.admin.pu.elastic.config.AutomaticCapacityScaleRuleConfig;
-import org.openspaces.admin.pu.elastic.config.AutomaticCapacityScaleRuleConfigurer;
-import org.openspaces.admin.pu.elastic.config.CapacityRequirementsConfig;
-import org.openspaces.admin.pu.elastic.config.CapacityRequirementsConfigurer;
+import org.openspaces.admin.pu.elastic.config.*;
 import org.openspaces.admin.pu.statistics.AverageInstancesStatisticsConfig;
 import org.openspaces.admin.pu.statistics.AverageTimeWindowStatisticsConfigurer;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
 import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsIdConfigurer;
 import org.openspaces.admin.zone.config.AnyZonesConfig;
 import org.openspaces.core.util.MemoryUnit;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * Tests the scale strategy config object to key/value pair conversions. 

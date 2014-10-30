@@ -15,18 +15,13 @@
  *******************************************************************************/
 package org.openspaces.utest.admin.zones.config;
 
-import java.util.HashMap;
-
 import junit.framework.Assert;
 import junit.framework.TestCase;
-
 import org.junit.Test;
-import org.openspaces.admin.zone.config.AnyZonesConfig;
-import org.openspaces.admin.zone.config.AtLeastOneZoneConfig;
-import org.openspaces.admin.zone.config.AtLeastOneZoneConfigurer;
-import org.openspaces.admin.zone.config.ExactZonesConfig;
-import org.openspaces.admin.zone.config.ExactZonesConfigurer;
+import org.openspaces.admin.zone.config.*;
 import org.openspaces.core.util.StringProperties;
+
+import java.util.HashMap;
 
 /**
  * Tests {@link CapacityRequirementsPerZoneConfig}

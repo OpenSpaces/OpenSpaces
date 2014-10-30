@@ -1,15 +1,13 @@
 package org.openspaces.utest.persistency.cassandra.cache;
 
-import java.util.Random;
-import java.util.Set;
-import java.util.concurrent.locks.ReentrantLock;
-
+import com.gigaspaces.internal.utils.collections.ConcurrentHashSet;
 import junit.framework.Assert;
-
 import org.junit.Test;
 import org.openspaces.persistency.cassandra.NamedLockProvider;
 
-import com.gigaspaces.internal.utils.collections.ConcurrentHashSet;
+import java.util.Random;
+import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class NamedLockProviderTest
 {

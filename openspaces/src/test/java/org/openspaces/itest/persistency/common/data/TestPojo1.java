@@ -17,9 +17,9 @@
  ******************************************************************************/
 package org.openspaces.itest.persistency.common.data;
 
-import java.io.Serializable;
-
 import com.gigaspaces.document.SpaceDocument;
+
+import java.io.Serializable;
 
 public class TestPojo1 implements Serializable {
 

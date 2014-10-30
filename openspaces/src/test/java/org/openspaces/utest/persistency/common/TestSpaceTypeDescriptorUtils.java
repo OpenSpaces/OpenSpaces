@@ -1,9 +1,8 @@
 package org.openspaces.utest.persistency.common;
 
-import junit.framework.Assert;
-
 import com.gigaspaces.metadata.SpaceTypeDescriptor;
 import com.gigaspaces.metadata.index.SpaceIndex;
+import junit.framework.Assert;
 
 public class TestSpaceTypeDescriptorUtils
 {

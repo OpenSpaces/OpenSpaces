@@ -19,7 +19,6 @@ package org.openspaces.itest.memcached.integrated;
 
 import junit.framework.TestCase;
 import net.spy.memcached.*;
-
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.pu.container.ProcessingUnitContainer;

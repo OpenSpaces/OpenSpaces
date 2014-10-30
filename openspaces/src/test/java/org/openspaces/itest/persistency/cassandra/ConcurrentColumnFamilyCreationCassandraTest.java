@@ -1,8 +1,6 @@
 package org.openspaces.itest.persistency.cassandra;
 
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-
+import com.gigaspaces.metadata.SpaceTypeDescriptorBuilder;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -10,7 +8,8 @@ import org.openspaces.itest.persistency.common.mock.MockIntroduceTypeData;
 import org.openspaces.persistency.cassandra.CassandraSpaceSynchronizationEndpoint;
 import org.openspaces.persistency.cassandra.HectorCassandraClient;
 
-import com.gigaspaces.metadata.SpaceTypeDescriptorBuilder;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 
 public class ConcurrentColumnFamilyCreationCassandraTest extends AbstractCassandraTest

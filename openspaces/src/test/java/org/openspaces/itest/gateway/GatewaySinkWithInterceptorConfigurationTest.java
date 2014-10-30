@@ -17,10 +17,16 @@
  ******************************************************************************/
 package org.openspaces.itest.gateway;
 
-import org.openspaces.core.gateway.GatewaySinkFactoryBean;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
-
 import com.gigaspaces.sync.SynchronizationEndpointInterceptor;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.openspaces.core.gateway.GatewaySinkFactoryBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test Sink component spring configuration
@@ -30,19 +36,21 @@ import com.gigaspaces.sync.SynchronizationEndpointInterceptor;
  *
  */
 @SuppressWarnings("deprecation")
-public class GatewaySinkWithInterceptorConfigurationTest extends AbstractDependencyInjectionSpringContextTests {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:/org/openspaces/itest/gateway/sinkinterceptor.xml")
+public class GatewaySinkWithInterceptorConfigurationTest   { 
 
     public GatewaySinkWithInterceptorConfigurationTest() {
-        setPopulateProtectedVariables(true);
+ 
     }
     
     protected String[] getConfigLocations() {
         return new String[]{"/org/openspaces/itest/gateway/sinkinterceptor.xml"};
     }
     
-    protected GatewaySinkFactoryBean sink;
+     @Autowired protected GatewaySinkFactoryBean sink;
     
-    public void testClusterConfiguration() throws SecurityException, NoSuchFieldException {
+     @Test public void testClusterConfiguration() throws SecurityException, NoSuchFieldException {
         SynchronizationEndpointInterceptor interceptor = sink.getSyncEndpointInterceptorConfiguration().getInterceptor();
         assertNotNull(interceptor);
         assertTrue(interceptor instanceof MySyncEndPointInterceptor);
@@ -52,3 +60,4 @@ public class GatewaySinkWithInterceptorConfigurationTest extends AbstractDepende
 
     
 }
+

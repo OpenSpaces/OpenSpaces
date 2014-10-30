@@ -15,14 +15,14 @@
  *******************************************************************************/
 package org.openspaces.itest.archive.dynamictemplate;
 
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Logger;
-
 import org.openspaces.archive.Archive;
 import org.openspaces.archive.ArchiveOperationHandler;
 import org.openspaces.events.DynamicEventTemplate;
 import org.openspaces.itest.events.pojos.MockPojo;
 import org.openspaces.itest.events.pojos.MockPojoFifoGrouping;
+
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
 
 /**
  * Archives {@link MockPojo} to the {@link ArchiveOperationHandler}

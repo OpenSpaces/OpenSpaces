@@ -17,14 +17,13 @@
  ******************************************************************************/
 package org.openspaces.itest.jotm;
 
-import javax.naming.NamingException;
-import javax.transaction.SystemException;
-
 import org.objectweb.jotm.Current;
 import org.objectweb.jotm.Jotm;
-
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
+
+import javax.naming.NamingException;
+import javax.transaction.SystemException;
 
 /**
  */

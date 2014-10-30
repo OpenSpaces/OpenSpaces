@@ -19,34 +19,43 @@ package org.openspaces.itest.remoting.methodannotations;
 import com.gigaspaces.annotation.pojo.SpaceClass;
 import com.gigaspaces.annotation.pojo.SpaceId;
 import com.gigaspaces.annotation.pojo.SpaceRouting;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.openspaces.core.GigaSpace;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 /**
  * @author uri
  */
-public class ExecutorRemotingMethodAnnotationsTests extends AbstractDependencyInjectionSpringContextTests {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:/org/openspaces/itest/remoting/methodannotations/method-annotations-remoting.xml")
+public class ExecutorRemotingMethodAnnotationsTests   { 
 
-    protected SimpleExecutorRemotingService executorProxy;
+     @Autowired protected SimpleExecutorRemotingService executorProxy;
 
-    protected GigaSpace gigaSpace;
+     @Autowired protected GigaSpace gigaSpace;
 
     public ExecutorRemotingMethodAnnotationsTests() {
-        setPopulateProtectedVariables(true);
+ 
     }
 
 
-    @Override
-    protected String[] getConfigLocations() {
+    //@Override
+    protected String[] getConfigLocations () {
         return new String[] {"/org/openspaces/itest/remoting/methodannotations/method-annotations-remoting.xml"};
     }
 
 
 
-    public void testTakeMultipleWorking() {
+     @Test public void testTakeMultipleWorking() {
         gigaSpace.write(new Message(1));
         gigaSpace.write(new Message(2));
         Message[] result = gigaSpace.takeMultiple(new Message(), Integer.MAX_VALUE);
@@ -54,73 +63,73 @@ public class ExecutorRemotingMethodAnnotationsTests extends AbstractDependencyIn
         gigaSpace.clear(new Message());
     }
 
-    public void testExecutorBroadcastWithInjectedReducer() {
+     @Test public void testExecutorBroadcastWithInjectedReducer() {
         int value = executorProxy.sumWithInjectedReducer(2);
         assertEquals(4, value);
     }
 
-    public void testExecutorAsyncBroadcastWithInjectedReducer() throws ExecutionException, InterruptedException {
+     @Test public void testExecutorAsyncBroadcastWithInjectedReducer() throws ExecutionException, InterruptedException {
         Future<Integer> result = executorProxy.asyncSumWithInjectedReducer(2);
         assertEquals(new Integer(4), result.get());
     }
 
-    public void testExecutorBroadcastWithReducerType() {
+     @Test public void testExecutorBroadcastWithReducerType() {
         int value = executorProxy.sumWithReducerType(2);
         assertEquals(4, value);
     }
 
-    public void testAsyncExecutorBroadcastWithReducerType() throws ExecutionException, InterruptedException {
+     @Test public void testAsyncExecutorBroadcastWithReducerType() throws ExecutionException, InterruptedException {
         Future<Integer> result = executorProxy.asyncSumWithReducerType(2);
         assertEquals(new Integer(4), result.get());
     }
 
-    public void testInjectedRoutingHandler() {
+     @Test public void testInjectedRoutingHandler() {
         int value = executorProxy.testInjectedRoutingHandler(1);
         assertEquals(value, 1);
     }
 
-    public void testAsyncInjectedRoutingHandler() throws ExecutionException, InterruptedException {
+     @Test public void testAsyncInjectedRoutingHandler() throws ExecutionException, InterruptedException {
         Future<Integer> result = executorProxy.asyncTestInjectedRoutingHandler(1);
         assertEquals(result.get(), new Integer(1));
     }
 
-    public void testRoutingHandlerType() {
+     @Test public void testRoutingHandlerType() {
         int value = executorProxy.testRoutingHandlerType(1);
         assertEquals(value, 1);
     }
 
-    public void testAsyncRoutingHandlerType() throws ExecutionException, InterruptedException {
+     @Test public void testAsyncRoutingHandlerType() throws ExecutionException, InterruptedException {
         Future<Integer> result = executorProxy.asyncTestRoutingHandlerType(1);
         assertEquals(result.get(), new Integer(1));
     }
 
-    public void testInjectedInvocationAspect() {
+     @Test public void testInjectedInvocationAspect() {
         boolean value = executorProxy.testInjectedInvocationAspect();
         assertTrue(value);
     }
 
-    public void testInvocationAspectType() {
+     @Test public void testInvocationAspectType() {
         boolean value = executorProxy.testInvocationAspectType();
         assertTrue(value);
     }
 
-    public void testInjectedMetaArgumentsHandler() {
+     @Test public void testInjectedMetaArgumentsHandler() {
         boolean value = executorProxy.testInjectedMetaArgumentsHandler();
         assertTrue(value);
     }
 
-    public void testAsyncInjectedMetaArgumentsHandler() throws ExecutionException, InterruptedException {
+     @Test public void testAsyncInjectedMetaArgumentsHandler() throws ExecutionException, InterruptedException {
         Future<Boolean> result = executorProxy.asyncTestInjectedMetaArgumentsHandler();
         assertEquals(result.get(), Boolean.TRUE);
     }
 
 
-    public void testMetaArgumentsHandlerType() {
+     @Test public void testMetaArgumentsHandlerType() {
         boolean value = executorProxy.testMetaArgumentsHandlerType();
         assertTrue(value);
     }
 
-    public void testAsyncMetaArgumentsHandlerType() throws ExecutionException, InterruptedException {
+     @Test public void testAsyncMetaArgumentsHandlerType() throws ExecutionException, InterruptedException {
         Future<Boolean> result = executorProxy.asyncTestMetaArgumentsHandlerType();
         assertEquals(result.get(), Boolean.TRUE);
     }
@@ -128,7 +137,9 @@ public class ExecutorRemotingMethodAnnotationsTests extends AbstractDependencyIn
 
 
     @SpaceClass
-    public static class Message {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:/org/openspaces/itest/remoting/methodannotations/method-annotations-remoting.xml")
+    public static class Message  { 
 
         private Integer routing;
 
@@ -160,3 +171,4 @@ public class ExecutorRemotingMethodAnnotationsTests extends AbstractDependencyIn
         }
     }
 }
+

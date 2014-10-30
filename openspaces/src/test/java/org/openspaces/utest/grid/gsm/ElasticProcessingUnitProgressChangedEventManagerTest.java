@@ -17,14 +17,8 @@
  ******************************************************************************/
 package org.openspaces.utest.grid.gsm;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
 import junit.framework.Assert;
 import junit.framework.TestCase;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,6 +30,11 @@ import org.openspaces.admin.internal.gsa.events.DefaultElasticGridServiceAgentPr
 import org.openspaces.admin.internal.gsa.events.DefaultElasticGridServiceAgentProvisioningProgressChangedEventManager;
 import org.openspaces.admin.internal.gsa.events.InternalElasticGridServiceAgentProvisioningProgressChangedEventManager;
 import org.springframework.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 public class ElasticProcessingUnitProgressChangedEventManagerTest extends TestCase {
 

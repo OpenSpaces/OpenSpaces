@@ -19,14 +19,9 @@ package org.openspaces.utest.grid.gsm;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
-
 import org.junit.Test;
 import org.openspaces.core.internal.commons.math.fraction.Fraction;
-import org.openspaces.grid.gsm.capacity.CapacityRequirements;
-import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerAgent;
-import org.openspaces.grid.gsm.capacity.CpuCapacityRequirement;
-import org.openspaces.grid.gsm.capacity.DriveCapacityRequirement;
-import org.openspaces.grid.gsm.capacity.MemoryCapacityRequirement;
+import org.openspaces.grid.gsm.capacity.*;
 
 public class CapacityRequirementsPerAgentTest extends TestCase {
 

@@ -17,10 +17,10 @@
  ******************************************************************************/
 package org.openspaces.utest.admin.alerts;
 
+import org.openspaces.admin.alert.config.AlertConfiguration;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import org.openspaces.admin.alert.config.AlertConfiguration;
 
 public class MockAlertConfiguration implements AlertConfiguration {
 

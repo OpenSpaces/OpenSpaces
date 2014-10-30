@@ -15,10 +15,11 @@
  *******************************************************************************/
 package org.openspaces.itest.persistency.cassandra;
 
-import java.util.Collection;
-
+import com.gigaspaces.datasource.DataIterator;
+import com.gigaspaces.document.SpaceDocument;
+import com.gigaspaces.sync.IntroduceTypeData;
+import edu.emory.mathcs.backport.java.util.Arrays;
 import junit.framework.Assert;
-
 import org.apache.cassandra.cql.jdbc.CassandraDataSource;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,16 +29,9 @@ import org.junit.runners.Parameterized.Parameters;
 import org.openspaces.itest.persistency.common.mock.MockDataSourceIdQuery;
 import org.openspaces.itest.persistency.common.mock.MockDataSourceQuery;
 import org.openspaces.itest.persistency.common.mock.MockOperationsBatchDataBuilder;
-import org.openspaces.persistency.cassandra.CassandraConsistencyLevel;
-import org.openspaces.persistency.cassandra.CassandraSpaceDataSource;
-import org.openspaces.persistency.cassandra.CassandraSpaceDataSourceConfigurer;
-import org.openspaces.persistency.cassandra.HectorCassandraClient;
-import org.openspaces.persistency.cassandra.HectorCassandraClientConfigurer;
+import org.openspaces.persistency.cassandra.*;
 
-import com.gigaspaces.datasource.DataIterator;
-import com.gigaspaces.document.SpaceDocument;
-import com.gigaspaces.sync.IntroduceTypeData;
-import edu.emory.mathcs.backport.java.util.Arrays;
+import java.util.Collection;
 
 @RunWith(Parameterized.class)
 public class DifferentConsistencyLevelsCassandraTest extends AbstractCassandraTest {

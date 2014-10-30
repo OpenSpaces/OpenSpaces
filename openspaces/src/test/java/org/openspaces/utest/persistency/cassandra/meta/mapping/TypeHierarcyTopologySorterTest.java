@@ -1,17 +1,16 @@
 package org.openspaces.utest.persistency.cassandra.meta.mapping;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.junit.Assert;
-import org.junit.Test;
-
 import com.gigaspaces.annotation.pojo.SpaceId;
 import com.gigaspaces.metadata.SpaceTypeDescriptor;
 import com.gigaspaces.metadata.SpaceTypeDescriptorBuilder;
+import org.junit.Assert;
+import org.junit.Test;
 import org.openspaces.persistency.support.SpaceTypeDescriptorContainer;
 import org.openspaces.persistency.support.TypeDescriptorUtils;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class TypeHierarcyTopologySorterTest
 {

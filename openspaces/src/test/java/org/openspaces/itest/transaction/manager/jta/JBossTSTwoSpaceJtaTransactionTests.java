@@ -17,13 +17,21 @@
  ******************************************************************************/
 package org.openspaces.itest.transaction.manager.jta;
 
+import org.junit.runner.RunWith;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+
 /**
  * @author kimchy
  */
-public class JBossTSTwoSpaceJtaTransactionTests extends AbstractTwoSpaceJtaTransactionTests {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:/org/openspaces/itest/transaction/manager/jta/jbossts.xml")
+public class JBossTSTwoSpaceJtaTransactionTests  extends AbstractTwoSpaceJtaTransactionTests { 
 
     protected String[] getConfigLocations() {
         return new String[]{"/org/openspaces/itest/transaction/manager/jta/jbossts.xml"};
     }
 
 }
+

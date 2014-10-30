@@ -1,21 +1,5 @@
 package org.openspaces.itest.persistency.cassandra;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.math.BigInteger;
-import java.util.Date;
-import java.util.Map;
-import java.util.UUID;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.openspaces.itest.persistency.common.data.TestPojo2;
-import org.openspaces.itest.persistency.common.mock.MockDataSourceQuery;
-import org.openspaces.itest.persistency.common.mock.MockDataSourceSqlQuery;
-import org.openspaces.itest.persistency.common.mock.MockIntroduceTypeData;
-import org.openspaces.itest.persistency.common.mock.MockOperationsBatchDataBuilder;
-
 import com.gigaspaces.datasource.DataIterator;
 import com.gigaspaces.datasource.DataSourceQuery;
 import com.gigaspaces.datasource.DataSourceSQLQuery;
@@ -25,6 +9,21 @@ import com.gigaspaces.metadata.SpaceTypeDescriptorBuilder;
 import com.gigaspaces.metadata.index.SpaceIndexType;
 import com.gigaspaces.sync.IntroduceTypeData;
 import com.gigaspaces.sync.OperationsBatchData;
+import org.junit.Before;
+import org.junit.Test;
+import org.openspaces.itest.persistency.common.data.TestPojo2;
+import org.openspaces.itest.persistency.common.mock.MockDataSourceQuery;
+import org.openspaces.itest.persistency.common.mock.MockDataSourceSqlQuery;
+import org.openspaces.itest.persistency.common.mock.MockIntroduceTypeData;
+import org.openspaces.itest.persistency.common.mock.MockOperationsBatchDataBuilder;
+
+import java.math.BigInteger;
+import java.util.Date;
+import java.util.Map;
+import java.util.UUID;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class BasicCQLQueriesCassandraTest extends AbstractCassandraTest
 {

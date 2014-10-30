@@ -17,16 +17,10 @@ package org.openspaces.utest.grid.gsm;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
-
 import org.junit.Test;
 import org.openspaces.admin.pu.elastic.config.CapacityRequirementsConfigurer;
 import org.openspaces.admin.pu.elastic.config.CapacityRequirementsPerZonesConfig;
-import org.openspaces.admin.zone.config.AnyZonesConfig;
-import org.openspaces.admin.zone.config.AtLeastOneZoneConfig;
-import org.openspaces.admin.zone.config.AtLeastOneZoneConfigurer;
-import org.openspaces.admin.zone.config.ExactZonesConfig;
-import org.openspaces.admin.zone.config.ExactZonesConfigurer;
-import org.openspaces.admin.zone.config.ZonesConfig;
+import org.openspaces.admin.zone.config.*;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerZones;
 

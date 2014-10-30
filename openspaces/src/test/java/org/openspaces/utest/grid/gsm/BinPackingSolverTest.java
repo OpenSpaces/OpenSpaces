@@ -17,22 +17,17 @@
  ******************************************************************************/
 package org.openspaces.utest.grid.gsm;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import junit.framework.Assert;
 import junit.framework.TestCase;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
 import org.openspaces.core.internal.commons.math.fraction.Fraction;
-import org.openspaces.grid.gsm.capacity.CapacityRequirements;
-import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerAgent;
-import org.openspaces.grid.gsm.capacity.CpuCapacityRequirement;
-import org.openspaces.grid.gsm.capacity.DriveCapacityRequirement;
-import org.openspaces.grid.gsm.capacity.MemoryCapacityRequirement;
+import org.openspaces.grid.gsm.capacity.*;
 import org.openspaces.grid.gsm.machines.BinPackingSolver;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class BinPackingSolverTest extends TestCase {
 

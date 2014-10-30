@@ -15,10 +15,8 @@
  *******************************************************************************/
 package org.openspaces.itest.archive;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
+import com.j_spaces.core.IJSpace;
 import junit.framework.Assert;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
@@ -40,7 +38,7 @@ import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import com.j_spaces.core.IJSpace;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * GS-10785 Test Archive Container

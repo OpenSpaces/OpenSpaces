@@ -16,22 +16,32 @@
 
 package org.openspaces.itest.events.polling.exceptionhandler;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.itest.utils.EmptySpaceDataObject;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 
 /**
  * @author kimchy
  */
-public class ExceptionHandlerPollingContainerTests extends AbstractDependencyInjectionSpringContextTests {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:/org/openspaces/itest/events/polling/exceptionhandler/polling-exceptionhandler.xml")
+public class ExceptionHandlerPollingContainerTests   { 
 
 
-    protected GigaSpace gigaSpace;
-    protected TestEventListener eventListener;
-    protected TestExceptionHandler exceptionHandler;
+     @Autowired protected GigaSpace gigaSpace;
+     @Autowired protected TestEventListener eventListener;
+     @Autowired protected TestExceptionHandler exceptionHandler;
 
     public ExceptionHandlerPollingContainerTests() {
-        setPopulateProtectedVariables(true);
+ 
     }
 
     protected String[] getConfigLocations() {
@@ -39,7 +49,7 @@ public class ExceptionHandlerPollingContainerTests extends AbstractDependencyInj
     }
 
 
-    public void testExceptionHandler() throws Exception{
+     @Test public void testExceptionHandler() throws Exception{
         exceptionHandler.reset();
         eventListener.reset();
         assertEquals(0, eventListener.getMessageCounter());
@@ -62,3 +72,4 @@ public class ExceptionHandlerPollingContainerTests extends AbstractDependencyInj
     }
 
 }
+

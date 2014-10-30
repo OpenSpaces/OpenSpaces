@@ -17,13 +17,15 @@
  ******************************************************************************/
 package org.openspaces.itest.gateway;
 
-import junit.framework.Assert;
-
-import org.openspaces.core.gateway.GatewayTargetsFactoryBean;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
-
 import com.gigaspaces.internal.cluster.node.impl.gateway.GatewaysPolicy;
 import com.j_spaces.core.cluster.RedoLogCapacityExceededPolicy;
+import junit.framework.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.openspaces.core.gateway.GatewayTargetsFactoryBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
  * Test "os-gateway:gateway-targets" element parsing & conversion to {@link GatewaysPolicy} object.
@@ -35,19 +37,21 @@ import com.j_spaces.core.cluster.RedoLogCapacityExceededPolicy;
  * @since 8.0.3
  *
  */
-public class GatewayClusterConfigurationTest extends AbstractDependencyInjectionSpringContextTests {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:/org/openspaces/itest/gateway/cluster.xml")
+public class GatewayClusterConfigurationTest   { 
 
     public GatewayClusterConfigurationTest() {
-        setPopulateProtectedVariables(true);
+ 
     }
     
     protected String[] getConfigLocations() {
         return new String[]{"/org/openspaces/itest/gateway/cluster.xml"};
     }
     
-    protected GatewayTargetsFactoryBean gatewayTargets;
+     @Autowired protected GatewayTargetsFactoryBean gatewayTargets;
     
-    public void testClusterConfiguration() {
+     @Test public void testClusterConfiguration() {
         Assert.assertNotNull(gatewayTargets);
         assertGatewaysPolicy(gatewayTargets.asGatewaysPolicy());
     }
@@ -87,3 +91,4 @@ public class GatewayClusterConfigurationTest extends AbstractDependencyInjection
 
     
 }
+

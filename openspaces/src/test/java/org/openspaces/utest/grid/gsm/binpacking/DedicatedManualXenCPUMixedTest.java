@@ -19,7 +19,6 @@ package org.openspaces.utest.grid.gsm.binpacking;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Test;

@@ -19,30 +19,39 @@ package org.openspaces.itest.remoting.broadcast;
 import com.gigaspaces.annotation.pojo.SpaceClass;
 import com.gigaspaces.annotation.pojo.SpaceId;
 import com.gigaspaces.annotation.pojo.SpaceRouting;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.openspaces.core.GigaSpace;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 /**
  * @author kimchy
  */
-public class BroadcastRemotingTests extends AbstractDependencyInjectionSpringContextTests {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:/org/openspaces/itest/remoting/broadcast/broadcast-remoting.xml")
+public class BroadcastRemotingTests   { 
 
-    protected SimpleService executorService;
+     @Autowired protected SimpleService executorService;
 
-    protected GigaSpace gigaSpace;
+     @Autowired protected GigaSpace gigaSpace;
 
     public BroadcastRemotingTests() {
-        setPopulateProtectedVariables(true);
+ 
     }
 
     protected String[] getConfigLocations() {
         return new String[]{"/org/openspaces/itest/remoting/broadcast/broadcast-remoting.xml"};
     }
 
-    public void testTakeMultipleWorking() {
+     @Test public void testTakeMultipleWorking() {
         gigaSpace.write(new Message(1));
         gigaSpace.write(new Message(2));
         Message[] result = gigaSpace.takeMultiple(new Message(), Integer.MAX_VALUE);
@@ -50,27 +59,27 @@ public class BroadcastRemotingTests extends AbstractDependencyInjectionSpringCon
         gigaSpace.clear(new Message());
     }
 
-    public void testExecutorSyncBroadcast() {
+     @Test public void testExecutorSyncBroadcast() {
         innerTestSyncBroadcast(executorService);
     }
 
-//    public void testSyncSyncBroadcast() {
+//     @Test public void testSyncSyncBroadcast() {
 //        innerTestSyncBroadcast(syncService);
 //    }
 
-    public void testExecutorAsyncBroadcast() throws ExecutionException, InterruptedException {
+     @Test public void testExecutorAsyncBroadcast() throws ExecutionException, InterruptedException {
         innerTestAsyncBroadcast(executorService);
     }
 
-//    public void testSyncAsyncBroadcast() throws ExecutionException, InterruptedException {
+//     @Test public void testSyncAsyncBroadcast() throws ExecutionException, InterruptedException {
 //        innerTestAsyncBroadcast(syncService);
 //    }
 
-    public void testExecutorAsyncException() throws ExecutionException, InterruptedException {
+     @Test public void testExecutorAsyncException() throws ExecutionException, InterruptedException {
         innerTestAsyncException(executorService);
     }
 
-    public void testExecutorSyncException() throws ExecutionException, InterruptedException {
+     @Test public void testExecutorSyncException() throws ExecutionException, InterruptedException {
         innerTestSyncException(executorService);
     }
 
@@ -107,7 +116,9 @@ public class BroadcastRemotingTests extends AbstractDependencyInjectionSpringCon
     }
 
     @SpaceClass
-    public static class Message {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:/org/openspaces/itest/remoting/broadcast/broadcast-remoting.xml")
+    public static class Message  { 
 
         private Integer routing;
 
@@ -139,3 +150,4 @@ public class BroadcastRemotingTests extends AbstractDependencyInjectionSpringCon
         }
     }
 }
+

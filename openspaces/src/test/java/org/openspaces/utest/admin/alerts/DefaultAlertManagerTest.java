@@ -19,7 +19,6 @@ package org.openspaces.utest.admin.alerts;
 
 
 import junit.framework.TestCase;
-
 import org.junit.Test;
 import org.openspaces.admin.alert.AlertConfigurationException;
 import org.openspaces.admin.alert.AlertManager;

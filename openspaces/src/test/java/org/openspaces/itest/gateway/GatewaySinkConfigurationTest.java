@@ -17,11 +17,19 @@
  ******************************************************************************/
 package org.openspaces.itest.gateway;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.openspaces.core.gateway.GatewaySinkFactoryBean;
 import org.openspaces.core.gateway.GatewaySinkServiceDetails;
 import org.openspaces.core.gateway.SinkErrorHandlingFactoryBean;
 import org.openspaces.pu.service.ServiceDetails;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 
 /**
  * Test Sink component spring configuration
@@ -31,19 +39,21 @@ import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
  *
  */
 @SuppressWarnings("deprecation")
-public class GatewaySinkConfigurationTest extends AbstractDependencyInjectionSpringContextTests {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:/org/openspaces/itest/gateway/sink.xml")
+public class GatewaySinkConfigurationTest   { 
 
     public GatewaySinkConfigurationTest() {
-        setPopulateProtectedVariables(true);
+ 
     }
     
     protected String[] getConfigLocations() {
         return new String[]{"/org/openspaces/itest/gateway/sink.xml"};
     }
     
-    protected GatewaySinkFactoryBean sink;
+     @Autowired protected GatewaySinkFactoryBean sink;
     
-    public void testClusterConfiguration() throws SecurityException, NoSuchFieldException {
+     @Test public void testClusterConfiguration() throws SecurityException, NoSuchFieldException {
         SinkErrorHandlingFactoryBean error = sink.getErrorHandlingConfiguration();
         assertEquals(Integer.valueOf(5), error.getMaximumRetriesOnTransactionLock());
         assertEquals(Integer.valueOf(1000), error.getTransactionLockRetryInterval());
@@ -63,3 +73,4 @@ public class GatewaySinkConfigurationTest extends AbstractDependencyInjectionSpr
 
     
 }
+

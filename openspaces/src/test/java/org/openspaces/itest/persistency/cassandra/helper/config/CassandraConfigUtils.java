@@ -1,19 +1,15 @@
 package org.openspaces.itest.persistency.cassandra.helper.config;
 
+import org.apache.cassandra.config.Config;
+import org.apache.cassandra.config.SeedProviderDef;
+import org.yaml.snakeyaml.*;
+import org.yaml.snakeyaml.DumperOptions.FlowStyle;
+import org.yaml.snakeyaml.constructor.Constructor;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-
-import org.apache.cassandra.config.Config;
-import org.apache.cassandra.config.SeedProviderDef;
-import org.yaml.snakeyaml.Dumper;
-import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.DumperOptions.FlowStyle;
-import org.yaml.snakeyaml.Loader;
-import org.yaml.snakeyaml.TypeDescription;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
 
 public class CassandraConfigUtils
 {

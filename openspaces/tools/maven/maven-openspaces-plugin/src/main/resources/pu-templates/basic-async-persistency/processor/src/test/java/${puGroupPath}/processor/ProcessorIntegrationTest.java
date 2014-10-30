@@ -3,8 +3,6 @@ package ${puGroupId}.processor;
 import ${puGroupId}.common.Data;
 
 import org.junit.runner.RunWith;
-import org.junit.Before;
-import org.junit.After;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -21,14 +19,11 @@ import org.openspaces.core.GigaSpace;
  * taking a processed one from the space.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration
 public class ProcessorIntegrationTest {
 
     @Autowired
     GigaSpace gigaSpace;
 
-    @Before
-    @After
     public void clearSpace() {
         gigaSpace.clear(null);
     }

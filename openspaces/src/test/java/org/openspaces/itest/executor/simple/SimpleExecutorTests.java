@@ -22,13 +22,19 @@ import com.gigaspaces.async.AsyncFuture;
 import com.gigaspaces.async.AsyncResult;
 import com.gigaspaces.async.AsyncResultFilter;
 import com.gigaspaces.async.AsyncResultFilterEvent;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.executor.*;
 import org.openspaces.core.executor.support.*;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import javax.annotation.Resource;
 import java.io.Serializable;
@@ -39,58 +45,62 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.junit.Assert.*;
+
 /**
  * @author kimchy
  */
-public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContextTests {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:/org/openspaces/itest/executor/simple/context.xml")
+public class SimpleExecutorTests   { 
 
-    protected GigaSpace gigaSpace1;
+     @Autowired protected GigaSpace gigaSpace1;
 
-    protected GigaSpace clusteredGigaSpace1;
+     @Autowired protected GigaSpace clusteredGigaSpace1;
 
-    protected GigaSpace gigaSpace2;
+     @Autowired protected GigaSpace gigaSpace2;
 
-    protected GigaSpace clusteredGigaSpace2;
+     @Autowired protected GigaSpace clusteredGigaSpace2;
 
     public SimpleExecutorTests() {
-        setPopulateProtectedVariables(true);
+ 
     }
 
     protected String[] getConfigLocations() {
         return new String[]{"/org/openspaces/itest/executor/simple/context.xml"};
     }
 
-    protected void onSetUp() throws Exception {
+     @Before public  void onSetUp() throws Exception {
         gigaSpace1.clear(null);
         gigaSpace2.clear(null);
     }
 
-    protected void onTearDown() throws Exception {
+     @After public  void onTearDown() throws Exception {
         gigaSpace1.clear(null);
         gigaSpace2.clear(null);
     }
 
-    public void testSimpleTaskExecution() throws Exception {
+     @Test public void testSimpleTaskExecution() throws Exception {
         AsyncFuture<Integer> result = clusteredGigaSpace1.execute(new MyTask());
         assertEquals(1, (int) result.get(1000, TimeUnit.MILLISECONDS));
     }
 
-    public void testSimpleTaskExecutionWithRouting() throws Exception {
+     @Test public void testSimpleTaskExecutionWithRouting() throws Exception {
         AsyncFuture<Integer> result = clusteredGigaSpace1.execute(new MyTask2(), 1);
         assertEquals(1, (int) result.get(1000, TimeUnit.MILLISECONDS));
     }
 
-    public void testMultiRoutingExecution() throws Exception {
+     @Test public void testMultiRoutingExecution() throws Exception {
         AsyncFuture<Integer> result = clusteredGigaSpace1.execute(new MyDistributedTask1(), 1, 2);
         assertEquals(2, (int) result.get(1000, TimeUnit.MILLISECONDS));
     }
 
-    public void testAutoWiredTaskInjectTest() throws Exception {
+     @Test public void testAutoWiredTaskInjectTest() throws Exception {
         AsyncFuture<Integer> result = clusteredGigaSpace1.execute(new MyTaskAuto(), 1);
         assertEquals(5, (int) result.get(1000, TimeUnit.MILLISECONDS));
     }
 
-    public void testException1() throws Exception {
+     @Test public void testException1() throws Exception {
         AsyncFuture<Integer> result = clusteredGigaSpace1.execute(new TaskException(), 1);
         try {
             result.get(1000, TimeUnit.MILLISECONDS);
@@ -100,7 +110,7 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
         }
     }
 
-    public void testExceptionListener1() throws Exception {
+     @Test public void testExceptionListener1() throws Exception {
         WaitForAllListener<Integer> listener = new WaitForAllListener<Integer>(1);
         clusteredGigaSpace1.execute(new TaskException(), 1, listener);
         Future[] results = listener.waitForResult(1000, TimeUnit.MILLISECONDS);
@@ -113,62 +123,62 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
         }
     }
 
-    public void testMultiRoutingExecutionWithModeratorAll() throws Exception {
+     @Test public void testMultiRoutingExecutionWithModeratorAll() throws Exception {
         AsyncFuture<Integer> result = clusteredGigaSpace1.execute(new AggregatorContinue(), 1, 2);
         assertEquals(2, (int) result.get(1000, TimeUnit.MILLISECONDS));
     }
 
-    public void testMultiRoutingExecutionWithModeratorBreak() throws Exception {
+     @Test public void testMultiRoutingExecutionWithModeratorBreak() throws Exception {
         AsyncFuture<Integer> result = clusteredGigaSpace1.execute(new AggregatorBreak(), 1, 2);
         assertEquals(1, (int) result.get(1000, TimeUnit.MILLISECONDS));
     }
 
-    public void testBroadcastExecutionWithModeratorAll() throws Exception {
+     @Test public void testBroadcastExecutionWithModeratorAll() throws Exception {
         AsyncFuture<Integer> result = clusteredGigaSpace1.execute(new AggregatorContinue());
         assertEquals(2, (int) result.get(1000, TimeUnit.MILLISECONDS));
     }
 
-    public void testBroadcastExecutionWithModeratorBreak() throws Exception {
+     @Test public void testBroadcastExecutionWithModeratorBreak() throws Exception {
         AsyncFuture<Integer> result = clusteredGigaSpace1.execute(new AggregatorBreak());
         assertEquals(1, (int) result.get(1000, TimeUnit.MILLISECONDS));
     }
 
-    public void testExecutorBuilder1() throws Exception {
+     @Test public void testExecutorBuilder1() throws Exception {
         AsyncFuture<Integer> result = clusteredGigaSpace1.executorBuilder(new AggregatorContinue())
                 .add(new Task1(), 1).add(new Task1(), 2).add(new Task1(), 3).execute();
         assertEquals(3, (int) result.get(1000, TimeUnit.MILLISECONDS));
     }
 
-    public void testExecutorBuilder2() throws Exception {
+     @Test public void testExecutorBuilder2() throws Exception {
         AsyncFuture<Integer> result = clusteredGigaSpace1.executorBuilder(new AggregatorContinue())
                 .add(new Task1Routing(1)).add(new Task1Routing(2)).add(new Task1Routing(2)).execute();
         assertEquals(3, (int) result.get(1000, TimeUnit.MILLISECONDS));
     }
 
-    public void testExecutorBuilder3() throws Exception {
+     @Test public void testExecutorBuilder3() throws Exception {
         AsyncFuture<Integer> result = clusteredGigaSpace1.executorBuilder(new AggregatorContinue())
                 .add(new Task1Routing(1)).add(new AggregatorContinue(), 1, 2).add(new Task1Routing(2)).execute();
         assertEquals(4, (int) result.get(1000, TimeUnit.MILLISECONDS));
     }
 
-    public void testExecutorBuilder4() throws Exception {
+     @Test public void testExecutorBuilder4() throws Exception {
         AsyncFuture<Integer> result = clusteredGigaSpace1.executorBuilder(new AggregatorContinue())
                 .add(new Task1Routing(1)).add(new AggregatorContinue()).add(new Task1Routing(2)).execute();
         assertEquals(4, (int) result.get(1000, TimeUnit.MILLISECONDS));
     }
 
-    public void testExecutorBuilder5() throws Exception {
+     @Test public void testExecutorBuilder5() throws Exception {
         AsyncFuture<Integer> result = clusteredGigaSpace1.executorBuilder(new AggregatorBreak())
                 .add(new Task1Routing(1)).add(new AggregatorContinue()).add(new Task1Routing(2)).execute();
         assertEquals(1, (int) result.get(1000, TimeUnit.MILLISECONDS));
     }
 
-    public void testBroadcastExecution() throws Exception {
+     @Test public void testBroadcastExecution() throws Exception {
         AsyncFuture<Integer> result = clusteredGigaSpace1.execute(new MyDistributedTask2());
         assertEquals(2, (int) result.get(1000, TimeUnit.MILLISECONDS));
     }
 
-    public void testDistributedExecutionWithListener() throws Exception {
+     @Test public void testDistributedExecutionWithListener() throws Exception {
         WaitForAllListener<Integer> listener = new WaitForAllListener<Integer>(1);
         clusteredGigaSpace1.execute(new MyDistributedTask(), listener);
         Future<Integer>[] results = listener.waitForResult(500, TimeUnit.MILLISECONDS);
@@ -176,50 +186,50 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
         assertEquals(2, (int) results[0].get());
     }
 
-    public void testInjection() throws Exception {
+     @Test public void testInjection() throws Exception {
         AsyncFuture<Integer> result = clusteredGigaSpace1.execute(new MyDistributedTask());
         assertEquals(2, (int) result.get(1000, TimeUnit.MILLISECONDS));
     }
 
-    public void testInjection2() throws Exception {
+     @Test public void testInjection2() throws Exception {
         AsyncFuture<Integer> result = clusteredGigaSpace1.execute(new ApplicationContextInjectable());
         assertEquals(2, (int) result.get(1000, TimeUnit.MILLISECONDS));
     }
 
-    public void testInjection3() throws TimeoutException, ExecutionException, InterruptedException {
+     @Test public void testInjection3() throws TimeoutException, ExecutionException, InterruptedException {
         AsyncFuture result = clusteredGigaSpace1.execute(new MyTask3(), 1);
         assertNull(result.get(1000, TimeUnit.MILLISECONDS));
     }
 
-    public void testInjection4() throws Exception {
+     @Test public void testInjection4() throws Exception {
         AsyncFuture<Integer> result = clusteredGigaSpace1.execute(new TaskGigaSpaceInjectable());
         assertEquals(2, (int) result.get(1000, TimeUnit.MILLISECONDS));
     }
 
-    public void testIntegerSumTask() throws Exception {
+     @Test public void testIntegerSumTask() throws Exception {
         AsyncFuture<Long> result = clusteredGigaSpace1.execute(new SumTask<Integer, Long>(Long.class, new Task1()));
         assertEquals(2, (long) result.get(100, TimeUnit.MILLISECONDS));
     }
 
-    public void testIntegerMaxTask() throws Exception {
+     @Test public void testIntegerMaxTask() throws Exception {
         AsyncFuture<Integer> result = clusteredGigaSpace1.execute(new MaxTask<Integer>(Integer.class, new IncrementalTask()));
         assertEquals(2, (int) result.get(100, TimeUnit.MILLISECONDS));
         IncrementalTask.reset();
     }        
     
-    public void testIntegerMinTask() throws Exception {
+     @Test public void testIntegerMinTask() throws Exception {
         AsyncFuture<Integer> result = clusteredGigaSpace1.execute(new MinTask<Integer>(Integer.class, new IncrementalTask()));
         assertEquals(1, (int) result.get(100, TimeUnit.MILLISECONDS));
         IncrementalTask.reset();
     }
 
-    public void testAvgTask() throws Exception {
+     @Test public void testAvgTask() throws Exception {
         AsyncFuture<Float> result = clusteredGigaSpace1.execute(new AvgTask<Integer, Float>(Float.class, new IncrementalTask()));
         assertEquals(1.5, result.get(100, TimeUnit.MILLISECONDS), 0.000001);
         IncrementalTask.reset();
     }
 
-    public void testWaitForAnyListener() throws Exception {
+     @Test public void testWaitForAnyListener() throws Exception {
         WaitForAnyListener<Integer> listener = new WaitForAnyListener<Integer>(2);
         AsyncFuture<Integer> future = clusteredGigaSpace1.execute(new DelayedTask(500));
         future.setListener(listener);
@@ -228,7 +238,7 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
         assertEquals(100, (int) listener.waitForResult());
     }
 
-    public void testWaitForAllListener() throws Exception {
+     @Test public void testWaitForAllListener() throws Exception {
         WaitForAllListener<Integer> listener = new WaitForAllListener<Integer>(2);
         AsyncFuture<Integer> future = clusteredGigaSpace1.execute(new DelayedTask(500));
         future.setListener(listener);
@@ -385,7 +395,9 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
         }
     }
 
-    public static class TaskGigaSpaceInjectable extends AggregatorContinue {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:/org/openspaces/itest/executor/simple/context.xml")
+    public static class TaskGigaSpaceInjectable  extends AggregatorContinue { 
 
         /**
          *
@@ -535,3 +547,4 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
         }
     }
 }
+

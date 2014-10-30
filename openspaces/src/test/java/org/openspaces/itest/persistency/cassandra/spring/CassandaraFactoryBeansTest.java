@@ -15,9 +15,9 @@
  *******************************************************************************/
 package org.openspaces.itest.persistency.cassandra.spring;
 
-import java.util.Map.Entry;
-import java.util.Properties;
-
+import com.gigaspaces.datasource.DataIterator;
+import com.gigaspaces.document.SpaceDocument;
+import com.gigaspaces.metadata.SpaceTypeDescriptorBuilder;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -31,9 +31,8 @@ import org.openspaces.persistency.cassandra.CassandraSpaceSynchronizationEndpoin
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import com.gigaspaces.datasource.DataIterator;
-import com.gigaspaces.document.SpaceDocument;
-import com.gigaspaces.metadata.SpaceTypeDescriptorBuilder;
+import java.util.Map.Entry;
+import java.util.Properties;
 
 public class CassandaraFactoryBeansTest {
 

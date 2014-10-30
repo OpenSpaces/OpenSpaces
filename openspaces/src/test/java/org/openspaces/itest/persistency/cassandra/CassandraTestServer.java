@@ -1,8 +1,7 @@
 package org.openspaces.itest.persistency.cassandra;
 
-import org.openspaces.itest.persistency.cassandra.helper.EmbeddedCassandraController;
-
 import com.gigaspaces.logger.GSLogConfigLoader;
+import org.openspaces.itest.persistency.cassandra.helper.EmbeddedCassandraController;
 
 public class CassandraTestServer {
 

@@ -1,21 +1,19 @@
 package org.openspaces.itest.persistency.cassandra;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import junit.framework.Assert;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.openspaces.itest.persistency.common.mock.MockOperationsBatchDataBuilder;
-
 import com.gigaspaces.datasource.DataIterator;
 import com.gigaspaces.datasource.DataSourceIdsQuery;
 import com.gigaspaces.datasource.DataSourceSQLQuery;
 import com.gigaspaces.document.SpaceDocument;
 import com.gigaspaces.metadata.SpaceTypeDescriptor;
 import com.gigaspaces.sync.IntroduceTypeData;
+import junit.framework.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.openspaces.itest.persistency.common.mock.MockOperationsBatchDataBuilder;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ReadByIdsCassandraTest extends AbstractCassandraTest
 {

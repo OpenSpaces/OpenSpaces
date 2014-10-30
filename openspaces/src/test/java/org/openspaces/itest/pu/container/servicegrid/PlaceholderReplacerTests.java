@@ -15,14 +15,13 @@
  *******************************************************************************/
 package org.openspaces.itest.pu.container.servicegrid;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import junit.framework.Assert;
 import junit.framework.TestCase;
-
 import org.openspaces.core.util.PlaceholderReplacer;
 import org.openspaces.core.util.PlaceholderReplacer.PlaceholderResolutionException;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Dan Kilman

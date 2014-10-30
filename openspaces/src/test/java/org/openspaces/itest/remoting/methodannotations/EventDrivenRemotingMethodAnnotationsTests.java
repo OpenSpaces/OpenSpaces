@@ -19,35 +19,44 @@ package org.openspaces.itest.remoting.methodannotations;
 import com.gigaspaces.annotation.pojo.SpaceClass;
 import com.gigaspaces.annotation.pojo.SpaceId;
 import com.gigaspaces.annotation.pojo.SpaceRouting;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.openspaces.core.GigaSpace;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 /**
  * @author uri
  */
-public class EventDrivenRemotingMethodAnnotationsTests extends AbstractDependencyInjectionSpringContextTests {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:/org/openspaces/itest/remoting/methodannotations/method-annotations-remoting.xml")
+public class EventDrivenRemotingMethodAnnotationsTests   { 
 
-    protected SimpleEventDrivenRemotingService eventDrivenProxy;
+     @Autowired protected SimpleEventDrivenRemotingService eventDrivenProxy;
 
-    protected GigaSpace gigaSpace;
+     @Autowired protected GigaSpace gigaSpace;
 
     public EventDrivenRemotingMethodAnnotationsTests() {
-        setPopulateProtectedVariables(true);
-        setAutowireMode(AUTOWIRE_BY_NAME);
+ 
+ 
     }
 
 
-    @Override
-    protected String[] getConfigLocations() {
+    //@Override
+    protected String[] getConfigLocations () {
         return new String[] {"/org/openspaces/itest/remoting/methodannotations/method-annotations-remoting.xml"};
     }
 
 
 
-    public void testTakeMultipleWorking() {
+     @Test public void testTakeMultipleWorking() {
         gigaSpace.write(new Message(1));
         gigaSpace.write(new Message(2));
         Message[] result = gigaSpace.takeMultiple(new Message(), Integer.MAX_VALUE);
@@ -55,53 +64,53 @@ public class EventDrivenRemotingMethodAnnotationsTests extends AbstractDependenc
         gigaSpace.clear(new Message());
     }
 
-    public void testInjectedRoutingHandler() {
+     @Test public void testInjectedRoutingHandler() {
         int value = eventDrivenProxy.testInjectedRoutingHandler(1);
         assertEquals(value, 1);
     }
 
-    public void testAsyncInjectedRoutingHandler() throws ExecutionException, InterruptedException {
+     @Test public void testAsyncInjectedRoutingHandler() throws ExecutionException, InterruptedException {
         Future<Integer> result = eventDrivenProxy.asyncTestInjectedRoutingHandler(1);
         assertEquals(result.get(), new Integer(1));
     }
 
-    public void testRoutingHandlerType() {
+     @Test public void testRoutingHandlerType() {
         int value = eventDrivenProxy.testRoutingHandlerType(1);
         assertEquals(value, 1);
     }
 
-    public void testAsyncRoutingHandlerType() throws ExecutionException, InterruptedException {
+     @Test public void testAsyncRoutingHandlerType() throws ExecutionException, InterruptedException {
         Future<Integer> result = eventDrivenProxy.asyncTestRoutingHandlerType(1);
         assertEquals(result.get(), new Integer(1));
     }
 
-    public void testInjectedInvocationAspect() {
+     @Test public void testInjectedInvocationAspect() {
         boolean value = eventDrivenProxy.testInjectedInvocationAspect();
         assertTrue(value);
     }
 
-    public void testInvocationAspectType() {
+     @Test public void testInvocationAspectType() {
         boolean value = eventDrivenProxy.testInvocationAspectType();
         assertTrue(value);
     }
 
-    public void testInjectedMetaArgumentsHandler() {
+     @Test public void testInjectedMetaArgumentsHandler() {
         boolean value = eventDrivenProxy.testInjectedMetaArgumentsHandler();
         assertTrue(value);
     }
 
-    public void testAsyncInjectedMetaArgumentsHandler() throws ExecutionException, InterruptedException {
+     @Test public void testAsyncInjectedMetaArgumentsHandler() throws ExecutionException, InterruptedException {
         Future<Boolean> result = eventDrivenProxy.asyncTestInjectedMetaArgumentsHandler();
         assertEquals(result.get(), Boolean.TRUE);
     }
 
 
-    public void testMetaArgumentsHandlerType() {
+     @Test public void testMetaArgumentsHandlerType() {
         boolean value = eventDrivenProxy.testMetaArgumentsHandlerType();
         assertTrue(value);
     }
 
-    public void testAsyncMetaArgumentsHandlerType() throws ExecutionException, InterruptedException {
+     @Test public void testAsyncMetaArgumentsHandlerType() throws ExecutionException, InterruptedException {
         Future<Boolean> result = eventDrivenProxy.asyncTestMetaArgumentsHandlerType();
         assertEquals(result.get(), Boolean.TRUE);
     }
@@ -109,7 +118,9 @@ public class EventDrivenRemotingMethodAnnotationsTests extends AbstractDependenc
 
 
     @SpaceClass
-    public static class Message {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:/org/openspaces/itest/remoting/methodannotations/method-annotations-remoting.xml")
+    public static class Message  { 
 
         private Integer routing;
 
@@ -141,3 +152,4 @@ public class EventDrivenRemotingMethodAnnotationsTests extends AbstractDependenc
         }
     }
 }
+

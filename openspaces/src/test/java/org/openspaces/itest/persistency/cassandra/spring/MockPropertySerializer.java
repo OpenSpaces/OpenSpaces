@@ -15,10 +15,10 @@
  *******************************************************************************/
 package org.openspaces.itest.persistency.cassandra.spring;
 
-import java.nio.ByteBuffer;
-
 import org.openspaces.persistency.cassandra.meta.types.SerializerProvider;
 import org.openspaces.persistency.cassandra.meta.types.dynamic.PropertyValueSerializer;
+
+import java.nio.ByteBuffer;
 
 /**
  * @author dank

@@ -15,11 +15,11 @@
  *******************************************************************************/
 package org.openspaces.itest.persistency.cassandra.archive;
 
-import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-
+import com.gigaspaces.document.SpaceDocument;
+import com.gigaspaces.metadata.SpaceTypeDescriptor;
+import com.gigaspaces.metadata.SpaceTypeDescriptorBuilder;
+import com.gigaspaces.metadata.index.SpaceIndexType;
+import com.j_spaces.core.IJSpace;
 import junit.framework.Assert;
 import me.prettyprint.cassandra.serializers.LongSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
@@ -29,7 +29,6 @@ import me.prettyprint.cassandra.service.template.ThriftColumnFamilyTemplate;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.factory.HFactory;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.After;
@@ -46,11 +45,10 @@ import org.openspaces.persistency.cassandra.error.SpaceCassandraException;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import com.gigaspaces.document.SpaceDocument;
-import com.gigaspaces.metadata.SpaceTypeDescriptor;
-import com.gigaspaces.metadata.SpaceTypeDescriptorBuilder;
-import com.gigaspaces.metadata.index.SpaceIndexType;
-import com.j_spaces.core.IJSpace;
+import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * GS-10785 Test Archive Container

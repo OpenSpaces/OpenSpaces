@@ -17,6 +17,10 @@
 package org.openspaces.itest.transaction.manager.distributed;
 
 import junit.framework.Assert;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.executor.AutowireTask;
 import org.openspaces.core.executor.Task;
@@ -24,7 +28,9 @@ import org.openspaces.core.executor.TaskGigaSpace;
 import org.openspaces.itest.transaction.manager.local.TestData1;
 import org.openspaces.itest.utils.EmptySpaceDataObject;
 import org.openspaces.itest.utils.TestUtils;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -33,32 +39,37 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.concurrent.Future;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
 /**
  * @author kimchy
  */
-public class SimpleDistributedTransactionTests extends AbstractDependencyInjectionSpringContextTests {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:/org/openspaces/itest/transaction/manager/distributed/context.xml")
+public class SimpleDistributedTransactionTests   { 
 
-    protected GigaSpace gigaSpace;
+     @Autowired protected GigaSpace gigaSpace;
 
-    protected PlatformTransactionManager mahaloTxManager;
+     @Autowired protected PlatformTransactionManager mahaloTxManager;
 
     public SimpleDistributedTransactionTests() {
-        setPopulateProtectedVariables(true);
+ 
     }
 
     protected String[] getConfigLocations() {
         return new String[]{"/org/openspaces/itest/transaction/manager/distributed/context.xml"};
     }
 
-    protected void onSetUp() throws Exception {
+     @Before public  void onSetUp() throws Exception {
         gigaSpace.clear(null);
     }
 
-    protected void onTearDown() throws Exception {
+     @After public  void onTearDown() throws Exception {
         gigaSpace.clear(null);
     }
 
-    public void testSimpleCommit() {
+     @Test public void testSimpleCommit() {
         TransactionTemplate txTemplate = new TransactionTemplate(mahaloTxManager);
         assertNull(gigaSpace.read(new EmptySpaceDataObject()));
         txTemplate.execute(new TransactionCallbackWithoutResult() {
@@ -71,7 +82,7 @@ public class SimpleDistributedTransactionTests extends AbstractDependencyInjecti
         assertNotNull(gigaSpace.read(new EmptySpaceDataObject()));
     }
 
-    public void testSimpleRollback() {
+     @Test public void testSimpleRollback() {
         TransactionTemplate txTemplate = new TransactionTemplate(mahaloTxManager);
         assertNull(gigaSpace.read(new EmptySpaceDataObject()));
         txTemplate.execute(new TransactionCallbackWithoutResult() {
@@ -85,7 +96,7 @@ public class SimpleDistributedTransactionTests extends AbstractDependencyInjecti
         assertNull(gigaSpace.read(new EmptySpaceDataObject()));
     }
 
-    public void testTakeRollback() {
+     @Test public void testTakeRollback() {
         TransactionTemplate txTemplate = new TransactionTemplate(mahaloTxManager);
         assertNull(gigaSpace.read(new EmptySpaceDataObject()));
         gigaSpace.write(new EmptySpaceDataObject());
@@ -99,7 +110,7 @@ public class SimpleDistributedTransactionTests extends AbstractDependencyInjecti
         assertNotNull(gigaSpace.take(new EmptySpaceDataObject()));
     }
 
-    public void testPropogationRequiredWithCommit() {
+     @Test public void testPropogationRequiredWithCommit() {
         TransactionTemplate txTemplate = new TransactionTemplate(mahaloTxManager);
         assertNull(gigaSpace.read(new EmptySpaceDataObject()));
         assertNull(gigaSpace.read(new TestData1()));
@@ -129,7 +140,7 @@ public class SimpleDistributedTransactionTests extends AbstractDependencyInjecti
         assertNotNull(gigaSpace.read(new TestData1()));
     }
 
-    public void testPropogationRequiredWithRollback() {
+     @Test public void testPropogationRequiredWithRollback() {
         TransactionTemplate txTemplate = new TransactionTemplate(mahaloTxManager);
         assertNull(gigaSpace.read(new EmptySpaceDataObject()));
         assertNull(gigaSpace.read(new TestData1()));
@@ -164,7 +175,7 @@ public class SimpleDistributedTransactionTests extends AbstractDependencyInjecti
         assertNull(gigaSpace.read(new EmptySpaceDataObject()));
     }
 
-    public void testPropogationRequiresNewWithCommit() {
+     @Test public void testPropogationRequiresNewWithCommit() {
         TransactionTemplate txTemplate = new TransactionTemplate(mahaloTxManager);
         assertNull(gigaSpace.read(new EmptySpaceDataObject()));
         assertNull(gigaSpace.read(new TestData1()));
@@ -194,7 +205,7 @@ public class SimpleDistributedTransactionTests extends AbstractDependencyInjecti
         assertNotNull(gigaSpace.read(new TestData1()));
     }
 
-    public void testPropogationRequiresNewWithRollback() {
+     @Test public void testPropogationRequiresNewWithRollback() {
         TransactionTemplate txTemplate = new TransactionTemplate(mahaloTxManager);
         assertNull(gigaSpace.read(new EmptySpaceDataObject()));
         assertNull(gigaSpace.read(new TestData1()));
@@ -225,7 +236,7 @@ public class SimpleDistributedTransactionTests extends AbstractDependencyInjecti
         assertNull(gigaSpace.read(new TestData1()));
     }
 
-    public void testPropagationNotSupportedWithRollback() {
+     @Test public void testPropagationNotSupportedWithRollback() {
         TransactionTemplate txTemplate = new TransactionTemplate(mahaloTxManager);
         assertNull(gigaSpace.read(new TestData2()));
         assertNull(gigaSpace.read(new TestData1()));
@@ -256,7 +267,7 @@ public class SimpleDistributedTransactionTests extends AbstractDependencyInjecti
         assertNotNull(gigaSpace.read(new TestData1()));
     }
 
-    public void testPropagationNotSupportedWithRollbackTask() {
+     @Test public void testPropagationNotSupportedWithRollbackTask() {
         TransactionTemplate txTemplate = new TransactionTemplate(mahaloTxManager);
         txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
         assertNull(gigaSpace.read(new TestData2()));
@@ -312,3 +323,4 @@ public class SimpleDistributedTransactionTests extends AbstractDependencyInjecti
         }
     }
 }
+

@@ -15,27 +15,19 @@
  *******************************************************************************/
 package org.openspaces.utest.admin.internal.pu.statistics;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import junit.framework.Assert;
 import junit.framework.TestCase;
-
 import org.junit.Test;
 import org.openspaces.admin.internal.pu.DefaultProcessingUnitStatistics;
 import org.openspaces.admin.internal.pu.ProcessingUnitStatistics;
 import org.openspaces.admin.internal.pu.statistics.InstancesStatisticsCalculator;
 import org.openspaces.admin.internal.pu.statistics.InternalProcessingUnitStatistics;
-import org.openspaces.admin.pu.statistics.AverageInstancesStatisticsConfig;
-import org.openspaces.admin.pu.statistics.LastSampleTimeWindowStatisticsConfig;
-import org.openspaces.admin.pu.statistics.MaximumInstancesStatisticsConfig;
-import org.openspaces.admin.pu.statistics.MinimumInstancesStatisticsConfig;
-import org.openspaces.admin.pu.statistics.PercentileInstancesStatisticsConfigurer;
-import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsId;
-import org.openspaces.admin.pu.statistics.ProcessingUnitStatisticsIdConfigurer;
-import org.openspaces.admin.pu.statistics.SingleInstanceStatisticsConfigurer;
+import org.openspaces.admin.pu.statistics.*;
 import org.openspaces.admin.zone.config.ExactZonesConfig;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Unit Tests for {@link InstancesStatisticsCalculator}

@@ -15,12 +15,8 @@
  *******************************************************************************/
 package org.openspaces.utest.admin.pu.elastic.config;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import junit.framework.Assert;
 import junit.framework.TestCase;
-
 import org.junit.Test;
 import org.openspaces.admin.pu.elastic.config.CapacityRequirementsConfig;
 import org.openspaces.admin.pu.elastic.config.CapacityRequirementsConfigurer;
@@ -30,6 +26,9 @@ import org.openspaces.admin.zone.config.AtLeastOneZoneConfigurer;
 import org.openspaces.admin.zone.config.ExactZonesConfig;
 import org.openspaces.admin.zone.config.ExactZonesConfigurer;
 import org.openspaces.grid.gsm.capacity.CapacityRequirementsPerZones;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Tests {@link CapacityRequirementsPerZoneConfig}

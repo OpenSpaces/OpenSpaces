@@ -16,34 +16,44 @@
 
 package org.openspaces.itest.remoting.simple.transactionalservice;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.openspaces.core.GigaSpace;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
+
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
 /**
  * @author kimchy
  */
-public class SimpleTransactionalServiceTests extends AbstractDependencyInjectionSpringContextTests {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:/org/openspaces/itest/remoting/simple/transactionalservice/transactional-service.xml")
+public class SimpleTransactionalServiceTests   { 
 
-    protected GigaSpace gigaSpace;
+     @Autowired protected GigaSpace gigaSpace;
 
-    protected SimpleTxService simpleService;
+     @Autowired protected SimpleTxService simpleService;
 
-    protected PlatformTransactionManager localTxManager;
+     @Autowired protected PlatformTransactionManager localTxManager;
 
     public SimpleTransactionalServiceTests() {
-        setPopulateProtectedVariables(true);
+ 
     }
 
     protected String[] getConfigLocations() {
         return new String[]{"/org/openspaces/itest/remoting/simple/transactionalservice/transactional-service.xml"};
     }
 
-    protected void onSetUp() throws Exception {
+     @Before public  void onSetUp() throws Exception {
         gigaSpace.clear(new Object());
     }
 
-    public void testRollbackTransaction() {
+     @Test public void testRollbackTransaction() {
         try {
             simpleService.bahh(new TestMessage("throwme"));
             fail();
@@ -53,3 +63,4 @@ public class SimpleTransactionalServiceTests extends AbstractDependencyInjection
         assertNull(gigaSpace.read(new TestMessage()));
     }
 }
+

@@ -1,9 +1,15 @@
 package ${puGroupId}.processor;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import static org.junit.Assert.*;
 
 import ${puGroupId}.common.Data;
 
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 
+import org.junit.Before
 import org.openspaces.core.GigaSpace;
 
 
@@ -12,18 +18,22 @@ import org.openspaces.core.GigaSpace;
  * to the actual pu.xml. Writs an unprocessed Data to the Space, and verifies that it has been processed by
  * taking a processed one from the space.
  */
-public class ProcessorIntegrationTest extends AbstractDependencyInjectionSpringContextTests {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:${puGroupPath}/processor/ProcessorIntegrationTest-context.xml")
+public class ProcessorIntegrationTest   { 
 
-    protected GigaSpace gigaSpace;
+     @Autowired protected GigaSpace gigaSpace;
     
     public ProcessorIntegrationTest() {
-        setPopulateProtectedVariables(true);
+ 
     }
 
-    protected void onSetUp() throws Exception {
+    @Before
+    public void onSetUp() throws Exception {
         gigaSpace.clear(null);
     }
-    
+
+    @
     protected void onTearDown() throws Exception {
         gigaSpace.clear(null);
     }
@@ -32,7 +42,7 @@ public class ProcessorIntegrationTest extends AbstractDependencyInjectionSpringC
         return new String[]{"${puGroupPath}/processor/ProcessorIntegrationTest-context.xml"};
     }
     
-    public void testVerifyProcessing() throws Exception {
+     @Test public void testVerifyProcessing() throws Exception {
         // write the data to be processed to the Space
         Data data = new Data(new Long(1l), "test");
         gigaSpace.write(data);
@@ -50,3 +60,4 @@ public class ProcessorIntegrationTest extends AbstractDependencyInjectionSpringC
         assertEquals("Processed text mismatch", "PROCESSED : " + data.getRawData(), result.getData());
     }
 }
+

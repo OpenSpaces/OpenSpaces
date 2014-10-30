@@ -16,13 +16,13 @@
 
 package org.openspaces.utest.remoting;
 
-import java.lang.reflect.Method;
-import java.util.Map;
-
 import com.gigaspaces.internal.reflection.IMethod;
 import junit.framework.TestCase;
 import org.openspaces.remoting.RemotingUtils;
 import org.openspaces.remoting.RemotingUtils.MethodHash;
+
+import java.lang.reflect.Method;
+import java.util.Map;
 
 /**
  * GS-8294: Methods of a Remoting Service interface are not included when it extends from another interface

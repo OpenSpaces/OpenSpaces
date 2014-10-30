@@ -17,14 +17,14 @@
  ******************************************************************************/
 package org.openspaces.itest.persistency.common.mock;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import com.gigaspaces.document.SpaceDocument;
 import com.gigaspaces.metadata.SpaceTypeDescriptorBuilder;
 import com.gigaspaces.sync.DataSyncOperation;
 import com.gigaspaces.sync.DataSyncOperationType;
 import com.gigaspaces.sync.OperationsBatchData;
+
+import java.util.LinkedList;
+import java.util.List;
 
 public class MockOperationsBatchDataBuilder {
 

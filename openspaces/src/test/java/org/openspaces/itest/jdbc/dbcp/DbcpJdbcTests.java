@@ -16,23 +16,31 @@
 
 package org.openspaces.itest.jdbc.dbcp;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.PreparedStatementCallback;
-import org.springframework.test.AbstractTransactionalDataSourceSpringContextTests;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import static org.junit.Assert.assertEquals;
+
 /**
  * @author kimchy
  */
-public class DbcpJdbcTests extends AbstractTransactionalDataSourceSpringContextTests {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:/org/openspaces/itest/jdbc/dbcp/jdbc.xml")
+public class DbcpJdbcTests  extends AbstractTransactionalJUnit4SpringContextTests {
 
     protected String[] getConfigLocations() {
         return new String[]{"/org/openspaces/itest/jdbc/dbcp/jdbc.xml"};
     }
 
-    public void testSimpleOperation() {
+     @Test public void testSimpleOperation() {
         jdbcTemplate.execute("create table Person(FirstName varchar2 INDEX, LastName varchar2)");
         jdbcTemplate.execute("insert into Person values(?,?)", new PreparedStatementCallback() {
             public Object doInPreparedStatement(PreparedStatement preparedStatement) throws SQLException, DataAccessException {
@@ -48,3 +56,4 @@ public class DbcpJdbcTests extends AbstractTransactionalDataSourceSpringContextT
         assertEquals(10, count);
     }
 }
+

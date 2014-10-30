@@ -1,13 +1,12 @@
 package org.openspaces.itest.persistency.cassandra;
 
+import com.gigaspaces.datasource.DataIterator;
+import com.gigaspaces.document.SpaceDocument;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openspaces.itest.persistency.common.data.TestPojoWithPrimitives;
 import org.openspaces.itest.persistency.common.mock.MockOperationsBatchDataBuilder;
-
-import com.gigaspaces.datasource.DataIterator;
-import com.gigaspaces.document.SpaceDocument;
 
 public class PojoWithPrimitiveTypesCassandraTest extends AbstractCassandraTest
 {

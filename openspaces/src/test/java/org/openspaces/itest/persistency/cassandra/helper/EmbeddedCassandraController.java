@@ -1,9 +1,5 @@
 package org.openspaces.itest.persistency.cassandra.helper;
 
-import java.io.File;
-import java.net.URL;
-import java.util.UUID;
-
 import org.github.jamm.MemoryMeter;
 import org.jini.rio.boot.BootUtil;
 import org.openspaces.itest.persistency.cassandra.helper.config.CassandraConfigUtils;
@@ -11,6 +7,10 @@ import org.openspaces.test.client.executor.Executor;
 import org.openspaces.test.client.executor.ExecutorUtils;
 import org.openspaces.test.client.executor.RemoteAsyncCommandResult;
 import org.openspaces.test.client.executor.RemoteJavaCommand;
+
+import java.io.File;
+import java.net.URL;
+import java.util.UUID;
 
 
 public class EmbeddedCassandraController

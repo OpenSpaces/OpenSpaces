@@ -17,10 +17,10 @@
  ******************************************************************************/
 package org.openspaces.utest.admin.alerts;
 
-import java.util.Map;
-
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.internal.alert.bean.AlertBean;
+
+import java.util.Map;
 
 public class MockAlertBean implements AlertBean {
 

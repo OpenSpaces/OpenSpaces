@@ -1,16 +1,14 @@
 package org.openspaces.itest.persistency.cassandra;
 
+import com.gigaspaces.datasource.DataIterator;
+import com.gigaspaces.document.SpaceDocument;
+import com.gigaspaces.sync.IntroduceTypeData;
 import junit.framework.Assert;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.openspaces.itest.persistency.common.data.TestPojo1;
 import org.openspaces.itest.persistency.common.mock.MockDataSourceQuery;
 import org.openspaces.itest.persistency.common.mock.MockOperationsBatchDataBuilder;
-
-import com.gigaspaces.datasource.DataIterator;
-import com.gigaspaces.document.SpaceDocument;
-import com.gigaspaces.sync.IntroduceTypeData;
 
 public class DataIteratorWithPropertyAddedLaterCassandraTest extends AbstractCassandraTest
 {

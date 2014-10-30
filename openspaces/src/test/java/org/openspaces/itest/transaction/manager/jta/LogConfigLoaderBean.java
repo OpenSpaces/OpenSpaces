@@ -15,13 +15,12 @@
  *******************************************************************************/
 package org.openspaces.itest.transaction.manager.jta;
 
-import java.lang.reflect.Field;
-import java.util.Properties;
-
+import com.gigaspaces.logger.GSLogConfigLoader;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 
-import com.gigaspaces.logger.GSLogConfigLoader;
+import java.lang.reflect.Field;
+import java.util.Properties;
 
 /**
  * @author Dan Kilman

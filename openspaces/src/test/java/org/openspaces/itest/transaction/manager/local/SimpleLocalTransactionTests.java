@@ -19,13 +19,19 @@ package org.openspaces.itest.transaction.manager.local;
 import junit.framework.Assert;
 import junit.framework.AssertionFailedError;
 import net.jini.core.transaction.Transaction;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.executor.AutowireTask;
 import org.openspaces.core.executor.Task;
 import org.openspaces.core.executor.TaskGigaSpace;
 import org.openspaces.core.transaction.manager.ExistingJiniTransactionManager;
 import org.openspaces.itest.utils.TestUtils;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -35,32 +41,36 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static org.junit.Assert.*;
+
 /**
  * @author kimchy
  */
-public class SimpleLocalTransactionTests extends AbstractDependencyInjectionSpringContextTests {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:/org/openspaces/itest/transaction/manager/local/context.xml")
+public class SimpleLocalTransactionTests   { 
 
-    protected GigaSpace gigaSpace;      
+     @Autowired protected GigaSpace gigaSpace;      
 
-    protected PlatformTransactionManager localTxManager;
+     @Autowired protected PlatformTransactionManager localTxManager;
 
     public SimpleLocalTransactionTests() {
-        setPopulateProtectedVariables(true);
+ 
     }
 
     protected String[] getConfigLocations() {
         return new String[]{"/org/openspaces/itest/transaction/manager/local/context.xml"};
     }
 
-    protected void onSetUp() throws Exception {
+     @Before public  void onSetUp() throws Exception {
         gigaSpace.clear(null);
     }
 
-    protected void onTearDown() throws Exception {
+     @After public  void onTearDown() throws Exception {
         gigaSpace.clear(null);
     }
 
-    public void testSimpleCommit() {
+     @Test public void testSimpleCommit() {
         TransactionTemplate txTemplate = new TransactionTemplate(localTxManager);
         assertNull(gigaSpace.read(new TestData1()));
         txTemplate.execute(new TransactionCallbackWithoutResult() {
@@ -73,7 +83,7 @@ public class SimpleLocalTransactionTests extends AbstractDependencyInjectionSpri
         assertNotNull(gigaSpace.read(new TestData1()));
     }
 
-    public void testSimpleRollback() {
+     @Test public void testSimpleRollback() {
         TransactionTemplate txTemplate = new TransactionTemplate(localTxManager);
         assertNull(gigaSpace.read(new TestData1()));
         txTemplate.execute(new TransactionCallbackWithoutResult() {
@@ -87,7 +97,7 @@ public class SimpleLocalTransactionTests extends AbstractDependencyInjectionSpri
         assertNull(gigaSpace.read(new TestData1()));
     }
 
-    public void testTakeRollback() {
+     @Test public void testTakeRollback() {
         TransactionTemplate txTemplate = new TransactionTemplate(localTxManager);
         assertNull(gigaSpace.read(new TestData1()));
         gigaSpace.write(new TestData1());
@@ -101,7 +111,7 @@ public class SimpleLocalTransactionTests extends AbstractDependencyInjectionSpri
         assertNotNull(gigaSpace.take(new TestData1()));
     }
 
-    public void testPropogationRequiredWithCommit() {
+     @Test public void testPropogationRequiredWithCommit() {
         TransactionTemplate txTemplate = new TransactionTemplate(localTxManager);
         assertNull(gigaSpace.read(new TestData2()));
         assertNull(gigaSpace.read(new TestData1()));
@@ -131,7 +141,7 @@ public class SimpleLocalTransactionTests extends AbstractDependencyInjectionSpri
         assertNotNull(gigaSpace.read(new TestData1()));
     }
 
-    public void testPropogationRequiredWithRollback() {
+     @Test public void testPropogationRequiredWithRollback() {
         TransactionTemplate txTemplate = new TransactionTemplate(localTxManager);
         assertNull(gigaSpace.read(new TestData2()));
         assertNull(gigaSpace.read(new TestData1()));
@@ -166,7 +176,7 @@ public class SimpleLocalTransactionTests extends AbstractDependencyInjectionSpri
         assertNull(gigaSpace.read(new TestData2()));
     }
 
-    public void testPropogationRequiresNewWithCommit() {
+     @Test public void testPropogationRequiresNewWithCommit() {
         TransactionTemplate txTemplate = new TransactionTemplate(localTxManager);
         assertNull(gigaSpace.read(new TestData2()));
         assertNull(gigaSpace.read(new TestData1()));
@@ -196,7 +206,7 @@ public class SimpleLocalTransactionTests extends AbstractDependencyInjectionSpri
         assertNotNull(gigaSpace.read(new TestData1()));
     }
 
-    public void testPropagationNotSupportedWithRollback() {
+     @Test public void testPropagationNotSupportedWithRollback() {
         TransactionTemplate txTemplate = new TransactionTemplate(localTxManager);
         assertNull(gigaSpace.read(new TestData2()));
         assertNull(gigaSpace.read(new TestData1()));
@@ -227,7 +237,7 @@ public class SimpleLocalTransactionTests extends AbstractDependencyInjectionSpri
         assertNotNull(gigaSpace.read(new TestData1()));
     }
 
-    public void testPropogationRequiresNewWithRollback() {
+     @Test public void testPropogationRequiresNewWithRollback() {
         TransactionTemplate txTemplate = new TransactionTemplate(localTxManager);
         assertNull(gigaSpace.read(new TestData2()));
         assertNull(gigaSpace.read(new TestData1()));
@@ -258,7 +268,7 @@ public class SimpleLocalTransactionTests extends AbstractDependencyInjectionSpri
         assertNull(gigaSpace.read(new TestData1()));
     }
 
-    public void testSimpleExistingTransactionWithCommit() throws Exception {
+     @Test public void testSimpleExistingTransactionWithCommit() throws Exception {
         TransactionTemplate txTemplate = new TransactionTemplate(localTxManager);
         assertNull(gigaSpace.read(new TestData2()));
         txTemplate.execute(new TransactionCallbackWithoutResult() {
@@ -311,7 +321,7 @@ public class SimpleLocalTransactionTests extends AbstractDependencyInjectionSpri
         assertNotNull(gigaSpace.read(new TestData1()));
     }
 
-    public void testPropagationNotSupportedWithRollback2() {
+     @Test public void testPropagationNotSupportedWithRollback2() {
         TransactionTemplate txTemplate = new TransactionTemplate(localTxManager);
         assertNull(gigaSpace.read(new TestData2()));
         assertNull(gigaSpace.read(new TestData1()));
@@ -342,7 +352,7 @@ public class SimpleLocalTransactionTests extends AbstractDependencyInjectionSpri
         assertNotNull(gigaSpace.read(new TestData1()));
     }
 
-    public void testPropagationNotSupportedWithRollbackTask() {
+     @Test public void testPropagationNotSupportedWithRollbackTask() {
         TransactionTemplate txTemplate = new TransactionTemplate(localTxManager);
         txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
         assertNull(gigaSpace.read(new TestData2()));
@@ -398,3 +408,4 @@ public class SimpleLocalTransactionTests extends AbstractDependencyInjectionSpri
         }
     }
 }
+

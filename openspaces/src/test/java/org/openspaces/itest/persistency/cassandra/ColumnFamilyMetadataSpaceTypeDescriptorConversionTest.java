@@ -1,17 +1,5 @@
 package org.openspaces.itest.persistency.cassandra;
 
-import junit.framework.Assert;
-
-import org.junit.Test;
-import org.openspaces.itest.persistency.common.data.TestDocumentWrapper;
-import org.openspaces.itest.persistency.common.data.TestPojoWithPrimitives;
-import org.openspaces.itest.persistency.common.data.TestPojo1;
-import org.openspaces.itest.persistency.common.data.TestPojo2;
-import org.openspaces.itest.persistency.common.data.TestPojo3;
-import org.openspaces.itest.persistency.common.data.TestPojo4;
-import org.openspaces.itest.persistency.common.mock.MockIntroduceTypeData;
-import org.openspaces.utest.persistency.common.TestSpaceTypeDescriptorUtils;
-
 import com.gigaspaces.annotation.pojo.FifoSupport;
 import com.gigaspaces.datasource.DataIterator;
 import com.gigaspaces.metadata.SpaceDocumentSupport;
@@ -19,6 +7,11 @@ import com.gigaspaces.metadata.SpaceTypeDescriptor;
 import com.gigaspaces.metadata.SpaceTypeDescriptorBuilder;
 import com.gigaspaces.metadata.StorageType;
 import com.gigaspaces.metadata.index.SpaceIndexType;
+import junit.framework.Assert;
+import org.junit.Test;
+import org.openspaces.itest.persistency.common.data.*;
+import org.openspaces.itest.persistency.common.mock.MockIntroduceTypeData;
+import org.openspaces.utest.persistency.common.TestSpaceTypeDescriptorUtils;
 
 public class ColumnFamilyMetadataSpaceTypeDescriptorConversionTest 
     extends AbstractCassandraTest

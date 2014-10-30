@@ -17,26 +17,34 @@
 package org.openspaces.itest.events.polling.dynamictemplate;
 
 import junit.framework.Assert;
-
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.itest.events.pojos.MockPojo;
 import org.openspaces.itest.utils.TestUtils;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import static org.junit.Assert.assertEquals;
+
 
 /**
  * @author Itai Frenkel
  * @since 9.1.1
  */
-public class DynamicTemplatePollingContainerTests extends AbstractDependencyInjectionSpringContextTests {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:/org/openspaces/itest/events/polling/dynamictemplate/polling-dynamictemplate.xml")
+public class DynamicTemplatePollingContainerTests   { 
 
 
-    protected GigaSpace gigaSpace;
-    protected TestEventListener eventListener;
+     @Autowired protected GigaSpace gigaSpace;
+     @Autowired protected TestEventListener eventListener;
 
 
     public DynamicTemplatePollingContainerTests() {
       //spring context need to inject this.gigaSpace and this.eventListener
-        setPopulateProtectedVariables(true);
+ 
     }
     
     protected String[] getConfigLocations() {
@@ -44,7 +52,7 @@ public class DynamicTemplatePollingContainerTests extends AbstractDependencyInje
     }
 
 
-    public void testDynamicTemplate() throws Exception{
+     @Test public void testDynamicTemplate() throws Exception{
         eventListener.reset();
         assertEquals(0, eventListener.getMessageCounter());
         final MockPojo[] entries = new MockPojo[] { new MockPojo(false, 1), new MockPojo(false, 2), new MockPojo(false, 3), new MockPojo(false, 4)  };
@@ -60,3 +68,4 @@ public class DynamicTemplatePollingContainerTests extends AbstractDependencyInje
     }
 
 }
+

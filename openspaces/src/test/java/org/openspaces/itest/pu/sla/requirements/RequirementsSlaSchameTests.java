@@ -16,29 +16,42 @@
 
 package org.openspaces.itest.pu.sla.requirements;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.openspaces.pu.sla.InstanceSLA;
 import org.openspaces.pu.sla.SLA;
 import org.openspaces.pu.sla.requirement.CpuRequirement;
 import org.openspaces.pu.sla.requirement.HostRequirement;
 import org.openspaces.pu.sla.requirement.MemoryRequirement;
 import org.openspaces.pu.sla.requirement.SystemRequirement;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 
 /**
  * @author kimchy
  */
-public class RequirementsSlaSchameTests extends AbstractDependencyInjectionSpringContextTests {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:/org/openspaces/itest/pu/sla/requirements/requirements.xml")
+public class RequirementsSlaSchameTests   { 
+@Autowired
+    protected ApplicationContext ac;
 
     public RequirementsSlaSchameTests() {
-        setPopulateProtectedVariables(true);
+ 
     }
 
     protected String[] getConfigLocations() {
         return new String[]{"/org/openspaces/itest/pu/sla/requirements/requirements.xml"};
     }
 
-    public void testRequirements() {
-        SLA sla = (SLA) getApplicationContext().getBean("SLA");
+     @Test public void testRequirements() {
+        SLA sla = (SLA) ac.getBean("SLA");
         assertNotNull(sla);
         assertNotNull(sla.getRequirements());
         assertEquals(4, sla.getRequirements().size());
@@ -48,9 +61,9 @@ public class RequirementsSlaSchameTests extends AbstractDependencyInjectionSprin
         assertEquals("test2", system.getName());
         assertNotNull(system.getAttributes());
         CpuRequirement cpuRequirement = (CpuRequirement) sla.getRequirements().get(2);
-        assertEquals(.9, cpuRequirement.getHigh());
+        assertEquals(.9, cpuRequirement.getHigh(),0);
         MemoryRequirement memoryRequirement = (MemoryRequirement) sla.getRequirements().get(3);
-        assertEquals(.8, memoryRequirement.getHigh());
+        assertEquals(.8, memoryRequirement.getHigh(),0);
 
         // verify instance SLA
         assertNotNull(sla.getInstanceSLAs());
@@ -64,3 +77,4 @@ public class RequirementsSlaSchameTests extends AbstractDependencyInjectionSprin
         assertEquals("test1", host.getIp());
     }
 }
+

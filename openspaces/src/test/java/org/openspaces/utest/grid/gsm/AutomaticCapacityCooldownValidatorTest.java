@@ -15,17 +15,16 @@
  *******************************************************************************/
 package org.openspaces.utest.grid.gsm;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
 import junit.framework.TestCase;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.openspaces.admin.pu.DeploymentStatus;
 import org.openspaces.grid.gsm.autoscaling.AutomaticCapacityCooldownValidator;
 import org.openspaces.grid.gsm.autoscaling.exceptions.AutoScalingTemporarilyDisabledCooldownException;
+
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author itaif

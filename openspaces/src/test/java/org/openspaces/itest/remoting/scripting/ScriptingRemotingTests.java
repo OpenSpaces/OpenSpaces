@@ -16,32 +16,38 @@
 
 package org.openspaces.itest.remoting.scripting;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.openspaces.core.GigaSpace;
+import org.openspaces.remoting.scripting.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import org.openspaces.core.GigaSpace;
-import org.openspaces.remoting.scripting.EventDrivenScriptingProxyConfigurer;
-import org.openspaces.remoting.scripting.ExecutorScriptingProxyConfigurer;
-import org.openspaces.remoting.scripting.ResourceLazyLoadingScript;
-import org.openspaces.remoting.scripting.ScriptingExecutor;
-import org.openspaces.remoting.scripting.StaticScript;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 
 /**
  * @author kimchy
  */
-public class ScriptingRemotingTests extends AbstractDependencyInjectionSpringContextTests {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:/org/openspaces/itest/remoting/scripting/scripting-remoting.xml")
+public class ScriptingRemotingTests   { 
 
-    protected ScriptingExecutor asyncScriptingExecutor;
+     @Autowired protected ScriptingExecutor asyncScriptingExecutor;
 
-    protected ScriptingExecutor executorScriptingExecutor;
+     @Autowired protected ScriptingExecutor executorScriptingExecutor;
 
-    protected ScriptingAnnotationBean scriptingAnnotationBean;
+     @Autowired protected ScriptingAnnotationBean scriptingAnnotationBean;
 
-    protected GigaSpace gigaSpace;
+     @Autowired protected GigaSpace gigaSpace;
 
     public ScriptingRemotingTests() {
-        setPopulateProtectedVariables(true);
+ 
     }
 
     protected String[] getConfigLocations() {
@@ -49,27 +55,27 @@ public class ScriptingRemotingTests extends AbstractDependencyInjectionSpringCon
     }
 
 
-    public void testAsyncSyncExecution() {
+     @Test public void testAsyncSyncExecution() {
         Integer value = (Integer) asyncScriptingExecutor.execute(new StaticScript("testAsyncSyncExecution", "groovy", "return 1"));
         assertEquals(1, value.intValue());
     }
 
-    public void testAsyncAsyncExcution() throws ExecutionException, InterruptedException {
+     @Test public void testAsyncAsyncExcution() throws ExecutionException, InterruptedException {
         Future<Integer> result = asyncScriptingExecutor.asyncExecute(new StaticScript("testAsyncAsycnExcution", "groovy", "return 1"));
         assertEquals(1, result.get().intValue());
     }
 
-    public void testExecutorSyncExecution() {
+     @Test public void testExecutorSyncExecution() {
         Integer value = (Integer) executorScriptingExecutor.execute(new StaticScript("testAsyncSyncExecution", "groovy", "return 1"));
         assertEquals(1, value.intValue());
     }
 
-    public void testExecutorAsyncExcution() throws ExecutionException, InterruptedException {
+     @Test public void testExecutorAsyncExcution() throws ExecutionException, InterruptedException {
         Future<Integer> result = executorScriptingExecutor.asyncExecute(new StaticScript("testAsyncAsycnExcution", "groovy", "return 1"));
         assertEquals(1, result.get().intValue());
     }
 
-    public void testAsyncSyncExecutionWithReferenceToSpace() {
+     @Test public void testAsyncSyncExecutionWithReferenceToSpace() {
         gigaSpace.clear(null);
         asyncScriptingExecutor.execute(new StaticScript("testAsyncSyncExecutionWithReferenceToSpace", "groovy", 
                                                         "import org.openspaces.itest.utils.EmptySpaceDataObject;" +
@@ -77,27 +83,27 @@ public class ScriptingRemotingTests extends AbstractDependencyInjectionSpringCon
         assertEquals(1, gigaSpace.count(new Object()));
     }
 
-    public void testSyncJsr223Execution() {
+     @Test public void testSyncJsr223Execution() {
         Double value = (Double) executorScriptingExecutor.execute(new StaticScript("testSyncJsr223Execution", "JavaScript", "1"));
         assertEquals(1, value.intValue());
     }
 
-    public void testSyncJsr223WithParameterExecution() {
+     @Test public void testSyncJsr223WithParameterExecution() {
         Integer value = (Integer) executorScriptingExecutor.execute(new StaticScript("testSyncJsr223WithParameterExecution", "JavaScript", "number").parameter("number", 1));
         assertEquals(1, value.intValue());
     }
 
-    public void testSyncJRubyExecution() {
+     @Test public void testSyncJRubyExecution() {
         Long value = (Long) executorScriptingExecutor.execute(new StaticScript("testSyncJRubyExecution", "ruby", "1"));
         assertEquals(1, value.intValue());
     }
 
-    public void testSyncJRubyWithParameteresExecution() {
+     @Test public void testSyncJRubyWithParameteresExecution() {
         Long value = (Long) executorScriptingExecutor.execute(new StaticScript("testSyncJRubyWithParameteresExecution", "ruby", "$number").parameter("number", 1));
         assertEquals(1, value.intValue());
     }
 
-    public void testSimpleCachingWithJRuby() {
+     @Test public void testSimpleCachingWithJRuby() {
         // warmup
         Long value = (Long) executorScriptingExecutor.execute(new StaticScript("testSimpleCachingWithJRuby-warmup", "ruby", "$number").parameter("number", 1));
         assertEquals(1, value.intValue());
@@ -134,7 +140,7 @@ public class ScriptingRemotingTests extends AbstractDependencyInjectionSpringCon
         assertTrue(cacheTime < nonCacheTime);
     }
 
-    public void testLazyLoadingGroovyScript() {
+     @Test public void testLazyLoadingGroovyScript() {
         gigaSpace.clear(null);
         Integer value = (Integer) executorScriptingExecutor.execute(new ResourceLazyLoadingScript("testLazyLoadingGroovyScript", "groovy", "classpath:/org/openspaces/itest/remoting/scripting/test.groovy"));
         assertEquals(1, value.intValue());
@@ -142,12 +148,12 @@ public class ScriptingRemotingTests extends AbstractDependencyInjectionSpringCon
         assertEquals(2, value.intValue());
     }
 
-    public void testAnnotationInjection() {
+     @Test public void testAnnotationInjection() {
         assertEquals(2, scriptingAnnotationBean.executeEventScriptThatReturns2().intValue());
         assertEquals(2, scriptingAnnotationBean.executeExecutorScriptThatReturns2().intValue());
     }
 
-    public void testEventScriptingConfigurer() {
+     @Test public void testEventScriptingConfigurer() {
         ScriptingExecutor<Integer> executor = new EventDrivenScriptingProxyConfigurer<Integer>(gigaSpace)
                 .timeout(15000)
                 .scriptingExecutor();
@@ -155,10 +161,11 @@ public class ScriptingRemotingTests extends AbstractDependencyInjectionSpringCon
         assertEquals(1, result.intValue());
     }
 
-    public void testExecutorScriptingConfigurer() {
+     @Test public void testExecutorScriptingConfigurer() {
         ScriptingExecutor<Integer> executor = new ExecutorScriptingProxyConfigurer<Integer>(gigaSpace)
                 .scriptingExecutor();
         Integer result = executor.execute(new StaticScript().type("groovy").name("testSyncScriptingConfigurer").script("return 1"));
         assertEquals(1, result.intValue());
     }
 }
+

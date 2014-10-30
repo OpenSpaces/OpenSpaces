@@ -1,23 +1,5 @@
 package org.openspaces.itest.persistency.cassandra;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.Date;
-import java.util.UUID;
-
-import org.junit.Assert;
-import org.junit.Test;
-import org.openspaces.itest.persistency.common.mock.MockAddIndexData;
-import org.openspaces.itest.persistency.common.mock.MockDataSourceIdQuery;
-import org.openspaces.itest.persistency.common.mock.MockDataSourceQuery;
-import org.openspaces.itest.persistency.common.mock.MockIntroduceTypeData;
-import org.openspaces.itest.persistency.common.mock.MockOperationsBatchDataBuilder;
-import org.openspaces.itest.persistency.common.mock.MockSpaceIndex;
-
 import com.gigaspaces.datasource.DataIterator;
 import com.gigaspaces.datasource.DataSourceQuery;
 import com.gigaspaces.document.SpaceDocument;
@@ -27,6 +9,18 @@ import com.gigaspaces.metadata.index.SpaceIndex;
 import com.gigaspaces.metadata.index.SpaceIndexType;
 import com.gigaspaces.sync.AddIndexData;
 import com.gigaspaces.sync.OperationsBatchData;
+import org.junit.Assert;
+import org.junit.Test;
+import org.openspaces.itest.persistency.common.mock.*;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.Date;
+import java.util.UUID;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class BasicCassandraTest extends AbstractCassandraTest
 {

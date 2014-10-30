@@ -18,41 +18,52 @@
 package org.openspaces.itest.executor.eventcontainer;
 
 import com.gigaspaces.async.AsyncFuture;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.events.support.RegisterEventContainerTask;
 import org.openspaces.events.support.UnregisterEventContainerTask;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.concurrent.TimeUnit;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author kimchy
  */
-public class EventContainerExecutorTestsX extends AbstractDependencyInjectionSpringContextTests {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:/org/openspaces/itest/executor/eventcontainer/context.xml")
+public class EventContainerExecutorTestsX   { 
 
-    protected GigaSpace gigaSpace1;
+     @Autowired protected GigaSpace gigaSpace1;
 
-    protected GigaSpace gigaSpace2;
+     @Autowired protected GigaSpace gigaSpace2;
 
-    protected GigaSpace distGigaSpace;
+     @Autowired protected GigaSpace distGigaSpace;
 
     public EventContainerExecutorTestsX() {
-        setPopulateProtectedVariables(true);
+ 
     }
 
     protected String[] getConfigLocations() {
         return new String[]{"/org/openspaces/itest/executor/eventcontainer/context.xml"};
     }
 
-    protected void onSetUp() throws Exception {
+     @Before public  void onSetUp() throws Exception {
         distGigaSpace.clear(null);
     }
 
-    protected void onTearDown() throws Exception {
+     @After public  void onTearDown() throws Exception {
         distGigaSpace.clear(null);
     }
 
-    public void testDynamicRegistrationOfEvents() throws Exception {
+     @Test public void testDynamicRegistrationOfEvents() throws Exception {
         DynamicEventListener listener = new DynamicEventListener();
         gigaSpace1.write(new Object());
         Thread.sleep(200);
@@ -71,3 +82,4 @@ public class EventContainerExecutorTestsX extends AbstractDependencyInjectionSpr
     }
 
 }
+

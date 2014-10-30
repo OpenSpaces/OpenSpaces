@@ -17,12 +17,12 @@
  ******************************************************************************/
 package org.openspaces.itest.persistency.support;
 
-import java.util.Map;
-
 import com.gigaspaces.datasource.BulkItem;
 import com.gigaspaces.document.SpaceDocument;
 import com.gigaspaces.metadata.SpaceTypeDescriptor;
 import com.gigaspaces.sync.DataSyncOperationType;
+
+import java.util.Map;
 
 /**
  * @author kimchy

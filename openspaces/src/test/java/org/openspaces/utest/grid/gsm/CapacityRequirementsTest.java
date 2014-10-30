@@ -19,7 +19,6 @@ package org.openspaces.utest.grid.gsm;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
-
 import org.junit.Test;
 import org.openspaces.admin.pu.elastic.config.CapacityRequirementsConfig;
 import org.openspaces.core.internal.commons.math.fraction.Fraction;

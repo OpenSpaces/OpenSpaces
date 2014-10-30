@@ -1,25 +1,19 @@
 package org.openspaces.itest.persistency.cassandra;
 
-import java.util.Date;
-
+import com.gigaspaces.datasource.DataIterator;
+import com.gigaspaces.document.SpaceDocument;
+import com.gigaspaces.metadata.SpaceTypeDescriptor;
+import com.gigaspaces.metadata.index.SpaceIndex;
+import com.gigaspaces.metadata.index.SpaceIndexType;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openspaces.itest.persistency.cassandra.data.TestDocumentFactory;
 import org.openspaces.itest.persistency.common.data.TestPojo1;
 import org.openspaces.itest.persistency.common.data.TestPojo3;
 import org.openspaces.itest.persistency.common.data.TestPojo4;
-import org.openspaces.itest.persistency.common.mock.MockAddIndexData;
-import org.openspaces.itest.persistency.common.mock.MockDataSourceQuery;
-import org.openspaces.itest.persistency.common.mock.MockDataSourceSqlQuery;
-import org.openspaces.itest.persistency.common.mock.MockIntroduceTypeData;
-import org.openspaces.itest.persistency.common.mock.MockOperationsBatchDataBuilder;
-import org.openspaces.itest.persistency.common.mock.MockSpaceIndex;
+import org.openspaces.itest.persistency.common.mock.*;
 
-import com.gigaspaces.datasource.DataIterator;
-import com.gigaspaces.document.SpaceDocument;
-import com.gigaspaces.metadata.SpaceTypeDescriptor;
-import com.gigaspaces.metadata.index.SpaceIndex;
-import com.gigaspaces.metadata.index.SpaceIndexType;
+import java.util.Date;
 
 public class MultiTypeNestedPropertiesCassandraTest extends AbstractCassandraTest
 {

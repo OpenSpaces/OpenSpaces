@@ -1,8 +1,8 @@
 package org.openspaces.itest.persistency.cassandra;
 
-import java.util.HashSet;
-import java.util.Set;
-
+import com.gigaspaces.datasource.DataIterator;
+import com.gigaspaces.document.SpaceDocument;
+import com.gigaspaces.metadata.SpaceTypeDescriptor;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,9 +13,8 @@ import org.openspaces.itest.persistency.common.mock.MockDataSourceSqlQuery;
 import org.openspaces.itest.persistency.common.mock.MockIntroduceTypeData;
 import org.openspaces.itest.persistency.common.mock.MockOperationsBatchDataBuilder;
 
-import com.gigaspaces.datasource.DataIterator;
-import com.gigaspaces.document.SpaceDocument;
-import com.gigaspaces.metadata.SpaceTypeDescriptor;
+import java.util.HashSet;
+import java.util.Set;
 
 public class CyclicReferencePropertyCassandraTest extends AbstractCassandraTest
 {

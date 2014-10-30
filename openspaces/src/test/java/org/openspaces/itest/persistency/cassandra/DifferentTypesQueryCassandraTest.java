@@ -1,18 +1,5 @@
 package org.openspaces.itest.persistency.cassandra;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.math.BigInteger;
-import java.util.Date;
-import java.util.UUID;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.openspaces.itest.persistency.common.mock.MockDataSourceQuery;
-import org.openspaces.itest.persistency.common.mock.MockIntroduceTypeData;
-import org.openspaces.itest.persistency.common.mock.MockOperationsBatchDataBuilder;
-
 import com.gigaspaces.datasource.DataIterator;
 import com.gigaspaces.datasource.DataSourceQuery;
 import com.gigaspaces.document.SpaceDocument;
@@ -20,6 +7,18 @@ import com.gigaspaces.metadata.SpaceTypeDescriptor;
 import com.gigaspaces.metadata.SpaceTypeDescriptorBuilder;
 import com.gigaspaces.metadata.index.SpaceIndexType;
 import com.gigaspaces.sync.OperationsBatchData;
+import org.junit.Before;
+import org.junit.Test;
+import org.openspaces.itest.persistency.common.mock.MockDataSourceQuery;
+import org.openspaces.itest.persistency.common.mock.MockIntroduceTypeData;
+import org.openspaces.itest.persistency.common.mock.MockOperationsBatchDataBuilder;
+
+import java.math.BigInteger;
+import java.util.Date;
+import java.util.UUID;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class DifferentTypesQueryCassandraTest extends AbstractCassandraTest
 {

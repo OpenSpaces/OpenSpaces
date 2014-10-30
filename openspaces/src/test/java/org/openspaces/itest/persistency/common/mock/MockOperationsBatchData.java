@@ -17,11 +17,11 @@
  ******************************************************************************/
 package org.openspaces.itest.persistency.common.mock;
 
-import java.util.List;
-
 import com.gigaspaces.sync.DataSyncOperation;
 import com.gigaspaces.sync.OperationsBatchData;
 import com.gigaspaces.sync.SynchronizationSourceDetails;
+
+import java.util.List;
 
 public class MockOperationsBatchData implements OperationsBatchData
 {

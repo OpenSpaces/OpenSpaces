@@ -16,17 +16,29 @@
 
 package org.openspaces.itest.pu.sla.policy.relocation;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.openspaces.pu.sla.RelocationPolicy;
 import org.openspaces.pu.sla.SLA;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import static org.junit.Assert.*;
+
 
 /**
  * @author kimchy
  */
-public class RelocationSlaSchameTests extends AbstractDependencyInjectionSpringContextTests {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:/org/openspaces/itest/pu/sla/policy/relocation/relocation-policy.xml")
+public class RelocationSlaSchameTests   { 
+@Autowired
+    protected ApplicationContext ac;
 
     public RelocationSlaSchameTests() {
-        setPopulateProtectedVariables(true);
+ 
     }
 
     protected String[] getConfigLocations() {
@@ -34,14 +46,15 @@ public class RelocationSlaSchameTests extends AbstractDependencyInjectionSpringC
     }
 
 
-    public void testRelocationSchema() {
-        SLA sla = (SLA) getApplicationContext().getBean("SLA");
+     @Test public void testRelocationSchema() {
+        SLA sla = (SLA) ac.getBean("SLA");
         assertNotNull(sla);
         assertNotNull(sla.getPolicy());
         assertTrue(sla.getPolicy() instanceof RelocationPolicy);
         RelocationPolicy relocationPolicy = (RelocationPolicy) sla.getPolicy();
         assertEquals("test", relocationPolicy.getMonitor());
-        assertEquals(0.2, relocationPolicy.getLow());
-        assertEquals(0.8, relocationPolicy.getHigh());
+        assertEquals(0.2, relocationPolicy.getLow(),0);
+        assertEquals(0.8, relocationPolicy.getHigh(),0);
     }
 }
+

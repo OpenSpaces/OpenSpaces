@@ -3,6 +3,11 @@
  */
 package org.openspaces.itest.persistency.cassandra.helper;
 
+import com.gigaspaces.logger.GSLogConfigLoader;
+import org.apache.cassandra.cql.jdbc.CassandraDataSource;
+import org.apache.cassandra.thrift.CassandraDaemon;
+import org.openspaces.itest.persistency.cassandra.helper.config.CassandraTestUtils;
+
 import java.io.File;
 import java.io.IOException;
 import java.rmi.Remote;
@@ -10,12 +15,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.apache.cassandra.cql.jdbc.CassandraDataSource;
-import org.apache.cassandra.thrift.CassandraDaemon;
-import org.openspaces.itest.persistency.cassandra.helper.config.CassandraTestUtils;
-
-import com.gigaspaces.logger.GSLogConfigLoader;
 
 
 public class EmbeddedCassandra implements IEmbeddedCassandra, Remote

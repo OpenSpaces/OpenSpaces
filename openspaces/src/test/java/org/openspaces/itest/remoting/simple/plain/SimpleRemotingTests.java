@@ -18,15 +18,14 @@ package org.openspaces.itest.remoting.simple.plain;
 
 import com.gigaspaces.async.AsyncFuture;
 import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.executor.support.WaitForAnyListener;
-import org.openspaces.remoting.EventDrivenRemotingProxyConfigurer;
-import org.openspaces.remoting.ExecutorRemotingProxyConfigurer;
-import org.openspaces.remoting.HashedSpaceRemotingEntry;
-import org.openspaces.remoting.SpaceRemotingEntry;
-import org.openspaces.remoting.SpaceRemotingEntryFactory;
-import org.openspaces.remoting.SpaceRemotingEntryMetadataFactory;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import org.openspaces.remoting.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -38,25 +37,29 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import static org.junit.Assert.*;
+
 /**
  * @author kimchy
  */
-public class SimpleRemotingTests extends AbstractDependencyInjectionSpringContextTests {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:/org/openspaces/itest/remoting/simple/plain/simple-remoting.xml")
+public class SimpleRemotingTests   { 
 
-    protected SimpleService simpleService;
+     @Autowired protected SimpleService simpleService;
 
-    protected SuperSimpleService superSimpleService;
+     @Autowired protected SuperSimpleService superSimpleService;
 
-    protected SimpleServiceAsync simpleServiceAsync;
+     @Autowired protected SimpleServiceAsync simpleServiceAsync;
 
-    protected SimpleService simpleServiceExecutor;
+     @Autowired protected SimpleService simpleServiceExecutor;
 
-    protected SimpleAnnotationBean simpleAnnotationBean;
+     @Autowired protected SimpleAnnotationBean simpleAnnotationBean;
 
-    protected GigaSpace gigaSpace;
+     @Autowired protected GigaSpace gigaSpace;
 
     public SimpleRemotingTests() {
-        setPopulateProtectedVariables(true);
+ 
     }
 
     protected String[] getConfigLocations() {
@@ -64,19 +67,19 @@ public class SimpleRemotingTests extends AbstractDependencyInjectionSpringContex
     }
 
 
-    public void testAsyncSyncExecution() {
+     @Test public void testAsyncSyncExecution() {
         String reply = simpleService.say("test");
         assertEquals("SAY test", reply);
         String reply1 = simpleService.superSay("test");
         assertEquals("Super SAY test", reply1);
     }
 
-    public void testSuperAsyncSyncExecution() {
+     @Test public void testSuperAsyncSyncExecution() {
         String reply = superSimpleService.superSay("test");
         assertEquals("Super SAY test", reply);
     }
 
-    public void testAsyncSyncExecutionWithException() {
+     @Test public void testAsyncSyncExecutionWithException() {
         try {
             simpleService.testException();
             fail();
@@ -85,7 +88,7 @@ public class SimpleRemotingTests extends AbstractDependencyInjectionSpringContex
         }
     }
 
-    public void testAsyncAsyncExecutionWithException() {
+     @Test public void testAsyncAsyncExecutionWithException() {
         try {
             simpleService.asyncTestException().get();
             fail();
@@ -98,7 +101,7 @@ public class SimpleRemotingTests extends AbstractDependencyInjectionSpringContex
         }
     }
 
-    public void testAsyncExecutionIsDone() throws InterruptedException, ExecutionException {
+     @Test public void testAsyncExecutionIsDone() throws InterruptedException, ExecutionException {
         Future result = simpleService.asyncSay("test");
         while (!result.isDone()) {
             Thread.sleep(1000);
@@ -106,34 +109,34 @@ public class SimpleRemotingTests extends AbstractDependencyInjectionSpringContex
         assertEquals("SAY test", result.get());
     }
 
-    public void testAsyncExecutionGet() throws ExecutionException, InterruptedException {
+     @Test public void testAsyncExecutionGet() throws ExecutionException, InterruptedException {
         Future result = simpleService.asyncSay("test");
         assertEquals("SAY test", result.get());
     }
 
-    public void testAsyncExecutionGetWithAsyncInterface() throws ExecutionException, InterruptedException {
+     @Test public void testAsyncExecutionGetWithAsyncInterface() throws ExecutionException, InterruptedException {
         Future result = simpleServiceAsync.say("test");
         assertEquals("SAY test", result.get());
     }
 
-    public void testExecutorSyncExecution() {
+     @Test public void testExecutorSyncExecution() {
         String reply = simpleServiceExecutor.say("test");
         assertEquals("SAY test", reply);
     }
 
-    public void testExecutorAsyncExecution() throws Exception {
+     @Test public void testExecutorAsyncExecution() throws Exception {
         Future<String> reply = simpleServiceExecutor.asyncSay("test");
         assertEquals("SAY test", reply.get());
     }
 
-    public void testExecutorAsyncExecutionWithListener() throws Exception {
+     @Test public void testExecutorAsyncExecutionWithListener() throws Exception {
         AsyncFuture<String> reply = (AsyncFuture<String>) simpleServiceExecutor.asyncSay("test");
         WaitForAnyListener<String> listener = new WaitForAnyListener<String>(1);
         reply.setListener(listener);
         assertEquals("SAY test", listener.waitForResult());
     }
 
-    public void testExecutorSyncExecutionWithException() {
+     @Test public void testExecutorSyncExecutionWithException() {
         try {
             simpleServiceExecutor.testException();
             fail();
@@ -142,7 +145,7 @@ public class SimpleRemotingTests extends AbstractDependencyInjectionSpringContex
         }
     }
 
-    public void testExecutorAsyncExecutionWithException() {
+     @Test public void testExecutorAsyncExecutionWithException() {
         try {
             simpleServiceExecutor.asyncTestException().get();
             fail();
@@ -155,7 +158,7 @@ public class SimpleRemotingTests extends AbstractDependencyInjectionSpringContex
         }
     }
 
-    public void testOverloaded() throws Exception {
+     @Test public void testOverloaded() throws Exception {
         String result = simpleAnnotationBean.executorSimpleService.overloaded(Arrays.asList("test", "something"));
         assertEquals("L2", result);
         result = simpleAnnotationBean.executorSimpleService.asyncOverloaded(Arrays.asList("test", "something")).get();
@@ -169,19 +172,19 @@ public class SimpleRemotingTests extends AbstractDependencyInjectionSpringContex
         assertEquals("M1", result);
     }
 
-    public void testSimpleAnnotationExecution() {
+     @Test public void testSimpleAnnotationExecution() {
         String reply = simpleAnnotationBean.eventSimpleService.say("test");
         assertEquals("SAY test", reply);
         reply = simpleAnnotationBean.executorSimpleService.say("test");
         assertEquals("SAY test", reply);
     }
 
-    public void testWiredParameters() {
+     @Test public void testWiredParameters() {
         assertTrue(simpleAnnotationBean.executorSimpleService.wire(new WiredParameter()));
         assertTrue(simpleAnnotationBean.eventSimpleService.wire(new WiredParameter()));
     }
 
-    public void testSimpleConfigurerExecution() {
+     @Test public void testSimpleConfigurerExecution() {
         SimpleService localSyncSimpleService = new ExecutorRemotingProxyConfigurer<SimpleService>(gigaSpace, SimpleService.class)
                 .proxy();
         String reply = localSyncSimpleService.say("test");
@@ -193,7 +196,7 @@ public class SimpleRemotingTests extends AbstractDependencyInjectionSpringContex
         assertEquals("SAY test", reply);
     }
 
-    public void testSerializationOfAsyncRemotingEntry() throws IOException, ClassNotFoundException {
+     @Test public void testSerializationOfAsyncRemotingEntry() throws IOException, ClassNotFoundException {
         SpaceRemotingEntryFactory remotingEntryFactory = new SpaceRemotingEntryMetadataFactory();
 		HashedSpaceRemotingEntry entry = remotingEntryFactory.createHashEntry();
         entry = entry.buildInvocation("test", "test", null, null);
@@ -252,3 +255,4 @@ public class SimpleRemotingTests extends AbstractDependencyInjectionSpringContex
         }
     }
 }
+

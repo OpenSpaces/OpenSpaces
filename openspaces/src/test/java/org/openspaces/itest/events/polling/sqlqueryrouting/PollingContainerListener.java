@@ -17,12 +17,11 @@
  ******************************************************************************/
 package org.openspaces.itest.events.polling.sqlqueryrouting;
 
+import com.j_spaces.core.client.SQLQuery;
 import org.openspaces.events.EventTemplate;
 import org.openspaces.events.adapter.SpaceDataEvent;
 import org.openspaces.events.polling.Polling;
 import org.openspaces.itest.events.pojos.MockPojo;
-
-import com.j_spaces.core.client.SQLQuery;
 
 /**
  * 

@@ -15,15 +15,13 @@
  *******************************************************************************/
 package org.openspaces.utest.admin.pu.elastic.config;
 
-import java.util.HashMap;
-
-import junit.framework.TestCase;
-
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.openspaces.admin.internal.pu.elastic.GridServiceAgentFailureDetectionConfig;
 import org.openspaces.admin.internal.pu.elastic.GridServiceAgentFailureDetectionConfig.FailureDetectionStatus;
+
+import java.util.HashMap;
 
 /**
  * Tests {@link GridServiceAgentFailureDetectionConfig}

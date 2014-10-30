@@ -17,15 +17,23 @@
  ******************************************************************************/
 package org.openspaces.itest.jpa;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Query;
-
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.remoting.ExecutorRemotingProxyConfigurer;
 import org.openspaces.remoting.scripting.ScriptingExecutor;
 import org.openspaces.remoting.scripting.StaticScript;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Query;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 
 /**
  * JPA Native Query dynamic {@link org.openspaces.remoting.scripting.Script} execution test.
@@ -34,21 +42,23 @@ import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
  * @since 8.0.1
  *
  */
-public class JpaNativeQueryScriptExecutionTest extends AbstractDependencyInjectionSpringContextTests {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:/org/openspaces/itest/jpa/jpa-scripting.xml")
+public class JpaNativeQueryScriptExecutionTest   { 
 
-    protected GigaSpace gigaSpace;
-    protected EntityManagerFactory entityManagerFactory;
+     @Autowired protected GigaSpace gigaSpace;
+     @Autowired protected EntityManagerFactory entityManagerFactory;
     
     public JpaNativeQueryScriptExecutionTest() {
-        setPopulateProtectedVariables(true);
+ 
     }
 
-    @Override
-    protected String[] getConfigLocations() {
+    //@Override
+    protected String[] getConfigLocations () {
         return new String[]{"/org/openspaces/itest/jpa/jpa-scripting.xml"};
     }
     
-    public void testScriptExecution() {
+     @Test public void testScriptExecution() {
         ScriptingExecutor<?> executor = new ExecutorRemotingProxyConfigurer<ScriptingExecutor>(gigaSpace, ScriptingExecutor.class).proxy();
         assertNotNull(executor);
         Integer result = (Integer) executor.execute(new StaticScript("groovy-script1", "groovy", "return 1"));
@@ -58,7 +68,7 @@ public class JpaNativeQueryScriptExecutionTest extends AbstractDependencyInjecti
     /**
      * Script execution test.
      */
-    public void testJpaScriptExecution() {
+     @Test public void testJpaScriptExecution() {
         EntityManager em = entityManagerFactory.createEntityManager();
         Query query = em.createNativeQuery("execute ?");
         query.setParameter(1, new StaticScript("groovy-script2", "groovy", "return 1"));
@@ -70,7 +80,7 @@ public class JpaNativeQueryScriptExecutionTest extends AbstractDependencyInjecti
     /**
      * Script execution test within a JPA transaction - the script operations aren't transactional.
      */
-    public void testJpaScriptExecutionWithTransaction() {
+     @Test public void testJpaScriptExecutionWithTransaction() {
         EntityManager em = entityManagerFactory.createEntityManager();
         em.getTransaction().begin();
         Query query = em.createNativeQuery("execute ?");
@@ -83,3 +93,4 @@ public class JpaNativeQueryScriptExecutionTest extends AbstractDependencyInjecti
     
     
 }
+

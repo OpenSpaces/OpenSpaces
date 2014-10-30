@@ -17,7 +17,6 @@ package org.openspaces.utest.admin.internal.pu.statistics;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
-
 import org.junit.Test;
 import org.openspaces.admin.internal.pu.statistics.StatisticsObjectList;
 
