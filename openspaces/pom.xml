@@ -565,6 +565,7 @@
             </testResource>
         </testResources>
         <plugins>
+<!--
             <plugin>
                 <groupId>com.gigaspaces</groupId>
                 <artifactId>permutation-generator-plugin</artifactId>
@@ -586,6 +587,7 @@
                     </execution>
                 </executions>
             </plugin>
+-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
