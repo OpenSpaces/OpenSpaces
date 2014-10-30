@@ -17,6 +17,7 @@
  ******************************************************************************/
 package org.openspaces.admin.internal.pu.elastic;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -34,17 +35,15 @@ public class GridServiceAgentFailureDetectionConfig {
 	
 	// each key is an ip address of a machine that its 
     private static final String DISABLED_FAILURE_DETECTION_KEY = "agent.disabled-failure-detection.";
-    private static final HashMap<String, String> DISABLED_FAILURE_DETECTION_DEFAULT = new HashMap<String, String>();
-    
+
     StringProperties properties;
-        
+
     public GridServiceAgentFailureDetectionConfig(Map<String,String> properties) {
         this.properties = new StringProperties(properties);
     }
     
     private Map<String, String> getDisabledFailureDetection() {
-        return properties.getMap(DISABLED_FAILURE_DETECTION_KEY,
-                DISABLED_FAILURE_DETECTION_DEFAULT);
+        return properties.getMap(DISABLED_FAILURE_DETECTION_KEY, null);
     }
 
     /**
@@ -60,6 +59,8 @@ public class GridServiceAgentFailureDetectionConfig {
      */
     public void disableFailureDetection(String ipAddress, long expireTimestamp) {
         Map<String, String> ipAddresses = this.getDisabledFailureDetection();
+        if (ipAddresses == null)
+            ipAddresses = new HashMap<String, String>();
         ipAddresses.put(ipAddress, String.valueOf(expireTimestamp));
         this.setDisabledFailureDetection(ipAddresses);
     }
@@ -68,13 +69,12 @@ public class GridServiceAgentFailureDetectionConfig {
      * Enable failure detection of agents in the specified IP address.
      */
     public void enableFailureDetection(String ipAddress) {
-        Map<String, String> ipAddresses = this.getDisabledFailureDetection();
-        ipAddresses.put(ipAddress, String.valueOf(0));
-        this.setDisabledFailureDetection(ipAddresses);
+        disableFailureDetection(ipAddress, 0);
     }
      
     public FailureDetectionStatus getFailureDetectionStatus(String ipAddress, long now) {
-		final String value = getDisabledFailureDetection().get(ipAddress);
+        final Map<String, String> disabledFailureDetection = getDisabledFailureDetection();
+		final String value = disabledFailureDetection != null ? disabledFailureDetection.get(ipAddress) : null;
     	if (value == null) {
 			return FailureDetectionStatus.DONT_CARE;
 		}
@@ -86,7 +86,8 @@ public class GridServiceAgentFailureDetectionConfig {
 	}
     
     public Set<String> getFailureDetectionIpAddresses() {
-    	return getDisabledFailureDetection().keySet();
+        Map<String, String> disabledFailureDetection = getDisabledFailureDetection();
+    	return disabledFailureDetection != null ? disabledFailureDetection.keySet() : Collections.EMPTY_SET;
     }
     
     public Map<String,String> getProperties() {

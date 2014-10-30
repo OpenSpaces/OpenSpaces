@@ -33,7 +33,6 @@ public class GridServiceAgentFailureDetectionConfigTest {
     private static final String IP = "127.0.0.1";
 
     @Test
-    @Ignore("Requires further investigation")
     public void testDontCare() {
 		GridServiceAgentFailureDetectionConfig c = new GridServiceAgentFailureDetectionConfig(new HashMap<String,String>());
     	Assert.assertEquals(FailureDetectionStatus.DONT_CARE, c.getFailureDetectionStatus(IP, 10000));
