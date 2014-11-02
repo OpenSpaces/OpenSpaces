@@ -94,7 +94,7 @@
     	<echo message="productversion=${productversion}"/>  
     	<echo message="maven.repo.local=${maven.repo.local}"/>  
     	<exec executable="${env.M2_HOME}\bin\${mvn.executable}" failonerror="true"> 
-			<arg line="package -DskipTests -Dmaven.repo.local=${maven.repo.local}" />
+			<arg line="package -P perm-gen -Dmaven.repo.local=${maven.repo.local}" />
 		</exec>
     	<exec executable="${env.M2_HOME}\bin\${mvn.executable}"> 
 			<arg line="install:install-file -DgroupId=com.gigaspaces -DartifactId=gs-openspaces -DcreateChecksum=true -Dversion=${productversion} -Dpackaging=jar -DpomFile=${basedir}/pom.xml -Dfile=${target.dir}/gs-openspaces.jar -Dmaven.repo.local=${maven.repo.local}"/>

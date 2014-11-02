@@ -533,14 +533,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-
-        <dependency>
-            <groupId>com.gigaspaces</groupId>
-            <artifactId>permutation-generator-plugin</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>test</scope>
-        </dependency>
-
         <!-- end of cassandra related dependencies -->
     </dependencies>
     <build>
@@ -566,27 +558,6 @@
             </testResource>
         </testResources>
         <plugins>
-            <plugin>
-                <groupId>com.gigaspaces</groupId>
-                <artifactId>permutation-generator-plugin</artifactId>
-                <version>1.0-SNAPSHOT</version>
-                <configuration>
-                    <includes>
-                        <include>**/itest/**</include>
-                        <include>**/*Abstract*</include>
-                        <include>**/SpaceFactoryBeanWrappersTest*</include>
-                        <include>**/PersistentQueueTests*</include>
-                        <include>**/PersistentSedaTests*</include>
-                    </includes>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -1007,6 +978,42 @@
                                 </annotationProcessor>
                             </annotationProcessors>
                         </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>perm-gen</id>
+            <dependencies>
+                <dependency>
+                    <groupId>com.gigaspaces</groupId>
+                    <artifactId>permutation-generator-plugin</artifactId>
+                    <version>1.0-SNAPSHOT</version>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.gigaspaces</groupId>
+                        <artifactId>permutation-generator-plugin</artifactId>
+                        <version>1.0-SNAPSHOT</version>
+                        <configuration>
+                            <includes>
+                                <include>**/itest/**</include>
+                                <include>**/*Abstract*</include>
+                                <include>**/SpaceFactoryBeanWrappersTest*</include>
+                                <include>**/PersistentQueueTests*</include>
+                                <include>**/PersistentSedaTests*</include>
+                            </includes>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>generate</goal>
+                                </goals>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>
