@@ -49,6 +49,10 @@ public class ProcedureCache {
      */
     public IGetterMethod<Object> getterMethodFor(Method getterMethod) {
         try {
+            IGetterMethod<Object> objectIGetterMethod = getters.get(getterMethod);
+            if(objectIGetterMethod != null)
+                return objectIGetterMethod;
+
             IGetterMethod<Object> possibleGetter = ReflectionUtil.createGetterMethod(getterMethod);
             IGetterMethod<Object> currentGetter = getters.putIfAbsent(getterMethod, possibleGetter);
             return currentGetter == null ? possibleGetter : currentGetter;
@@ -64,6 +68,10 @@ public class ProcedureCache {
      */
     public ISetterMethod<Object> setterMethodFor(Method setterMethod) {
         try {
+            ISetterMethod<Object> objectISetterMethod = setters.get(setterMethod);
+            if(objectISetterMethod != null)
+                return objectISetterMethod;
+
             ISetterMethod<Object> possibleSetter = ReflectionUtil.createSetterMethod(setterMethod);
             ISetterMethod<Object> currentSetter = setters.putIfAbsent(setterMethod, possibleSetter);
             return currentSetter == null ? possibleSetter : currentSetter;
@@ -79,6 +87,10 @@ public class ProcedureCache {
      */
     public IConstructor<Object> constructorFor(Constructor<Object> constructor) {
         try {
+            IConstructor<Object> objectIConstructor = constructors.get(constructor);
+            if(objectIConstructor != null)
+                return objectIConstructor;
+
             IConstructor<Object> possibleConst = ReflectionUtil.createCtor(constructor);
             IConstructor<Object> currentConst = constructors.putIfAbsent(constructor, possibleConst);
             return currentConst == null ? possibleConst : currentConst;
