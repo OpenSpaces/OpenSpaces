@@ -333,7 +333,7 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
         }
 
         if (containerRunnable.hasException()) {
-            throw new CannotCreateContainerException("Failed to started container", containerRunnable.getException());
+            throw new CannotCreateContainerException("Failed to start container", containerRunnable.getException());
         }
 
         return new StandaloneProcessingUnitContainer(containerRunnable);
