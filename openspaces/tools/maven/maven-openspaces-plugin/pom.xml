@@ -11,7 +11,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <pluginVersion>${project.version}</pluginVersion>
         <gsVersion>${project.version}</gsVersion>
-        <springVersion>3.2.4.RELEASE</springVersion>
+        <springVersion>5.3.18</springVersion>
     </properties>
    	<repositories>
 		<repository>
